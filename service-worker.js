@@ -960,7 +960,7 @@ Find a hidden venue
 Get given Boomtown bucks
 Talk to an actor in character
 ..."></textarea>
-      <div id="bingoGrid" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; margin:10px 0;"></div>
+      <div id="bingoGrid"></div>
       <button class="action" id="bingoGenerateBtn">Build/shuffle my card</button>
       <button class="action danger" id="bingoLockBtn" style="display:none;">Lock in this card</button>
       <p class="empty-note" id="bingoStatusNote" style="margin-top:8px;"></p>

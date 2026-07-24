@@ -138,7 +138,7 @@
      out over the row below — that vertical spill was the "overlap" bug
      on narrow phones. word-break/hyphens stop a single long word from
      doing the same thing horizontally. */
-  #bingoGrid{display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; margin:10px 0; align-items:stretch;}
+  #bingoGrid{display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:5px; margin:10px 0; align-items:stretch; width:100%;}
   .bingo-cell{min-height:64px; min-width:0; border:1px solid var(--line); border-radius:8px; background:var(--bg-panel-2); color:var(--text-muted); font-size:10.5px; line-height:1.25; display:flex; align-items:center; justify-content:center; text-align:center; padding:5px 4px; cursor:pointer; user-select:none; overflow:hidden; word-break:break-word; overflow-wrap:break-word; hyphens:auto; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
   .bingo-cell.marked{background:rgba(75,227,172,.18); border-color:var(--accent-teal); color:var(--text-primary); text-decoration:line-through;}
   .bingo-cell.free{background:rgba(242,168,60,.16); border-color:var(--accent-amber); color:var(--accent-amber); font-weight:700; text-decoration:none;}
