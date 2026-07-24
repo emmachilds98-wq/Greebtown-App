@@ -16,7 +16,31 @@ fixBottomClearance();
 // ===============================
 // STORAGE HELPER
 // ===============================
-const DEFAULTS = { schedule: [], discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "" };
+// DATA ISOLATION MODEL — read this before touching Store or DEFAULTS:
+//  - Every key below lives ONLY in this browser's localStorage, on this
+//    one device. There is no server, no account system, and no
+//    background sync of any kind (see service-worker.js: it caches
+//    static assets only, never app data).
+//  - window.__boomtownSavedData (EMBEDDED_DATA below) exists purely so a
+//    user-generated backup/snapshot file (buildSnapshotHtml(), further
+//    down this file) can carry that one person's data with it when
+//    reopened. In the master index.html committed to the shared GitHub
+//    repo, it must always be seeded as {} — never real values — because
+//    that copy is what every visitor's browser loads. Anything else here
+//    would leak one person's saved data to everyone as their default.
+//  - The one deliberately shared/merged flow is the Sync feature
+//    (buildSyncPayload/mergeSyncPayload) — it's opt-in and only ever
+//    touches the shared discovery-log style fields (clues, theories,
+//    hiddenVenues, discoveries, customSocials, quotes, sightings,
+//    customLandmarks), which merge additively with no duplicates, PLUS
+//    one read-only snapshot field: each person's saved-artist "schedule"
+//    rides along in the same code, but it is never merged into your own
+//    "schedule" key. Incoming schedules land under peopleSchedules[name]
+//    instead, kept separate per contributor, and the Plan screen's
+//    person-tab bar is the only place they're ever displayed. Sync must
+//    never read or write personal fields like schedule, meeting, notes,
+//    bingoCard, bingoMarked, bingoLocked, or myCharacter.
+const DEFAULTS = { schedule: [], peopleSchedules: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "" };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -171,6 +195,57 @@ const STAGE_GENRE = {
   "Check app":"Unconfirmed"
 };
 function genreOf(a){ return a.genre || STAGE_GENRE[a.stage] || "Unconfirmed"; }
+
+// One-line, genre-level (not artist-specific) descriptions of what each
+// tag generally sounds like — shown under the tag on artist cards and
+// in the Genre guide on the Artists screen, so a name you don't
+// recognise still tells you roughly what you're walking into.
+const GENRE_INFO = {
+  "Acid / Techno": "Squelchy 303 acid lines over driving, hypnotic techno.",
+  "Alt / Punk / Metal": "Guitar-led live bands — punk energy through to heavier metal.",
+  "Bass / Alt": "Bass-weight production with an alternative, less-club-standard edge.",
+  "Bass / D&B": "Fast breakbeats and heavy sub-bass — the drum & bass family.",
+  "Bass / Drum & Bass": "Fast breakbeats and heavy sub-bass at full drum & bass tempo.",
+  "Bass / Dub / Jungle": "Sound-system bass culture — dub weight and jungle's chopped breaks.",
+  "Bass / Hardstyle": "Hard, distorted kicks and euphoric leads at high tempo.",
+  "Bass / Party": "Crowd-pleasing bass music built for singalongs and big drops.",
+  "Bass / Rave": "Old-school rave stabs and breakbeats with modern bass weight.",
+  "Breaks / Big Beat": "Chunky breakbeats and big, riffy drops — festival breaks.",
+  "Cabaret / Variety": "Live hosted variety — burlesque, comedy, circus and song.",
+  "D&B / Reggae / Headline": "Big-stage drum & bass headliners alongside reggae/sound-system sets.",
+  "Dub / Bass": "Deep, echo-laden dub reggae with sub-bass at its core.",
+  "Dubstep / Bass": "Half-time wobble and weight — classic and modern dubstep.",
+  "Eclectic / DJ": "Genre-hopping DJ sets that don't sit still in one lane.",
+  "Folk / Balkan / Party": "Brass-heavy Balkan folk turned into a full-on party set.",
+  "Hardcore / Gabber": "Very fast, distorted kicks — the hardcore/gabber end of the spectrum.",
+  "House / Dance": "Classic four-to-the-floor house built for dancing.",
+  "House / Techno": "The house/techno crossover — groovy but driving.",
+  "Irish Folk / Trad": "Traditional Irish folk, played live and built for a sing-along.",
+  "Live / Alternative": "Live bands outside the DJ/electronic lineup — alternative/indie leaning.",
+  "Party / Playback Sets": "Themed nostalgia/playback sets built around a single album or era.",
+  "Party / Variety": "Feel-good party sets — a bit of everything, low on pretension.",
+  "Psytrance / Trance": "Fast, hypnotic, high-energy trance and psytrance.",
+  "Swing / Variety": "Swing-era music and variety entertainment, live and danceable.",
+  "Techno / Electro": "Driving, machine-built techno and electro.",
+  "World / Eclectic": "Global sounds and genre-blending selections.",
+  "Unconfirmed": "Genre not confirmed yet — check the app or ask on-site."
+};
+function genreDescriptorText(genre){ return GENRE_INFO[genre] || ""; }
+// Short, auto-composed line built only from data already in the app
+// (stage, genre, set length) — not a fabricated bio, just context.
+function artistDescriptor(a){
+  const g = genreOf(a);
+  const bits = [];
+  if(a.start && a.end && a.day && a.day !== "TBC"){
+    const mins = toMinutes(a.day, a.end) !== null && toMinutes(a.day, a.start) !== null
+      ? (()=>{ let d = toMinutes(a.day, a.end) - toMinutes(a.day, a.start); if(d <= 0) d += 1440; return d; })()
+      : null;
+    if(mins) bits.push(`~${mins >= 60 ? Math.round(mins/60*10)/10 + "hr" : mins + "min"} set`);
+  }
+  bits.push(`${a.stage}`);
+  if(g && g !== "Unconfirmed") bits.push(g);
+  return bits.join(" · ");
+}
 
 const artists = [
   // ================= WEDNESDAY =================
@@ -1566,13 +1641,17 @@ function showArtists(list){
     const saved = Store.get("schedule").some(x=>x.name === artist.name);
     const div = document.createElement("div");
     div.className = "item";
+    const genre = genreOf(artist);
+    const gDesc = genreDescriptorText(genre);
     div.innerHTML = `
       <div class="item-top">
         <div>
           <strong>${artist.name}</strong><br>
           ${artist.stage}<br>
           ${timeLabel(artist)}<br>
-          <small>${genreOf(artist)}</small>
+          <small>${genre}</small>
+          <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
+          ${gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : ""}
         </div>
         <button aria-label="Toggle saved">${saved ? "★" : "☆"}</button>
       </div>
@@ -1602,6 +1681,114 @@ artistSearch.oninput = ()=>{
 };
 promptArtistSearch();
 
+// ===============================
+// SHARED TIMELINE BUILDER — used by both the Artists screen ("all acts,
+// by stage and time, for one day") and the Plan screen ("saved acts,
+// by stage and time, for whichever person's tab is selected"). Renders
+// a horizontally-scrollable set of stage columns against a shared,
+// vertically-scrollable time axis.
+// ===============================
+function buildTimelineHTML(items, opts){
+  opts = opts || {};
+  const pxPerMin = opts.pxPerMin || 2;
+  if(!items.length){
+    return { html: `<p class="empty-note" style="padding:16px;">Nothing to show here yet.</p>`, stages: [] };
+  }
+  const parsed = items.map(a=>{
+    const [sh,sm] = (a.start||"0:0").split(":").map(Number);
+    const [eh,em] = (a.end||a.start||"0:0").split(":").map(Number);
+    let start = (sh||0)*60 + (sm||0);
+    let end = (eh||0)*60 + (em||0);
+    if(end <= start) end += 1440;
+    return { ...a, _start:start, _end:end };
+  });
+  const minMin = Math.floor(Math.min(...parsed.map(p=>p._start))/60)*60;
+  const maxMin = Math.ceil(Math.max(...parsed.map(p=>p._end))/60)*60;
+  const stages = [...new Set(parsed.map(p=>p.stage))].sort();
+  const totalHeight = Math.max((maxMin-minMin)*pxPerMin, 40);
+  const savedNames = opts.savedNames || null;
+
+  let hourLabels = "", hourLines = "";
+  for(let m=minMin; m<=maxMin; m+=60){
+    const top = (m-minMin)*pxPerMin;
+    const hh = Math.floor((((m%1440)+1440)%1440)/60).toString().padStart(2,"0");
+    hourLabels += `<div class="timeline-hour-label" style="top:${top}px;">${hh}:00</div>`;
+    hourLines += `<div class="timeline-hourline" style="top:${top}px;"></div>`;
+  }
+
+  const cols = stages.map(stage=>{
+    const stageItems = parsed.filter(p=>p.stage===stage);
+    const blocks = stageItems.map(p=>{
+      const top = (p._start-minMin)*pxPerMin;
+      const height = Math.max((p._end-p._start)*pxPerMin, 26);
+      const isSaved = savedNames ? savedNames.has(p.name) : false;
+      const cls = "timeline-block" + (isSaved ? " saved" : "") + (opts.readonly ? " readonly" : "");
+      return `<div class="${cls}" style="top:${top}px; height:${height}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}"><b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
+    }).join("");
+    return `<div class="timeline-col"><div class="timeline-col-head">${escapeHtml(stage)}</div><div class="timeline-body" style="height:${totalHeight}px;">${hourLines}${blocks}</div></div>`;
+  }).join("");
+
+  const html = `<div class="timeline-grid">
+    <div class="timeline-hours"><div class="timeline-col-head">&nbsp;</div><div class="timeline-body" style="height:${totalHeight}px;">${hourLabels}</div></div>
+    ${cols}
+  </div>`;
+  return { html, stages };
+}
+
+let artistsTimelineDay = "Wed";
+let artistsView = "list";
+
+function renderArtistTimelineDayTabs(){
+  const box = document.getElementById("artistTimelineDayTabs");
+  if(!box) return;
+  box.className = "tabstrip";
+  box.innerHTML = DAY_ORDER.map(d=>`<button class="${d===artistsTimelineDay?"active":""}" data-day="${d}">${d}</button>`).join("");
+  box.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      artistsTimelineDay = btn.dataset.day;
+      renderArtistTimelineDayTabs();
+      renderArtistsTimeline();
+    };
+  });
+}
+
+function renderArtistsTimeline(){
+  const grid = document.getElementById("artistTimelineGrid");
+  if(!grid) return;
+  const dayItems = allArtists().filter(a=> a.day === artistsTimelineDay && a.start);
+  const savedNames = new Set(Store.get("schedule").map(s=>s.name));
+  const { html } = buildTimelineHTML(dayItems, { savedNames });
+  grid.innerHTML = html;
+  grid.querySelectorAll(".timeline-block").forEach(b=>{
+    b.onclick = ()=>{
+      const name = b.dataset.name, day = b.dataset.day;
+      const artist = allArtists().find(a=>a.name===name && a.day===day);
+      if(artist){ saveArtist(artist); renderArtistsTimeline(); }
+    };
+  });
+}
+
+const artistsViewListBtn = document.getElementById("artistsViewListBtn");
+const artistsViewTimelineBtn = document.getElementById("artistsViewTimelineBtn");
+if(artistsViewListBtn && artistsViewTimelineBtn){
+  artistsViewListBtn.onclick = ()=>{
+    artistsView = "list";
+    artistsViewListBtn.classList.add("active");
+    artistsViewTimelineBtn.classList.remove("active");
+    document.getElementById("artistsListView").style.display = "";
+    document.getElementById("artistsTimelineView").style.display = "none";
+  };
+  artistsViewTimelineBtn.onclick = ()=>{
+    artistsView = "timeline";
+    artistsViewTimelineBtn.classList.add("active");
+    artistsViewListBtn.classList.remove("active");
+    document.getElementById("artistsListView").style.display = "none";
+    document.getElementById("artistsTimelineView").style.display = "";
+    renderArtistTimelineDayTabs();
+    renderArtistsTimeline();
+  };
+}
+
 function loadGenreChips(){
   const genres = [...new Set(allArtists().map(genreOf))].filter(g=>g && g !== "Unconfirmed").sort();
   const box = document.getElementById("genreChips");
@@ -1614,6 +1801,16 @@ function loadGenreChips(){
   });
 }
 loadGenreChips();
+
+function renderGenreGuide(){
+  const box = document.getElementById("genreGuideList");
+  if(!box) return;
+  const names = Object.keys(GENRE_INFO).filter(g=>g!=="Unconfirmed").sort();
+  box.innerHTML = names.map(g=>`
+    <div class="genre-guide-row"><b>${escapeHtml(g)}</b><span>${escapeHtml(GENRE_INFO[g])}</span></div>
+  `).join("");
+}
+renderGenreGuide();
 
 // ===============================
 // ADD YOUR OWN ARTIST
@@ -1676,8 +1873,10 @@ function findClashes(schedule){
   return clashMap;
 }
 
-function scheduleItemHTML(artist, idx, clashNames){
+function scheduleItemHTML(artist, idx, clashNames, readonly){
   const clashClass = clashNames && clashNames.length ? " clash" : "";
+  const genre = genreOf(artist);
+  const gDesc = genreDescriptorText(genre);
   return `
     <div class="item${clashClass}" data-idx="${idx}">
       <div class="item-top">
@@ -1685,11 +1884,13 @@ function scheduleItemHTML(artist, idx, clashNames){
           <strong>${artist.name}</strong><br>
           ${artist.stage}<br>
           <span class="time-label">${timeLabel(artist)}</span>
+          <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
+          ${gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : ""}
         </div>
-        <div class="btnrow">
+        ${readonly ? "" : `<div class="btnrow">
           <button class="set-time-btn">Set time</button>
           <button class="remove-btn">Remove</button>
-        </div>
+        </div>`}
       </div>
       ${clashNames && clashNames.length ? `<div class="clash-note">⚠ Clashes with ${clashNames.join(", ")}</div>` : ""}
       <div class="edit-slot"></div>
@@ -1721,16 +1922,65 @@ function openTimeEditor(container, artist, onSave){
   };
 }
 
+// ===============================
+// PLAN — WHOSE SCHEDULE AM I LOOKING AT
+// ===============================
+// "mine" is always this device's own Store.get("schedule") — the only
+// one that's ever editable, saved to, or counted in stats/next-event.
+// Anything else is a name key into peopleSchedules, a read-only snapshot
+// that arrived via a teammate's Sync code. Switching tabs never copies
+// or merges one into the other.
+let planActiveOwner = "mine";
+
+function activeScheduleData(){
+  if(planActiveOwner === "mine") return Store.get("schedule");
+  const people = Store.get("peopleSchedules") || {};
+  return (people[planActiveOwner] || []).slice();
+}
+
+function renderPlanPersonTabs(){
+  const box = document.getElementById("planPersonTabs");
+  const note = document.getElementById("planPersonNote");
+  if(!box) return;
+  const people = Store.get("peopleSchedules") || {};
+  const names = Object.keys(people).filter(n=> (people[n]||[]).length > 0);
+  if(names.length === 0){
+    box.style.display = "none";
+    if(note) note.style.display = "none";
+    planActiveOwner = "mine";
+    return;
+  }
+  box.style.display = "";
+  box.className = "tabstrip";
+  box.innerHTML = `<button class="${planActiveOwner==="mine"?"active":""}" data-owner="mine">⭐ Mine</button>` +
+    names.map(n=>`<button class="person ${planActiveOwner===n?"active":""}" data-owner="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join("");
+  box.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      planActiveOwner = btn.dataset.owner;
+      renderPlanPersonTabs();
+      renderSchedule();
+      if(planView === "timeline") renderPlanTimeline();
+    };
+  });
+  if(note){
+    note.style.display = "";
+    note.textContent = planActiveOwner === "mine"
+      ? "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours."
+      : `Viewing ${planActiveOwner}'s saved artists from their last Sync code — read-only, and it hasn't changed or added anything to your own list.`;
+  }
+}
+
 function renderSchedule(){
-  const schedule = Store.get("schedule");
+  const schedule = activeScheduleData();
+  const readonly = planActiveOwner !== "mine";
 
   if(schedule.length === 0){
-    scheduleList.innerHTML = `<div class="card"><p class="empty-note">No saved artists yet. Add some from the Artists tab.</p></div>`;
+    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${readonly ? `${escapeHtml(planActiveOwner)} hasn't saved any artists yet.` : "No saved artists yet. Add some from the Artists tab."}</p></div>`;
     return;
   }
 
   if(planView === "list"){
-    scheduleList.innerHTML = schedule.map((a,i)=> scheduleItemHTML(a,i,null)).join("");
+    scheduleList.innerHTML = schedule.map((a,i)=> scheduleItemHTML(a,i,null,readonly)).join("");
   } else {
     const clashMap = findClashes(schedule);
     const byDay = {};
@@ -1744,50 +1994,96 @@ function renderSchedule(){
       if(!byDay[day]) return;
       const items = byDay[day].sort((x,y)=> (x.a.start||"99:99").localeCompare(y.a.start||"99:99"));
       html += `<div class="daygroup">${day}</div>`;
-      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i]));
+      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly));
     });
     scheduleList.innerHTML = html;
   }
 
-  scheduleList.querySelectorAll(".item").forEach(itemEl=>{
-    const idx = Number(itemEl.dataset.idx);
-    const artist = Store.get("schedule")[idx];
+  if(!readonly){
+    scheduleList.querySelectorAll(".item").forEach(itemEl=>{
+      const idx = Number(itemEl.dataset.idx);
+      const artist = Store.get("schedule")[idx];
 
-    itemEl.querySelector(".remove-btn").onclick = ()=>{
-      let sched = Store.get("schedule");
-      sched.splice(idx,1);
-      Store.set("schedule", sched);
-      renderSchedule();
-      showArtists(currentFilteredArtists());
-      updateNextEvent();
-    };
-
-    itemEl.querySelector(".set-time-btn").onclick = ()=>{
-      openTimeEditor(itemEl.querySelector(".edit-slot"), artist, (day,start,end)=>{
+      itemEl.querySelector(".remove-btn").onclick = ()=>{
         let sched = Store.get("schedule");
-        sched[idx] = { ...sched[idx], day, start, end };
+        sched.splice(idx,1);
         Store.set("schedule", sched);
         renderSchedule();
+        showArtists(currentFilteredArtists());
         updateNextEvent();
-      });
-    };
-  });
+      };
+
+      itemEl.querySelector(".set-time-btn").onclick = ()=>{
+        openTimeEditor(itemEl.querySelector(".edit-slot"), artist, (day,start,end)=>{
+          let sched = Store.get("schedule");
+          sched[idx] = { ...sched[idx], day, start, end };
+          Store.set("schedule", sched);
+          renderSchedule();
+          updateNextEvent();
+        });
+      };
+    });
+  }
 
   if(typeof renderNowNext === "function") renderNowNext();
 }
 
-document.getElementById("viewListBtn").onclick = ()=>{
-  planView = "list";
-  document.getElementById("viewListBtn").classList.add("active");
-  document.getElementById("viewClashBtn").classList.remove("active");
-  renderSchedule();
-};
-document.getElementById("viewClashBtn").onclick = ()=>{
-  planView = "clash";
-  document.getElementById("viewClashBtn").classList.add("active");
-  document.getElementById("viewListBtn").classList.remove("active");
-  renderSchedule();
-};
+function setPlanView(view){
+  planView = view;
+  ["viewListBtn","viewClashBtn","viewTimelineBtn"].forEach(id=>{
+    const btn = document.getElementById(id);
+    if(btn) btn.classList.remove("active");
+  });
+  const activeBtn = document.getElementById(view==="list"?"viewListBtn":view==="clash"?"viewClashBtn":"viewTimelineBtn");
+  if(activeBtn) activeBtn.classList.add("active");
+
+  const listEls = [scheduleList, document.getElementById("nowNextBanner")];
+  const timelineEl = document.getElementById("planTimelineView");
+  if(view === "timeline"){
+    listEls.forEach(el=> el && (el.style.display = "none"));
+    if(timelineEl) timelineEl.style.display = "";
+    renderPlanTimelineDayTabs();
+    renderPlanTimeline();
+  } else {
+    listEls.forEach(el=> el && (el.style.display = ""));
+    if(timelineEl) timelineEl.style.display = "none";
+    renderSchedule();
+  }
+}
+
+document.getElementById("viewListBtn").onclick = ()=> setPlanView("list");
+document.getElementById("viewClashBtn").onclick = ()=> setPlanView("clash");
+document.getElementById("viewTimelineBtn").onclick = ()=> setPlanView("timeline");
+
+// ===============================
+// SAVED-ARTIST TIMELINE (Plan) — same scrollable stage/time grid as the
+// Artists screen's Timeline view, but scoped to whichever person's tab
+// (mine or a synced teammate's) is currently selected above.
+// ===============================
+let planTimelineDay = "Wed";
+
+function renderPlanTimelineDayTabs(){
+  const box = document.getElementById("planTimelineDayTabs");
+  if(!box) return;
+  box.className = "tabstrip";
+  box.innerHTML = DAY_ORDER.map(d=>`<button class="${d===planTimelineDay?"active":""}" data-day="${d}">${d}</button>`).join("");
+  box.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      planTimelineDay = btn.dataset.day;
+      renderPlanTimelineDayTabs();
+      renderPlanTimeline();
+    };
+  });
+}
+
+function renderPlanTimeline(){
+  const grid = document.getElementById("planTimelineGrid");
+  if(!grid) return;
+  const schedule = activeScheduleData();
+  const dayItems = schedule.filter(a=> a.day === planTimelineDay && a.start);
+  const { html } = buildTimelineHTML(dayItems, { readonly:true });
+  grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">Nothing with a set time saved for ${planTimelineDay} yet.</p>`;
+}
 
 // ===============================
 // DASHBOARD NEXT EVENT
@@ -1860,6 +2156,7 @@ document.getElementById("browseAllArtistsBtn").onclick = ()=>{
   window.scrollTo(0, 0);
 };
 
+renderPlanPersonTabs();
 renderSchedule();
 updateNextEvent();
 
@@ -2799,7 +3096,12 @@ function buildSyncPayload(){
     customSocials: Store.get("customSocials") || [],
     quotes: Store.get("quotes") || [],
     sightings: Store.get("sightings") || [],
-    customLandmarks: Store.get("customLandmarks") || []
+    customLandmarks: Store.get("customLandmarks") || [],
+    // Read-only snapshot of this device's own saved artists — the
+    // receiving phone stores this under peopleSchedules[from], never
+    // merged into its own "schedule". See the DATA ISOLATION MODEL note
+    // near Store/DEFAULTS above.
+    schedule: Store.get("schedule") || []
   };
 }
 
@@ -2817,7 +3119,7 @@ function decodeSyncCode(code){
 }
 
 function mergeSyncPayload(payload){
-  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0 };
+  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0 };
   const from = payload.from || "Someone";
 
   // Clue notes are freeform multi-line text per district, and an incoming
@@ -2923,6 +3225,17 @@ function mergeSyncPayload(payload){
   });
   Store.set("customLandmarks", customLandmarksList);
 
+  // Read-only per-person schedule snapshot — replaces that person's own
+  // entry each time they resync (it's a full current snapshot of their
+  // Plan, not incremental additions), and never touches this device's
+  // own "schedule" key.
+  if(Array.isArray(payload.schedule)){
+    const people = Store.get("peopleSchedules") || {};
+    people[from] = payload.schedule.map(a=>({ ...a }));
+    Store.set("peopleSchedules", people);
+    stats.schedule = payload.schedule.length;
+  }
+
   return { stats, from };
 }
 
@@ -2980,7 +3293,7 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     const payload = decodeSyncCode(raw);
     const { stats, from } = mergeSyncPayload(payload);
     input.value = "";
-    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. Nothing already saved was duplicated.`;
+    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}Nothing already saved was duplicated.`;
     loadDiscoveries();
     loadGetInvolved();
     loadTheories();
@@ -2992,6 +3305,7 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     if(typeof loadCustomLandmarksList === "function") loadCustomLandmarksList();
     if(typeof loadMap === "function") loadMap();
     if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
+    if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
   }catch(err){
     note.textContent = "Couldn't read that code — make sure you copied the whole thing, with nothing missing from either end.";
   }

@@ -4,8 +4,8 @@
     --text-primary:#eef6f1; --text-muted:#8fa89c; --line:#24403a;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{min-height:100%; overflow-x:hidden; scroll-behavior:smooth;}
-  body{min-height:100%; overflow-x:hidden;}
+  html{min-height:100%; overflow-x:hidden; scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
+  body{min-height:100%; overflow-x:hidden; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
   body{
     background:
       radial-gradient(circle at 15% 20%, rgba(242,168,60,0.10), transparent 40%),
@@ -132,9 +132,61 @@
   .venue-filters{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;}
   .venue-filters button{background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-muted); font-size:12px; padding:6px 12px; border-radius:20px; cursor:pointer;}
   .venue-filters button.active{color:var(--accent-amber); border-color:var(--accent-amber);}
-  .bingo-cell{aspect-ratio:1; border:1px solid var(--line); border-radius:8px; background:var(--bg-panel-2); color:var(--text-muted); font-size:10px; line-height:1.25; display:flex; align-items:center; justify-content:center; text-align:center; padding:4px; cursor:pointer; user-select:none;}
+  /* Bingo grid: rebuilt on plain percentage-based flexbox instead of CSS
+     Grid's fr units. Each cell is exactly (20% - 4px) wide plus 2px of
+     margin on every side, so five cells always sum to exactly 100% of
+     the container's width, by simple arithmetic — not by trusting a
+     browser's track-sizing algorithm to shrink content correctly. This
+     is the fix after minmax(0,1fr) still overflowed on a real device:
+     percentages + box-sizing:border-box cannot mathematically exceed
+     the container width, regardless of engine or content. min-height
+     (a floor, not a forced square) plus word-break/hyphens still let
+     long phrases wrap onto extra lines instead of spilling vertically.
+  */
+  #bingoGrid{display:flex; flex-wrap:wrap; width:100%; box-sizing:border-box; margin:10px 0 10px -2px;}
+  .bingo-cell{box-sizing:border-box; width:calc(20% - 4px); margin:2px; min-height:56px; min-width:0; border:1px solid var(--line); border-radius:8px; background:var(--bg-panel-2); color:var(--text-muted); font-size:9.5px; line-height:1.2; display:flex; align-items:center; justify-content:center; text-align:center; padding:4px 3px; cursor:pointer; user-select:none; overflow:hidden; word-break:break-word; overflow-wrap:break-word; hyphens:auto; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
   .bingo-cell.marked{background:rgba(75,227,172,.18); border-color:var(--accent-teal); color:var(--text-primary); text-decoration:line-through;}
   .bingo-cell.free{background:rgba(242,168,60,.16); border-color:var(--accent-amber); color:var(--accent-amber); font-weight:700; text-decoration:none;}
+  @media (max-width:380px){
+    .bingo-cell{width:calc(20% - 3px); margin:1.5px; min-height:50px; font-size:8.5px; padding:3px 2px;}
+  }
+  @media (max-width:340px){
+    .bingo-cell{width:calc(20% - 2px); margin:1px; min-height:46px; font-size:8px; padding:2px;}
+  }
+
+  /* ===== Tabstrip — reusable pill-tab row (Plan person tabs, timeline day tabs) ===== */
+  .tabstrip{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .tabstrip button{background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-muted); font-size:12px; padding:6px 12px; border-radius:20px; cursor:pointer; white-space:nowrap;}
+  .tabstrip button.active{color:var(--accent-amber); border-color:var(--accent-amber); background:rgba(242,168,60,.1);}
+  .tabstrip button.person{color:var(--accent-teal); border-color:rgba(75,227,172,.35);}
+  .tabstrip button.person.active{color:var(--accent-teal); border-color:var(--accent-teal); background:rgba(75,227,172,.12);}
+
+  /* ===== Genre guide ===== */
+  #genreGuideList{display:flex; flex-direction:column; gap:8px;}
+  .genre-guide-row b{color:var(--accent-teal); font-size:13px;}
+  .genre-guide-row span{display:block; color:var(--text-muted); font-size:13px; line-height:1.4; margin-top:2px;}
+  .genre-desc{color:var(--text-muted); font-size:11.5px; line-height:1.4; margin-top:3px; font-style:italic;}
+  .artist-descriptor{color:var(--text-muted); font-size:12px; line-height:1.4; margin-top:4px;}
+
+  /* ===== Timeline (Artists-by-stage and Plan) ===== */
+  .timeline-outer{position:relative; overflow:auto; max-height:68vh; border:1px solid var(--line); border-radius:14px; background:var(--bg-panel); -webkit-overflow-scrolling:touch;}
+  .timeline-grid{position:relative; display:flex; min-width:100%;}
+  .timeline-hours{position:sticky; left:0; z-index:3; width:46px; flex-shrink:0; background:var(--bg-panel); border-right:1px solid var(--line);}
+  .timeline-hours .timeline-col-head{background:var(--bg-panel);}
+  .timeline-hour-label{position:absolute; left:0; right:0; font-size:10px; color:var(--text-muted); padding:2px 4px; text-align:right; transform:translateY(-50%);}
+  .timeline-col{width:132px; flex-shrink:0; border-right:1px solid var(--line); position:relative;}
+  .timeline-col-head{position:sticky; top:0; z-index:2; background:var(--bg-panel-2); padding:8px 6px; text-align:center; font-size:11.5px; font-weight:700; border-bottom:1px solid var(--line); line-height:1.25;}
+  .timeline-body{position:relative;}
+  .timeline-hourline{position:absolute; left:0; right:0; border-top:1px solid var(--line); opacity:.5;}
+  .timeline-block{position:absolute; left:2px; right:2px; border-radius:8px; padding:4px 6px; font-size:10.5px; line-height:1.25; overflow:hidden; cursor:pointer; border:1px solid var(--accent-teal); background:rgba(75,227,172,.14); color:var(--text-primary);}
+  .timeline-block.saved{background:rgba(242,168,60,.22); border-color:var(--accent-amber);}
+  .timeline-block b{display:block; font-size:11px;}
+  .timeline-block .tb-time{display:block; color:var(--text-muted); font-size:9.5px; margin-top:1px;}
+  .timeline-block.readonly{cursor:default;}
+  @media (max-width:420px){
+    .timeline-col{width:108px;}
+    .timeline-block{font-size:9.5px;}
+  }
   .char-card{border:1px dashed rgba(242,168,60,.45); border-radius:14px; padding:14px; background:linear-gradient(145deg, rgba(242,168,60,.08), var(--bg-panel-2));}
   .compact-list li + li{margin-top:5px;}
   nav.tabbar{position:fixed; left:0; right:0; bottom:0; display:flex; background:rgba(11,21,18,.94); backdrop-filter:blur(10px); border-top:1px solid var(--line); padding:8px 2px calc(8px + env(safe-area-inset-bottom)); z-index:30;}
