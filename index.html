@@ -752,6 +752,32 @@ Meet at the clock tower if separated"></textarea>
     <div id="mapInfo"></div>
 
     <div class="card">
+      <span class="tag">Full directory, incl. your own finds</span>
+      <h3>Every stage, hidden venue &amp; shop we could source</h3>
+      <p>Main stages, confirmed 2026 hidden venues, food &amp; drink, shops, workshops, leisure/rides and support spaces, plus a handful of past-chapter names with no 2026 evidence — clearly marked. "Confirmed" means it appeared in Boomtown's own 2026 lineup/schedule tool or official site copy; "Rumoured" means it's a lead from a past chapter, not a promise; "Your find" is anything your group logs below. Every row also says 🎵 Music / 🔇 No music, so it's clear which entries are genuinely deliberately-hidden venues worth hunting versus places you'll simply walk past (food stalls, welfare, workshops). A 📍 note gives a rough location where we could place one.</p>
+      <div class="venue-filters" id="venueStatusFilters">
+        <button class="active" data-status="all">All statuses</button>
+        <button data-status="confirmed">Confirmed only</button>
+        <button data-status="rumoured">Rumoured only</button>
+        <button data-status="logged">Your finds</button>
+      </div>
+      <div class="venue-filters" id="venueTypeFilters">
+        <button class="active" data-type="all">All types</button>
+        <button data-type="Main stage">Main stages</button>
+        <button data-type="Hidden venue">Hidden venues</button>
+        <button data-type="Shop / hidden venue">Shops</button>
+        <button data-type="Workshop / shop">Workshops</button>
+        <button data-type="Welfare / support">Welfare / support</button>
+        <button data-type="Talks / installation">Talks / installations</button>
+        <button data-type="Leisure / ride">Leisure / rides</button>
+        <button data-type="Food & drink">Food &amp; drink</button>
+      </div>
+      <div class="venue-list" id="venueTableBody"></div>
+      <p class="empty-note" id="venueTableCount" style="margin-top:2px;"></p>
+      <p class="empty-note" style="margin-top:6px;">Best rule: if a storefront, queue or actor feels suspiciously over-designed, investigate — but don't expect last year's exact location to survive the redesign.</p>
+    </div>
+
+    <div class="card">
       <h3>📍 Meeting point</h3>
       <p>Set directly here, or tap any stage/district marker above and use "Save as meeting point."</p>
       <div id="currentMeetingDisplay" class="empty-note" style="margin-bottom:8px;"></div>
@@ -811,32 +837,6 @@ Meet at the clock tower if separated"></textarea>
     <div class="card">
       <h3>Hidden venues &amp; things to find</h3>
       <p>On top of the 18 official stages, Boomtown runs 50+ unlisted hidden venues built by independent collectives inside the districts — some kitted out as a post office, hotel or police station, all deliberately not published anywhere. The named "?" markers on the map above are real past-chapter and 2026 venue names, positioned near the district their theme best fits; the plain "?" markers further out are a reminder there are always more than are named here. None of these positions are surveyed — finding them is the point.</p>
-    </div>
-
-    <div class="card">
-      <span class="tag">Full directory, incl. your own finds</span>
-      <h3>Every stage, hidden venue &amp; shop we could source</h3>
-      <p>Main stages, confirmed 2026 hidden venues, food &amp; drink, shops, workshops, leisure/rides and support spaces, plus a handful of past-chapter names with no 2026 evidence — clearly marked. "Confirmed" means it appeared in Boomtown's own 2026 lineup/schedule tool or official site copy; "Rumoured" means it's a lead from a past chapter, not a promise; "Your find" is anything your group logs below. Every row also says 🎵 Music / 🔇 No music, so it's clear which entries are genuinely deliberately-hidden venues worth hunting versus places you'll simply walk past (food stalls, welfare, workshops). A 📍 note gives a rough location where we could place one.</p>
-      <div class="venue-filters" id="venueStatusFilters">
-        <button class="active" data-status="all">All statuses</button>
-        <button data-status="confirmed">Confirmed only</button>
-        <button data-status="rumoured">Rumoured only</button>
-        <button data-status="logged">Your finds</button>
-      </div>
-      <div class="venue-filters" id="venueTypeFilters">
-        <button class="active" data-type="all">All types</button>
-        <button data-type="Main stage">Main stages</button>
-        <button data-type="Hidden venue">Hidden venues</button>
-        <button data-type="Shop / hidden venue">Shops</button>
-        <button data-type="Workshop / shop">Workshops</button>
-        <button data-type="Welfare / support">Welfare / support</button>
-        <button data-type="Talks / installation">Talks / installations</button>
-        <button data-type="Leisure / ride">Leisure / rides</button>
-        <button data-type="Food & drink">Food &amp; drink</button>
-      </div>
-      <div class="venue-list" id="venueTableBody"></div>
-      <p class="empty-note" id="venueTableCount" style="margin-top:2px;"></p>
-      <p class="empty-note" style="margin-top:6px;">Best rule: if a storefront, queue or actor feels suspiciously over-designed, investigate — but don't expect last year's exact location to survive the redesign.</p>
     </div>
 
     <div class="card">
