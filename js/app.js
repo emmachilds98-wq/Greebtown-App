@@ -231,6 +231,11 @@ const GENRE_INFO = {
   "Unconfirmed": "Genre not confirmed yet — check the app or ask on-site."
 };
 function genreDescriptorText(genre){ return GENRE_INFO[genre] || ""; }
+// Researched, artist-specific one-liners (real sound/style, not the
+// generic per-genre blurb above) — keyed by exact artist name, filled
+// in from js/artist-bios.js. Falls back to the genre-level description
+// when an act has no specific entry yet.
+function artistBioText(name){ return (window.ARTIST_BIOS && window.ARTIST_BIOS[name]) || ""; }
 // Short, auto-composed line built only from data already in the app
 // (stage, genre, set length) — not a fabricated bio, just context.
 function artistDescriptor(a){
@@ -1653,7 +1658,8 @@ function showArtists(list){
     const div = document.createElement("div");
     div.className = "item";
     const genre = genreOf(artist);
-    const gDesc = genreDescriptorText(genre);
+    const bio = artistBioText(artist.name);
+    const gDesc = bio ? "" : genreDescriptorText(genre);
     div.innerHTML = `
       <div class="item-top">
         <div>
@@ -1662,6 +1668,7 @@ function showArtists(list){
           ${timeLabel(artist)}<br>
           <small>${genre}</small>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
+          ${bio ? `<div class="genre-desc">${escapeHtml(bio)}</div>` : ""}
           ${gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : ""}
         </div>
         <button aria-label="Toggle saved">${saved ? "★" : "☆"}</button>
@@ -1895,7 +1902,8 @@ function findClashes(schedule){
 function scheduleItemHTML(artist, idx, clashNames, readonly){
   const clashClass = clashNames && clashNames.length ? " clash" : "";
   const genre = genreOf(artist);
-  const gDesc = genreDescriptorText(genre);
+  const bio = artistBioText(artist.name);
+  const gDesc = bio ? "" : genreDescriptorText(genre);
   return `
     <div class="item${clashClass}" data-idx="${idx}">
       <div class="item-top">
@@ -1904,6 +1912,7 @@ function scheduleItemHTML(artist, idx, clashNames, readonly){
           ${artist.stage}<br>
           <span class="time-label">${timeLabel(artist)}</span>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
+          ${bio ? `<div class="genre-desc">${escapeHtml(bio)}</div>` : ""}
           ${gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : ""}
         </div>
         ${readonly ? "" : `<div class="btnrow">
@@ -2235,15 +2244,19 @@ if(sharePlanBtn){
   };
 }
 
-document.getElementById("browseAllArtistsBtn").onclick = ()=>{
+function browseAllArtists(){
   document.querySelector('.tab[data-tab="artists"]').click();
+  if(artistsView !== "list" && artistsViewListBtn) artistsViewListBtn.click();
   artistSearch.value = "";
   setActiveGenreChip(null);
   updateClearArtistSearchBtn();
   showArtists(allArtists());
   artistSearch.placeholder = `Browsing all ${allArtists().length} artists — use a genre chip or search to narrow it down`;
   window.scrollTo(0, 0);
-};
+}
+document.getElementById("browseAllArtistsBtn").onclick = browseAllArtists;
+const artistsBrowseAllBtn = document.getElementById("artistsBrowseAllBtn");
+if(artistsBrowseAllBtn) artistsBrowseAllBtn.onclick = browseAllArtists;
 
 renderPlanPersonTabs();
 renderSchedule();
