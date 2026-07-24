@@ -113,6 +113,10 @@
   .map-label.camp{background:none; border:none; padding:0; font-size:8px; text-transform:uppercase; letter-spacing:.08em; color:rgba(238,246,241,.6); text-shadow:0 1px 3px rgba(0,0,0,.7); transform:translate(-50%, -50%);}
   .stagelist{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
   .stagelist span{font-size:12px; background:var(--bg-panel-2); border:1px solid var(--line); padding:4px 10px; border-radius:20px; color:var(--text-muted);}
+  .search-row{display:flex; gap:8px; align-items:center;}
+  .search-row input{flex:1;}
+  .search-row button{flex-shrink:0;}
+  #genreChips .chip.active{color:var(--accent-amber); border-color:var(--accent-amber); background:rgba(242,168,60,.14); font-weight:700;}
   .discovery{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px;}
   .story-brief{border-color:rgba(75,227,172,.42); background:linear-gradient(145deg, rgba(75,227,172,.10), var(--bg-panel));}
   .story-step{padding:10px 0; border-top:1px solid var(--line);}
@@ -150,11 +154,12 @@
   .bingo-cell{box-sizing:border-box; width:calc(20% - 3px); margin:1.5px; min-height:clamp(28px, 7vw, 40px); min-width:0; border:1px solid var(--line); border-radius:8px; background:var(--bg-panel-2); color:var(--text-muted); font-size:clamp(7.5px, 2vw, 10px); line-height:1.15; display:flex; align-items:center; justify-content:center; text-align:center; padding:3px 2px; cursor:pointer; user-select:none; overflow:hidden; word-break:break-word; overflow-wrap:break-word; hyphens:auto; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
   .bingo-cell.marked{background:rgba(75,227,172,.18); border-color:var(--accent-teal); color:var(--text-primary); text-decoration:line-through;}
   .bingo-cell.free{background:rgba(242,168,60,.16); border-color:var(--accent-amber); color:var(--accent-amber); font-weight:700; text-decoration:none;}
+  .bingo-cell.winning{background:rgba(242,168,60,.32); border-color:var(--accent-amber); color:var(--text-primary); box-shadow:0 0 0 2px rgba(242,168,60,.5) inset;}
   @media (max-width:380px){
     .bingo-cell{width:calc(20% - 2.4px); margin:1.2px; min-height:clamp(26px, 7.5vw, 34px); font-size:clamp(7px, 2.1vw, 9px); padding:2px 1.5px;}
   }
   @media (max-width:340px){
-    .bingo-cell{width:calc(20% - 2px); margin:1px; min-height:26px; font-size:6.5px; padding:2px 1px;}
+    .bingo-cell{width:calc(20% - 2px); margin:1px; min-height:32px; font-size:6.5px; padding:2px 1px;}
   }
 
   /* ===== Tabstrip — reusable pill-tab row (Plan person tabs, timeline day tabs) ===== */

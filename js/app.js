@@ -40,7 +40,7 @@ fixBottomClearance();
 //    person-tab bar is the only place they're ever displayed. Sync must
 //    never read or write personal fields like schedule, meeting, notes,
 //    bingoCard, bingoMarked, bingoLocked, or myCharacter.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "" };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -1630,6 +1630,17 @@ function timeLabel(a){
 // ===============================
 const artistSearch = document.getElementById("artistSearch");
 const artistResults = document.getElementById("artistResults");
+const clearArtistSearchBtn = document.getElementById("clearArtistSearchBtn");
+
+function setActiveGenreChip(chipEl){
+  document.querySelectorAll("#genreChips .chip").forEach(c=>c.classList.remove("active"));
+  if(chipEl) chipEl.classList.add("active");
+}
+
+function updateClearArtistSearchBtn(){
+  if(!clearArtistSearchBtn) return;
+  clearArtistSearchBtn.style.display = artistSearch.value.trim().length ? "" : "none";
+}
 
 function showArtists(list){
   artistResults.innerHTML = "";
@@ -1675,10 +1686,26 @@ function currentFilteredArtists(){
 function promptArtistSearch(){
   artistResults.innerHTML = `<p class="empty-note">Start typing a name, stage or genre — or tap a genre chip above — to search ${allArtists().length} acts across all 5 days.</p>`;
 }
+let artistSearchDebounceTimer = null;
 artistSearch.oninput = ()=>{
-  if(artistSearch.value.trim().length === 0){ promptArtistSearch(); return; }
-  showArtists(currentFilteredArtists());
+  // Manual typing overrides whatever genre chip was tapped, so drop its highlight.
+  setActiveGenreChip(null);
+  updateClearArtistSearchBtn();
+  clearTimeout(artistSearchDebounceTimer);
+  artistSearchDebounceTimer = setTimeout(()=>{
+    if(artistSearch.value.trim().length === 0){ promptArtistSearch(); return; }
+    showArtists(currentFilteredArtists());
+  }, 180);
 };
+if(clearArtistSearchBtn){
+  clearArtistSearchBtn.onclick = ()=>{
+    artistSearch.value = "";
+    setActiveGenreChip(null);
+    updateClearArtistSearchBtn();
+    promptArtistSearch();
+  };
+}
+updateClearArtistSearchBtn();
 promptArtistSearch();
 
 // ===============================
@@ -1796,6 +1823,8 @@ function loadGenreChips(){
   box.querySelectorAll(".chip").forEach(s=>{
     s.onclick = ()=>{
       artistSearch.value = s.dataset.g;
+      setActiveGenreChip(s);
+      updateClearArtistSearchBtn();
       showArtists(currentFilteredArtists());
     };
   });
@@ -2138,9 +2167,62 @@ document.getElementById("copyPlanBtn").onclick = async ()=>{
   setTimeout(()=> btn.textContent = "Copy plan as text", 1500);
 };
 
+// Plain-text plan summary grouped by day, sorted by start time within each
+// day — readable enough to paste straight into a group chat.
+function buildPlanShareText(){
+  const schedule = Store.get("schedule");
+  if(schedule.length === 0) return null;
+  const byDay = {};
+  schedule.forEach(a=>{
+    const day = a.day && a.day !== "TBC" ? a.day : "No time set";
+    (byDay[day] = byDay[day] || []).push(a);
+  });
+  const order = [...DAY_ORDER, "No time set"];
+  const lines = ["My Boomtown 2026 plan:"];
+  order.filter(d=> byDay[d]).forEach(day=>{
+    const items = byDay[day].slice().sort((a,b)=> (toMinutes(a.day,a.start)||0) - (toMinutes(b.day,b.start)||0));
+    lines.push(`\n${day}:`);
+    items.forEach(a=> lines.push(`  ${a.name} — ${a.stage} — ${timeLabel(a)}`));
+  });
+  return lines.join("\n");
+}
+
+const sharePlanBtn = document.getElementById("sharePlanBtn");
+const sharePlanStatusNote = document.getElementById("sharePlanStatusNote");
+if(sharePlanBtn){
+  sharePlanBtn.onclick = async ()=>{
+    const text = buildPlanShareText();
+    if(!text){
+      if(sharePlanStatusNote) sharePlanStatusNote.textContent = "Nothing saved yet.";
+      return;
+    }
+    if(navigator.share){
+      try{
+        await navigator.share({ title:"My Boomtown 2026 plan", text });
+        if(sharePlanStatusNote) sharePlanStatusNote.textContent = "";
+        return;
+      }catch(e){
+        // user cancelled the share sheet, or it's unsupported for this
+        // content — fall through to clipboard below rather than erroring.
+      }
+    }
+    try{
+      await navigator.clipboard.writeText(text);
+      if(sharePlanStatusNote){
+        sharePlanStatusNote.textContent = "Copied to clipboard!";
+        setTimeout(()=> sharePlanStatusNote.textContent = "", 1500);
+      }
+    }catch(e){
+      window.prompt("Copy this manually:", text);
+    }
+  };
+}
+
 document.getElementById("browseAllArtistsBtn").onclick = ()=>{
   document.querySelector('.tab[data-tab="artists"]').click();
   artistSearch.value = "";
+  setActiveGenreChip(null);
+  updateClearArtistSearchBtn();
   showArtists(allArtists());
   artistSearch.placeholder = `Browsing all ${allArtists().length} artists — use a genre chip or search to narrow it down`;
   window.scrollTo(0, 0);
@@ -3364,6 +3446,17 @@ const bingoPool = [
   "Spot a Von Vanderland extra in costume", "Hear The Great Mother's followers chanting"
 ];
 
+// All 12 standard 5x5 bingo win lines (5 rows + 5 cols + 2 diagonals),
+// as flat-index arrays into the 25-cell card.
+const BINGO_LINES = (()=>{
+  const lines = [];
+  for(let r=0;r<5;r++) lines.push([0,1,2,3,4].map(c=> r*5+c));
+  for(let c=0;c<5;c++) lines.push([0,1,2,3,4].map(r=> r*5+c));
+  lines.push([0,6,12,18,24]);
+  lines.push([4,8,12,16,20]);
+  return lines;
+})();
+
 function shuffledPick(pool, count){
   const copy = pool.slice();
   for(let i = copy.length - 1; i > 0; i--){
@@ -3404,10 +3497,20 @@ function renderBingo(){
     Store.set("bingoCard", card);
   }
 
+  // The FREE centre square always counts as marked for line-completion
+  // purposes, even though it's never in bingoMarked itself.
+  const effectiveMarked = new Set([...marked, 12]);
+  const completedLines = BINGO_LINES.filter(line=> line.every(i=> effectiveMarked.has(i)));
+  const winningCells = new Set(completedLines.flat());
+  const linesSeen = Store.get("bingoLinesSeen") || 0;
+  const isNewWin = locked && completedLines.length > linesSeen;
+  if(completedLines.length !== linesSeen) Store.set("bingoLinesSeen", completedLines.length);
+
   grid.innerHTML = card.map((text,i)=>{
     const isFree = i === 12;
     const isMarked = isFree || marked.includes(i);
-    return `<div class="bingo-cell${isMarked ? " marked" : ""}${isFree ? " free" : ""}" data-i="${i}">${escapeHtml(text)}</div>`;
+    const isWinning = winningCells.has(i);
+    return `<div class="bingo-cell${isMarked ? " marked" : ""}${isFree ? " free" : ""}${isWinning ? " winning" : ""}" data-i="${i}">${escapeHtml(text)}</div>`;
   }).join("");
 
   grid.querySelectorAll(".bingo-cell").forEach(cell=>{
@@ -3424,9 +3527,13 @@ function renderBingo(){
 
   generateBtn.style.display = locked ? "none" : "";
   lockBtn.style.display = locked ? "none" : "";
-  note.textContent = locked
-    ? `Locked in — ${marked.length}/24 crossed off. Tap a square to mark it done.`
-    : "Not locked yet — keep shuffling, nothing counts until you lock it in.";
+  if(isNewWin){
+    note.textContent = `🎉 Bingo! You've completed a line. ${marked.length}/24 crossed off — keep going for more.`;
+  } else {
+    note.textContent = locked
+      ? `Locked in — ${marked.length}/24 crossed off. Tap a square to mark it done.`
+      : "Not locked yet — keep shuffling, nothing counts until you lock it in.";
+  }
 }
 
 document.getElementById("bingoGenerateBtn").onclick = ()=>{
@@ -3435,6 +3542,7 @@ document.getElementById("bingoGenerateBtn").onclick = ()=>{
   card.splice(12, 0, "FREE");
   Store.set("bingoCard", card);
   Store.set("bingoMarked", []);
+  Store.set("bingoLinesSeen", 0);
   renderBingo();
 };
 
