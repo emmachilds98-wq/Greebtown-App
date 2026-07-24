@@ -158,7 +158,10 @@ Meet at the clock tower if separated"></textarea>
   <section id="artists" class="screen">
     <div class="eyebrow">Lineup</div>
     <h2 style="margin-bottom:14px;">Artists</h2>
-    <input type="text" id="artistSearch" placeholder="Browsing all 1173 artists — use a genre chip or search to narrow it down">
+    <div class="search-row">
+      <input type="text" id="artistSearch" placeholder="Browsing all 1173 artists — use a genre chip or search to narrow it down">
+      <button class="ghost" id="clearArtistSearchBtn" style="display:none;">Clear</button>
+    </div>
     <div class="stagelist" id="genreChips" style="margin:10px 0 0;"><span class="chip" data-g="Acid / Techno">Acid / Techno</span><span class="chip" data-g="Alt / Punk / Metal">Alt / Punk / Metal</span><span class="chip" data-g="Bass / Alt">Bass / Alt</span><span class="chip" data-g="Bass / D&amp;B">Bass / D&amp;B</span><span class="chip" data-g="Bass / Drum &amp; Bass">Bass / Drum &amp; Bass</span><span class="chip" data-g="Bass / Dub / Jungle">Bass / Dub / Jungle</span><span class="chip" data-g="Bass / Hardstyle">Bass / Hardstyle</span><span class="chip" data-g="Bass / Party">Bass / Party</span><span class="chip" data-g="Bass / Rave">Bass / Rave</span><span class="chip" data-g="Breaks / Big Beat">Breaks / Big Beat</span><span class="chip" data-g="Cabaret / Variety">Cabaret / Variety</span><span class="chip" data-g="D&amp;B / Reggae / Headline">D&amp;B / Reggae / Headline</span><span class="chip" data-g="Dub / Bass">Dub / Bass</span><span class="chip" data-g="Dubstep / Bass">Dubstep / Bass</span><span class="chip" data-g="Eclectic / DJ">Eclectic / DJ</span><span class="chip" data-g="Folk / Balkan / Party">Folk / Balkan / Party</span><span class="chip" data-g="Hardcore / Gabber">Hardcore / Gabber</span><span class="chip" data-g="House / Dance">House / Dance</span><span class="chip" data-g="House / Techno">House / Techno</span><span class="chip" data-g="Irish Folk / Trad">Irish Folk / Trad</span><span class="chip" data-g="Live / Alternative">Live / Alternative</span><span class="chip" data-g="Party / Playback Sets">Party / Playback Sets</span><span class="chip" data-g="Party / Variety">Party / Variety</span><span class="chip" data-g="Psytrance / Trance">Psytrance / Trance</span><span class="chip" data-g="Swing / Variety">Swing / Variety</span><span class="chip" data-g="Techno / Electro">Techno / Electro</span><span class="chip" data-g="World / Eclectic">World / Eclectic</span></div>
     <p class="empty-note" style="margin:10px 0;">Full Wed–Sun times below, sourced from Clashfinder's crowd-maintained Boomtown 26 schedule and cross-checked after Boomtown posted official day splits/set times in the app. Most end times are real, not estimated — anything still marked <strong>(est.)</strong> wasn't in that source and is guessed as "until the next act on that stage." Always worth a final check against the official app once you're on-site, especially for anything added or changed last-minute.</p>
     <div class="viewtoggle" id="artistsViewToggle">
@@ -210,7 +213,9 @@ Meet at the clock tower if separated"></textarea>
     </div>
 
     <button class="ghost" id="copyPlanBtn" style="margin-top:12px;">Copy plan as text</button>
+    <button class="ghost" id="sharePlanBtn" style="margin-top:12px;">Share my plan</button>
     <button class="action" id="browseAllArtistsBtn" style="margin:12px 0 0 8px;">Browse all artists</button>
+    <p class="empty-note" id="sharePlanStatusNote" style="margin-top:6px;"></p>
   </section>
 
   <!-- MAP -->
