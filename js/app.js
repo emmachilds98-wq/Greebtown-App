@@ -1802,16 +1802,6 @@ function loadGenreChips(){
 }
 loadGenreChips();
 
-function renderGenreGuide(){
-  const box = document.getElementById("genreGuideList");
-  if(!box) return;
-  const names = Object.keys(GENRE_INFO).filter(g=>g!=="Unconfirmed").sort();
-  box.innerHTML = names.map(g=>`
-    <div class="genre-guide-row"><b>${escapeHtml(g)}</b><span>${escapeHtml(GENRE_INFO[g])}</span></div>
-  `).join("");
-}
-renderGenreGuide();
-
 // ===============================
 // ADD YOUR OWN ARTIST
 // ===============================
