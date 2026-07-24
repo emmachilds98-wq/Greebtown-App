@@ -2098,10 +2098,27 @@ function renderPlanTimelineDayTabs(){
 function renderPlanTimeline(){
   const grid = document.getElementById("planTimelineGrid");
   if(!grid) return;
+  const readonly = planActiveOwner !== "mine";
   const schedule = activeScheduleData();
   const dayItems = schedule.filter(a=> a.day === planTimelineDay && a.start);
-  const { html } = buildTimelineHTML(dayItems, { readonly:true });
+  const savedNames = new Set(dayItems.map(a=>a.name));
+  const { html } = buildTimelineHTML(dayItems, { readonly, savedNames });
   grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">Nothing with a set time saved for ${planTimelineDay} yet.</p>`;
+
+  const hint = document.getElementById("planTimelineHint");
+  if(hint) hint.textContent = readonly
+    ? "Scroll down for time, sideways for stage."
+    : "Scroll down for time, sideways for stage. Tap a block to unsave it.";
+
+  if(!readonly){
+    grid.querySelectorAll(".timeline-block").forEach(b=>{
+      b.onclick = ()=>{
+        const name = b.dataset.name, day = b.dataset.day;
+        const artist = Store.get("schedule").find(a=>a.name===name && a.day===day);
+        if(artist){ saveArtist(artist); renderPlanTimeline(); }
+      };
+    });
+  }
 }
 
 // ===============================
