@@ -132,19 +132,26 @@
   .venue-filters{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;}
   .venue-filters button{background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-muted); font-size:12px; padding:6px 12px; border-radius:20px; cursor:pointer;}
   .venue-filters button.active{color:var(--accent-amber); border-color:var(--accent-amber);}
-  /* Bingo grid: rows size themselves to whatever the longest square needs
-     (min-height as a floor, not a forced aspect-ratio square) so long
-     phrases wrap onto extra lines within the cell instead of spilling
-     out over the row below — that vertical spill was the "overlap" bug
-     on narrow phones. word-break/hyphens stop a single long word from
-     doing the same thing horizontally. */
-  #bingoGrid{display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:5px; margin:10px 0; align-items:stretch; width:100%;}
-  .bingo-cell{min-height:64px; min-width:0; border:1px solid var(--line); border-radius:8px; background:var(--bg-panel-2); color:var(--text-muted); font-size:10.5px; line-height:1.25; display:flex; align-items:center; justify-content:center; text-align:center; padding:5px 4px; cursor:pointer; user-select:none; overflow:hidden; word-break:break-word; overflow-wrap:break-word; hyphens:auto; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
+  /* Bingo grid: rebuilt on plain percentage-based flexbox instead of CSS
+     Grid's fr units. Each cell is exactly (20% - 4px) wide plus 2px of
+     margin on every side, so five cells always sum to exactly 100% of
+     the container's width, by simple arithmetic — not by trusting a
+     browser's track-sizing algorithm to shrink content correctly. This
+     is the fix after minmax(0,1fr) still overflowed on a real device:
+     percentages + box-sizing:border-box cannot mathematically exceed
+     the container width, regardless of engine or content. min-height
+     (a floor, not a forced square) plus word-break/hyphens still let
+     long phrases wrap onto extra lines instead of spilling vertically.
+  */
+  #bingoGrid{display:flex; flex-wrap:wrap; width:100%; box-sizing:border-box; margin:10px 0 10px -2px;}
+  .bingo-cell{box-sizing:border-box; width:calc(20% - 4px); margin:2px; min-height:56px; min-width:0; border:1px solid var(--line); border-radius:8px; background:var(--bg-panel-2); color:var(--text-muted); font-size:9.5px; line-height:1.2; display:flex; align-items:center; justify-content:center; text-align:center; padding:4px 3px; cursor:pointer; user-select:none; overflow:hidden; word-break:break-word; overflow-wrap:break-word; hyphens:auto; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
   .bingo-cell.marked{background:rgba(75,227,172,.18); border-color:var(--accent-teal); color:var(--text-primary); text-decoration:line-through;}
   .bingo-cell.free{background:rgba(242,168,60,.16); border-color:var(--accent-amber); color:var(--accent-amber); font-weight:700; text-decoration:none;}
   @media (max-width:380px){
-    #bingoGrid{gap:3px;}
-    .bingo-cell{min-height:56px; font-size:9px; padding:3px;}
+    .bingo-cell{width:calc(20% - 3px); margin:1.5px; min-height:50px; font-size:8.5px; padding:3px 2px;}
+  }
+  @media (max-width:340px){
+    .bingo-cell{width:calc(20% - 2px); margin:1px; min-height:46px; font-size:8px; padding:2px;}
   }
 
   /* ===== Tabstrip — reusable pill-tab row (Plan person tabs, timeline day tabs) ===== */
