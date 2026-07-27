@@ -1664,7 +1664,7 @@ function showArtists(list){
       <div class="item-top">
         <div>
           <strong>${artist.name}</strong><br>
-          ${artist.stage}<br>
+          <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
           ${timeLabel(artist)}<br>
           <small>${genre}</small>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
@@ -1675,6 +1675,7 @@ function showArtists(list){
       </div>
     `;
     div.querySelector("button").onclick = ()=> saveArtist(artist);
+    div.querySelector(".stage-link").onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
     artistResults.appendChild(div);
   });
 }
@@ -1759,7 +1760,7 @@ function buildTimelineHTML(items, opts){
       const cls = "timeline-block" + (isSaved ? " saved" : "") + (opts.readonly ? " readonly" : "");
       return `<div class="${cls}" style="top:${top}px; height:${height}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}"><b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
-    return `<div class="timeline-col"><div class="timeline-col-head">${escapeHtml(stage)}</div><div class="timeline-body" style="height:${totalHeight}px;">${hourLines}${blocks}</div></div>`;
+    return `<div class="timeline-col"><div class="timeline-col-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-body" style="height:${totalHeight}px;">${hourLines}${blocks}</div></div>`;
   }).join("");
 
   const html = `<div class="timeline-grid">
@@ -1800,6 +1801,7 @@ function renderArtistsTimeline(){
       if(artist){ saveArtist(artist); renderArtistsTimeline(); }
     };
   });
+  wireStageLinks(grid);
 }
 
 const artistsViewListBtn = document.getElementById("artistsViewListBtn");
@@ -1909,7 +1911,7 @@ function scheduleItemHTML(artist, idx, clashNames, readonly){
       <div class="item-top">
         <div>
           <strong>${artist.name}</strong><br>
-          ${artist.stage}<br>
+          <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
           <span class="time-label">${timeLabel(artist)}</span>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bio ? `<div class="genre-desc">${escapeHtml(bio)}</div>` : ""}
@@ -2053,6 +2055,10 @@ function renderSchedule(){
     });
   }
 
+  scheduleList.querySelectorAll(".stage-link").forEach(el=>{
+    el.onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(el.dataset.stage); };
+  });
+
   if(typeof renderNowNext === "function") renderNowNext();
 }
 
@@ -2128,6 +2134,7 @@ function renderPlanTimeline(){
       };
     });
   }
+  wireStageLinks(grid);
 }
 
 // ===============================
@@ -2403,46 +2410,47 @@ const venueDirectory = [
   { name:"Acid Leak", type:"Main stage", status:"confirmed", music:true, genre:"Acid techno, hard techno", near:"Area 404", info:"Area 404's darker, sweatier 4/4 stage." },
   { name:"Infinity", type:"Main stage", status:"rumoured", music:"unclear", genre:"Genre policy unconfirmed", near:"Unclear", info:"One of Chapter Five's smaller stages — treat as a wildcard; no 2026-specific confirmation found for this name at all." },
   { name:"The Observatory", type:"Research hub", status:"confirmed", music:false, genre:"—", near:"Thrutopia (likely)", info:"Genuine 2026 academic study led by Dr Martha Newson, 10+ UK universities — real research, not story canon." },
-  { name:"The Boomtown Bobbies", type:"Hidden venue", status:"confirmed", music:true, genre:"DJs, live takeovers", near:"Area 404", info:"Mock police station in Area 404's territory, playing on The Guardians storyline." },
-  { name:"Soapranos Laundrette", type:"Hidden venue", status:"confirmed", music:true, genre:"Dance/house DJs", near:"Letsbe Avenue", info:"Laundrette-fronted micro venue in Letsbe Avenue — DJs behind the washing machines." },
-  { name:"Hotel Paradiso", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, lounge", near:"Copperwood", info:"Faded-glamour hotel bar fitting Copperwood's 1925 film-world setting." },
-  { name:"Luck Exchange Casino", type:"Hidden venue", status:"confirmed", music:true, genre:"Party, eclectic", near:"Area 404", info:"Casino-themed venue in Area 404's territory." },
-  { name:"The Garden Centre", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Chill, eclectic", near:"Botanica", info:"Garden-centre-fronted spot fitting Botanica's plant-temple theme." },
-  { name:"Botanica Zoo", type:"Hidden venue", status:"confirmed", music:true, genre:"Character-led, eclectic", near:"Botanica", info:"A 'zoo' micro-world inside Botanica — the theme is the clue." },
-  { name:"The Immortal Children of the Eternal Seed", type:"Hidden venue", status:"confirmed", music:true, genre:"Ritual, ambient/eclectic", near:"Botanica", info:"Botanica-flavoured cult/ritual-themed micro venue — name suggests a Great Mother tie-in." },
+  { name:"The Boomtown Bobbies", type:"Hidden venue", status:"rumoured", music:true, genre:"DJs, live takeovers", near:"Area 404 / Oldtown", info:"Long-running mock police station tied to the storyline — no 2026 confirmation found; recent evidence (a Nachtlicker co-billing post) ties it to past chapters, not yet reconfirmed for Chapter Five." },
+  { name:"Soapranos Laundrette", type:"Hidden venue", status:"rumoured", music:true, genre:"Dance/house DJs", near:"Letsbe Avenue", info:"Laundrette-fronted micro venue with its own account and a Boomtown-official shout-out — no 2026-dated confirmation found, only prior-chapter posts, so treat as unconfirmed for Chapter Five for now." },
+  { name:"Hotel Paradiso", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic, lounge", near:"Copperwood", info:"Faded-glamour hotel bar with its own account; found in 2023 and 2025 chapters but no 2026 confirmation found — was part of Copperwood's Chapter Four (2025) and earlier." },
+  { name:"Luck Exchange Casino", type:"Hidden venue", status:"rumoured", music:true, genre:"Party, eclectic", near:"Area 404", info:"Casino-themed venue promoted by Boomtown's own account in past chapters; no 2026 confirmation found." },
+  { name:"The Garden Centre", type:"Shop / hidden venue", status:"rumoured", music:true, genre:"Chill, eclectic", near:"Botanica", info:"Garden-centre-fronted spot fitting Botanica's plant-temple theme; found live at Boomtown 2025 but no 2026 confirmation found yet." },
+  { name:"Botanica Zoo", type:"Hidden venue", status:"confirmed", music:true, genre:"Jungle, hardcore, breaks, UK garage, bass", near:"Botanica", info:"Feral, animal-led 'anarcho-squat zoo' venue — 2026 event listings (Killa P, DJ Hybrid, 14 Aug) and its own 'just over 2 weeks til Boomtown' July 2026 post confirm it's back for Chapter Five." },
+  { name:"The Immortal Children of the Eternal Seed", type:"Hidden venue", status:"rumoured", music:true, genre:"Ritual, ambient/eclectic", near:"Botanica", info:"Botanica-flavoured cult/ritual-themed micro venue — only evidence found dates to a 2023 Boomtown post, no 2026 confirmation found." },
   { name:"Topsy Turvy Trims", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Barbershop novelty, party", near:"Oldtown", info:"Barbershop/salon-themed spot — fits Oldtown's topsy-turvy rebuild." },
-  { name:"PFP Robot", type:"Hidden venue", status:"confirmed", music:true, genre:"Electro, tech", near:"Metropolis (likely)", info:"Robot/tech-themed venue, likely Metropolis-adjacent." },
-  { name:"Sub Lab", type:"Hidden venue", status:"confirmed", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue with a heavier, sub-driven sound." },
-  { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Techno, late-night electronic", near:"Metropolis (likely)", info:"Name suggests a darker after-hours techno room." },
-  { name:"Deviant Lounge", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, after-hours", near:"Metropolis (likely)", info:"Late-night lounge for when the bigger stages wind down." },
-  { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Kebab-shop chaos paired with gabber and hardcore — tiny and loud." },
-  { name:"E Numbers", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Party, eclectic", near:"Letsbe Avenue", info:"Sweet-shop-themed party spot fitting Letsbe Avenue's BLIP storyline." },
-  { name:"The Pomegranate Parlour", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic party DJs", near:"Site-wide", info:"Parlour-style oddity — a good stop wherever a venue is doing something theatrical." },
-  { name:"Busker's Wharf", type:"Hidden venue", status:"confirmed", music:true, genre:"Live/acoustic, folk", near:"Site-wide", info:"Wharf/street-performance themed spot." },
-  { name:"Twisted Time Machine (Bad Apple Bar)", type:"Hidden venue", status:"confirmed", music:true, genre:"Rotates by slot: emo, nu-metal, jungle disco, 90s rave", near:"Site-wide", info:"Themed bar/party room — expect a different fancy-dress theme by time slot." },
+  { name:"PFP Robot", type:"Hidden venue", status:"rumoured", music:true, genre:"Electro, makina, trance, acid, techno", near:"Area 404", info:"PFP's robotic soundsystem — a real, long-running fixture of Area 404 (documented 2022 through 2024) but no 2026 confirmation found yet." },
+  { name:"Sub Lab", type:"Hidden venue", status:"rumoured", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — documented at Boomtown 2025 but no 2026 confirmation found." },
+  { name:"Nachtlicker", type:"Hidden venue", status:"rumoured", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Area 404", info:"Curated nocturnal-rave/punk-theatre night in Area 404 in 2024 and 2025 — no 2026 confirmation found yet." },
+  { name:"Deviant Lounge", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic, after-hours", near:"Metropolis (likely)", info:"No evidence found tying this name to Boomtown at all in current searches (past or present) — treat as unverified until seen on site." },
+  { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"rumoured", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Dystopian kebab-shop gabber stage, running since at least 2023 through 2025 ('MK2'); no 2026 confirmation found yet." },
+  { name:"E Numbers", type:"Shop / hidden venue", status:"rumoured", music:true, genre:"Hyperpop, party, eclectic", near:"Metropolis", info:"Hyperpop 'sweetshop' venue documented in Metropolis 2023 through 2025; no 2026 confirmation found yet." },
+  { name:"The Pomegranate Parlour", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic party DJs", near:"Site-wide", info:"Actor-led parlour-style venue documented in 2023 and 2024; no 2026 confirmation found yet." },
+  { name:"Busker's Wharf", type:"Hidden venue", status:"confirmed", music:true, genre:"Live/acoustic, folk", near:"Site-wide", info:"Wharf/street-performance themed spot — a real, recurring hidden venue, though no year-dated source was found to pin down a specific chapter." },
+  { name:"Twisted Time Machine (Bad Apple Bar)", type:"Hidden venue", status:"rumoured", music:true, genre:"Rotates by slot: emo, nu-metal, jungle disco, 90s rave", near:"Site-wide", info:"Long-running takeover of Boomtown's historic Bad Apple Bar (documented Chapter 10, Chapter 11, and 2024) — no 2026 confirmation found yet." },
   { name:"Circus Tent", type:"Hidden venue", status:"confirmed", music:true, genre:"Circus, live performance", near:"Oldtown (likely)", info:"Performance-led rather than a straight dancefloor." },
-  { name:"Airetiko", type:"Hidden venue", status:"confirmed", music:true, genre:"Techno, tech-house (inferred)", near:"Metropolis (likely)", info:"Name and past billing suggest a techno-leaning room." },
-  { name:"Rebel Girls Club", type:"Hidden venue", status:"confirmed", music:true, genre:"Party, empowerment-themed", near:"Metropolis (likely)", info:"Female-led party space." },
+  { name:"Airetiko", type:"Hidden venue", status:"rumoured", music:true, genre:"Aerial circus — trapeze, rope, silks, hoop", near:"Site-wide", info:"Real aerial-arts collective (trapeze, rope, silks, hoop) that runs its own area 'every year' at Boomtown, Glastonbury and WOMAD — not a techno room as previously listed; no explicit 2026 confirmation found, so left as rumoured pending one." },
+  { name:"Rebel Girls Club", type:"Hidden venue", status:"rumoured", music:true, genre:"Party, empowerment-themed", near:"Downtown Village", info:"Women-led venue documented at Downtown Village in 2022; no 2026 confirmation found." },
   { name:"Mining for (g)Old Town", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, party", near:"Oldtown", info:"Mining/prospecting theme playing on Oldtown's rebuild-uphill storyline." },
-  { name:"XR", type:"Installation / talks", status:"confirmed", music:false, genre:"Climate activism, talks", near:"Thrutopia", info:"Extinction Rebellion-linked space — fits Thrutopia's climate focus." },
-  { name:"End of the Line", type:"Hidden venue", status:"confirmed", music:true, genre:"Atmospheric, genre unclear", near:"Unclear", info:"Name suggests a rail/transit theme — exact vibe unconfirmed." },
+  { name:"XR", type:"Installation / talks", status:"rumoured", music:false, genre:"Climate activism, talks", near:"Thrutopia", info:"Extinction Rebellion-linked space from past chapters; Thrutopia itself is confirmed newly redesigned for Chapter Five (formerly The Rookery) but this specific installation wasn't found reconfirmed under the new area." },
+  { name:"End of the Line", type:"Hidden venue", status:"rumoured", music:true, genre:"Atmospheric, genre unclear", near:"Unclear", info:"Train-station-themed venue documented at Boomtown 2024 and 2025 — no 2026 confirmation found yet." },
   { name:"Cas's Costumes", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Dress-up, party", near:"Oldtown", info:"Costume-shop-fronted micro venue fitting Oldtown's circus theme." },
   { name:"Garden", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Botanica (likely)", info:"Planting/chill space, likely Botanica or Thrutopia-adjacent." },
-  { name:"Craft Tent", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Craft-making workshops and stalls." },
-  { name:"Hapitat", type:"Installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Wellbeing/habitat-themed space, Thrutopia-adjacent." },
-  { name:"Crafty Rascals", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Family/kids craft activities." },
+  { name:"Craft Tent", type:"Workshop / shop", status:"rumoured", music:false, genre:"—", near:"Thrutopia", info:"Craft-making workshops and stalls from past chapters; Thrutopia is confirmed newly redesigned for Chapter Five (formerly The Rookery), and 2026 coverage confirms craft workshops there generally, but this specific named tent wasn't found reconfirmed." },
+  { name:"Hapitat", type:"Installation", status:"rumoured", music:false, genre:"—", near:"Thrutopia", info:"Wellbeing/habitat-themed space from past chapters; Thrutopia's 2026 redesign centres on The Retreat (confirmed) instead — this specific name wasn't found reconfirmed for Chapter Five." },
+  { name:"The Retreat", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Thrutopia (woodland)", info:"New wellness sanctuary for Chapter Five, with its own page on Boomtown's site — professional massage, holistic treatments, communal saunas, hot tubs, sound baths, breathwork and artisan workshops; book slots in advance as they fill fast." },
+  { name:"Crafty Rascals", type:"Workshop / shop", status:"rumoured", music:false, genre:"—", near:"Thrutopia", info:"Family/kids craft activities from past chapters; no 2026 confirmation found under this name for the newly redesigned Thrutopia." },
   { name:"Spinney Hollow", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, woodland", near:"Woodland edge (Anara/Hidden Woods)", info:"Small grove venue tucked into wooded ground." },
-  { name:"Tinker Station", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Repair/maker space, pairs with the Reparium ethos." },
-  { name:"Blink Mental Health", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market", info:"On-site mental health support service." },
-  { name:"Energy Garden", type:"Installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Sustainable-energy themed space." },
-  { name:"Climate Live", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Climate talks and programming, Thrutopia-adjacent." },
-  { name:"Reparium", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Free volunteer repair hub — debuted 2025, back for Chapter Five." },
+  { name:"Tinker Station", type:"Workshop / shop", status:"rumoured", music:false, genre:"—", near:"Thrutopia", info:"Repair/maker space, pairs with the Reparium ethos, from past chapters — the Reparium itself is confirmed back for 2026, but this specific named space wasn't found reconfirmed." },
+  { name:"Blink Mental Health", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market / Thrutopia", info:"On-site mental health support — named alongside The Samaritans and Cocaine Anonymous as a 2026 welfare partner on Boomtown's own Chapter Five safety page." },
+  { name:"Energy Garden", type:"Installation", status:"rumoured", music:false, genre:"—", near:"Thrutopia", info:"Sustainable-energy themed space from past chapters; no 2026 confirmation found for the newly redesigned Thrutopia." },
+  { name:"Climate Live", type:"Talks / installation", status:"rumoured", music:false, genre:"—", near:"Thrutopia", info:"Climate talks and programming from past chapters; no 2026 confirmation found for the newly redesigned Thrutopia." },
+  { name:"Reparium", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia (hilltop)", info:"Free volunteer repair hub — Boomtown's own 2026 coverage confirms it 'will return this year' in Pepperpot Market/on the Thrutopia hilltop to fix camping gear and kit." },
   { name:"Games Lounge", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market", info:"Games and downtime area away from the stages." },
-  { name:"Permaculture", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Growing and permaculture talks." },
+  { name:"Permaculture", type:"Talks / installation", status:"rumoured", music:false, genre:"—", near:"Thrutopia", info:"Growing and permaculture talks from past chapters; no 2026 confirmation found for the newly redesigned Thrutopia." },
   { name:"The Magic Teapot", type:"Shop / cafe", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Tea-themed chill spot and cafe." },
-  { name:"Cocaine Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market", info:"On-site 12-step support meeting." },
-  { name:"Narcotics Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market", info:"On-site 12-step support meeting." },
-  { name:"Ancient Futures", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Future-facing talks in a Thrutopia-adjacent style." },
+  { name:"Cocaine Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market / Thrutopia", info:"On-site 12-step support meeting — explicitly named as a 2026 welfare partner on Boomtown's own Chapter Five safety page." },
+  { name:"Narcotics Anonymous", type:"Welfare / support", status:"rumoured", music:false, genre:"—", near:"Pepperpot Market", info:"On-site 12-step support meeting in past chapters; Boomtown's 2026 safety page names Blink Mental Health and Cocaine Anonymous as welfare partners but NA wasn't found listed for Chapter Five — likely still present, but not explicitly confirmed." },
+  { name:"Ancient Futures", type:"Talks / installation", status:"rumoured", music:false, genre:"—", near:"Thrutopia", info:"Future-facing talks from past chapters; no 2026 confirmation found for the newly redesigned Thrutopia." },
   { name:"Reel News", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, spoken-word", near:"Copperwood", info:"Newsreel/cinema-themed spot tying into Copperwood's film-district story." },
   { name:"The Chair-o-Plane", type:"Leisure / ride", status:"confirmed", music:false, genre:"—", near:"Area 404 / Downtown", info:"A classic swing-carousel fairground ride, named in Boomtown's own 2026 essential guide near the Hide Out Downtown venue." },
   { name:"The Boomtown Bank", type:"Leisure / ride", status:"rumoured", music:false, genre:"Games, novelty", near:"Unclear", info:"A recurring past-chapter attraction offering fun-and-nonsense games rather than real banking; not explicitly reconfirmed for 2026 yet." },
@@ -2995,6 +3003,7 @@ loadMap();
 // ===============================
 let venueStatusFilter = "all";
 let venueTypeFilter = "all";
+let venueSearchTerm = "";
 
 const statusLabels = { confirmed:"Confirmed", rumoured:"Rumoured", logged:"Your find" };
 
@@ -3052,15 +3061,21 @@ function renderVenueTable(){
   const countNote = document.getElementById("venueTableCount");
   if(!body) return;
   const all = fullVenueDirectory();
+  const term = venueSearchTerm.trim().toLowerCase();
   const rows = all.filter(v=>
     (venueStatusFilter === "all" || v.status === venueStatusFilter) &&
-    (venueTypeFilter === "all" || v.type === venueTypeFilter)
+    (venueTypeFilter === "all" || v.type === venueTypeFilter) &&
+    (!term ||
+      v.name.toLowerCase().includes(term) ||
+      (v.genre || "").toLowerCase().includes(term) ||
+      (v.near || "").toLowerCase().includes(term) ||
+      (v.info || "").toLowerCase().includes(term))
   );
   const musicLabel = m => m === true ? "🎵 Music" : m === false ? "🔇 No music" : "🎵 Music unclear";
   body.innerHTML = rows.map(v=>{
     const hours = v.status === "logged" ? null : stageHoursFromSchedule(v.name);
     return `
-    <div class="venue-row">
+    <div class="venue-row" data-venue-name="${escapeHtml(v.name)}">
       <div class="venue-row-head">
         <strong>${escapeHtml(v.name)}</strong>
         <span style="display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
@@ -3075,6 +3090,27 @@ function renderVenueTable(){
   `;
   }).join("") || `<p class="empty-note">No entries match these filters yet.</p>`;
   if(countNote) countNote.textContent = `Showing ${rows.length} of ${all.length} entries.`;
+}
+
+const venueSearchInput = document.getElementById("venueSearch");
+const clearVenueSearchBtn = document.getElementById("clearVenueSearchBtn");
+function updateClearVenueSearchBtn(){
+  if(clearVenueSearchBtn) clearVenueSearchBtn.style.display = venueSearchTerm.trim().length ? "" : "none";
+}
+if(venueSearchInput){
+  venueSearchInput.oninput = ()=>{
+    venueSearchTerm = venueSearchInput.value;
+    updateClearVenueSearchBtn();
+    renderVenueTable();
+  };
+}
+if(clearVenueSearchBtn){
+  clearVenueSearchBtn.onclick = ()=>{
+    venueSearchTerm = "";
+    venueSearchInput.value = "";
+    updateClearVenueSearchBtn();
+    renderVenueTable();
+  };
 }
 
 function setupVenueTableFilters(){
@@ -3099,6 +3135,32 @@ function setupVenueTableFilters(){
 }
 setupVenueTableFilters();
 renderVenueTable();
+
+// Jump here from an artist's stage name (Artists list, Plan, Timeline)
+// to see that venue's directory entry — resets other filters, uses the
+// same search box so only the matching row(s) show, and scrolls to it.
+function jumpToStageDirectory(stageName){
+  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  venueStatusFilter = "all";
+  venueTypeFilter = "all";
+  document.querySelectorAll("#venueStatusFilters button").forEach(b=> b.classList.toggle("active", b.dataset.status === "all"));
+  document.querySelectorAll("#venueTypeFilters button").forEach(b=> b.classList.toggle("active", b.dataset.type === "all"));
+  venueSearchTerm = stageName;
+  if(venueSearchInput) venueSearchInput.value = stageName;
+  updateClearVenueSearchBtn();
+  renderVenueTable();
+  requestAnimationFrame(()=>{
+    const row = document.querySelector(`.venue-row[data-venue-name="${CSS.escape(stageName)}"]`) || document.querySelector(".venue-row");
+    if(row) row.scrollIntoView({ behavior:"smooth", block:"center" });
+  });
+}
+
+function wireStageLinks(container){
+  if(!container) return;
+  container.querySelectorAll(".stage-link").forEach(el=>{
+    el.onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(el.dataset.stage); };
+  });
+}
 
 // ===============================
 // DISTRICT PASSPORT
