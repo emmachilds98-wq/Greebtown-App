@@ -4001,12 +4001,13 @@ function buildConsolidatedReportByPerson(){
   const socials = Store.get("customSocials") || [];
   const quoteEntries = Store.get("quotes") || [];
   const sightingEntries = Store.get("sightings") || [];
+  const landmarkEntries = Store.get("customLandmarks") || [];
   const tagPattern = /^\[(.+?)\]\s(.*)$/;
 
   const byPerson = {};
   function bucket(name){
     const key = name && name.trim() ? name.trim() : "Unassigned";
-    if(!byPerson[key]) byPerson[key] = { theories:[], venues:[], clues:[], involved:[], socials:[], quotes:[], sightings:[] };
+    if(!byPerson[key]) byPerson[key] = { theories:[], venues:[], clues:[], involved:[], socials:[], quotes:[], sightings:[], landmarks:[] };
     return byPerson[key];
   }
 
@@ -4027,12 +4028,14 @@ function buildConsolidatedReportByPerson(){
   socials.forEach(s=> bucket(s.from).socials.push(`${s.name} — ${s.url}`));
   quoteEntries.forEach(q=> bucket(q.from).quotes.push(`"${q.text}"${q.saidBy ? ` — ${q.saidBy}` : ""}`));
   sightingEntries.forEach(s=> bucket(s.from).sightings.push(s.text));
+  landmarkEntries.forEach(l=> bucket(l.from).landmarks.push(`${l.name} (${l.district})`));
 
   return Object.entries(byPerson).map(([name, data])=>({
     heading: name,
     lines: [
       ...data.theories.map(l=>`Theory: ${l}`),
       ...data.venues.map(l=>`Hidden venue: ${l}`),
+      ...data.landmarks.map(l=>`Landmark: ${l}`),
       ...data.quotes.map(l=>`Quote: ${l}`),
       ...data.sightings.map(l=>`Sighting: ${l}`),
       ...data.clues.map(l=>`District note — ${l}`),
@@ -4042,22 +4045,101 @@ function buildConsolidatedReportByPerson(){
   })).filter(s=> s.lines.length > 0);
 }
 
+// A person's saved-artist Plan, read the same read-only way the Plan
+// screen's person tabs do — "mine" is this device's own Store schedule,
+// anyone else comes from their last-synced peopleSchedules snapshot.
+// Never merged into anything; purely for display here.
+function planLinesForPerson(name){
+  const isMine = name === currentContributorName();
+  const schedule = isMine ? (Store.get("schedule") || []) : ((Store.get("peopleSchedules") || {})[name] || []);
+  if(!schedule.length) return [];
+  return schedule
+    .slice()
+    .sort((a,b)=> (toMinutes(a.day,a.start) ?? 99999) - (toMinutes(b.day,b.start) ?? 99999))
+    .map(a=> `${a.name} — ${a.stage} — ${timeLabel(a)}`);
+}
+
+// All names with anything attributable to them — synced contributor
+// data (from-tagged entries) plus anyone with a saved Plan snapshot —
+// so the tab list covers people who've only ever shared a Plan.
+function consolidatedPeopleNames(){
+  const names = new Set();
+  buildConsolidatedReportByPerson().forEach(s=>{ if(s.heading !== "Unassigned") names.add(s.heading); });
+  Object.keys(Store.get("peopleSchedules") || {}).forEach(n=> names.add(n));
+  const mine = currentContributorName();
+  if(mine && ((Store.get("schedule")||[]).length || names.has(mine))) names.add(mine);
+  return [...names].sort((a,b)=> a.localeCompare(b));
+}
+
 let consolidatedViewMode = "person";
+let consolidatedActivePerson = null;
+
+function renderPeopleTabs(){
+  const box = document.getElementById("consolidatedPeopleTabs");
+  if(!box) return;
+  if(consolidatedViewMode !== "person"){ box.style.display = "none"; return; }
+  const names = consolidatedPeopleNames();
+  if(!names.length){ box.style.display = "none"; return; }
+  if(!consolidatedActivePerson || !names.includes(consolidatedActivePerson)) consolidatedActivePerson = names[0];
+  box.style.display = "";
+  box.innerHTML = names.map(n=>`<button class="${n===consolidatedActivePerson?"active":""}" data-name="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join("");
+  box.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      consolidatedActivePerson = btn.dataset.name;
+      renderConsolidatedNotes();
+    };
+  });
+}
 
 function renderConsolidatedNotes(){
   const box = document.getElementById("consolidatedNotes");
   if(!box) return;
-  const sections = consolidatedViewMode === "person" ? buildConsolidatedReportByPerson() : buildConsolidatedReport();
-  box.innerHTML = sections.map(s=>`
-    <div style="margin-top:10px;">
-      <div style="font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent-teal); margin-bottom:4px;">${escapeHtml(s.heading)}</div>
-      <ul class="compact-list">${s.lines.length ? s.lines.map(l=>`<li>${escapeHtml(l)}</li>`).join("") : "<li>Nothing here yet.</li>"}</ul>
-    </div>
-  `).join("");
+  renderPeopleTabs();
+
+  if(consolidatedViewMode !== "person"){
+    box.innerHTML = buildConsolidatedReport().map(s=>`
+      <div style="margin-top:10px;">
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent-teal); margin-bottom:4px;">${escapeHtml(s.heading)}</div>
+        <ul class="compact-list">${s.lines.length ? s.lines.map(l=>`<li>${escapeHtml(l)}</li>`).join("") : "<li>Nothing here yet.</li>"}</ul>
+      </div>
+    `).join("");
+    return;
+  }
+
+  const names = consolidatedPeopleNames();
+  if(!names.length){
+    box.innerHTML = `<p class="empty-note" style="margin-top:10px;">Nothing to show yet — add some notes/finds, or merge in a teammate's Sync code.</p>`;
+    return;
+  }
+  const name = consolidatedActivePerson || names[0];
+  const personSection = buildConsolidatedReportByPerson().find(s=> s.heading === name);
+  const planLines = planLinesForPerson(name);
+  const sections = [
+    { heading: "Saved Plan", lines: planLines.length ? planLines : ["Nothing saved yet."] },
+    { heading: "Everything else", lines: (personSection && personSection.lines.length) ? personSection.lines : ["Nothing here yet."] }
+  ];
+  box.innerHTML = `<p class="empty-note" style="margin:6px 0 4px;">${escapeHtml(name)}'s page — pulled from their synced notes and last saved Plan snapshot.</p>` +
+    sections.map(s=>`
+      <div style="margin-top:10px;">
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent-teal); margin-bottom:4px;">${escapeHtml(s.heading)}</div>
+        <ul class="compact-list">${s.lines.map(l=>`<li>${escapeHtml(l)}</li>`).join("")}</ul>
+      </div>
+    `).join("");
 }
 
 const copyConsolidatedBtn = document.getElementById("copyConsolidatedBtn");
 if(copyConsolidatedBtn) copyConsolidatedBtn.onclick = (e)=>{
+  if(consolidatedViewMode === "person" && consolidatedActivePerson){
+    const name = consolidatedActivePerson;
+    const personSection = buildConsolidatedReportByPerson().find(s=> s.heading === name);
+    const planLines = planLinesForPerson(name);
+    const text = [
+      `Saved Plan:\n` + (planLines.length ? planLines.map(l=>`- ${l}`).join("\n") : "- Nothing saved yet."),
+      `Everything else:\n` + ((personSection && personSection.lines.length) ? personSection.lines.map(l=>`- ${l}`).join("\n") : "- Nothing here yet.")
+    ].join("\n\n");
+    copyText(`${name}'s Boomtown page:\n\n` + text, e.target);
+    return;
+  }
   const sections = consolidatedViewMode === "person" ? buildConsolidatedReportByPerson() : buildConsolidatedReport();
   const text = sections.map(s=> `${s.heading}:\n` + (s.lines.length ? s.lines.map(l=>`- ${l}`).join("\n") : "- Nothing here yet.")).join("\n\n");
   copyText(`Boomtown consolidated notes (by ${consolidatedViewMode}):\n\n` + text, e.target);
