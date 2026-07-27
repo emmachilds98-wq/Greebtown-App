@@ -2310,27 +2310,31 @@ const locations = [
   { name:"Meeting Point", kind:"meeting", x:"48%", y:"58%", info:"Your chosen meetup spot — set this with your group before you split up." }
 ];
 
-// The other 11 official stages, plotted small — real, confirmed names
-// (matched against the 2026 lineup listing), illustrative positions —
-// no verified coordinates for these, unlike the 15 pinned above.
+// The other 11 official stages, plotted small — real names, illustrative
+// positions (no verified coordinates for these, unlike the 15 pinned
+// above). status matches the venueDirectory verification pass (see
+// venueDirectory's Main stage entries): "confirmed" found real
+// 2026-specific evidence, "rumoured" found only past-chapter evidence
+// or nothing — rendered with a dashed/dimmed marker on the map.
 const otherStages = [
-  { name:"Spectrum 360", info:"A circular arena entirely enclosed in shipping containers, running 360° visuals with a broad electronic bill spanning UK garage through to gabber." },
-  { name:"Tangled Roots", info:"A laid-back dub and roots stage with its own cocktail bar — a good slow-down spot between bigger sets." },
-  { name:"Full Moon Ballroom", info:"A ballroom-themed stage — expect a mixed, dressed-up crowd and a more theatrical vibe than the bass-heavy stages." },
-  { name:"Rose and Clown", info:"One of the site's smaller character-led stages — treat the name as the clue and expect an eclectic, party-focused bill." },
-  { name:"The Fools Leap", info:"A smaller stage leaning into Boomtown's playful, circus-adjacent side — good for stumbling on something odd and fun." },
-  { name:"Foggers Mill", info:"An industrial/mill-themed stage — exact genre policy varies by year, so follow the crowd and the smoke machines." },
-  { name:"Hangar 161", info:"Punk's home at Boomtown — a proudly loud, socialist, anti-racist stage with a mosh-pit crowd." },
-  { name:"Tribe of Frog", info:"Hosted by the long-running UK psytrance party brand of the same name — expect psytrance, full-on and progressive sets deep into the night." },
-  { name:"Sibín Beag", info:"Irish for 'little shebeen' — a folk and traditional-music stage, with acts blending trad sessions and folk-tinged party sets." },
-  { name:"Acid Leak", info:"Area 404's acid techno and hard techno stage — expect a darker, sweatier crowd and relentless 4/4." },
-  { name:"Infinity", info:"One of Chapter Five's smaller stages — exact genre policy for 2026 isn't confirmed publicly, so treat it as a wildcard worth a look." }
+  { name:"Spectrum 360", status:"confirmed", info:"A circular arena entirely enclosed in shipping containers, running 360° visuals with a broad electronic bill spanning UK garage through to gabber." },
+  { name:"Tangled Roots", status:"rumoured", info:"A laid-back dub and roots stage with its own cocktail bar — a good slow-down spot between bigger sets. No 2026-specific confirmation found; recent evidence ties it to Chapter Four (2025) and earlier." },
+  { name:"Full Moon Ballroom", status:"rumoured", info:"A ballroom-themed stage — expect a mixed, dressed-up crowd and a more theatrical vibe than the bass-heavy stages. No 2026 confirmation found at all." },
+  { name:"Rose and Clown", status:"confirmed", info:"One of the site's smaller character-led stages — treat the name as the clue and expect an eclectic, party-focused bill." },
+  { name:"The Fools Leap", status:"rumoured", info:"A smaller stage leaning into Boomtown's playful, circus-adjacent side — good for stumbling on something odd and fun. No 2026-specific confirmation found." },
+  { name:"Foggers Mill", status:"rumoured", info:"An industrial/mill-themed stage — exact genre policy varies by year, so follow the crowd and the smoke machines. No 2026 confirmation found." },
+  { name:"Hangar 161", status:"confirmed", info:"Punk's home at Boomtown — a proudly loud, socialist, anti-racist stage with a mosh-pit crowd." },
+  { name:"Tribe of Frog", status:"rumoured", info:"Hosted by the long-running UK psytrance party brand of the same name — expect psytrance, full-on and progressive sets deep into the night. No 2026 Boomtown confirmation found; recent hits tie it to past chapters." },
+  { name:"Sibín Beag", status:"rumoured", info:"Irish for 'little shebeen' — a folk and traditional-music stage, with acts blending trad sessions and folk-tinged party sets. Found in Chapter Four (2025) but no 2026 confirmation found." },
+  { name:"Acid Leak", status:"confirmed", info:"Area 404's acid techno and hard techno stage — expect a darker, sweatier crowd and relentless 4/4." },
+  { name:"Infinity", status:"rumoured", info:"One of Chapter Five's smaller stages — no 2026-specific confirmation found for this name at all; treat it as a wildcard." }
 ];
 
 const minorStagePositions = [[40,42],[14,50],[58,30],[44,52],[30,58],[62,52],[12,36],[72,66],[40,76],[78,40],[56,80]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
+  status: s.status,
   x: minorStagePositions[i][0] + "%",
   y: minorStagePositions[i][1] + "%"
 }));
@@ -2677,15 +2681,16 @@ function loadMap(){
   });
 
   minorStages.forEach(place=>{
+    const isRumoured = place.status === "rumoured";
     const marker = document.createElement("div");
-    marker.className = "marker stage minor";
+    marker.className = "marker stage minor" + (isRumoured ? " rumoured" : "");
     marker.style.left = place.x;
     marker.style.top = place.y;
-    marker.title = place.name;
+    marker.title = place.name + (isRumoured ? " (rumoured — no 2026 confirmation)" : "");
     marker.onclick = ()=>{
       mapInfo.innerHTML = `
         <div class="card">
-          <span class="tag">stage</span>
+          <span class="tag">stage${isRumoured ? " — rumoured" : ""}</span>
           <h3>${place.name}</h3>
           <p>${place.info} <em>Position here is illustrative, not surveyed.</em></p>
         </div>
@@ -2694,7 +2699,7 @@ function loadMap(){
     inner.appendChild(marker);
 
     const label = document.createElement("div");
-    label.className = "map-label minor";
+    label.className = "map-label minor" + (isRumoured ? " rumoured" : "");
     label.style.left = place.x;
     label.style.top = place.y;
     label.textContent = place.name;

@@ -90,6 +90,8 @@
   .marker.minor{width:16px; height:16px; margin:-8px 0 0 -8px;}
   .marker.minor::before{width:8px; height:8px; box-shadow:none; border:1px solid rgba(11,21,18,.6); opacity:.85;}
   .marker.minor::after{content:none;}
+  .marker.stage.rumoured::before{background:transparent; border:1.5px dashed rgba(238,246,241,.6); opacity:.7;}
+  .map-label.rumoured{color:var(--text-muted); font-style:italic;}
   .marker.secret{width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; border:1.5px dashed rgba(238,246,241,.55); background:rgba(11,21,18,.4); color:rgba(238,246,241,.8); font-size:11px; font-weight:700;}
   .marker.secret::before, .marker.secret::after{content:none;}
   .marker.gate{width:20px; height:20px; margin:-10px 0 0 -10px;}
