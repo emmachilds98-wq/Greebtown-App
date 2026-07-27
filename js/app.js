@@ -1664,7 +1664,7 @@ function showArtists(list){
       <div class="item-top">
         <div>
           <strong>${artist.name}</strong><br>
-          ${artist.stage}<br>
+          <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
           ${timeLabel(artist)}<br>
           <small>${genre}</small>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
@@ -1675,6 +1675,7 @@ function showArtists(list){
       </div>
     `;
     div.querySelector("button").onclick = ()=> saveArtist(artist);
+    div.querySelector(".stage-link").onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
     artistResults.appendChild(div);
   });
 }
@@ -1759,7 +1760,7 @@ function buildTimelineHTML(items, opts){
       const cls = "timeline-block" + (isSaved ? " saved" : "") + (opts.readonly ? " readonly" : "");
       return `<div class="${cls}" style="top:${top}px; height:${height}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}"><b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
-    return `<div class="timeline-col"><div class="timeline-col-head">${escapeHtml(stage)}</div><div class="timeline-body" style="height:${totalHeight}px;">${hourLines}${blocks}</div></div>`;
+    return `<div class="timeline-col"><div class="timeline-col-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-body" style="height:${totalHeight}px;">${hourLines}${blocks}</div></div>`;
   }).join("");
 
   const html = `<div class="timeline-grid">
@@ -1800,6 +1801,7 @@ function renderArtistsTimeline(){
       if(artist){ saveArtist(artist); renderArtistsTimeline(); }
     };
   });
+  wireStageLinks(grid);
 }
 
 const artistsViewListBtn = document.getElementById("artistsViewListBtn");
@@ -1909,7 +1911,7 @@ function scheduleItemHTML(artist, idx, clashNames, readonly){
       <div class="item-top">
         <div>
           <strong>${artist.name}</strong><br>
-          ${artist.stage}<br>
+          <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
           <span class="time-label">${timeLabel(artist)}</span>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bio ? `<div class="genre-desc">${escapeHtml(bio)}</div>` : ""}
@@ -2053,6 +2055,10 @@ function renderSchedule(){
     });
   }
 
+  scheduleList.querySelectorAll(".stage-link").forEach(el=>{
+    el.onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(el.dataset.stage); };
+  });
+
   if(typeof renderNowNext === "function") renderNowNext();
 }
 
@@ -2128,6 +2134,7 @@ function renderPlanTimeline(){
       };
     });
   }
+  wireStageLinks(grid);
 }
 
 // ===============================
@@ -2995,6 +3002,7 @@ loadMap();
 // ===============================
 let venueStatusFilter = "all";
 let venueTypeFilter = "all";
+let venueSearchTerm = "";
 
 const statusLabels = { confirmed:"Confirmed", rumoured:"Rumoured", logged:"Your find" };
 
@@ -3052,15 +3060,21 @@ function renderVenueTable(){
   const countNote = document.getElementById("venueTableCount");
   if(!body) return;
   const all = fullVenueDirectory();
+  const term = venueSearchTerm.trim().toLowerCase();
   const rows = all.filter(v=>
     (venueStatusFilter === "all" || v.status === venueStatusFilter) &&
-    (venueTypeFilter === "all" || v.type === venueTypeFilter)
+    (venueTypeFilter === "all" || v.type === venueTypeFilter) &&
+    (!term ||
+      v.name.toLowerCase().includes(term) ||
+      (v.genre || "").toLowerCase().includes(term) ||
+      (v.near || "").toLowerCase().includes(term) ||
+      (v.info || "").toLowerCase().includes(term))
   );
   const musicLabel = m => m === true ? "🎵 Music" : m === false ? "🔇 No music" : "🎵 Music unclear";
   body.innerHTML = rows.map(v=>{
     const hours = v.status === "logged" ? null : stageHoursFromSchedule(v.name);
     return `
-    <div class="venue-row">
+    <div class="venue-row" data-venue-name="${escapeHtml(v.name)}">
       <div class="venue-row-head">
         <strong>${escapeHtml(v.name)}</strong>
         <span style="display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
@@ -3075,6 +3089,27 @@ function renderVenueTable(){
   `;
   }).join("") || `<p class="empty-note">No entries match these filters yet.</p>`;
   if(countNote) countNote.textContent = `Showing ${rows.length} of ${all.length} entries.`;
+}
+
+const venueSearchInput = document.getElementById("venueSearch");
+const clearVenueSearchBtn = document.getElementById("clearVenueSearchBtn");
+function updateClearVenueSearchBtn(){
+  if(clearVenueSearchBtn) clearVenueSearchBtn.style.display = venueSearchTerm.trim().length ? "" : "none";
+}
+if(venueSearchInput){
+  venueSearchInput.oninput = ()=>{
+    venueSearchTerm = venueSearchInput.value;
+    updateClearVenueSearchBtn();
+    renderVenueTable();
+  };
+}
+if(clearVenueSearchBtn){
+  clearVenueSearchBtn.onclick = ()=>{
+    venueSearchTerm = "";
+    venueSearchInput.value = "";
+    updateClearVenueSearchBtn();
+    renderVenueTable();
+  };
 }
 
 function setupVenueTableFilters(){
@@ -3099,6 +3134,32 @@ function setupVenueTableFilters(){
 }
 setupVenueTableFilters();
 renderVenueTable();
+
+// Jump here from an artist's stage name (Artists list, Plan, Timeline)
+// to see that venue's directory entry — resets other filters, uses the
+// same search box so only the matching row(s) show, and scrolls to it.
+function jumpToStageDirectory(stageName){
+  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  venueStatusFilter = "all";
+  venueTypeFilter = "all";
+  document.querySelectorAll("#venueStatusFilters button").forEach(b=> b.classList.toggle("active", b.dataset.status === "all"));
+  document.querySelectorAll("#venueTypeFilters button").forEach(b=> b.classList.toggle("active", b.dataset.type === "all"));
+  venueSearchTerm = stageName;
+  if(venueSearchInput) venueSearchInput.value = stageName;
+  updateClearVenueSearchBtn();
+  renderVenueTable();
+  requestAnimationFrame(()=>{
+    const row = document.querySelector(`.venue-row[data-venue-name="${CSS.escape(stageName)}"]`) || document.querySelector(".venue-row");
+    if(row) row.scrollIntoView({ behavior:"smooth", block:"center" });
+  });
+}
+
+function wireStageLinks(container){
+  if(!container) return;
+  container.querySelectorAll(".stage-link").forEach(el=>{
+    el.onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(el.dataset.stage); };
+  });
+}
 
 // ===============================
 // DISTRICT PASSPORT
