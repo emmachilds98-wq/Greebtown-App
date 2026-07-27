@@ -1637,14 +1637,29 @@ const artistSearch = document.getElementById("artistSearch");
 const artistResults = document.getElementById("artistResults");
 const clearArtistSearchBtn = document.getElementById("clearArtistSearchBtn");
 
-function setActiveGenreChip(chipEl){
-  document.querySelectorAll("#genreChips .chip").forEach(c=>c.classList.remove("active"));
-  if(chipEl) chipEl.classList.add("active");
+// Genre chips are a multi-select filter (AND-combined with the free-text
+// search below), not exclusive with each other or with typed text.
+let selectedGenres = new Set();
+
+function toggleGenreChip(g){
+  if(selectedGenres.has(g)) selectedGenres.delete(g); else selectedGenres.add(g);
+}
+
+function clearGenreChips(){
+  selectedGenres.clear();
+}
+
+function updateGenreChipHighlights(){
+  document.querySelectorAll("#genreChips .chip").forEach(c=> c.classList.toggle("active", selectedGenres.has(c.dataset.g)));
+}
+
+function hasActiveArtistFilters(){
+  return artistSearch.value.trim().length > 0 || selectedGenres.size > 0;
 }
 
 function updateClearArtistSearchBtn(){
   if(!clearArtistSearchBtn) return;
-  clearArtistSearchBtn.style.display = artistSearch.value.trim().length ? "" : "none";
+  clearArtistSearchBtn.style.display = hasActiveArtistFilters() ? "" : "none";
 }
 
 function showArtists(list){
@@ -1681,34 +1696,37 @@ function showArtists(list){
 }
 
 function currentFilteredArtists(){
-  const term = artistSearch.value.toLowerCase();
-  return allArtists().filter(artist=>
-    artist.name.toLowerCase().includes(term) ||
-    artist.stage.toLowerCase().includes(term) ||
-    genreOf(artist).toLowerCase().includes(term)
-  );
+  const term = artistSearch.value.trim().toLowerCase();
+  return allArtists().filter(artist=>{
+    const matchesTerm = !term ||
+      artist.name.toLowerCase().includes(term) ||
+      artist.stage.toLowerCase().includes(term) ||
+      genreOf(artist).toLowerCase().includes(term);
+    const matchesGenres = selectedGenres.size === 0 || selectedGenres.has(genreOf(artist));
+    return matchesTerm && matchesGenres;
+  });
 }
 
 // With 1000+ acts across the full 5-day dataset, dumping everything to
 // the DOM on load is slow on older phones — search-first instead.
 function promptArtistSearch(){
-  artistResults.innerHTML = `<p class="empty-note">Start typing a name, stage or genre — or tap a genre chip above — to search ${allArtists().length} acts across all 5 days.</p>`;
+  artistResults.innerHTML = `<p class="empty-note">Start typing a name, stage or genre — or tap one or more genre chips above — to search ${allArtists().length} acts across all 5 days.</p>`;
+}
+function renderArtistSearchResults(){
+  if(!hasActiveArtistFilters()){ promptArtistSearch(); return; }
+  showArtists(currentFilteredArtists());
 }
 let artistSearchDebounceTimer = null;
 artistSearch.oninput = ()=>{
-  // Manual typing overrides whatever genre chip was tapped, so drop its highlight.
-  setActiveGenreChip(null);
   updateClearArtistSearchBtn();
   clearTimeout(artistSearchDebounceTimer);
-  artistSearchDebounceTimer = setTimeout(()=>{
-    if(artistSearch.value.trim().length === 0){ promptArtistSearch(); return; }
-    showArtists(currentFilteredArtists());
-  }, 180);
+  artistSearchDebounceTimer = setTimeout(renderArtistSearchResults, 180);
 };
 if(clearArtistSearchBtn){
   clearArtistSearchBtn.onclick = ()=>{
     artistSearch.value = "";
-    setActiveGenreChip(null);
+    clearGenreChips();
+    updateGenreChipHighlights();
     updateClearArtistSearchBtn();
     promptArtistSearch();
   };
@@ -1829,12 +1847,13 @@ function loadGenreChips(){
   const genres = [...new Set(allArtists().map(genreOf))].filter(g=>g && g !== "Unconfirmed").sort();
   const box = document.getElementById("genreChips");
   box.innerHTML = genres.map(g=>`<span class="chip" data-g="${g}">${g}</span>`).join("");
+  updateGenreChipHighlights();
   box.querySelectorAll(".chip").forEach(s=>{
     s.onclick = ()=>{
-      artistSearch.value = s.dataset.g;
-      setActiveGenreChip(s);
+      toggleGenreChip(s.dataset.g);
+      updateGenreChipHighlights();
       updateClearArtistSearchBtn();
-      showArtists(currentFilteredArtists());
+      renderArtistSearchResults();
     };
   });
 }
@@ -2255,7 +2274,8 @@ function browseAllArtists(){
   document.querySelector('.tab[data-tab="artists"]').click();
   if(artistsView !== "list" && artistsViewListBtn) artistsViewListBtn.click();
   artistSearch.value = "";
-  setActiveGenreChip(null);
+  clearGenreChips();
+  updateGenreChipHighlights();
   updateClearArtistSearchBtn();
   showArtists(allArtists());
   artistSearch.placeholder = `Browsing all ${allArtists().length} artists — use a genre chip or search to narrow it down`;
@@ -3246,7 +3266,9 @@ document.getElementById("copyVenuesBtn").onclick = (e)=>{
 // GROUP SYNC — turns everyone's clues/theories/finds/socials into a
 // short pasteable code, and merges someone else's code in without
 // duplicating anything already saved. This is how one phone ends up
-// with everyone's info in it, ready to "Download a copy" and share.
+// with everyone's info in it, ready to "Download shareable group copy"
+// and share (that export leaves out personal-only fields — see
+// PERSONAL_ONLY_KEYS below).
 // ===============================
 function buildSyncPayload(){
   return {
@@ -4096,8 +4118,7 @@ const chapterFiveGuide = [
   { title:"🎯 Tips to actually do well", text:"Talk to everyone in costume, not just the obviously theatrical ones — some of the best characters look like ordinary festival staff at first glance. Ask direct questions ('who are you', 'what's going on here', 'who's in charge') — actors are built to answer and redirect you. Revisit the same spot at a different time of day: a 'dead end' at 2pm can be very much alive at 10pm. Write down names and phrases you don't recognise and check them against the Characters and Glossary lists in Discover — half the fun is realising two odd conversations were connected. Go in a small group of 2–3 rather than a big pack, and split up occasionally so you're covering more ground and can compare notes after. Log everything in Discover's clue log per district — you will forget who told you what by day three. And don't expect a tidy ending: threads resolve in scenes, not menus, sometimes as a big public moment, sometimes as a quiet answer from one actor — both count." },
   { title:"🔍 Where to start if you're not sure", text:"Area 404 and Botanica are this chapter's two poles — the deepfake cover-up versus The Network trying to expose it — so starting in either gets you into the main plot fastest. If you'd rather ease in first, Letsbe Avenue's BLIP subplot is lower-stakes and a good warm-up before diving into the bigger factions." },
   { title:"🆘 If you're stuck, or want to see it through", text:"There's no single storyline to solve — it's many overlapping ones, and which you find depends on district, who you talk to, and luck. If a thread goes cold, just ask an actor directly; they're built to nudge you toward the next step rather than leave you hanging. In past chapters, sticking with one district has meant collecting a kind of 'stamp' at each stop, which eventually unlocks a bigger, sometimes intense final scene for that storyline. Don't expect to solve every district in one weekend — most people don't, and the festival's actual ending is a closing ceremony for everyone regardless of how much you've uncovered." },
-  { title:"Districts as story threads", html:"<p><strong>Area 404:</strong> having won last year's election, it now runs the city — Chief Guardian Mr Biga (appointed by The Collector) is training up more Guardians at a boot camp, and the Luck Exchange has expanded in from Letsbe Avenue to hand out 'work permits' and manage the paperwork of power. Some residents say the Guardians have gotten drunk on it, fleecing people with 'official' fines. <strong>Botanica:</strong> The Great Mother, still smarting from her electoral defeat, is plotting a ritual to sacrifice her followers and fire herself into her own portal to ASCEND — competing with The Collector, and sitting alongside Temple of Zero's Shadow Post / IONA photocopier mystery. <strong>Copperwood:</strong> now Edna 'VVH' Von Vanderhaus's permanent home and self-appointed Creative Director's chair, turning the district into a live film set for <em>Race to the Red Planet</em> — this year pioneering 'Actual Live Sound'. <strong>Oldtown:</strong> Rufus the Red and the Den of Dis Order are building the People's Republic of Oldtownia after a hard year moving their whole community. <strong>Metropolis:</strong> Aurora Venturestone, CEO of Betterverse™, now runs the district herself with Guardian help — Bettercorp™ posts record profits despite mass layoffs, while she quietly runs a 'Black Goo' side hustle. Laid-off inGeniuses offer illegal urban-explorer tours into the crumbling Betterverse™, risky because of 'Digital Foreverness'.</p>" },
-  { title:"📰 Story updates since our first pass", html:"<p>Boomtown's own district-spotlight posts (published after our first research pass) confirm some sharper detail worth knowing before you go: Mr Biga now holds the title <strong>Chief Guardian</strong>, appointed by The Collector, and is training up new recruits at a Guardian boot camp; Letsbe Avenue's <strong>Luck Exchange</strong> has expanded into Area 404 to issue 'work permits' and manage the district's paperwork of power. In Metropolis, it's <strong>Aurora Venturestone</strong> (Betterverse™ CEO) who's now running things directly, alongside a mysterious 'Black Goo' side hustle, while Bettercorp™ posts record profits despite laying off the inGeniuses — whose unofficial Betterverse™ tours now carry a rumoured risk of 'Digital Foreverness'. BLIP has also been confirmed as short for 'Boomtown Lifestyle Important Product', Patrick Kahn's rebrand after his BLEP campaign lost the 2024 district election. Separately, Boomtown's own current copy describes 'eight city districts' in this redesign — likely a mix of storyline districts and non-story zones like Thrutopia — so don't be surprised if the map shows more named areas than the five core plot districts plus Letsbe Avenue this guide tracks; treat the exact count as unconfirmed until you're looking at the on-site map. We couldn't find any Reddit or social-media leaks naming new characters or plot beyond what's already in this guide and the official Discover page — if your group spots something on-site that isn't here yet, log it in Discover and compare against the official channels below.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/discover\" target=\"_blank\" rel=\"noopener\">Official Discover &amp; district spotlights</a>" },
+  { title:"Districts as story threads", html:"<p><strong>Area 404:</strong> having won last year's election, it now runs the city — Chief Guardian Mr Biga (appointed by The Collector) is training up more Guardians at a boot camp, and the Luck Exchange has expanded in from Letsbe Avenue to hand out 'work permits' and manage the paperwork of power. Some residents say the Guardians have gotten drunk on it, fleecing people with 'official' fines. <strong>Botanica:</strong> The Great Mother, still smarting from her electoral defeat, is plotting a ritual to sacrifice her followers and fire herself into her own portal to ASCEND — competing with The Collector, and sitting alongside Temple of Zero's Shadow Post / IONA photocopier mystery. <strong>Copperwood:</strong> now Edna 'VVH' Von Vanderhaus's permanent home and self-appointed Creative Director's chair, turning the district into a live film set for <em>Race to the Red Planet</em> — this year pioneering 'Actual Live Sound'. <strong>Oldtown:</strong> Rufus the Red and the Den of Dis Order are building the People's Republic of Oldtownia after a hard year moving their whole community. <strong>Metropolis:</strong> Aurora Venturestone, CEO of Betterverse™, now runs the district herself with Guardian help — Bettercorp™ posts record profits despite mass layoffs, while she quietly runs a 'Black Goo' side hustle. Laid-off inGeniuses offer illegal urban-explorer tours into the crumbling Betterverse™, risky because of 'Digital Foreverness'. Boomtown's own current copy also references an eighth city district beyond the seven this guide tracks (the five core plot districts, Letsbe Avenue and Thrutopia) — treat the exact map layout as unconfirmed until you're looking at it on-site.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/discover\" target=\"_blank\" rel=\"noopener\">Official Discover &amp; district spotlights</a>" },
   { title:"Ceremonies & city-wide moments", html:"<p>The opening and closing ceremonies are the official bookends of the chapter and are worth treating as story events, not merely big shows. Between them, The Daily Rag, district meetings, public broadcasts and characters’ sudden invitations are your best catch-up tools. If you hear a crowd gathering for an announcement, go.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/discover\" target=\"_blank\" rel=\"noopener\">Official story & districts</a>" },
   { title:"🆕 What's new this chapter", text:"The Lion's Den returns to the Temple Valley amphitheatre, Hilltop is now a live music hub, Hydro XL becomes a hydrogen-powered flagship stage expanded and relocated to Downtown, and a new Thrutopia zone brings talks, workshops and rest space. There's also a community 'Cloak of Hope' project, a genuine on-site Observatory research study, and open Thrutopia workshop submissions — see Get Involved in Discover." },
   { title:"Non-music things actually worth pencilling in", html:"<ul class=\"compact-list\"><li><strong>Thrutopia:</strong> talks, workshops and thoughtful daytime programming around imagining better futures.</li><li><strong>The Retreat:</strong> massages, hot tubs, sauna/cold splash, sound baths, beauty and maker sessions. It is in the Thrutopia woodlands; book ahead for the most popular slots.</li><li><strong>Cloak of Hope:</strong> stitch a 10–15cm hope patch on-site for the collective artwork.</li><li><strong>Agents of Change:</strong> sign up for the badge, HQ, recycled-T-shirt screen print and early quest access.</li><li><strong>The Observatory:</strong> take part in a genuine 2026 academic study on identity and behaviour at live events, led by Dr Martha Newson.</li><li><strong>Reparium:</strong> it debuted as a free volunteer repair hub in 2025; look out for its return if gear needs rescuing.</li></ul>" },
@@ -4106,18 +4127,15 @@ const chapterFiveGuide = [
   { title:"🎟 Set times & clashes", text:"Boomtown holds its own official timetable back until a few days before gates open, so the Fri/Sat times in this app are early and subject to change. Once the official app confirms things, use 'Set time' on any saved act in Plan to correct it — the Clashes view flags overlaps automatically." },
   { title:"🎫 Tickets & resale", html:"<p>Boomtown 2026 sold out during its initial release. If you're still after a ticket, resale runs exclusively through the official Kaboodle account system on the Boomtown site — never buy from unofficial resale sites or social media listings, as tickets are registered to the original buyer and unofficial transfers can be refused entry.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/tickets\" target=\"_blank\" rel=\"noopener\">Official tickets &amp; resale</a>" },
   { title:"💳 Cashless", html:"<p>Boomtown runs on cashless RFID wristbands — top up before or on arrival, either through your Boomtown account or on-site top-up points.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/info/cash-free\" target=\"_blank\" rel=\"noopener\">Official Cash Free page</a>" },
-  { title:"🎒 First-timer basics", text:"18+ only, five days of camping on working farmland in the South Downs — expect mud if it rains, so pack wellies alongside festival gear. Gates open Wednesday lunchtime with music from early afternoon." },
   { title:"⛺ Camping field guide", text:"The site splits roughly into two halves either side of a big central hill: Downtown (west) and Hilltop (east) — worth knowing which half you're in before you start walking. West Camping and Downtown Camping sit nearest West Gate and the public transport hub, handy if you arrived by coach or shuttle. Meadow Camping is the accessible campsite — apply in advance if you need it, spaces are limited and prioritised for accessibility bookings. Valley and Temple Valley Camping sit toward Hilltop, closer to that side's stages. East Camping and Campervan Field are nearest East Gate and the car parks. Quiet Camping is set apart for those wanting more sleep. Standard fields aren't numbered, so pick a landmark (a flag, a food stall, a distinctive tree) and save it in Notes so you can find your tent at 2am." },
   { title:"🍺 Alcohol — what you can bring in", html:"<p>Per Boomtown's official Terms &amp; Conditions: on a weekend ticket you can bring in up to <strong>3.5 litres of cider, lager or beer in sealed plastic bottles or cans</strong> (roughly 8 cans of 440ml) on your <strong>first entry only</strong> — there's no topping up on re-entry, and anything over the limit is confiscated. No spirits (plastic or glass) and no glass of any kind is allowed on site at all, including glass bottles of mixers. Bottles must be sealed — opened bottles of anything, including water and soft drinks, are confiscated at the gate and you'll need to buy a sealed one to bring in instead.</p><p>These figures come from the festival's own terms page and independent reporting, not a live scrape of this year's small print — always check the official page below for the current-year numbers before you pack, since festival alcohol allowances do shift year to year.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/legal/terms\" target=\"_blank\" rel=\"noopener\">Official Terms &amp; Conditions</a><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/info/safety\" target=\"_blank\" rel=\"noopener\">Official Safety page</a>" },
-  { title:"🛟 Welfare & safety", text:"Welfare centres on site have trained staff for support with anything from feeling overwhelmed to bereavement or eating disorders — just walk in. Safer Spaces (sexual harassment, assault, domestic violence support) is based in Pepperpot Market and also roams the site. Blink Mental Health is also confirmed for Chapter Five." },
   { title:"🚫 What not to bring", html:"<p>Aerosol paint cans, glass of any kind, and any alcohol beyond your first-entry allowance (see Alcohol above — there's no topping up on re-entry). Unsealed or unidentifiable e-cigarette liquid can also be confiscated.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/info/safety\" target=\"_blank\" rel=\"noopener\">Official Safety page — full current list</a>" },
   { title:"♻️ Sustainability", text:"Boomtown runs a leave-no-trace, no-litter policy — take your tent and rubbish home with you (there's an Eco Bond scheme to encourage it). No single-use plastic bottles on site; free water refill points are dotted around arenas and campsites, so bring a reusable bottle. Food stalls use compostable packaging only. The Reparium repair hub and on-site Permaculture and Energy Garden spaces are part of the same push." },
   { title:"🧭 Vibe Check — take the pledge", html:"<p>Chapter Five's community-responsibility campaign, covering wellness, party safety and looking out for your crew: stay crew-conscious (keep people close, check in often), know your safe zones, party smart (know the risks, spot the signs), fuel up rather than burn out (real meals, hydration, spacers not chasers), and try at least one set or mission with a clear head. Boomtown runs a genuine pledge you can sign — anyone who takes it is in the running for festival prizes.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/news/take-the-vibe-check-pledge\" target=\"_blank\" rel=\"noopener\">Take the Vibe Check pledge</a>" },
   { title:"📍 Meeting up", text:"Agree a clear meeting point before you split up and save it in the Map tab. Don't rely on having signal to find each other — it's patchy on-site." },
   { title:"🔋 Power", text:"Bring a charged power bank — this app and your photos are the main drain. Screens go dim fast in daylight, check brightness before you head out." },
   { title:"📲 Using this companion", text:"This is a self-contained web page, not an app-store app — Add to Home Screen (iOS Safari) or 'Install app' (Android Chrome) gives it a proper icon and offline access. Everything you save (Plan, Discover notes, hidden-venue log) stays on this device only; use the copy buttons in Discover and Map to share progress with your group." },
-  { title:"🤝 Getting one shared copy for the group", text:"Each phone saves its own data separately. To end up with one file that has everyone's notes, theories, hidden-venue finds and ticks in it: add your name and copy a Sync code in Discover, send it to a teammate, they paste and merge it in (nothing gets duplicated), and repeat round the group. Whoever's phone ends up with everyone merged in is the one to hit 'Download a copy with our updates' on — that file is the group's master copy, and Discover's Consolidated Notes card shows you everything that's in it at a glance before you do." },
-  { title:"♿ Accessibility", html:"<p>Boomtown runs an access scheme via Nimbus Access Card — apply with a valid Access Card number through the official Boomtown Accessibility Request Form; free Essential Companion (+1) tickets are available for anyone who qualifies. Packs can include an accessibility wristband, raised-viewing-platform access, an EC lanyard and an accessibility map. Note: the standard 2026 request deadline was 1 July — if you're reading this after that and still need access support, contact Boomtown's accessibility team directly rather than assuming you've missed out entirely, as late/on-the-day requests are sometimes still possible. Viewing platforms (with wheelchair charging and a nearby wide-access toilet) are first come, first served for access customers and their PA — expect stage names attached to specific platforms to have shifted with this chapter's redesign.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/accessibility\" target=\"_blank\" rel=\"noopener\">Official Accessibility page</a><a class=\"linkbtn\" href=\"https://form.jotform.com/Forms_Boomtown/accessibility-request-form-boomtown\" target=\"_blank\" rel=\"noopener\">Accessibility Request Form</a>" },
+  { title:"🤝 Getting one shared copy for the group", text:"Each phone saves its own data separately. To end up with one file that has everyone's notes, theories, hidden-venue finds and ticks in it: add your name and copy a Sync code in Discover, send it to a teammate, they paste and merge it in (nothing gets duplicated), and repeat round the group. Whoever's phone ends up with everyone merged in is the one to hit 'Download shareable group copy' on — that file is the group's master copy with personal things (bingo card, character, HQ notes) left out, so it's safe to actually hand round, and Discover's Consolidated Notes card shows you everything that's in it at a glance before you do." },
   { title:"🎡 Fairground &amp; leisure", html:"<p>Beyond the stages, expect a scattering of fairground and leisure attractions — Boomtown's own 2026 guide confirms a chair-o-plane ride near Area 404/Downtown, and past chapters have run a retro amusements arcade and vintage fairground rides (waltzers and similar) elsewhere on site. Treat the wider fairground as a strong likelihood rather than a locked-in promise until you see it. The full rundown, with what's confirmed vs rumoured, is in the venue directory on the Map tab.</p><a class=\"linkbtn\" href=\"https://www.boomtownfair.co.uk/news/boomtown-chapter-five-radical-redesign-essential-guide\" target=\"_blank\" rel=\"noopener\">Official Chapter Five essential guide</a>" }
 ];
 
@@ -4143,20 +4161,47 @@ document.getElementById("resetApp").onclick = ()=>{
   }
 };
 
-// Building the snapshot HTML is shared by all three buttons below — the
-// download itself needs three fallbacks because a sandboxed viewer (like
-// an embedded preview) can silently block a plain <a download> click.
-function buildSnapshotHtml(){
-  const saved = Object.fromEntries(Object.keys(DEFAULTS).map(key=>[key, Store.get(key)]));
+// Fields that never leave this device via Sync (see the DATA ISOLATION
+// MODEL note near Store/DEFAULTS above) — also left out of the
+// shareable group snapshot below, so handing that file to the group
+// can never leak one person's bingo card, character or private notes.
+const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName"];
+
+// Building the snapshot HTML is shared by both download flows below —
+// each needs three fallbacks because a sandboxed viewer (like an
+// embedded preview) can silently block a plain <a download> click.
+// excludePersonal:true produces the shareable "group copy" variant.
+//
+// IMPORTANT: this snapshots a freshly-*fetched* copy of index.html
+// (from cache/network, same as the service worker serves), never the
+// live document.documentElement — every screen in this app is rendered
+// into the DOM up front and just hidden with CSS (not removed), so a
+// personal-only value like myCharacter's name is sitting in the live
+// DOM's hidden Discover screen the moment it's ever been entered, and
+// document.documentElement.outerHTML would happily capture it even
+// though it's filtered out of the seed-data object below. Starting
+// from the pristine served template sidesteps that entirely — it has
+// no rendered personal content in it at all, only the seed script.
+async function buildSnapshotHtml(opts){
+  opts = opts || {};
+  const keys = opts.excludePersonal ? Object.keys(DEFAULTS).filter(k=> !PERSONAL_ONLY_KEYS.includes(k)) : Object.keys(DEFAULTS);
+  const saved = Object.fromEntries(keys.map(key=>[key, Store.get(key)]));
   const data = JSON.stringify(saved).replace(/</g, "\\u003c");
   const seedScript = `<script>window.__boomtownSavedData=${data};<\/script>`;
-  return document.documentElement.outerHTML.replace("</head>", `${seedScript}</head>`);
+  let template;
+  try{
+    const res = await fetch("./index.html", { cache: "no-store" });
+    template = await res.text();
+  }catch(err){
+    template = document.documentElement.outerHTML; // last-resort fallback if fetch fails entirely
+  }
+  return template.replace("</head>", `${seedScript}</head>`);
 }
 
-document.getElementById("downloadSnapshot").onclick = ()=>{
+document.getElementById("downloadSnapshot").onclick = async ()=>{
   const note = document.getElementById("downloadStatusNote");
   try{
-    const blob = new Blob([buildSnapshotHtml()], { type:"text/html;charset=utf-8" });
+    const blob = new Blob([await buildSnapshotHtml()], { type:"text/html;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Boomtown-Companion-2026-ours.html";
@@ -4170,10 +4215,10 @@ document.getElementById("downloadSnapshot").onclick = ()=>{
   }
 };
 
-document.getElementById("openSnapshotTab").onclick = ()=>{
+document.getElementById("openSnapshotTab").onclick = async ()=>{
   const note = document.getElementById("downloadStatusNote");
   try{
-    const blob = new Blob([buildSnapshotHtml()], { type:"text/html;charset=utf-8" });
+    const blob = new Blob([await buildSnapshotHtml()], { type:"text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const win = window.open(url, "_blank");
     if(!win) throw new Error("popup blocked");
@@ -4183,8 +4228,47 @@ document.getElementById("openSnapshotTab").onclick = ()=>{
   }
 };
 
-document.getElementById("copySnapshotHtml").onclick = (e)=>{
-  copyText(buildSnapshotHtml(), e.target);
+document.getElementById("copySnapshotHtml").onclick = async (e)=>{
+  copyText(await buildSnapshotHtml(), e.target);
   const note = document.getElementById("downloadStatusNote");
+  note.textContent = "Copied the entire file as text — paste it into a plain text editor and save it with a .html extension.";
+};
+
+const downloadGroupSnapshotBtn = document.getElementById("downloadGroupSnapshot");
+if(downloadGroupSnapshotBtn) downloadGroupSnapshotBtn.onclick = async ()=>{
+  const note = document.getElementById("downloadGroupStatusNote");
+  try{
+    const blob = new Blob([await buildSnapshotHtml({ excludePersonal:true })], { type:"text/html;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Boomtown-Companion-2026-group.html";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(link.href), 1000);
+    note.textContent = "If a file didn't actually save (some in-app browsers block this silently), use the buttons below instead.";
+  }catch(err){
+    note.textContent = "Download blocked by this browser/viewer — use one of the buttons below instead.";
+  }
+};
+
+const openGroupSnapshotTabBtn = document.getElementById("openGroupSnapshotTab");
+if(openGroupSnapshotTabBtn) openGroupSnapshotTabBtn.onclick = async ()=>{
+  const note = document.getElementById("downloadGroupStatusNote");
+  try{
+    const blob = new Blob([await buildSnapshotHtml({ excludePersonal:true })], { type:"text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, "_blank");
+    if(!win) throw new Error("popup blocked");
+    note.textContent = "Opened in a new tab — use that tab's own save/share/print-to-PDF option to keep a copy.";
+  }catch(err){
+    note.textContent = "That was blocked too (likely a popup blocker, or this viewer doesn't allow it) — try 'copy the whole file as text' below.";
+  }
+};
+
+const copyGroupSnapshotHtmlBtn = document.getElementById("copyGroupSnapshotHtml");
+if(copyGroupSnapshotHtmlBtn) copyGroupSnapshotHtmlBtn.onclick = async (e)=>{
+  copyText(await buildSnapshotHtml({ excludePersonal:true }), e.target);
+  const note = document.getElementById("downloadGroupStatusNote");
   note.textContent = "Copied the entire file as text — paste it into a plain text editor and save it with a .html extension.";
 };

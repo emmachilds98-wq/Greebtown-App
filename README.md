@@ -14,11 +14,12 @@ Near the top of `index.html` there's a line like:
 ```html
 <script>window.__boomtownSavedData={};</script>
 ```
-This must stay exactly `{}`. It exists so that when *you personally* use the in-app "Download a copy with our updates" button, that downloaded file can carry your own saved data with it. But if a copy of that downloaded file — or any `index.html` with real values in that line — ever gets uploaded to the shared repo, **every visitor's browser will load your personal data as their own starting defaults.** Always upload the original `index.html` from this project folder, never a downloaded snapshot/backup file, and never one you were testing locally with real data already saved.
+This must stay exactly `{}`. It exists so that when *you personally* use one of the in-app "Download my personal backup" / "Download shareable group copy" buttons, that downloaded file can carry saved data with it. But if a copy of either downloaded file — or any `index.html` with real values in that line — ever gets uploaded to the shared repo, **every visitor's browser will load that saved data as their own starting defaults.** Always upload the original `index.html` from this project folder, never a downloaded snapshot/backup file, and never one you were testing locally with real data already saved.
 
 Recommended: add a `.gitignore` with at least:
 ```
 *-ours.html
+*-group.html
 *.bak
 .DS_Store
 ```
