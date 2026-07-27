@@ -40,8 +40,9 @@
   personal data to everyone.
   The only legitimate way this placeholder gets populated with real
   data is client-side, inside a file a user generates for themselves via
-  "Download a copy with our updates" (see buildSnapshotHtml() in
-  js/app.js) — never inside the master index.html that gets committed.
+  "Download my personal backup" or "Download shareable group copy" in
+  Settings (see buildSnapshotHtml() in js/app.js) — never inside the
+  master index.html that gets committed.
 -->
 <script>window.__boomtownSavedData={};</script>
 </head>
@@ -77,8 +78,8 @@
       <h3>💾 Your data &amp; backups</h3>
       <p>Everything you save here — Plan, Discover notes, theories, hidden-venue finds, HQ notes, custom social links — saves itself to this browser on this device the instant you type or tap. There's no separate save button because it's already saved; you'll never lose anything by just closing the tab.</p>
       <p>The catch: it's tied to this exact page in this exact browser. It won't be there if you open a private/incognito window, clear site data, switch browsers, or use a different device — nothing syncs between phones automatically.</p>
-      <p>To back it up: use <strong>"Download a copy with our updates"</strong> in Settings, right at the bottom of this page. It bakes everything saved so far into a new file that already has your data in it when reopened — keep it as a backup. Worth doing every so often, and definitely before you set off.</p>
-      <p>To combine everyone's info into one file without duplicating anything: use <strong>Sync</strong> in Discover — it turns your notes, theories, hidden-venue finds and more into a short code your teammates paste in and merge. Once one phone has everyone's code merged in, download a copy from that phone as the group's master file.</p>
+      <p>To back it up: use <strong>"Download my personal backup"</strong> in Settings, right at the bottom of this page. It bakes everything saved so far — including personal things like your bingo card, character and HQ notes — into a new file that already has your data in it when reopened. Only ever reopen this one on your own device; it's not for sharing.</p>
+      <p>To combine everyone's info into one file without duplicating anything: use <strong>Sync</strong> in Discover — it turns your notes, theories, hidden-venue finds and more into a short code your teammates paste in and merge. Once one phone has everyone's code merged in, use <strong>"Download shareable group copy"</strong> in Settings on that phone — that version leaves out anyone's personal bingo/character/notes, so it's safe to actually hand round the group.</p>
       <p>Your <strong>Plan</strong> (saved artists) rides along in that same sync code now too, but it never merges into your own list — a teammate's saved lineup lands in its own tab, named after them, at the top of the Plan screen. Your list only ever has your own picks in it; theirs is there to look at, not to combine.</p>
     </div>
 
@@ -89,7 +90,7 @@
       <p><strong>Your progress stays yours:</strong> your Plan, notes, HQ log, hidden-venue finds, bingo card and everything else lives only in this browser's storage on this device. A GitHub update can never combine your saved data with anyone else's, and it can't reset or overwrite it either — it only touches code and content files, never your local data.</p>
       <p><strong>Offline use:</strong> once the app has loaded with signal one time, the service worker has cached every screen, so it keeps working with none at all — browsing, saving and editing everything. Nothing here needs a connection except the external links out to Instagram, the app stores, etc. If a GitHub update lands while you're offline, it'll just sit there and download itself next time you get signal.</p>
       <p><strong>If you've been offline and want to combine devices:</strong> this app never merges devices automatically. To bring two phones' info together, use <strong>Sync</strong> in Discover — it's a manual, one-way-at-a-time code you paste in. It adds new shared entries (notes, theories, venue finds) without duplicating, and it now carries each person's saved-artist Plan along too — but that always lands in its own named tab on the Plan screen, never merged into your own list. It never touches personal things like your HQ notes or bingo card at all.</p>
-      <p><strong>Back up before a big update:</strong> if you're not sure whether an update is coming, it costs nothing to be safe — use <strong>"Download a copy with our updates"</strong> in Settings first. That saves everything on this device into a file you keep, just in case.</p>
+      <p><strong>Back up before a big update:</strong> if you're not sure whether an update is coming, it costs nothing to be safe — use <strong>"Download my personal backup"</strong> in Settings first. That saves everything on this device into a file you keep, just in case.</p>
     </div>
 
     <div class="card">
@@ -147,10 +148,18 @@ Meet at the clock tower if separated"></textarea>
   <div class="card">
   <h3>⚙️ Settings</h3>
   <p>Reset saved favourites, plans, notes and district passport on this device. See "Your data &amp; backups" above for how saving and downloading actually works.</p>
-  <button class="action" id="downloadSnapshot">Download a copy with our updates</button>
+  <p><strong>My personal backup</strong> — everything on this device, including things that never sync to anyone else (bingo card, character, HQ notes, meeting point). Only ever reopen this on your own device to restore it.</p>
+  <button class="action" id="downloadSnapshot">Download my personal backup</button>
   <button class="ghost" id="openSnapshotTab" style="margin-top:6px;">If that didn't download: open it in a new tab</button>
   <button class="ghost" id="copySnapshotHtml" style="margin-top:6px;">Still stuck: copy the whole file as text</button>
   <p class="empty-note" id="downloadStatusNote" style="margin-top:8px;"></p>
+
+  <p style="margin-top:14px;"><strong>Shareable group copy</strong> — the merged notes, theories, hidden-venue finds and Plan tabs from everyone whose Sync code you've merged in. Leaves out your own bingo card, character and HQ notes, so sharing this file with the group never hands them your personal stuff.</p>
+  <button class="action" id="downloadGroupSnapshot">Download shareable group copy</button>
+  <button class="ghost" id="openGroupSnapshotTab" style="margin-top:6px;">If that didn't download: open it in a new tab</button>
+  <button class="ghost" id="copyGroupSnapshotHtml" style="margin-top:6px;">Still stuck: copy the whole file as text</button>
+  <p class="empty-note" id="downloadGroupStatusNote" style="margin-top:8px;"></p>
+
   <button class="action danger" id="resetApp" style="margin-top:10px;">Reset app</button>
 </div></section>
 
@@ -914,7 +923,7 @@ Meet at the clock tower if separated"></textarea>
       <ol class="compact-list" style="padding-left:20px;">
         <li><strong>Pick who you are below.</strong> Everything you add anywhere in the app from now on — theories, hidden-venue finds, get-involved ticks, found socials — is tagged with that name automatically.</li>
         <li><strong>Copy your sync code</strong> and send it to a teammate. They paste it into "Merge it in" on their phone; your notes, finds and theories combine with theirs (nothing already saved gets doubled up), and your current saved-artist Plan comes along too.</li>
-        <li>That saved-artist Plan never gets folded into their own list, though — it shows up as its own tab, named after you, over on their Plan screen. Their picks stay theirs, yours stay yours; the tabs are just there to compare. Do the code-swap round the whole group and everyone ends up with the same shared notes plus a full set of everyone's named Plan tabs. Whoever hits <strong>"Download a copy with our updates"</strong> on Home last bakes that combined set into one shareable file. Discover's Consolidated Notes card (below) shows the notes side split by person or by category — so you can check what's actually in it first.</li>
+        <li>That saved-artist Plan never gets folded into their own list, though — it shows up as its own tab, named after you, over on their Plan screen. Their picks stay theirs, yours stay yours; the tabs are just there to compare. Do the code-swap round the whole group and everyone ends up with the same shared notes plus a full set of everyone's named Plan tabs. Whoever hits <strong>"Download shareable group copy"</strong> on Home last bakes that combined set into one file safe to hand round — it leaves out anyone's personal bingo card, character or HQ notes. Discover's Consolidated Notes card (below) shows the notes side split by person or by category — so you can check what's actually in it first.</li>
       </ol>
       <div class="field"><label>Who are you?</label>
         <select id="contributorName">
@@ -1187,11 +1196,12 @@ Talk to an actor in character
     <div class="card" id="jumpNotes" style="border:1px solid rgba(75,227,172,.45); background:linear-gradient(145deg, rgba(75,227,172,.08), var(--bg-panel));">
       <span class="tag">👥 One view, whose is whose</span>
       <h3>🗂 All notes — everyone's, in one place</h3>
-      <p>Everything below is pulled live from this device — district notes, theories, hidden-venue finds, get-involved progress, memory journal, sightings and found socials. Defaults to <strong>By person</strong> so it's always clear who added what. Merge in your teammates' Sync codes first (above), and this becomes the group's full combined picture — copy it out, or use "Download a copy" on Home to bake all of it into one shareable file.</p>
+      <p>Everything below is pulled live from this device — district notes, theories, hidden-venue finds, get-involved progress, memory journal, sightings, found socials and landmarks. Defaults to <strong>By person</strong> — tab through names above the list to see one person's own tailored page (including their saved Plan). Merge in your teammates' Sync codes first (above), and this becomes the group's full combined picture — copy it out, or use "Download shareable group copy" on Home to bake all of it into one file that's safe to hand round (it leaves out your own bingo card, character and HQ notes). Personal-only things — bingo cards and characters — never travel through Sync at all, so they're never in here, on your device or anyone else's.</p>
       <div class="venue-filters" id="consolidatedViewToggle">
         <button data-view="category">By category</button>
         <button class="active" data-view="person">By person</button>
       </div>
+      <div class="tabstrip" id="consolidatedPeopleTabs" style="display:none; margin-bottom:8px;"></div>
       <button class="ghost" id="copyConsolidatedBtn" style="margin:4px 0 10px;">Copy full report</button>
       <div id="consolidatedNotes"></div>
     </div>
