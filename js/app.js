@@ -43,7 +43,7 @@ fixBottomClearance();
 //    person-tab bar is the only place they're ever displayed. Sync must
 //    never read or write personal fields like schedule, meeting, notes,
 //    bingoCard, bingoMarked, bingoLocked, or myCharacter.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -3500,22 +3500,136 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     const { stats, from } = mergeSyncPayload(payload);
     input.value = "";
     note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}Nothing already saved was duplicated.`;
-    loadDiscoveries();
-    loadGetInvolved();
-    loadTheories();
-    renderVenueTable();
-    loadCustomSocials();
-    updateStats();
-    if(typeof loadQuotes === "function") loadQuotes();
-    if(typeof loadSightings === "function") loadSightings();
-    if(typeof loadCustomLandmarksList === "function") loadCustomLandmarksList();
-    if(typeof loadMap === "function") loadMap();
-    if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
-    if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+    refreshAfterMerge();
   }catch(err){
     note.textContent = "Couldn't read that code — make sure you copied the whole thing, with nothing missing from either end.";
   }
 };
+
+// ===============================
+// CLOUD SYNC — optional, no-login auto-sync layered on top of the manual
+// code flow above. A "room code" is just a shared password your group
+// picks; each device pushes its own sync payload to
+// rooms/{roomCode}/members/{yourName} and pulls everyone else's, running
+// every pull through the exact same mergeSyncPayload() the manual code
+// box uses, so the no-duplicates/no-silent-overwrite guarantees are
+// identical either way. Fails quietly back to the manual flow if there's
+// no signal or the Firebase scripts didn't load (e.g. fully offline).
+// ===============================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAgiBfNu3IpTCpumJQrYkFOh03VNFTWOVQ",
+  authDomain: "greebtown.firebaseapp.com",
+  projectId: "greebtown",
+  storageBucket: "greebtown.firebasestorage.app",
+  messagingSenderId: "944940862671",
+  appId: "1:944940862671:web:f84ece4e66b052b4f97bba"
+};
+
+let _firestoreDb = null;
+function getFirestoreDb(){
+  if(_firestoreDb) return _firestoreDb;
+  if(typeof firebase === "undefined" || !firebase.initializeApp) return null;
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _firestoreDb = firebase.firestore();
+    return _firestoreDb;
+  }catch(err){
+    return null;
+  }
+}
+
+const roomCodeInput = document.getElementById("roomCodeInput");
+if(roomCodeInput){
+  roomCodeInput.value = Store.get("roomCode") || "";
+  roomCodeInput.onchange = ()=> Store.set("roomCode", roomCodeInput.value.trim());
+  roomCodeInput.onblur = roomCodeInput.onchange;
+}
+
+function currentRoomCode(){
+  return (Store.get("roomCode") || "").trim();
+}
+
+// Same refresh list a manual "Merge it in" and a cloud sync both need,
+// shared so either path leaves the UI equally up to date.
+function refreshAfterMerge(){
+  loadDiscoveries();
+  loadGetInvolved();
+  loadTheories();
+  renderVenueTable();
+  loadCustomSocials();
+  updateStats();
+  if(typeof loadQuotes === "function") loadQuotes();
+  if(typeof loadSightings === "function") loadSightings();
+  if(typeof loadCustomLandmarksList === "function") loadCustomLandmarksList();
+  if(typeof loadMap === "function") loadMap();
+  if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
+  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+}
+
+async function pushToCloud(){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  const name = currentContributorName();
+  if(!db || !room || !name) return;
+  const payload = buildSyncPayload();
+  payload.updatedAt = Date.now();
+  await db.collection("rooms").doc(room).collection("members").doc(name).set(payload);
+}
+
+async function pullFromCloud(){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  const name = currentContributorName();
+  if(!db || !room) return { stats: null, count: 0 };
+  const snap = await db.collection("rooms").doc(room).collection("members").get();
+  const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0 };
+  let count = 0;
+  snap.forEach(doc=>{
+    if(doc.id === name) return; // never merge your own payload back into yourself
+    const { stats } = mergeSyncPayload(doc.data());
+    Object.keys(totals).forEach(k=> totals[k] += stats[k] || 0);
+    count++;
+  });
+  return { stats: totals, count };
+}
+
+const cloudSyncBtn = document.getElementById("cloudSyncBtn");
+if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
+  const note = document.getElementById("cloudSyncStatusNote");
+  if(!currentContributorName()){ note.textContent = "Pick who you are above first."; return; }
+  if(!currentRoomCode()){ note.textContent = "Type your group's room code above first."; return; }
+  if(!getFirestoreDb()){ note.textContent = "Cloud sync isn't available right now — use the manual code box below instead."; return; }
+  if(navigator.onLine === false){ note.textContent = "No signal — use the manual code box below, or try Sync now again once you're back online."; return; }
+  cloudSyncBtn.disabled = true;
+  note.textContent = "Syncing…";
+  try{
+    await pushToCloud();
+    const { stats, count } = await pullFromCloud();
+    refreshAfterMerge();
+    if(!count){
+      note.textContent = "Sent your update. No one else's synced to this room code yet.";
+    }else{
+      note.textContent = `Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. Nothing already saved was duplicated.`;
+    }
+  }catch(err){
+    note.textContent = "Couldn't sync — check you've got signal and try again.";
+  }finally{
+    cloudSyncBtn.disabled = false;
+  }
+};
+
+// Quiet auto-pull whenever the app opens with a signal, so the group's
+// latest is there without anyone having to press anything — this only
+// ever pulls, it never pushes on its own; sending your own update is
+// opt-in via the Sync now button above ("upload when you have signal").
+(function autoPullOnOpen(){
+  if(navigator.onLine === false) return;
+  if(!currentRoomCode() || !currentContributorName()) return;
+  if(!getFirestoreDb()) return;
+  pullFromCloud().then(({ count })=>{
+    if(count) refreshAfterMerge();
+  }).catch(()=>{ /* no signal, or room not set up yet — skip quietly */ });
+})();
 
 // ===============================
 // YOUR CHARACTER BUILDER — a persona to introduce yourself to actors
@@ -4267,7 +4381,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // MODEL note near Store/DEFAULTS above) — also left out of the
 // shareable group snapshot below, so handing that file to the group
 // can never leak one person's bingo card, character or private notes.
-const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName"];
+const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
