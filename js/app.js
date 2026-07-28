@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v86";
-const APP_BUILD_TIME = "2026-07-28T20:28:00Z";
+const APP_CACHE_VERSION = "v87";
+const APP_BUILD_TIME = "2026-07-28T20:32:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5459,6 +5459,10 @@ const packingCategories = [
 const packingListBox = document.getElementById("packingList");
 const packingSearchInput = document.getElementById("packingSearch");
 let packingSearchTerm = "";
+// Collapsed by default, like the genre chips' "see more" — 78 items
+// across 7 categories is a lot of scroll to land on all at once.
+// Session-only (not persisted), same as genreChipsExpanded above.
+const packingExpandedCats = new Set();
 
 function packingItemKey(catTitle, item){ return catTitle + "::" + item; }
 
@@ -5477,27 +5481,48 @@ function loadPacking(){
   });
 
   let html = "";
+  let anyVisible = false;
   packingCategories.forEach(cat=>{
     const items = term ? cat.items.filter(i=> i.toLowerCase().includes(term)) : cat.items;
     if(!items.length) return;
-    html += `<div class="daygroup">${escapeHtml(cat.title)}</div><div>`;
-    items.forEach(item=>{
-      const key = packingItemKey(cat.title, item);
-      const isChecked = checked.has(key);
-      html += `
-        <div class="item${isChecked ? " packed" : ""}" data-key="${escapeHtml(key)}">
-          <div class="item-top">
-            <div><strong style="${isChecked ? "text-decoration:line-through; opacity:.6;" : ""}">${escapeHtml(item)}</strong></div>
-            <button class="pack-toggle-btn">${isChecked ? "Packed ✓" : "Not yet"}</button>
-          </div>
-        </div>`;
-    });
-    html += `</div>`;
+    anyVisible = true;
+    const catChecked = cat.items.filter(i=> checked.has(packingItemKey(cat.title, i))).length;
+    // Searching auto-expands any category with a match, so results are
+    // never hidden behind a collapsed header — the toggle only governs
+    // the default, browse-everything state.
+    const expanded = term ? true : packingExpandedCats.has(cat.title);
+    html += `<button class="packing-cat-toggle" data-cat="${escapeHtml(cat.title)}">
+      <span>${escapeHtml(cat.title)}</span>
+      <span class="packing-cat-count">${catChecked}/${cat.items.length} ${expanded ? "▴" : "▾"}</span>
+    </button>`;
+    if(expanded){
+      html += `<div>`;
+      items.forEach(item=>{
+        const key = packingItemKey(cat.title, item);
+        const isChecked = checked.has(key);
+        html += `
+          <div class="item${isChecked ? " packed" : ""}" data-key="${escapeHtml(key)}">
+            <div class="item-top">
+              <div><strong style="${isChecked ? "text-decoration:line-through; opacity:.6;" : ""}">${escapeHtml(item)}</strong></div>
+              <button class="pack-toggle-btn">${isChecked ? "Packed ✓" : "Not yet"}</button>
+            </div>
+          </div>`;
+      });
+      html += `</div>`;
+    }
   });
-  packingListBox.innerHTML = html || `<p class="empty-note">No items match "${escapeHtml(packingSearchInput ? packingSearchInput.value.trim() : "")}".</p>`;
+  packingListBox.innerHTML = anyVisible ? html : `<p class="empty-note">No items match "${escapeHtml(packingSearchInput ? packingSearchInput.value.trim() : "")}".</p>`;
   const progressNote = document.getElementById("packingProgress");
   if(progressNote) progressNote.textContent = `${totalChecked}/${totalItems} packed`;
 
+  packingListBox.querySelectorAll(".packing-cat-toggle").forEach(btn=>{
+    btn.onclick = ()=>{
+      const cat = btn.dataset.cat;
+      if(packingExpandedCats.has(cat)) packingExpandedCats.delete(cat);
+      else packingExpandedCats.add(cat);
+      loadPacking();
+    };
+  });
   packingListBox.querySelectorAll(".item").forEach(el=>{
     el.querySelector(".pack-toggle-btn").onclick = ()=>{
       let c = Store.get("packingChecked") || [];
