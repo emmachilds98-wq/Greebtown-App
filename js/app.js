@@ -32,12 +32,14 @@ fixBottomClearance();
 //    (buildSyncPayload/mergeSyncPayload, plus its cloud transport —
 //    pushToCloud/pullFromCloud — which auto-runs on app open as well as
 //    the manual Sync now button) — it only ever touches the shared
-//    discovery-log style fields (clues, theories, hiddenVenues,
-//    discoveries, customSocials, quotes, sightings, customLandmarks),
-//    which merge additively with no duplicates from the same contributor
-//    — hiddenVenues/customLandmarks dedupe per name+from, not name
-//    alone, so two people's differing entries for a same-named place
-//    both survive instead of one silently overwriting the other, PLUS
+//    discovery-log style fields (clues, characterNotes, theories,
+//    hiddenVenues, discoveries, customSocials, quotes, sightings,
+//    customLandmarks), which merge additively with no duplicates from
+//    the same contributor — hiddenVenues/customLandmarks dedupe per
+//    name+from+note-text, not name alone, so a second genuinely
+//    different note about the same place from the same person (a
+//    return visit, say) survives too, instead of being silently
+//    treated as a repeat of the first one, PLUS
 //    three read-only snapshot fields: each person's saved-artist
 //    "schedule", bingo card, and built character ride along in the same
 //    payload, but none is ever merged into your own
@@ -46,7 +48,7 @@ fixBottomClearance();
 //    instead, kept separate per contributor, shown only in their own
 //    person-tab on the Plan, Bingo, and My Character cards. Sync must
 //    never read or write other personal fields: meeting, notes, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -3480,6 +3482,7 @@ function buildSyncPayload(){
     v: 1,
     from: (Store.get("contributorName") || "").trim() || "Someone",
     clues: Store.get("clues") || {},
+    characterNotes: Store.get("characterNotes") || {},
     theories: Store.get("theories") || [],
     hiddenVenues: Store.get("hiddenVenues") || [],
     involvedDone: Store.get("involvedDone") || [],
@@ -3522,7 +3525,7 @@ function decodeSyncCode(code){
 }
 
 function mergeSyncPayload(payload){
-  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0 };
+  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   const from = payload.from || "Someone";
 
   // Clue notes are freeform multi-line text per district, and an incoming
@@ -3544,6 +3547,25 @@ function mergeSyncPayload(payload){
     stats.clues += newLines.length;
   });
   Store.set("clues", clues);
+
+  // Same line-by-line merge as clues above, but keyed per in-fiction
+  // character instead of per district — lets you (and everyone else)
+  // log more than one note about the same character over the weekend
+  // without any of them overwriting each other.
+  const characterNotes = Store.get("characterNotes") || {};
+  Object.entries(payload.characterNotes || {}).forEach(([charName, text])=>{
+    if(!text) return;
+    const existing = characterNotes[charName] || "";
+    const existingLines = new Set(existing.split("\n").map(l=>l.trim()).filter(Boolean));
+    const incomingLines = String(text).split("\n").map(l=>l.trim()).filter(Boolean);
+    const newLines = incomingLines
+      .map(l=> tagPattern.test(l) ? l : `[${from}] ${l}`)
+      .filter(l=> !existingLines.has(l));
+    if(!newLines.length) return;
+    characterNotes[charName] = existing ? existing + "\n" + newLines.join("\n") : newLines.join("\n");
+    stats.characterNotes += newLines.length;
+  });
+  Store.set("characterNotes", characterNotes);
 
   const theories = Store.get("theories") || [];
   const theoryKeys = new Set(theories.map(t=>(t.text || "").trim().toLowerCase()));
@@ -3852,7 +3874,7 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     const payload = decodeSyncCode(raw);
     const { stats, from } = mergeSyncPayload(payload);
     input.value = "";
-    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}${stats.character ? `${from}'s character is now viewable in its own tab on the My Character card. ` : ""}Nothing already saved was duplicated.`;
+    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}${stats.character ? `${from}'s character is now viewable in its own tab on the My Character card. ` : ""}Nothing already saved was duplicated.`;
     refreshAfterMerge();
   }catch(err){
     note.textContent = "Couldn't read that code — make sure you copied the whole thing, with nothing missing from either end.";
@@ -3941,7 +3963,7 @@ async function pullFromCloud(){
   const name = currentContributorName();
   if(!db || !room) return { stats: null, count: 0 };
   const snap = await db.collection("rooms").doc(room).collection("members").get();
-  const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0 };
+  const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   let count = 0;
   snap.forEach(doc=>{
     if(doc.id === name) return; // never merge your own payload back into yourself
@@ -3968,7 +3990,7 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
     if(!count){
       note.textContent = "Sent your update. No one else's synced to this room code yet.";
     }else{
-      note.textContent = `Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}${stats.character ? `, ${stats.character} character${stats.character===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
+      note.textContent = `Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}${stats.character ? `, ${stats.character} character${stats.character===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
     }
   }catch(err){
     note.textContent = "Couldn't sync — check you've got signal and try again.";
@@ -4324,6 +4346,7 @@ function showCharacters(list){
     characterResults.innerHTML = `<p class="empty-note">No matches.</p>`;
     return;
   }
+  const characterNotes = Store.get("characterNotes") || {};
   list.forEach(c=>{
     const div = document.createElement("div");
     div.className = "item";
@@ -4334,10 +4357,16 @@ function showCharacters(list){
         <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">${c.blurb}</p>
         <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 ${c.ask}</p>
       </div>
+      <textarea class="char-note-input" placeholder="What actually happened when you met ${escapeHtml(c.name)}? Add a new line each time you interact with them again." style="margin-top:8px;">${escapeHtml(characterNotes[c.name] || "")}</textarea>
     `;
     // Only the blurb/ask text, not the card's own name heading, so a
     // character's own name doesn't turn into a pointless self-link.
     linkifyKeyTerms(div.querySelector(".linkify-zone"));
+    div.querySelector(".char-note-input").oninput = (e)=>{
+      const notes = Store.get("characterNotes") || {};
+      notes[c.name] = e.target.value;
+      Store.set("characterNotes", notes);
+    };
     characterResults.appendChild(div);
   });
 }
@@ -4599,6 +4628,7 @@ loadSightings();
 // ===============================
 function buildConsolidatedReport(){
   const clues = Store.get("clues") || {};
+  const characterNotes = Store.get("characterNotes") || {};
   const visited = Store.get("discoveries") || [];
   const theoryEntries = Store.get("theories") || [];
   const venueEntries = Store.get("hiddenVenues") || [];
@@ -4626,6 +4656,13 @@ function buildConsolidatedReport(){
   sections.push({
     heading: "Hidden-venue finds",
     lines: venueEntries.length ? venueEntries.map(v=>`${v.name}${v.genre ? ` (${v.genre})` : ""}${v.near ? ` — near ${v.near}` : ""}${v.info ? `: ${v.info}` : ""}${v.from ? ` (via ${v.from})` : ""}`) : ["None logged yet."]
+  });
+
+  sections.push({
+    heading: "Character notes",
+    lines: Object.keys(characterNotes).length
+      ? Object.entries(characterNotes).flatMap(([charName, text])=> String(text).split("\n").map(l=>l.trim()).filter(Boolean).map(l=> `${charName}: ${l}`))
+      : ["None saved yet."]
   });
 
   sections.push({
@@ -4659,6 +4696,7 @@ function buildConsolidatedReport(){
 // answers "what has each person actually contributed?" at a glance.
 function buildConsolidatedReportByPerson(){
   const clues = Store.get("clues") || {};
+  const characterNotes = Store.get("characterNotes") || {};
   const theoryEntries = Store.get("theories") || [];
   const venueEntries = Store.get("hiddenVenues") || [];
   const involved = Store.get("involvedDone") || [];
@@ -4671,7 +4709,7 @@ function buildConsolidatedReportByPerson(){
   const byPerson = {};
   function bucket(name){
     const key = name && name.trim() ? name.trim() : "Unassigned";
-    if(!byPerson[key]) byPerson[key] = { theories:[], venues:[], clues:[], involved:[], socials:[], quotes:[], sightings:[], landmarks:[] };
+    if(!byPerson[key]) byPerson[key] = { theories:[], venues:[], clues:[], characterNotes:[], involved:[], socials:[], quotes:[], sightings:[], landmarks:[] };
     return byPerson[key];
   }
 
@@ -4685,6 +4723,13 @@ function buildConsolidatedReportByPerson(){
       const m = line.match(tagPattern);
       if(m) bucket(m[1]).clues.push(`${district}: ${m[2]}`);
       else bucket(null).clues.push(`${district}: ${line}`);
+    });
+  });
+  Object.entries(characterNotes).forEach(([charName, text])=>{
+    String(text).split("\n").map(l=>l.trim()).filter(Boolean).forEach(line=>{
+      const m = line.match(tagPattern);
+      if(m) bucket(m[1]).characterNotes.push(`${charName}: ${m[2]}`);
+      else bucket(null).characterNotes.push(`${charName}: ${line}`);
     });
   });
   involved.forEach(entry=>{
@@ -4706,6 +4751,7 @@ function buildConsolidatedReportByPerson(){
       ...data.quotes.map(l=>`Quote: ${l}`),
       ...data.sightings.map(l=>`Sighting: ${l}`),
       ...data.clues.map(l=>`District note — ${l}`),
+      ...data.characterNotes.map(l=>`Character note — ${l}`),
       ...data.involved.map(l=>`Get involved: ${l}`),
       ...data.socials.map(l=>`Social found: ${l}`)
     ]
