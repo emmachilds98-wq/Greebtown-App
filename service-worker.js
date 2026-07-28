@@ -1,6 +1,6 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v85";
+const CACHE_VERSION = "v86";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
 
 // Everything the app needs to run with zero network connection.
