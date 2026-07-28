@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v84";
-const APP_BUILD_TIME = "2026-07-28T20:16:00Z";
+const APP_CACHE_VERSION = "v86";
+const APP_BUILD_TIME = "2026-07-28T20:28:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -287,7 +287,7 @@ fixBottomClearance();
 //    instead, kept separate per contributor, shown only in their own
 //    person-tab on the Plan, Bingo, and My Character cards. Sync must
 //    never read or write other personal fields: meeting, notes, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [] };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -4212,11 +4212,22 @@ const discoveries = [
 ];
 
 const discoveriesBox = document.getElementById("discoveries");
+const districtSearchInput = document.getElementById("districtSearch");
+let districtSearchTerm = "";
 
 function loadDiscoveries(){
   discoveriesBox.innerHTML = "";
   const clues = Store.get("clues") || {};
-  discoveries.forEach((item, index)=>{
+  const term = districtSearchTerm.trim().toLowerCase();
+  const matches = term
+    ? discoveries.map((item,index)=>({item,index})).filter(({item})=>
+        (item.title + " " + item.location + " " + item.description + " " + item.characters).toLowerCase().includes(term))
+    : discoveries.map((item,index)=>({item,index}));
+  if(term && !matches.length){
+    discoveriesBox.innerHTML = `<p class="empty-note">No districts match "${escapeHtml(districtSearchInput ? districtSearchInput.value.trim() : "")}".</p>`;
+    return;
+  }
+  matches.forEach(({item, index})=>{
     const unlocked = Store.get("discoveries").includes(index);
     const box = document.createElement("div");
     box.className = "discovery";
@@ -4246,6 +4257,10 @@ function unlockDiscovery(index){
 }
 
 loadDiscoveries();
+if(districtSearchInput) districtSearchInput.oninput = ()=>{
+  districtSearchTerm = districtSearchInput.value;
+  loadDiscoveries();
+};
 
 async function copyText(text, btn){
   const old = btn.textContent;
@@ -4694,7 +4709,7 @@ function renderHomeInfoCard(){
       <span class="tag">Read this once</span>
       <h3>💾 Your data, sync &amp; updates</h3>
       <p>Everything you add saves itself to this device the instant you type or tap — no save button. Once you've picked your name in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a>, this phone syncs itself automatically every time you open the app with signal — no button needed, and no one has to remember. It quietly sends your updates up and pulls everyone else's in behind the scenes; a "Sync now" button is there too for an instant one mid-session.</p>
-      <p>Shared things — theories, hidden-venue finds, journal quotes, live sightings, district notes, get-involved ticks, found socials, landmarks — combine into one pool everyone sees (Discover's "All notes"). Your Plan, bingo card and character stay yours — sync never merges anyone else's into them — but everyone else's land in their own named tab right next to yours, on the Plan, Bingo and My Character screens, so you can see what your friends have without it touching your own.</p>
+      <p>Shared things — theories, hidden-venue finds, quotebook entries, live sightings, district notes, get-involved ticks, found socials, landmarks — combine into one pool everyone sees (Discover's "All notes"). Your Plan, bingo card and character stay yours — sync never merges anyone else's into them — but everyone else's land in their own named tab right next to yours, on the Plan, Bingo and My Character screens, so you can see what your friends have without it touching your own.</p>
       <p>Want just your own stuff backed up? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
       <p>The app itself updates quietly in the background whenever you're online, and keeps working fully offline once it's loaded once — updates never touch anything you've saved.</p>
       <button class="ghost" id="collapseHomeInfoBtn" style="margin-top:10px;">Got it, don't show this in full again</button>
@@ -5397,6 +5412,110 @@ function loadGetInvolved(){
 loadGetInvolved();
 
 // ===============================
+// PACKING CHECKLIST — Emma's group kit list, device-local only (see
+// PERSONAL_ONLY_KEYS: "packingChecked" never syncs, since packing is a
+// personal to-do, not a shared group fact like theories/clues are).
+// Grouped by category, with a text search across all items since it's
+// long enough to overwhelm at a glance otherwise.
+// ===============================
+const packingCategories = [
+  { title:"⛺ Shelter & camp setup", items:[
+    "Tent","Pegs & mallet","Groundsheet if needed","Sleeping bag","Extra blanket","Pillow",
+    "Sleeping mat/air bed & pump","Picnic blanket","Folding chairs","Folding table (Emma has 1)"
+  ]},
+  { title:"🍳 Kitchen & food", items:[
+    "Camping stove","Gas canisters","Lighters / rolling supplies","Kettle/pots/pans for stove",
+    "Plates, bowls, cutlery","Toastie maker (Emma)","Cups","Water container / shower bag",
+    "Small bottled water pack (6–12 small bottles)","Electrolyte sachets","Fresh food / snacks / drinks",
+    "Alcohol","Ice packs/cool box contents (Emma)"
+  ]},
+  { title:"🔌 Power, light & entertainment", items:[
+    "Speakers","Power banks","Projector with movies (Emma)","Charging cables","Lanterns/camp lamps",
+    "String lights","Head torch","Batteries (AA and AAA)","Cards/games","Notebook and pen",
+    "Dry bag for tech","Disposable camera or digital?"
+  ]},
+  { title:"👕 Clothing", items:[
+    "Festival clothes","Lots of socks and pants","Warm hoodie/fleece","Waterproof jacket",
+    "Trainers / shoes (wellies / comfy night shoes)","Hats","Sunglasses"
+  ]},
+  { title:"🧴 Hygiene & health", items:[
+    "Toothbrush & toothpaste","Deodorant","Shower gel","Shampoo","Fans (electric for tent, hand fan for stages)",
+    "Wash cloth","Towel","Moisturiser","Hairbrush","Dry shampoo","Sun cream","Lip balm","Wet wipes",
+    "Tweezers / nail clips","Emery board","Hand sanitiser","Toilet rolls","Tissue packs",
+    "Painkillers / anti-acid","Antihistamines","Plasters/basic first aid","Earplugs!!!!",
+    "Eye mask if you'll struggle to sleep"
+  ]},
+  { title:"🔧 Practical & repairs", items:[
+    "Bin bags / plastic bags","Duct tape","Paracord/string spares for tent / patch kit",
+    "A crate or box to use as a bedside table in the tent","A few carabiners for hanging lights, bags and jackets around tent",
+    "Few zip ties","Clothesline (string) — the tent line works fine too","Small bag for daytime"
+  ]},
+  { title:"🎫 Day-of essentials", items:[
+    "Fully charge phone, speaker, lanterns, lights, torch and power banks","Festival ticket","Wallet, ID",
+    "House keys","Phone"
+  ]}
+];
+
+const packingListBox = document.getElementById("packingList");
+const packingSearchInput = document.getElementById("packingSearch");
+let packingSearchTerm = "";
+
+function packingItemKey(catTitle, item){ return catTitle + "::" + item; }
+
+function loadPacking(){
+  if(!packingListBox) return;
+  const checked = new Set(Store.get("packingChecked") || []);
+  const term = packingSearchTerm.trim().toLowerCase();
+
+  // Progress always counts the whole list, regardless of any active
+  // search filter, so it reads as a stable "how much of the whole list
+  // is done" summary rather than jumping around as you type.
+  let totalItems = 0, totalChecked = 0;
+  packingCategories.forEach(cat=>{
+    totalItems += cat.items.length;
+    totalChecked += cat.items.filter(i=> checked.has(packingItemKey(cat.title, i))).length;
+  });
+
+  let html = "";
+  packingCategories.forEach(cat=>{
+    const items = term ? cat.items.filter(i=> i.toLowerCase().includes(term)) : cat.items;
+    if(!items.length) return;
+    html += `<div class="daygroup">${escapeHtml(cat.title)}</div><div>`;
+    items.forEach(item=>{
+      const key = packingItemKey(cat.title, item);
+      const isChecked = checked.has(key);
+      html += `
+        <div class="item${isChecked ? " packed" : ""}" data-key="${escapeHtml(key)}">
+          <div class="item-top">
+            <div><strong style="${isChecked ? "text-decoration:line-through; opacity:.6;" : ""}">${escapeHtml(item)}</strong></div>
+            <button class="pack-toggle-btn">${isChecked ? "Packed ✓" : "Not yet"}</button>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+  packingListBox.innerHTML = html || `<p class="empty-note">No items match "${escapeHtml(packingSearchInput ? packingSearchInput.value.trim() : "")}".</p>`;
+  const progressNote = document.getElementById("packingProgress");
+  if(progressNote) progressNote.textContent = `${totalChecked}/${totalItems} packed`;
+
+  packingListBox.querySelectorAll(".item").forEach(el=>{
+    el.querySelector(".pack-toggle-btn").onclick = ()=>{
+      let c = Store.get("packingChecked") || [];
+      const key = el.dataset.key;
+      if(c.includes(key)) c = c.filter(k=> k !== key);
+      else c.push(key);
+      Store.set("packingChecked", c);
+      loadPacking();
+    };
+  });
+}
+loadPacking();
+if(packingSearchInput) packingSearchInput.oninput = ()=>{
+  packingSearchTerm = packingSearchInput.value;
+  loadPacking();
+};
+
+// ===============================
 // HIDDEN VENUE LOG — feeds straight into the venue directory above,
 // tagged "Your find".
 // ===============================
@@ -5519,7 +5638,7 @@ document.getElementById("addQuoteBtn").onclick = ()=>{
 document.getElementById("copyQuotesBtn").onclick = (e)=>{
   const entries = Store.get("quotes") || [];
   const lines = entries.map(q=>`- "${q.text}"${q.saidBy ? ` — ${q.saidBy}` : ""}`);
-  copyText(entries.length ? "Memory journal:\n" + lines.join("\n") : "No quotes saved yet.", e.target);
+  copyText(entries.length ? "Quotebook:\n" + lines.join("\n") : "No quotes saved yet.", e.target);
 };
 
 loadQuotes();
@@ -5638,7 +5757,7 @@ function buildConsolidatedReport(){
   });
 
   sections.push({
-    heading: "Memory journal",
+    heading: "Quotebook",
     lines: quoteEntries.length ? quoteEntries.map(q=>`"${q.text}"${q.saidBy ? ` — ${q.saidBy}` : ""}${q.from ? ` (logged by ${q.from})` : ""}`) : ["None saved yet."]
   });
 
@@ -5999,7 +6118,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // MODEL note near Store/DEFAULTS above) — also left out of the
 // shareable group snapshot below, so handing that file to the group
 // can never leak one person's bingo card, character or private notes.
-const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome"];
+const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
