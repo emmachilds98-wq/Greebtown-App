@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v75";
-const APP_BUILD_TIME = "2026-07-28T18:54:00Z";
+const APP_CACHE_VERSION = "v76";
+const APP_BUILD_TIME = "2026-07-28T19:02:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -21,28 +21,129 @@ const APP_BUILD_TIME = "2026-07-28T18:54:00Z";
   const date = d.toLocaleDateString([], { day:"numeric", month:"short" });
   pill.textContent = `Updated ${date}, ${time}`;
 })();
-(function checkForStaleCopy(){
+// Clears every cache + service worker registration before reloading — a
+// proper nuclear refresh, not just location.reload() (which a stale
+// service worker could just re-serve from cache). Shared by the header
+// pill's tap-to-fix and by pull-to-refresh below.
+function forceAppRefresh(){
   const pill = document.getElementById("buildStatusPill");
-  if(!pill) return;
-  fetch("./service-worker.js", { cache: "no-store" })
+  if(pill) pill.textContent = "Refreshing…";
+  const cleanup = [];
+  if("caches" in window) cleanup.push(caches.keys().then(keys=> Promise.all(keys.map(k=> caches.delete(k)))));
+  if("serviceWorker" in navigator) cleanup.push(navigator.serviceWorker.getRegistrations().then(regs=> Promise.all(regs.map(r=> r.unregister()))));
+  return Promise.all(cleanup).finally(()=> location.reload());
+}
+// Returns a promise resolving true if a newer version was found (and the
+// header pill turned into a tap-to-refresh button) — pull-to-refresh
+// uses that to decide whether to trigger forceAppRefresh() itself
+// instead of waiting for a tap.
+function checkForStaleCopy(){
+  const pill = document.getElementById("buildStatusPill");
+  if(!pill) return Promise.resolve(false);
+  return fetch("./service-worker.js", { cache: "no-store" })
     .then(r=> r.text())
     .then(text=>{
       const m = text.match(/CACHE_VERSION\s*=\s*"(v\d+)"/);
-      if(!m || m[1] === APP_CACHE_VERSION) return;
+      if(!m || m[1] === APP_CACHE_VERSION) return false;
       pill.textContent = "🔄 Update available — tap to refresh";
       pill.style.cursor = "pointer";
       pill.style.background = "rgba(226,131,106,.16)";
       pill.style.color = "var(--accent-red)";
       pill.style.borderColor = "rgba(226,131,106,.4)";
-      pill.onclick = ()=>{
-        pill.textContent = "Refreshing…";
-        const cleanup = [];
-        if("caches" in window) cleanup.push(caches.keys().then(keys=> Promise.all(keys.map(k=> caches.delete(k)))));
-        if("serviceWorker" in navigator) cleanup.push(navigator.serviceWorker.getRegistrations().then(regs=> Promise.all(regs.map(r=> r.unregister()))));
-        Promise.all(cleanup).finally(()=> location.reload());
-      };
+      pill.onclick = forceAppRefresh;
+      return true;
     })
-    .catch(()=>{ /* offline, or the request itself got served from a cache we can't bypass — leave the static label as-is */ });
+    .catch(()=> false); /* offline, or the request itself got served from a cache we can't bypass — leave the static label as-is */
+}
+checkForStaleCopy();
+
+// ===============================
+// PULL TO REFRESH — installed/standalone PWAs don't get the browser's
+// own pull-to-refresh gesture (that's browser chrome, not something a
+// full-screen "app" has), so this rebuilds it by hand: pulling down from
+// the very top of the page checks for a newer app version first —
+// auto-applying it via forceAppRefresh() if one's found, same as the
+// header pill's tap-to-fix — and if the app's already current, runs the
+// same push+pull cloud sync opening the app or "Sync now" does
+// (autoSyncNow, defined later in this file — only called from inside an
+// event handler here, well after the whole script has finished loading,
+// so the forward reference is safe).
+// ===============================
+(function setupPullToRefresh(){
+  const THRESHOLD = 68, MAX_PULL = 110;
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let startY = null, pulling = false, refreshing = false, lastDist = 0;
+
+  const indicator = document.createElement("div");
+  indicator.id = "ptrIndicator";
+  indicator.style.cssText = "position:fixed; top:0; left:50%; z-index:70; background:var(--bg-panel); border:1px solid var(--line); border-radius:20px; padding:7px 16px; font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:7px; box-shadow:0 6px 18px rgba(0,0,0,.35); pointer-events:none; transform:translate(-50%,-60px);";
+  indicator.innerHTML = `<span id="ptrArrow" style="display:inline-block;">↓</span><span id="ptrLabel">Pull to refresh</span>`;
+  document.body.appendChild(indicator);
+  const arrow = indicator.querySelector("#ptrArrow");
+  const label = indicator.querySelector("#ptrLabel");
+
+  function setIndicatorY(px, withTransition){
+    indicator.style.transition = withTransition ? "transform .25s ease" : "none";
+    indicator.style.transform = `translate(-50%, ${px - 60}px)`;
+  }
+
+  function atTop(){
+    return (document.scrollingElement || document.documentElement).scrollTop <= 0;
+  }
+
+  function reset(){
+    pulling = false; startY = null; lastDist = 0;
+    setIndicatorY(0, true);
+    arrow.style.animation = "";
+    arrow.style.transform = "rotate(0deg)";
+    setTimeout(()=>{ if(!pulling && !refreshing) label.textContent = "Pull to refresh"; }, 250);
+  }
+
+  document.addEventListener("touchstart", (e)=>{
+    if(refreshing || e.touches.length !== 1 || !atTop()) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", (e)=>{
+    if(!pulling || startY === null || refreshing) return;
+    const delta = e.touches[0].clientY - startY;
+    if(delta <= 0 || !atTop()){ pulling = false; setIndicatorY(0, true); return; }
+    // Still pulling down from the very top — this is our gesture, not a
+    // normal scroll, so take over the motion instead of letting the
+    // browser's own rubber-band overscroll fight it.
+    e.preventDefault();
+    lastDist = Math.min(MAX_PULL, delta * 0.5);
+    setIndicatorY(lastDist + 60, false);
+    arrow.style.transform = lastDist >= THRESHOLD ? "rotate(180deg)" : "rotate(0deg)";
+    label.textContent = lastDist >= THRESHOLD ? "Release to refresh" : "Pull to refresh";
+  }, { passive: false });
+
+  document.addEventListener("touchend", ()=>{
+    if(!pulling){ startY = null; return; }
+    const pastThreshold = lastDist >= THRESHOLD;
+    pulling = false; startY = null;
+    if(!pastThreshold){ reset(); return; }
+
+    refreshing = true;
+    label.textContent = "Refreshing…";
+    if(!reduceMotion) arrow.style.animation = "ptrspin .7s linear infinite";
+    setIndicatorY(THRESHOLD, true);
+
+    checkForStaleCopy().then(stale=>{
+      if(stale) return forceAppRefresh(); // page is about to reload — nothing left to reset
+      return Promise.resolve(typeof autoSyncNow === "function" ? autoSyncNow("pull to refresh") : null).then(()=>{
+        label.textContent = "Up to date";
+        arrow.style.animation = "";
+        arrow.style.transform = "rotate(0deg)";
+        setTimeout(()=>{ refreshing = false; reset(); }, 900);
+      });
+    }).catch(()=>{
+      label.textContent = "Couldn't refresh — check signal";
+      arrow.style.animation = "";
+      setTimeout(()=>{ refreshing = false; reset(); }, 1400);
+    });
+  }, { passive: true });
 })();
 
 // ===============================
@@ -4437,16 +4538,16 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
 const AUTO_SYNC_INTERVAL_MS = 3 * 60 * 1000;
 let _lastAutoSyncAttempt = 0;
 function autoSyncNow(trigger){
-  if(navigator.onLine === false) return;
-  if(!currentRoomCode()) return;
-  if(!getFirestoreDb()) return;
+  if(navigator.onLine === false) return Promise.resolve();
+  if(!currentRoomCode()) return Promise.resolve();
+  if(!getFirestoreDb()) return Promise.resolve();
   _lastAutoSyncAttempt = Date.now();
   // Pulling in synced teammates' picks (their Plan tab, Compare, etc.)
   // never needs your own name set — only pushing your own update does,
   // since that's what it gets filed under. So this still runs and still
   // shows you their tabs even before you've picked who you are.
   const haveName = !!currentContributorName();
-  (haveName ? pushToCloud() : Promise.resolve()).then(()=> pullFromCloud()).then(({ stats, count })=>{
+  return (haveName ? pushToCloud() : Promise.resolve()).then(()=> pullFromCloud()).then(({ stats, count })=>{
     recordLastSynced();
     const note = document.getElementById("cloudSyncStatusNote");
     const prefix = haveName ? `Auto-synced (${trigger}): sent your update, ` : `Auto-synced (${trigger}, pick who you are above to send your own update): `;
