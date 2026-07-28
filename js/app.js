@@ -3072,14 +3072,15 @@ function stageHoursFromSchedule(name){
 }
 
 function loggedVenuesAsDirectory(){
-  return (Store.get("hiddenVenues") || []).map(entry=>({
+  return (Store.get("hiddenVenues") || []).map((entry,i)=>({
     name: entry.name || "Untitled find",
     type: entry.type || "Hidden venue",
     status: "logged",
     genre: entry.genre || "—",
     near: entry.near || "",
     music: typeof entry.music === "boolean" ? entry.music : "unclear",
-    info: (entry.info ? entry.info : "") + (entry.when ? ` (logged ${entry.when}${entry.from ? " via " + entry.from : ""})` : "")
+    info: (entry.info ? entry.info : "") + (entry.when ? ` (logged ${entry.when}${entry.from ? " via " + entry.from : ""})` : ""),
+    _hiddenVenueIndex: i
   }));
 }
 
@@ -3117,10 +3118,20 @@ function renderVenueTable(){
       <div class="venue-row-meta">${escapeHtml(v.type)}${v.genre && v.genre !== "—" ? " · " + escapeHtml(v.genre) : ""}${v.near ? " · 📍 " + escapeHtml(v.near) : ""}</div>
       <p class="venue-row-info">${escapeHtml(v.info)}</p>
       ${hours ? `<p class="venue-row-info" style="color:var(--accent-teal); margin-top:4px;">🕐 Acts running roughly ${hours} (from saved set times — see Plan for exact slots)</p>` : ""}
+      ${v.status === "logged" ? `<button data-i="${v._hiddenVenueIndex}" class="ghost removeHiddenVenueBtn" style="margin-top:6px;">Remove this find</button>` : ""}
     </div>
   `;
   }).join("") || `<p class="empty-note">No entries match these filters yet.</p>`;
   if(countNote) countNote.textContent = `Showing ${rows.length} of ${all.length} entries.`;
+  body.querySelectorAll(".removeHiddenVenueBtn").forEach(btn=>{
+    btn.onclick = ()=>{
+      const list = Store.get("hiddenVenues") || [];
+      list.splice(Number(btn.dataset.i), 1);
+      Store.set("hiddenVenues", list);
+      renderVenueTable();
+      if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
+    };
+  });
 }
 
 const venueSearchInput = document.getElementById("venueSearch");
@@ -3618,16 +3629,27 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
   }
 };
 
-// Quiet auto-pull whenever the app opens with a signal, so the group's
-// latest is there without anyone having to press anything — this only
-// ever pulls, it never pushes on its own; sending your own update is
-// opt-in via the Sync now button above ("upload when you have signal").
+// Quiet-ish auto-pull whenever the app opens with a signal, so the
+// group's latest is there without anyone having to press anything —
+// this only ever pulls, it never pushes on its own; sending your own
+// update is opt-in via the Sync now button above ("upload when you
+// have signal"). Not silent, though — it leaves a one-line note behind
+// so anything that merged in automatically is still visible, not
+// invisible background writes to your saved data.
 (function autoPullOnOpen(){
   if(navigator.onLine === false) return;
   if(!currentRoomCode() || !currentContributorName()) return;
   if(!getFirestoreDb()) return;
-  pullFromCloud().then(({ count })=>{
-    if(count) refreshAfterMerge();
+  pullFromCloud().then(({ stats, count })=>{
+    if(!count) return;
+    refreshAfterMerge();
+    const note = document.getElementById("cloudSyncStatusNote");
+    if(note){
+      const total = Object.values(stats).reduce((a,b)=>a+b, 0);
+      note.textContent = total
+        ? `Auto-synced on open: picked up ${total} new item${total===1?"":"s"} from ${count} other device${count===1?"":"s"}.`
+        : `Auto-synced on open: up to date with ${count} other device${count===1?"":"s"}, nothing new.`;
+    }
   }).catch(()=>{ /* no signal, or room not set up yet — skip quietly */ });
 })();
 
@@ -3960,11 +3982,21 @@ const theoriesBox = document.getElementById("theoriesList");
 function loadTheories(){
   const entries = Store.get("theories") || [];
   theoriesBox.innerHTML = "";
-  entries.slice().reverse().forEach(entry=>{
+  entries.slice().reverse().forEach((entry,revI)=>{
+    const i = entries.length - 1 - revI;
     const div = document.createElement("div");
     div.className = "update-entry";
-    div.innerHTML = `<div class="when">${entry.when}${entry.from ? " · via " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div>`;
+    div.innerHTML = `<div class="when">${entry.when}${entry.from ? " · via " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div><button data-i="${i}" class="ghost removeTheoryBtn" style="margin-top:4px;">Remove</button>`;
     theoriesBox.appendChild(div);
+  });
+  theoriesBox.querySelectorAll(".removeTheoryBtn").forEach(btn=>{
+    btn.onclick = ()=>{
+      const list = Store.get("theories") || [];
+      list.splice(Number(btn.dataset.i), 1);
+      Store.set("theories", list);
+      loadTheories();
+      if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
+    };
   });
 }
 
@@ -3992,11 +4024,21 @@ const quotesBox = document.getElementById("quotesList");
 function loadQuotes(){
   const entries = Store.get("quotes") || [];
   quotesBox.innerHTML = "";
-  entries.slice().reverse().forEach(entry=>{
+  entries.slice().reverse().forEach((entry,revI)=>{
+    const i = entries.length - 1 - revI;
     const div = document.createElement("div");
     div.className = "update-entry";
-    div.innerHTML = `<div class="when">${entry.when}${entry.saidBy ? " · said by " + escapeHtml(entry.saidBy) : ""}${entry.from ? " · logged by " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div>`;
+    div.innerHTML = `<div class="when">${entry.when}${entry.saidBy ? " · said by " + escapeHtml(entry.saidBy) : ""}${entry.from ? " · logged by " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div><button data-i="${i}" class="ghost removeQuoteBtn" style="margin-top:4px;">Remove</button>`;
     quotesBox.appendChild(div);
+  });
+  quotesBox.querySelectorAll(".removeQuoteBtn").forEach(btn=>{
+    btn.onclick = ()=>{
+      const list = Store.get("quotes") || [];
+      list.splice(Number(btn.dataset.i), 1);
+      Store.set("quotes", list);
+      loadQuotes();
+      if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
+    };
   });
 }
 
@@ -4034,11 +4076,21 @@ const sightingsBox = document.getElementById("sightingsList");
 function loadSightings(){
   const entries = Store.get("sightings") || [];
   sightingsBox.innerHTML = "";
-  entries.slice().reverse().forEach(entry=>{
+  entries.slice().reverse().forEach((entry,revI)=>{
+    const i = entries.length - 1 - revI;
     const div = document.createElement("div");
     div.className = "update-entry";
-    div.innerHTML = `<div class="when">${entry.when}${entry.source ? " · via " + escapeHtml(entry.source) : ""}${entry.from ? " · logged by " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div>`;
+    div.innerHTML = `<div class="when">${entry.when}${entry.source ? " · via " + escapeHtml(entry.source) : ""}${entry.from ? " · logged by " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div><button data-i="${i}" class="ghost removeSightingBtn" style="margin-top:4px;">Remove</button>`;
     sightingsBox.appendChild(div);
+  });
+  sightingsBox.querySelectorAll(".removeSightingBtn").forEach(btn=>{
+    btn.onclick = ()=>{
+      const list = Store.get("sightings") || [];
+      list.splice(Number(btn.dataset.i), 1);
+      Store.set("sightings", list);
+      loadSightings();
+      if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
+    };
   });
 }
 
