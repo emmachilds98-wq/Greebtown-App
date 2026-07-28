@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v77";
-const APP_BUILD_TIME = "2026-07-28T19:07:00Z";
+const APP_CACHE_VERSION = "v78";
+const APP_BUILD_TIME = "2026-07-28T19:12:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -74,17 +74,25 @@ checkForStaleCopy();
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let startY = null, pulling = false, refreshing = false, lastDist = 0;
 
+  // Anchored below env(safe-area-inset-top) — same inset the header
+  // itself pads for — so on notched/Dynamic-Island phones the indicator
+  // settles below the cutout instead of hiding behind it. HIDDEN/VISIBLE
+  // are offsets from that safe anchor, not from the literal top of the
+  // viewport: 0 = flush with the anchor (fully visible), negative =
+  // pulled back up above it (hidden).
+  const HIDDEN = -70, VISIBLE = 0;
   const indicator = document.createElement("div");
   indicator.id = "ptrIndicator";
-  indicator.style.cssText = "position:fixed; top:0; left:50%; z-index:70; background:var(--bg-panel); border:1px solid var(--line); border-radius:20px; padding:7px 16px; font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:7px; box-shadow:0 6px 18px rgba(0,0,0,.35); pointer-events:none; transform:translate(-50%,-60px);";
+  indicator.style.cssText = "position:fixed; top:calc(env(safe-area-inset-top,0px) + 6px); left:50%; z-index:70; background:var(--bg-panel); border:1px solid var(--line); border-radius:20px; padding:7px 16px; font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:7px; box-shadow:0 6px 18px rgba(0,0,0,.35); pointer-events:none;";
   indicator.innerHTML = `<span id="ptrArrow" style="display:inline-block;">↓</span><span id="ptrLabel">Pull to refresh</span>`;
   document.body.appendChild(indicator);
   const arrow = indicator.querySelector("#ptrArrow");
   const label = indicator.querySelector("#ptrLabel");
+  setIndicatorY(HIDDEN, false);
 
   function setIndicatorY(px, withTransition){
     indicator.style.transition = withTransition ? "transform .25s ease" : "none";
-    indicator.style.transform = `translate(-50%, ${px - 60}px)`;
+    indicator.style.transform = `translate(-50%, ${px}px)`;
   }
 
   function atTop(){
@@ -93,7 +101,7 @@ checkForStaleCopy();
 
   function reset(){
     pulling = false; startY = null; lastDist = 0;
-    setIndicatorY(0, true);
+    setIndicatorY(HIDDEN, true);
     arrow.style.animation = "";
     arrow.style.transform = "rotate(0deg)";
     setTimeout(()=>{ if(!pulling && !refreshing) label.textContent = "Pull to refresh"; }, 250);
@@ -108,13 +116,13 @@ checkForStaleCopy();
   document.addEventListener("touchmove", (e)=>{
     if(!pulling || startY === null || refreshing) return;
     const delta = e.touches[0].clientY - startY;
-    if(delta <= 0 || !atTop()){ pulling = false; setIndicatorY(0, true); return; }
+    if(delta <= 0 || !atTop()){ pulling = false; setIndicatorY(HIDDEN, true); return; }
     // Still pulling down from the very top — this is our gesture, not a
     // normal scroll, so take over the motion instead of letting the
     // browser's own rubber-band overscroll fight it.
     e.preventDefault();
     lastDist = Math.min(MAX_PULL, delta * 0.5);
-    setIndicatorY(lastDist + 60, false);
+    setIndicatorY(HIDDEN + lastDist, false);
     arrow.style.transform = lastDist >= THRESHOLD ? "rotate(180deg)" : "rotate(0deg)";
     label.textContent = lastDist >= THRESHOLD ? "Release to refresh" : "Pull to refresh";
   }, { passive: false });
@@ -128,7 +136,7 @@ checkForStaleCopy();
     refreshing = true;
     label.textContent = "Refreshing…";
     if(!reduceMotion) arrow.style.animation = "ptrspin .7s linear infinite";
-    setIndicatorY(THRESHOLD, true);
+    setIndicatorY(VISIBLE, true);
 
     checkForStaleCopy().then(stale=>{
       if(stale) return forceAppRefresh(); // page is about to reload — nothing left to reset
@@ -4258,8 +4266,8 @@ function updateHomeSyncStatusText(){
   }
   if(heading) heading.textContent = name ? `✅ Syncing as ${name}` : "⚠️ Pick your name to start syncing";
   if(para) para.innerHTML = name
-    ? `This runs automatically every time you open the app with signal — you never need to press anything for it to work, first time or any time after. "Sync now" in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> is only there if you want an instant one mid-session.`
-    : `Nothing you add will reach the group until you've picked who you are — a one-time thing, done for good on this device afterwards. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover, if you'd rather set it there.`;
+    ? `Syncs automatically on open, every few minutes, and whenever you pull down from the top ↓ to refresh. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> also has a manual button, any time.`
+    : `Pick who you are to start syncing — one-time, done for good on this device. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover.`;
 }
 
 function wireHomeSyncStatusPicker(){
@@ -4302,8 +4310,8 @@ function renderHomeSyncStatus(){
     <span class="tag" style="${name ? "" : "background:rgba(242,168,60,.16); color:var(--accent-amber); border-color:rgba(242,168,60,.4);"}">${name ? "Syncing" : "Set this up once"}</span>
     <h3>${name ? `✅ Syncing as ${escapeHtml(name)}` : "⚠️ Pick your name to start syncing"}</h3>
     <p>${name
-      ? `This runs automatically every time you open the app with signal — you never need to press anything for it to work, first time or any time after. "Sync now" in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> is only there if you want an instant one mid-session.`
-      : `Nothing you add will reach the group until you've picked who you are — a one-time thing, done for good on this device afterwards. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover, if you'd rather set it there.`}</p>
+      ? `Syncs automatically on open, every few minutes, and whenever you pull down from the top ↓ to refresh. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> also has a manual button, any time.`
+      : `Pick who you are to start syncing — one-time, done for good on this device. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover.`}</p>
     ${name ? `<p style="margin-top:6px; font-size:12px; color:var(--text-muted);">🔄 Data last synced with the group: <strong>${formatLastSynced()}</strong> — not the same as the app-version pill up top, that's about new code shipping, this is about your notes actually reaching everyone.</p>` : ""}
     <div class="field" style="margin-top:10px;"><label>Who are you?</label>
       <select id="homeContributorName">
