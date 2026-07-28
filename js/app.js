@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v78";
-const APP_BUILD_TIME = "2026-07-28T19:12:00Z";
+const APP_CACHE_VERSION = "v79";
+const APP_BUILD_TIME = "2026-07-28T19:20:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -68,32 +68,18 @@ checkForStaleCopy();
 // (autoSyncNow, defined later in this file — only called from inside an
 // event handler here, well after the whole script has finished loading,
 // so the forward reference is safe).
+// No separate floating indicator — an earlier version added one, but it
+// needed its own safe-area math to avoid the iPhone notch and ended up
+// as a stray sliver visible even at rest. Simpler and more reliable to
+// just drive the existing "↓ Pull down to refresh & sync" header hint's
+// own text through the same states, since it already sits somewhere
+// safe-area-correct by construction.
 // ===============================
 (function setupPullToRefresh(){
-  const THRESHOLD = 68, MAX_PULL = 110;
-  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const THRESHOLD = 68;
+  const hint = document.getElementById("ptrHint");
+  const DEFAULT_TEXT = hint ? hint.textContent : "";
   let startY = null, pulling = false, refreshing = false, lastDist = 0;
-
-  // Anchored below env(safe-area-inset-top) — same inset the header
-  // itself pads for — so on notched/Dynamic-Island phones the indicator
-  // settles below the cutout instead of hiding behind it. HIDDEN/VISIBLE
-  // are offsets from that safe anchor, not from the literal top of the
-  // viewport: 0 = flush with the anchor (fully visible), negative =
-  // pulled back up above it (hidden).
-  const HIDDEN = -70, VISIBLE = 0;
-  const indicator = document.createElement("div");
-  indicator.id = "ptrIndicator";
-  indicator.style.cssText = "position:fixed; top:calc(env(safe-area-inset-top,0px) + 6px); left:50%; z-index:70; background:var(--bg-panel); border:1px solid var(--line); border-radius:20px; padding:7px 16px; font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:7px; box-shadow:0 6px 18px rgba(0,0,0,.35); pointer-events:none;";
-  indicator.innerHTML = `<span id="ptrArrow" style="display:inline-block;">↓</span><span id="ptrLabel">Pull to refresh</span>`;
-  document.body.appendChild(indicator);
-  const arrow = indicator.querySelector("#ptrArrow");
-  const label = indicator.querySelector("#ptrLabel");
-  setIndicatorY(HIDDEN, false);
-
-  function setIndicatorY(px, withTransition){
-    indicator.style.transition = withTransition ? "transform .25s ease" : "none";
-    indicator.style.transform = `translate(-50%, ${px}px)`;
-  }
 
   function atTop(){
     return (document.scrollingElement || document.documentElement).scrollTop <= 0;
@@ -101,10 +87,7 @@ checkForStaleCopy();
 
   function reset(){
     pulling = false; startY = null; lastDist = 0;
-    setIndicatorY(HIDDEN, true);
-    arrow.style.animation = "";
-    arrow.style.transform = "rotate(0deg)";
-    setTimeout(()=>{ if(!pulling && !refreshing) label.textContent = "Pull to refresh"; }, 250);
+    if(hint && !refreshing) hint.textContent = DEFAULT_TEXT;
   }
 
   document.addEventListener("touchstart", (e)=>{
@@ -116,15 +99,13 @@ checkForStaleCopy();
   document.addEventListener("touchmove", (e)=>{
     if(!pulling || startY === null || refreshing) return;
     const delta = e.touches[0].clientY - startY;
-    if(delta <= 0 || !atTop()){ pulling = false; setIndicatorY(HIDDEN, true); return; }
+    if(delta <= 0 || !atTop()){ reset(); return; }
     // Still pulling down from the very top — this is our gesture, not a
     // normal scroll, so take over the motion instead of letting the
     // browser's own rubber-band overscroll fight it.
     e.preventDefault();
-    lastDist = Math.min(MAX_PULL, delta * 0.5);
-    setIndicatorY(HIDDEN + lastDist, false);
-    arrow.style.transform = lastDist >= THRESHOLD ? "rotate(180deg)" : "rotate(0deg)";
-    label.textContent = lastDist >= THRESHOLD ? "Release to refresh" : "Pull to refresh";
+    lastDist = delta * 0.5;
+    if(hint) hint.textContent = lastDist >= THRESHOLD ? "↑ Release to refresh & sync" : DEFAULT_TEXT;
   }, { passive: false });
 
   document.addEventListener("touchend", ()=>{
@@ -134,22 +115,17 @@ checkForStaleCopy();
     if(!pastThreshold){ reset(); return; }
 
     refreshing = true;
-    label.textContent = "Refreshing…";
-    if(!reduceMotion) arrow.style.animation = "ptrspin .7s linear infinite";
-    setIndicatorY(VISIBLE, true);
+    if(hint) hint.textContent = "Refreshing…";
 
     checkForStaleCopy().then(stale=>{
       if(stale) return forceAppRefresh(); // page is about to reload — nothing left to reset
       return Promise.resolve(typeof autoSyncNow === "function" ? autoSyncNow("pull to refresh") : null).then(()=>{
-        label.textContent = "Up to date";
-        arrow.style.animation = "";
-        arrow.style.transform = "rotate(0deg)";
-        setTimeout(()=>{ refreshing = false; reset(); }, 900);
+        if(hint) hint.textContent = "Up to date ✓";
+        setTimeout(()=>{ refreshing = false; reset(); }, 1400);
       });
     }).catch(()=>{
-      label.textContent = "Couldn't refresh — check signal";
-      arrow.style.animation = "";
-      setTimeout(()=>{ refreshing = false; reset(); }, 1400);
+      if(hint) hint.textContent = "Couldn't refresh — check signal";
+      setTimeout(()=>{ refreshing = false; reset(); }, 1800);
     });
   }, { passive: true });
 })();
@@ -3519,7 +3495,7 @@ document.getElementById("addLandmarkBtn").onclick = ()=>{
     name,
     district: document.getElementById("landmarkDistrict").value,
     info: document.getElementById("landmarkInfo").value.trim(),
-    from: currentContributorName() || undefined
+    from: currentContributorName() || ""
   });
   Store.set("customLandmarks", list);
   document.getElementById("landmarkName").value = "";
@@ -4482,7 +4458,18 @@ async function pushToCloud(){
   if(!db || !room || !name) return;
   const payload = buildSyncPayload();
   payload.updatedAt = Date.now();
-  await db.collection("rooms").doc(room).collection("members").doc(name).set(payload);
+  // Firestore's SDK throws (not silently drops) on any field whose value
+  // is literally `undefined`, anywhere in the object — a real bug here
+  // used to write "from: currentContributorName() || undefined" whenever
+  // a note/find/theory/quote/sighting/landmark was logged before picking
+  // a name, baking an undefined into localStorage that broke every
+  // future cloud sync with a generic "Couldn't sync" until that one
+  // entry was found and removed by hand. That's fixed at the source now,
+  // but this device (or a synced-in teammate's) may already be carrying
+  // old poisoned entries — a JSON round-trip is a cheap, reliable way to
+  // strip any undefined value recursively before every push, regardless
+  // of where it came from.
+  await db.collection("rooms").doc(room).collection("members").doc(name).set(JSON.parse(JSON.stringify(payload)));
 }
 
 async function pullFromCloud(){
@@ -4528,7 +4515,8 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
       note.textContent = `${namePrefix}Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}${stats.character ? `, ${stats.character} character${stats.character===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
     }
   }catch(err){
-    note.textContent = "Couldn't sync — check you've got signal and try again.";
+    console.error("Cloud sync failed:", err);
+    note.textContent = `Couldn't sync (${err && err.message ? err.message : "unknown error"}) — check you've got signal and try again.`;
   }finally{
     cloudSyncBtn.disabled = false;
   }
@@ -4570,7 +4558,7 @@ function autoSyncNow(trigger){
         ? `${prefix}picked up ${total} new item${total===1?"":"s"} from ${count} other device${count===1?"":"s"}.`
         : `${prefix}up to date with ${count} other device${count===1?"":"s"}, nothing new from them.`;
     }
-  }).catch(()=>{ /* no signal, or room not set up yet — skip quietly */ });
+  }).catch(err=>{ console.error("Auto-sync failed:", err); /* stays quiet in the UI — no signal, or room not set up yet — but still logged for diagnosis */ });
 }
 autoSyncNow("on open");
 setInterval(()=> autoSyncNow("periodic"), AUTO_SYNC_INTERVAL_MS);
@@ -4995,7 +4983,7 @@ function loadGetInvolved(){
       if(involvedEntryFor(d, g.title)){
         d = d.filter(x=> (typeof x === "string" ? x !== g.title : x.title !== g.title));
       } else {
-        d.push({ title: g.title, from: currentContributorName() || undefined });
+        d.push({ title: g.title, from: currentContributorName() || "" });
       }
       Store.set("involvedDone", d);
       loadGetInvolved();
@@ -5027,7 +5015,7 @@ document.getElementById("addHiddenVenueBtn").onclick = ()=>{
     genre: hiddenVenueGenreInput.value.trim(),
     near: hiddenVenueNearInput.value.trim(),
     info,
-    from: currentContributorName() || undefined,
+    from: currentContributorName() || "",
     when: new Date().toLocaleString()
   });
   Store.set("hiddenVenues", entries);
@@ -5073,7 +5061,7 @@ document.getElementById("addTheoryBtn").onclick = ()=>{
   const text = theoryInput.value.trim();
   if(!text) return;
   const entries = Store.get("theories") || [];
-  entries.push({ text, when: new Date().toLocaleString(), from: currentContributorName() || undefined });
+  entries.push({ text, when: new Date().toLocaleString(), from: currentContributorName() || "" });
   Store.set("theories", entries);
   theoryInput.value = "";
   loadTheories();
@@ -5118,7 +5106,7 @@ document.getElementById("addQuoteBtn").onclick = ()=>{
   const text = quoteInput.value.trim();
   if(!text) return;
   const entries = Store.get("quotes") || [];
-  entries.push({ text, saidBy: quoteSaidByInput.value.trim(), from: currentContributorName() || undefined, when: new Date().toLocaleString() });
+  entries.push({ text, saidBy: quoteSaidByInput.value.trim(), from: currentContributorName() || "", when: new Date().toLocaleString() });
   Store.set("quotes", entries);
   quoteInput.value = "";
   quoteSaidByInput.value = "";
@@ -5173,7 +5161,7 @@ document.getElementById("addSightingBtn").onclick = ()=>{
   const text = sightingInput.value.trim();
   if(!text) return;
   const entries = Store.get("sightings") || [];
-  entries.push({ text, source: sightingSourceInput.value.trim(), from: currentContributorName() || undefined, when: new Date().toLocaleString() });
+  entries.push({ text, source: sightingSourceInput.value.trim(), from: currentContributorName() || "", when: new Date().toLocaleString() });
   Store.set("sightings", entries);
   sightingInput.value = "";
   sightingSourceInput.value = "";

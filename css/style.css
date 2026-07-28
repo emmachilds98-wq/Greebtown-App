@@ -27,7 +27,6 @@
   .screen{display:none;}
   .screen.active{display:block; animation:fade .25s ease;}
   @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
-  @keyframes ptrspin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
   .card{background:var(--bg-panel); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px;}
   .card h2, .card h3{margin-bottom:6px;}
   .card:has(.skip-card){display:none;}
