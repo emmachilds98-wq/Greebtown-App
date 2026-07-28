@@ -10,7 +10,7 @@
 // CACHE_VERSION every time it's bumped, and keep the pill's "Updated"
 // text in index.html current too.
 // ===============================
-const APP_CACHE_VERSION = "v46";
+const APP_CACHE_VERSION = "v47";
 (function checkForStaleCopy(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
