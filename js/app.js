@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v71";
-const APP_BUILD_TIME = "2026-07-28T17:09:00Z";
+const APP_CACHE_VERSION = "v72";
+const APP_BUILD_TIME = "2026-07-28T17:18:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
