@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v50";
-const APP_BUILD_TIME = "2026-07-28T06:15:00Z";
+const APP_CACHE_VERSION = "v51";
+const APP_BUILD_TIME = "2026-07-28T06:45:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -1876,17 +1876,30 @@ function buildTimelineHTML(items, opts){
 // Shared detail card for a tapped timeline block — same bio/genre info as
 // the Artists list view, plus a star button, rendered into a container
 // below the grid instead of toggling saved state on tap alone.
-function renderTimelineBlockDetail(containerId, artist, opts){
+// A tapped timeline block used to render its detail card into a div
+// below the (horizontally-scrollable) timeline grid — easy to miss
+// entirely, since it landed off the visible area with no indication
+// anything had happened. Shows as a proper overlay instead, centred
+// over the timeline, closed explicitly via the × or by tapping outside.
+function closeTimelineDetailModal(){
+  const existing = document.getElementById("timelineDetailModal");
+  if(existing) existing.remove();
+}
+
+function showTimelineDetailModal(artist, opts){
   opts = opts || {};
-  const box = document.getElementById(containerId);
-  if(!box) return;
+  closeTimelineDetailModal();
   const saved = Store.get("schedule").some(x=>x.name === artist.name);
   const genre = genreOf(artist);
   const bio = artistBioText(artist.name);
   const gDesc = bio ? "" : composedFallbackBio(artist);
-  box.innerHTML = `
-    <div class="card">
-      <div class="item-top">
+  const backdrop = document.createElement("div");
+  backdrop.id = "timelineDetailModal";
+  backdrop.style.cssText = "position:fixed; inset:0; z-index:60; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
+  backdrop.innerHTML = `
+    <div class="card" style="position:relative; width:100%; max-width:420px; max-height:80vh; overflow-y:auto; margin:0;">
+      <button aria-label="Close" id="timelineDetailCloseBtn" style="position:absolute; top:10px; right:10px; background:none; border:1px solid var(--line); color:var(--text-primary); border-radius:10px; width:32px; height:32px; font-size:16px; line-height:1; cursor:pointer;">✕</button>
+      <div class="item-top" style="padding-right:34px;">
         <div>
           <strong>${escapeHtml(artist.name)}</strong><br>
           <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${escapeHtml(artist.stage)}</span><br>
@@ -1900,15 +1913,19 @@ function renderTimelineBlockDetail(containerId, artist, opts){
       </div>
     </div>
   `;
-  const stageLink = box.querySelector(".stage-link");
-  if(stageLink) stageLink.onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
-  const starBtn = box.querySelector("#timelineDetailStarBtn");
+  backdrop.onclick = (e)=>{ if(e.target === backdrop) closeTimelineDetailModal(); };
+  document.body.appendChild(backdrop);
+  backdrop.querySelector("#timelineDetailCloseBtn").onclick = closeTimelineDetailModal;
+  const stageLink = backdrop.querySelector(".stage-link");
+  if(stageLink) stageLink.onclick = (e)=>{ e.stopPropagation(); closeTimelineDetailModal(); jumpToStageDirectory(artist.stage); };
+  const starBtn = backdrop.querySelector("#timelineDetailStarBtn");
   if(starBtn) starBtn.onclick = ()=>{
     saveArtist(artist);
     if(opts.onSaveToggle) opts.onSaveToggle();
-    const stillSaved = Store.get("schedule").some(x=>x.name === artist.name);
-    if(stillSaved) renderTimelineBlockDetail(containerId, artist, opts);
-    else box.innerHTML = "";
+    // Stay open after a save/unsave tap — the × (or tapping outside) is
+    // the only way this closes, so toggling the star doesn't feel like
+    // it randomly dismissed the card out from under you.
+    showTimelineDetailModal(artist, opts);
   };
 }
 
@@ -1940,7 +1957,7 @@ function renderArtistsTimeline(){
     b.onclick = ()=>{
       const name = b.dataset.name, day = b.dataset.day;
       const artist = allArtists().find(a=>a.name===name && a.day===day);
-      if(artist) renderTimelineBlockDetail("artistTimelineInfo", artist, { onSaveToggle: renderArtistsTimeline });
+      if(artist) showTimelineDetailModal(artist, { onSaveToggle: renderArtistsTimeline });
     };
   });
   wireStageLinks(grid);
@@ -2275,7 +2292,7 @@ function renderPlanTimeline(){
     b.onclick = ()=>{
       const name = b.dataset.name, day = b.dataset.day;
       const artist = schedule.find(a=>a.name===name && a.day===day);
-      if(artist) renderTimelineBlockDetail("planTimelineInfo", artist, { readonly, onSaveToggle: renderPlanTimeline });
+      if(artist) showTimelineDetailModal(artist, { readonly, onSaveToggle: renderPlanTimeline });
     };
   });
   wireStageLinks(grid);
@@ -4994,7 +5011,12 @@ renderConsolidatedNotes();
 // labelled as such, never presented as fact. Kept short — stale entries
 // get removed by the daily update rather than piling up.
 // ===============================
-const officialLiveIntel = [];
+const officialLiveIntel = [
+  { text:"Boomtown published its official Chapter Five: Radical Redesign Essential Guide, covering alcohol limits, drugs policy, harm reduction, car park passes, accessibility, travel/luggage and campsite info all in one place — worth a skim even with this app's own Guide section.", source:"boomtownfair.co.uk/news", when:"11 Jun 2026", confirmed:true },
+  { text:"The Winchester train station shuttle bus is confirmed to run again this year (wheelchair accessible); the full timetable of shuttle times across the week is due to be published via the official Boomtown website/app in July, closer to the festival.", source:"boomtownfair.co.uk/info/travel, South Western Railway", when:"Jul 2026", confirmed:true },
+  { text:"Boomtown's drugs policy explicitly names Nitrous Oxide (laughing gas) and all New Psychoactive Substances (NPS) as banned alongside illegal drugs generally — amnesty points are available near entry with no questions asked if you need to dispose of anything before being searched.", source:"boomtownfair.co.uk essential guide", when:"Jun 2026", confirmed:true },
+  { text:"On-site parking needs a car park pass booked in advance through your Boomtown account — a weekend ticket doesn't automatically include one, so sort it ahead of time if you're driving.", source:"boomtownfair.co.uk/info", when:"2026", confirmed:true }
+];
 
 function loadOfficialLiveIntel(){
   const box = document.getElementById("officialLiveIntelList");
