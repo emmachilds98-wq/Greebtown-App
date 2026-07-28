@@ -53,7 +53,7 @@
     <h1>Boomtown 26</h1>
     <div>Chapter Five: Radical Redesign · 12–16 Aug</div>
   </div>
-  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 05:00</span>
+  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 06:00</span>
 </header>
 
 <main>
@@ -176,8 +176,9 @@ Meet at the clock tower if separated"></textarea>
 
     <div id="artistsTimelineView" style="display:none;">
       <div class="stagelist" id="artistTimelineDayTabs" style="margin-bottom:10px;"></div>
-      <p class="empty-note" style="margin-bottom:8px;">Scroll down for time, sideways for stage. Each block is one set — tap it to save or unsave.</p>
+      <p class="empty-note" style="margin-bottom:8px;">Scroll down for time, sideways for stage. Tap a block to see who's playing and save it.</p>
       <div class="timeline-outer" id="artistTimelineOuter"><div id="artistTimelineGrid"></div></div>
+      <div id="artistTimelineInfo" style="margin-top:10px;"></div>
     </div>
 
     <div class="card">
@@ -210,8 +211,9 @@ Meet at the clock tower if separated"></textarea>
 
     <div id="planTimelineView" style="display:none;">
       <div class="stagelist" id="planTimelineDayTabs" style="margin:10px 0;"></div>
-      <p class="empty-note" id="planTimelineHint" style="margin-bottom:8px;">Scroll down for time, sideways for stage. Tap a block to unsave it.</p>
+      <p class="empty-note" id="planTimelineHint" style="margin-bottom:8px;">Scroll down for time, sideways for stage. Tap a block to see details.</p>
       <div class="timeline-outer" id="planTimelineOuter"><div id="planTimelineGrid"></div></div>
+      <div id="planTimelineInfo" style="margin-top:10px;"></div>
     </div>
 
     <button class="ghost" id="copyPlanBtn" style="margin-top:12px;">Copy plan as text</button>
@@ -227,9 +229,9 @@ Meet at the clock tower if separated"></textarea>
     <p class="empty-note" style="margin-bottom:10px;">An illustrated schematic, not the official surveyed map — venue positions inside the city are illustrative, especially with this chapter's redesign. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
     <div class="stagelist" id="mapLayerToggles" style="margin-bottom:8px;">
       <span class="chip active" data-layer="minor">Other stages</span>
-      <span class="chip active" data-layer="secret">Hidden venues &amp; things to find</span>
-      <span class="chip active" data-layer="camp">Camping labels</span>
-      <span class="chip active" data-layer="landmark">Landmarks</span>
+      <span class="chip" data-layer="secret">Hidden venues &amp; things to find</span>
+      <span class="chip" data-layer="camp">Camping labels</span>
+      <span class="chip" data-layer="landmark">Landmarks</span>
     </div>
     <div id="map"></div>
 
