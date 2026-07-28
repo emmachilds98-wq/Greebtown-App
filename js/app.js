@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v84";
-const APP_BUILD_TIME = "2026-07-28T20:16:00Z";
+const APP_CACHE_VERSION = "v85";
+const APP_BUILD_TIME = "2026-07-28T20:25:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -4212,11 +4212,22 @@ const discoveries = [
 ];
 
 const discoveriesBox = document.getElementById("discoveries");
+const districtSearchInput = document.getElementById("districtSearch");
+let districtSearchTerm = "";
 
 function loadDiscoveries(){
   discoveriesBox.innerHTML = "";
   const clues = Store.get("clues") || {};
-  discoveries.forEach((item, index)=>{
+  const term = districtSearchTerm.trim().toLowerCase();
+  const matches = term
+    ? discoveries.map((item,index)=>({item,index})).filter(({item})=>
+        (item.title + " " + item.location + " " + item.description + " " + item.characters).toLowerCase().includes(term))
+    : discoveries.map((item,index)=>({item,index}));
+  if(term && !matches.length){
+    discoveriesBox.innerHTML = `<p class="empty-note">No districts match "${escapeHtml(districtSearchInput ? districtSearchInput.value.trim() : "")}".</p>`;
+    return;
+  }
+  matches.forEach(({item, index})=>{
     const unlocked = Store.get("discoveries").includes(index);
     const box = document.createElement("div");
     box.className = "discovery";
@@ -4246,6 +4257,10 @@ function unlockDiscovery(index){
 }
 
 loadDiscoveries();
+if(districtSearchInput) districtSearchInput.oninput = ()=>{
+  districtSearchTerm = districtSearchInput.value;
+  loadDiscoveries();
+};
 
 async function copyText(text, btn){
   const old = btn.textContent;
@@ -4694,7 +4709,7 @@ function renderHomeInfoCard(){
       <span class="tag">Read this once</span>
       <h3>💾 Your data, sync &amp; updates</h3>
       <p>Everything you add saves itself to this device the instant you type or tap — no save button. Once you've picked your name in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a>, this phone syncs itself automatically every time you open the app with signal — no button needed, and no one has to remember. It quietly sends your updates up and pulls everyone else's in behind the scenes; a "Sync now" button is there too for an instant one mid-session.</p>
-      <p>Shared things — theories, hidden-venue finds, journal quotes, live sightings, district notes, get-involved ticks, found socials, landmarks — combine into one pool everyone sees (Discover's "All notes"). Your Plan, bingo card and character stay yours — sync never merges anyone else's into them — but everyone else's land in their own named tab right next to yours, on the Plan, Bingo and My Character screens, so you can see what your friends have without it touching your own.</p>
+      <p>Shared things — theories, hidden-venue finds, quotebook entries, live sightings, district notes, get-involved ticks, found socials, landmarks — combine into one pool everyone sees (Discover's "All notes"). Your Plan, bingo card and character stay yours — sync never merges anyone else's into them — but everyone else's land in their own named tab right next to yours, on the Plan, Bingo and My Character screens, so you can see what your friends have without it touching your own.</p>
       <p>Want just your own stuff backed up? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
       <p>The app itself updates quietly in the background whenever you're online, and keeps working fully offline once it's loaded once — updates never touch anything you've saved.</p>
       <button class="ghost" id="collapseHomeInfoBtn" style="margin-top:10px;">Got it, don't show this in full again</button>
@@ -5519,7 +5534,7 @@ document.getElementById("addQuoteBtn").onclick = ()=>{
 document.getElementById("copyQuotesBtn").onclick = (e)=>{
   const entries = Store.get("quotes") || [];
   const lines = entries.map(q=>`- "${q.text}"${q.saidBy ? ` — ${q.saidBy}` : ""}`);
-  copyText(entries.length ? "Memory journal:\n" + lines.join("\n") : "No quotes saved yet.", e.target);
+  copyText(entries.length ? "Quotebook:\n" + lines.join("\n") : "No quotes saved yet.", e.target);
 };
 
 loadQuotes();
@@ -5638,7 +5653,7 @@ function buildConsolidatedReport(){
   });
 
   sections.push({
-    heading: "Memory journal",
+    heading: "Quotebook",
     lines: quoteEntries.length ? quoteEntries.map(q=>`"${q.text}"${q.saidBy ? ` — ${q.saidBy}` : ""}${q.from ? ` (logged by ${q.from})` : ""}`) : ["None saved yet."]
   });
 

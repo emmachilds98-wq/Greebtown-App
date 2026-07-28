@@ -441,17 +441,17 @@ Meet at the clock tower if separated"></textarea>
 
     <div class="venue-filters" id="discoverNav" style="margin-bottom:14px;">
       <button data-jump="jumpStory">📖 The story</button>
-      <button data-jump="discoveries">🏙 Districts</button>
+      <button data-jump="jumpDistrictsIntro">🏙 Districts</button>
       <button data-jump="jumpDailyRag">🗞 Live intel</button>
       <button data-jump="jumpInvolved">🙋 Get involved</button>
       <button data-jump="jumpStoryDeep">🕹 How to play it</button>
-      <button data-jump="jumpBeyondMusic">🎯 Beyond the music</button>
-      <button data-jump="jumpLogistics">🗓 Logistics</button>
       <button data-jump="jumpCharacter">🎭 My character</button>
       <button data-jump="jumpBingo">🎲 Bingo</button>
-      <button data-jump="jumpJournal">😂 Journal</button>
+      <button data-jump="jumpJournal">😂 Quotebook</button>
       <button data-jump="jumpTheories">🔮 Theories</button>
       <button data-jump="jumpCharacters">🗣 Characters</button>
+      <button data-jump="jumpBeyondMusic">🎯 Beyond the music</button>
+      <button data-jump="jumpLogistics">🗓 Logistics</button>
       <button data-jump="jumpGlossary">📔 Glossary</button>
       <button data-jump="jumpNotes">👥 All notes</button>
       <button data-jump="jumpSync">🤝 Sync</button>
@@ -505,6 +505,12 @@ Meet at the clock tower if separated"></textarea>
 <div class="stagelist" id="sightingsPersonChips" style="display:none; margin:6px 0;"></div>
 <div id="sightingsList"></div>
 
+<div class="card" id="jumpDistrictsIntro">
+  <span class="tag">🏙 The districts</span>
+  <h3>Every district this chapter</h3>
+  <p>Who's running each corner of the city, and what's actually going on there.</p>
+  <input type="text" id="districtSearch" placeholder="Search a district, faction or name">
+</div>
 <div id="discoveries"><div class="discovery">
       <h3>Area 404 ◻️</h3>
       <p>Industrial-punk district, now the political centre</p>
@@ -636,12 +642,12 @@ Talk to an actor in character
     </div>
 
     <div class="card" id="jumpJournal">
-      <h3>😂 Memory journal</h3>
+      <h3>😂 Quotebook</h3>
       <p>The funny, ridiculous or unhinged things people actually said — the bits you'll want to read back in a year.</p>
       <textarea id="quoteInput" placeholder="e.g. &quot;I've told the Guardian we're the water inspectors&quot;"></textarea>
       <div class="field" style="margin-top:8px;"><label>Who said it? (optional)</label><input type="text" id="quoteSaidBy" placeholder="e.g. 'the Mr Biga actor', or a stranger in the queue"></div>
       <button class="action" id="addQuoteBtn">Save it</button>
-      <button class="ghost" id="copyQuotesBtn" style="margin:8px 0 0;">Copy the journal</button>
+      <button class="ghost" id="copyQuotesBtn" style="margin:8px 0 0;">Copy the quotebook</button>
     </div>
     <div class="stagelist" id="journalPersonChips" style="display:none; margin:6px 0;"></div>
     <div id="quotesList"></div>
@@ -723,6 +729,28 @@ Talk to an actor in character
       <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">The merger of BIGACORP™ and BETTERCORP™ — a corporate space programme threatening to strip Earth's resources. The chapter's main antagonist force, with reps and messaging popping up in every district.</p>
       <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask a BBXL rep what the space programme actually costs Earth.</p>
     </div></div>
+
+    <div class="card" id="jumpBeyondMusic">
+      <h3>🎯 Beyond the music</h3>
+      <p>Not everything worth doing this chapter is a set — genuine, non-scripted ways to take part on-site:</p>
+      <ul class="compact-list" style="padding-left:20px;">
+        <li><strong>Thrutopia's workshops</strong> — talks and workshops imagining better futures, more daytime reset than story beat.</li>
+        <li><strong>Cloak of Hope</strong> — the community artwork: stitch a small fabric patch expressing a hope for the future, ahead of time or on-site. See <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpInvolved')">Get involved</a> for the how-to.</li>
+        <li><strong>The Observatory</strong> — a genuine, real (non-scripted) on-site research project, worth a look even if you're not deep in the story.</li>
+        <li><strong>Vibe Check</strong> — this chapter's community campaign: look out for each other on-site, and use welfare or Safer Spaces if you or a friend need them.</li>
+      </ul>
+    </div>
+
+    <div class="card" id="jumpLogistics">
+      <h3>🗓 Logistics</h3>
+      <p>The practical, day-to-day stuff — full detail lives on the Map tab so it's not duplicated here, but the quick version:</p>
+      <ul class="compact-list" style="padding-left:20px;">
+        <li>Gate times, opening hours and site basics — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSiteInfo','mapscreen')">Gate &amp; hours</a> (Map).</li>
+        <li>Food, bars and where to get supplies — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFoodBars','mapscreen')">Food &amp; bars</a> (Map).</li>
+        <li>Welfare, medic points, water refills and toilets are marked on the map itself, and loggable as landmarks if your group finds a good one.</li>
+        <li>Agreeing where to meet if you get separated — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpMeetingPoint','mapscreen')">Meeting point</a> (Map) syncs across your group automatically.</li>
+      </ul>
+    </div>
 
     <div class="card" id="jumpGlossary">
       <h3>📔 Glossary</h3>
