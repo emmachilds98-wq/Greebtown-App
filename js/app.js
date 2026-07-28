@@ -2077,7 +2077,10 @@ function renderSchedule(){
     let html = "";
     order.forEach(day=>{
       if(!byDay[day]) return;
-      const items = byDay[day].sort((x,y)=> (x.a.start||"99:99").localeCompare(y.a.start||"99:99"));
+      // toMinutes(), not a raw string compare — a same-day "00:00" set
+      // (the tail of that day's overnight programme) must sort AFTER
+      // "23:30", not before it as "0..." vs "2..." would alphabetically.
+      const items = byDay[day].sort((x,y)=> (toMinutes(x.a.day, x.a.start) ?? 999999) - (toMinutes(y.a.day, y.a.start) ?? 999999));
       html += `<div class="daygroup">${day}</div>`;
       items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly));
     });
