@@ -10,7 +10,7 @@
 // CACHE_VERSION every time it's bumped, and keep the pill's "Updated"
 // text in index.html current too.
 // ===============================
-const APP_CACHE_VERSION = "v43";
+const APP_CACHE_VERSION = "v44";
 (function checkForStaleCopy(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -85,7 +85,7 @@ fixBottomClearance();
 //    instead, kept separate per contributor, shown only in their own
 //    person-tab on the Plan, Bingo, and My Character cards. Sync must
 //    never read or write other personal fields: meeting, notes, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -3873,6 +3873,7 @@ function renderHomeSyncStatus(){
     <p>${name
       ? `This runs automatically every time you open the app with signal — you never need to press anything for it to work, first time or any time after. "Sync now" in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> is only there if you want an instant one mid-session.`
       : `Nothing you add will reach the group until you've picked who you are — a one-time thing, done for good on this device afterwards. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover, if you'd rather set it there.`}</p>
+    ${name ? `<p style="margin-top:6px; font-size:12px; color:var(--text-muted);">🔄 Data last synced with the group: <strong>${formatLastSynced()}</strong> — not the same as the app-version pill up top, that's about new code shipping, this is about your notes actually reaching everyone.</p>` : ""}
     <div class="field" style="margin-top:10px;"><label>Who are you?</label>
       <select id="homeContributorName">
         <option value="">Select a name…</option>
@@ -3912,6 +3913,7 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     const { stats, from } = mergeSyncPayload(payload);
     input.value = "";
     note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}${stats.character ? `${from}'s character is now viewable in its own tab on the My Character card. ` : ""}Nothing already saved was duplicated.`;
+    recordLastSynced();
     refreshAfterMerge();
   }catch(err){
     note.textContent = "Couldn't read that code — make sure you copied the whole thing, with nothing missing from either end.";
@@ -3963,6 +3965,24 @@ if(roomCodeInput){
 
 function currentRoomCode(){
   return (Store.get("roomCode") || "").trim();
+}
+
+// Separate from the header's app-version pill on purpose — that tracks
+// when the APP ITSELF last shipped new code, this tracks when THIS
+// DEVICE last successfully exchanged data with the group. Different
+// things, easy to conflate, worth keeping visibly distinct.
+function formatLastSynced(){
+  const ts = Store.get("lastSyncedAt");
+  if(!ts) return "Not synced yet";
+  const d = new Date(ts);
+  const now = new Date();
+  const time = d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  return d.toDateString() === now.toDateString() ? `Today, ${time}` : `${d.toLocaleDateString([], { day:"numeric", month:"short" })}, ${time}`;
+}
+
+function recordLastSynced(){
+  Store.set("lastSyncedAt", Date.now());
+  if(typeof renderHomeSyncStatus === "function") renderHomeSyncStatus();
 }
 
 // Same refresh list a manual "Merge it in" and a cloud sync both need,
@@ -4023,6 +4043,7 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
   try{
     await pushToCloud();
     const { stats, count } = await pullFromCloud();
+    recordLastSynced();
     refreshAfterMerge();
     if(!count){
       note.textContent = "Sent your update. No one else's synced to this room code yet.";
@@ -4048,6 +4069,7 @@ function autoSyncOnOpen(){
   if(!currentRoomCode() || !currentContributorName()) return;
   if(!getFirestoreDb()) return;
   pushToCloud().then(()=> pullFromCloud()).then(({ stats, count })=>{
+    recordLastSynced();
     const note = document.getElementById("cloudSyncStatusNote");
     if(!count){
       if(note) note.textContent = "Auto-synced your update on open. No one else's synced to this room code yet.";
@@ -5041,7 +5063,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // MODEL note near Store/DEFAULTS above) — also left out of the
 // shareable group snapshot below, so handing that file to the group
 // can never leak one person's bingo card, character or private notes.
-const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode"];
+const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
