@@ -53,7 +53,7 @@
     <h1>Boomtown 26</h1>
     <div>Chapter Five: Radical Redesign · 12–16 Aug</div>
   </div>
-  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 16:03</span>
+  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 16:10</span>
 </header>
 
 <main>
@@ -197,6 +197,7 @@ Meet at the clock tower if separated"></textarea>
       <button class="active" id="viewListBtn">List</button>
       <button id="viewClashBtn">Clashes</button>
       <button id="viewTimelineBtn">Timeline</button>
+      <button id="viewCompareBtn">Compare</button>
     </div>
     <div id="nowNextBanner"></div>
     <div id="scheduleList"><div class="card"><p class="empty-note">No saved artists yet. Add some from the Lineup tab.</p></div></div>
@@ -205,6 +206,12 @@ Meet at the clock tower if separated"></textarea>
       <div class="stagelist" id="planTimelineDayTabs" style="margin:10px 0;"></div>
       <p class="empty-note" id="planTimelineHint" style="margin-bottom:8px;">Scroll sideways for time, down for stage. Tap a block to see details.</p>
       <div class="timeline-outer" id="planTimelineOuter"><div id="planTimelineGrid"></div></div>
+    </div>
+
+    <div id="planCompareView" style="display:none;">
+      <p class="empty-note" style="margin-bottom:8px;">Everyone's picks side by side — merged from each person's last Sync code. Tap "Only shared" to see just what two or more of you have in common.</p>
+      <div class="stagelist" id="compareFilterChips" style="margin-bottom:10px;"></div>
+      <div id="planCompareList"></div>
     </div>
 
     <button class="ghost" id="copyPlanBtn" style="margin-top:12px;">Copy plan as text</button>

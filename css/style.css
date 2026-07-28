@@ -55,6 +55,9 @@
   .item button:hover{border-color:var(--accent-amber);}
   .item .btnrow{display:flex; gap:6px; flex-shrink:0;}
   .clash-note{color:var(--accent-red); font-size:12px; margin-top:6px;}
+  .compare-people{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .compare-person{font-size:11px; padding:3px 9px; border-radius:20px; border:1px solid var(--line); color:var(--text-muted); opacity:.5;}
+  .compare-person.in{opacity:1; color:var(--accent-teal); border-color:var(--accent-teal); background:rgba(75,227,172,.14); font-weight:700;}
   button.action{background:var(--accent-teal); color:#08211a; border:none; font-weight:700; padding:10px 16px; border-radius:12px; margin-top:4px; cursor:pointer; font-size:14px;}
   button.action:hover{filter:brightness(1.08);}
   button.danger{background:transparent; border:1px solid #b6543f; color:#e2836a;}
