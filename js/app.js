@@ -10,7 +10,7 @@
 // CACHE_VERSION every time it's bumped, and keep the pill's "Updated"
 // text in index.html current too.
 // ===============================
-const APP_CACHE_VERSION = "v44";
+const APP_CACHE_VERSION = "v45";
 (function checkForStaleCopy(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -1863,6 +1863,45 @@ function buildTimelineHTML(items, opts){
   return { html, stages };
 }
 
+// Shared detail card for a tapped timeline block — same bio/genre info as
+// the Artists list view, plus a star button, rendered into a container
+// below the grid instead of toggling saved state on tap alone.
+function renderTimelineBlockDetail(containerId, artist, opts){
+  opts = opts || {};
+  const box = document.getElementById(containerId);
+  if(!box) return;
+  const saved = Store.get("schedule").some(x=>x.name === artist.name);
+  const genre = genreOf(artist);
+  const bio = artistBioText(artist.name);
+  const gDesc = bio ? "" : composedFallbackBio(artist);
+  box.innerHTML = `
+    <div class="card">
+      <div class="item-top">
+        <div>
+          <strong>${escapeHtml(artist.name)}</strong><br>
+          <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${escapeHtml(artist.stage)}</span><br>
+          ${timeLabel(artist)}<br>
+          <small>${escapeHtml(genre)}</small>
+          <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
+          ${bio ? `<div class="genre-desc">${escapeHtml(bio)}</div>` : ""}
+          ${gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : ""}
+        </div>
+        ${opts.readonly ? "" : `<button aria-label="Toggle saved" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
+      </div>
+    </div>
+  `;
+  const stageLink = box.querySelector(".stage-link");
+  if(stageLink) stageLink.onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
+  const starBtn = box.querySelector("#timelineDetailStarBtn");
+  if(starBtn) starBtn.onclick = ()=>{
+    saveArtist(artist);
+    if(opts.onSaveToggle) opts.onSaveToggle();
+    const stillSaved = Store.get("schedule").some(x=>x.name === artist.name);
+    if(stillSaved) renderTimelineBlockDetail(containerId, artist, opts);
+    else box.innerHTML = "";
+  };
+}
+
 let artistsTimelineDay = "Wed";
 let artistsView = "list";
 
@@ -1891,7 +1930,7 @@ function renderArtistsTimeline(){
     b.onclick = ()=>{
       const name = b.dataset.name, day = b.dataset.day;
       const artist = allArtists().find(a=>a.name===name && a.day===day);
-      if(artist){ saveArtist(artist); renderArtistsTimeline(); }
+      if(artist) renderTimelineBlockDetail("artistTimelineInfo", artist, { onSaveToggle: renderArtistsTimeline });
     };
   });
   wireStageLinks(grid);
@@ -2219,18 +2258,16 @@ function renderPlanTimeline(){
 
   const hint = document.getElementById("planTimelineHint");
   if(hint) hint.textContent = readonly
-    ? "Scroll down for time, sideways for stage."
-    : "Scroll down for time, sideways for stage. Tap a block to unsave it.";
+    ? "Scroll down for time, sideways for stage. Tap a block to see details."
+    : "Scroll down for time, sideways for stage. Tap a block to see details or unsave it.";
 
-  if(!readonly){
-    grid.querySelectorAll(".timeline-block").forEach(b=>{
-      b.onclick = ()=>{
-        const name = b.dataset.name, day = b.dataset.day;
-        const artist = Store.get("schedule").find(a=>a.name===name && a.day===day);
-        if(artist){ saveArtist(artist); renderPlanTimeline(); }
-      };
-    });
-  }
+  grid.querySelectorAll(".timeline-block").forEach(b=>{
+    b.onclick = ()=>{
+      const name = b.dataset.name, day = b.dataset.day;
+      const artist = schedule.find(a=>a.name===name && a.day===day);
+      if(artist) renderTimelineBlockDetail("planTimelineInfo", artist, { readonly, onSaveToggle: renderPlanTimeline });
+    };
+  });
   wireStageLinks(grid);
 }
 
@@ -2715,6 +2752,12 @@ function buildMapBackground(){
   `;
 }
 
+// Layer visibility persists across loadMap() re-renders (tab switches, syncs,
+// adding a hidden venue, etc. all rebuild #mapInner from scratch). Off by
+// default for the busier layers so the map isn't crowded on first arrival —
+// "Other stages" stays on since stage wayfinding is core info.
+let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false };
+
 function loadMap(){
   map.innerHTML = `
     <div id="mapInner"></div>
@@ -2870,9 +2913,13 @@ function loadMap(){
   });
 
   document.querySelectorAll("#mapLayerToggles .chip").forEach(chip=>{
+    const layer = chip.dataset.layer;
+    chip.classList.toggle("active", !!mapLayerVisible[layer]);
+    inner.classList.toggle("hide-" + layer, !mapLayerVisible[layer]);
     chip.onclick = ()=>{
-      chip.classList.toggle("active");
-      inner.classList.toggle("hide-" + chip.dataset.layer, !chip.classList.contains("active"));
+      mapLayerVisible[layer] = !mapLayerVisible[layer];
+      chip.classList.toggle("active", mapLayerVisible[layer]);
+      inner.classList.toggle("hide-" + layer, !mapLayerVisible[layer]);
     };
   });
 
