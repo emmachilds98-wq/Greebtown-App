@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v87";
-const APP_BUILD_TIME = "2026-07-28T20:32:00Z";
+const APP_CACHE_VERSION = "v88";
+const APP_BUILD_TIME = "2026-07-28T20:38:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -3677,9 +3677,30 @@ function clampMapPan(){
   mapTy = Math.min(0, Math.max(-maxY, mapTy));
 }
 function setMapScale(newScale){
-  mapScale = Math.min(3.5, Math.max(1, newScale));
+  mapScale = Math.min(4, Math.max(1, newScale));
   clampMapPan();
   applyMapTransform();
+}
+// Zooms toward a specific point (in #map's own coordinate space, i.e.
+// clientX/Y minus its bounding rect) rather than always scaling from
+// #mapInner's fixed top-left transform-origin — otherwise every pinch,
+// scroll-wheel or +/- tap makes the view visibly slide toward the
+// corner instead of staying centred on whatever you were looking at.
+// Derivation: a local point p maps to screen position tx + s*p, so
+// solving "screen position stays put across a scale change" for the
+// new translate gives tx2 = px - (s2/s) * (px - tx).
+function setMapScaleAt(newScale, px, py){
+  const clamped = Math.min(4, Math.max(1, newScale));
+  const k = clamped / mapScale;
+  mapTx = px - k * (px - mapTx);
+  mapTy = py - k * (py - mapTy);
+  mapScale = clamped;
+  clampMapPan();
+  applyMapTransform();
+}
+function mapCenterPoint(){
+  const rect = map.getBoundingClientRect();
+  return { x: rect.width / 2, y: rect.height / 2 };
 }
 
 let mapDragGuardInstalled = false;
@@ -3687,14 +3708,22 @@ function setupMapZoomPan(){
   mapScale = 1; mapTx = 0; mapTy = 0;
   applyMapTransform();
 
-  document.getElementById("zoomInBtn").onclick = ()=> setMapScale(mapScale + 0.5);
-  document.getElementById("zoomOutBtn").onclick = ()=> setMapScale(mapScale - 0.5);
+  document.getElementById("zoomInBtn").onclick = ()=>{ const c = mapCenterPoint(); setMapScaleAt(mapScale + 0.5, c.x, c.y); };
+  document.getElementById("zoomOutBtn").onclick = ()=>{ const c = mapCenterPoint(); setMapScaleAt(mapScale - 0.5, c.x, c.y); };
   document.getElementById("zoomResetBtn").onclick = ()=> { mapScale = 1; mapTx = 0; mapTy = 0; applyMapTransform(); };
 
   const pointers = new Map();
   let dragging = false, dragMoved = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
   let pinchStartDist = null, pinchStartScale = 1;
   const dist = (p1, p2)=> Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  const mid = (p1, p2)=> ({ x:(p1.x + p2.x) / 2, y:(p1.y + p2.y) / 2 });
+
+  // Double-tap-to-zoom: two single-finger taps landing close together in
+  // both time and position zoom in (anchored on the tap point), or reset
+  // back to scale 1 if already zoomed in past a light threshold — same
+  // toggle behaviour as most map apps.
+  let lastTapTime = 0, lastTapPos = null;
+  const DOUBLE_TAP_MS = 320, DOUBLE_TAP_PX = 30;
 
   map.onpointerdown = (e)=>{
     // Let the zoom buttons handle their own clicks untouched — capturing
@@ -3726,8 +3755,10 @@ function setupMapZoomPan(){
     if(!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
     if(pointers.size === 2 && pinchStartDist){
+      const rect = map.getBoundingClientRect();
       const pts = [...pointers.values()];
-      setMapScale(pinchStartScale * (dist(pts[0], pts[1]) / pinchStartDist));
+      const m = mid(pts[0], pts[1]);
+      setMapScaleAt(pinchStartScale * (dist(pts[0], pts[1]) / pinchStartDist), m.x - rect.left, m.y - rect.top);
       dragMoved = true;
     } else if(dragging && pointers.size === 1){
       const dx = e.clientX - startX, dy = e.clientY - startY;
@@ -3747,6 +3778,24 @@ function setupMapZoomPan(){
       // Gesture's over — always give touch-action back to the page, even
       // if still zoomed in, so the very next swipe can scroll normally.
       map.style.touchAction = "pan-y";
+
+      // Double-tap check: only for a clean tap (no drag/pinch happened)
+      // that didn't land on a marker/label/control — those already have
+      // their own tap behaviour and shouldn't also trigger a zoom.
+      if(!dragMoved && !e.target.closest(".marker, .map-label, .mapZoomControls")){
+        const now = Date.now();
+        const pos = { x:e.clientX, y:e.clientY };
+        const isDouble = lastTapPos && (now - lastTapTime) < DOUBLE_TAP_MS && dist(pos, lastTapPos) < DOUBLE_TAP_PX;
+        if(isDouble){
+          const rect = map.getBoundingClientRect();
+          const px = pos.x - rect.left, py = pos.y - rect.top;
+          if(mapScale > 1.3) { mapScale = 1; mapTx = 0; mapTy = 0; applyMapTransform(); }
+          else setMapScaleAt(mapScale + 1.2, px, py);
+          lastTapTime = 0; lastTapPos = null;
+        } else {
+          lastTapTime = now; lastTapPos = pos;
+        }
+      }
     }
   }
   map.onpointerup = endPointer;
@@ -3754,7 +3803,8 @@ function setupMapZoomPan(){
 
   map.onwheel = (e)=>{
     e.preventDefault();
-    setMapScale(mapScale + (e.deltaY < 0 ? 0.3 : -0.3));
+    const rect = map.getBoundingClientRect();
+    setMapScaleAt(mapScale + (e.deltaY < 0 ? 0.3 : -0.3), e.clientX - rect.left, e.clientY - rect.top);
   };
 
   if(!mapDragGuardInstalled){
