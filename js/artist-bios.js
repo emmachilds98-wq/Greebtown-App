@@ -261,6 +261,7 @@ window.ARTIST_BIOS = {
   "The Prophet": "Dutch 'Godfather of Hardstyle' Dov Elkabas, who founded gabber crew The Dreamteam before launching the Scantraxx label that shaped acts like Headhunterz and Brennan Heart.",
   "The Restarts": "London street punk band formed in 1995, mixing thrash punk, ska and old-school hardcore with anti-racist, pro-equality politics honed touring Europe's squats for two decades.",
   "The Showhawk Duo": "Music comedy duo blending live instrumentation with stunt-laden stagecraft, who built a large following through YouTube and relentless touring.",
+  "Theo Sheldrake": "Manchester DJ/producer (aka Shelly) who broke through via a Radio 1 Dance and BBC Introducing talent search and debuted at an Ibiza festival opening set, spanning UK garage, jungle and hardgroove-techno.",
   "This Is Inja": "Luton-raised, Cambridge-based MC and crowd-hyping host moving fluidly between reggae, hip hop, grime, dubstep and drum and bass.",
   "Unkle - Psyence Fiction Album Playback": "Playback of UNKLE's landmark 1998 debut, James Lavelle and DJ Shadow's star-studded Mo Wax album blending trip hop, rock and cinematic sampling.",
   "Vengaboys": "Dutch Eurodance act behind some of the biggest novelty dance-pop hits of the late '90s — a full singalong, feel-good party set.",
