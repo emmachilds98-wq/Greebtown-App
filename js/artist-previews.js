@@ -46,3 +46,18 @@ window.ARTIST_PREVIEWS = {
   "DJ EZ": { soundcloud: "https://soundcloud.com/djez", instagram: "https://www.instagram.com/djezofficial/" },
   "Peaches": { spotifyArtist: "1gkSl4XpHIHI4I1WQbfXOE", soundcloud: "https://soundcloud.com/peachesnisker", youtubeChannel: "http://www.youtube.com/channel/UCAVB5fxiG2CYxS74w3qUpqw", instagram: "https://www.instagram.com/peachesnisker/" }
 };
+
+// Aliases for exact lineup billing text that differs from the plain
+// artist name above ("Groove Armada DJ Set", capitalisation
+// differences, "Ft./B2B/AV Show" suffixes) — the preview lookup is an
+// exact string match against artist.name, same as artist-bios.js, so
+// these need their own entries even though they're the same act.
+[
+  ["Groove Armada DJ Set", "Groove Armada"],
+  ["Floating Points Live", "Floating Points"],
+  ["Sampa The Great", "Sampa the Great"],
+  ["Shy FX Ft. Rage", "Shy FX"],
+  ["Sherelle AV Show", "Sherelle"],
+].forEach(([alias, canonical])=>{
+  if(window.ARTIST_PREVIEWS[canonical]) window.ARTIST_PREVIEWS[alias] = window.ARTIST_PREVIEWS[canonical];
+});
