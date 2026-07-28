@@ -119,6 +119,7 @@
   .search-row input{flex:1;}
   .search-row button{flex-shrink:0;}
   #genreChips .chip.active{color:var(--accent-amber); border-color:var(--accent-amber); background:rgba(242,168,60,.14); font-weight:700;}
+  .stagelist .chip.active{color:var(--accent-teal); border-color:var(--accent-teal); background:rgba(75,227,172,.14); font-weight:700;}
   .discovery{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px;}
   .story-brief{border-color:rgba(75,227,172,.42); background:linear-gradient(145deg, rgba(75,227,172,.10), var(--bg-panel));}
   .story-step{padding:10px 0; border-top:1px solid var(--line);}

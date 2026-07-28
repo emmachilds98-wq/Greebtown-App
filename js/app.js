@@ -3042,6 +3042,26 @@ function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, c=>({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 }
 
+// Generic "who added this" chip filter, same chip UI as the genre
+// filter — dropped above any synced list (theories, journal, sightings,
+// hidden-venue finds) so you can view one person's entries at a glance
+// instead of a merged wall of everyone's. Purely a display filter, never
+// touches what's actually stored or synced.
+function renderPersonChipBar(boxId, entries, getActive, setActive, rerender){
+  const box = document.getElementById(boxId);
+  if(!box) return;
+  const names = [...new Set(entries.map(e=>(e.from || "").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  if(names.length < 2){ box.innerHTML = ""; box.style.display = "none"; return; }
+  box.style.display = "";
+  const active = getActive();
+  box.innerHTML = ["All", ...names].map(n=>
+    `<span class="chip ${(!active && n==="All") || active===n ? "active" : ""}" data-name="${escapeHtml(n)}">${escapeHtml(n)}</span>`
+  ).join("");
+  box.querySelectorAll(".chip").forEach(c=>{
+    c.onclick = ()=>{ setActive(c.dataset.name === "All" ? null : c.dataset.name); rerender(); };
+  });
+}
+
 // Derives a rough "typical hours" window for a stage from the actual
 // scheduled set times already in the lineup data — not invented, and
 // only shown where a real match is found. Anything with no schedule
@@ -3080,6 +3100,7 @@ function loggedVenuesAsDirectory(){
     near: entry.near || "",
     music: typeof entry.music === "boolean" ? entry.music : "unclear",
     info: (entry.info ? entry.info : "") + (entry.when ? ` (logged ${entry.when}${entry.from ? " via " + entry.from : ""})` : ""),
+    from: entry.from,
     _hiddenVenueIndex: i
   }));
 }
@@ -3088,15 +3109,18 @@ function fullVenueDirectory(){
   return venueDirectory.concat(loggedVenuesAsDirectory());
 }
 
+let venuePersonFilter = null;
 function renderVenueTable(){
   const body = document.getElementById("venueTableBody");
   const countNote = document.getElementById("venueTableCount");
   if(!body) return;
   const all = fullVenueDirectory();
+  renderPersonChipBar("venuePersonChips", all.filter(v=>v.status === "logged"), ()=>venuePersonFilter, v=>{ venuePersonFilter = v; }, renderVenueTable);
   const term = venueSearchTerm.trim().toLowerCase();
   const rows = all.filter(v=>
     (venueStatusFilter === "all" || v.status === venueStatusFilter) &&
     (venueTypeFilter === "all" || v.type === venueTypeFilter) &&
+    (!venuePersonFilter || (v.from || "").trim() === venuePersonFilter) &&
     (!term ||
       v.name.toLowerCase().includes(term) ||
       (v.genre || "").toLowerCase().includes(term) ||
@@ -3979,11 +4003,14 @@ document.getElementById("addHiddenVenueBtn").onclick = ()=>{
 const theoryInput = document.getElementById("theoryInput");
 const theoriesBox = document.getElementById("theoriesList");
 
+let theoriesPersonFilter = null;
 function loadTheories(){
-  const entries = Store.get("theories") || [];
+  const all = Store.get("theories") || [];
+  renderPersonChipBar("theoriesPersonChips", all, ()=>theoriesPersonFilter, v=>{ theoriesPersonFilter = v; }, loadTheories);
+  const entries = theoriesPersonFilter ? all.filter(e=>(e.from || "").trim() === theoriesPersonFilter) : all;
   theoriesBox.innerHTML = "";
-  entries.slice().reverse().forEach((entry,revI)=>{
-    const i = entries.length - 1 - revI;
+  entries.slice().reverse().forEach(entry=>{
+    const i = all.indexOf(entry);
     const div = document.createElement("div");
     div.className = "update-entry";
     div.innerHTML = `<div class="when">${entry.when}${entry.from ? " · via " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div><button data-i="${i}" class="ghost removeTheoryBtn" style="margin-top:4px;">Remove</button>`;
@@ -4021,11 +4048,14 @@ const quoteInput = document.getElementById("quoteInput");
 const quoteSaidByInput = document.getElementById("quoteSaidBy");
 const quotesBox = document.getElementById("quotesList");
 
+let journalPersonFilter = null;
 function loadQuotes(){
-  const entries = Store.get("quotes") || [];
+  const all = Store.get("quotes") || [];
+  renderPersonChipBar("journalPersonChips", all, ()=>journalPersonFilter, v=>{ journalPersonFilter = v; }, loadQuotes);
+  const entries = journalPersonFilter ? all.filter(e=>(e.from || "").trim() === journalPersonFilter) : all;
   quotesBox.innerHTML = "";
-  entries.slice().reverse().forEach((entry,revI)=>{
-    const i = entries.length - 1 - revI;
+  entries.slice().reverse().forEach(entry=>{
+    const i = all.indexOf(entry);
     const div = document.createElement("div");
     div.className = "update-entry";
     div.innerHTML = `<div class="when">${entry.when}${entry.saidBy ? " · said by " + escapeHtml(entry.saidBy) : ""}${entry.from ? " · logged by " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div><button data-i="${i}" class="ghost removeQuoteBtn" style="margin-top:4px;">Remove</button>`;
@@ -4073,11 +4103,14 @@ const sightingInput = document.getElementById("sightingInput");
 const sightingSourceInput = document.getElementById("sightingSource");
 const sightingsBox = document.getElementById("sightingsList");
 
+let sightingsPersonFilter = null;
 function loadSightings(){
-  const entries = Store.get("sightings") || [];
+  const all = Store.get("sightings") || [];
+  renderPersonChipBar("sightingsPersonChips", all, ()=>sightingsPersonFilter, v=>{ sightingsPersonFilter = v; }, loadSightings);
+  const entries = sightingsPersonFilter ? all.filter(e=>(e.from || "").trim() === sightingsPersonFilter) : all;
   sightingsBox.innerHTML = "";
-  entries.slice().reverse().forEach((entry,revI)=>{
-    const i = entries.length - 1 - revI;
+  entries.slice().reverse().forEach(entry=>{
+    const i = all.indexOf(entry);
     const div = document.createElement("div");
     div.className = "update-entry";
     div.innerHTML = `<div class="when">${entry.when}${entry.source ? " · via " + escapeHtml(entry.source) : ""}${entry.from ? " · logged by " + escapeHtml(entry.from) : ""}</div><div>${escapeHtml(entry.text)}</div><button data-i="${i}" class="ghost removeSightingBtn" style="margin-top:4px;">Remove</button>`;
