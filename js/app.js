@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v67";
-const APP_BUILD_TIME = "2026-07-28T16:22:00Z";
+const APP_CACHE_VERSION = "v68";
+const APP_BUILD_TIME = "2026-07-28T16:31:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -4408,17 +4408,22 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
   }
 };
 
-// Auto-sync whenever the app opens with a signal, so nobody has to
-// remember to tap "Sync now" — pushes your own update (once you've
-// picked who you are) AND always pulls everyone else's, same as the
-// button does, just automatic. Not silent, though — it leaves a one-line
-// note behind so background syncing is still visible, not invisible
-// writes to your saved data. The manual button stays for an immediate
-// mid-session sync without having to reopen the app.
-function autoSyncOnOpen(){
+// Auto-sync — on open, every few minutes while the app stays open, and
+// whenever it comes back to the foreground (phone locked/backgrounded
+// then reopened) — so nobody has to remember to tap "Sync now" or
+// reopen the app just to pick up a teammate's latest picks. Pushes your
+// own update (once you've picked who you are) AND always pulls everyone
+// else's, same as the button does, just automatic. Not silent, though —
+// it leaves a one-line note behind so background syncing is still
+// visible, not invisible writes to your saved data. The manual button
+// stays for an on-demand sync without waiting for the next automatic one.
+const AUTO_SYNC_INTERVAL_MS = 3 * 60 * 1000;
+let _lastAutoSyncAttempt = 0;
+function autoSyncNow(trigger){
   if(navigator.onLine === false) return;
   if(!currentRoomCode()) return;
   if(!getFirestoreDb()) return;
+  _lastAutoSyncAttempt = Date.now();
   // Pulling in synced teammates' picks (their Plan tab, Compare, etc.)
   // never needs your own name set — only pushing your own update does,
   // since that's what it gets filed under. So this still runs and still
@@ -4427,9 +4432,9 @@ function autoSyncOnOpen(){
   (haveName ? pushToCloud() : Promise.resolve()).then(()=> pullFromCloud()).then(({ stats, count })=>{
     recordLastSynced();
     const note = document.getElementById("cloudSyncStatusNote");
-    const prefix = haveName ? "Auto-synced on open: sent your update, " : "Auto-synced on open (pick who you are above to send your own update): ";
+    const prefix = haveName ? `Auto-synced (${trigger}): sent your update, ` : `Auto-synced (${trigger}, pick who you are above to send your own update): `;
     if(!count){
-      if(note) note.textContent = haveName ? "Auto-synced your update on open. No one else's synced to this room code yet." : "No one else's synced to this room code yet.";
+      if(note) note.textContent = haveName ? `Auto-synced your update (${trigger}). No one else's synced to this room code yet.` : "No one else's synced to this room code yet.";
       return;
     }
     refreshAfterMerge();
@@ -4441,7 +4446,16 @@ function autoSyncOnOpen(){
     }
   }).catch(()=>{ /* no signal, or room not set up yet — skip quietly */ });
 }
-autoSyncOnOpen();
+autoSyncNow("on open");
+setInterval(()=> autoSyncNow("periodic"), AUTO_SYNC_INTERVAL_MS);
+document.addEventListener("visibilitychange", ()=>{
+  // Guard against firing right on top of the interval or another
+  // just-happened attempt (e.g. rapid tab switching) — only worth a
+  // fresh pull if it's actually been a while.
+  if(document.visibilityState === "visible" && Date.now() - _lastAutoSyncAttempt > 60000){
+    autoSyncNow("welcome back");
+  }
+});
 
 // ===============================
 // YOUR CHARACTER BUILDER — a persona to introduce yourself to actors
