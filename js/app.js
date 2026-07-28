@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v89";
-const APP_BUILD_TIME = "2026-07-28T20:46:00Z";
+const APP_CACHE_VERSION = "v90";
+const APP_BUILD_TIME = "2026-07-28T21:07:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -581,27 +581,59 @@ const PREVIEW_PLATFORMS = [
   { key:"youtube", label:"YouTube", icon:"🔴" }
 ];
 
-function previewEmbedHtml(platform, val){
-  const src = platform === "spotify" ? `https://open.spotify.com/embed/track/${encodeURIComponent(val)}`
-    : platform === "soundcloud" ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(val)}&color=%23f2a83c&auto_play=false&visual=false`
-    : platform === "youtube" ? `https://www.youtube.com/embed/${encodeURIComponent(val)}`
-    : null;
+// A verified value that embeds inline (a real preview player, not just
+// a link). Spotify's artist-page embed plays 30s previews of an
+// artist's popular tracks, so spotifyArtist alone is enough — no need
+// to pin a specific track. spotifyTrack (if ever added) takes priority
+// since it's more specific. SoundCloud's widget accepts a bare profile
+// URL too. YouTube has no equivalent "embed a channel" option, so it
+// only embeds when a specific verified video ID exists.
+function previewEmbeddableValue(entry, platformKey){
+  if(!entry) return null;
+  if(platformKey === "spotify") return entry.spotifyTrack || entry.spotifyArtist || null;
+  if(platformKey === "soundcloud") return entry.soundcloud || null;
+  if(platformKey === "youtube") return entry.youtube || null;
+  return null;
+}
+// A verified value that opens directly (a real confirmed profile/
+// channel) when there's nothing to embed — still strictly better than
+// a generic search, since it's guaranteed to be the right artist.
+function previewLinkOutValue(entry, platformKey){
+  if(!entry) return null;
+  if(platformKey === "youtube") return entry.youtubeChannel || null;
+  return null;
+}
+
+function previewEmbedHtml(platform, entry){
+  let src = null, height = 120;
+  if(platform === "spotify"){
+    const id = entry.spotifyTrack || entry.spotifyArtist;
+    if(id) src = `https://open.spotify.com/embed/${entry.spotifyTrack ? "track" : "artist"}/${encodeURIComponent(id)}`;
+    height = 152;
+  } else if(platform === "soundcloud" && entry.soundcloud){
+    src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(entry.soundcloud)}&color=%23f2a83c&auto_play=false&visual=false`;
+  } else if(platform === "youtube" && entry.youtube){
+    src = `https://www.youtube.com/embed/${encodeURIComponent(entry.youtube)}`;
+    height = 180;
+  }
   if(!src) return "";
-  const height = platform === "spotify" ? 152 : platform === "youtube" ? 180 : 120;
   return `<iframe src="${src}" width="100%" height="${height}" frameborder="0" allow="autoplay; encrypted-media" loading="lazy" style="border-radius:10px; margin-top:6px;"></iframe>`;
 }
 
 // Row of preview buttons + an (initially empty/hidden) slot below it for
 // an inline embed. Shared by the Lineup list and the timeline detail
 // modal — wirePreviewButtons() below does the actual click wiring after
-// this HTML lands in the DOM.
+// this HTML lands in the DOM. Instagram only ever shows when there's a
+// verified account — there's no public unauthenticated search page to
+// fall back to, so an unverified button would just be a dead end.
 function artistPreviewBlockHtml(artist){
-  const entry = artistPreviewEntry(artist.name);
+  const entry = artistPreviewEntry(artist.name) || {};
   const buttons = PREVIEW_PLATFORMS.map(p=>{
-    const verified = !!(entry && entry[p.key]);
+    const verified = !!(previewEmbeddableValue(entry, p.key) || previewLinkOutValue(entry, p.key));
     return `<button class="preview-btn" data-platform="${p.key}" data-artist="${escapeHtml(artist.name)}">${p.icon} ${p.label}${verified ? " ▶" : ""}</button>`;
   }).join("");
-  return `<div class="preview-row">${buttons}</div><div class="preview-embed" style="display:none;"></div>`;
+  const instaBtn = entry.instagram ? `<button class="preview-btn" data-platform="instagram" data-artist="${escapeHtml(artist.name)}">📸 Instagram</button>` : "";
+  return `<div class="preview-row">${buttons}${instaBtn}</div><div class="preview-embed" style="display:none;"></div>`;
 }
 
 // Delegated wiring, safe to call repeatedly on re-render — looks up the
@@ -617,11 +649,18 @@ function wirePreviewButtons(container){
         e.stopPropagation();
         const platform = btn.dataset.platform;
         const name = btn.dataset.artist;
-        const entry = artistPreviewEntry(name);
-        const verifiedVal = entry && entry[platform];
-        if(verifiedVal && embedBox){
-          embedBox.innerHTML = previewEmbedHtml(platform, verifiedVal);
+        const entry = artistPreviewEntry(name) || {};
+        if(platform === "instagram"){
+          if(entry.instagram) window.open(entry.instagram, "_blank", "noopener");
+          return;
+        }
+        const embeddableVal = previewEmbeddableValue(entry, platform);
+        const linkOutVal = previewLinkOutValue(entry, platform);
+        if(embeddableVal && embedBox){
+          embedBox.innerHTML = previewEmbedHtml(platform, entry);
           embedBox.style.display = "";
+        } else if(linkOutVal){
+          window.open(linkOutVal, "_blank", "noopener");
         } else {
           window.open(previewSearchUrl(platform, name), "_blank", "noopener");
         }
