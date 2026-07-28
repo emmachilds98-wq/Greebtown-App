@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v93";
-const APP_BUILD_TIME = "2026-07-28T21:32:00Z";
+const APP_CACHE_VERSION = "v94";
+const APP_BUILD_TIME = "2026-07-28T21:41:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -616,7 +616,7 @@ const PREVIEW_PLATFORMS = [
 // only embeds when a specific verified video ID exists.
 function previewEmbeddableValue(entry, platformKey){
   if(!entry) return null;
-  if(platformKey === "spotify") return entry.spotifyTrack || entry.spotifyArtist || null;
+  if(platformKey === "spotify") return entry.audioPreview || entry.spotifyTrack || entry.spotifyArtist || null;
   if(platformKey === "soundcloud") return entry.soundcloud || null;
   if(platformKey === "youtube") return entry.youtube || null;
   return null;
@@ -632,7 +632,9 @@ function previewLinkOutValue(entry, platformKey){
 
 function previewEmbedHtml(platform, entry){
   let src = null, height = 120;
-  if(platform === "spotify"){
+  if(platform === "spotify" && entry.audioPreview){
+    return `<audio controls preload="none" src="${entry.audioPreview}" style="width:100%; margin-top:6px;"></audio>`;
+  } else if(platform === "spotify"){
     const id = entry.spotifyTrack || entry.spotifyArtist;
     if(id) src = `https://open.spotify.com/embed/${entry.spotifyTrack ? "track" : "artist"}/${encodeURIComponent(id)}`;
     height = 152;
