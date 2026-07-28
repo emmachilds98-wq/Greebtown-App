@@ -61,6 +61,20 @@
      target and a clearer amber fill on save. */
   .star-toggle-lg{background:none; border:none; color:var(--accent-amber); font-size:34px; line-height:1; padding:4px 6px; cursor:pointer; flex-shrink:0;}
   .star-toggle-lg:active{transform:scale(.92);}
+  /* Timeline detail modal: right padding zeroed on the card itself so
+     the star's 64px column butts right up against the card's true
+     visual edge — then centering the star within that column puts its
+     center exactly midway between the text and the edge, which makes
+     the two gaps equal regardless of the glyph's own rendered width.
+     (If the card kept its normal 16px right padding, that padding would
+     stack on top of the column's own slack on the edge side only,
+     making the edge-side gap bigger than the text-side one.) The grid
+     row's height — set by the taller text column — keeps the star
+     vertically centered against the full card content, name through
+     bio, not just the first line. */
+  .timeline-modal-card{padding-right:0;}
+  .timeline-modal-body{display:grid; grid-template-columns:1fr 64px; align-items:center;}
+  .timeline-modal-body .star-toggle-lg{justify-self:center;}
   .item .btnrow{display:flex; gap:6px; flex-shrink:0;}
   .clash-note{color:var(--accent-red); font-size:12px; margin-top:6px;}
   .compare-people{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
