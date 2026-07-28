@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v66";
-const APP_BUILD_TIME = "2026-07-28T16:16:00Z";
+const APP_CACHE_VERSION = "v67";
+const APP_BUILD_TIME = "2026-07-28T16:22:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -4379,21 +4379,27 @@ async function pullFromCloud(){
 const cloudSyncBtn = document.getElementById("cloudSyncBtn");
 if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
   const note = document.getElementById("cloudSyncStatusNote");
-  if(!currentContributorName()){ note.textContent = "Pick who you are above first."; return; }
+  const haveName = !!currentContributorName();
   if(!currentRoomCode()){ note.textContent = "Type your group's room code above first."; return; }
   if(!getFirestoreDb()){ note.textContent = "Cloud sync isn't available right now — use the manual code box below instead."; return; }
   if(navigator.onLine === false){ note.textContent = "No signal — use the manual code box below, or try Sync now again once you're back online."; return; }
   cloudSyncBtn.disabled = true;
   note.textContent = "Syncing…";
   try{
-    await pushToCloud();
+    // Pulling everyone else's picks never needs your own name — only
+    // pushing your own update does, since that's what it gets filed
+    // under. So without a name picked yet, this still pulls (you can see
+    // synced teammates' tabs straight away), it just can't push you into
+    // the room for them to see back.
+    if(haveName) await pushToCloud();
     const { stats, count } = await pullFromCloud();
     recordLastSynced();
     refreshAfterMerge();
+    const namePrefix = haveName ? "" : "Pick who you are above to send your own update. ";
     if(!count){
-      note.textContent = "Sent your update. No one else's synced to this room code yet.";
+      note.textContent = `${namePrefix}${haveName ? "Sent your update. " : ""}No one else's synced to this room code yet.`;
     }else{
-      note.textContent = `Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}${stats.character ? `, ${stats.character} character${stats.character===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
+      note.textContent = `${namePrefix}Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}${stats.character ? `, ${stats.character} character${stats.character===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
     }
   }catch(err){
     note.textContent = "Couldn't sync — check you've got signal and try again.";
@@ -4403,29 +4409,35 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
 };
 
 // Auto-sync whenever the app opens with a signal, so nobody has to
-// remember to tap "Sync now" — pushes your own update AND pulls
-// everyone else's, same as the button does, just automatic. Not
-// silent, though — it leaves a one-line note behind so background
-// syncing is still visible, not invisible writes to your saved data.
-// The manual button stays for an immediate mid-session sync without
-// having to reopen the app.
+// remember to tap "Sync now" — pushes your own update (once you've
+// picked who you are) AND always pulls everyone else's, same as the
+// button does, just automatic. Not silent, though — it leaves a one-line
+// note behind so background syncing is still visible, not invisible
+// writes to your saved data. The manual button stays for an immediate
+// mid-session sync without having to reopen the app.
 function autoSyncOnOpen(){
   if(navigator.onLine === false) return;
-  if(!currentRoomCode() || !currentContributorName()) return;
+  if(!currentRoomCode()) return;
   if(!getFirestoreDb()) return;
-  pushToCloud().then(()=> pullFromCloud()).then(({ stats, count })=>{
+  // Pulling in synced teammates' picks (their Plan tab, Compare, etc.)
+  // never needs your own name set — only pushing your own update does,
+  // since that's what it gets filed under. So this still runs and still
+  // shows you their tabs even before you've picked who you are.
+  const haveName = !!currentContributorName();
+  (haveName ? pushToCloud() : Promise.resolve()).then(()=> pullFromCloud()).then(({ stats, count })=>{
     recordLastSynced();
     const note = document.getElementById("cloudSyncStatusNote");
+    const prefix = haveName ? "Auto-synced on open: sent your update, " : "Auto-synced on open (pick who you are above to send your own update): ";
     if(!count){
-      if(note) note.textContent = "Auto-synced your update on open. No one else's synced to this room code yet.";
+      if(note) note.textContent = haveName ? "Auto-synced your update on open. No one else's synced to this room code yet." : "No one else's synced to this room code yet.";
       return;
     }
     refreshAfterMerge();
     if(note){
       const total = Object.values(stats).reduce((a,b)=>a+b, 0);
       note.textContent = total
-        ? `Auto-synced on open: sent your update, picked up ${total} new item${total===1?"":"s"} from ${count} other device${count===1?"":"s"}.`
-        : `Auto-synced on open: sent your update, up to date with ${count} other device${count===1?"":"s"}, nothing new from them.`;
+        ? `${prefix}picked up ${total} new item${total===1?"":"s"} from ${count} other device${count===1?"":"s"}.`
+        : `${prefix}up to date with ${count} other device${count===1?"":"s"}, nothing new from them.`;
     }
   }).catch(()=>{ /* no signal, or room not set up yet — skip quietly */ });
 }
