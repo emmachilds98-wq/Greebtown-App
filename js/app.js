@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v83";
-const APP_BUILD_TIME = "2026-07-28T20:07:00Z";
+const APP_CACHE_VERSION = "v84";
+const APP_BUILD_TIME = "2026-07-28T20:16:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2335,6 +2335,9 @@ document.getElementById("addArtistBtn").onclick = ()=>{
 // ===============================
 const scheduleList = document.getElementById("scheduleList");
 let planView = "list";
+let planMustSeeFilter = false;
+let clashSubView = "list";
+let clashTimelineDay = "Wed";
 
 function saveArtist(artist){
   let schedule = Store.get("schedule");
@@ -2379,6 +2382,7 @@ function refreshAfterStarChange(){
   updateNextEvent();
   if(typeof renderArtistsTimeline === "function" && artistsView === "timeline") renderArtistsTimeline();
   if(typeof renderPlanTimeline === "function" && planView === "timeline") renderPlanTimeline();
+  if(typeof renderClashTimeline === "function" && planView === "clash" && clashSubView === "timeline") renderClashTimeline();
 }
 
 function showStarHint(btn){
@@ -2411,6 +2415,10 @@ function wireStarButton(btn, artist, onChange){
   }
 
   btn.addEventListener("pointerdown", (e)=>{
+    // Stops a sustained touch-hold from being read as "select this text"
+    // or popping the copy/select callout — CSS user-select/touch-callout
+    // covers most browsers, this catches the rest.
+    if(e.pointerType === "touch") e.preventDefault();
     held = false;
     startX = e.clientX; startY = e.clientY;
     clearHold();
@@ -2458,29 +2466,33 @@ function findClashes(schedule){
   return clashMap;
 }
 
-function scheduleItemHTML(artist, idx, clashes, readonly){
+function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
+  const mustSeeSet = mustSeeNamesSet || new Set();
   const clashLines = (clashes || []).map(c=>{
     const walk = estimateWalk(artist.stage, c.stage);
-    return `<div>⚠ Clashes with <strong>${escapeHtml(c.name)}</strong> at <span class="stage-link" data-stage="${escapeHtml(c.stage)}">${escapeHtml(c.stage)}</span>${walk ? ` — ${escapeHtml(walk.text)}${escapeHtml(walk.suffix)}` : ""}</div>`;
+    const otherMustSee = mustSeeSet.has(c.name);
+    return `<div>⚠ Clashes with <strong>${escapeHtml(c.name)}</strong>${otherMustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""} at <span class="stage-link" data-stage="${escapeHtml(c.stage)}">${escapeHtml(c.stage)}</span>${walk ? ` — ${escapeHtml(walk.text)}${escapeHtml(walk.suffix)}` : ""}</div>`;
   }).join("");
   return `
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
       <div class="item-top">
         <div>
-          <strong>${artist.name}</strong><br>
+          <strong>${artist.name}</strong>${mustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""}<br>
           <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
           <span class="time-label">${timeLabel(artist)}</span>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
         </div>
-        ${readonly ? "" : `<div class="btnrow">
-          <button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>
+        ${readonly ? "" : `<div class="btnrow plan-btnrow">
+          <div class="btnrow-top">
+            <button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>
+            <button class="remove-btn">Remove</button>
+          </div>
           <button class="set-time-btn">Set time</button>
-          <button class="remove-btn">Remove</button>
         </div>`}
       </div>
       ${clashLines ? `<div class="clash-note">${clashLines}</div>` : ""}
@@ -2572,20 +2584,32 @@ function renderPlanPersonTabs(){
 }
 
 function renderSchedule(){
-  const schedule = activeScheduleData();
+  const fullSchedule = activeScheduleData();
   const readonly = planActiveOwner !== "mine";
 
-  if(schedule.length === 0){
+  if(fullSchedule.length === 0){
     scheduleList.innerHTML = `<div class="card"><p class="empty-note">${readonly ? `${escapeHtml(planActiveOwner)} hasn't saved any artists yet.` : "No saved artists yet. Add some from the Lineup tab."}</p></div>`;
     return;
   }
 
+  const mustSeeNamesSet = new Set(fullSchedule.filter(a=>a.mustSee).map(a=>a.name));
+  // Keep each entry's ORIGINAL index into the full (unfiltered) schedule
+  // even when the must-sees-only filter is on — remove/set-time/star
+  // wiring below reads .dataset.idx straight into Store.get("schedule"),
+  // so a filtered-array position would point at the wrong artist.
+  const shown = fullSchedule.map((a,i)=>({a,i})).filter(({a})=> !planMustSeeFilter || a.mustSee);
+
+  if(shown.length === 0){
+    scheduleList.innerHTML = `<div class="card"><p class="empty-note">No must-sees yet — hold a star to upgrade one.</p></div>`;
+    return;
+  }
+
   if(planView === "list"){
-    scheduleList.innerHTML = schedule.map((a,i)=> scheduleItemHTML(a,i,null,readonly)).join("");
+    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet)).join("");
   } else {
-    const clashMap = findClashes(schedule);
+    const clashMap = findClashes(fullSchedule);
     const byDay = {};
-    schedule.forEach((a,i)=>{
+    shown.forEach(({a,i})=>{
       const key = a.day && a.day !== "TBC" ? a.day : "No time set";
       (byDay[key] = byDay[key] || []).push({a, i});
     });
@@ -2598,7 +2622,7 @@ function renderSchedule(){
       // "23:30", not before it as "0..." vs "2..." would alphabetically.
       const items = byDay[day].sort((x,y)=> (toMinutes(x.a.day, x.a.start) ?? 999999) - (toMinutes(y.a.day, y.a.start) ?? 999999));
       html += `<div class="daygroup">${day}</div>`;
-      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly));
+      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet));
     });
     scheduleList.innerHTML = html;
   }
@@ -2639,6 +2663,27 @@ function renderSchedule(){
   if(typeof renderNowNext === "function") renderNowNext();
 }
 
+// Clash view has its own List/Timeline sub-toggle nested inside it —
+// this just flips which of scheduleList vs clashTimelineView shows and
+// renders the right one, without touching the outer setPlanView state.
+function updateClashSubViewVisibility(){
+  const listEls = [scheduleList, document.getElementById("nowNextBanner")];
+  const clashTimelineEl = document.getElementById("clashTimelineView");
+  document.querySelectorAll("#clashSubViewToggle button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.sub === clashSubView);
+  });
+  if(clashSubView === "timeline"){
+    listEls.forEach(el=> el && (el.style.display = "none"));
+    if(clashTimelineEl) clashTimelineEl.style.display = "";
+    renderClashTimelineDayTabs();
+    renderClashTimeline();
+  } else {
+    listEls.forEach(el=> el && (el.style.display = ""));
+    if(clashTimelineEl) clashTimelineEl.style.display = "none";
+    renderSchedule();
+  }
+}
+
 function setPlanView(view){
   planView = view;
   ["viewListBtn","viewClashBtn","viewTimelineBtn","viewCompareBtn"].forEach(id=>{
@@ -2652,9 +2697,15 @@ function setPlanView(view){
   const listEls = [scheduleList, document.getElementById("nowNextBanner")];
   const timelineEl = document.getElementById("planTimelineView");
   const compareEl = document.getElementById("planCompareView");
-  listEls.forEach(el=> el && (el.style.display = view==="list"||view==="clash" ? "" : "none"));
+  const clashTimelineEl = document.getElementById("clashTimelineView");
+  const clashExtras = document.getElementById("clashExtras");
+  const mustSeeFilterToggle = document.getElementById("mustSeeFilterToggle");
+  if(clashExtras) clashExtras.style.display = view==="clash" ? "" : "none";
+  if(mustSeeFilterToggle) mustSeeFilterToggle.style.display = view==="compare" ? "none" : "";
   if(timelineEl) timelineEl.style.display = view==="timeline" ? "" : "none";
   if(compareEl) compareEl.style.display = view==="compare" ? "" : "none";
+  if(clashTimelineEl && view!=="clash") clashTimelineEl.style.display = "none";
+  listEls.forEach(el=> el && (el.style.display = (view==="list"||(view==="clash"&&clashSubView==="list")) ? "" : "none"));
 
   if(view === "timeline"){
     renderPlanTimelineDayTabs();
@@ -2662,6 +2713,8 @@ function setPlanView(view){
   } else if(view === "compare"){
     renderCompareFilterChips();
     renderPlanCompare();
+  } else if(view === "clash"){
+    updateClashSubViewVisibility();
   } else {
     renderSchedule();
   }
@@ -2672,6 +2725,23 @@ document.getElementById("viewClashBtn").onclick = ()=> setPlanView("clash");
 document.getElementById("viewTimelineBtn").onclick = ()=> setPlanView("timeline");
 const viewCompareBtn = document.getElementById("viewCompareBtn");
 if(viewCompareBtn) viewCompareBtn.onclick = ()=> setPlanView("compare");
+
+document.querySelectorAll("#mustSeeFilterToggle button").forEach(btn=>{
+  btn.onclick = ()=>{
+    planMustSeeFilter = btn.dataset.filter === "mustsee";
+    document.querySelectorAll("#mustSeeFilterToggle button").forEach(b=> b.classList.toggle("active", b===btn));
+    if(planView === "timeline") renderPlanTimeline();
+    else if(planView === "clash" && clashSubView === "timeline") renderClashTimeline();
+    else renderSchedule();
+  };
+});
+
+document.querySelectorAll("#clashSubViewToggle button").forEach(btn=>{
+  btn.onclick = ()=>{
+    clashSubView = btn.dataset.sub;
+    updateClashSubViewVisibility();
+  };
+});
 
 // ===============================
 // COMPARE — everyone's picks (mine + every synced teammate's last Sync
@@ -2797,11 +2867,11 @@ function renderPlanTimeline(){
   if(!grid) return;
   const readonly = planActiveOwner !== "mine";
   const schedule = activeScheduleData();
-  const dayItems = schedule.filter(a=> a.day === planTimelineDay && a.start);
+  const dayItems = schedule.filter(a=> a.day === planTimelineDay && a.start && (!planMustSeeFilter || a.mustSee));
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
   const { html } = buildTimelineHTML(dayItems, { readonly, savedNames, mustSeeNames });
-  grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">Nothing with a set time saved for ${planTimelineDay} yet.</p>`;
+  grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">${planMustSeeFilter ? `No must-sees with a set time saved for ${planTimelineDay} yet.` : `Nothing with a set time saved for ${planTimelineDay} yet.`}</p>`;
 
   const hint = document.getElementById("planTimelineHint");
   if(hint) hint.textContent = readonly
@@ -2813,6 +2883,52 @@ function renderPlanTimeline(){
       const name = b.dataset.name, day = b.dataset.day;
       const artist = schedule.find(a=>a.name===name && a.day===day);
       if(artist) showTimelineDetailModal(artist, { readonly, onSaveToggle: renderPlanTimeline });
+    };
+  });
+  wireStageLinks(grid);
+}
+
+// ===============================
+// CLASH TIMELINE — same grid, filtered to only picks that actually
+// overlap with something else, so a clash reads as blocks lining up
+// across stage rows instead of needing to spot it in a list of warnings.
+// ===============================
+function renderClashTimelineDayTabs(){
+  const box = document.getElementById("clashTimelineDayTabs");
+  if(!box) return;
+  box.className = "tabstrip";
+  box.innerHTML = DAY_ORDER.map(d=>`<button class="${d===clashTimelineDay?"active":""}" data-day="${d}">${d}</button>`).join("");
+  box.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      clashTimelineDay = btn.dataset.day;
+      renderClashTimelineDayTabs();
+      renderClashTimeline();
+    };
+  });
+}
+
+function renderClashTimeline(){
+  const grid = document.getElementById("clashTimelineGrid");
+  if(!grid) return;
+  const readonly = planActiveOwner !== "mine";
+  const fullSchedule = activeScheduleData();
+  const clashMap = findClashes(fullSchedule);
+  const clashingIdx = new Set(Object.keys(clashMap).map(Number));
+  const dayItems = fullSchedule
+    .map((a,i)=>({a,i}))
+    .filter(({a,i})=> clashingIdx.has(i) && a.day === clashTimelineDay && a.start && (!planMustSeeFilter || a.mustSee))
+    .map(({a})=>a);
+  const savedNames = new Set(dayItems.map(a=>a.name));
+  const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
+  const { html } = buildTimelineHTML(dayItems, { readonly, savedNames, mustSeeNames });
+  grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">No clashes on ${clashTimelineDay}${planMustSeeFilter ? " among your must-sees" : ""}.</p>`;
+
+  grid.querySelectorAll(".timeline-block").forEach(b=>{
+    b.classList.add("clashing");
+    b.onclick = ()=>{
+      const name = b.dataset.name, day = b.dataset.day;
+      const artist = fullSchedule.find(a=>a.name===name && a.day===day);
+      if(artist) showTimelineDetailModal(artist, { readonly, onSaveToggle: ()=>{ renderClashTimeline(); } });
     };
   });
   wireStageLinks(grid);
