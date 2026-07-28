@@ -232,6 +232,15 @@
   .tabstrip button.person.active{color:var(--accent-teal); border-color:var(--accent-teal); background:rgba(75,227,172,.12);}
 
   .genre-desc{color:var(--text-muted); font-size:11.5px; line-height:1.4; margin-top:3px; font-style:italic;}
+  /* Music preview buttons — Spotify/SoundCloud/YouTube. Unverified
+     artists (almost all of them right now) open a same-name search on
+     that platform in a new tab; a hand-verified entry in
+     js/artist-previews.js instead expands an inline embed below the
+     row. Needs signal either way, unlike the rest of this app. */
+  .preview-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;}
+  .preview-btn{background:none; border:1px solid var(--line); border-radius:20px; padding:3px 10px; font-size:11px; color:var(--text-muted); cursor:pointer; white-space:nowrap;}
+  .preview-btn:hover, .preview-btn:active{border-color:var(--accent-teal); color:var(--text-primary);}
+  .preview-embed{max-width:320px;}
   .artist-descriptor{color:var(--text-muted); font-size:12px; line-height:1.4; margin-top:4px;}
   .stage-link{color:var(--accent-teal); text-decoration:underline; text-decoration-style:dotted; text-underline-offset:2px; cursor:pointer;}
   .timeline-row-head.stage-link{color:inherit; text-decoration:none;}
