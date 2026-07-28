@@ -431,24 +431,27 @@ Meet at the clock tower if separated"></textarea>
 
     <div class="card" id="jumpCharacter">
       <h3>🎭 Build your character</h3>
-      <p>Give yourself a name and an angle before you go — actors respond to you a lot better when you're playing along rather than just watching. Doesn't lock in like Bingo; edit it any time.</p>
-      <div class="field"><label>Character name</label><input type="text" id="charName" placeholder="e.g. Delia Voss"></div>
-      <div class="field"><label>District allegiance</label>
-        <select id="charDistrict">
-          <option value="">Undecided / floating</option>
-          <option value="Area 404">Area 404</option>
-          <option value="Botanica">Botanica</option>
-          <option value="Thrutopia">Thrutopia</option>
-          <option value="Copperwood">Copperwood</option>
-          <option value="Oldtown">Oldtown</option>
-          <option value="Letsbe Avenue">Letsbe Avenue</option>
-          <option value="Metropolis">Metropolis</option>
-        </select>
+      <p>Give yourself a name and an angle before you go — actors respond to you a lot better when you're playing along rather than just watching. Doesn't lock in like Bingo; edit it any time. Sync brings in everyone's characters too — see the tabs below to check who's playing who.</p>
+      <div class="tabstrip" id="charPersonTabs" style="display:none; margin-bottom:8px;"></div>
+      <div id="charFormFields">
+        <div class="field"><label>Character name</label><input type="text" id="charName" placeholder="e.g. Delia Voss"></div>
+        <div class="field"><label>District allegiance</label>
+          <select id="charDistrict">
+            <option value="">Undecided / floating</option>
+            <option value="Area 404">Area 404</option>
+            <option value="Botanica">Botanica</option>
+            <option value="Thrutopia">Thrutopia</option>
+            <option value="Copperwood">Copperwood</option>
+            <option value="Oldtown">Oldtown</option>
+            <option value="Letsbe Avenue">Letsbe Avenue</option>
+            <option value="Metropolis">Metropolis</option>
+          </select>
+        </div>
+        <div class="field"><label>A quirk or trait</label><input type="text" id="charQuirk" placeholder="e.g. Convinced everyone owes her a favour"></div>
+        <div class="field"><label>Opening line / catchphrase</label><input type="text" id="charCatchphrase" placeholder="e.g. &quot;I don't do introductions, I do arrivals.&quot;"></div>
+        <div class="field"><label>Backstory (a line or two)</label><textarea id="charBackstory" placeholder="Why is this person in the city right now?"></textarea></div>
+        <button class="action" id="saveCharBtn">Save character</button>
       </div>
-      <div class="field"><label>A quirk or trait</label><input type="text" id="charQuirk" placeholder="e.g. Convinced everyone owes her a favour"></div>
-      <div class="field"><label>Opening line / catchphrase</label><input type="text" id="charCatchphrase" placeholder="e.g. &quot;I don't do introductions, I do arrivals.&quot;"></div>
-      <div class="field"><label>Backstory (a line or two)</label><textarea id="charBackstory" placeholder="Why is this person in the city right now?"></textarea></div>
-      <button class="action" id="saveCharBtn">Save character</button>
       <div id="charCardDisplay" style="margin-top:10px;"></div>
     </div>
 
