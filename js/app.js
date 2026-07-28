@@ -3706,11 +3706,39 @@ if(contributorNameInput){
       contributorOtherField.style.display = "none";
       Store.set("contributorName", contributorNameInput.value);
     }
+    if(typeof renderHomeSyncStatus === "function") renderHomeSyncStatus();
   };
   contributorOtherInput.oninput = ()=>{
     if(contributorNameInput.value === "__other__") Store.set("contributorName", contributorOtherInput.value.trim());
+    if(typeof renderHomeSyncStatus === "function") renderHomeSyncStatus();
   };
 }
+
+// A prominent, always-visible Home callout so it's obvious at a glance
+// whether sync is actually going to work — "your name isn't set" is
+// the single most common reason someone's inputs silently never leave
+// their device, so this is deliberately hard to miss rather than
+// buried only in the Sync card itself.
+function renderHomeSyncStatus(){
+  const box = document.getElementById("homeSyncStatus");
+  if(!box) return;
+  const name = currentContributorName();
+  if(!name){
+    box.innerHTML = `
+      <span class="tag" style="background:rgba(242,168,60,.16); color:var(--accent-amber); border-color:rgba(242,168,60,.4);">Set this up once</span>
+      <h3>⚠️ Pick your name to start syncing</h3>
+      <p>Nothing you add will reach the group until you've picked who you are — a one-time thing, done for good on this device afterwards.</p>
+      <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Pick your name in Sync →</a>
+    `;
+  } else {
+    box.innerHTML = `
+      <span class="tag">Syncing</span>
+      <h3>✅ Syncing as ${escapeHtml(name)}</h3>
+      <p>This runs automatically every time you open the app with signal — you never need to press anything for it to work, first time or any time after. "Sync now" in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> is only there if you want an instant one mid-session.</p>
+    `;
+  }
+}
+renderHomeSyncStatus();
 
 const copySyncCodeBtn = document.getElementById("copySyncCodeBtn");
 if(copySyncCodeBtn) copySyncCodeBtn.onclick = (e)=>{
@@ -4695,6 +4723,31 @@ document.querySelectorAll("#consolidatedViewToggle button").forEach(btn=>{
 });
 
 renderConsolidatedNotes();
+
+// ===============================
+// OFFICIAL LIVE INTEL — genuinely sourced findings from the daily
+// auto-update's Reddit/social-media check, not a user's own log (that's
+// the separate "sightings" feature below, which is personal + synced).
+// Each entry must be real and sourced — the daily update never invents
+// these. `confirmed:false` entries are rumour/fan speculation and are
+// labelled as such, never presented as fact. Kept short — stale entries
+// get removed by the daily update rather than piling up.
+// ===============================
+const officialLiveIntel = [];
+
+function loadOfficialLiveIntel(){
+  const box = document.getElementById("officialLiveIntelList");
+  if(!box) return;
+  if(!officialLiveIntel.length){ box.innerHTML = ""; return; }
+  box.innerHTML = officialLiveIntel.map(i=>`
+    <div class="item" style="margin-top:8px;">
+      <span class="status-pill2 ${i.confirmed ? "confirmed" : "rumoured"}">${i.confirmed ? "confirmed" : "rumour"}</span>
+      <p style="margin-top:6px;">${escapeHtml(i.text)}</p>
+      <small style="color:var(--text-muted);">${escapeHtml(i.source)}${i.when ? " · " + escapeHtml(i.when) : ""}</small>
+    </div>
+  `).join("");
+}
+loadOfficialLiveIntel();
 
 // ===============================
 // GLOSSARY
