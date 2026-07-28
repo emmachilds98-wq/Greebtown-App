@@ -2398,13 +2398,16 @@ const campLabels = [
   { x:"86%", y:"14%", text:"Campervan Field" },
   { x:"85%", y:"32%", text:"Temple Valley Camping" },
   { x:"91%", y:"48%", text:"East Camping" },
-  { x:"95%", y:"64%", text:"Quiet Camping" }
+  { x:"95%", y:"64%", text:"Quiet Camping" },
+  { x:"9%", y:"39%", text:"Camp Orchid Downtown (premium, public transport)" },
+  { x:"75%", y:"22%", text:"Camp Skylark Hilltop (premium)" },
+  { x:"74%", y:"87%", text:"Camp Skylark Sunset (premium)" }
 ];
 
 const gates = [
-  { name:"West Gate", x:"3%", y:"46%", info:"Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
+  { name:"West Gate", x:"3%", y:"46%", info:"Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, plus the Public Transport Hub and the premium Camp Orchid Downtown pitches (built for coach/shuttle arrivals — closest gate access is here, not South Gate).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
   { name:"East Gate", x:"96%", y:"32%", info:"Nearest the White Carparks, motorcycle and cycle parking, and Campervan Field.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
-  { name:"South Gate", x:"78%", y:"93%", info:"Nearest White Carpark 4 and the premium Camp Orchid / Camp Skylark camping pods.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
+  { name:"South Gate", x:"78%", y:"93%", info:"Nearest White Carpark 4 and Camp Skylark Sunset (one of two Camp Skylark premium sites for 2026 — the other, Camp Skylark Hilltop, sits up on Hilltop instead).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
 ];
 
 // ===============================
