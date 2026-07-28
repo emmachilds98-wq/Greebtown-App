@@ -3224,6 +3224,118 @@ function setupVenueTableFilters(){
 setupVenueTableFilters();
 renderVenueTable();
 
+// Generic cross-screen jump: switch tab (if given) then scroll an id
+// into view. Every screen is always in the DOM (hidden via CSS, not
+// removed), so no delay is needed between the two.
+function jumpToId(id, tab){
+  if(tab) document.querySelector(`.tab[data-tab="${tab}"]`).click();
+  requestAnimationFrame(()=>{
+    const el = document.getElementById(id);
+    if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+  });
+}
+
+// Jump straight to a district's own marker/card on the map, from a
+// mention of its name anywhere else in the app (guide text, etc.).
+function jumpToDistrictOnMap(name){
+  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  requestAnimationFrame(()=>{
+    const marker = [...document.querySelectorAll("#mapInner .marker")].find(m=> m.title === name);
+    if(marker) marker.click();
+    const info = document.getElementById("mapInfo");
+    if(info) info.scrollIntoView({ behavior:"smooth", block:"start" });
+  });
+}
+
+function jumpToGlossaryTerm(term){
+  document.querySelector('.tab[data-tab="discover"]').click();
+  requestAnimationFrame(()=>{
+    const box = document.getElementById("jumpGlossary");
+    if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(glossarySearch){ glossarySearch.value = term; glossarySearch.dispatchEvent(new Event("input")); }
+  });
+}
+
+function jumpToCharacter(name){
+  document.querySelector('.tab[data-tab="discover"]').click();
+  requestAnimationFrame(()=>{
+    const box = document.getElementById("jumpCharacters");
+    if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(characterSearch){ characterSearch.value = name; characterSearch.dispatchEvent(new Event("input")); }
+  });
+}
+
+// ===============================
+// INLINE TERM LINKING — turns mentions of district names, character
+// names and glossary terms inside guide text into clickable links to
+// that term's fuller entry elsewhere in the app (map marker, Characters
+// search, Glossary search), so a name you don't recognise mid-paragraph
+// is one tap from its actual explanation instead of a dead end. Built
+// lazily since it depends on `characters`/`glossary` being defined.
+// ===============================
+const GUIDE_DISTRICT_NAMES = ["Area 404","Botanica","Thrutopia","Copperwood","Oldtown","Letsbe Avenue","Metropolis"];
+let _inlineTermIndex = null;
+function inlineTermIndex(){
+  if(_inlineTermIndex) return _inlineTermIndex;
+  const index = {};
+  const cleanTerm = t=> /^[A-Za-z0-9'’.\- ]+$/.test(t); // skip anything with ™, /, () etc — too fiddly to match/escape safely
+  characters.forEach(c=>{ const k=c.name.toLowerCase(); if(cleanTerm(c.name) && !index[k]) index[k] = { label:c.name, type:"character" }; });
+  glossary.forEach(g=>{ const k=g.term.toLowerCase(); if(cleanTerm(g.term) && !index[k]) index[k] = { label:g.term, type:"glossary" }; });
+  GUIDE_DISTRICT_NAMES.forEach(d=>{ index[d.toLowerCase()] = { label:d, type:"district" }; }); // districts always win any clash
+  _inlineTermIndex = index;
+  return index;
+}
+
+function linkifyKeyTerms(container){
+  const index = inlineTermIndex();
+  const terms = Object.values(index).map(t=>t.label).concat(["districts","district"]);
+  const escaped = terms.slice().sort((a,b)=> b.length - a.length).map(t=> t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const pattern = new RegExp("\\b(" + escaped.join("|") + ")\\b", "g");
+  const linkedAlready = new Set();
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      if(node.parentElement && node.parentElement.closest("a")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes = [];
+  let n; while((n = walker.nextNode())) nodes.push(n);
+  nodes.forEach(node=>{
+    const text = node.nodeValue;
+    pattern.lastIndex = 0;
+    if(!pattern.test(text)) return;
+    pattern.lastIndex = 0;
+    const frag = document.createDocumentFragment();
+    let lastIndex = 0, match;
+    while((match = pattern.exec(text))){
+      const word = match[0];
+      const key = word.toLowerCase();
+      const isGeneric = key === "district" || key === "districts";
+      const entry = isGeneric ? null : index[key];
+      const shouldLink = isGeneric || (entry && !linkedAlready.has(key));
+      frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+      if(shouldLink){
+        const a = document.createElement("a");
+        a.className = "inline-link";
+        a.href = "javascript:void(0)";
+        a.textContent = word;
+        if(isGeneric) a.onclick = ()=> document.querySelector('.tab[data-tab="mapscreen"]').click();
+        else if(entry.type === "district") a.onclick = ()=> jumpToDistrictOnMap(entry.label);
+        else if(entry.type === "character") a.onclick = ()=> jumpToCharacter(entry.label);
+        else a.onclick = ()=> jumpToGlossaryTerm(entry.label);
+        if(!isGeneric) linkedAlready.add(key);
+        frag.appendChild(a);
+      } else {
+        frag.appendChild(document.createTextNode(word));
+      }
+      lastIndex = match.index + word.length;
+    }
+    frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+
 // Jump here from an artist's stage name (Artists list, Plan, Timeline)
 // to see that venue's directory entry — resets other filters, uses the
 // same search box so only the matching row(s) show, and scrolls to it.
@@ -4453,6 +4565,7 @@ const guideContent = document.getElementById("guideContent");
 const chapterFiveGuide = [
   { title:"Chapter Five — the one-page briefing", html:"<p><strong>Then:</strong> The Collector was freed at the 2025 closing ceremony and passed leadership to The Network. <strong>Now:</strong> Mr Biga and Aurora Venturestone have merged their companies into BBXL™ and are pushing a space programme that treats Earth as a ‘single-use planet’. <strong>The pressure point:</strong> BBXL is draining the city’s resources while still attracting citizens into its VIP world. The Network wants a shared, people-led redesign — but that is not yet a victory.</p>" },
   { title:"🧩 This chapter's central question", text:"Chapter Five asks whether The Network can actually hand real power back to the people — or whether BBXL and the districts' own power plays make that impossible. Following the story district to district is how you find out." },
+  { title:"📰 What's new this chapter", text:"Chapter Five's redesign relocated some stages and opened new spaces. Thrutopia is a brand-new district — talks, workshops and rest space in the woodlands, alongside the Cloak of Hope collective artwork, a genuine on-site Observatory research study, and the Reparium repair hub returning. On the stages side: the Lion's Den is back in the Temple Valley amphitheatre, Hilltop is now built around live music, and Hydro XL — a new hydrogen-powered flagship stage — has been expanded and relocated to Downtown (the full stage-by-stage and hidden-venue directory is on the Map tab). This card gets edited in place as new sourced details come in, rather than growing a fresh note every time something changes — it should always read as where things stand now, not a log of when each fact arrived." },
   { title:"A simple way to follow the story", html:"<ul class=\"compact-list\"><li><strong>Start with a side:</strong> Area 404 for power and policing; Botanica for portals, IONA and Shadow Post; Letsbe Avenue for the suspiciously cheerful BLIP product.</li><li><strong>Ask for a motive:</strong> ‘What do you want?’, ‘Who benefits?’, ‘Who should we speak to next?’ works better than hunting for a scripted answer.</li><li><strong>Keep a chain:</strong> person → place → strange phrase → next lead. Add it to the district note straight away, then compare notes as a group.</li><li><strong>Watch the public moments:</strong> announcements, meetings, ceremonies, arguments and queues are often more useful than an empty-looking door.</li></ul>" },
   { title:"🕹 How the story actually works", text:"It's not something you read, it's something you play — closer to immersive theatre than a puzzle with one right answer. Street actors are in character across the whole site; approach them, ask questions, and stay in the fiction as long as you can bear it. They'll usually feed you a lead, a rumour, an object, or point you toward another district or person. Pick up copies of The Daily Rag (the in-universe newspaper) wherever you see them — often the clearest single source of plot for that day. Trade information, do favours, pay with 'Boomtown bucks' if you pick some up, and don't be afraid to lie, bluff or be a bit cheeky — the actors are trained to work with whatever you give them. Some of the best finds come from just opening doors that look like scenery, especially around Oldtown and Metropolis." },
   { title:"🗺 A game plan for the weekend", text:"There's no single fixed path — it branches by who you meet — but this rhythm gets you properly pulled in rather than wandering past it. Wed/Thu (quiet build-up): walk every district once, cold, just to get your bearings and spot which plot grabs you. Friday daytime: the single best window all weekend — quieter, you're not tired or drunk yet, and actors have more time to engage properly. Pick your district and go looking for a person, not a place: a market stall, a bar, a 'closed' door. Fri evening–Sat: once you're in with one district you'll usually get passed sideways to another (Botanica's Network sending you toward Area 404's Guardians, say) — follow it rather than restarting cold elsewhere. Sat/Sun: threads tend to converge and pay off in bigger set-piece scenes — keep an ear out for anything that sounds like a public gathering, announcement or 'trial'. This is general guidance based on how past chapters have run; the exact actors, locations and beats for Chapter Five will only reveal themselves on-site." },
@@ -4485,6 +4598,7 @@ function loadGuide(){
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `<h3>${section.title}</h3>${section.html || `<p>${section.text}</p>`}`;
+    linkifyKeyTerms(card);
     guideContent.appendChild(card);
   });
 }
