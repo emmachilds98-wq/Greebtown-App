@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v64";
-const APP_BUILD_TIME = "2026-07-28T16:03:00Z";
+const APP_CACHE_VERSION = "v65";
+const APP_BUILD_TIME = "2026-07-28T16:10:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2315,23 +2315,28 @@ function renderSchedule(){
 
 function setPlanView(view){
   planView = view;
-  ["viewListBtn","viewClashBtn","viewTimelineBtn"].forEach(id=>{
+  ["viewListBtn","viewClashBtn","viewTimelineBtn","viewCompareBtn"].forEach(id=>{
     const btn = document.getElementById(id);
     if(btn) btn.classList.remove("active");
   });
-  const activeBtn = document.getElementById(view==="list"?"viewListBtn":view==="clash"?"viewClashBtn":"viewTimelineBtn");
+  const activeBtnId = view==="list" ? "viewListBtn" : view==="clash" ? "viewClashBtn" : view==="timeline" ? "viewTimelineBtn" : "viewCompareBtn";
+  const activeBtn = document.getElementById(activeBtnId);
   if(activeBtn) activeBtn.classList.add("active");
 
   const listEls = [scheduleList, document.getElementById("nowNextBanner")];
   const timelineEl = document.getElementById("planTimelineView");
+  const compareEl = document.getElementById("planCompareView");
+  listEls.forEach(el=> el && (el.style.display = view==="list"||view==="clash" ? "" : "none"));
+  if(timelineEl) timelineEl.style.display = view==="timeline" ? "" : "none";
+  if(compareEl) compareEl.style.display = view==="compare" ? "" : "none";
+
   if(view === "timeline"){
-    listEls.forEach(el=> el && (el.style.display = "none"));
-    if(timelineEl) timelineEl.style.display = "";
     renderPlanTimelineDayTabs();
     renderPlanTimeline();
+  } else if(view === "compare"){
+    renderCompareFilterChips();
+    renderPlanCompare();
   } else {
-    listEls.forEach(el=> el && (el.style.display = ""));
-    if(timelineEl) timelineEl.style.display = "none";
     renderSchedule();
   }
 }
@@ -2339,6 +2344,106 @@ function setPlanView(view){
 document.getElementById("viewListBtn").onclick = ()=> setPlanView("list");
 document.getElementById("viewClashBtn").onclick = ()=> setPlanView("clash");
 document.getElementById("viewTimelineBtn").onclick = ()=> setPlanView("timeline");
+const viewCompareBtn = document.getElementById("viewCompareBtn");
+if(viewCompareBtn) viewCompareBtn.onclick = ()=> setPlanView("compare");
+
+// ===============================
+// COMPARE — everyone's picks (mine + every synced teammate's last Sync
+// code snapshot) merged side by side, so a group can spot overlaps and
+// plan to meet up, without any tab-switching. Purely a read view over
+// existing data — it doesn't change what "mine" or the person tabs do
+// anywhere else.
+// ===============================
+let compareOnlyShared = false;
+
+function comparePeopleList(){
+  const people = [{ key:"mine", label:"You", list: Store.get("schedule") }];
+  const peopleSchedules = Store.get("peopleSchedules") || {};
+  Object.keys(peopleSchedules).forEach(n=>{
+    if((peopleSchedules[n]||[]).length) people.push({ key:n, label:n, list:peopleSchedules[n] });
+  });
+  return people;
+}
+
+function renderCompareFilterChips(){
+  const box = document.getElementById("compareFilterChips");
+  if(!box) return;
+  const people = comparePeopleList();
+  if(people.length < 2){ box.innerHTML = ""; return; }
+  box.innerHTML = `<span class="chip ${!compareOnlyShared?"active":""}" data-mode="all">Everyone's picks</span><span class="chip ${compareOnlyShared?"active":""}" data-mode="shared">Only shared (2+)</span>`;
+  box.querySelectorAll(".chip").forEach(c=>{
+    c.onclick = ()=>{
+      compareOnlyShared = c.dataset.mode === "shared";
+      renderCompareFilterChips();
+      renderPlanCompare();
+    };
+  });
+}
+
+function renderPlanCompare(){
+  const box = document.getElementById("planCompareList");
+  if(!box) return;
+  const people = comparePeopleList();
+
+  if(people.length < 2){
+    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — swap Sync codes in Discover, then their picks will show up here alongside yours.</p></div>`;
+    return;
+  }
+
+  const rows = new Map();
+  people.forEach(p=>{
+    p.list.forEach(a=>{
+      if(!rows.has(a.name)) rows.set(a.name, { artist:a, people:new Set() });
+      rows.get(a.name).people.add(p.key);
+    });
+  });
+
+  let entries = [...rows.values()];
+  if(compareOnlyShared) entries = entries.filter(e=> e.people.size >= 2);
+
+  if(entries.length === 0){
+    box.innerHTML = `<div class="card"><p class="empty-note">${compareOnlyShared ? "Nothing picked by two or more of you yet." : "Nobody's saved anything yet."}</p></div>`;
+    return;
+  }
+
+  entries.sort((x,y)=>{
+    const dx = DAY_ORDER.indexOf(x.artist.day), dy = DAY_ORDER.indexOf(y.artist.day);
+    const rd = (dx===-1?99:dx) - (dy===-1?99:dy);
+    if(rd) return rd;
+    return (toMinutes(x.artist.day, x.artist.start) ?? 999999) - (toMinutes(y.artist.day, y.artist.start) ?? 999999);
+  });
+
+  const byDay = {};
+  entries.forEach(e=>{
+    const key = e.artist.day && e.artist.day !== "TBC" ? e.artist.day : "No time set";
+    (byDay[key] = byDay[key] || []).push(e);
+  });
+
+  const order = [...DAY_ORDER, "No time set"];
+  let html = "";
+  order.forEach(day=>{
+    if(!byDay[day]) return;
+    html += `<div class="daygroup">${day}</div>`;
+    byDay[day].forEach(e=>{
+      const peopleChips = people.map(p=>
+        `<span class="compare-person${e.people.has(p.key) ? " in" : ""}">${escapeHtml(p.label)}</span>`
+      ).join("");
+      html += `
+        <div class="item">
+          <div class="item-top">
+            <div>
+              <strong>${escapeHtml(e.artist.name)}</strong><br>
+              <span class="stage-link" data-stage="${escapeHtml(e.artist.stage)}">${escapeHtml(e.artist.stage)}</span><br>
+              <span class="time-label">${timeLabel(e.artist)}</span>
+            </div>
+          </div>
+          <div class="compare-people">${peopleChips}</div>
+        </div>`;
+    });
+  });
+  box.innerHTML = html;
+  wireStageLinks(box);
+}
 
 // ===============================
 // SAVED-ARTIST TIMELINE (Plan) — same scrollable stage/time grid as the
@@ -4235,6 +4340,8 @@ function refreshAfterMerge(){
   if(typeof loadMap === "function") loadMap();
   if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
   if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+  if(typeof renderCompareFilterChips === "function") renderCompareFilterChips();
+  if(typeof renderPlanCompare === "function" && planView === "compare") renderPlanCompare();
   if(typeof renderBingoPersonTabs === "function"){ renderBingoPersonTabs(); renderBingo(); }
   if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
 }
