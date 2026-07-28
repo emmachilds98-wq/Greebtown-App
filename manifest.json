@@ -1,6 +1,6 @@
 {
-  "name": "Boomtown Companion 2026",
-  "short_name": "Boomtown 26",
+  "name": "Greebtown",
+  "short_name": "Greebtown",
   "description": "Offline festival companion for Boomtown 2026 — lineup, schedule planner, map, discoveries and guide.",
   "start_url": "./index.html",
   "scope": "./",
