@@ -54,7 +54,7 @@
     <div>Chapter Five: Radical Redesign · 12&ndash;16&nbsp;Aug</div>
     <div class="ptr-hint" id="ptrHint">↓ Pull down to refresh &amp; sync</div>
   </div>
-  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:20</span>
+  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:30</span>
 </header>
 
 <main>
@@ -251,6 +251,18 @@ Meet at the clock tower if separated"></textarea>
     <div class="eyebrow">Find your way</div>
     <h2 style="margin-bottom:14px;">Map</h2>
     <p class="empty-note" style="margin-bottom:10px;">An illustrated schematic, not the official surveyed map — venue positions inside the city are illustrative, especially with this chapter's redesign. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
+
+    <div class="venue-filters" id="mapNav" style="margin-bottom:14px;">
+      <button data-jump="jumpMapView">🗺 Map</button>
+      <button data-jump="jumpDirectory">📋 Directory</button>
+      <button data-jump="jumpMeetingPoint">📍 Meeting point</button>
+      <button data-jump="jumpLogLandmark">🏕 Log a landmark</button>
+      <button data-jump="jumpLogHidden">🕵 Log a hidden venue</button>
+      <button data-jump="jumpSiteInfo">🕐 Gate &amp; hours</button>
+      <button data-jump="jumpFoodBars">🍺 Food &amp; bars</button>
+    </div>
+
+    <div id="jumpMapView">
     <div class="stagelist" id="mapLayerToggles" style="margin-bottom:8px;">
       <span class="chip active" data-layer="minor">Other stages</span>
       <span class="chip" data-layer="secret">Hidden venues &amp; things to find</span>
@@ -269,8 +281,9 @@ Meet at the clock tower if separated"></textarea>
       <span><span class="line-swatch"></span>Approx. route, not a literal path</span>
     </div>
     <div id="mapInfo"></div>
+    </div>
 
-    <div class="card">
+    <div class="card" id="jumpDirectory">
       <span class="tag">Full directory, incl. your own finds</span>
       <h3>Every stage, hidden venue &amp; shop we could source</h3>
       <p>Main stages, confirmed 2026 hidden venues, food &amp; drink, shops, workshops, leisure/rides and support spaces, plus a handful of past-chapter names with no 2026 evidence — clearly marked. "Confirmed" means it appeared in Boomtown's own 2026 lineup/schedule tool or official site copy; "Rumoured" means it's a lead from a past chapter, not a promise; "Your find" is anything your group logs below. Every row also says 🎵 Music / 🔇 No music, so it's clear which entries are genuinely deliberately-hidden venues worth hunting versus places you'll simply walk past (food stalls, welfare, workshops). A 📍 note gives a rough location where we could place one.</p>
@@ -301,7 +314,7 @@ Meet at the clock tower if separated"></textarea>
       <p class="empty-note" style="margin-top:6px;">Best rule: if a storefront, queue or actor feels suspiciously over-designed, investigate — but don't expect last year's exact location to survive the redesign.</p>
     </div>
 
-    <div class="card">
+    <div class="card" id="jumpMeetingPoint">
       <h3>📍 Meeting point</h3>
       <p>Set directly here, or tap any stage/district marker above and use "Save as meeting point."</p>
       <div id="currentMeetingDisplay" class="empty-note" style="margin-bottom:8px;"></div>
@@ -309,7 +322,7 @@ Meet at the clock tower if separated"></textarea>
       <button class="action" id="setMeetingBtn">Set meeting point</button>
     </div>
 
-    <div class="card">
+    <div class="card" id="jumpLogLandmark">
       <h3>Log a landmark</h3>
       <p>Spotted something worth marking that's not in the list — a good water point, a landmark tree, a meetup spot? Add it here; it shows up on the map above and can be removed any time.</p>
       <div class="field"><label>Name</label><input type="text" id="landmarkName" placeholder="What is it?"></div>
@@ -329,41 +342,7 @@ Meet at the clock tower if separated"></textarea>
     </div>
     <div id="customLandmarksList"></div>
 
-    <div class="card">
-      <h3>🕐 Gate, car park &amp; music hours</h3>
-      <ul class="compact-list">
-        <li><strong>Gates:</strong> Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30.</li>
-        <li><strong>Car parks:</strong> 10:00–21:00 daily.</li>
-        <li><strong>Music hours:</strong> Wed 14:00–23:00 · Thu 12:00–00:00 · Fri–Sat 12:00–04:00 · Sun 12:00–00:00.</li>
-        <li><strong>Medical centres:</strong> 24 hours (Pepperpot Market and Hilltop).</li>
-        <li><strong>Site closes:</strong> Monday 12:00 — everyone off site by then.</li>
-      </ul>
-      <p class="empty-note" style="margin-top:8px;">Individual stage/venue set times aren't published this far out — where this app has a saved set time for a stage, its rough running window shows in the venue directory below.</p>
-    </div>
-
-    <div class="card">
-      <h3>🍺 Bars &amp; food — prices &amp; where</h3>
-      <p>No official price list is published in advance and it varies by stall, but as a rough guide from past chapters: pints run about £6–£7, cocktails and mixed drinks £7–£12, and hot food £8–£13 a portion. Everything runs on the cashless wristband, so top up before you're queuing.</p>
-      <p>Every district has its own bars and food stalls in keeping with its theme, rather than one central food court — Letsbe Avenue and Metropolis tend to be the densest for options, and Pepperpot Market is a reliable food-and-drink hub roughly central to the site. Expect more stalls near the bigger stages (Grand Central, Lion's Den, Hydro XL) and around the main camping fields for a morning coffee. Exact stalls and locations for Chapter Five are confirmed on the official app once you're on-site.</p>
-    </div>
-
-    <div class="card">
-      <h3 class="skip-card">What's around site</h3>
-      <p>From past years' site maps — Boomtown typically has these dotted around the whole city and campsites (exact spots shown in the official app on-site once you're there):</p>
-      <div class="stagelist">
-        <span>🩹 Welfare &amp; medic points</span><span>🚰 Water refill points</span><span>🚻 Toilets (incl. accessible)</span>
-        <span>🍺 Bars</span><span>🍔 Food &amp; drink vendors</span><span>🛍 Market stalls</span>
-        <span>ℹ️ Info points</span><span>🔌 Phone charging</span><span>💳 Cashless top-up / bank points</span>
-        <span>🔒 Lockers</span><span>🚿 Showers</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>Hidden venues &amp; things to find</h3>
-      <p>On top of the 18 official stages, Boomtown runs 50+ unlisted hidden venues built by independent collectives inside the districts — some kitted out as a post office, hotel or police station, all deliberately not published anywhere. The named "?" markers on the map above are real past-chapter and 2026 venue names, positioned near the district their theme best fits; the plain "?" markers further out are a reminder there are always more than are named here. None of these positions are surveyed — finding them is the point.</p>
-    </div>
-
-    <div class="card">
+    <div class="card" id="jumpLogHidden">
       <h3>Log a hidden venue</h3>
       <p>Found one of the 50+ secret spots? Save it here — it'll show up in the directory above tagged "Your find", and everyone in your group can copy the list out.</p>
       <div class="field"><label>Name</label><input type="text" id="hiddenVenueName" placeholder="What was it called?"></div>
@@ -383,6 +362,40 @@ Meet at the clock tower if separated"></textarea>
       <div class="field"><label>Notes</label><textarea id="hiddenVenueInput" placeholder="What it was like, when you found it..."></textarea></div>
       <button class="action" id="addHiddenVenueBtn">Save find</button>
       <button class="ghost" id="copyVenuesBtn" style="margin:8px 6px 0 0;">Copy your finds</button>
+    </div>
+
+    <div class="card">
+      <h3>Hidden venues &amp; things to find</h3>
+      <p>On top of the 18 official stages, Boomtown runs 50+ unlisted hidden venues built by independent collectives inside the districts — some kitted out as a post office, hotel or police station, all deliberately not published anywhere. The named "?" markers on the map above are real past-chapter and 2026 venue names, positioned near the district their theme best fits; the plain "?" markers further out are a reminder there are always more than are named here. None of these positions are surveyed — finding them is the point.</p>
+    </div>
+
+    <div class="card" id="jumpSiteInfo">
+      <h3>🕐 Gate, car park &amp; music hours</h3>
+      <ul class="compact-list">
+        <li><strong>Gates:</strong> Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30.</li>
+        <li><strong>Car parks:</strong> 10:00–21:00 daily.</li>
+        <li><strong>Music hours:</strong> Wed 14:00–23:00 · Thu 12:00–00:00 · Fri–Sat 12:00–04:00 · Sun 12:00–00:00.</li>
+        <li><strong>Medical centres:</strong> 24 hours (Pepperpot Market and Hilltop).</li>
+        <li><strong>Site closes:</strong> Monday 12:00 — everyone off site by then.</li>
+      </ul>
+      <p class="empty-note" style="margin-top:8px;">Individual stage/venue set times aren't published this far out — where this app has a saved set time for a stage, its rough running window shows in the venue directory above.</p>
+    </div>
+
+    <div class="card" id="jumpFoodBars">
+      <h3>🍺 Bars &amp; food — prices &amp; where</h3>
+      <p>No official price list is published in advance and it varies by stall, but as a rough guide from past chapters: pints run about £6–£7, cocktails and mixed drinks £7–£12, and hot food £8–£13 a portion. Everything runs on the cashless wristband, so top up before you're queuing.</p>
+      <p>Every district has its own bars and food stalls in keeping with its theme, rather than one central food court — Letsbe Avenue and Metropolis tend to be the densest for options, and Pepperpot Market is a reliable food-and-drink hub roughly central to the site. Expect more stalls near the bigger stages (Grand Central, Lion's Den, Hydro XL) and around the main camping fields for a morning coffee. Exact stalls and locations for Chapter Five are confirmed on the official app once you're on-site.</p>
+    </div>
+
+    <div class="card">
+      <h3 class="skip-card">What's around site</h3>
+      <p>From past years' site maps — Boomtown typically has these dotted around the whole city and campsites (exact spots shown in the official app on-site once you're there):</p>
+      <div class="stagelist">
+        <span>🩹 Welfare &amp; medic points</span><span>🚰 Water refill points</span><span>🚻 Toilets (incl. accessible)</span>
+        <span>🍺 Bars</span><span>🍔 Food &amp; drink vendors</span><span>🛍 Market stalls</span>
+        <span>ℹ️ Info points</span><span>🔌 Phone charging</span><span>💳 Cashless top-up / bank points</span>
+        <span>🔒 Lockers</span><span>🚿 Showers</span>
+      </div>
     </div>
 
   <div class="card">
