@@ -229,8 +229,25 @@ Meet at the clock tower if separated"></textarea>
       <button id="viewTimelineBtn">Timeline</button>
       <button id="viewCompareBtn">Compare</button>
     </div>
+    <div class="stagelist" id="mustSeeFilterToggle" style="margin:10px 0;">
+      <button class="active" data-filter="all">All saved</button>
+      <button data-filter="mustsee">★ Must-sees only</button>
+    </div>
+    <div id="clashExtras" style="display:none;">
+      <p class="empty-note" id="clashLegend" style="margin-bottom:8px;">🔵 Starred · 🟠 Must-see — both count toward clashes below.</p>
+      <div class="stagelist" id="clashSubViewToggle" style="margin-bottom:10px;">
+        <button class="active" data-sub="list">List</button>
+        <button data-sub="timeline">Timeline</button>
+      </div>
+    </div>
     <div id="nowNextBanner"></div>
     <div id="scheduleList"><div class="card"><p class="empty-note">No saved artists yet. Add some from the Lineup tab.</p></div></div>
+
+    <div id="clashTimelineView" style="display:none;">
+      <div class="stagelist" id="clashTimelineDayTabs" style="margin:10px 0;"></div>
+      <p class="empty-note" style="margin-bottom:8px;">Only picks that clash with something else — tap a block for details.</p>
+      <div class="timeline-outer"><div id="clashTimelineGrid"></div></div>
+    </div>
 
     <div id="planTimelineView" style="display:none;">
       <div class="stagelist" id="planTimelineDayTabs" style="margin:10px 0;"></div>

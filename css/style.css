@@ -1,6 +1,6 @@
   :root{
     --bg-deep:#0b1512; --bg-panel:#132420; --bg-panel-2:#1a2f29;
-    --accent-amber:#f2a83c; --accent-teal:#4be3ac; --accent-red:#e2836a; --accent-lightblue:#5ec8f0;
+    --accent-amber:#f2a83c; --accent-teal:#4be3ac; --accent-red:#e2836a; --accent-lightblue:#2f9bff;
     --text-primary:#eef6f1; --text-muted:#8fa89c; --line:#24403a;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -63,6 +63,15 @@
      the plain ".item button" rule above so it actually wins. */
   .item button.star-btn{color:var(--accent-lightblue);}
   .item button.star-btn.mustsee{color:var(--accent-amber);}
+  /* Long-pressing a star is meant to upgrade it to must-see, not select
+     it as text or pop up the browser's copy/select callout — both of
+     which mobile Safari/Chrome otherwise treat a sustained touch-hold on
+     text-bearing elements as a trigger for. */
+  .star-btn, .star-toggle-lg{
+    -webkit-user-select:none; user-select:none;
+    -webkit-touch-callout:none;
+    touch-action:manipulation;
+  }
   /* Bigger, more tappable star for the timeline detail modal — the
      regular list-view star sits next to plenty of other text so a small
      button reads fine, but the modal's star is often the only thing
@@ -88,7 +97,16 @@
   .timeline-modal-body{display:grid; grid-template-columns:1fr 64px; align-items:center;}
   .timeline-modal-body .star-toggle-lg{justify-self:center;}
   .item .btnrow{display:flex; gap:6px; flex-shrink:0;}
+  /* Plan screen only: "Set time" drops onto its own row below star +
+     remove, so the button column is only ever two buttons wide — leaving
+     the artist name/stage/bio text on the left noticeably more room,
+     especially on narrow phones where a 3-wide button column was eating
+     into it. */
+  .plan-btnrow{flex-direction:column; align-items:stretch; gap:6px;}
+  .plan-btnrow .btnrow-top{display:flex; gap:6px;}
+  .plan-btnrow .set-time-btn{width:100%;}
   .clash-note{color:var(--accent-red); font-size:12px; margin-top:6px;}
+  .mustsee-tag{display:inline-block; font-size:10px; font-weight:700; color:var(--accent-amber); background:rgba(242,168,60,.14); border:1px solid rgba(242,168,60,.4); border-radius:20px; padding:1px 7px; margin-left:2px; vertical-align:middle;}
   .compare-people{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
   .compare-person{font-size:11px; padding:3px 9px; border-radius:20px; border:1px solid var(--line); color:var(--text-muted); opacity:.5;}
   .compare-person.in{opacity:1; color:var(--accent-teal); border-color:var(--accent-teal); background:rgba(75,227,172,.14); font-weight:700;}
@@ -231,8 +249,9 @@
   .timeline-row-body{position:relative; flex-shrink:0; border-bottom:1px solid var(--line);}
   .timeline-vline{position:absolute; top:0; bottom:0; border-left:1px solid var(--line); opacity:.5;}
   .timeline-block{position:absolute; top:3px; bottom:3px; border-radius:8px; padding:4px 6px; font-size:10.5px; line-height:1.25; overflow:hidden; cursor:pointer; border:1px solid var(--accent-teal); background:rgba(75,227,172,.14); color:var(--text-primary);}
-  .timeline-block.saved{background:rgba(94,200,240,.22); border-color:var(--accent-lightblue);}
+  .timeline-block.saved{background:rgba(47,155,255,.22); border-color:var(--accent-lightblue);}
   .timeline-block.mustsee{background:rgba(242,168,60,.22); border-color:var(--accent-amber);}
+  .timeline-block.clashing{box-shadow:0 0 0 2px var(--accent-red) inset;}
   .timeline-block b{display:block; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .timeline-block .tb-time{display:block; color:var(--text-muted); font-size:9.5px; margin-top:1px; white-space:nowrap;}
   .timeline-block.readonly{cursor:default;}
