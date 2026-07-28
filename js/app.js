@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v61";
-const APP_BUILD_TIME = "2026-07-28T15:37:00Z";
+const APP_CACHE_VERSION = "v62";
+const APP_BUILD_TIME = "2026-07-28T15:50:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2016,7 +2016,7 @@ function showTimelineDetailModal(artist, opts){
 }
 
 let artistsTimelineDay = "Wed";
-let artistsView = "list";
+let artistsView = "timeline";
 
 function renderArtistTimelineDayTabs(){
   const box = document.getElementById("artistTimelineDayTabs");
@@ -2249,7 +2249,7 @@ function renderSchedule(){
   const readonly = planActiveOwner !== "mine";
 
   if(schedule.length === 0){
-    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${readonly ? `${escapeHtml(planActiveOwner)} hasn't saved any artists yet.` : "No saved artists yet. Add some from the Artists tab."}</p></div>`;
+    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${readonly ? `${escapeHtml(planActiveOwner)} hasn't saved any artists yet.` : "No saved artists yet. Add some from the Lineup tab."}</p></div>`;
     return;
   }
 
@@ -5406,3 +5406,14 @@ if(copyGroupSnapshotHtmlBtn) copyGroupSnapshotHtmlBtn.onclick = async (e)=>{
 renderVenueTable();
 if(typeof characters !== "undefined") showCharacters(currentFilteredCharacters());
 if(typeof loadGetInvolved === "function") loadGetInvolved();
+
+// Timeline is the Lineup tab's default view (browseAllArtists() — the
+// "Browse all artists" button — switches to List/search on demand). Its
+// render needs venueDirectory (for main-stage ordering), which like
+// characters/glossary above is only fully defined by this point in the
+// script, so the initial paint happens here rather than back where the
+// view-toggle buttons are wired up.
+if(artistsView === "timeline"){
+  renderArtistTimelineDayTabs();
+  renderArtistsTimeline();
+}

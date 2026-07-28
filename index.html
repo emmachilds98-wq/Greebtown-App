@@ -53,7 +53,7 @@
     <h1>Boomtown 26</h1>
     <div>Chapter Five: Radical Redesign · 12–16 Aug</div>
   </div>
-  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 15:37</span>
+  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 15:50</span>
 </header>
 
 <main>
@@ -149,8 +149,8 @@ Meet at the clock tower if separated"></textarea>
 
   <!-- ARTISTS -->
   <section id="artists" class="screen">
-    <div class="eyebrow">Lineup</div>
-    <h2 style="margin-bottom:14px;">Artists</h2>
+    <div class="eyebrow">Full lineup &amp; timetable</div>
+    <h2 style="margin-bottom:14px;">Lineup</h2>
     <div class="search-row">
       <input type="text" id="artistSearch" placeholder="Browsing all 1173 artists — use a genre chip or search to narrow it down">
       <button class="ghost" id="clearArtistSearchBtn" style="display:none;">Clear</button>
@@ -159,15 +159,15 @@ Meet at the clock tower if separated"></textarea>
     <div class="stagelist" id="genreChips" style="margin:10px 0 0;"><span class="chip" data-g="Acid / Techno">Acid / Techno</span><span class="chip" data-g="Alt / Punk / Metal">Alt / Punk / Metal</span><span class="chip" data-g="Bass / Alt">Bass / Alt</span><span class="chip" data-g="Bass / D&amp;B">Bass / D&amp;B</span><span class="chip" data-g="Bass / Drum &amp; Bass">Bass / Drum &amp; Bass</span><span class="chip" data-g="Bass / Dub / Jungle">Bass / Dub / Jungle</span><span class="chip" data-g="Bass / Hardstyle">Bass / Hardstyle</span><span class="chip" data-g="Bass / Party">Bass / Party</span><span class="chip" data-g="Bass / Rave">Bass / Rave</span><span class="chip" data-g="Breaks / Big Beat">Breaks / Big Beat</span><span class="chip" data-g="Cabaret / Variety">Cabaret / Variety</span><span class="chip" data-g="D&amp;B / Reggae / Headline">D&amp;B / Reggae / Headline</span><span class="chip" data-g="Dub / Bass">Dub / Bass</span><span class="chip" data-g="Dubstep / Bass">Dubstep / Bass</span><span class="chip" data-g="Eclectic / DJ">Eclectic / DJ</span><span class="chip" data-g="Folk / Balkan / Party">Folk / Balkan / Party</span><span class="chip" data-g="Hardcore / Gabber">Hardcore / Gabber</span><span class="chip" data-g="House / Dance">House / Dance</span><span class="chip" data-g="House / Techno">House / Techno</span><span class="chip" data-g="Irish Folk / Trad">Irish Folk / Trad</span><span class="chip" data-g="Live / Alternative">Live / Alternative</span><span class="chip" data-g="Party / Playback Sets">Party / Playback Sets</span><span class="chip" data-g="Party / Variety">Party / Variety</span><span class="chip" data-g="Psytrance / Trance">Psytrance / Trance</span><span class="chip" data-g="Swing / Variety">Swing / Variety</span><span class="chip" data-g="Techno / Electro">Techno / Electro</span><span class="chip" data-g="World / Eclectic">World / Eclectic</span></div>
     <p class="empty-note" style="margin:10px 0;">Full Wed–Sun times below, sourced from Clashfinder's crowd-maintained Boomtown 26 schedule and cross-checked after Boomtown posted official day splits/set times in the app. Most end times are real, not estimated — anything still marked <strong>(est.)</strong> wasn't in that source and is guessed as "until the next act on that stage." Always worth a final check against the official app once you're on-site, especially for anything added or changed last-minute.</p>
     <div class="viewtoggle" id="artistsViewToggle">
-      <button class="active" id="artistsViewListBtn">List / search</button>
-      <button id="artistsViewTimelineBtn">Timeline by stage</button>
+      <button id="artistsViewListBtn">List / search</button>
+      <button class="active" id="artistsViewTimelineBtn">Timeline by stage</button>
     </div>
 
-    <div id="artistsListView">
+    <div id="artistsListView" style="display:none;">
     <div id="artistResults"><p class="empty-note">Start typing a name, stage or genre — or tap a genre chip above — to search 1173+ acts across all 5 days.</p></div>
     </div>
 
-    <div id="artistsTimelineView" style="display:none;">
+    <div id="artistsTimelineView">
       <div class="stagelist" id="artistTimelineDayTabs" style="margin-bottom:10px;"></div>
       <p class="empty-note" style="margin-bottom:8px;">Scroll sideways for time, down for stage. Tap a block to see who's playing and save it.</p>
       <div class="timeline-outer" id="artistTimelineOuter"><div id="artistTimelineGrid"></div></div>
@@ -199,7 +199,7 @@ Meet at the clock tower if separated"></textarea>
       <button id="viewTimelineBtn">Timeline</button>
     </div>
     <div id="nowNextBanner"></div>
-    <div id="scheduleList"><div class="card"><p class="empty-note">No saved artists yet. Add some from the Artists tab.</p></div></div>
+    <div id="scheduleList"><div class="card"><p class="empty-note">No saved artists yet. Add some from the Lineup tab.</p></div></div>
 
     <div id="planTimelineView" style="display:none;">
       <div class="stagelist" id="planTimelineDayTabs" style="margin:10px 0;"></div>
@@ -722,7 +722,7 @@ Talk to an actor in character
 
 <nav class="tabbar">
   <button class="tab active" data-tab="home"><span class="icon">🏠</span>Home</button>
-  <button class="tab" data-tab="artists"><span class="icon">🎵</span>Artists</button>
+  <button class="tab" data-tab="artists"><span class="icon">🎵</span>Lineup</button>
   <button class="tab" data-tab="plan"><span class="icon">⭐</span>Plan</button>
   <button class="tab" data-tab="mapscreen"><span class="icon">🗺</span>Map</button>
   <button class="tab" data-tab="discover"><span class="icon">✨</span>Discover</button>
