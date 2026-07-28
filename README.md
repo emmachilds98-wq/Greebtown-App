@@ -127,6 +127,8 @@ The Discover screen's Sync card has a "Sync now" button (Firebase Firestore, no 
 
 This limits reads/writes to the exact `rooms/{roomCode}/members/{name}` shape the app uses and blocks everything else in the database — but with no login, anyone who knows (or guesses) a room code can read and write to it. There's no per-user auth in this model, so **pick a room code that isn't guessable** (a short phrase, not "team1" or "boomtown"), the same way you'd treat a shared Wi-Fi password.
 
+This deployment's room code is pre-set in `js/app.js` (`const GROUP_ROOM_CODE`), auto-filled and saved for everyone so nobody has to type or agree one — the Sync card's room code field just shows it. If you fork this for a different group, change that one constant to a new unguessable code.
+
 ---
 
 ### Notes for the technically curious
