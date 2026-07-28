@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v68";
-const APP_BUILD_TIME = "2026-07-28T16:31:00Z";
+const APP_CACHE_VERSION = "v69";
+const APP_BUILD_TIME = "2026-07-28T16:38:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -4105,10 +4105,20 @@ if(contributorNameInput){
       Store.set("contributorName", contributorNameInput.value);
     }
     syncContributorNameDisplays();
+    // Picking a name from the dropdown is the one moment a first-time
+    // setup most needs instant feedback — otherwise nothing visibly
+    // happens until the next periodic tick or a manual "Sync now" tap,
+    // which reads as broken. Skip it for "Other…" itself (no name yet,
+    // just the text field appearing) — the oninput handler below covers
+    // that once something's actually typed.
+    if(contributorNameInput.value !== "__other__" && typeof autoSyncNow === "function") autoSyncNow("name picked");
   };
   contributorOtherInput.oninput = ()=>{
     if(contributorNameInput.value === "__other__") Store.set("contributorName", contributorOtherInput.value.trim());
     syncContributorNameDisplays();
+  };
+  contributorOtherInput.onblur = ()=>{
+    if(contributorNameInput.value === "__other__" && contributorOtherInput.value.trim() && typeof autoSyncNow === "function") autoSyncNow("name picked");
   };
 }
 
