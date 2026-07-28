@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v52";
-const APP_BUILD_TIME = "2026-07-28T07:10:00Z";
+const APP_CACHE_VERSION = "v53";
+const APP_BUILD_TIME = "2026-07-28T11:57:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -95,7 +95,7 @@ fixBottomClearance();
 //    instead, kept separate per contributor, shown only in their own
 //    person-tab on the Plan, Bingo, and My Character cards. Sync must
 //    never read or write other personal fields: meeting, notes, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -2580,8 +2580,8 @@ const venueDirectory = [
   { name:"Infinity", type:"Main stage", status:"rumoured", music:"unclear", genre:"Genre policy unconfirmed", near:"Unclear", info:"One of Chapter Five's smaller stages — treat as a wildcard; no 2026-specific confirmation found for this name at all." },
   { name:"The Observatory", type:"Research hub", status:"confirmed", music:false, genre:"—", near:"Thrutopia (likely)", info:"Genuine 2026 academic study led by Dr Martha Newson, 10+ UK universities — real research, not story canon." },
   { name:"The Boomtown Bobbies", type:"Hidden venue", status:"rumoured", music:true, genre:"DJs, live takeovers", near:"Area 404 / Oldtown", info:"Long-running mock police station tied to the storyline — no 2026 confirmation found; recent evidence (a Nachtlicker co-billing post) ties it to past chapters, not yet reconfirmed for Chapter Five." },
-  { name:"Soapranos Laundrette", type:"Hidden venue", status:"rumoured", music:true, genre:"Dance/house DJs", near:"Letsbe Avenue", info:"Laundrette-fronted micro venue with its own account and a Boomtown-official shout-out — no 2026-dated confirmation found, only prior-chapter posts, so treat as unconfirmed for Chapter Five for now." },
-  { name:"Hotel Paradiso", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic, lounge", near:"Copperwood", info:"Faded-glamour hotel bar with its own account; found in 2023 and 2025 chapters but no 2026 confirmation found — was part of Copperwood's Chapter Four (2025) and earlier." },
+  { name:"Soapranos Laundrette", type:"Hidden venue", status:"confirmed", music:true, genre:"Dance/house DJs", near:"Letsbe Avenue", info:"Laundrette-fronted micro venue on Letsbe Avenue's high street — confirmed for 2026 with a full Thu–Sun DJ programme including Laundry Night Live and Soapranos: Hotwash!" },
+  { name:"Hotel Paradiso", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, lounge", near:"Copperwood", info:"Faded-glamour hotel-themed micro venue in Copperwood — confirmed returning for 2026 ('Hotel on Wheels') with a full Thu–Sat lounge/DJ programme; check in at the 'front desk'." },
   { name:"Luck Exchange Casino", type:"Hidden venue", status:"rumoured", music:true, genre:"Party, eclectic", near:"Area 404", info:"Casino-themed venue promoted by Boomtown's own account in past chapters; no 2026 confirmation found." },
   { name:"The Garden Centre", type:"Shop / hidden venue", status:"rumoured", music:true, genre:"Chill, eclectic", near:"Botanica", info:"Garden-centre-fronted spot fitting Botanica's plant-temple theme; found live at Boomtown 2025 but no 2026 confirmation found yet." },
   { name:"Botanica Zoo", type:"Hidden venue", status:"confirmed", music:true, genre:"Jungle, hardcore, breaks, UK garage, bass", near:"Botanica", info:"Feral, animal-led 'anarcho-squat zoo' venue — 2026 event listings (Killa P, DJ Hybrid, 14 Aug) and its own 'just over 2 weeks til Boomtown' July 2026 post confirm it's back for Chapter Five." },
@@ -2626,12 +2626,12 @@ const venueDirectory = [
   { name:"Retro Amusements Arcade", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Unclear", info:"Past chapters have run a retro amusements arcade among the site's entertainment; not explicitly reconfirmed for 2026 yet." },
   { name:"Vintage Fairground (waltzers & rides)", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Oldtown / Area 404 (typical)", info:"Past chapters have included a vintage fairground with waltzers and similar rides alongside the chair-o-plane; general presence expected but exact 2026 line-up of rides unconfirmed." },
   { name:"Little Pharma", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic party DJs", near:"Unclear", info:"Seen in past chapters; no 2026 listing found — chase it but don't bank on it." },
-  { name:"Postal Posse", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic", near:"Botanica (past chapters)", info:"Past-chapter character-led micro world tied to Botanica's postal-worker subplot; no 2026 evidence found." },
+  { name:"Postal Posse", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic", near:"Botanica", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations." },
   { name:"Copper Feel Cabaret", type:"Hidden venue", status:"rumoured", music:true, genre:"Cabaret, live", near:"Copperwood (past chapters)", info:"Copperwood-adjacent name from past searches; not confirmed for 2026." },
   { name:"Cosmic Junkyard", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic bass", near:"Unclear", info:"Turned up in past-chapter searches with no dedicated account; treat as unconfirmed." },
   { name:"Clik Clik", type:"Hidden venue", status:"rumoured", music:false, genre:"Photo-booth / party novelty", near:"Unclear", info:"Seen in past social mentions; no 2026 confirmation found." },
   { name:"Engine House", type:"Hidden venue", status:"rumoured", music:true, genre:"Industrial, eclectic", near:"Unclear", info:"Past-chapter name with no dedicated 2026 account found." },
-  { name:"Job Centre", type:"Hidden venue", status:"rumoured", music:false, genre:"—", near:"Metropolis (past chapters)", info:"Reported to have closed for good in 2023 and folded into the Betterverse™ storyline — don't go looking for it." },
+  { name:"Job Centre", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Metropolis", info:"Reopens for 2026 as 'Jobcentre 2.0', after previously folding into the Betterverse™ storyline — this year's version adds aptitude tests, biometric data collection and new jobs to appraise your skillset." },
   { name:"Shamrock", type:"Hidden venue", status:"rumoured", music:true, genre:"Irish/folk, party", near:"Unclear", info:"Past-chapter name; no 2026 evidence found." },
   { name:"Indian Street Food", type:"Food & drink", status:"confirmed", music:false, genre:"—", near:"Site-wide", info:"One of the cuisines Boomtown has confirmed for 2026, plus a £6 meal deal at selected traders — you'll pass stalls like this rather than need to seek them out." },
   { name:"Caribbean Comfort Food", type:"Food & drink", status:"confirmed", music:false, genre:"—", near:"Site-wide", info:"Confirmed 2026 food category — an everyday-encounter stall, not a hidden find." },
@@ -3970,6 +3970,36 @@ function renderHomeSyncStatus(){
 }
 renderHomeSyncStatus();
 
+// The "how data/sync/updates work" explainer only needs a full read
+// once — collapses to a one-liner after the first Home visit rather
+// than reappearing in full on every single open. Still one tap away.
+function renderHomeInfoCard(){
+  const box = document.getElementById("homeInfoCard");
+  if(!box) return;
+  const seen = Store.get("seenHomeInfoCard");
+  if(!seen){
+    box.innerHTML = `
+      <span class="tag">Read this once</span>
+      <h3>💾 Your data, sync &amp; updates</h3>
+      <p>Everything you add saves itself to this device the instant you type or tap — no save button. Once you've picked your name in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a>, this phone syncs itself automatically every time you open the app with signal — no button needed, and no one has to remember. It quietly sends your updates up and pulls everyone else's in behind the scenes; a "Sync now" button is there too for an instant one mid-session.</p>
+      <p>Shared things — theories, hidden-venue finds, journal quotes, live sightings, district notes, get-involved ticks, found socials, landmarks — combine into one pool everyone sees (Discover's "All notes"). Your Plan, bingo card and character stay yours — sync never merges anyone else's into them — but everyone else's land in their own named tab right next to yours, on the Plan, Bingo and My Character screens, so you can see what your friends have without it touching your own.</p>
+      <p>Want just your own stuff backed up? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
+      <p>The app itself updates quietly in the background whenever you're online, and keeps working fully offline once it's loaded once — updates never touch anything you've saved.</p>
+      <button class="ghost" id="collapseHomeInfoBtn" style="margin-top:10px;">Got it, don't show this in full again</button>
+    `;
+    const collapseBtn = document.getElementById("collapseHomeInfoBtn");
+    if(collapseBtn) collapseBtn.onclick = ()=>{ Store.set("seenHomeInfoCard", true); renderHomeInfoCard(); };
+  } else {
+    box.innerHTML = `
+      <h3 style="margin-bottom:0;">💾 Your data, sync &amp; updates</h3>
+      <p style="margin-top:6px;">Saves itself automatically, syncs itself automatically once you've picked a name — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a> · <a class="inline-link" href="javascript:void(0)" id="expandHomeInfoLink">full explanation</a></p>
+    `;
+    const expandLink = document.getElementById("expandHomeInfoLink");
+    if(expandLink) expandLink.onclick = ()=>{ Store.set("seenHomeInfoCard", false); renderHomeInfoCard(); };
+  }
+}
+renderHomeInfoCard();
+
 const copySyncCodeBtn = document.getElementById("copySyncCodeBtn");
 if(copySyncCodeBtn) copySyncCodeBtn.onclick = (e)=>{
   if(!currentContributorName()){ window.alert("Pick who you are above first, so your teammates know whose update this is."); return; }
@@ -4169,6 +4199,7 @@ autoSyncOnOpen();
 // read-only snapshot from a teammate's sync. Switching tabs never
 // copies, merges, or overwrites one into the other.
 let myCharacterActiveOwner = "mine";
+let charFormForcedOpen = false;
 
 function myCharacterPeopleNames(){
   const people = Store.get("peopleCharacters") || {};
@@ -4220,9 +4251,13 @@ function renderMyCharacter(){
     return;
   }
 
-  if(formFields) formFields.style.display = "";
   const c = Store.get("myCharacter");
-  if(!c || !c.name){ box.innerHTML = ""; return; }
+  const hasChar = !!(c && c.name);
+  // Once a character's saved, the 5-field edit form is just clutter on
+  // every return visit — lead with the summary card instead and only
+  // bring the form back if they actually tap Edit.
+  if(formFields) formFields.style.display = (hasChar && !charFormForcedOpen) ? "none" : "";
+  if(!hasChar){ box.innerHTML = ""; return; }
   box.innerHTML = `
     <div class="char-card">
       <div style="font-size:16px; font-weight:700; color:var(--accent-amber);">${escapeHtml(c.name)}</div>
@@ -4231,7 +4266,13 @@ function renderMyCharacter(){
       ${c.catchphrase ? `<p style="margin-top:6px; font-size:14px; font-style:italic;">"${escapeHtml(c.catchphrase)}"</p>` : ""}
       ${c.backstory ? `<p style="margin-top:6px; font-size:14px; color:var(--text-muted);">${escapeHtml(c.backstory)}</p>` : ""}
     </div>
+    ${charFormForcedOpen ? "" : `<button class="ghost" id="editCharBtn" style="margin-top:8px;">Edit character</button>`}
   `;
+  const editBtn = document.getElementById("editCharBtn");
+  if(editBtn) editBtn.onclick = ()=>{
+    charFormForcedOpen = true;
+    renderMyCharacter();
+  };
 }
 
 function loadMyCharacterForm(){
@@ -4253,6 +4294,7 @@ document.getElementById("saveCharBtn").onclick = ()=>{
     backstory: document.getElementById("charBackstory").value.trim()
   };
   Store.set("myCharacter", character);
+  charFormForcedOpen = false;
   renderMyCharacter();
 };
 
@@ -5014,7 +5056,8 @@ renderConsolidatedNotes();
 const officialLiveIntel = [
   { text:"Boomtown secured planning permission for a 20% capacity boost this chapter — from roughly 66,000 up to just under 77,000 attendees — the scale behind the 'Radical Redesign' push for more space, more woodland and more hidden places across the whole site.", source:"South Downs National Park Authority planning approval, via festival trade press", when:"2026", confirmed:true },
   { text:"Grand Central has moved to roomier woodland terrain as part of the redesign — if you remember it from a previous chapter, don't expect it in the same spot this year.", source:"Official Chapter Five redesign coverage", when:"2026", confirmed:true },
-  { text:"Hydro XL has taken over the former Origins stage footprint in Downtown and doubled in capacity to 20,000, running entirely on green hydrogen fuel cells — one of the UK's first large-scale stages to do so.", source:"Boomtown official announcement / festival press", when:"2026", confirmed:true }
+  { text:"Hydro XL has taken over the former Origins stage footprint in Downtown and doubled in capacity to 20,000, running entirely on green hydrogen fuel cells — one of the UK's first large-scale stages to do so.", source:"Boomtown official announcement / festival press", when:"2026", confirmed:true },
+  { text:"Metropolis's Job Centre — long reported closed and folded into the Betterverse™ storyline — is confirmed reopening for Chapter Five as 'Jobcentre 2.0', now with aptitude tests, biometric data collection and new jobs to appraise your skillset.", source:"Boomtown Jobcentre official social posts", when:"2026", confirmed:true }
 ];
 
 function loadOfficialLiveIntel(){
@@ -5161,7 +5204,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // MODEL note near Store/DEFAULTS above) — also left out of the
 // shareable group snapshot below, so handing that file to the group
 // can never leak one person's bingo card, character or private notes.
-const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt"];
+const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
