@@ -278,7 +278,7 @@
   }
   .char-card{border:1px dashed rgba(242,168,60,.45); border-radius:14px; padding:14px; background:linear-gradient(145deg, rgba(242,168,60,.08), var(--bg-panel-2));}
   .compact-list li + li{margin-top:5px;}
-  nav.tabbar{position:fixed; left:0; right:0; bottom:0; display:flex; background:rgba(11,21,18,.94); backdrop-filter:blur(10px); border-top:1px solid var(--line); padding:8px calc(2px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(2px + env(safe-area-inset-left)); z-index:30;}
+  nav.tabbar{position:fixed; left:0; right:0; bottom:0; display:flex; background:rgba(11,21,18,.94); backdrop-filter:blur(10px); border-top:1px solid var(--line); padding:8px calc(2px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(2px + env(safe-area-inset-left)); z-index:30; transform:translateZ(0); -webkit-transform:translateZ(0); will-change:transform;}
   .tab{flex:1; background:none; border:none; color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; padding:6px 2px; cursor:pointer;}
   .tab .icon{font-size:18px;}
   .tab.active{color:var(--accent-amber);}
