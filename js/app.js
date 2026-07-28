@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v73";
-const APP_BUILD_TIME = "2026-07-28T17:27:00Z";
+const APP_CACHE_VERSION = "v74";
+const APP_BUILD_TIME = "2026-07-28T18:46:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -1995,7 +1995,7 @@ function showTimelineDetailModal(artist, opts){
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
         </div>
-        ${opts.readonly ? "" : `<button aria-label="Toggle saved" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
+        ${opts.readonly ? "" : `<button class="star-toggle-lg" aria-label="Toggle saved" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
       </div>
     </div>
   `;
