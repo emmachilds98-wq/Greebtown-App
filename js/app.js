@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v79";
-const APP_BUILD_TIME = "2026-07-28T19:20:00Z";
+const APP_CACHE_VERSION = "v80";
+const APP_BUILD_TIME = "2026-07-28T19:30:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -225,6 +225,18 @@ tabs.forEach(tab=>{
 // long blind scroll, since it's grown to a lot of cards.
 // ===============================
 document.querySelectorAll("#discoverNav button").forEach(btn=>{
+  btn.onclick = ()=>{
+    const target = document.getElementById(btn.dataset.jump);
+    if(target) target.scrollIntoView({ behavior:"smooth", block:"start" });
+  };
+});
+
+// ===============================
+// MAP TOP NAVIGATOR — same jump-to-section pattern as Discover's, so
+// it's clear at a glance that logging and reference info both exist on
+// this screen instead of only surfacing after a long scroll.
+// ===============================
+document.querySelectorAll("#mapNav button").forEach(btn=>{
   btn.onclick = ()=>{
     const target = document.getElementById(btn.dataset.jump);
     if(target) target.scrollIntoView({ behavior:"smooth", block:"start" });
