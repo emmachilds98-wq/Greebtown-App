@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v65";
-const APP_BUILD_TIME = "2026-07-28T16:10:00Z";
+const APP_CACHE_VERSION = "v66";
+const APP_BUILD_TIME = "2026-07-28T16:16:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2224,8 +2224,11 @@ function renderPlanPersonTabs(){
   const names = Object.keys(people).filter(n=> (people[n]||[]).length > 0);
   if(names.length === 0){
     box.style.display = "none";
-    if(note) note.style.display = "none";
     planActiveOwner = "mine";
+    if(note){
+      note.style.display = "";
+      note.textContent = "Nobody's synced in yet — this is where a teammate's picks will show up (and in the Compare view below) once they have. Pick your name in Discover and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
+    }
     return;
   }
   box.style.display = "";
@@ -2243,8 +2246,8 @@ function renderPlanPersonTabs(){
   if(note){
     note.style.display = "";
     note.textContent = planActiveOwner === "mine"
-      ? "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours."
-      : `Viewing ${planActiveOwner}'s saved artists from their last Sync code — read-only, and it hasn't changed or added anything to your own list.`;
+      ? "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours. See everyone at once in the Compare view below."
+      : `Viewing ${planActiveOwner}'s saved artists from their last sync — read-only, and it hasn't changed or added anything to your own list.`;
   }
 }
 
@@ -2386,7 +2389,7 @@ function renderPlanCompare(){
   const people = comparePeopleList();
 
   if(people.length < 2){
-    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — swap Sync codes in Discover, then their picks will show up here alongside yours.</p></div>`;
+    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — pick your name in Discover and it syncs automatically whenever you've both got signal (no signal, there's a manual backup code there too). Once they've synced, their picks show up here alongside yours.</p></div>`;
     return;
   }
 
