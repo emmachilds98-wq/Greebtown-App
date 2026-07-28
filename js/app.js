@@ -29,21 +29,23 @@ fixBottomClearance();
 //    that copy is what every visitor's browser loads. Anything else here
 //    would leak one person's saved data to everyone as their default.
 //  - The one deliberately shared/merged flow is the Sync feature
-//    (buildSyncPayload/mergeSyncPayload) — it's opt-in and only ever
-//    touches the shared discovery-log style fields (clues, theories,
-//    hiddenVenues, discoveries, customSocials, quotes, sightings,
-//    customLandmarks), which merge additively with no duplicates from the
-//    same contributor — hiddenVenues/customLandmarks dedupe per name+from,
-//    not name alone, so two people's differing entries for a same-named
-//    place both survive instead of one silently overwriting the other, PLUS
-//    one read-only snapshot field: each person's saved-artist "schedule"
-//    rides along in the same code, but it is never merged into your own
-//    "schedule" key. Incoming schedules land under peopleSchedules[name]
-//    instead, kept separate per contributor, and the Plan screen's
-//    person-tab bar is the only place they're ever displayed. Sync must
-//    never read or write personal fields like schedule, meeting, notes,
-//    bingoCard, bingoMarked, bingoLocked, or myCharacter.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
+//    (buildSyncPayload/mergeSyncPayload, plus its cloud transport —
+//    pushToCloud/pullFromCloud — which auto-runs on app open as well as
+//    the manual Sync now button) — it only ever touches the shared
+//    discovery-log style fields (clues, theories, hiddenVenues,
+//    discoveries, customSocials, quotes, sightings, customLandmarks),
+//    which merge additively with no duplicates from the same contributor
+//    — hiddenVenues/customLandmarks dedupe per name+from, not name
+//    alone, so two people's differing entries for a same-named place
+//    both survive instead of one silently overwriting the other, PLUS
+//    two read-only snapshot fields: each person's saved-artist
+//    "schedule" and bingo card ride along in the same payload, but
+//    neither is ever merged into your own "schedule"/bingoCard — they
+//    land under peopleSchedules[name]/peopleBingo[name] instead, kept
+//    separate per contributor, shown only in their own person-tab on
+//    the Plan and Bingo screens. Sync must never read or write other
+//    personal fields: meeting, notes, myCharacter, roomCode.
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -3169,6 +3171,10 @@ function renderVenueTable(){
   `;
   }).join("") || `<p class="empty-note">No entries match these filters yet.</p>`;
   if(countNote) countNote.textContent = `Showing ${rows.length} of ${all.length} entries.`;
+  // Only the meta line ("near Botanica") and info blurb, never the venue's
+  // own name heading — a venue like "Botanica Zoo" would otherwise get its
+  // own name partially turned into a link.
+  body.querySelectorAll(".venue-row-meta, .venue-row-info").forEach(el=> linkifyKeyTerms(el));
   body.querySelectorAll(".removeHiddenVenueBtn").forEach(btn=>{
     btn.onclick = ()=>{
       const list = Store.get("hiddenVenues") || [];
@@ -3287,7 +3293,14 @@ function inlineTermIndex(){
 }
 
 function linkifyKeyTerms(container){
-  const index = inlineTermIndex();
+  // Called from renderVenueTable(), which fires once very early at
+  // top-level script init — before `characters`/`glossary` (defined
+  // much further down this file) exist yet. Guard against that TDZ
+  // crash rather than letting it abort the whole script; later calls
+  // (guide render, filter changes, etc.) succeed normally once
+  // everything is defined.
+  let index;
+  try{ index = inlineTermIndex(); }catch(e){ return; }
   const terms = Object.values(index).map(t=>t.label).concat(["districts","district"]);
   const escaped = terms.slice().sort((a,b)=> b.length - a.length).map(t=> t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
   const pattern = new RegExp("\\b(" + escaped.join("|") + ")\\b", "g");
@@ -3467,7 +3480,15 @@ function buildSyncPayload(){
     // receiving phone stores this under peopleSchedules[from], never
     // merged into its own "schedule". See the DATA ISOLATION MODEL note
     // near Store/DEFAULTS above.
-    schedule: Store.get("schedule") || []
+    schedule: Store.get("schedule") || [],
+    // Same read-only-snapshot treatment as schedule/peopleSchedules —
+    // lands in peopleBingo[from] on the receiving end, viewable in its
+    // own tab, never merged into or overwriting anyone's own card.
+    bingo: {
+      card: Store.get("bingoCard") || [],
+      marked: Store.get("bingoMarked") || [],
+      locked: !!Store.get("bingoLocked")
+    }
   };
 }
 
@@ -3485,7 +3506,7 @@ function decodeSyncCode(code){
 }
 
 function mergeSyncPayload(payload){
-  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0 };
+  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0 };
   const from = payload.from || "Someone";
 
   // Clue notes are freeform multi-line text per district, and an incoming
@@ -3611,6 +3632,20 @@ function mergeSyncPayload(payload){
     stats.schedule = payload.schedule.length;
   }
 
+  // Same read-only per-person snapshot treatment as schedule above —
+  // replaces that person's own bingo entry each resync, never touches
+  // this device's own bingoCard/bingoMarked/bingoLocked.
+  if(payload.bingo && Array.isArray(payload.bingo.card) && payload.bingo.card.length){
+    const peopleBingo = Store.get("peopleBingo") || {};
+    peopleBingo[from] = {
+      card: payload.bingo.card.slice(),
+      marked: Array.isArray(payload.bingo.marked) ? payload.bingo.marked.slice() : [],
+      locked: !!payload.bingo.locked
+    };
+    Store.set("peopleBingo", peopleBingo);
+    stats.bingo = 1;
+  }
+
   return { stats, from };
 }
 
@@ -3668,7 +3703,7 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     const payload = decodeSyncCode(raw);
     const { stats, from } = mergeSyncPayload(payload);
     input.value = "";
-    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}Nothing already saved was duplicated.`;
+    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}Nothing already saved was duplicated.`;
     refreshAfterMerge();
   }catch(err){
     note.textContent = "Couldn't read that code — make sure you copied the whole thing, with nothing missing from either end.";
@@ -3707,9 +3742,13 @@ function getFirestoreDb(){
   }
 }
 
+// This group's shared room code is fixed (not something to make up) —
+// pre-filled and saved automatically so nobody has to type it in.
+const GROUP_ROOM_CODE = "medway-massive";
 const roomCodeInput = document.getElementById("roomCodeInput");
 if(roomCodeInput){
-  roomCodeInput.value = Store.get("roomCode") || "";
+  if(!Store.get("roomCode")) Store.set("roomCode", GROUP_ROOM_CODE);
+  roomCodeInput.value = Store.get("roomCode");
   roomCodeInput.onchange = ()=> Store.set("roomCode", roomCodeInput.value.trim());
   roomCodeInput.onblur = roomCodeInput.onchange;
 }
@@ -3733,6 +3772,7 @@ function refreshAfterMerge(){
   if(typeof loadMap === "function") loadMap();
   if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
   if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+  if(typeof renderBingoPersonTabs === "function"){ renderBingoPersonTabs(); renderBingo(); }
 }
 
 async function pushToCloud(){
@@ -3751,7 +3791,7 @@ async function pullFromCloud(){
   const name = currentContributorName();
   if(!db || !room) return { stats: null, count: 0 };
   const snap = await db.collection("rooms").doc(room).collection("members").get();
-  const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0 };
+  const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0 };
   let count = 0;
   snap.forEach(doc=>{
     if(doc.id === name) return; // never merge your own payload back into yourself
@@ -3778,7 +3818,7 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
     if(!count){
       note.textContent = "Sent your update. No one else's synced to this room code yet.";
     }else{
-      note.textContent = `Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. Nothing already saved was duplicated.`;
+      note.textContent = `Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
     }
   }catch(err){
     note.textContent = "Couldn't sync — check you've got signal and try again.";
@@ -3787,29 +3827,33 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
   }
 };
 
-// Quiet-ish auto-pull whenever the app opens with a signal, so the
-// group's latest is there without anyone having to press anything —
-// this only ever pulls, it never pushes on its own; sending your own
-// update is opt-in via the Sync now button above ("upload when you
-// have signal"). Not silent, though — it leaves a one-line note behind
-// so anything that merged in automatically is still visible, not
-// invisible background writes to your saved data.
-(function autoPullOnOpen(){
+// Auto-sync whenever the app opens with a signal, so nobody has to
+// remember to tap "Sync now" — pushes your own update AND pulls
+// everyone else's, same as the button does, just automatic. Not
+// silent, though — it leaves a one-line note behind so background
+// syncing is still visible, not invisible writes to your saved data.
+// The manual button stays for an immediate mid-session sync without
+// having to reopen the app.
+function autoSyncOnOpen(){
   if(navigator.onLine === false) return;
   if(!currentRoomCode() || !currentContributorName()) return;
   if(!getFirestoreDb()) return;
-  pullFromCloud().then(({ stats, count })=>{
-    if(!count) return;
-    refreshAfterMerge();
+  pushToCloud().then(()=> pullFromCloud()).then(({ stats, count })=>{
     const note = document.getElementById("cloudSyncStatusNote");
+    if(!count){
+      if(note) note.textContent = "Auto-synced your update on open. No one else's synced to this room code yet.";
+      return;
+    }
+    refreshAfterMerge();
     if(note){
       const total = Object.values(stats).reduce((a,b)=>a+b, 0);
       note.textContent = total
-        ? `Auto-synced on open: picked up ${total} new item${total===1?"":"s"} from ${count} other device${count===1?"":"s"}.`
-        : `Auto-synced on open: up to date with ${count} other device${count===1?"":"s"}, nothing new.`;
+        ? `Auto-synced on open: sent your update, picked up ${total} new item${total===1?"":"s"} from ${count} other device${count===1?"":"s"}.`
+        : `Auto-synced on open: sent your update, up to date with ${count} other device${count===1?"":"s"}, nothing new from them.`;
     }
   }).catch(()=>{ /* no signal, or room not set up yet — skip quietly */ });
-})();
+}
+autoSyncOnOpen();
 
 // ===============================
 // YOUR CHARACTER BUILDER — a persona to introduce yourself to actors
@@ -3906,17 +3950,72 @@ function buildBingoSquares(){
   return shuffledPick(custom.concat(filler), 24);
 }
 
+// "mine" is always this device's own bingoCard/bingoMarked/bingoLocked
+// — the only one that's ever editable. Anything else is a name key into
+// peopleBingo, a read-only snapshot from a teammate's sync. Switching
+// tabs never copies, merges, or overwrites one into the other.
+let bingoActiveOwner = "mine";
+
+function bingoPeopleNames(){
+  const people = Store.get("peopleBingo") || {};
+  return Object.keys(people).filter(n=> ((people[n] && people[n].card) || []).length > 0).sort((a,b)=> a.localeCompare(b));
+}
+
+function renderBingoPersonTabs(){
+  const box = document.getElementById("bingoPersonTabs");
+  if(!box) return;
+  const names = bingoPeopleNames();
+  if(names.length === 0){
+    box.style.display = "none";
+    bingoActiveOwner = "mine";
+    return;
+  }
+  box.style.display = "";
+  box.className = "tabstrip";
+  box.innerHTML = `<button class="${bingoActiveOwner==="mine"?"active":""}" data-owner="mine">⭐ Mine</button>` +
+    names.map(n=>`<button class="person ${bingoActiveOwner===n?"active":""}" data-owner="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join("");
+  box.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      bingoActiveOwner = btn.dataset.owner;
+      renderBingoPersonTabs();
+      renderBingo();
+    };
+  });
+}
+
 function renderBingo(){
   const grid = document.getElementById("bingoGrid");
   const generateBtn = document.getElementById("bingoGenerateBtn");
   const lockBtn = document.getElementById("bingoLockBtn");
   const note = document.getElementById("bingoStatusNote");
+  const customInput = document.getElementById("bingoCustomInput");
   if(!grid) return;
+
+  if(bingoActiveOwner !== "mine"){
+    const people = Store.get("peopleBingo") || {};
+    const data = people[bingoActiveOwner] || { card: [], marked: [], locked: false };
+    if(customInput) customInput.style.display = "none";
+    generateBtn.style.display = "none";
+    lockBtn.style.display = "none";
+    const theirMarked = new Set([...(data.marked || []), 12]);
+    const completedLines = BINGO_LINES.filter(line=> line.every(i=> theirMarked.has(i)));
+    const winningCells = new Set(completedLines.flat());
+    grid.innerHTML = data.card.map((text,i)=>{
+      const isFree = i === 12;
+      const isMarked = isFree || (data.marked || []).includes(i);
+      const isWinning = winningCells.has(i);
+      return `<div class="bingo-cell${isMarked ? " marked" : ""}${isFree ? " free" : ""}${isWinning ? " winning" : ""}" data-i="${i}">${escapeHtml(text)}</div>`;
+    }).join("");
+    grid.querySelectorAll(".bingo-cell").forEach(cell=>{ cell.onclick = null; });
+    note.textContent = data.locked
+      ? `🔒 ${bingoActiveOwner} locked in — ${(data.marked || []).length}/24 crossed off. Read-only — this is their card, not yours.`
+      : `${bingoActiveOwner} hasn't locked in yet — showing their card as last synced, still subject to change.`;
+    return;
+  }
 
   let card = Store.get("bingoCard") || [];
   const locked = !!Store.get("bingoLocked");
   const marked = Store.get("bingoMarked") || [];
-  const customInput = document.getElementById("bingoCustomInput");
   if(customInput) customInput.style.display = locked ? "none" : "";
 
   if(!card.length && !locked){
@@ -3986,6 +4085,7 @@ if(bingoCustomInputEl){
   bingoCustomInputEl.oninput = ()=> Store.set("bingoCustomText", bingoCustomInputEl.value);
 }
 
+renderBingoPersonTabs();
 renderBingo();
 
 // ===============================
@@ -4025,9 +4125,14 @@ function showCharacters(list){
     div.innerHTML = `
       <strong>${c.name}</strong><br>
       <small>${c.faction} · ${c.where}</small>
-      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">${c.blurb}</p>
-      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 ${c.ask}</p>
+      <div class="linkify-zone">
+        <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">${c.blurb}</p>
+        <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 ${c.ask}</p>
+      </div>
     `;
+    // Only the blurb/ask text, not the card's own name heading, so a
+    // character's own name doesn't turn into a pointless self-link.
+    linkifyKeyTerms(div.querySelector(".linkify-zone"));
     characterResults.appendChild(div);
   });
 }
@@ -4076,12 +4181,13 @@ function loadGetInvolved(){
       <div class="item-top">
         <div>
           <strong>${g.title}</strong> ${isDone ? "✅" : ""}${who ? ` <small style="color:var(--accent-teal);">(${escapeHtml(who)})</small>` : ""}<br>
-          <small>${g.text}</small>
+          <small class="linkify-zone">${g.text}</small>
           ${g.link ? `<br><a class="linkbtn" href="${g.link}" target="_blank" rel="noopener">${g.linkLabel}</a>` : ""}
         </div>
         <button>${isDone ? "Done" : "Mark done"}</button>
       </div>
     `;
+    linkifyKeyTerms(div.querySelector(".linkify-zone"));
     div.querySelector(".item-top > button").onclick = ()=>{
       let d = Store.get("involvedDone") || [];
       if(involvedEntryFor(d, g.title)){
@@ -4726,3 +4832,14 @@ if(copyGroupSnapshotHtmlBtn) copyGroupSnapshotHtmlBtn.onclick = async (e)=>{
   const note = document.getElementById("downloadGroupStatusNote");
   note.textContent = "Copied the entire file as text — paste it into a plain text editor and save it with a .html extension.";
 };
+
+// renderVenueTable()/showCharacters()/loadGetInvolved() all first run
+// earlier in this file than `characters`/`glossary` are fully defined
+// (glossary is one of the very last things declared), so their
+// inline-term links silently no-op that first time (see the try/catch
+// in linkifyKeyTerms). Re-run them now, at the very end of the script
+// once everything is defined, so the very first paint is fully linked
+// too, not just after a user touches a filter/search.
+renderVenueTable();
+if(typeof characters !== "undefined") showCharacters(currentFilteredCharacters());
+if(typeof loadGetInvolved === "function") loadGetInvolved();

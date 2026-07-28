@@ -401,10 +401,10 @@ Meet at the clock tower if separated"></textarea>
 
     <div class="card" id="jumpSync">
       <h3>🤝 Sync with your group</h3>
-      <p>Shares theories, hidden-venue finds and notes across everyone — automatically, no copying and pasting needed.</p>
+      <p>Shares theories, hidden-venue finds, notes and locked-in bingo cards across everyone — automatically, no copying and pasting needed. This app's room code is already set for us: <strong>medway-massive</strong> — nobody needs to make one up or type it in.</p>
       <ol class="compact-list" style="padding-left:20px;">
-        <li>Pick your name, and agree a room code with the group (like a shared password — everyone types the same one in).</li>
-        <li>Got signal? Tap <strong>Sync now</strong>. Your updates go up, everyone else's come in — nothing gets duplicated.</li>
+        <li>Pick your name below — that's the only thing you need to set.</li>
+        <li>Whenever you've got signal and open the app, it syncs automatically in the background — your updates go up, everyone else's come in, nothing gets duplicated. Tap <strong>Sync now</strong> any time for an immediate one, mid-session.</li>
       </ol>
       <div class="field"><label>Who are you?</label>
         <select id="contributorName">
@@ -419,7 +419,7 @@ Meet at the clock tower if separated"></textarea>
         </select>
       </div>
       <div class="field" id="contributorOtherField" style="display:none;"><label>Your name</label><input type="text" id="contributorOtherInput" placeholder="Type your name"></div>
-      <div class="field"><label>Group room code</label><input type="text" id="roomCodeInput" placeholder="e.g. redesign-crew-26"></div>
+      <div class="field"><label>Group room code (already set for us)</label><input type="text" id="roomCodeInput"></div>
       <button class="action" id="cloudSyncBtn" style="margin:4px 6px 0 0;">☁️ Sync now</button>
       <p class="empty-note" id="cloudSyncStatusNote" style="margin-top:6px;"></p>
       <p style="margin-top:14px;"><strong>No signal?</strong> Copy a code by hand instead — same result:</p>
@@ -455,6 +455,8 @@ Meet at the clock tower if separated"></textarea>
     <div class="card" id="jumpBingo">
       <h3>🎲 Boomtown bingo</h3>
       <p>Write your own 24 squares below (one per line) — under 24 and the rest fill from a default list, over 24 and it picks 24 at random from what you wrote. Shuffle as much as you like, then lock it in: the squares are fixed for the weekend after that, but you can still tap any square to cross it off as you go.</p>
+      <p class="empty-note">Sync brings in everyone's cards too, once locked — see the tabs below to check who's locked in and with what. Yours is never touched by anyone else's.</p>
+      <div class="tabstrip" id="bingoPersonTabs" style="display:none; margin-bottom:8px;"></div>
       <textarea id="bingoCustomInput" placeholder="One idea per line, e.g.
 Find a hidden venue
 Get given Boomtown bucks
