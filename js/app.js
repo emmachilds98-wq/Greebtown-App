@@ -6,11 +6,21 @@
 // version, and if they differ, turns the header pill into a one-tap fix
 // that clears every cache and service worker registration before
 // reloading — a proper nuclear refresh, not just location.reload().
-// Bump APP_CACHE_VERSION here to match service-worker.js's
-// CACHE_VERSION every time it's bumped, and keep the pill's "Updated"
-// text in index.html current too.
+// Bump APP_CACHE_VERSION and APP_BUILD_TIME here to match
+// service-worker.js's CACHE_VERSION every time it's bumped — the pill's
+// "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
+// own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v47";
+const APP_CACHE_VERSION = "v48";
+const APP_BUILD_TIME = "2026-07-28T05:21:00Z";
+(function renderBuildStatusPill(){
+  const pill = document.getElementById("buildStatusPill");
+  if(!pill) return;
+  const d = new Date(APP_BUILD_TIME);
+  const time = d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  const date = d.toLocaleDateString([], { day:"numeric", month:"short" });
+  pill.textContent = `Updated ${date}, ${time}`;
+})();
 (function checkForStaleCopy(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
