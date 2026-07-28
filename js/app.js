@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v59";
-const APP_BUILD_TIME = "2026-07-28T14:23:00Z";
+const APP_CACHE_VERSION = "v61";
+const APP_BUILD_TIME = "2026-07-28T15:37:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -1729,6 +1729,44 @@ function allArtists(){
   return artists.concat(Store.get("customArtists"));
 }
 
+// A starred artist is saved as a snapshot ({...artist}) at the moment it's
+// starred, so if the festival later moves that artist to a new stage/day/
+// time, the saved snapshot goes stale and the plan shows the old slot
+// instead of following the artist to the new one. Re-sync every saved
+// snapshot (both this device's own plan and any synced group plans)
+// against the current lineup data on every load, so a starred artist keeps
+// tracking their current slot rather than freezing at whatever it was when
+// starred. An artist dropped entirely from the lineup is left as-is.
+function reconcileSavedArtists(){
+  const byName = new Map(allArtists().map(a=>[a.name, a]));
+  const fields = ["stage","day","start","end","genre"];
+  function reconciled(list){
+    let changed = false;
+    const next = list.map(saved=>{
+      const latest = byName.get(saved.name);
+      if(!latest) return saved;
+      const updated = { ...saved };
+      fields.forEach(f=>{
+        if(latest[f] !== undefined && latest[f] !== saved[f]){ updated[f] = latest[f]; changed = true; }
+      });
+      return updated;
+    });
+    return { list: next, changed };
+  }
+
+  const mine = reconciled(Store.get("schedule"));
+  if(mine.changed) Store.set("schedule", mine.list);
+
+  const people = Store.get("peopleSchedules") || {};
+  let peopleChanged = false;
+  Object.keys(people).forEach(person=>{
+    const r = reconciled(people[person] || []);
+    if(r.changed){ people[person] = r.list; peopleChanged = true; }
+  });
+  if(peopleChanged) Store.set("peopleSchedules", people);
+}
+reconcileSavedArtists();
+
 function timeLabel(a){
   if(a.day && a.day !== "TBC" && a.start){
     return `${a.day} · ${a.start}${a.end ? "–"+a.end+(a.estimatedEnd ? " (est.)" : "") : ""}`;
@@ -1845,9 +1883,25 @@ promptArtistSearch();
 // a horizontally-scrollable set of stage columns against a shared,
 // vertically-scrollable time axis.
 // ===============================
+// Stages down the left, time along the top — matches the official
+// Boomtown app's own timetable layout (and every printed festival
+// timetable), and scales better than the old stages-as-columns layout:
+// time is bounded to a single day so the horizontal scroll stays capped,
+// while the stage list — unbounded, 12 main stages plus 50+ hidden
+// venues — scrolls naturally downward instead of forcing an ever-wider
+// row of columns.
+// venueDirectory is declared further down the file, so this set is built
+// lazily on first use rather than at module-evaluation time.
+let _mainStageNames = null;
+function mainStageNames(){
+  if(!_mainStageNames) _mainStageNames = new Set(venueDirectory.filter(v=>v.type==="Main stage").map(v=>v.name));
+  return _mainStageNames;
+}
+
 function buildTimelineHTML(items, opts){
   opts = opts || {};
-  const pxPerMin = opts.pxPerMin || 2;
+  const pxPerMin = opts.pxPerMin || 2.6;
+  const rowHeight = opts.rowHeight || 48;
   if(!items.length){
     return { html: `<p class="empty-note" style="padding:16px;">Nothing to show here yet.</p>`, stages: [] };
   }
@@ -1857,8 +1911,8 @@ function buildTimelineHTML(items, opts){
     // Early-morning times (00:00–05:59) are always the tail of that
     // day's own overnight programme, not a fresh start (see toMinutes()
     // and DAY_ORDER above) — shift them past the rest of the day's raw
-    // minute-of-day range so they plot at the BOTTOM of the timeline,
-    // continuing on from the evening, instead of jumbled in at the top
+    // minute-of-day range so they plot at the END of the timeline,
+    // continuing on from the evening, instead of jumbled in at the start
     // as if they were the day's earliest slot.
     let start = (sh||0)*60 + (sm||0);
     if((sh||0) < 6) start += 1440;
@@ -1869,33 +1923,40 @@ function buildTimelineHTML(items, opts){
   });
   const minMin = Math.floor(Math.min(...parsed.map(p=>p._start))/60)*60;
   const maxMin = Math.ceil(Math.max(...parsed.map(p=>p._end))/60)*60;
-  const stages = [...new Set(parsed.map(p=>p.stage))].sort();
-  const totalHeight = Math.max((maxMin-minMin)*pxPerMin, 40);
+  // Main stages first (Grand Central, Hydro XL, etc.), then every smaller/
+  // hidden venue, alphabetically within each group.
+  const mainStages = mainStageNames();
+  const stages = [...new Set(parsed.map(p=>p.stage))].sort((a,b)=>{
+    const aMain = mainStages.has(a) ? 0 : 1;
+    const bMain = mainStages.has(b) ? 0 : 1;
+    return aMain !== bMain ? aMain - bMain : a.localeCompare(b);
+  });
+  const totalWidth = Math.max((maxMin-minMin)*pxPerMin, 40);
   const savedNames = opts.savedNames || null;
 
   let hourLabels = "", hourLines = "";
   for(let m=minMin; m<=maxMin; m+=60){
-    const top = (m-minMin)*pxPerMin;
+    const left = (m-minMin)*pxPerMin;
     const hh = Math.floor((((m%1440)+1440)%1440)/60).toString().padStart(2,"0");
-    hourLabels += `<div class="timeline-hour-label" style="top:${top}px;">${hh}:00</div>`;
-    hourLines += `<div class="timeline-hourline" style="top:${top}px;"></div>`;
+    hourLabels += `<div class="timeline-hour-label" style="left:${left}px;">${hh}:00</div>`;
+    hourLines += `<div class="timeline-vline" style="left:${left}px;"></div>`;
   }
 
-  const cols = stages.map(stage=>{
+  const rows = stages.map(stage=>{
     const stageItems = parsed.filter(p=>p.stage===stage);
     const blocks = stageItems.map(p=>{
-      const top = (p._start-minMin)*pxPerMin;
-      const height = Math.max((p._end-p._start)*pxPerMin, 26);
+      const left = (p._start-minMin)*pxPerMin;
+      const width = Math.max((p._end-p._start)*pxPerMin, 60);
       const isSaved = savedNames ? savedNames.has(p.name) : false;
       const cls = "timeline-block" + (isSaved ? " saved" : "") + (opts.readonly ? " readonly" : "");
-      return `<div class="${cls}" style="top:${top}px; height:${height}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}"><b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
+      return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}"><b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
-    return `<div class="timeline-col"><div class="timeline-col-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-body" style="height:${totalHeight}px;">${hourLines}${blocks}</div></div>`;
+    return `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${rowHeight}px;">${hourLines}${blocks}</div></div>`;
   }).join("");
 
   const html = `<div class="timeline-grid">
-    <div class="timeline-hours"><div class="timeline-col-head">&nbsp;</div><div class="timeline-body" style="height:${totalHeight}px;">${hourLabels}</div></div>
-    ${cols}
+    <div class="timeline-hours-row"><div class="timeline-row-head">&nbsp;</div><div class="timeline-hours-body" style="width:${totalWidth}px;">${hourLabels}</div></div>
+    ${rows}
   </div>`;
   return { html, stages };
 }
@@ -2308,8 +2369,8 @@ function renderPlanTimeline(){
 
   const hint = document.getElementById("planTimelineHint");
   if(hint) hint.textContent = readonly
-    ? "Scroll down for time, sideways for stage. Tap a block to see details."
-    : "Scroll down for time, sideways for stage. Tap a block to see details or unsave it.";
+    ? "Scroll sideways for time, down for stage. Tap a block to see details."
+    : "Scroll sideways for time, down for stage. Tap a block to see details or unsave it.";
 
   grid.querySelectorAll(".timeline-block").forEach(b=>{
     b.onclick = ()=>{
