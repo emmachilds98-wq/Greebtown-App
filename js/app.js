@@ -1778,8 +1778,16 @@ function buildTimelineHTML(items, opts){
   const parsed = items.map(a=>{
     const [sh,sm] = (a.start||"0:0").split(":").map(Number);
     const [eh,em] = (a.end||a.start||"0:0").split(":").map(Number);
+    // Early-morning times (00:00–05:59) are always the tail of that
+    // day's own overnight programme, not a fresh start (see toMinutes()
+    // and DAY_ORDER above) — shift them past the rest of the day's raw
+    // minute-of-day range so they plot at the BOTTOM of the timeline,
+    // continuing on from the evening, instead of jumbled in at the top
+    // as if they were the day's earliest slot.
     let start = (sh||0)*60 + (sm||0);
+    if((sh||0) < 6) start += 1440;
     let end = (eh||0)*60 + (em||0);
+    if((eh||0) < 6) end += 1440;
     if(end <= start) end += 1440;
     return { ...a, _start:start, _end:end };
   });
