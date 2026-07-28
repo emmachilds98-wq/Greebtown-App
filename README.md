@@ -112,9 +112,9 @@ The Discover screen's Sync card has a "Sync now" button (Firebase Firestore, no 
        match /rooms/{roomCode}/members/{memberName} {
          allow read: if true;
          allow write: if request.resource.data.keys().hasOnly([
-           'v','from','clues','theories','hiddenVenues','involvedDone',
-           'discoveries','customSocials','quotes','sightings',
-           'customLandmarks','schedule','updatedAt'
+           'v','from','clues','characterNotes','theories','hiddenVenues',
+           'involvedDone','discoveries','customSocials','quotes','sightings',
+           'customLandmarks','schedule','bingo','character','updatedAt'
          ]) && request.resource.data.size() < 900000;
        }
        match /{document=**} {
