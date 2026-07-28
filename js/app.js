@@ -38,14 +38,15 @@ fixBottomClearance();
 //    — hiddenVenues/customLandmarks dedupe per name+from, not name
 //    alone, so two people's differing entries for a same-named place
 //    both survive instead of one silently overwriting the other, PLUS
-//    two read-only snapshot fields: each person's saved-artist
-//    "schedule" and bingo card ride along in the same payload, but
-//    neither is ever merged into your own "schedule"/bingoCard — they
-//    land under peopleSchedules[name]/peopleBingo[name] instead, kept
-//    separate per contributor, shown only in their own person-tab on
-//    the Plan and Bingo screens. Sync must never read or write other
-//    personal fields: meeting, notes, myCharacter, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
+//    three read-only snapshot fields: each person's saved-artist
+//    "schedule", bingo card, and built character ride along in the same
+//    payload, but none is ever merged into your own
+//    "schedule"/bingoCard/myCharacter — they land under
+//    peopleSchedules[name]/peopleBingo[name]/peopleCharacters[name]
+//    instead, kept separate per contributor, shown only in their own
+//    person-tab on the Plan, Bingo, and My Character cards. Sync must
+//    never read or write other personal fields: meeting, notes, roomCode.
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0 };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -3488,7 +3489,11 @@ function buildSyncPayload(){
       card: Store.get("bingoCard") || [],
       marked: Store.get("bingoMarked") || [],
       locked: !!Store.get("bingoLocked")
-    }
+    },
+    // Same read-only-snapshot treatment again — lands in
+    // peopleCharacters[from], viewable in its own tab, never merged
+    // into or overwriting your own myCharacter.
+    character: Store.get("myCharacter") || null
   };
 }
 
@@ -3506,7 +3511,7 @@ function decodeSyncCode(code){
 }
 
 function mergeSyncPayload(payload){
-  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0 };
+  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0 };
   const from = payload.from || "Someone";
 
   // Clue notes are freeform multi-line text per district, and an incoming
@@ -3646,6 +3651,15 @@ function mergeSyncPayload(payload){
     stats.bingo = 1;
   }
 
+  // Same again for the character builder — replaces that person's own
+  // entry each resync, never touches this device's own myCharacter.
+  if(payload.character && payload.character.name){
+    const peopleCharacters = Store.get("peopleCharacters") || {};
+    peopleCharacters[from] = { ...payload.character };
+    Store.set("peopleCharacters", peopleCharacters);
+    stats.character = 1;
+  }
+
   return { stats, from };
 }
 
@@ -3703,7 +3717,7 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     const payload = decodeSyncCode(raw);
     const { stats, from } = mergeSyncPayload(payload);
     input.value = "";
-    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}Nothing already saved was duplicated.`;
+    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}${stats.character ? `${from}'s character is now viewable in its own tab on the My Character card. ` : ""}Nothing already saved was duplicated.`;
     refreshAfterMerge();
   }catch(err){
     note.textContent = "Couldn't read that code — make sure you copied the whole thing, with nothing missing from either end.";
@@ -3773,6 +3787,7 @@ function refreshAfterMerge(){
   if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
   if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
   if(typeof renderBingoPersonTabs === "function"){ renderBingoPersonTabs(); renderBingo(); }
+  if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
 }
 
 async function pushToCloud(){
@@ -3791,7 +3806,7 @@ async function pullFromCloud(){
   const name = currentContributorName();
   if(!db || !room) return { stats: null, count: 0 };
   const snap = await db.collection("rooms").doc(room).collection("members").get();
-  const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0 };
+  const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0 };
   let count = 0;
   snap.forEach(doc=>{
     if(doc.id === name) return; // never merge your own payload back into yourself
@@ -3818,7 +3833,7 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
     if(!count){
       note.textContent = "Sent your update. No one else's synced to this room code yet.";
     }else{
-      note.textContent = `Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
+      note.textContent = `Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}${stats.character ? `, ${stats.character} character${stats.character===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
     }
   }catch(err){
     note.textContent = "Couldn't sync — check you've got signal and try again.";
@@ -3859,9 +3874,63 @@ autoSyncOnOpen();
 // YOUR CHARACTER BUILDER — a persona to introduce yourself to actors
 // with, distinct from the in-fiction Characters & Factions roster below.
 // ===============================
+// "mine" is always this device's own myCharacter — the only one that's
+// ever editable. Anything else is a name key into peopleCharacters, a
+// read-only snapshot from a teammate's sync. Switching tabs never
+// copies, merges, or overwrites one into the other.
+let myCharacterActiveOwner = "mine";
+
+function myCharacterPeopleNames(){
+  const people = Store.get("peopleCharacters") || {};
+  return Object.keys(people).filter(n=> people[n] && people[n].name).sort((a,b)=> a.localeCompare(b));
+}
+
+function renderMyCharacterPersonTabs(){
+  const box = document.getElementById("charPersonTabs");
+  if(!box) return;
+  const names = myCharacterPeopleNames();
+  if(names.length === 0){
+    box.style.display = "none";
+    myCharacterActiveOwner = "mine";
+    return;
+  }
+  box.style.display = "";
+  box.className = "tabstrip";
+  box.innerHTML = `<button class="${myCharacterActiveOwner==="mine"?"active":""}" data-owner="mine">⭐ Mine</button>` +
+    names.map(n=>`<button class="person ${myCharacterActiveOwner===n?"active":""}" data-owner="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join("");
+  box.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      myCharacterActiveOwner = btn.dataset.owner;
+      renderMyCharacterPersonTabs();
+      renderMyCharacter();
+    };
+  });
+}
+
 function renderMyCharacter(){
   const box = document.getElementById("charCardDisplay");
+  const formFields = document.getElementById("charFormFields");
   if(!box) return;
+
+  if(myCharacterActiveOwner !== "mine"){
+    if(formFields) formFields.style.display = "none";
+    const people = Store.get("peopleCharacters") || {};
+    const c = people[myCharacterActiveOwner];
+    if(!c || !c.name){ box.innerHTML = `<p class="empty-note">No character saved yet.</p>`; return; }
+    box.innerHTML = `
+      <div class="char-card">
+        <div style="font-size:12px; color:var(--accent-teal);">${escapeHtml(myCharacterActiveOwner)}'s character — read-only</div>
+        <div style="font-size:16px; font-weight:700; color:var(--accent-amber); margin-top:4px;">${escapeHtml(c.name)}</div>
+        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">${c.district ? escapeHtml(c.district) : "Undecided / floating"}</div>
+        ${c.quirk ? `<p style="margin-top:8px; font-size:14px;"><strong>Quirk:</strong> ${escapeHtml(c.quirk)}</p>` : ""}
+        ${c.catchphrase ? `<p style="margin-top:6px; font-size:14px; font-style:italic;">"${escapeHtml(c.catchphrase)}"</p>` : ""}
+        ${c.backstory ? `<p style="margin-top:6px; font-size:14px; color:var(--text-muted);">${escapeHtml(c.backstory)}</p>` : ""}
+      </div>
+    `;
+    return;
+  }
+
+  if(formFields) formFields.style.display = "";
   const c = Store.get("myCharacter");
   if(!c || !c.name){ box.innerHTML = ""; return; }
   box.innerHTML = `
@@ -3898,6 +3967,7 @@ document.getElementById("saveCharBtn").onclick = ()=>{
 };
 
 loadMyCharacterForm();
+renderMyCharacterPersonTabs();
 renderMyCharacter();
 
 // ===============================
