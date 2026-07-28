@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v53";
-const APP_BUILD_TIME = "2026-07-28T11:57:00Z";
+const APP_CACHE_VERSION = "v54";
+const APP_BUILD_TIME = "2026-07-28T12:12:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2466,8 +2466,8 @@ const otherStages = [
   { name:"The Fools Leap", status:"rumoured", info:"A smaller stage leaning into Boomtown's playful, circus-adjacent side — good for stumbling on something odd and fun. No 2026-specific confirmation found." },
   { name:"Foggers Mill", status:"rumoured", info:"An industrial/mill-themed stage — exact genre policy varies by year, so follow the crowd and the smoke machines. No 2026 confirmation found." },
   { name:"Hangar 161", status:"confirmed", info:"Punk's home at Boomtown — a proudly loud, socialist, anti-racist stage with a mosh-pit crowd." },
-  { name:"Tribe of Frog", status:"rumoured", info:"Hosted by the long-running UK psytrance party brand of the same name — expect psytrance, full-on and progressive sets deep into the night. No 2026 Boomtown confirmation found; recent hits tie it to past chapters." },
-  { name:"Sibín Beag", status:"rumoured", info:"Irish for 'little shebeen' — a folk and traditional-music stage, with acts blending trad sessions and folk-tinged party sets. Found in Chapter Four (2025) but no 2026 confirmation found." },
+  { name:"Tribe of Frog", status:"confirmed", info:"Hosted by the long-running UK psytrance party brand of the same name — expect psytrance, full-on and progressive sets deep into the night, confirmed with a full 2026 lineup running Thu-Sun." },
+  { name:"Síbín Beag", status:"confirmed", info:"Irish for 'little shebeen' — a folk and traditional-music stage blending trad sessions with folk-tinged party sets, confirmed with a full 2026 lineup." },
   { name:"Acid Leak", status:"confirmed", info:"Area 404's acid techno and hard techno stage — expect a darker, sweatier crowd and relentless 4/4." },
   { name:"Infinity", status:"rumoured", info:"One of Chapter Five's smaller stages — no 2026-specific confirmation found for this name at all; treat it as a wildcard." }
 ];
@@ -2574,12 +2574,12 @@ const venueDirectory = [
   { name:"The Fools Leap", type:"Main stage", status:"rumoured", music:true, genre:"Playful, circus-adjacent", near:"Oldtown", info:"Good for stumbling on something odd and fun; no 2026-specific confirmation found — recent mentions trace to earlier chapters, not yet reconfirmed for Chapter Five." },
   { name:"Foggers Mill", type:"Main stage", status:"rumoured", music:true, genre:"Industrial-themed, genre varies", near:"Unclear", info:"Follow the crowd and the smoke machines; no 2026 confirmation found — was part of past chapters, not yet reconfirmed for Chapter Five." },
   { name:"Hangar 161", type:"Main stage", status:"confirmed", music:true, genre:"Punk", near:"Unclear", info:"Last Gang's proudly loud, socialist, anti-racist stage with a mosh-pit crowd — its own account posted 'BOOMTOWN 2026! Hangar 161, see you there' confirming its Chapter Five return." },
-  { name:"Tribe of Frog", type:"Main stage", status:"rumoured", music:true, genre:"Psytrance, full-on, progressive", near:"Unclear", info:"Hosted by the long-running UK psytrance party brand of the same name; no 2026 Boomtown confirmation found — recent hits tie it to past chapters, not Chapter Five specifically." },
-  { name:"Sibín Beag", type:"Main stage", status:"rumoured", music:true, genre:"Folk, traditional", near:"Unclear", info:"Irish for 'little shebeen' — trad sessions and folk-tinged party sets; found in Boomtown's Chapter Four (2025) lineup but no Chapter Five/2026 confirmation — also runs as its own venue at Shambala." },
+  { name:"Tribe of Frog", type:"Main stage", status:"confirmed", music:true, genre:"Psytrance, full-on, progressive", near:"Unclear", info:"Hosted by the long-running UK psytrance party brand of the same name — confirmed with a full 2026 lineup running Thursday through Sunday." },
+  { name:"Síbín Beag", type:"Main stage", status:"confirmed", music:true, genre:"Folk, traditional", near:"Unclear", info:"Irish for 'little shebeen' — trad sessions and folk-tinged party sets, confirmed with a full 2026 Boomtown lineup; also runs as its own venue at Shambala." },
   { name:"Acid Leak", type:"Main stage", status:"confirmed", music:true, genre:"Acid techno, hard techno", near:"Area 404", info:"Area 404's darker, sweatier 4/4 stage." },
   { name:"Infinity", type:"Main stage", status:"rumoured", music:"unclear", genre:"Genre policy unconfirmed", near:"Unclear", info:"One of Chapter Five's smaller stages — treat as a wildcard; no 2026-specific confirmation found for this name at all." },
   { name:"The Observatory", type:"Research hub", status:"confirmed", music:false, genre:"—", near:"Thrutopia (likely)", info:"Genuine 2026 academic study led by Dr Martha Newson, 10+ UK universities — real research, not story canon." },
-  { name:"The Boomtown Bobbies", type:"Hidden venue", status:"rumoured", music:true, genre:"DJs, live takeovers", near:"Area 404 / Oldtown", info:"Long-running mock police station tied to the storyline — no 2026 confirmation found; recent evidence (a Nachtlicker co-billing post) ties it to past chapters, not yet reconfirmed for Chapter Five." },
+  { name:"The Boomtown Bobbies", type:"Hidden venue", status:"confirmed", music:true, genre:"DJs, live takeovers", near:"Area 404 / Oldtown", info:"Long-running mock police station tied to the storyline's rising Area 404 crackdown — confirmed for 2026 with a full Thu-Sun DJ programme." },
   { name:"Soapranos Laundrette", type:"Hidden venue", status:"confirmed", music:true, genre:"Dance/house DJs", near:"Letsbe Avenue", info:"Laundrette-fronted micro venue on Letsbe Avenue's high street — confirmed for 2026 with a full Thu–Sun DJ programme including Laundry Night Live and Soapranos: Hotwash!" },
   { name:"Hotel Paradiso", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, lounge", near:"Copperwood", info:"Faded-glamour hotel-themed micro venue in Copperwood — confirmed returning for 2026 ('Hotel on Wheels') with a full Thu–Sat lounge/DJ programme; check in at the 'front desk'." },
   { name:"Luck Exchange Casino", type:"Hidden venue", status:"rumoured", music:true, genre:"Party, eclectic", near:"Area 404", info:"Casino-themed venue promoted by Boomtown's own account in past chapters; no 2026 confirmation found." },
@@ -2591,7 +2591,7 @@ const venueDirectory = [
   { name:"Sub Lab", type:"Hidden venue", status:"rumoured", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — documented at Boomtown 2025 but no 2026 confirmation found." },
   { name:"Nachtlicker", type:"Hidden venue", status:"rumoured", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Area 404", info:"Curated nocturnal-rave/punk-theatre night in Area 404 in 2024 and 2025 — no 2026 confirmation found yet." },
   { name:"Deviant Lounge", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic, after-hours", near:"Metropolis (likely)", info:"No evidence found tying this name to Boomtown at all in current searches (past or present) — treat as unverified until seen on site." },
-  { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"rumoured", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Dystopian kebab-shop gabber stage, running since at least 2023 through 2025 ('MK2'); no 2026 confirmation found yet." },
+  { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Dystopian kebab-shop gabber stage running since 2023 — confirmed for 2026 with a full Thu-Sun DJ programme." },
   { name:"E Numbers", type:"Shop / hidden venue", status:"rumoured", music:true, genre:"Hyperpop, party, eclectic", near:"Metropolis", info:"Hyperpop 'sweetshop' venue documented in Metropolis 2023 through 2025; no 2026 confirmation found yet." },
   { name:"The Pomegranate Parlour", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic party DJs", near:"Site-wide", info:"Actor-led parlour-style venue documented in 2023 and 2024; no 2026 confirmation found yet." },
   { name:"Busker's Wharf", type:"Hidden venue", status:"confirmed", music:true, genre:"Live/acoustic, folk", near:"Site-wide", info:"Wharf/street-performance themed spot — a real, recurring hidden venue, though no year-dated source was found to pin down a specific chapter." },
