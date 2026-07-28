@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v54";
-const APP_BUILD_TIME = "2026-07-28T12:12:00Z";
+const APP_CACHE_VERSION = "v55";
+const APP_BUILD_TIME = "2026-07-28T13:44:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -313,6 +313,35 @@ function composedFallbackBio(a){
 // in from js/artist-bios.js. Falls back to the genre-level description
 // when an act has no specific entry yet.
 function artistBioText(name){ return (window.ARTIST_BIOS && window.ARTIST_BIOS[name]) || ""; }
+// For "X B2B Y" (and "... Ft. Z" / "... w/ Z") billings with no dedicated
+// combo bio, split into individual people and look each one up on their
+// own, so a known artist's bio still surfaces even when their B2B partner
+// doesn't have one. Falls back to "" (and the composed genre blurb) only
+// when nobody in the billing has a bio at all.
+function artistBioParts(name){
+  const bios = window.ARTIST_BIOS || {};
+  if(bios[name]) return [{ label: name, bio: bios[name] }];
+  if(!/\bb2b\b/i.test(name)) return [];
+  const people = name.split(/\s*\bb2b\b\s*/i)
+    .flatMap(part => part.split(/\s+(?:ft\.?|feat\.?|w\/)\s+/i))
+    .map(p => p.trim())
+    .filter(Boolean);
+  return people
+    .map(p => ({ label: p, bio: bios[p] || "" }))
+    .filter(p => p.bio);
+}
+// Full "genre-desc" markup block for an artist card: a dedicated bio (or
+// per-person B2B bios), else the composed genre/format fallback line.
+function artistBioBlockHtml(artist){
+  const bio = artistBioText(artist.name);
+  if(bio) return `<div class="genre-desc">${escapeHtml(bio)}</div>`;
+  const parts = artistBioParts(artist.name);
+  if(parts.length){
+    return parts.map(p => `<div class="genre-desc"><strong>${escapeHtml(p.label)}:</strong> ${escapeHtml(p.bio)}</div>`).join("");
+  }
+  const gDesc = composedFallbackBio(artist);
+  return gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : "";
+}
 // Short, auto-composed line built only from data already in the app
 // (stage, genre, set length) — not a fabricated bio, just context.
 function artistDescriptor(a){
@@ -1750,8 +1779,7 @@ function showArtists(list){
     const div = document.createElement("div");
     div.className = "item";
     const genre = genreOf(artist);
-    const bio = artistBioText(artist.name);
-    const gDesc = bio ? "" : composedFallbackBio(artist);
+    const bioBlock = artistBioBlockHtml(artist);
     div.innerHTML = `
       <div class="item-top">
         <div>
@@ -1760,8 +1788,7 @@ function showArtists(list){
           ${timeLabel(artist)}<br>
           <small>${genre}</small>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
-          ${bio ? `<div class="genre-desc">${escapeHtml(bio)}</div>` : ""}
-          ${gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : ""}
+          ${bioBlock}
         </div>
         <button aria-label="Toggle saved">${saved ? "★" : "☆"}</button>
       </div>
@@ -1891,8 +1918,7 @@ function showTimelineDetailModal(artist, opts){
   closeTimelineDetailModal();
   const saved = Store.get("schedule").some(x=>x.name === artist.name);
   const genre = genreOf(artist);
-  const bio = artistBioText(artist.name);
-  const gDesc = bio ? "" : composedFallbackBio(artist);
+  const bioBlock = artistBioBlockHtml(artist);
   const backdrop = document.createElement("div");
   backdrop.id = "timelineDetailModal";
   backdrop.style.cssText = "position:fixed; inset:0; z-index:60; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
@@ -1906,8 +1932,7 @@ function showTimelineDetailModal(artist, opts){
           ${timeLabel(artist)}<br>
           <small>${escapeHtml(genre)}</small>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
-          ${bio ? `<div class="genre-desc">${escapeHtml(bio)}</div>` : ""}
-          ${gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : ""}
+          ${bioBlock}
         </div>
         ${opts.readonly ? "" : `<button aria-label="Toggle saved" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
       </div>
@@ -2064,8 +2089,7 @@ function findClashes(schedule){
 function scheduleItemHTML(artist, idx, clashNames, readonly){
   const clashClass = clashNames && clashNames.length ? " clash" : "";
   const genre = genreOf(artist);
-  const bio = artistBioText(artist.name);
-  const gDesc = bio ? "" : composedFallbackBio(artist);
+  const bioBlock = artistBioBlockHtml(artist);
   return `
     <div class="item${clashClass}" data-idx="${idx}">
       <div class="item-top">
@@ -2074,8 +2098,7 @@ function scheduleItemHTML(artist, idx, clashNames, readonly){
           <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
           <span class="time-label">${timeLabel(artist)}</span>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
-          ${bio ? `<div class="genre-desc">${escapeHtml(bio)}</div>` : ""}
-          ${gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : ""}
+          ${bioBlock}
         </div>
         ${readonly ? "" : `<div class="btnrow">
           <button class="set-time-btn">Set time</button>
