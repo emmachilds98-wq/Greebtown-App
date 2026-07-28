@@ -76,13 +76,9 @@
     <div class="card">
       <span class="tag">Read this once</span>
       <h3>💾 Your data, sync &amp; updates</h3>
-      <p>Everything you save lives on this device only, saved automatically as you go — nothing leaves it unless you use Sync.</p>
-      <ul class="compact-list" style="padding-left:20px;">
-        <li><strong>Back up this device:</strong> Settings → "Download my personal backup".</li>
-        <li><strong>Share with the group:</strong> Discover → Sync — pick your name, agree a room code, tap "Sync now" (or use the manual code box if you're offline). Nothing gets duplicated, and everyone's saved Plan stays in its own named tab rather than merging into anyone else's.</li>
-        <li><strong>Hand round a combined copy:</strong> once everyone's synced, Settings → "Download shareable group copy" — leaves out everyone's personal bingo/character/notes.</li>
-        <li><strong>App updates itself</strong> quietly when you're online, and keeps working fully offline once loaded — updates never touch what you've saved.</li>
-      </ul>
+      <p>Everything you add saves itself to this device the instant you type or tap — no save button, and nothing leaves this phone unless you actually use <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a>.</p>
+      <p>Want just your own stuff backed up? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a>. Want everyone's notes, theories and finds in one place? Head to <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> first — pick your name, agree a room code with the group, then tap "Sync now" whenever you've got signal (no signal yet? there's a manual code box there too, same result). Once everyone's synced in, come back to <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a> for the shareable group copy — it leaves out everyone's personal bingo card, character and notes, so it's safe to actually hand round.</p>
+      <p>The app itself updates quietly in the background whenever you're online, and keeps working fully offline once it's loaded once — updates never touch anything you've saved.</p>
     </div>
 
     <div class="card">
@@ -137,9 +133,9 @@
       <textarea id="notes" placeholder="e.g. Yellow campsite, near the big oak past the water point
 Meet at the clock tower if separated"></textarea>
     </div>
-  <div class="card">
+  <div class="card" id="jumpSettings">
   <h3>⚙️ Settings</h3>
-  <p>Reset saved favourites, plans, notes and district passport on this device. See "Your data &amp; backups" above for how saving and downloading actually works.</p>
+  <p>Reset saved favourites, plans, notes and district passport on this device. See "Your data, sync &amp; updates" above for how saving and downloading actually works.</p>
   <p><strong>My personal backup</strong> — everything on this device, including things that never sync to anyone else (bingo card, character, HQ notes, meeting point). Only ever reopen this on your own device to restore it.</p>
   <button class="action" id="downloadSnapshot">Download my personal backup</button>
   <button class="ghost" id="openSnapshotTab" style="margin-top:6px;">If that didn't download: open it in a new tab</button>
@@ -710,7 +706,7 @@ Talk to an actor in character
   <section id="guide" class="screen">
     <div class="eyebrow">Good to know</div>
     <h2 style="margin-bottom:14px;">Guide</h2>
-    <div id="guideContent"><div class="card"><h3>Chapter Five — the one-page briefing</h3><p><strong>Then:</strong> The Collector was freed at the 2025 closing ceremony and passed leadership to The Network. <strong>Now:</strong> Mr Biga and Aurora Venturestone have merged their companies into BBXL™ and are pushing a space programme that treats Earth as a ‘single-use planet’. <strong>The pressure point:</strong> BBXL is draining the city’s resources while still attracting citizens into its VIP world. The Network wants a shared, people-led redesign — but that is not yet a victory.</p></div><div class="card"><h3>A simple way to follow the story</h3><ul class="compact-list"><li><strong>Start with a side:</strong> Area 404 for power and policing; Botanica for portals, IONA and Shadow Post; Letsbe Avenue for the suspiciously cheerful BLIP product.</li><li><strong>Ask for a motive:</strong> ‘What do you want?’, ‘Who benefits?’, ‘Who should we speak to next?’ works better than hunting for a scripted answer.</li><li><strong>Keep a chain:</strong> person → place → strange phrase → next lead. Add it to the district note straight away, then compare notes as a group.</li><li><strong>Watch the public moments:</strong> announcements, meetings, ceremonies, arguments and queues are often more useful than an empty-looking door.</li></ul></div><div class="card"><h3>Districts as story threads</h3><p><strong>Area 404:</strong> a former outsider district now running the city; power is concentrating around the Guardians and Mr Biga. <strong>Botanica:</strong> The Great Mother’s ascension plan sits alongside Temple of Zero’s Shadow Post / IONA photocopier mystery. <strong>Copperwood:</strong> Edna Von Vanderhaus is turning the district into a live film set for <em>Race to the Red Planet</em>. <strong>Oldtown:</strong> Rufus the Red and the Den of Dis Order are building the People’s Republic of Oldtownia. <strong>Metropolis:</strong> Bettercorp’s shiny future has left inGeniuses behind, with risky tours into the broken Betterverse™.</p></div><div class="card"><h3>Ceremonies &amp; city-wide moments</h3><p>The opening and closing ceremonies are the official bookends of the chapter and are worth treating as story events, not merely big shows. Between them, The Daily Rag, district meetings, public broadcasts and characters’ sudden invitations are your best catch-up tools. If you hear a crowd gathering for an announcement, go.</p><a class="linkbtn" href="https://www.boomtownfair.co.uk/discover" target="_blank" rel="noopener">Official story &amp; districts</a></div><div class="card"><h3>Non-music things actually worth pencilling in</h3><ul class="compact-list"><li><strong>Thrutopia:</strong> talks, workshops and thoughtful daytime programming around imagining better futures.</li><li><strong>The Retreat:</strong> massages, hot tubs, sauna/cold splash, sound baths, beauty and maker sessions. It is in the Thrutopia woodlands; book ahead for the most popular slots.</li><li><strong>Cloak of Hope:</strong> stitch a 10–15cm hope patch on-site for the collective artwork.</li><li><strong>Agents of Change:</strong> sign up for the badge, HQ, recycled-T-shirt screen print and early quest access.</li><li><strong>Repairium:</strong> it debuted as a free volunteer repair hub in 2025; look out for its return if gear needs rescuing.</li></ul></div><div class="card"><h3>The Retreat — quick booking guide</h3><p>Current listings include 90-minute spa/hot-tub access (£50), sauna and cold splash (£35), sound baths (£20), massages from £68, plus clay and silver workshops. Bring swimwear for the water/heat sessions; towel rental is available. It is separate from the festival ticket and the official advice is to book early.</p><a class="linkbtn" href="https://www.boomtownfair.co.uk/the-retreat" target="_blank" rel="noopener">Browse &amp; book The Retreat</a></div></div>
+    <div id="guideContent"></div>
   </section>
 
 
