@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v74";
-const APP_BUILD_TIME = "2026-07-28T18:46:00Z";
+const APP_CACHE_VERSION = "v75";
+const APP_BUILD_TIME = "2026-07-28T18:54:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -1984,9 +1984,9 @@ function showTimelineDetailModal(artist, opts){
   backdrop.id = "timelineDetailModal";
   backdrop.style.cssText = "position:fixed; inset:0; z-index:60; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
   backdrop.innerHTML = `
-    <div class="card" style="position:relative; width:100%; max-width:420px; max-height:80vh; overflow-y:auto; margin:0;">
+    <div class="card timeline-modal-card" style="position:relative; width:100%; max-width:420px; max-height:80vh; overflow-y:auto; margin:0;">
       <button aria-label="Close" id="timelineDetailCloseBtn" style="position:absolute; top:10px; right:10px; background:none; border:1px solid var(--line); color:var(--text-primary); border-radius:10px; width:32px; height:32px; font-size:16px; line-height:1; cursor:pointer;">✕</button>
-      <div class="item-top" style="padding-right:34px;">
+      <div class="timeline-modal-body">
         <div>
           <strong>${escapeHtml(artist.name)}</strong><br>
           <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${escapeHtml(artist.stage)}</span><br>
