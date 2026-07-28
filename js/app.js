@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v91";
-const APP_BUILD_TIME = "2026-07-28T21:10:00Z";
+const APP_CACHE_VERSION = "v92";
+const APP_BUILD_TIME = "2026-07-28T21:15:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -563,8 +563,34 @@ function artistBioBlockHtml(artist){
 //    not a guessed ID — so every one of the 1000+ artists gets a
 //    working button with zero manual verification needed.
 // ===============================
+// Case-insensitive lookup — some artists bill themselves in ALL CAPS
+// (SHERELLE) or otherwise differently-cased than how they show up in
+// the lineup data, and an exact-case match would silently miss those.
+// Built once from window.ARTIST_PREVIEWS and cached; a fresh copy of
+// that object (e.g. after editing artist-previews.js) invalidates it.
+let _artistPreviewsLowerSrc = null, _artistPreviewsLower = null;
+function artistPreviewsLowerMap(){
+  const src = window.ARTIST_PREVIEWS || {};
+  if(_artistPreviewsLowerSrc !== src){
+    _artistPreviewsLowerSrc = src;
+    _artistPreviewsLower = {};
+    Object.keys(src).forEach(k=> _artistPreviewsLower[k.toLowerCase()] = src[k]);
+  }
+  return _artistPreviewsLower;
+}
 function artistPreviewEntry(name){
-  return (window.ARTIST_PREVIEWS && window.ARTIST_PREVIEWS[name]) || null;
+  return artistPreviewsLowerMap()[(name || "").toLowerCase()] || null;
+}
+// Splits a "X B2B Y" (or "... Ft. Z" / "... w/ Z") billing into
+// individual names so each half can get its own verified-or-search
+// preview row — same split logic as artistBioParts() above. A billing
+// with no B2B/ft/feat/w in it returns just itself, unchanged.
+function artistPreviewNameParts(name){
+  if(!/\bb2b\b/i.test(name)) return [name];
+  return name.split(/\s*\bb2b\b\s*/i)
+    .flatMap(part => part.split(/\s+(?:ft\.?|feat\.?|w\/)\s+/i))
+    .map(p => p.trim())
+    .filter(Boolean);
 }
 
 function previewSearchUrl(platform, name){
@@ -620,20 +646,31 @@ function previewEmbedHtml(platform, entry){
   return `<iframe src="${src}" width="100%" height="${height}" frameborder="0" allow="autoplay; encrypted-media" loading="lazy" style="border-radius:10px; margin-top:6px;"></iframe>`;
 }
 
-// Row of preview buttons + an (initially empty/hidden) slot below it for
-// an inline embed. Shared by the Lineup list and the timeline detail
-// modal — wirePreviewButtons() below does the actual click wiring after
-// this HTML lands in the DOM. Instagram only ever shows when there's a
-// verified account — there's no public unauthenticated search page to
-// fall back to, so an unverified button would just be a dead end.
-function artistPreviewBlockHtml(artist){
-  const entry = artistPreviewEntry(artist.name) || {};
+// One platform-button row (+ its own embed slot) for a single name.
+// showLabel prints a small name heading above the row — used only when
+// a B2B billing has been split into more than one row, so it's clear
+// whose buttons are whose; a lone artist's name is already shown right
+// above this block by the caller, so it stays off there.
+function previewRowHtml(name, entry, showLabel){
+  entry = entry || {};
   const buttons = PREVIEW_PLATFORMS.map(p=>{
     const verified = !!(previewEmbeddableValue(entry, p.key) || previewLinkOutValue(entry, p.key));
-    return `<button class="preview-btn" data-platform="${p.key}" data-artist="${escapeHtml(artist.name)}">${p.icon} ${p.label}${verified ? " ▶" : ""}</button>`;
+    return `<button class="preview-btn" data-platform="${p.key}" data-artist="${escapeHtml(name)}">${p.icon} ${p.label}${verified ? " ▶" : ""}</button>`;
   }).join("");
-  const instaBtn = entry.instagram ? `<button class="preview-btn" data-platform="instagram" data-artist="${escapeHtml(artist.name)}">📸 Instagram</button>` : "";
-  return `<div class="preview-row">${buttons}${instaBtn}</div><div class="preview-embed" style="display:none;"></div>`;
+  const instaBtn = entry.instagram ? `<button class="preview-btn" data-platform="instagram" data-artist="${escapeHtml(name)}">📸 Instagram</button>` : "";
+  const label = showLabel ? `<div class="empty-note" style="margin-top:6px; font-size:11px; font-weight:700;">${escapeHtml(name)}</div>` : "";
+  return `${label}<div class="preview-row">${buttons}${instaBtn}</div><div class="preview-embed" style="display:none;"></div>`;
+}
+
+// Shared by the Lineup list and the timeline detail modal —
+// wirePreviewButtons() below does the actual click wiring after this
+// HTML lands in the DOM. A "X B2B Y" billing gets one row per person,
+// each independently verified-or-search, rather than one row that can
+// only ever represent one half of the billing (or neither).
+function artistPreviewBlockHtml(artist){
+  const names = artistPreviewNameParts(artist.name);
+  if(names.length <= 1) return previewRowHtml(artist.name, artistPreviewEntry(artist.name), false);
+  return names.map(n=> previewRowHtml(n, artistPreviewEntry(n), true)).join("");
 }
 
 // Delegated wiring, safe to call repeatedly on re-render — looks up the
