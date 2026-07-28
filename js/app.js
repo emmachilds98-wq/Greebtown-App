@@ -234,6 +234,28 @@ const GENRE_INFO = {
   "Unconfirmed": "Genre not confirmed yet — check the app or ask on-site."
 };
 function genreDescriptorText(genre){ return GENRE_INFO[genre] || ""; }
+// For acts with no researched bio (js/artist-bios.js), builds a fuller
+// line than the flat genre blurb alone — still only from real signals
+// already in the name/lineup data (format, pairing), never invented
+// facts about the act itself.
+function detectActFormat(name){
+  if(/\bb2b\b/i.test(name)) return "b2b";
+  if(/\bft\.?\s|feat\.?\s/i.test(name)) return "guest";
+  if(/\blive\b/i.test(name)) return "live";
+  if(/\btakeover\b/i.test(name)) return "takeover";
+  return null;
+}
+function composedFallbackBio(a){
+  const blurb = genreDescriptorText(genreOf(a));
+  const format = detectActFormat(a.name);
+  const bits = [];
+  if(blurb) bits.push(blurb);
+  if(format === "b2b") bits.push("A back-to-back pairing sharing the decks for this slot.");
+  else if(format === "guest") bits.push("Billed with a guest MC or vocalist alongside the DJ/producer.");
+  else if(format === "live") bits.push("Billed as a live set rather than a DJ mix.");
+  else if(format === "takeover") bits.push("A crew/collective takeover slot rather than a single named act.");
+  return bits.join(" ");
+}
 // Researched, artist-specific one-liners (real sound/style, not the
 // generic per-genre blurb above) — keyed by exact artist name, filled
 // in from js/artist-bios.js. Falls back to the genre-level description
@@ -1677,7 +1699,7 @@ function showArtists(list){
     div.className = "item";
     const genre = genreOf(artist);
     const bio = artistBioText(artist.name);
-    const gDesc = bio ? "" : genreDescriptorText(genre);
+    const gDesc = bio ? "" : composedFallbackBio(artist);
     div.innerHTML = `
       <div class="item-top">
         <div>
@@ -1927,7 +1949,7 @@ function scheduleItemHTML(artist, idx, clashNames, readonly){
   const clashClass = clashNames && clashNames.length ? " clash" : "";
   const genre = genreOf(artist);
   const bio = artistBioText(artist.name);
-  const gDesc = bio ? "" : genreDescriptorText(genre);
+  const gDesc = bio ? "" : composedFallbackBio(artist);
   return `
     <div class="item${clashClass}" data-idx="${idx}">
       <div class="item-top">
@@ -4395,14 +4417,32 @@ const glossary = [
   { term:"The Observatory", def:"A genuine 2026 academic research hub on site, led by psychologist Dr Martha Newson, studying identity and behaviour at live events — real research, not story canon." },
   { term:"Lion's Gate Portal", def:"The story's central portal art piece — last chapter's closing ceremony used it to foretell the Lion's Den's return to Temple Valley this year." },
   { term:"Von Vanderland", def:"The fan-built settlement in Copperwood dedicated to Edna Von Vanderhaus and her film 'Race to the Red Planet.'" },
-  { term:"inGeniuses", def:"Metropolis workers laid off by Bettercorp™, now running unofficial 'urban explorer' tours into the glitching Betterverse™." }
+  { term:"inGeniuses", def:"Metropolis workers laid off by Bettercorp™, now running unofficial 'urban explorer' tours into the glitching Betterverse™." },
+  { term:"Temple of Zero", def:"Botanica's transformed temple — home to The Network and IONA, and the site of the recurring photocopier mystery Shadow Post is tied up in." },
+  { term:"People's Republic of Oldtownia", def:"Rufus the Red's declared separatist state for Oldtown, formed after the district was rebuilt uphill following Area 404's expansion." },
+  { term:"Den of Dis Order", def:"Rufus the Red's inner circle of circus hustlers, fortune tellers and rogues, running Oldtown's day-to-day chaos behind the separatist push." },
+  { term:"Hippie Highway", def:"The steep hill path connecting Downtown and Hilltop — the walking route between the site's two halves, alongside The Stairs." },
+  { term:"The Stairs", def:"A temporary staircase structure linking Downtown and Hilltop, the alternative to walking Hippie Highway." },
+  { term:"Kaboodle", def:"Boomtown's official account system for tickets and resale — the only legitimate way to buy or transfer a ticket after the initial sale." },
+  { term:"Agents of Change", def:"A sign-up scheme for Chapter Five: a badge, an HQ, a recycled-T-shirt screen print, and early access to certain quests." },
+  { term:"Cloak of Hope", def:"A collective on-site artwork — stitch a 10–15cm hope patch of your own to add to it." },
+  { term:"Reparium", def:"A free volunteer repair hub that debuted in 2025; look out for it returning if your gear needs rescuing." },
+  { term:"Camp Orchid / Camp Skylark", def:"Boomtown's premium camping options. Camp Orchid Downtown sits by West Gate for public-transport arrivals; Camp Skylark splits into Hilltop and Sunset sites for 2026, Sunset nearest South Gate." }
 ];
 
-function loadGlossary(){
-  document.getElementById("glossaryList").innerHTML = glossary.map(g=>`
-    <div class="item"><strong>${g.term}</strong><p style="margin-top:4px; color:var(--text-muted); font-size:14px;">${g.def}</p></div>
-  `).join("");
+const glossarySearch = document.getElementById("glossarySearch");
+function currentGlossaryList(){
+  const term = (glossarySearch && glossarySearch.value || "").trim().toLowerCase();
+  if(!term) return glossary;
+  return glossary.filter(g=> g.term.toLowerCase().includes(term) || g.def.toLowerCase().includes(term));
 }
+function loadGlossary(){
+  const list = currentGlossaryList();
+  document.getElementById("glossaryList").innerHTML = list.length ? list.map(g=>`
+    <div class="item"><strong>${escapeHtml(g.term)}</strong><p style="margin-top:4px; color:var(--text-muted); font-size:14px;">${escapeHtml(g.def)}</p></div>
+  `).join("") : `<p class="empty-note">No terms match "${escapeHtml(glossarySearch ? glossarySearch.value.trim() : "")}".</p>`;
+}
+if(glossarySearch) glossarySearch.oninput = loadGlossary;
 loadGlossary();
 
 // ===============================
