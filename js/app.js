@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v63";
-const APP_BUILD_TIME = "2026-07-28T15:57:00Z";
+const APP_CACHE_VERSION = "v64";
+const APP_BUILD_TIME = "2026-07-28T16:03:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2139,18 +2139,22 @@ function findClashes(schedule){
     for(let j=i+1;j<timed.length;j++){
       const A = timed[i], B = timed[j];
       if(A.startMin < B.endMin && B.startMin < A.endMin){
-        (clashMap[A.i] = clashMap[A.i] || []).push(B.name);
-        (clashMap[B.i] = clashMap[B.i] || []).push(A.name);
+        (clashMap[A.i] = clashMap[A.i] || []).push({ name:B.name, stage:B.stage });
+        (clashMap[B.i] = clashMap[B.i] || []).push({ name:A.name, stage:A.stage });
       }
     }
   }
   return clashMap;
 }
 
-function scheduleItemHTML(artist, idx, clashNames, readonly){
-  const clashClass = clashNames && clashNames.length ? " clash" : "";
+function scheduleItemHTML(artist, idx, clashes, readonly){
+  const clashClass = clashes && clashes.length ? " clash" : "";
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
+  const clashLines = (clashes || []).map(c=>{
+    const walk = estimateWalk(artist.stage, c.stage);
+    return `<div>⚠ Clashes with <strong>${escapeHtml(c.name)}</strong> at <span class="stage-link" data-stage="${escapeHtml(c.stage)}">${escapeHtml(c.stage)}</span>${walk ? ` — ${escapeHtml(walk.text)}${escapeHtml(walk.suffix)}` : ""}</div>`;
+  }).join("");
   return `
     <div class="item${clashClass}" data-idx="${idx}">
       <div class="item-top">
@@ -2166,7 +2170,7 @@ function scheduleItemHTML(artist, idx, clashNames, readonly){
           <button class="remove-btn">Remove</button>
         </div>`}
       </div>
-      ${clashNames && clashNames.length ? `<div class="clash-note">⚠ Clashes with ${clashNames.join(", ")}</div>` : ""}
+      ${clashLines ? `<div class="clash-note">${clashLines}</div>` : ""}
       <div class="edit-slot"></div>
     </div>
   `;
@@ -2724,6 +2728,49 @@ const venueDirectory = [
   { name:"Burger Shack", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." },
   { name:"Greek Gyros", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." }
 ];
+
+// CLASH WALK ESTIMATOR — there's no verified precise map of Boomtown's
+// real site distances, so rather than fabricate exact minute figures,
+// this groups each venue's researched `near` text into one of the
+// festival's named areas and gives a rough band (same area / neighbouring
+// areas / different areas). Genuinely approximate — always allow extra
+// time and double-check the official app/map on-site.
+const VENUE_AREA_GROUPS = {
+  "downtown": "Downtown", "downtown village": "Downtown", "area 404": "Downtown", "botanica": "Downtown",
+  "hilltop": "Hilltop", "hilltop edge": "Hilltop", "oldtown": "Hilltop", "thrutopia": "Hilltop",
+  "woodland edge": "Hilltop", "pepperpot market": "Hilltop",
+  "temple valley": "Temple Valley",
+  "copperwood": "Copperwood",
+  "letsbe avenue": "Letsbe Avenue",
+  "metropolis": "Metropolis",
+};
+// Downtown and Hilltop sit next to each other in the site's central
+// cluster; Temple Valley is explicitly its own third area separate from
+// both (per Boomtown's own copy); Copperwood, Letsbe Avenue and
+// Metropolis are each their own named district further round the site.
+const NEIGHBOURING_AREAS = new Set(["Downtown|Hilltop", "Hilltop|Downtown"]);
+
+let _venueAreaByStage = null;
+function venueArea(stageName){
+  if(!_venueAreaByStage){
+    _venueAreaByStage = new Map();
+    venueDirectory.forEach(v=>{
+      const near = (v.near || "").toLowerCase().replace(/\s*\(.*?\)\s*/g, "").trim();
+      const area = VENUE_AREA_GROUPS[near];
+      if(area) _venueAreaByStage.set(v.name, area);
+    });
+  }
+  return _venueAreaByStage.get(stageName) || null;
+}
+
+function estimateWalk(stageA, stageB){
+  if(stageA === stageB) return null;
+  const areaA = venueArea(stageA), areaB = venueArea(stageB);
+  if(!areaA || !areaB) return { text:"Distance unclear — check the map on-site", suffix:"" };
+  if(areaA === areaB) return { text:"~5 min", suffix:" walk (same area)" };
+  if(NEIGHBOURING_AREAS.has(`${areaA}|${areaB}`)) return { text:"~10–15 min", suffix:" walk (neighbouring areas)" };
+  return { text:"~15–25 min", suffix:" walk (different areas — allow good time)" };
+}
 
 const map = document.getElementById("map");
 const mapInfo = document.getElementById("mapInfo");
