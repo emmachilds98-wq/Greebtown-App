@@ -54,7 +54,7 @@
     <div>Chapter Five: Radical Redesign · 12&ndash;16&nbsp;Aug</div>
     <div class="ptr-hint" id="ptrHint">↓ Pull down to refresh &amp; sync</div>
   </div>
-  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:30</span>
+  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:39</span>
 </header>
 
 <main>
@@ -480,13 +480,17 @@ Meet at the clock tower if separated"></textarea>
       <span class="tag">👥 One view, whose is whose</span>
       <h3>🗂 All notes — everyone's, in one place</h3>
       <p>Everything below is pulled live from this device — district notes, theories, hidden-venue finds, get-involved progress, memory journal, sightings, found socials and landmarks. Defaults to <strong>By person</strong> — tab through names above the list to see one person's own tailored page (including their saved Plan). Merge in your teammates' Sync codes first (above), and this becomes the group's full combined picture — copy it out, or use "Download shareable group copy" on Home to bake all of it into one file that's safe to hand round (it leaves out your own bingo card, character and HQ notes). Personal-only things — bingo cards and characters — never travel through Sync at all, so they're never in here, on your device or anyone else's.</p>
-      <div class="venue-filters" id="consolidatedViewToggle">
-        <button data-view="category">By category</button>
-        <button class="active" data-view="person">By person</button>
+      <p class="empty-note" style="margin-top:2px;">Each person's own notes also show up in their own tab wherever they were logged (Plan, Bingo, My Character) — this is only for seeing everyone's at once, so it's rolled up by default.</p>
+      <button class="ghost" id="consolidatedToggleBtn" style="margin:8px 0;">Show all notes ▾</button>
+      <div id="consolidatedNotesBody" style="display:none;">
+        <div class="venue-filters" id="consolidatedViewToggle">
+          <button data-view="category">By category</button>
+          <button class="active" data-view="person">By person</button>
+        </div>
+        <div class="tabstrip" id="consolidatedPeopleTabs" style="display:none; margin-bottom:8px;"></div>
+        <button class="ghost" id="copyConsolidatedBtn" style="margin:4px 0 10px;">Copy full report</button>
+        <div id="consolidatedNotes"></div>
       </div>
-      <div class="tabstrip" id="consolidatedPeopleTabs" style="display:none; margin-bottom:8px;"></div>
-      <button class="ghost" id="copyConsolidatedBtn" style="margin:4px 0 10px;">Copy full report</button>
-      <div id="consolidatedNotes"></div>
     </div>
 
     <div class="daygroup">📖 The story &amp; the day</div>

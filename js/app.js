@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v80";
-const APP_BUILD_TIME = "2026-07-28T19:30:00Z";
+const APP_CACHE_VERSION = "v81";
+const APP_BUILD_TIME = "2026-07-28T19:39:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -144,6 +144,108 @@ window.addEventListener("orientationchange", fixBottomClearance);
 window.addEventListener("load", fixBottomClearance);
 setTimeout(fixBottomClearance, 300);
 fixBottomClearance();
+
+// ===============================
+// BACK TO TOP (Discover) — Discover is by far the longest screen, so a
+// floating button to jump back to its top nav is worth having. Position
+// is drag-to-move and remembered (plain localStorage, not Store — this
+// is a device-local UI preference, not festival data, so it's
+// deliberately kept out of the sync/backup system entirely). Only shown
+// once you've actually scrolled down a bit, and only on Discover.
+// ===============================
+(function setupBackToTop(){
+  const POS_KEY = "btt_pos_v1";
+  const SHOW_AFTER_PX = 420;
+  const btn = document.createElement("button");
+  btn.id = "backToTopBtn";
+  btn.setAttribute("aria-label", "Back to top");
+  btn.textContent = "↑";
+  btn.style.cssText = "position:fixed; width:46px; height:46px; border-radius:50%; background:var(--accent-teal); color:var(--bg-deep); border:none; font-size:20px; font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,.4); z-index:55; display:none; cursor:grab; touch-action:none;";
+  document.body.appendChild(btn);
+
+  function clampPos(x, y){
+    const margin = 8;
+    const maxX = window.innerWidth - btn.offsetWidth - margin;
+    const maxY = window.innerHeight - btn.offsetHeight - margin;
+    return { x: Math.min(Math.max(x, margin), Math.max(margin, maxX)), y: Math.min(Math.max(y, margin), Math.max(margin, maxY)) };
+  }
+
+  function setPos(x, y, save){
+    const p = clampPos(x, y);
+    btn.style.left = p.x + "px";
+    btn.style.top = p.y + "px";
+    btn.style.right = "auto";
+    btn.style.bottom = "auto";
+    if(save){ try{ localStorage.setItem(POS_KEY, JSON.stringify(p)); }catch(e){} }
+  }
+
+  function loadPos(){
+    try{
+      const raw = localStorage.getItem(POS_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return null;
+  }
+
+  function isDiscoverActive(){
+    const el = document.getElementById("discover");
+    return !!el && el.classList.contains("active");
+  }
+
+  function updateVisibility(){
+    const shouldShow = isDiscoverActive() && (document.scrollingElement || document.documentElement).scrollTop > SHOW_AFTER_PX;
+    btn.style.display = shouldShow ? "flex" : "none";
+    btn.style.alignItems = "center";
+    btn.style.justifyContent = "center";
+  }
+
+  // Default bottom-right, just above the tab bar, unless the user's
+  // already dragged it somewhere else on this device.
+  const saved = loadPos();
+  if(saved){
+    setPos(saved.x, saved.y, false);
+  }else{
+    const place = ()=> setPos(window.innerWidth - 62, window.innerHeight - 170, false);
+    place();
+    window.addEventListener("resize", ()=>{ if(!loadPos()) place(); });
+  }
+
+  let dragging = false, moved = false, startX = 0, startY = 0, originX = 0, originY = 0;
+  btn.addEventListener("pointerdown", (e)=>{
+    dragging = true; moved = false;
+    startX = e.clientX; startY = e.clientY;
+    const rect = btn.getBoundingClientRect();
+    originX = rect.left; originY = rect.top;
+    btn.setPointerCapture(e.pointerId);
+    btn.style.cursor = "grabbing";
+  });
+  btn.addEventListener("pointermove", (e)=>{
+    if(!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if(Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+    if(moved) setPos(originX + dx, originY + dy, false);
+  });
+  function endDrag(e){
+    if(!dragging) return;
+    dragging = false;
+    btn.style.cursor = "grab";
+    if(moved){
+      const rect = btn.getBoundingClientRect();
+      setPos(rect.left, rect.top, true);
+    }
+  }
+  btn.addEventListener("pointerup", endDrag);
+  btn.addEventListener("pointercancel", endDrag);
+
+  btn.addEventListener("click", ()=>{
+    if(moved) return; // that click was the end of a drag, not a tap
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  document.addEventListener("scroll", updateVisibility, { passive: true });
+  document.querySelectorAll(".tab").forEach(t=> t.addEventListener("click", ()=> setTimeout(updateVisibility, 50)));
+  updateVisibility();
+})();
 
 // ===============================
 // STORAGE HELPER
@@ -2167,12 +2269,25 @@ if(artistsViewListBtn && artistsViewTimelineBtn){
   };
 }
 
+// Collapsed to a handful of rows by default — the full genre list runs
+// to dozens of chips, which used to push the actual artist list well
+// below the fold on every visit. "See more" reveals the rest; any
+// already-selected genre outside the collapsed set still counts (it's
+// just not shown as a chip) until you expand and can see/toggle it.
+const GENRE_CHIPS_COLLAPSED_COUNT = 10;
+let genreChipsExpanded = false;
+
 function loadGenreChips(){
   const genres = [...new Set(allArtists().map(genreOf))].filter(g=>g && g !== "Unconfirmed").sort();
   const box = document.getElementById("genreChips");
-  box.innerHTML = genres.map(g=>`<span class="chip" data-g="${g}">${g}</span>`).join("");
+  const showAll = genreChipsExpanded || genres.length <= GENRE_CHIPS_COLLAPSED_COUNT;
+  const visible = showAll ? genres : genres.slice(0, GENRE_CHIPS_COLLAPSED_COUNT);
+  const hiddenCount = genres.length - visible.length;
+  box.innerHTML = visible.map(g=>`<span class="chip" data-g="${g}">${g}</span>`).join("")
+    + (hiddenCount > 0 ? `<span class="chip" id="genreChipsToggle" style="border-style:dashed;">See more (+${hiddenCount}) ▾</span>` : "")
+    + (showAll && genres.length > GENRE_CHIPS_COLLAPSED_COUNT ? `<span class="chip" id="genreChipsToggle" style="border-style:dashed;">See less ▴</span>` : "");
   updateGenreChipHighlights();
-  box.querySelectorAll(".chip").forEach(s=>{
+  box.querySelectorAll(".chip[data-g]").forEach(s=>{
     s.onclick = ()=>{
       toggleGenreChip(s.dataset.g);
       updateGenreChipHighlights();
@@ -2180,6 +2295,8 @@ function loadGenreChips(){
       renderArtistSearchResults();
     };
   });
+  const toggleBtn = document.getElementById("genreChipsToggle");
+  if(toggleBtn) toggleBtn.onclick = ()=>{ genreChipsExpanded = !genreChipsExpanded; loadGenreChips(); };
 }
 loadGenreChips();
 
@@ -4314,12 +4431,16 @@ function renderHomeSyncStatus(){
       </select>
     </div>
     <div class="field" id="homeContributorOtherField" style="display:${isOther ? "" : "none"};"><label>Your name</label><input type="text" id="homeContributorOtherInput" placeholder="Type your name"></div>
+    <button class="action" id="homeSyncNowBtn" style="margin-top:10px;">☁️ Sync now</button>
+    <p class="empty-note" id="homeSyncNowNote" style="margin-top:6px;"></p>
   `;
   const sel = document.getElementById("homeContributorName");
   const otherInput = document.getElementById("homeContributorOtherInput");
   if(name && KNOWN_CONTRIBUTORS.includes(name)) sel.value = name;
   else if(isOther){ sel.value = "__other__"; otherInput.value = name; }
   wireHomeSyncStatusPicker();
+  const syncNowBtn = document.getElementById("homeSyncNowBtn");
+  if(syncNowBtn) syncNowBtn.onclick = ()=> runManualSync(syncNowBtn, document.getElementById("homeSyncNowNote"));
 }
 renderHomeSyncStatus();
 
@@ -4501,15 +4622,17 @@ async function pullFromCloud(){
   return { stats: totals, count };
 }
 
-const cloudSyncBtn = document.getElementById("cloudSyncBtn");
-if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
-  const note = document.getElementById("cloudSyncStatusNote");
+// Shared by the Discover "Sync now" button and Home's own copy of it
+// (Home added later so status is visible without a trip to Discover) —
+// same behaviour either way, just reporting into whichever button/note
+// pair triggered it.
+async function runManualSync(btn, note){
   const haveName = !!currentContributorName();
-  if(!currentRoomCode()){ note.textContent = "Type your group's room code above first."; return; }
-  if(!getFirestoreDb()){ note.textContent = "Cloud sync isn't available right now — use the manual code box below instead."; return; }
-  if(navigator.onLine === false){ note.textContent = "No signal — use the manual code box below, or try Sync now again once you're back online."; return; }
-  cloudSyncBtn.disabled = true;
-  note.textContent = "Syncing…";
+  if(!currentRoomCode()){ if(note) note.textContent = "Type your group's room code above first."; return; }
+  if(!getFirestoreDb()){ if(note) note.textContent = "Cloud sync isn't available right now — use the manual code box in Discover instead."; return; }
+  if(navigator.onLine === false){ if(note) note.textContent = "No signal — use the manual code box in Discover, or try Sync now again once you're back online."; return; }
+  if(btn) btn.disabled = true;
+  if(note) note.textContent = "Syncing…";
   try{
     // Pulling everyone else's picks never needs your own name — only
     // pushing your own update does, since that's what it gets filed
@@ -4521,18 +4644,26 @@ if(cloudSyncBtn) cloudSyncBtn.onclick = async ()=>{
     recordLastSynced();
     refreshAfterMerge();
     const namePrefix = haveName ? "" : "Pick who you are above to send your own update. ";
-    if(!count){
+    if(!note){ /* no status note in this context — still ran, just nothing to write to */ }
+    else if(!count){
       note.textContent = `${namePrefix}${haveName ? "Sent your update. " : ""}No one else's synced to this room code yet.`;
     }else{
       note.textContent = `${namePrefix}Synced with ${count} other device${count===1?"":"s"}: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks${stats.bingo ? `, ${stats.bingo} bingo card${stats.bingo===1?"":"s"} updated` : ""}${stats.character ? `, ${stats.character} character${stats.character===1?"":"s"} updated` : ""}. Nothing already saved was duplicated.`;
     }
   }catch(err){
     console.error("Cloud sync failed:", err);
-    note.textContent = `Couldn't sync (${err && err.message ? err.message : "unknown error"}) — check you've got signal and try again.`;
+    if(note) note.textContent = `Couldn't sync (${err && err.message ? err.message : "unknown error"}) — check you've got signal and try again.`;
   }finally{
-    cloudSyncBtn.disabled = false;
+    if(btn) btn.disabled = false;
   }
-};
+}
+
+const cloudSyncBtn = document.getElementById("cloudSyncBtn");
+if(cloudSyncBtn) cloudSyncBtn.onclick = ()=> runManualSync(cloudSyncBtn, document.getElementById("cloudSyncStatusNote"));
+// Home's own "Sync now" button lives inside #homeSyncStatus, which
+// renderHomeSyncStatus() fully rebuilds on every call (new name picked,
+// after a merge, etc.) — wiring it there, not here, so it's re-attached
+// to the fresh button each time instead of going stale.
 
 // Auto-sync — on open, every few minutes while the app stays open, and
 // whenever it comes back to the foreground (phone locked/backgrounded
@@ -5407,6 +5538,18 @@ function renderConsolidatedNotes(){
       </div>
     `).join("");
 }
+
+// Rolled up by default — everyone's own notes already surface in their
+// own tab wherever they were logged (Plan, Bingo, My Character), so
+// this combined view is only needed occasionally, not on every visit.
+const consolidatedToggleBtn = document.getElementById("consolidatedToggleBtn");
+if(consolidatedToggleBtn) consolidatedToggleBtn.onclick = ()=>{
+  const body = document.getElementById("consolidatedNotesBody");
+  if(!body) return;
+  const nowOpen = body.style.display === "none";
+  body.style.display = nowOpen ? "" : "none";
+  consolidatedToggleBtn.textContent = nowOpen ? "Hide all notes ▴" : "Show all notes ▾";
+};
 
 const copyConsolidatedBtn = document.getElementById("copyConsolidatedBtn");
 if(copyConsolidatedBtn) copyConsolidatedBtn.onclick = (e)=>{
