@@ -99,6 +99,36 @@ Links that go out to Instagram, the official Boomtown site, app stores, etc. sti
 
 ---
 
+## 7. Cloud sync — one-time Firestore security rules
+
+The Discover screen's Sync card has a "Sync now" button (Firebase Firestore, no login) alongside the original manual copy/paste code, which still works offline as a fallback. The Firebase config in `js/app.js` is a public client key by design — the actual protection is the Firestore **security rules**, which must be set once in the Firebase console (this can't be done from the repo):
+
+1. Firebase console → your project → **Build → Firestore Database → Rules** tab.
+2. Replace the default rules with:
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /rooms/{roomCode}/members/{memberName} {
+         allow read: if true;
+         allow write: if request.resource.data.keys().hasOnly([
+           'v','from','clues','theories','hiddenVenues','involvedDone',
+           'discoveries','customSocials','quotes','sightings',
+           'customLandmarks','schedule','updatedAt'
+         ]) && request.resource.data.size() < 900000;
+       }
+       match /{document=**} {
+         allow read, write: if false;
+       }
+     }
+   }
+   ```
+3. Click **Publish**.
+
+This limits reads/writes to the exact `rooms/{roomCode}/members/{name}` shape the app uses and blocks everything else in the database — but with no login, anyone who knows (or guesses) a room code can read and write to it. There's no per-user auth in this model, so **pick a room code that isn't guessable** (a short phrase, not "team1" or "boomtown"), the same way you'd treat a shared Wi-Fi password.
+
+---
+
 ### Notes for the technically curious
 - This is a pure static site — no build step, no server, no backend. Just HTML/CSS/JS + a service worker.
 - The service worker (`service-worker.js`) precaches the app shell on install and serves it cache-first while offline, and network-first (with a cache fallback) for the page itself so updates are picked up quickly when online.

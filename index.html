@@ -412,11 +412,11 @@ Meet at the clock tower if separated"></textarea>
 
     <div class="card" id="jumpSync">
       <h3>🤝 Sync with your group — no duplicates</h3>
-      <p>How it fits together, in three steps:</p>
+      <p>How it fits together:</p>
       <ol class="compact-list" style="padding-left:20px;">
-        <li><strong>Pick who you are below.</strong> Everything you add anywhere in the app from now on — theories, hidden-venue finds, get-involved ticks, found socials — is tagged with that name automatically.</li>
-        <li><strong>Copy your sync code</strong> and send it to a teammate. They paste it into "Merge it in" on their phone; your notes, finds and theories combine with theirs (nothing already saved gets doubled up), and your current saved-artist Plan comes along too.</li>
-        <li>That saved-artist Plan never gets folded into their own list, though — it shows up as its own tab, named after you, over on their Plan screen. Their picks stay theirs, yours stay yours; the tabs are just there to compare. Do the code-swap round the whole group and everyone ends up with the same shared notes plus a full set of everyone's named Plan tabs. Whoever hits <strong>"Download shareable group copy"</strong> on Home last bakes that combined set into one file safe to hand round — it leaves out anyone's personal bingo card, character or HQ notes. Discover's Consolidated Notes card (below) shows the notes side split by person or by category — so you can check what's actually in it first.</li>
+        <li><strong>Pick who you are</strong> and <strong>type your group's room code</strong> below (make one up between you — anyone who knows it can sync into it, so treat it like a shared password, not "team1"). Everything you add anywhere in the app from now on — theories, hidden-venue finds, get-involved ticks, found socials — is tagged with your name automatically.</li>
+        <li>With signal, hit <strong>"Sync now"</strong> — it sends your updates up and pulls everyone else's in, automatically, no codes to copy. The app also quietly checks for everyone else's latest whenever you open it, if you're online. Nothing already saved gets doubled up, and your saved-artist Plan travels along as its own tab (named after you) rather than merging into anyone's list — their picks stay theirs, yours stay yours.</li>
+        <li>No signal at the festival? Use the manual code box further down instead — same result, just copy/pasted by hand. Whoever hits <strong>"Download shareable group copy"</strong> on Home last bakes everyone's combined set into one file safe to hand round — it leaves out anyone's personal bingo card, character or HQ notes. Discover's Consolidated Notes card (below) shows the notes side split by person or by category — so you can check what's actually in it first.</li>
       </ol>
       <div class="field"><label>Who are you?</label>
         <select id="contributorName">
@@ -431,6 +431,10 @@ Meet at the clock tower if separated"></textarea>
         </select>
       </div>
       <div class="field" id="contributorOtherField" style="display:none;"><label>Your name</label><input type="text" id="contributorOtherInput" placeholder="Type your name"></div>
+      <div class="field"><label>Group room code</label><input type="text" id="roomCodeInput" placeholder="e.g. redesign-crew-26"></div>
+      <button class="action" id="cloudSyncBtn" style="margin:4px 6px 0 0;">☁️ Sync now</button>
+      <p class="empty-note" id="cloudSyncStatusNote" style="margin-top:6px;"></p>
+      <p style="margin-top:14px;"><strong>No signal? Manual code instead:</strong></p>
       <button class="ghost" id="copySyncCodeBtn" style="margin:4px 6px 0 0;">Copy your sync code</button>
       <div class="field" style="margin-top:10px;"><label>Paste a teammate's sync code</label><textarea id="syncCodeInput" placeholder="Paste a BTC1:... code here"></textarea></div>
       <button class="action" id="mergeSyncCodeBtn">Merge it in</button>
@@ -744,6 +748,11 @@ Talk to an actor in character
 </nav>
 
 
+<!-- Cloud sync — optional, no-login. Loaded from CDN; if there's no
+     signal these simply fail to load and the app carries on offline,
+     the manual copy/paste sync code still works either way. -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="js/artist-bios.js"></script>
 <script src="js/app.js"></script>
 <script src="js/pwa-register.js"></script>
