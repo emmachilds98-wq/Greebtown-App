@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v82";
-const APP_BUILD_TIME = "2026-07-28T20:00:00Z";
+const APP_CACHE_VERSION = "v83";
+const APP_BUILD_TIME = "2026-07-28T20:07:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -40,7 +40,12 @@ function forceAppRefresh(){
 function checkForStaleCopy(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return Promise.resolve(false);
-  return fetch("./service-worker.js", { cache: "no-store" })
+  // Cache-bust with a query string, not just {cache:"no-store"} — that
+  // header only bypasses the browser's HTTP cache, not this same-origin
+  // request being intercepted by our OWN (old) service worker, which
+  // cache-first-serves its own previously-cached copy of this exact file
+  // and would otherwise always report "up to date" against itself.
+  return fetch("./service-worker.js?_=" + Date.now(), { cache: "no-store" })
     .then(r=> r.text())
     .then(text=>{
       const m = text.match(/CACHE_VERSION\s*=\s*"(v\d+)"/);
