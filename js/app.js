@@ -1,4 +1,41 @@
 // ===============================
+// STALE-COPY CHECK — a passive "Updated <date>" label alone isn't
+// enough, since a stale cached page would show a stale timestamp too.
+// This actively fetches the live service-worker.js with cache
+// bypassed, compares its CACHE_VERSION against this page's own baked-in
+// version, and if they differ, turns the header pill into a one-tap fix
+// that clears every cache and service worker registration before
+// reloading — a proper nuclear refresh, not just location.reload().
+// Bump APP_CACHE_VERSION here to match service-worker.js's
+// CACHE_VERSION every time it's bumped, and keep the pill's "Updated"
+// text in index.html current too.
+// ===============================
+const APP_CACHE_VERSION = "v43";
+(function checkForStaleCopy(){
+  const pill = document.getElementById("buildStatusPill");
+  if(!pill) return;
+  fetch("./service-worker.js", { cache: "no-store" })
+    .then(r=> r.text())
+    .then(text=>{
+      const m = text.match(/CACHE_VERSION\s*=\s*"(v\d+)"/);
+      if(!m || m[1] === APP_CACHE_VERSION) return;
+      pill.textContent = "🔄 Update available — tap to refresh";
+      pill.style.cursor = "pointer";
+      pill.style.background = "rgba(226,131,106,.16)";
+      pill.style.color = "var(--accent-red)";
+      pill.style.borderColor = "rgba(226,131,106,.4)";
+      pill.onclick = ()=>{
+        pill.textContent = "Refreshing…";
+        const cleanup = [];
+        if("caches" in window) cleanup.push(caches.keys().then(keys=> Promise.all(keys.map(k=> caches.delete(k)))));
+        if("serviceWorker" in navigator) cleanup.push(navigator.serviceWorker.getRegistrations().then(regs=> Promise.all(regs.map(r=> r.unregister()))));
+        Promise.all(cleanup).finally(()=> location.reload());
+      };
+    })
+    .catch(()=>{ /* offline, or the request itself got served from a cache we can't bypass — leave the static label as-is */ });
+})();
+
+// ===============================
 // BOTTOM NAV CLEARANCE — measure the real nav height instead of
 // guessing a fixed px value, so content is never hidden behind it
 // regardless of device/safe-area.
