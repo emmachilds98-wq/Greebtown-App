@@ -44,7 +44,31 @@ window.ARTIST_PREVIEWS = {
   "Sherelle": { spotifyArtist: "2TFDQkQ7LahhuwL9p7R6MO", soundcloud: "https://soundcloud.com/iamsherelle", youtubeChannel: "https://www.youtube.com/channel/UCeRnxh2z9k9QrD4WTgddwEg", instagram: "https://www.instagram.com/sherelle_/" },
   "Vengaboys": { spotifyArtist: "0cwmNvclzPd8mQnoHuIksj", soundcloud: "https://soundcloud.com/vengaboys-official", youtubeChannel: "http://www.youtube.com/channel/UC2-0suM5zJqTlyGRt-4GasA", instagram: "https://www.instagram.com/vengaboys" },
   "DJ EZ": { soundcloud: "https://soundcloud.com/djez", instagram: "https://www.instagram.com/djezofficial/" },
-  "Peaches": { spotifyArtist: "1gkSl4XpHIHI4I1WQbfXOE", soundcloud: "https://soundcloud.com/peachesnisker", youtubeChannel: "http://www.youtube.com/channel/UCAVB5fxiG2CYxS74w3qUpqw", instagram: "https://www.instagram.com/peachesnisker/" }
+  "Peaches": { spotifyArtist: "1gkSl4XpHIHI4I1WQbfXOE", soundcloud: "https://soundcloud.com/peachesnisker", youtubeChannel: "http://www.youtube.com/channel/UCAVB5fxiG2CYxS74w3qUpqw", instagram: "https://www.instagram.com/peachesnisker/" },
+  "Kae Tempest": { spotifyArtist: "1O3wYcUD08X9yb6J3xaw5M", soundcloud: "https://soundcloud.com/kaetempest", youtubeChannel: "https://www.youtube.com/channel/UCds3t8SvEFkiqXWwVIi9IQg", instagram: "https://www.instagram.com/kaetempest/" },
+  "Hak Baker": { spotifyArtist: "5QsqiLFA5Z2gmpKBbxQB2j", soundcloud: "https://soundcloud.com/hakbaker", youtubeChannel: "https://www.youtube.com/channel/UCCXVm1QtI9bVGH7_Bgcjsgw", instagram: "https://www.instagram.com/hakbaker/" },
+  "Panic Shack": { spotifyArtist: "26HCuM5PamldoaHII5Ifxc", youtubeChannel: "https://www.youtube.com/channel/UCMV_H2YjdXmzp5DLRywnIYQ", instagram: "https://www.instagram.com/panicshack/" },
+  "Beardyman": { spotifyArtist: "6lITXT7V1VIC7nwlgh8ycO", soundcloud: "https://soundcloud.com/beardyman", youtubeChannel: "https://www.youtube.com/channel/UC-_zxXP5Qo4D4eoWe4gFC_w", instagram: "https://www.instagram.com/beardymanofficial/" },
+  "Lynks": { spotifyArtist: "44tV2d4RDeMsS2sLOdcXHD", soundcloud: "https://soundcloud.com/lynksafrikka", youtubeChannel: "https://www.youtube.com/channel/UCfT4PNfVf-NMxgorz02Bsjg", instagram: "https://www.instagram.com/lynkslynkslynks" },
+  "Henge": { spotifyArtist: "5R09pajxQjiwdUH6Fw4yM5", soundcloud: "https://soundcloud.com/hengemusic", youtubeChannel: "https://www.youtube.com/channel/UCIsYg7VvHTAw9rk3BuMAipw", instagram: "https://www.instagram.com/henge_cosmicdross" },
+  "Rose Gray": { spotifyArtist: "5YYrWH3w4JYijU4JZrOXWA", soundcloud: "https://soundcloud.com/oseray", youtubeChannel: "https://www.youtube.com/channel/UCwBKtW5UEKfHpdRrhbyW3Pw", instagram: "https://www.instagram.com/rosegray_/" },
+  "Gurriers": { spotifyArtist: "0bPAi2zCrxUrPBREWdetZ5", youtubeChannel: "https://www.youtube.com/channel/UCNdXGw1baUM2smmk1WPNUxA", instagram: "https://www.instagram.com/gurriersband/" },
+  "Dub Pistols": { spotifyArtist: "4LYX3rRdXV2l99wR5YPFoK", soundcloud: "https://soundcloud.com/dubpistols", youtubeChannel: "http://www.youtube.com/channel/UC-ocgQ-8Y7zg81SMSpEgoFQ", instagram: "https://www.instagram.com/dubpistol" },
+  "Dutty Moonshine": { spotifyArtist: "2aRD3jAqJXXE6luSkvLp3W", soundcloud: "https://soundcloud.com/duttymoonshine", youtubeChannel: "https://www.youtube.com/user/DuttyMoonshine", instagram: "https://www.instagram.com/duttymoonshinebigband/" },
+  "Nubiyan Twist": { spotifyArtist: "5HNkGissAKlCv88sus7rVO", soundcloud: "https://soundcloud.com/nubiyantwist", youtubeChannel: "https://www.youtube.com/user/NubiyanTwist", instagram: "https://www.instagram.com/nubiyantwist/" },
+  "999999999": { spotifyArtist: "6uD2LjPHUjxrpax0se17Nc", soundcloud: "https://soundcloud.com/999999999music", instagram: "https://www.instagram.com/999999999_live/" },
+  "Brutalismus 3000": { spotifyArtist: "6LtXxYMIiKSy2EGHnz1f5j", soundcloud: "https://soundcloud.com/brutalismus-3000", instagram: "https://www.instagram.com/brutalismus3000/" },
+  "Marlon Hoffstadt": { spotifyArtist: "0HHa7ZJZxUQlg5l2mB0N0f", soundcloud: "https://soundcloud.com/marlonhoffstadt", youtubeChannel: "https://www.youtube.com/user/MarlonHoffstadt", instagram: "https://www.instagram.com/marlonhoffstadt/" },
+  "VTSS": { spotifyArtist: "0zo109NM3S7CqHpvlXwqEN", soundcloud: "https://soundcloud.com/vtss", youtubeChannel: "https://www.youtube.com/channel/UC1hS4zcYjl9n7ODh29bVsAA", instagram: "https://www.instagram.com/vtss/" },
+  "SBTRKT": { spotifyArtist: "1O10apSOoAPjOu6UhUNmeI", soundcloud: "https://soundcloud.com/sbtrkt", youtubeChannel: "https://www.youtube.com/user/SBTRKT", instagram: "https://www.instagram.com/sbtrkt/" },
+  "The Bloody Beetroots": { spotifyArtist: "0QJKELJZZuLAjqLOOixJm5", soundcloud: "http://soundcloud.com/thebloodybeetroots", youtubeChannel: "https://www.youtube.com/channel/UCVpnCPbd_jmm2c4WGg9qzqg", instagram: "https://www.instagram.com/thebloodybeetrootsofficial" },
+  "Frankie Stew and Harvey Gunn": { spotifyArtist: "1jVvXqdwDHekLwFBamrcUx", soundcloud: "https://soundcloud.com/fsandhg", youtubeChannel: "https://www.youtube.com/channel/UCkXwVPgZgcMVmx0Ts3MDh3A", instagram: "https://www.instagram.com/fsandhg/" },
+  "Eats Everything": { spotifyArtist: "4W991QdgKWX4TO864ypInA", soundcloud: "https://soundcloud.com/eatseverything", youtubeChannel: "https://www.youtube.com/user/MrEatsEverything", instagram: "https://www.instagram.com/eatseverything/" },
+  "TSHA": { spotifyArtist: "2kLa7JZu4Ijdz1Gle2khZh", soundcloud: "https://soundcloud.com/tshamusic", youtubeChannel: "https://www.youtube.com/channel/UCZmwUDJ4yCqrTgHcnA8ncmQ", instagram: "https://www.instagram.com/tshamusic/" },
+  "Ross From Friends": { spotifyArtist: "1Ma3pJzPIrAyYPNRkp3SUF", soundcloud: "https://soundcloud.com/rossfromfriends", youtubeChannel: "https://www.youtube.com/channel/UCQF0bMNU7G-F07QuLJEJ0GQ", instagram: "https://www.instagram.com/rossfromfriends/" },
+  "Folamour": { spotifyArtist: "6pJY5At9SiMpAOBrw9YosS", soundcloud: "https://soundcloud.com/folamour", youtubeChannel: "https://www.youtube.com/channel/UC6cU5MIwHhDe-83ycfHEbyA", instagram: "https://www.instagram.com/folamour_fhuo/" },
+  "Alix Perez": { spotifyArtist: "4e6pQ61gYReORJoXcrQH1Z", soundcloud: "http://soundcloud.com/alixperez", instagram: "https://www.instagram.com/alixperez1985/" },
+  "Hamdi": { spotifyArtist: "7vvicoei9BbKpZix8qSeLg", soundcloud: "https://soundcloud.com/hamdiofficialmusic", youtubeChannel: "https://www.youtube.com/channel/UCsvs03ZW_Mko0LP4HerZG_w", instagram: "https://www.instagram.com/hamdimusic/" }
 };
 
 // Aliases for exact lineup billing text that differs from the plain
@@ -58,6 +82,11 @@ window.ARTIST_PREVIEWS = {
   ["Sampa The Great", "Sampa the Great"],
   ["Shy FX Ft. Rage", "Shy FX"],
   ["Sherelle AV Show", "Sherelle"],
+  ["Dutty Moonshine Big Band", "Dutty Moonshine"],
+  ["999999999 AV Show", "999999999"],
+  ["Sbtrkt DJ Set", "SBTRKT"],
+  ["Frankie Stew & Harvey Gunn", "Frankie Stew and Harvey Gunn"],
+  ["Alix Perez Ft. Sp:Mc", "Alix Perez"],
 ].forEach(([alias, canonical])=>{
   if(window.ARTIST_PREVIEWS[canonical]) window.ARTIST_PREVIEWS[alias] = window.ARTIST_PREVIEWS[canonical];
 });
