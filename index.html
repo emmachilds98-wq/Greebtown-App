@@ -377,9 +377,9 @@ Meet at the clock tower if separated"></textarea>
 
   <!-- DISCOVER -->
   <section id="discover" class="screen">
-    <div class="eyebrow">Districts &amp; story</div>
+    <div class="eyebrow">Story, games &amp; guide</div>
     <h2 style="margin-bottom:14px;">Discover</h2>
-    <p class="empty-note" style="margin-bottom:10px;">Boomtown's story runs district by district — real names and plotlines below. Mark each district off as you visit, and jot any leads your group picks up so you can compare notes later.</p>
+    <p class="empty-note" style="margin-bottom:10px;">Everything that isn't the lineup or map lives here — the story, day-to-day logistics, the games, and lookup reference — grouped below so it's easy to find the bit you actually want.</p>
 
     <div class="venue-filters" id="discoverNav" style="margin-bottom:14px;">
       <button data-jump="jumpSync">🤝 Sync</button>
@@ -388,6 +388,9 @@ Meet at the clock tower if separated"></textarea>
       <button data-jump="discoveries">🏙 Districts</button>
       <button data-jump="jumpDailyRag">🗞 Live intel</button>
       <button data-jump="jumpInvolved">🙋 Get involved</button>
+      <button data-jump="jumpStoryDeep">🕹 How to play it</button>
+      <button data-jump="jumpBeyondMusic">🎯 Beyond the music</button>
+      <button data-jump="jumpLogistics">🗓 Logistics</button>
       <button data-jump="jumpCharacter">🎭 My character</button>
       <button data-jump="jumpBingo">🎲 Bingo</button>
       <button data-jump="jumpJournal">😂 Journal</button>
@@ -581,6 +584,8 @@ Meet at the clock tower if separated"></textarea>
       </div>
     </div></div>
 
+    <div id="guideContent"></div>
+
     <div class="daygroup">🎮 Just for fun</div>
 
     <div class="card" id="jumpCharacter">
@@ -722,14 +727,6 @@ Talk to an actor in character
     <div id="glossaryList"></div>
   </section>
 
-  <!-- GUIDE -->
-  <section id="guide" class="screen">
-    <div class="eyebrow">Good to know</div>
-    <h2 style="margin-bottom:14px;">Guide</h2>
-    <div id="guideContent"></div>
-  </section>
-
-
 </main>
 
 <nav class="tabbar">
@@ -738,7 +735,6 @@ Talk to an actor in character
   <button class="tab" data-tab="plan"><span class="icon">⭐</span>Plan</button>
   <button class="tab" data-tab="mapscreen"><span class="icon">🗺</span>Map</button>
   <button class="tab" data-tab="discover"><span class="icon">✨</span>Discover</button>
-  <button class="tab" data-tab="guide"><span class="icon">📖</span>Guide</button>
 </nav>
 
 

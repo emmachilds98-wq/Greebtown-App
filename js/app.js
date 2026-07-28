@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v49";
-const APP_BUILD_TIME = "2026-07-28T05:50:00Z";
+const APP_CACHE_VERSION = "v50";
+const APP_BUILD_TIME = "2026-07-28T06:15:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5094,9 +5094,14 @@ const chapterFiveGuide = [
 ];
 
 const GUIDE_SECTION_LABELS = {
-  story: "📖 The story",
+  story: "📖 The story, in depth",
   extras: "🎯 Beyond the music",
   logistics: "🗓 Logistics for the day"
+};
+const GUIDE_SECTION_IDS = {
+  story: "jumpStoryDeep",
+  extras: "jumpBeyondMusic",
+  logistics: "jumpLogistics"
 };
 
 function loadGuide(){
@@ -5107,6 +5112,7 @@ function loadGuide(){
       lastSection = section.section;
       const divider = document.createElement("div");
       divider.className = "daygroup";
+      divider.id = GUIDE_SECTION_IDS[lastSection] || "";
       divider.textContent = GUIDE_SECTION_LABELS[lastSection] || lastSection;
       guideContent.appendChild(divider);
     }
