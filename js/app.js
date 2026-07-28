@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v69";
-const APP_BUILD_TIME = "2026-07-28T16:38:00Z";
+const APP_CACHE_VERSION = "v70";
+const APP_BUILD_TIME = "2026-07-28T16:43:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2222,18 +2222,21 @@ function renderPlanPersonTabs(){
   if(!box) return;
   const people = Store.get("peopleSchedules") || {};
   const names = Object.keys(people).filter(n=> (people[n]||[]).length > 0);
-  if(names.length === 0){
-    box.style.display = "none";
-    planActiveOwner = "mine";
-    if(note){
-      note.style.display = "";
-      note.textContent = "Nobody's synced in yet — this is where a teammate's picks will show up (and in the Compare view below) once they have. Pick your name in Discover and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
-    }
-    return;
-  }
+  // If the previously-active friend has since disappeared from
+  // peopleSchedules (nothing saved, or never actually synced), fall
+  // back to your own tab rather than pointing at a button that's about
+  // to stop existing.
+  if(planActiveOwner !== "mine" && !names.includes(planActiveOwner)) planActiveOwner = "mine";
+
+  // Your own tab is always shown, even with zero friends synced in yet —
+  // labelled with your own picked name (matching what a friend would see
+  // for you on their device) once you've set one, "Mine" until then.
+  const myName = (Store.get("contributorName") || "").trim();
+  const myLabel = myName ? `⭐ ${myName}` : "⭐ Mine";
+
   box.style.display = "";
   box.className = "tabstrip";
-  box.innerHTML = `<button class="${planActiveOwner==="mine"?"active":""}" data-owner="mine">⭐ Mine</button>` +
+  box.innerHTML = `<button class="${planActiveOwner==="mine"?"active":""}" data-owner="mine">${escapeHtml(myLabel)}</button>` +
     names.map(n=>`<button class="person ${planActiveOwner===n?"active":""}" data-owner="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join("");
   box.querySelectorAll("button").forEach(btn=>{
     btn.onclick = ()=>{
@@ -2245,9 +2248,13 @@ function renderPlanPersonTabs(){
   });
   if(note){
     note.style.display = "";
-    note.textContent = planActiveOwner === "mine"
-      ? "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours. See everyone at once in the Compare view below."
-      : `Viewing ${planActiveOwner}'s saved artists from their last sync — read-only, and it hasn't changed or added anything to your own list.`;
+    if(names.length === 0){
+      note.textContent = "Nobody's synced in yet — a teammate's picks will show up as their own tab here (and in Compare below) once they have. Pick your name in Discover if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
+    } else {
+      note.textContent = planActiveOwner === "mine"
+        ? "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours. See everyone at once in the Compare view below."
+        : `Viewing ${planActiveOwner}'s saved artists from their last sync — read-only, and it hasn't changed or added anything to your own list.`;
+    }
   }
 }
 
