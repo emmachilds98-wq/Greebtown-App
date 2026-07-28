@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v51";
-const APP_BUILD_TIME = "2026-07-28T06:45:00Z";
+const APP_CACHE_VERSION = "v52";
+const APP_BUILD_TIME = "2026-07-28T07:10:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5012,10 +5012,9 @@ renderConsolidatedNotes();
 // get removed by the daily update rather than piling up.
 // ===============================
 const officialLiveIntel = [
-  { text:"Boomtown published its official Chapter Five: Radical Redesign Essential Guide, covering alcohol limits, drugs policy, harm reduction, car park passes, accessibility, travel/luggage and campsite info all in one place — worth a skim even with this app's own Guide section.", source:"boomtownfair.co.uk/news", when:"11 Jun 2026", confirmed:true },
-  { text:"The Winchester train station shuttle bus is confirmed to run again this year (wheelchair accessible); the full timetable of shuttle times across the week is due to be published via the official Boomtown website/app in July, closer to the festival.", source:"boomtownfair.co.uk/info/travel, South Western Railway", when:"Jul 2026", confirmed:true },
-  { text:"Boomtown's drugs policy explicitly names Nitrous Oxide (laughing gas) and all New Psychoactive Substances (NPS) as banned alongside illegal drugs generally — amnesty points are available near entry with no questions asked if you need to dispose of anything before being searched.", source:"boomtownfair.co.uk essential guide", when:"Jun 2026", confirmed:true },
-  { text:"On-site parking needs a car park pass booked in advance through your Boomtown account — a weekend ticket doesn't automatically include one, so sort it ahead of time if you're driving.", source:"boomtownfair.co.uk/info", when:"2026", confirmed:true }
+  { text:"Boomtown secured planning permission for a 20% capacity boost this chapter — from roughly 66,000 up to just under 77,000 attendees — the scale behind the 'Radical Redesign' push for more space, more woodland and more hidden places across the whole site.", source:"South Downs National Park Authority planning approval, via festival trade press", when:"2026", confirmed:true },
+  { text:"Grand Central has moved to roomier woodland terrain as part of the redesign — if you remember it from a previous chapter, don't expect it in the same spot this year.", source:"Official Chapter Five redesign coverage", when:"2026", confirmed:true },
+  { text:"Hydro XL has taken over the former Origins stage footprint in Downtown and doubled in capacity to 20,000, running entirely on green hydrogen fuel cells — one of the UK's first large-scale stages to do so.", source:"Boomtown official announcement / festival press", when:"2026", confirmed:true }
 ];
 
 function loadOfficialLiveIntel(){
