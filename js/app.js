@@ -3556,15 +3556,17 @@ function mergeSyncPayload(payload){
   });
   Store.set("theories", theories);
 
-  // Keyed by name+contributor, not name alone — two people logging a
-  // venue under the same name with different details (genre, location,
-  // description) are different observations and must both survive, not
-  // silently collapse into whichever arrived first.
+  // Keyed by name+contributor+info, not just name+contributor — the
+  // same person can log the same venue more than once (going back a
+  // second night, a different set, a different note) and every one of
+  // those must survive as its own entry. Only an exact re-send of the
+  // identical note (same name+from+info, e.g. re-syncing the same code
+  // twice) counts as a true duplicate.
   const venues = Store.get("hiddenVenues") || [];
-  const venueKeys = new Set(venues.map(v=>`${(v.name || "").trim().toLowerCase()}|${(v.from || "").trim().toLowerCase()}`));
+  const venueKeys = new Set(venues.map(v=>`${(v.name || "").trim().toLowerCase()}|${(v.from || "").trim().toLowerCase()}|${(v.info || "").trim().toLowerCase()}`));
   (payload.hiddenVenues || []).forEach(v=>{
     const name = (v.name || "").trim().toLowerCase();
-    const key = `${name}|${from.trim().toLowerCase()}`;
+    const key = `${name}|${from.trim().toLowerCase()}|${(v.info || "").trim().toLowerCase()}`;
     if(!name || venueKeys.has(key)) return;
     venueKeys.add(key);
     venues.push({ ...v, from });
@@ -3622,14 +3624,16 @@ function mergeSyncPayload(payload){
   });
   Store.set("sightings", sightings);
 
-  // Same name+contributor keying as hiddenVenues above, and for the same
-  // reason — don't let one person's landmark note silently eat another's.
+  // Same name+contributor+info keying as hiddenVenues above, and for
+  // the same reason — a second note about the same landmark from the
+  // same person must survive as its own entry, not get silently eaten
+  // by the first one just because the name matches.
   const customLandmarksList = Store.get("customLandmarks") || [];
-  const landmarkKeys = new Set(customLandmarksList.map(l=>`${(l.name || "").trim().toLowerCase()}|${(l.from || "").trim().toLowerCase()}`));
+  const landmarkKeys = new Set(customLandmarksList.map(l=>`${(l.name || "").trim().toLowerCase()}|${(l.from || "").trim().toLowerCase()}|${(l.info || "").trim().toLowerCase()}`));
   (payload.customLandmarks || []).forEach(l=>{
     const name = (l.name || "").trim().toLowerCase();
     const entryFrom = l.from || from;
-    const key = `${name}|${entryFrom.trim().toLowerCase()}`;
+    const key = `${name}|${entryFrom.trim().toLowerCase()}|${(l.info || "").trim().toLowerCase()}`;
     if(!name || landmarkKeys.has(key)) return;
     landmarkKeys.add(key);
     customLandmarksList.push({ ...l, from: entryFrom });
@@ -3689,6 +3693,28 @@ function currentContributorName(){
   return (Store.get("contributorName") || "").trim();
 }
 
+// Keeps the Discover Sync card's picker and Home's inline picker (built
+// below) showing the same value, whichever one someone actually used —
+// both write to the same Store key, this just keeps the two displays
+// from going stale relative to each other.
+function syncContributorNameDisplays(){
+  const name = currentContributorName();
+  if(contributorNameInput){
+    if(name && KNOWN_CONTRIBUTORS.includes(name)){
+      contributorNameInput.value = name;
+      if(contributorOtherField) contributorOtherField.style.display = "none";
+    } else if(name){
+      contributorNameInput.value = "__other__";
+      if(contributorOtherField) contributorOtherField.style.display = "";
+      if(contributorOtherInput) contributorOtherInput.value = name;
+    } else {
+      contributorNameInput.value = "";
+      if(contributorOtherField) contributorOtherField.style.display = "none";
+    }
+  }
+  if(typeof renderHomeSyncStatus === "function") renderHomeSyncStatus();
+}
+
 if(contributorNameInput){
   const saved = Store.get("contributorName") || "";
   if(saved && KNOWN_CONTRIBUTORS.includes(saved)){
@@ -3706,11 +3732,11 @@ if(contributorNameInput){
       contributorOtherField.style.display = "none";
       Store.set("contributorName", contributorNameInput.value);
     }
-    if(typeof renderHomeSyncStatus === "function") renderHomeSyncStatus();
+    syncContributorNameDisplays();
   };
   contributorOtherInput.oninput = ()=>{
     if(contributorNameInput.value === "__other__") Store.set("contributorName", contributorOtherInput.value.trim());
-    if(typeof renderHomeSyncStatus === "function") renderHomeSyncStatus();
+    syncContributorNameDisplays();
   };
 }
 
@@ -3718,25 +3744,95 @@ if(contributorNameInput){
 // whether sync is actually going to work — "your name isn't set" is
 // the single most common reason someone's inputs silently never leave
 // their device, so this is deliberately hard to miss rather than
-// buried only in the Sync card itself.
+// buried only in the Sync card itself. Also fully editable right here,
+// not just a status readout — Discover's Sync card keeps its own copy
+// of the same picker too, for anyone who lands there first instead.
+//
+// renderHomeSyncStatus() does a full rebuild — safe for init and for
+// changes that originate elsewhere (Discover's picker). It must NOT be
+// called while someone is actively typing in Home's own "other name"
+// field, though — that would destroy/recreate the input mid-keystroke
+// and drop focus. updateHomeSyncStatusText() is the lightweight
+// alternative for that case: it only touches the status text, never
+// the picker's own DOM.
+function updateHomeSyncStatusText(){
+  const box = document.getElementById("homeSyncStatus");
+  if(!box) return;
+  const tag = box.querySelector(".tag");
+  const heading = box.querySelector("h3");
+  const para = box.querySelector("p");
+  const name = currentContributorName();
+  if(tag){
+    tag.textContent = name ? "Syncing" : "Set this up once";
+    tag.style.cssText = name ? "" : "background:rgba(242,168,60,.16); color:var(--accent-amber); border-color:rgba(242,168,60,.4);";
+  }
+  if(heading) heading.textContent = name ? `✅ Syncing as ${name}` : "⚠️ Pick your name to start syncing";
+  if(para) para.innerHTML = name
+    ? `This runs automatically every time you open the app with signal — you never need to press anything for it to work, first time or any time after. "Sync now" in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> is only there if you want an instant one mid-session.`
+    : `Nothing you add will reach the group until you've picked who you are — a one-time thing, done for good on this device afterwards. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover, if you'd rather set it there.`;
+}
+
+function wireHomeSyncStatusPicker(){
+  const sel = document.getElementById("homeContributorName");
+  const otherField = document.getElementById("homeContributorOtherField");
+  const otherInput = document.getElementById("homeContributorOtherInput");
+  if(!sel) return;
+  sel.onchange = ()=>{
+    if(sel.value === "__other__"){
+      // Just opened "Other" with nothing typed yet — show the field
+      // and mirror the open state to Discover's picker, but don't
+      // clobber the saved name with an empty string until there's
+      // actually something to save.
+      otherField.style.display = "";
+      if(otherInput.value.trim()) Store.set("contributorName", otherInput.value.trim());
+      if(contributorNameInput){ contributorNameInput.value = "__other__"; }
+      if(contributorOtherField){ contributorOtherField.style.display = ""; }
+      updateHomeSyncStatusText();
+    } else {
+      otherField.style.display = "none";
+      Store.set("contributorName", sel.value);
+      syncContributorNameDisplays();
+    }
+  };
+  otherInput.oninput = ()=>{
+    Store.set("contributorName", otherInput.value.trim());
+    if(contributorOtherInput){ contributorOtherInput.value = otherInput.value; }
+    if(contributorNameInput){ contributorNameInput.value = "__other__"; }
+    if(contributorOtherField){ contributorOtherField.style.display = ""; }
+    updateHomeSyncStatusText();
+  };
+}
+
 function renderHomeSyncStatus(){
   const box = document.getElementById("homeSyncStatus");
   if(!box) return;
   const name = currentContributorName();
-  if(!name){
-    box.innerHTML = `
-      <span class="tag" style="background:rgba(242,168,60,.16); color:var(--accent-amber); border-color:rgba(242,168,60,.4);">Set this up once</span>
-      <h3>⚠️ Pick your name to start syncing</h3>
-      <p>Nothing you add will reach the group until you've picked who you are — a one-time thing, done for good on this device afterwards.</p>
-      <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Pick your name in Sync →</a>
-    `;
-  } else {
-    box.innerHTML = `
-      <span class="tag">Syncing</span>
-      <h3>✅ Syncing as ${escapeHtml(name)}</h3>
-      <p>This runs automatically every time you open the app with signal — you never need to press anything for it to work, first time or any time after. "Sync now" in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> is only there if you want an instant one mid-session.</p>
-    `;
-  }
+  const isOther = name && !KNOWN_CONTRIBUTORS.includes(name);
+  box.innerHTML = `
+    <span class="tag" style="${name ? "" : "background:rgba(242,168,60,.16); color:var(--accent-amber); border-color:rgba(242,168,60,.4);"}">${name ? "Syncing" : "Set this up once"}</span>
+    <h3>${name ? `✅ Syncing as ${escapeHtml(name)}` : "⚠️ Pick your name to start syncing"}</h3>
+    <p>${name
+      ? `This runs automatically every time you open the app with signal — you never need to press anything for it to work, first time or any time after. "Sync now" in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> is only there if you want an instant one mid-session.`
+      : `Nothing you add will reach the group until you've picked who you are — a one-time thing, done for good on this device afterwards. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover, if you'd rather set it there.`}</p>
+    <div class="field" style="margin-top:10px;"><label>Who are you?</label>
+      <select id="homeContributorName">
+        <option value="">Select a name…</option>
+        <option value="Emma">Emma</option>
+        <option value="Dave">Dave</option>
+        <option value="Rob">Rob</option>
+        <option value="Jack">Jack</option>
+        <option value="Lewis">Lewis</option>
+        <option value="Dana">Dana</option>
+        <option value="__other__">Other…</option>
+      </select>
+    </div>
+    <div class="field" id="homeContributorOtherField" style="display:${isOther ? "" : "none"};"><label>Your name</label><input type="text" id="homeContributorOtherInput" placeholder="Type your name"></div>
+  `;
+  const sel = document.getElementById("homeContributorName");
+  const otherInput = document.getElementById("homeContributorOtherInput");
+  if(name && KNOWN_CONTRIBUTORS.includes(name)) sel.value = name;
+  else if(isOther){ sel.value = "__other__"; otherInput.value = name; }
+  wireHomeSyncStatusPicker();
 }
 renderHomeSyncStatus();
 
@@ -4580,7 +4676,10 @@ function buildConsolidatedReportByPerson(){
   }
 
   theoryEntries.forEach(t=> bucket(t.from).theories.push(t.text));
-  venueEntries.forEach(v=> bucket(v.from).venues.push(`${v.name}${v.near ? ` (near ${v.near})` : ""}`));
+  // Include the actual note text (and when it was logged) — not just
+  // the venue name — so a second visit/note about the same place reads
+  // as its own distinct entry here, not an identical-looking repeat.
+  venueEntries.forEach(v=> bucket(v.from).venues.push(`${v.name}${v.near ? ` (near ${v.near})` : ""}${v.info ? ` — ${v.info}` : ""}${v.when ? ` (${v.when})` : ""}`));
   Object.entries(clues).forEach(([district, text])=>{
     String(text).split("\n").map(l=>l.trim()).filter(Boolean).forEach(line=>{
       const m = line.match(tagPattern);
@@ -4596,7 +4695,7 @@ function buildConsolidatedReportByPerson(){
   socials.forEach(s=> bucket(s.from).socials.push(`${s.name} — ${s.url}`));
   quoteEntries.forEach(q=> bucket(q.from).quotes.push(`"${q.text}"${q.saidBy ? ` — ${q.saidBy}` : ""}`));
   sightingEntries.forEach(s=> bucket(s.from).sightings.push(s.text));
-  landmarkEntries.forEach(l=> bucket(l.from).landmarks.push(`${l.name} (${l.district})`));
+  landmarkEntries.forEach(l=> bucket(l.from).landmarks.push(`${l.name} (${l.district})${l.info ? ` — ${l.info}` : ""}`));
 
   return Object.entries(byPerson).map(([name, data])=>({
     heading: name,
