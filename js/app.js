@@ -32,7 +32,10 @@ fixBottomClearance();
 //    (buildSyncPayload/mergeSyncPayload) — it's opt-in and only ever
 //    touches the shared discovery-log style fields (clues, theories,
 //    hiddenVenues, discoveries, customSocials, quotes, sightings,
-//    customLandmarks), which merge additively with no duplicates, PLUS
+//    customLandmarks), which merge additively with no duplicates from the
+//    same contributor — hiddenVenues/customLandmarks dedupe per name+from,
+//    not name alone, so two people's differing entries for a same-named
+//    place both survive instead of one silently overwriting the other, PLUS
 //    one read-only snapshot field: each person's saved-artist "schedule"
 //    rides along in the same code, but it is never merged into your own
 //    "schedule" key. Incoming schedules land under peopleSchedules[name]
@@ -3347,11 +3350,16 @@ function mergeSyncPayload(payload){
   });
   Store.set("theories", theories);
 
+  // Keyed by name+contributor, not name alone — two people logging a
+  // venue under the same name with different details (genre, location,
+  // description) are different observations and must both survive, not
+  // silently collapse into whichever arrived first.
   const venues = Store.get("hiddenVenues") || [];
-  const venueKeys = new Set(venues.map(v=>(v.name || "").trim().toLowerCase()));
+  const venueKeys = new Set(venues.map(v=>`${(v.name || "").trim().toLowerCase()}|${(v.from || "").trim().toLowerCase()}`));
   (payload.hiddenVenues || []).forEach(v=>{
-    const key = (v.name || "").trim().toLowerCase();
-    if(!key || venueKeys.has(key)) return;
+    const name = (v.name || "").trim().toLowerCase();
+    const key = `${name}|${from.trim().toLowerCase()}`;
+    if(!name || venueKeys.has(key)) return;
     venueKeys.add(key);
     venues.push({ ...v, from });
     stats.venues++;
@@ -3408,13 +3416,17 @@ function mergeSyncPayload(payload){
   });
   Store.set("sightings", sightings);
 
+  // Same name+contributor keying as hiddenVenues above, and for the same
+  // reason — don't let one person's landmark note silently eat another's.
   const customLandmarksList = Store.get("customLandmarks") || [];
-  const landmarkKeys = new Set(customLandmarksList.map(l=>(l.name || "").trim().toLowerCase()));
+  const landmarkKeys = new Set(customLandmarksList.map(l=>`${(l.name || "").trim().toLowerCase()}|${(l.from || "").trim().toLowerCase()}`));
   (payload.customLandmarks || []).forEach(l=>{
-    const key = (l.name || "").trim().toLowerCase();
-    if(!key || landmarkKeys.has(key)) return;
+    const name = (l.name || "").trim().toLowerCase();
+    const entryFrom = l.from || from;
+    const key = `${name}|${entryFrom.trim().toLowerCase()}`;
+    if(!name || landmarkKeys.has(key)) return;
     landmarkKeys.add(key);
-    customLandmarksList.push({ ...l, from: l.from || from });
+    customLandmarksList.push({ ...l, from: entryFrom });
     stats.landmarks++;
   });
   Store.set("customLandmarks", customLandmarksList);
