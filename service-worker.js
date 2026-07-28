@@ -1,6 +1,6 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v88";
+const CACHE_VERSION = "v89";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
 
 // Everything the app needs to run with zero network connection.
@@ -12,6 +12,7 @@ const PRECACHE_URLS = [
   "./css/style.css",
   "./js/app.js",
   "./js/artist-bios.js",
+  "./js/artist-previews.js",
   "./js/pwa-register.js",
   "./icons/icon-72.png",
   "./icons/icon-96.png",

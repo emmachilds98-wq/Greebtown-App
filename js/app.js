@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v88";
-const APP_BUILD_TIME = "2026-07-28T20:38:00Z";
+const APP_CACHE_VERSION = "v89";
+const APP_BUILD_TIME = "2026-07-28T20:46:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -546,6 +546,90 @@ function artistBioBlockHtml(artist){
   const gDesc = composedFallbackBio(artist);
   return gDesc ? `<div class="genre-desc">${escapeHtml(gDesc)}</div>` : "";
 }
+
+// ===============================
+// MUSIC PREVIEWS — Spotify/SoundCloud/YouTube. Needs a network
+// connection regardless of a hand-verified ID being on file, unlike the
+// rest of this offline-first app — there's no way around that for an
+// embedded player or an outbound search link.
+//
+// Two tiers per platform, chosen per artist at render time:
+//  - Verified (window.ARTIST_PREVIEWS[name], see js/artist-previews.js):
+//    a real track/video ID someone's actually confirmed belongs to this
+//    artist — renders an inline embedded player on tap.
+//  - Unverified (the default for almost every artist right now): a
+//    "search on <platform>" link pre-filled with the artist's exact
+//    name, opened in a new tab. Can never misattribute — it's a search,
+//    not a guessed ID — so every one of the 1000+ artists gets a
+//    working button with zero manual verification needed.
+// ===============================
+function artistPreviewEntry(name){
+  return (window.ARTIST_PREVIEWS && window.ARTIST_PREVIEWS[name]) || null;
+}
+
+function previewSearchUrl(platform, name){
+  const q = encodeURIComponent(name);
+  if(platform === "spotify") return `https://open.spotify.com/search/${q}`;
+  if(platform === "soundcloud") return `https://soundcloud.com/search?q=${q}`;
+  if(platform === "youtube") return `https://www.youtube.com/results?search_query=${q}`;
+  return "#";
+}
+
+const PREVIEW_PLATFORMS = [
+  { key:"spotify", label:"Spotify", icon:"🟢" },
+  { key:"soundcloud", label:"SoundCloud", icon:"🟠" },
+  { key:"youtube", label:"YouTube", icon:"🔴" }
+];
+
+function previewEmbedHtml(platform, val){
+  const src = platform === "spotify" ? `https://open.spotify.com/embed/track/${encodeURIComponent(val)}`
+    : platform === "soundcloud" ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(val)}&color=%23f2a83c&auto_play=false&visual=false`
+    : platform === "youtube" ? `https://www.youtube.com/embed/${encodeURIComponent(val)}`
+    : null;
+  if(!src) return "";
+  const height = platform === "spotify" ? 152 : platform === "youtube" ? 180 : 120;
+  return `<iframe src="${src}" width="100%" height="${height}" frameborder="0" allow="autoplay; encrypted-media" loading="lazy" style="border-radius:10px; margin-top:6px;"></iframe>`;
+}
+
+// Row of preview buttons + an (initially empty/hidden) slot below it for
+// an inline embed. Shared by the Lineup list and the timeline detail
+// modal — wirePreviewButtons() below does the actual click wiring after
+// this HTML lands in the DOM.
+function artistPreviewBlockHtml(artist){
+  const entry = artistPreviewEntry(artist.name);
+  const buttons = PREVIEW_PLATFORMS.map(p=>{
+    const verified = !!(entry && entry[p.key]);
+    return `<button class="preview-btn" data-platform="${p.key}" data-artist="${escapeHtml(artist.name)}">${p.icon} ${p.label}${verified ? " ▶" : ""}</button>`;
+  }).join("");
+  return `<div class="preview-row">${buttons}</div><div class="preview-embed" style="display:none;"></div>`;
+}
+
+// Delegated wiring, safe to call repeatedly on re-render — looks up the
+// live artist name from the button's own data attribute rather than
+// closing over anything, so it works identically whether it's inside a
+// Lineup card or the timeline modal.
+function wirePreviewButtons(container){
+  if(!container) return;
+  container.querySelectorAll(".preview-row").forEach(row=>{
+    const embedBox = row.nextElementSibling;
+    row.querySelectorAll(".preview-btn").forEach(btn=>{
+      btn.onclick = (e)=>{
+        e.stopPropagation();
+        const platform = btn.dataset.platform;
+        const name = btn.dataset.artist;
+        const entry = artistPreviewEntry(name);
+        const verifiedVal = entry && entry[platform];
+        if(verifiedVal && embedBox){
+          embedBox.innerHTML = previewEmbedHtml(platform, verifiedVal);
+          embedBox.style.display = "";
+        } else {
+          window.open(previewSearchUrl(platform, name), "_blank", "noopener");
+        }
+      };
+    });
+  });
+}
+
 // Short, auto-composed line built only from data already in the app
 // (stage, genre, set length) — not a fabricated bio, just context.
 function artistDescriptor(a){
@@ -2023,6 +2107,7 @@ function showArtists(list){
     div.className = "item" + (mustSee ? " mustsee" : "");
     const genre = genreOf(artist);
     const bioBlock = artistBioBlockHtml(artist);
+    const previewBlock = artistPreviewBlockHtml(artist);
     div.innerHTML = `
       <div class="item-top">
         <div>
@@ -2032,12 +2117,14 @@ function showArtists(list){
           <small>${genre}</small>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
+          ${previewBlock}
         </div>
         <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
       </div>
     `;
     wireStarButton(div.querySelector(".star-btn"), artist);
     div.querySelector(".stage-link").onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
+    wirePreviewButtons(div);
     artistResults.appendChild(div);
   });
 }
@@ -2188,6 +2275,7 @@ function showTimelineDetailModal(artist, opts){
   const mustSee = isMustSee(artist.name);
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
+  const previewBlock = artistPreviewBlockHtml(artist);
   const backdrop = document.createElement("div");
   backdrop.id = "timelineDetailModal";
   backdrop.style.cssText = "position:fixed; inset:0; z-index:60; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
@@ -2202,6 +2290,7 @@ function showTimelineDetailModal(artist, opts){
           <small>${escapeHtml(genre)}</small>
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
+          ${previewBlock}
         </div>
         ${opts.readonly ? "" : `<button class="star-toggle-lg${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
       </div>
@@ -2210,6 +2299,7 @@ function showTimelineDetailModal(artist, opts){
   backdrop.onclick = (e)=>{ if(e.target === backdrop) closeTimelineDetailModal(); };
   document.body.appendChild(backdrop);
   backdrop.querySelector("#timelineDetailCloseBtn").onclick = closeTimelineDetailModal;
+  wirePreviewButtons(backdrop);
   const stageLink = backdrop.querySelector(".stage-link");
   if(stageLink) stageLink.onclick = (e)=>{ e.stopPropagation(); closeTimelineDetailModal(); jumpToStageDirectory(artist.stage); };
   const starBtn = backdrop.querySelector("#timelineDetailStarBtn");
