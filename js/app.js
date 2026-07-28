@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v59";
-const APP_BUILD_TIME = "2026-07-28T14:23:00Z";
+const APP_CACHE_VERSION = "v60";
+const APP_BUILD_TIME = "2026-07-28T15:25:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -1728,6 +1728,44 @@ function toMinutes(day, time){
 function allArtists(){
   return artists.concat(Store.get("customArtists"));
 }
+
+// A starred artist is saved as a snapshot ({...artist}) at the moment it's
+// starred, so if the festival later moves that artist to a new stage/day/
+// time, the saved snapshot goes stale and the plan shows the old slot
+// instead of following the artist to the new one. Re-sync every saved
+// snapshot (both this device's own plan and any synced group plans)
+// against the current lineup data on every load, so a starred artist keeps
+// tracking their current slot rather than freezing at whatever it was when
+// starred. An artist dropped entirely from the lineup is left as-is.
+function reconcileSavedArtists(){
+  const byName = new Map(allArtists().map(a=>[a.name, a]));
+  const fields = ["stage","day","start","end","genre"];
+  function reconciled(list){
+    let changed = false;
+    const next = list.map(saved=>{
+      const latest = byName.get(saved.name);
+      if(!latest) return saved;
+      const updated = { ...saved };
+      fields.forEach(f=>{
+        if(latest[f] !== undefined && latest[f] !== saved[f]){ updated[f] = latest[f]; changed = true; }
+      });
+      return updated;
+    });
+    return { list: next, changed };
+  }
+
+  const mine = reconciled(Store.get("schedule"));
+  if(mine.changed) Store.set("schedule", mine.list);
+
+  const people = Store.get("peopleSchedules") || {};
+  let peopleChanged = false;
+  Object.keys(people).forEach(person=>{
+    const r = reconciled(people[person] || []);
+    if(r.changed){ people[person] = r.list; peopleChanged = true; }
+  });
+  if(peopleChanged) Store.set("peopleSchedules", people);
+}
+reconcileSavedArtists();
 
 function timeLabel(a){
   if(a.day && a.day !== "TBC" && a.start){
