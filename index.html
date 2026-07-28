@@ -79,7 +79,7 @@
       <p>Everything you save here — Plan, Discover notes, theories, hidden-venue finds, HQ notes, custom social links — saves itself to this browser on this device the instant you type or tap. There's no separate save button because it's already saved; you'll never lose anything by just closing the tab.</p>
       <p>The catch: it's tied to this exact page in this exact browser. It won't be there if you open a private/incognito window, clear site data, switch browsers, or use a different device — nothing syncs between phones automatically.</p>
       <p>To back it up: use <strong>"Download my personal backup"</strong> in Settings, right at the bottom of this page. It bakes everything saved so far — including personal things like your bingo card, character and HQ notes — into a new file that already has your data in it when reopened. Only ever reopen this one on your own device; it's not for sharing.</p>
-      <p>To combine everyone's info into one file without duplicating anything: use <strong>Sync</strong> in Discover — it turns your notes, theories, hidden-venue finds and more into a short code your teammates paste in and merge. Once one phone has everyone's code merged in, use <strong>"Download shareable group copy"</strong> in Settings on that phone — that version leaves out anyone's personal bingo/character/notes, so it's safe to actually hand round the group.</p>
+      <p>To combine everyone's info without duplicating anything: use <strong>Sync</strong> in Discover — pick your name, agree a room code with the group, and tap "Sync now" whenever you've got signal. No signal? There's a manual code to copy/paste instead, same result. Once everyone's synced, use <strong>"Download shareable group copy"</strong> in Settings — that version leaves out anyone's personal bingo/character/notes, so it's safe to actually hand round the group.</p>
       <p>Your <strong>Plan</strong> (saved artists) rides along in that same sync code now too, but it never merges into your own list — a teammate's saved lineup lands in its own tab, named after them, at the top of the Plan screen. Your list only ever has your own picks in it; theirs is there to look at, not to combine.</p>
     </div>
 
@@ -89,7 +89,7 @@
       <p><strong>App updates:</strong> this app is a set of files sitting in a GitHub repo. When that repo gets updated and you have signal, your installed copy notices in the background, quietly downloads the new files, and reloads once — no reinstall, no App Store, nothing to tap. Updates only ever replace the app itself (screens, guide content, styling, this text); they cannot see or touch what's saved on your phone.</p>
       <p><strong>Your progress stays yours:</strong> your Plan, notes, HQ log, hidden-venue finds, bingo card and everything else lives only in this browser's storage on this device. A GitHub update can never combine your saved data with anyone else's, and it can't reset or overwrite it either — it only touches code and content files, never your local data.</p>
       <p><strong>Offline use:</strong> once the app has loaded with signal one time, the service worker has cached every screen, so it keeps working with none at all — browsing, saving and editing everything. Nothing here needs a connection except the external links out to Instagram, the app stores, etc. If a GitHub update lands while you're offline, it'll just sit there and download itself next time you get signal.</p>
-      <p><strong>If you've been offline and want to combine devices:</strong> this app never merges devices automatically. To bring two phones' info together, use <strong>Sync</strong> in Discover — it's a manual, one-way-at-a-time code you paste in. It adds new shared entries (notes, theories, venue finds) without duplicating, and it now carries each person's saved-artist Plan along too — but that always lands in its own named tab on the Plan screen, never merged into your own list. It never touches personal things like your HQ notes or bingo card at all.</p>
+      <p><strong>Combining devices:</strong> use <strong>Sync</strong> in Discover — tap "Sync now" with signal and it handles everything automatically (or use the manual code box if you're offline). It adds new shared entries (notes, theories, venue finds) without duplicating, and carries each person's saved-artist Plan along too — but that always lands in its own named tab on the Plan screen, never merged into your own list. It never touches personal things like your HQ notes or bingo card at all.</p>
       <p><strong>Back up before a big update:</strong> if you're not sure whether an update is coming, it costs nothing to be safe — use <strong>"Download my personal backup"</strong> in Settings first. That saves everything on this device into a file you keep, just in case.</p>
     </div>
 
@@ -411,12 +411,11 @@ Meet at the clock tower if separated"></textarea>
     </div>
 
     <div class="card" id="jumpSync">
-      <h3>🤝 Sync with your group — no duplicates</h3>
-      <p>How it fits together:</p>
+      <h3>🤝 Sync with your group</h3>
+      <p>Shares theories, hidden-venue finds and notes across everyone — automatically, no copying and pasting needed.</p>
       <ol class="compact-list" style="padding-left:20px;">
-        <li><strong>Pick who you are</strong> and <strong>type your group's room code</strong> below (make one up between you — anyone who knows it can sync into it, so treat it like a shared password, not "team1"). Everything you add anywhere in the app from now on — theories, hidden-venue finds, get-involved ticks, found socials — is tagged with your name automatically.</li>
-        <li>With signal, hit <strong>"Sync now"</strong> — it sends your updates up and pulls everyone else's in, automatically, no codes to copy. The app also quietly checks for everyone else's latest whenever you open it, if you're online. Nothing already saved gets doubled up, and your saved-artist Plan travels along as its own tab (named after you) rather than merging into anyone's list — their picks stay theirs, yours stay yours.</li>
-        <li>No signal at the festival? Use the manual code box further down instead — same result, just copy/pasted by hand. Whoever hits <strong>"Download shareable group copy"</strong> on Home last bakes everyone's combined set into one file safe to hand round — it leaves out anyone's personal bingo card, character or HQ notes. Discover's Consolidated Notes card (below) shows the notes side split by person or by category — so you can check what's actually in it first.</li>
+        <li>Pick your name, and agree a room code with the group (like a shared password — everyone types the same one in).</li>
+        <li>Got signal? Tap <strong>Sync now</strong>. Your updates go up, everyone else's come in — nothing gets duplicated.</li>
       </ol>
       <div class="field"><label>Who are you?</label>
         <select id="contributorName">
@@ -434,7 +433,7 @@ Meet at the clock tower if separated"></textarea>
       <div class="field"><label>Group room code</label><input type="text" id="roomCodeInput" placeholder="e.g. redesign-crew-26"></div>
       <button class="action" id="cloudSyncBtn" style="margin:4px 6px 0 0;">☁️ Sync now</button>
       <p class="empty-note" id="cloudSyncStatusNote" style="margin-top:6px;"></p>
-      <p style="margin-top:14px;"><strong>No signal? Manual code instead:</strong></p>
+      <p style="margin-top:14px;"><strong>No signal?</strong> Copy a code by hand instead — same result:</p>
       <button class="ghost" id="copySyncCodeBtn" style="margin:4px 6px 0 0;">Copy your sync code</button>
       <div class="field" style="margin-top:10px;"><label>Paste a teammate's sync code</label><textarea id="syncCodeInput" placeholder="Paste a BTC1:... code here"></textarea></div>
       <button class="action" id="mergeSyncCodeBtn">Merge it in</button>
