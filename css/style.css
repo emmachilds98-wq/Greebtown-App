@@ -1,6 +1,6 @@
   :root{
     --bg-deep:#0b1512; --bg-panel:#132420; --bg-panel-2:#1a2f29;
-    --accent-amber:#f2a83c; --accent-teal:#4be3ac; --accent-red:#e2836a;
+    --accent-amber:#f2a83c; --accent-teal:#4be3ac; --accent-red:#e2836a; --accent-lightblue:#5ec8f0;
     --text-primary:#eef6f1; --text-muted:#8fa89c; --line:#24403a;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -51,17 +51,28 @@
   .field label{display:block; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;}
   .item{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
   .item.clash{border-color:var(--accent-red); background:rgba(226,131,106,.08);}
+  .item.mustsee{border-color:var(--accent-amber); background:rgba(242,168,60,.06);}
   .item-top{display:flex; justify-content:space-between; align-items:center; gap:10px;}
   .item small{color:var(--text-muted);}
   .item button{background:none; border:1px solid var(--line); color:var(--accent-amber); border-radius:10px; padding:6px 12px; font-size:14px; cursor:pointer; white-space:nowrap;}
   .item button:hover{border-color:var(--accent-amber);}
+  /* Two-tier starring: a plain star (saved to plan) is light blue; hold
+     it down to upgrade to a must-see, which takes over the amber that
+     used to just mean "any saved star" — amber's now specifically a
+     must-see signal everywhere a star shows up. Higher specificity than
+     the plain ".item button" rule above so it actually wins. */
+  .item button.star-btn{color:var(--accent-lightblue);}
+  .item button.star-btn.mustsee{color:var(--accent-amber);}
   /* Bigger, more tappable star for the timeline detail modal — the
      regular list-view star sits next to plenty of other text so a small
      button reads fine, but the modal's star is often the only thing
      someone taps a timeline block to reach, so it gets a much larger
-     target and a clearer amber fill on save. */
-  .star-toggle-lg{background:none; border:none; color:var(--accent-amber); font-size:34px; line-height:1; padding:4px 6px; cursor:pointer; flex-shrink:0;}
+     target. */
+  .star-toggle-lg{background:none; border:none; color:var(--accent-lightblue); font-size:34px; line-height:1; padding:4px 6px; cursor:pointer; flex-shrink:0;}
+  .star-toggle-lg.mustsee{color:var(--accent-amber);}
   .star-toggle-lg:active{transform:scale(.92);}
+  .star-hint-bubble{position:fixed; z-index:80; background:var(--bg-panel-2); border:1px solid var(--accent-amber); color:var(--text-primary); font-size:11.5px; padding:5px 10px; border-radius:10px; white-space:nowrap; opacity:0; transform:translateY(4px); transition:opacity .2s ease, transform .2s ease; pointer-events:none; box-shadow:0 4px 12px rgba(0,0,0,.35);}
+  .star-hint-bubble.show{opacity:1; transform:translateY(0);}
   /* Timeline detail modal: right padding zeroed on the card itself so
      the star's 64px column butts right up against the card's true
      visual edge — then centering the star within that column puts its
@@ -220,7 +231,8 @@
   .timeline-row-body{position:relative; flex-shrink:0; border-bottom:1px solid var(--line);}
   .timeline-vline{position:absolute; top:0; bottom:0; border-left:1px solid var(--line); opacity:.5;}
   .timeline-block{position:absolute; top:3px; bottom:3px; border-radius:8px; padding:4px 6px; font-size:10.5px; line-height:1.25; overflow:hidden; cursor:pointer; border:1px solid var(--accent-teal); background:rgba(75,227,172,.14); color:var(--text-primary);}
-  .timeline-block.saved{background:rgba(242,168,60,.22); border-color:var(--accent-amber);}
+  .timeline-block.saved{background:rgba(94,200,240,.22); border-color:var(--accent-lightblue);}
+  .timeline-block.mustsee{background:rgba(242,168,60,.22); border-color:var(--accent-amber);}
   .timeline-block b{display:block; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .timeline-block .tb-time{display:block; color:var(--text-muted); font-size:9.5px; margin-top:1px; white-space:nowrap;}
   .timeline-block.readonly{cursor:default;}

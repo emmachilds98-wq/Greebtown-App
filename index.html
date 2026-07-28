@@ -76,7 +76,7 @@
 
     <div class="card" id="homeSyncStatus"></div>
 
-    <div class="card">
+    <div class="card" id="addToHomeCard">
       <span class="tag">Set this up once</span>
       <h3>📲 Add Greebtown! to your Home Screen</h3>
       <p>Do this once and it opens like a normal app from then on — full screen, works offline, and keeps syncing with the group in the background. Takes about a minute.</p>
@@ -99,6 +99,7 @@
         </div>
       </div>
       <p class="empty-note" style="margin-top:8px;">Already picked your name above? Great — do this next so it keeps syncing without needing the browser open.</p>
+      <button class="ghost" id="dismissAddToHomeBtn" style="margin-top:10px;">Already done this — hide it</button>
     </div>
 
     <div class="card" id="homeInfoCard"></div>
@@ -158,6 +159,8 @@ Meet at the clock tower if separated"></textarea>
   <div class="card" id="jumpSettings">
   <h3>⚙️ Settings</h3>
   <p>Reset saved favourites, plans, notes and district passport on this device. See "Your data, sync &amp; updates" above for how saving and downloading actually works.</p>
+  <button class="ghost" id="settingsToggleBtn">Show settings ▾</button>
+  <div id="settingsBody" style="display:none; margin-top:10px;">
   <p><strong>My personal backup</strong> — everything on this device, including things that never sync to anyone else (bingo card, character, HQ notes, meeting point). Only ever reopen this on your own device to restore it.</p>
   <button class="action" id="downloadSnapshot">Download my personal backup</button>
   <button class="ghost" id="openSnapshotTab" style="margin-top:6px;">If that didn't download: open it in a new tab</button>
@@ -171,6 +174,7 @@ Meet at the clock tower if separated"></textarea>
   <p class="empty-note" id="downloadGroupStatusNote" style="margin-top:8px;"></p>
 
   <button class="action danger" id="resetApp" style="margin-top:10px;">Reset app</button>
+  </div>
 </div></section>
 
   <!-- ARTISTS -->
@@ -419,8 +423,6 @@ Meet at the clock tower if separated"></textarea>
     <p class="empty-note" style="margin-bottom:10px;">Everything that isn't the lineup or map lives here — the story, day-to-day logistics, the games, and lookup reference — grouped below so it's easy to find the bit you actually want.</p>
 
     <div class="venue-filters" id="discoverNav" style="margin-bottom:14px;">
-      <button data-jump="jumpSync">🤝 Sync</button>
-      <button data-jump="jumpNotes">👥 All notes</button>
       <button data-jump="jumpStory">📖 The story</button>
       <button data-jump="discoveries">🏙 Districts</button>
       <button data-jump="jumpDailyRag">🗞 Live intel</button>
@@ -434,63 +436,8 @@ Meet at the clock tower if separated"></textarea>
       <button data-jump="jumpTheories">🔮 Theories</button>
       <button data-jump="jumpCharacters">🗣 Characters</button>
       <button data-jump="jumpGlossary">📔 Glossary</button>
-    </div>
-
-    <div class="daygroup">🤝 Setup &amp; sharing</div>
-
-    <div class="card" id="jumpSync">
-      <h3>🤝 Sync with your group</h3>
-      <p>Shares theories, hidden-venue finds, notes and locked-in bingo cards across everyone — automatically, no copying and pasting needed. This app's room code is already set for us: <strong>medway-massive</strong> — nobody needs to make one up or type it in.</p>
-      <ol class="compact-list" style="padding-left:20px;">
-        <li>Pick your name below — that's the only thing you need to set, and it syncs the moment you pick it (watch the note under the button below for confirmation).</li>
-        <li>After that, it keeps syncing on its own — on open, every few minutes while the app's open, and whenever you come back to it — plus <strong>Sync now</strong> any time for an immediate one. Everyone needs to have done step 1 at least once (with signal) for their picks to show up for the rest of the group.</li>
-      </ol>
-      <div class="field"><label>Who are you?</label>
-        <select id="contributorName">
-          <option value="">Select a name…</option>
-          <option value="Emma">Emma</option>
-          <option value="Dave">Dave</option>
-          <option value="Rob">Rob</option>
-          <option value="Jack">Jack</option>
-          <option value="Lewis">Lewis</option>
-          <option value="Dana">Dana</option>
-          <option value="__other__">Other…</option>
-        </select>
-      </div>
-      <div class="field" id="contributorOtherField" style="display:none;"><label>Your name</label><input type="text" id="contributorOtherInput" placeholder="Type your name"></div>
-      <div class="field"><label>Group room code (already set for us)</label><input type="text" id="roomCodeInput"></div>
-      <button class="action" id="cloudSyncBtn" style="margin:4px 6px 0 0;">☁️ Sync now</button>
-      <p class="empty-note" id="cloudSyncStatusNote" style="margin-top:6px;"></p>
-      <p style="margin-top:14px;"><strong>No signal?</strong> Copy a code by hand instead — same result:</p>
-      <button class="ghost" id="copySyncCodeBtn" style="margin:4px 6px 0 0;">Copy your sync code</button>
-      <div class="field" style="margin-top:10px;"><label>Paste a teammate's sync code</label><textarea id="syncCodeInput" placeholder="Paste a BTC1:... code here"></textarea></div>
-      <button class="action" id="mergeSyncCodeBtn">Merge it in</button>
-      <p class="empty-note" id="syncStatusNote" style="margin-top:8px;"></p>
-    </div>
-
-    <div class="card">
-      <h3>📋 Sharing with your group</h3>
-      <p>Everything below saves only to this phone — it's not synced between friends' devices. Use these to paste your progress into your group chat as plain text so everyone stays up to date. Hidden-venue finds have their own log and copy button over on the Map tab. For a proper merge (see below), use Sync above instead of these.</p>
-      <p>Your saved-artist Plan isn't in these plain-text copy buttons — it travels through Sync above instead, into a tab of its own on the Plan screen, never merged into anyone's list.</p>
-      <button class="ghost" id="copyCluesBtn" style="margin:4px 6px 0 0;">Copy district notes</button>
-      <button class="ghost" id="copyTheoriesBtn" style="margin:4px 6px 0 0;">Copy theories</button>
-    </div>
-
-    <div class="card" id="jumpNotes" style="border:1px solid rgba(75,227,172,.45); background:linear-gradient(145deg, rgba(75,227,172,.08), var(--bg-panel));">
-      <span class="tag">👥 One view, whose is whose</span>
-      <h3>🗂 All notes — everyone's, in one place</h3>
-      <p>Everything below is pulled live from this device — district notes, theories, hidden-venue finds, get-involved progress, memory journal, sightings, found socials and landmarks. Defaults to <strong>By person</strong> — tab through names above the list to see one person's own tailored page (including their saved Plan). Merge in your teammates' Sync codes first (above), and this becomes the group's full combined picture — copy it out, or use "Download shareable group copy" on Home to bake all of it into one file that's safe to hand round (it leaves out your own bingo card, character and HQ notes). Personal-only things — bingo cards and characters — never travel through Sync at all, so they're never in here, on your device or anyone else's.</p>
-      <p class="empty-note" style="margin-top:2px;">Each person's own notes also show up in their own tab wherever they were logged (Plan, Bingo, My Character) — this is only for seeing everyone's at once, so it's rolled up by default.</p>
-      <button class="ghost" id="consolidatedToggleBtn" style="margin:8px 0;">Show all notes ▾</button>
-      <div id="consolidatedNotesBody" style="display:none;">
-        <div class="venue-filters" id="consolidatedViewToggle">
-          <button data-view="category">By category</button>
-          <button class="active" data-view="person">By person</button>
-        </div>
-        <div class="tabstrip" id="consolidatedPeopleTabs" style="display:none; margin-bottom:8px;"></div>
-        <button class="ghost" id="copyConsolidatedBtn" style="margin:4px 0 10px;">Copy full report</button>
-        <div id="consolidatedNotes"></div>
-      </div>
+      <button data-jump="jumpNotes">👥 All notes</button>
+      <button data-jump="jumpSync">🤝 Sync</button>
     </div>
 
     <div class="daygroup">📖 The story &amp; the day</div>
@@ -766,6 +713,63 @@ Talk to an actor in character
       <div class="field"><input type="text" id="glossarySearch" placeholder="Search terms, e.g. IONA, BLIP, Kaboodle"></div>
     </div>
     <div id="glossaryList"></div>
+
+    <div class="daygroup">🤝 Setup &amp; sharing</div>
+
+    <div class="card" id="jumpNotes" style="border:1px solid rgba(75,227,172,.45); background:linear-gradient(145deg, rgba(75,227,172,.08), var(--bg-panel));">
+      <span class="tag">👥 One view, whose is whose</span>
+      <h3>🗂 All notes — everyone's, in one place</h3>
+      <p>Everything below is pulled live from this device — district notes, theories, hidden-venue finds, get-involved progress, memory journal, sightings, found socials and landmarks. Defaults to <strong>By person</strong> — tab through names above the list to see one person's own tailored page (including their saved Plan). Merge in your teammates' Sync codes first (below), and this becomes the group's full combined picture — copy it out, or use "Download shareable group copy" on Home to bake all of it into one file that's safe to hand round (it leaves out your own bingo card, character and HQ notes). Personal-only things — bingo cards and characters — never travel through Sync at all, so they're never in here, on your device or anyone else's.</p>
+      <p class="empty-note" style="margin-top:2px;">Each person's own notes also show up in their own tab wherever they were logged (Plan, Bingo, My Character) — this is only for seeing everyone's at once, so it's rolled up by default.</p>
+      <button class="ghost" id="consolidatedToggleBtn" style="margin:8px 0;">Show all notes ▾</button>
+      <div id="consolidatedNotesBody" style="display:none;">
+        <div class="venue-filters" id="consolidatedViewToggle">
+          <button data-view="category">By category</button>
+          <button class="active" data-view="person">By person</button>
+        </div>
+        <div class="tabstrip" id="consolidatedPeopleTabs" style="display:none; margin-bottom:8px;"></div>
+        <button class="ghost" id="copyConsolidatedBtn" style="margin:4px 0 10px;">Copy full report</button>
+        <div id="consolidatedNotes"></div>
+      </div>
+    </div>
+
+    <div class="card" id="jumpSync">
+      <h3>🤝 Sync with your group</h3>
+      <p>Shares theories, hidden-venue finds, notes and locked-in bingo cards across everyone — automatically, no copying and pasting needed. This app's room code is already set for us: <strong>medway-massive</strong> — nobody needs to make one up or type it in.</p>
+      <ol class="compact-list" style="padding-left:20px;">
+        <li>Pick your name below — that's the only thing you need to set, and it syncs the moment you pick it (watch the note under the button below for confirmation).</li>
+        <li>After that, it keeps syncing on its own — on open, every few minutes while the app's open, and whenever you come back to it — plus <strong>Sync now</strong> any time for an immediate one. Everyone needs to have done step 1 at least once (with signal) for their picks to show up for the rest of the group.</li>
+      </ol>
+      <div class="field"><label>Who are you?</label>
+        <select id="contributorName">
+          <option value="">Select a name…</option>
+          <option value="Emma">Emma</option>
+          <option value="Dave">Dave</option>
+          <option value="Rob">Rob</option>
+          <option value="Jack">Jack</option>
+          <option value="Lewis">Lewis</option>
+          <option value="Dana">Dana</option>
+          <option value="__other__">Other…</option>
+        </select>
+      </div>
+      <div class="field" id="contributorOtherField" style="display:none;"><label>Your name</label><input type="text" id="contributorOtherInput" placeholder="Type your name"></div>
+      <div class="field"><label>Group room code (already set for us)</label><input type="text" id="roomCodeInput"></div>
+      <button class="action" id="cloudSyncBtn" style="margin:4px 6px 0 0;">☁️ Sync now</button>
+      <p class="empty-note" id="cloudSyncStatusNote" style="margin-top:6px;"></p>
+      <p style="margin-top:14px;"><strong>No signal?</strong> Copy a code by hand instead — same result:</p>
+      <button class="ghost" id="copySyncCodeBtn" style="margin:4px 6px 0 0;">Copy your sync code</button>
+      <div class="field" style="margin-top:10px;"><label>Paste a teammate's sync code</label><textarea id="syncCodeInput" placeholder="Paste a BTC1:... code here"></textarea></div>
+      <button class="action" id="mergeSyncCodeBtn">Merge it in</button>
+      <p class="empty-note" id="syncStatusNote" style="margin-top:8px;"></p>
+    </div>
+
+    <div class="card">
+      <h3>📋 Sharing with your group</h3>
+      <p>Everything below saves only to this phone — it's not synced between friends' devices. Use these to paste your progress into your group chat as plain text so everyone stays up to date. Hidden-venue finds have their own log and copy button over on the Map tab. For a proper merge (see below), use Sync above instead of these.</p>
+      <p>Your saved-artist Plan isn't in these plain-text copy buttons — it travels through Sync above instead, into a tab of its own on the Plan screen, never merged into anyone's list.</p>
+      <button class="ghost" id="copyCluesBtn" style="margin:4px 6px 0 0;">Copy district notes</button>
+      <button class="ghost" id="copyTheoriesBtn" style="margin:4px 6px 0 0;">Copy theories</button>
+    </div>
   </section>
 
 </main>

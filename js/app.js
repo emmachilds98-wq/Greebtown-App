@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v81";
-const APP_BUILD_TIME = "2026-07-28T19:39:00Z";
+const APP_CACHE_VERSION = "v82";
+const APP_BUILD_TIME = "2026-07-28T20:00:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -282,7 +282,7 @@ fixBottomClearance();
 //    instead, kept separate per contributor, shown only in their own
 //    person-tab on the Plan, Bingo, and My Character cards. Sync must
 //    never read or write other personal fields: meeting, notes, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -2013,8 +2013,9 @@ function showArtists(list){
   }
   list.forEach(artist=>{
     const saved = Store.get("schedule").some(x=>x.name === artist.name);
+    const mustSee = isMustSee(artist.name);
     const div = document.createElement("div");
-    div.className = "item";
+    div.className = "item" + (mustSee ? " mustsee" : "");
     const genre = genreOf(artist);
     const bioBlock = artistBioBlockHtml(artist);
     div.innerHTML = `
@@ -2027,10 +2028,10 @@ function showArtists(list){
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
         </div>
-        <button aria-label="Toggle saved">${saved ? "★" : "☆"}</button>
+        <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
       </div>
     `;
-    div.querySelector("button").onclick = ()=> saveArtist(artist);
+    wireStarButton(div.querySelector(".star-btn"), artist);
     div.querySelector(".stage-link").onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
     artistResults.appendChild(div);
   });
@@ -2132,6 +2133,7 @@ function buildTimelineHTML(items, opts){
   });
   const totalWidth = Math.max((maxMin-minMin)*pxPerMin, 40);
   const savedNames = opts.savedNames || null;
+  const mustSeeNames = opts.mustSeeNames || null;
 
   let hourLabels = "", hourLines = "";
   for(let m=minMin; m<=maxMin; m+=60){
@@ -2147,7 +2149,8 @@ function buildTimelineHTML(items, opts){
       const left = (p._start-minMin)*pxPerMin;
       const width = Math.max((p._end-p._start)*pxPerMin, 60);
       const isSaved = savedNames ? savedNames.has(p.name) : false;
-      const cls = "timeline-block" + (isSaved ? " saved" : "") + (opts.readonly ? " readonly" : "");
+      const isMustSeeBlock = mustSeeNames ? mustSeeNames.has(p.name) : false;
+      const cls = "timeline-block" + (isSaved ? " saved" : "") + (isMustSeeBlock ? " mustsee" : "") + (opts.readonly ? " readonly" : "");
       return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}"><b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
     return `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${rowHeight}px;">${hourLines}${blocks}</div></div>`;
@@ -2177,6 +2180,7 @@ function showTimelineDetailModal(artist, opts){
   opts = opts || {};
   closeTimelineDetailModal();
   const saved = Store.get("schedule").some(x=>x.name === artist.name);
+  const mustSee = isMustSee(artist.name);
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
   const backdrop = document.createElement("div");
@@ -2194,7 +2198,7 @@ function showTimelineDetailModal(artist, opts){
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
         </div>
-        ${opts.readonly ? "" : `<button class="star-toggle-lg" aria-label="Toggle saved" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
+        ${opts.readonly ? "" : `<button class="star-toggle-lg${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
       </div>
     </div>
   `;
@@ -2204,14 +2208,13 @@ function showTimelineDetailModal(artist, opts){
   const stageLink = backdrop.querySelector(".stage-link");
   if(stageLink) stageLink.onclick = (e)=>{ e.stopPropagation(); closeTimelineDetailModal(); jumpToStageDirectory(artist.stage); };
   const starBtn = backdrop.querySelector("#timelineDetailStarBtn");
-  if(starBtn) starBtn.onclick = ()=>{
-    saveArtist(artist);
+  // Stay open after a save/unsave/must-see toggle — the × (or tapping
+  // outside) is the only way this closes, so touching the star doesn't
+  // feel like it randomly dismissed the card out from under you.
+  if(starBtn) wireStarButton(starBtn, artist, ()=>{
     if(opts.onSaveToggle) opts.onSaveToggle();
-    // Stay open after a save/unsave tap — the × (or tapping outside) is
-    // the only way this closes, so toggling the star doesn't feel like
-    // it randomly dismissed the card out from under you.
     showTimelineDetailModal(artist, opts);
-  };
+  });
 }
 
 let artistsTimelineDay = "Wed";
@@ -2236,7 +2239,8 @@ function renderArtistsTimeline(){
   if(!grid) return;
   const dayItems = allArtists().filter(a=> a.day === artistsTimelineDay && a.start);
   const savedNames = new Set(Store.get("schedule").map(s=>s.name));
-  const { html } = buildTimelineHTML(dayItems, { savedNames });
+  const mustSeeNames = new Set(Store.get("schedule").filter(s=>s.mustSee).map(s=>s.name));
+  const { html } = buildTimelineHTML(dayItems, { savedNames, mustSeeNames });
   grid.innerHTML = html;
   grid.querySelectorAll(".timeline-block").forEach(b=>{
     b.onclick = ()=>{
@@ -2336,9 +2340,97 @@ function saveArtist(artist){
     schedule.push({ ...artist });
   }
   Store.set("schedule", schedule);
+  refreshAfterStarChange();
+}
+
+// ===============================
+// MUST-SEE — a second tier above a plain star. A plain star (saved to
+// plan) shows light blue; holding it down upgrades that act to
+// must-see, which takes over the amber that used to just mean "any
+// saved star" everywhere a star appears (list, timeline modal, timeline
+// blocks). Holding an act that isn't saved yet saves it as a must-see
+// directly, in one motion, rather than requiring a tap-then-hold.
+// ===============================
+function isMustSee(name){
+  const entry = Store.get("schedule").find(x=>x.name === name);
+  return !!(entry && entry.mustSee);
+}
+
+function setMustSee(artist, value){
+  let schedule = Store.get("schedule");
+  const idx = schedule.findIndex(x=>x.name === artist.name);
+  if(idx === -1){
+    schedule.push({ ...artist, mustSee: value });
+  } else {
+    schedule[idx] = { ...schedule[idx], mustSee: value };
+  }
+  Store.set("schedule", schedule);
+  refreshAfterStarChange();
+}
+
+function refreshAfterStarChange(){
   renderSchedule();
   showArtists(currentFilteredArtists());
   updateNextEvent();
+  if(typeof renderArtistsTimeline === "function" && artistsView === "timeline") renderArtistsTimeline();
+  if(typeof renderPlanTimeline === "function" && planView === "timeline") renderPlanTimeline();
+}
+
+function showStarHint(btn){
+  document.querySelectorAll(".star-hint-bubble").forEach(b=> b.remove());
+  const bubble = document.createElement("div");
+  bubble.className = "star-hint-bubble";
+  bubble.textContent = "Hold ★ to make it a must-see";
+  document.body.appendChild(bubble);
+  const rect = btn.getBoundingClientRect();
+  const bubbleWidth = 190;
+  bubble.style.left = Math.min(window.innerWidth - bubbleWidth - 8, Math.max(8, rect.left + rect.width/2 - bubbleWidth/2)) + "px";
+  bubble.style.top = Math.max(8, rect.top - 34) + "px";
+  requestAnimationFrame(()=> bubble.classList.add("show"));
+  setTimeout(()=>{
+    bubble.classList.remove("show");
+    setTimeout(()=> bubble.remove(), 250);
+  }, 2200);
+}
+
+// Shared long-press wiring for every star button (Lineup list, timeline
+// detail modal). A short tap toggles saved on/off as before; holding it
+// past STAR_HOLD_MS toggles must-see instead, and suppresses the
+// tap-toggle that would otherwise also fire when the finger lifts.
+const STAR_HOLD_MS = 550;
+function wireStarButton(btn, artist, onChange){
+  let holdTimer = null, held = false, startX = 0, startY = 0;
+
+  function clearHold(){
+    if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
+  }
+
+  btn.addEventListener("pointerdown", (e)=>{
+    held = false;
+    startX = e.clientX; startY = e.clientY;
+    clearHold();
+    holdTimer = setTimeout(()=>{
+      held = true;
+      setMustSee(artist, !isMustSee(artist.name));
+      if(navigator.vibrate) navigator.vibrate(15);
+      if(onChange) onChange();
+    }, STAR_HOLD_MS);
+  });
+  btn.addEventListener("pointermove", (e)=>{
+    if(!holdTimer) return;
+    if(Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) clearHold();
+  });
+  btn.addEventListener("pointerup", clearHold);
+  btn.addEventListener("pointercancel", clearHold);
+  btn.addEventListener("pointerleave", clearHold);
+
+  btn.addEventListener("click", (e)=>{
+    if(held){ held = false; e.preventDefault(); e.stopPropagation(); return; }
+    const wasSaved = Store.get("schedule").some(x=>x.name === artist.name);
+    saveArtist(artist);
+    if(!wasSaved) showStarHint(btn);
+    if(onChange) onChange();
+  });
 }
 
 function findClashes(schedule){
@@ -2363,6 +2455,7 @@ function findClashes(schedule){
 
 function scheduleItemHTML(artist, idx, clashes, readonly){
   const clashClass = clashes && clashes.length ? " clash" : "";
+  const mustSee = !!artist.mustSee;
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
   const clashLines = (clashes || []).map(c=>{
@@ -2370,7 +2463,7 @@ function scheduleItemHTML(artist, idx, clashes, readonly){
     return `<div>⚠ Clashes with <strong>${escapeHtml(c.name)}</strong> at <span class="stage-link" data-stage="${escapeHtml(c.stage)}">${escapeHtml(c.stage)}</span>${walk ? ` — ${escapeHtml(walk.text)}${escapeHtml(walk.suffix)}` : ""}</div>`;
   }).join("");
   return `
-    <div class="item${clashClass}" data-idx="${idx}">
+    <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
       <div class="item-top">
         <div>
           <strong>${artist.name}</strong><br>
@@ -2380,6 +2473,7 @@ function scheduleItemHTML(artist, idx, clashes, readonly){
           ${bioBlock}
         </div>
         ${readonly ? "" : `<div class="btnrow">
+          <button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>
           <button class="set-time-btn">Set time</button>
           <button class="remove-btn">Remove</button>
         </div>`}
@@ -2517,6 +2611,9 @@ function renderSchedule(){
         showArtists(currentFilteredArtists());
         updateNextEvent();
       };
+
+      const mustSeeBtn = itemEl.querySelector(".mustsee-toggle-btn");
+      if(mustSeeBtn) mustSeeBtn.onclick = ()=> setMustSee(artist, !isMustSee(artist.name));
 
       itemEl.querySelector(".set-time-btn").onclick = ()=>{
         openTimeEditor(itemEl.querySelector(".edit-slot"), artist, (day,start,end)=>{
@@ -2697,7 +2794,8 @@ function renderPlanTimeline(){
   const schedule = activeScheduleData();
   const dayItems = schedule.filter(a=> a.day === planTimelineDay && a.start);
   const savedNames = new Set(dayItems.map(a=>a.name));
-  const { html } = buildTimelineHTML(dayItems, { readonly, savedNames });
+  const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
+  const { html } = buildTimelineHTML(dayItems, { readonly, savedNames, mustSeeNames });
   grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">Nothing with a set time saved for ${planTimelineDay} yet.</p>`;
 
   const hint = document.getElementById("planTimelineHint");
@@ -3820,11 +3918,30 @@ renderVenueTable();
 // removed), so no delay is needed between the two.
 function jumpToId(id, tab){
   if(tab) document.querySelector(`.tab[data-tab="${tab}"]`).click();
+  // Settings folds up by default (see setupSettingsToggle()) — jumping
+  // to it from a link elsewhere should open it, not scroll to what'd
+  // look like an empty card.
+  if(id === "jumpSettings"){
+    const body = document.getElementById("settingsBody");
+    const toggleBtn = document.getElementById("settingsToggleBtn");
+    if(body && body.style.display === "none" && toggleBtn) toggleBtn.click();
+  }
   requestAnimationFrame(()=>{
     const el = document.getElementById(id);
     if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
   });
 }
+
+(function setupSettingsToggle(){
+  const btn = document.getElementById("settingsToggleBtn");
+  const body = document.getElementById("settingsBody");
+  if(!btn || !body) return;
+  btn.onclick = ()=>{
+    const nowOpen = body.style.display === "none";
+    body.style.display = nowOpen ? "" : "none";
+    btn.textContent = nowOpen ? "Hide settings ▴" : "Show settings ▾";
+  };
+})();
 
 // Jump straight to a district's own marker/card on the map, from a
 // mention of its name anywhere else in the app (guide text, etc.).
@@ -4473,6 +4590,27 @@ function renderHomeInfoCard(){
   }
 }
 renderHomeInfoCard();
+
+// "Add to Home Screen" card: hides itself once it's actually done — the
+// most reliable signal is the app running in standalone/installed mode
+// at all (display-mode: standalone covers Android/desktop PWA installs;
+// navigator.standalone is the older iOS-Safari-specific equivalent) —
+// plus a manual dismiss for anyone who installed it but hasn't yet
+// relaunched from the Home Screen icon this session.
+(function setupAddToHomeCard(){
+  const card = document.getElementById("addToHomeCard");
+  if(!card) return;
+  const isStandalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+  if(isStandalone || Store.get("dismissedAddToHome")){
+    card.style.display = "none";
+    return;
+  }
+  const dismissBtn = document.getElementById("dismissAddToHomeBtn");
+  if(dismissBtn) dismissBtn.onclick = ()=>{
+    Store.set("dismissedAddToHome", true);
+    card.style.display = "none";
+  };
+})();
 
 const copySyncCodeBtn = document.getElementById("copySyncCodeBtn");
 if(copySyncCodeBtn) copySyncCodeBtn.onclick = (e)=>{
@@ -5740,7 +5878,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // MODEL note near Store/DEFAULTS above) — also left out of the
 // shareable group snapshot below, so handing that file to the group
 // can never leak one person's bingo card, character or private notes.
-const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard"];
+const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
