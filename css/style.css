@@ -23,6 +23,24 @@
   header.appbar .titles div{font-size:11px; color:var(--text-muted); margin-top:2px;}
   header.appbar .titles .ptr-hint{font-size:9.5px; opacity:.65; margin-top:3px;}
   .status-pill{font-size:11px; padding:4px 10px; border-radius:20px; background:rgba(75,227,172,.12); color:var(--accent-teal); border:1px solid rgba(75,227,172,.3); white-space:nowrap; flex-shrink:0;}
+  /* Fixed, not sticky, and positioned purely by JS transform (translate/scale/opacity)
+     driven by touchmove — the pull gesture can start from any screen, not just
+     ones with a scrollable header above it, so this can't rely on document flow.
+     top offset clears env(safe-area-inset-top) plus extra margin: on notch/Dynamic
+     Island devices that inset already accounts for the island's height, but iOS has
+     been inconsistent about exactly how much across versions, so a bit of margin on
+     top is cheap insurance against ever visually colliding with it. Starts fully
+     hidden (opacity:0, tucked up under the safe area) — this is exactly the "stray
+     sliver visible at rest" failure mode an earlier version hit, avoided here by
+     never giving it a resting transform/opacity that's even partially visible. */
+  .ptr-indicator{position:fixed; top:calc(env(safe-area-inset-top) + 10px); left:50%; z-index:60; display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; background:rgba(11,21,18,.94); backdrop-filter:blur(12px); border:1px solid var(--line); color:var(--accent-teal); font-size:12px; font-weight:700; white-space:nowrap; pointer-events:none; opacity:0; transform:translate(-50%, -14px) scale(.6); transition:opacity .12s ease, transform .12s ease;}
+  .ptr-indicator.ptr-visible{transition:none;} /* while actively dragging, JS drives every frame directly — a CSS transition here would lag a finger by ~120ms */
+  .ptr-indicator .ptr-indicator-arrow{display:inline-block; font-size:13px; line-height:1; transition:transform .15s ease;}
+  .ptr-indicator.ptr-ready .ptr-indicator-arrow{transform:rotate(180deg);}
+  .ptr-indicator .ptr-indicator-spinner{display:none; width:12px; height:12px; border-radius:50%; border:2px solid rgba(75,227,172,.25); border-top-color:var(--accent-teal); animation:ptr-spin .7s linear infinite;}
+  .ptr-indicator.ptr-refreshing .ptr-indicator-arrow{display:none;}
+  .ptr-indicator.ptr-refreshing .ptr-indicator-spinner{display:inline-block;}
+  @keyframes ptr-spin{to{transform:rotate(360deg);}}
   .friend-status-bar{position:sticky; top:calc(58px + env(safe-area-inset-top)); z-index:39; display:flex; gap:8px; overflow-x:auto; padding:6px 16px; background:rgba(11,21,18,.85); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
   .friend-status-bar .status-chip{flex-shrink:0; font-size:11px; padding:4px 10px; border-radius:20px; background:rgba(255,255,255,.06); border:1px solid var(--line); color:var(--text-muted); white-space:nowrap;}
   .friend-status-bar .status-chip.status-stale{opacity:.55;}

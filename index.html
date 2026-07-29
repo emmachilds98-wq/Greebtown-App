@@ -102,6 +102,11 @@
   </div>
   <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:39</span>
 </header>
+<div id="ptrIndicator" class="ptr-indicator" aria-hidden="true">
+  <span class="ptr-indicator-arrow">↓</span>
+  <span class="ptr-indicator-spinner"></span>
+  <span class="ptr-indicator-text"></span>
+</div>
 <div id="friendStatusBar" class="friend-status-bar" style="display:none;"></div>
 
 <main>
@@ -946,10 +951,14 @@ Talk to an actor in character
       <h3>📱 Using someone else's phone?</h3>
       <p>If your own phone's dead or lost and you're borrowing a teammate's for a bit, this picks up where you left off — pulls in your last-synced saved artists, bingo card and character, and this phone continues as you from here.</p>
       <p class="empty-note">It can only restore what actually made it to a sync — your own private notes and packing list only ever lived on your original phone, so those can't come back this way (the shared meeting point isn't personal, so that one's unaffected either way). And it needs signal, since it fetches your latest synced data live.</p>
-      <p class="empty-note"><strong>Whoever's using this phone right now — hit Sync now above first,</strong> or whatever's currently on here gets wiped before it ever reaches the cloud.</p>
+      <p class="empty-note">Whatever's currently on this phone gets backed up to the cloud automatically right before the switch — if that backup fails (no signal), nothing is touched and the switch is cancelled, so this can't lose data even if someone forgets to sync first.</p>
       <div class="field"><label>Your name</label><input type="text" id="handoffNameInput" placeholder="e.g. Dave"></div>
       <button class="action danger" id="handoffSwitchBtn">Wipe this phone &amp; switch to me</button>
       <p class="empty-note" id="handoffStatusNote" style="margin-top:6px;"></p>
+      <div id="handoffSwitchBackBox" style="display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">
+        <p class="empty-note">This phone was <span id="handoffSwitchBackLabel"></span> before the last switch — its data was backed up first, so you can bring it right back.</p>
+        <button class="action" id="handoffSwitchBackBtn">Switch back</button>
+      </div>
     </div>
 
     <div class="card" id="jumpFriendStatus">
