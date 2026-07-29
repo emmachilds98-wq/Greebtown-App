@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v164";
-const APP_BUILD_TIME = "2026-07-29T22:02:30Z";
+const APP_CACHE_VERSION = "v165";
+const APP_BUILD_TIME = "2026-07-29T22:03:43Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -379,6 +379,57 @@ fixBottomClearance();
 })();
 
 // ===============================
+// TIMELINE SCROLL PROGRESS — a visible vertical scroll indicator inside
+// each .timeline-outer box (Lineup/Plan/Clash timelines), which scrolls
+// both ways in a fixed-height (68vh) container. The native scrollbar
+// there is easy to miss (thin, low-contrast, fades fast on
+// -webkit-overflow-scrolling:touch), which is exactly why "am I near
+// the bottom of this stage list yet" was hard to tell on a long one.
+// setupTimelineScrollProgress() builds the track+thumb once per
+// container (idempotent — safe to call again); refreshTimelineScrollProgress()
+// recomputes size/position/visibility and must be called after any
+// render that can change the container's scrollable content (a new
+// day, a filter, etc.), since scrollHeight only updates once new
+// content is actually in the DOM.
+// ===============================
+function setupTimelineScrollProgress(outerId){
+  const outer = document.getElementById(outerId);
+  if(!outer || outer.querySelector(".timeline-scroll-track")) return;
+  const track = document.createElement("div");
+  track.className = "timeline-scroll-track";
+  const thumb = document.createElement("div");
+  thumb.className = "timeline-scroll-thumb";
+  track.appendChild(thumb);
+  outer.appendChild(track);
+  outer.addEventListener("scroll", ()=> updateTimelineScrollThumb(outerId), { passive: true });
+}
+
+function updateTimelineScrollThumb(outerId){
+  const outer = document.getElementById(outerId);
+  const track = outer && outer.querySelector(".timeline-scroll-track");
+  const thumb = track && track.querySelector(".timeline-scroll-thumb");
+  if(!outer || !track || !thumb) return;
+  const overflow = outer.scrollHeight - outer.clientHeight;
+  // Only worth showing once there's genuinely more than a screenful —
+  // a short day/filtered view shouldn't get a progress bar with
+  // nowhere to go.
+  if(overflow < 24){ track.style.display = "none"; return; }
+  track.style.display = "block";
+  const trackHeight = track.clientHeight;
+  const thumbHeight = Math.max(24, (outer.clientHeight / outer.scrollHeight) * trackHeight);
+  const thumbTop = (outer.scrollTop / overflow) * (trackHeight - thumbHeight);
+  thumb.style.height = thumbHeight + "px";
+  thumb.style.top = thumbTop + "px";
+}
+
+function refreshTimelineScrollProgress(outerId){
+  setupTimelineScrollProgress(outerId);
+  // Content just changed — layout needs a tick to settle before
+  // scrollHeight reflects the new grid.
+  requestAnimationFrame(()=> updateTimelineScrollThumb(outerId));
+}
+
+// ===============================
 // STORAGE HELPER
 // ===============================
 // DATA ISOLATION MODEL — read this before touching Store or DEFAULTS:
@@ -476,7 +527,7 @@ const tabs = document.querySelectorAll(".tab");
 // at, with no way back except re-finding your place by hand. Every jump
 // function below routes through jumpToTab() instead of clicking a tab
 // button directly, which remembers where you were (tab + scroll
-// position) so navBackBtn can return you there. Tapping a bottom-nav tab
+// position) so the floating back-nav button can return you there. Tapping a bottom-nav tab
 // directly (not via a jump) clears this — that's a deliberate fresh
 // navigation, not a "look something up and return" trip.
 let navReturnStack = [];
@@ -491,10 +542,93 @@ let suppressNavClear = false;
 // sense after the page's own content has changed shape.
 let tabScrollPositions = {};
 
+// Floating, drag-to-move button — same pattern as "Back to top" below
+// (own remembered position, own localStorage key), not a fixed header
+// icon. Only ever appears when navReturnStack actually has somewhere to
+// go back to (a jump link was used to get here) — plain bottom-nav tab
+// switches never populate that stack, so this stays hidden for those,
+// exactly as requested: it's for "I followed a link, now take me back,"
+// not a general-purpose nav control.
+const backNavBtn = document.createElement("button");
+(function setupBackNavButton(){
+  const POS_KEY = "backnav_pos_v1";
+  backNavBtn.id = "backNavBtn";
+  backNavBtn.setAttribute("aria-label", "Back to where you were");
+  backNavBtn.title = "Back to where you were";
+  backNavBtn.textContent = "←";
+  backNavBtn.style.cssText = "position:fixed; width:46px; height:46px; border-radius:50%; background:var(--bg-panel-2); color:var(--text-primary); border:1px solid var(--line); font-size:20px; font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,.4); z-index:56; display:none; cursor:grab; touch-action:none;";
+  document.body.appendChild(backNavBtn);
+
+  function clampPos(x, y){
+    const margin = 8;
+    const maxX = window.innerWidth - backNavBtn.offsetWidth - margin;
+    const maxY = window.innerHeight - backNavBtn.offsetHeight - margin;
+    return { x: Math.min(Math.max(x, margin), Math.max(margin, maxX)), y: Math.min(Math.max(y, margin), Math.max(margin, maxY)) };
+  }
+  function setPos(x, y, save){
+    const p = clampPos(x, y);
+    backNavBtn.style.left = p.x + "px";
+    backNavBtn.style.top = p.y + "px";
+    backNavBtn.style.right = "auto";
+    backNavBtn.style.bottom = "auto";
+    if(save){ try{ localStorage.setItem(POS_KEY, JSON.stringify(p)); }catch(e){} }
+  }
+  function loadPos(){
+    try{
+      const raw = localStorage.getItem(POS_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return null;
+  }
+  // Default top-left, below the header, unless already dragged
+  // elsewhere — deliberately not near "Back to top"'s bottom-right
+  // default so a screen showing both at once doesn't stack them.
+  const saved = loadPos();
+  if(saved) setPos(saved.x, saved.y, false);
+  else{
+    const place = ()=> setPos(14, 78, false);
+    place();
+    window.addEventListener("resize", ()=>{ if(!loadPos()) place(); });
+  }
+
+  let dragging = false, moved = false, startX = 0, startY = 0, originX = 0, originY = 0;
+  backNavBtn.addEventListener("pointerdown", (e)=>{
+    dragging = true; moved = false;
+    startX = e.clientX; startY = e.clientY;
+    const rect = backNavBtn.getBoundingClientRect();
+    originX = rect.left; originY = rect.top;
+    backNavBtn.setPointerCapture(e.pointerId);
+    backNavBtn.style.cursor = "grabbing";
+  });
+  backNavBtn.addEventListener("pointermove", (e)=>{
+    if(!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if(Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+    if(moved) setPos(originX + dx, originY + dy, false);
+  });
+  function endDrag(){
+    if(!dragging) return;
+    dragging = false;
+    backNavBtn.style.cursor = "grab";
+    if(moved){
+      const rect = backNavBtn.getBoundingClientRect();
+      setPos(rect.left, rect.top, true);
+    }
+  }
+  backNavBtn.addEventListener("pointerup", endDrag);
+  backNavBtn.addEventListener("pointercancel", endDrag);
+  backNavBtn.addEventListener("click", ()=>{
+    if(moved) return; // that click was the end of a drag, not a tap
+    doBackNav();
+  });
+})();
+
 function updateNavBackButton(){
-  const btn = document.getElementById("navBackBtn");
-  if(!btn) return;
-  btn.style.display = navReturnStack.length ? "flex" : "none";
+  backNavBtn.style.display = navReturnStack.length ? "flex" : "none";
+  if(navReturnStack.length){
+    backNavBtn.style.alignItems = "center";
+    backNavBtn.style.justifyContent = "center";
+  }
 }
 
 function jumpToTab(tabId){
@@ -508,8 +642,7 @@ function jumpToTab(tabId){
   if(btn) btn.click();
 }
 
-const navBackBtn = document.getElementById("navBackBtn");
-if(navBackBtn) navBackBtn.onclick = ()=>{
+function doBackNav(){
   const entry = navReturnStack.pop();
   if(!entry) return;
   updateNavBackButton();
@@ -527,7 +660,7 @@ if(navBackBtn) navBackBtn.onclick = ()=>{
     window.scrollTo(0, entry.scrollY);
     if(document.scrollingElement) document.scrollingElement.scrollTop = entry.scrollY;
   }));
-};
+}
 
 tabs.forEach(tab=>{
   tab.onclick = ()=>{
@@ -3376,6 +3509,7 @@ function renderArtistsTimeline(){
     };
   });
   wireStageLinks(grid);
+  refreshTimelineScrollProgress("artistTimelineOuter");
 }
 
 const artistsViewListBtn = document.getElementById("artistsViewListBtn");
@@ -4566,6 +4700,7 @@ function renderPlanTimeline(){
     };
   });
   wireStageLinks(grid);
+  refreshTimelineScrollProgress("planTimelineOuter");
 }
 
 // ===============================
@@ -4613,6 +4748,7 @@ function renderClashTimeline(){
     };
   });
   wireStageLinks(grid);
+  refreshTimelineScrollProgress("clashTimelineOuter");
 }
 
 // ===============================

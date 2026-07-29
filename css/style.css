@@ -23,13 +23,6 @@
   h1,h2,h3{font-family:Futura, "Century Gothic", Avenir, Arial, sans-serif; letter-spacing:.03em;}
   .eyebrow{text-transform:uppercase; letter-spacing:.16em; font-size:11px; color:var(--accent-teal); font-weight:700; margin-bottom:4px;}
   header.appbar{position:sticky; top:0; z-index:40; background:rgba(11,21,18,.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); padding:calc(12px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) 12px calc(18px + env(safe-area-inset-left)); display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:6px 10px;}
-  /* Native-app-style back button, integrated into the header itself
-     rather than floating as a separate banner below it — same dark/blur
-     surface as the header, so it reads as part of the bar, not a bolted-
-     on extra. Sits before the titles; hidden entirely (not just faded)
-     when there's nowhere to go back to, so it never reserves dead space. */
-  .appbar-back-btn{display:none; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.06); border:1px solid var(--line); color:var(--text-primary); font-size:16px; line-height:1; cursor:pointer; flex-shrink:0; margin-right:2px; transition:background .15s ease, border-color .15s ease, color .15s ease;}
-  .appbar-back-btn:hover, .appbar-back-btn:active{background:rgba(75,227,172,.14); border-color:var(--accent-teal); color:var(--accent-teal);}
   header.appbar .titles{min-width:0;}
   header.appbar .titles h1{text-transform:uppercase; font-size:18px; letter-spacing:.06em; line-height:1.1;}
   header.appbar .titles div{font-size:11px; color:var(--text-muted); margin-top:2px;}
@@ -112,7 +105,7 @@
      it as text or pop up the browser's copy/select callout — both of
      which mobile Safari/Chrome otherwise treat a sustained touch-hold on
      text-bearing elements as a trigger for. */
-  .star-btn, .star-toggle-lg{
+  .star-btn, .star-toggle-lg, .seen-btn, .seen-toggle-lg{
     -webkit-user-select:none; user-select:none;
     -webkit-touch-callout:none;
     touch-action:manipulation;
@@ -390,6 +383,18 @@
      Stage list scrolls vertically (unbounded: 12 main stages + 50+ hidden
      venues); time scrolls horizontally (bounded to a single day). ===== */
   .timeline-outer{position:relative; overflow:auto; max-height:68vh; border:1px solid var(--line); border-radius:14px; background:var(--bg-panel); -webkit-overflow-scrolling:touch;}
+  /* Custom vertical scroll-progress bar — the native scrollbar inside a
+     -webkit-overflow-scrolling:touch box is thin, low-contrast, and
+     fades out fast on mobile, which is exactly why "am I near the
+     bottom of this stage list yet" was hard to answer on a long
+     timeline. Sits just inside the right edge, above the grid content
+     (z-index higher than the sticky hour row/stage column), thumb
+     height/position reflects how much is scrolled and how much more
+     there is — a real progress indicator, not just a scrollbar
+     restyle. display:none by default; JS only shows it once there's
+     genuinely more content than fits.  */
+  .timeline-scroll-track{position:absolute; top:8px; bottom:8px; right:4px; width:5px; border-radius:4px; background:rgba(255,255,255,.08); pointer-events:none; z-index:6; display:none;}
+  .timeline-scroll-thumb{position:absolute; left:0; right:0; border-radius:4px; background:var(--accent-teal); box-shadow:0 0 6px rgba(75,227,172,.5);}
   .timeline-grid{position:relative; display:flex; flex-direction:column; min-width:100%; width:max-content;}
   .timeline-hours-row{display:flex; position:sticky; top:0; z-index:3;}
   /* Sticky (frozen) to the left in every timeline view — Artists,
