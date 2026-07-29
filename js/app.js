@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v133";
-const APP_BUILD_TIME = "2026-07-29T12:00:00Z";
+const APP_CACHE_VERSION = "v134";
+const APP_BUILD_TIME = "2026-07-29T12:06:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -115,32 +115,72 @@ function getFirestoreDb(){
 // (autoSyncNow, defined later in this file — only called from inside an
 // event handler here, well after the whole script has finished loading,
 // so the forward reference is safe).
-// No separate floating indicator — an earlier version added one, but it
-// needed its own safe-area math to avoid the iPhone notch and ended up
-// as a stray sliver visible even at rest. Simpler and more reliable to
-// just drive the existing "↓ Pull down to refresh & sync" header hint's
-// own text through the same states, since it already sits somewhere
-// safe-area-correct by construction.
+// Two visible pieces while dragging: <main> itself translates down with
+// the finger (damped, capped) for the "screen pulls down" feel, and a
+// small pill (#ptrIndicator, fixed position, defined in index.html/
+// style.css) fades/scales in above it. The pill is fixed-position and a
+// SIBLING of <main>, not a descendant — deliberately, since a CSS
+// transform on an ancestor would make position:fixed descendants track
+// that transform instead of the real viewport, breaking the pill's own
+// "stay put near the top" positioning the moment <main> starts moving.
+// The pill's resting state is fully hidden (opacity 0, tucked under the
+// safe area) — an earlier version of this feature had a floating
+// indicator that ended up as a stray sliver visible even at rest; this
+// one only ever gets a non-zero opacity while a finger is actually
+// dragging or a refresh is in flight.
 // ===============================
 (function setupPullToRefresh(){
   const THRESHOLD = 68;
+  const MAX_PULL = 100; // content damps hard and caps here even if the finger keeps going, so it never feels like it's being dragged off-screen
   const hint = document.getElementById("ptrHint");
   const DEFAULT_TEXT = hint ? hint.textContent : "";
+  const mainEl = document.querySelector("main");
+  const indicator = document.getElementById("ptrIndicator");
+  const indicatorText = indicator ? indicator.querySelector(".ptr-indicator-text") : null;
   let startY = null, pulling = false, refreshing = false, lastDist = 0;
 
   function atTop(){
     return (document.scrollingElement || document.documentElement).scrollTop <= 0;
   }
 
+  function setIndicatorText(text){ if(indicatorText) indicatorText.textContent = text; }
+
+  // progress: 0 (just started) to 1+ (at/past threshold) — drives the
+  // pill's fade-in and scale continuously with the finger, not in a
+  // single jump at the threshold, so it reads as following the drag
+  // rather than popping in.
+  function applyPull(dist){
+    if(mainEl) mainEl.style.transform = dist ? `translateY(${dist}px)` : "";
+    if(!indicator) return;
+    const progress = Math.min(dist / THRESHOLD, 1);
+    indicator.style.opacity = String(Math.min(dist / 18, 1));
+    indicator.style.transform = `translate(-50%, ${-14 + progress * 14}px) scale(${0.6 + progress * 0.4})`;
+    indicator.classList.toggle("ptr-ready", dist >= THRESHOLD);
+    setIndicatorText(dist >= THRESHOLD ? "Release" : "");
+  }
+
+  function resetVisuals(){
+    if(mainEl){ mainEl.style.transition = "transform .25s ease"; mainEl.style.transform = ""; }
+    if(indicator){
+      indicator.classList.remove("ptr-visible", "ptr-ready", "ptr-refreshing");
+      indicator.style.opacity = "0";
+      indicator.style.transform = "translate(-50%, -14px) scale(.6)";
+    }
+    setTimeout(()=>{ if(mainEl) mainEl.style.transition = ""; }, 260);
+  }
+
   function reset(){
     pulling = false; startY = null; lastDist = 0;
     if(hint && !refreshing) hint.textContent = DEFAULT_TEXT;
+    resetVisuals();
   }
 
   document.addEventListener("touchstart", (e)=>{
     if(refreshing || e.touches.length !== 1 || !atTop()) return;
     startY = e.touches[0].clientY;
     pulling = true;
+    if(mainEl) mainEl.style.transition = "";
+    if(indicator) indicator.classList.add("ptr-visible"); // suspends the CSS transition so every touchmove frame tracks the finger exactly
   }, { passive: true });
 
   document.addEventListener("touchmove", (e)=>{
@@ -151,8 +191,13 @@ function getFirestoreDb(){
     // normal scroll, so take over the motion instead of letting the
     // browser's own rubber-band overscroll fight it.
     e.preventDefault();
-    lastDist = delta * 0.5;
+    // Damped (0.5x) like before, then eased further as it approaches
+    // MAX_PULL so it visibly resists rather than tracking the finger
+    // 1:1 all the way — the rubber-band feel native pull-to-refresh has.
+    const damped = delta * 0.5;
+    lastDist = damped < MAX_PULL ? damped : MAX_PULL + (damped - MAX_PULL) * 0.15;
     if(hint) hint.textContent = lastDist >= THRESHOLD ? "↑ Release to refresh & sync" : DEFAULT_TEXT;
+    applyPull(lastDist);
   }, { passive: false });
 
   document.addEventListener("touchend", ()=>{
@@ -163,15 +208,27 @@ function getFirestoreDb(){
 
     refreshing = true;
     if(hint) hint.textContent = "Refreshing…";
+    if(mainEl){ mainEl.style.transition = "transform .2s ease"; mainEl.style.transform = "translateY(56px)"; }
+    if(indicator){
+      indicator.classList.add("ptr-refreshing");
+      indicator.classList.remove("ptr-ready");
+      indicator.style.opacity = "1";
+      indicator.style.transform = "translate(-50%, 0) scale(1)";
+      setIndicatorText("Syncing…");
+    }
 
     checkForStaleCopy().then(stale=>{
       if(stale) return forceAppRefresh(); // page is about to reload — nothing left to reset
       return Promise.resolve(typeof autoSyncNow === "function" ? autoSyncNow("pull to refresh") : null).then(()=>{
         if(hint) hint.textContent = "Up to date ✓";
+        setIndicatorText("Up to date ✓");
+        if(indicator) indicator.classList.remove("ptr-refreshing");
         setTimeout(()=>{ refreshing = false; reset(); }, 1400);
       });
     }).catch(()=>{
       if(hint) hint.textContent = "Couldn't refresh — check signal";
+      setIndicatorText("Couldn't refresh");
+      if(indicator) indicator.classList.remove("ptr-refreshing");
       setTimeout(()=>{ refreshing = false; reset(); }, 1800);
     });
   }, { passive: true });
