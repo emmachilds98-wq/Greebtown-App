@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v120";
-const APP_BUILD_TIME = "2026-07-29T04:46:00Z";
+const APP_CACHE_VERSION = "v121";
+const APP_BUILD_TIME = "2026-07-29T04:52:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5379,6 +5379,7 @@ function renderHomeSyncStatus(){
     </div>
     <div class="field" id="homeStatusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
     <button class="action" id="homeStatusCustomBtn" style="margin-top:6px;">Set my status</button>
+    <p class="empty-note" id="homeStatusFeedbackNote" style="margin-top:6px;"></p>
     <div id="homeFriendStatusList" style="margin-top:12px;"></div>
   `;
   const sel = document.getElementById("homeContributorName");
@@ -5389,7 +5390,7 @@ function renderHomeSyncStatus(){
   const syncNowBtn = document.getElementById("homeSyncNowBtn");
   if(syncNowBtn) syncNowBtn.onclick = ()=> runManualSync(syncNowBtn, document.getElementById("homeSyncNowNote"));
   if(typeof wireDeviceHandoffControl === "function") wireDeviceHandoffControl("homeHandoffNameInput", "homeHandoffSwitchBtn", "homeHandoffStatusNote");
-  if(typeof wireStatusControl === "function") wireStatusControl("homeStatusLocationSelect", "homeStatusOtherField", "homeStatusCustomInput", "homeStatusCustomBtn");
+  if(typeof wireStatusControl === "function") wireStatusControl("homeStatusLocationSelect", "homeStatusOtherField", "homeStatusCustomInput", "homeStatusCustomBtn", "homeStatusFeedbackNote");
   if(typeof renderFriendStatusList === "function") renderFriendStatusList("homeFriendStatusList");
 }
 renderHomeSyncStatus();
@@ -5511,16 +5512,13 @@ function getFirestoreDb(){
   }
 }
 
-// This group's shared room code is fixed (not something to make up) —
-// pre-filled and saved automatically so nobody has to type it in.
+// This group's shared room code is fixed — not something anyone types
+// in or can accidentally clear. No editable field for it any more (an
+// earlier version had one, and an empty blur/change event on it could
+// silently wipe the room code, quietly breaking sync for that device).
+// Forced on every load regardless of whatever's already in storage.
 const GROUP_ROOM_CODE = "medway-massive";
-const roomCodeInput = document.getElementById("roomCodeInput");
-if(roomCodeInput){
-  if(!Store.get("roomCode")) Store.set("roomCode", GROUP_ROOM_CODE);
-  roomCodeInput.value = Store.get("roomCode");
-  roomCodeInput.onchange = ()=> setRoomCode(roomCodeInput.value);
-  roomCodeInput.onblur = roomCodeInput.onchange;
-}
+Store.set("roomCode", GROUP_ROOM_CODE);
 
 // Trimmed, lowercased, with slashes/whitespace collapsed to a single
 // hyphen — a Firestore document ID, and needs to compare equal for
@@ -5570,7 +5568,6 @@ function setRoomCode(raw){
   const previous = currentRoomCode();
   const lastPushed = Store.get("lastPushedRoomId") || "";
   Store.set("roomCode", next);
-  if(roomCodeInput) roomCodeInput.value = next;
   if(lastPushed && lastPushed !== next){
     // If this fails (offline, most likely), lastPushedRoomId deliberately
     // stays pointing at the uncleaned room rather than being cleared —
@@ -5736,27 +5733,29 @@ function statusLocationOptionsHTML(){
   `;
 }
 
-function wireStatusControl(selectId, otherFieldId, otherInputId, btnId){
+function wireStatusControl(selectId, otherFieldId, otherInputId, btnId, noteId){
   const sel = document.getElementById(selectId);
   const otherField = document.getElementById(otherFieldId);
   const otherInput = document.getElementById(otherInputId);
   const btn = document.getElementById(btnId);
   if(!sel || !btn) return;
   if(sel.options.length <= 1) sel.innerHTML = statusLocationOptionsHTML();
+  const setNote = (text)=>{ if(!noteId) return; const el = document.getElementById(noteId); if(el) el.textContent = text; };
   sel.onchange = ()=>{
     if(otherField) otherField.style.display = sel.value === "__other__" ? "" : "none";
   };
   btn.onclick = ()=>{
     let place = sel.value;
     if(place === "__other__") place = (otherInput && otherInput.value.trim()) || "";
-    if(!place) return;
+    if(!place){ setNote("Pick a location above first."); return; }
     setMyStatus(place);
     sel.value = "";
     if(otherField) otherField.style.display = "none";
     if(otherInput) otherInput.value = "";
+    setNote(`Done — set your status to ${place}.`);
   };
 }
-wireStatusControl("statusLocationSelect", "statusOtherField", "statusCustomInput", "statusCustomBtn");
+wireStatusControl("statusLocationSelect", "statusOtherField", "statusCustomInput", "statusCustomBtn", "statusFeedbackNote");
 renderAllFriendStatusUI();
 setInterval(renderAllFriendStatusUI, 60000);
 
