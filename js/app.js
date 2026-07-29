@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v105";
-const APP_BUILD_TIME = "2026-07-29T02:40:00Z";
+const APP_CACHE_VERSION = "v106";
+const APP_BUILD_TIME = "2026-07-29T02:47:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -287,7 +287,7 @@ fixBottomClearance();
 //    instead, kept separate per contributor, shown only in their own
 //    person-tab on the Plan, Bingo, and My Character cards. Sync must
 //    never read or write other personal fields: meeting, notes, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [] };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -5176,12 +5176,69 @@ const roomCodeInput = document.getElementById("roomCodeInput");
 if(roomCodeInput){
   if(!Store.get("roomCode")) Store.set("roomCode", GROUP_ROOM_CODE);
   roomCodeInput.value = Store.get("roomCode");
-  roomCodeInput.onchange = ()=> Store.set("roomCode", roomCodeInput.value.trim());
+  roomCodeInput.onchange = ()=> setRoomCode(roomCodeInput.value);
   roomCodeInput.onblur = roomCodeInput.onchange;
 }
 
+// Trimmed, lowercased, with slashes/whitespace collapsed to a single
+// hyphen — a Firestore document ID, and needs to compare equal for
+// "Medway Massive" / "medway-massive " / "medway/massive" alike, or
+// stray formatting silently splits a group across two different rooms.
+function normalizeRoomCode(raw){
+  return (raw || "").trim().toLowerCase().replace(/[\/\s]+/g, "-");
+}
+
 function currentRoomCode(){
-  return (Store.get("roomCode") || "").trim();
+  return normalizeRoomCode(Store.get("roomCode"));
+}
+
+// A stable per-device identity, generated once and never re-derived from
+// anything the user can retype (name, room code) — the whole point is
+// that renaming yourself or switching rooms can't accidentally collide
+// with, overwrite, or orphan someone else's (or your own past) synced
+// data. Never included in the shareable group snapshot (see
+// PERSONAL_ONLY_KEYS) — it's identity infrastructure, not content.
+function ensureDeviceId(){
+  let id = Store.get("deviceId");
+  if(!id){
+    id = (typeof crypto !== "undefined" && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : "dev-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+    Store.set("deviceId", id);
+  }
+  return id;
+}
+
+// Changing rooms (or clearing the code to leave one) must clean up the
+// membership doc left behind in the room you're moving away from —
+// otherwise your last-synced data sits there frozen forever, still
+// visible to anyone left in that room. Best-effort: offline or a
+// permissions hiccup just leaves the old doc for next time, never blocks
+// the actual room switch.
+function cleanupOldRoomMembership(oldRoomId){
+  const db = getFirestoreDb();
+  if(!db || !oldRoomId) return Promise.resolve(false);
+  const deviceId = ensureDeviceId();
+  return db.collection("rooms").doc(oldRoomId).collection("members").doc(deviceId).delete().then(()=>true).catch(()=>false);
+}
+
+function setRoomCode(raw){
+  const next = normalizeRoomCode(raw);
+  const previous = currentRoomCode();
+  const lastPushed = Store.get("lastPushedRoomId") || "";
+  Store.set("roomCode", next);
+  if(roomCodeInput) roomCodeInput.value = next;
+  if(lastPushed && lastPushed !== next){
+    // If this fails (offline, most likely), lastPushedRoomId deliberately
+    // stays pointing at the uncleaned room rather than being cleared —
+    // so the next room change (or a future retry) still knows there's a
+    // leftover membership doc it owes a cleanup to, instead of losing
+    // track of it the moment this one attempt didn't land.
+    cleanupOldRoomMembership(lastPushed).then(ok=>{
+      if(ok && Store.get("lastPushedRoomId") === lastPushed) Store.set("lastPushedRoomId", "");
+    });
+  }
+  if(next && next !== previous && typeof autoSyncNow === "function") autoSyncNow("room changed");
 }
 
 // Separate from the header's app-version pill on purpose — that tracks
@@ -5230,6 +5287,7 @@ async function pushToCloud(){
   const room = currentRoomCode();
   const name = currentContributorName();
   if(!db || !room || !name) return;
+  const deviceId = ensureDeviceId();
   const payload = buildSyncPayload();
   payload.updatedAt = Date.now();
   // Firestore's SDK throws (not silently drops) on any field whose value
@@ -5243,19 +5301,31 @@ async function pushToCloud(){
   // old poisoned entries — a JSON round-trip is a cheap, reliable way to
   // strip any undefined value recursively before every push, regardless
   // of where it came from.
-  await db.collection("rooms").doc(room).collection("members").doc(name).set(JSON.parse(JSON.stringify(payload)));
+  //
+  // Keyed by deviceId, not by name — a document ID that never changes
+  // just because someone retypes their name or two people happen to pick
+  // the same one. Renaming updates the `from` field inside your one
+  // stable document instead of creating (or colliding with) another.
+  await db.collection("rooms").doc(room).collection("members").doc(deviceId).set(JSON.parse(JSON.stringify(payload)));
+  Store.set("lastPushedRoomId", room);
+  // Legacy cleanup: this room may still have a doc from before this
+  // device had a stable id, filed under the old name-as-doc-id scheme.
+  // Best-effort and safe to repeat forever — deleting an already-gone
+  // doc is a no-op, so this just self-heals any leftover ghost from the
+  // transition without needing a one-time migration flag.
+  if(name) db.collection("rooms").doc(room).collection("members").doc(name).delete().catch(()=>{});
 }
 
 async function pullFromCloud(){
   const db = getFirestoreDb();
   const room = currentRoomCode();
-  const name = currentContributorName();
   if(!db || !room) return { stats: null, count: 0 };
+  const deviceId = ensureDeviceId();
   const snap = await db.collection("rooms").doc(room).collection("members").get();
   const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   let count = 0;
   snap.forEach(doc=>{
-    if(doc.id === name) return; // never merge your own payload back into yourself
+    if(doc.id === deviceId) return; // never merge your own payload back into yourself
     const { stats } = mergeSyncPayload(doc.data());
     Object.keys(totals).forEach(k=> totals[k] += stats[k] || 0);
     count++;
@@ -6530,7 +6600,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // MODEL note near Store/DEFAULTS above) — also left out of the
 // shareable group snapshot below, so handing that file to the group
 // can never leak one person's bingo card, character or private notes.
-const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked"];
+const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
