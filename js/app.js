@@ -6349,6 +6349,16 @@ function renderTodayNow(){
   `;
 }
 
+// Countdown label ("in 45m" / "in 2h 15m") for a NEXT UP row — same
+// nowMin/startMin units as the rest of Today's timing (minutes since
+// FESTIVAL_START), so no separate date math needed here.
+function nextUpCountdownLabel(startMin, nowMin){
+  const diff = startMin - nowMin;
+  if(diff < 60) return `in ${diff}m`;
+  const h = Math.floor(diff / 60), m = diff % 60;
+  return `in ${h}h${m ? ` ${m}m` : ""}`;
+}
+
 function renderTodayNextUp(){
   const box = document.getElementById("todayNextUp");
   if(!box) return;
@@ -6364,11 +6374,20 @@ function renderTodayNextUp(){
     })
     .slice(0, 4);
   box.innerHTML = `
-    <h3 style="margin-bottom:6px;">NEXT UP</h3>
-    ${upcoming.length ? upcoming.map(a=>{
-      const owners = Object.entries(a.interest).map(([o,m])=> `${escapeHtml(o)}${m ? " ★" : ""}`).join(" · ");
-      return `<div class="decision-artist-line"><strong>${escapeHtml(a.name)}</strong> — ${escapeHtml(a.stage)} · ${timeLabel(a)}<br><span style="font-size:12px;">${owners}</span></div>`;
-    }).join("") : `<p class="empty-note">Nothing upcoming saved yet.</p>`}
+    <h3 style="margin-bottom:8px;">NEXT UP</h3>
+    ${upcoming.length ? `<div class="nextup-list">${upcoming.map(a=>{
+      const owners = Object.entries(a.interest).map(([o,m])=>
+        `<span class="nextup-owner${m ? " mustsee" : ""}">${escapeHtml(o)}${m ? " ★" : ""}</span>`
+      ).join("");
+      return `<div class="nextup-row">
+        <div class="nextup-time">${escapeHtml(a.start || "")}<span class="nextup-countdown">${nextUpCountdownLabel(a.startMin, nowMin)}</span></div>
+        <div class="nextup-info">
+          <div class="nextup-name">${escapeHtml(a.name)}</div>
+          <div class="nextup-stage">${escapeHtml(a.stage)}</div>
+          ${owners ? `<div class="nextup-owners">${owners}</div>` : ""}
+        </div>
+      </div>`;
+    }).join("")}</div>` : `<p class="empty-note">Nothing upcoming saved yet.</p>`}
   `;
 }
 
