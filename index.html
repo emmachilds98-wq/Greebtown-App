@@ -1,97 +1,946 @@
-// Greebtown — Service Worker
-// Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v122";
-const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-// Everything the app needs to run with zero network connection.
-// Paths are relative so this works from a GitHub Pages project subpath too.
-const PRECACHE_URLS = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./css/style.css",
-  "./js/app.js",
-  "./js/artist-bios.js",
-  "./js/artist-previews.js",
-  "./js/pwa-register.js",
-  "./icons/icon-72.png",
-  "./icons/icon-96.png",
-  "./icons/icon-128.png",
-  "./icons/icon-144.png",
-  "./icons/icon-152.png",
-  "./icons/icon-167.png",
-  "./icons/icon-180.png",
-  "./icons/icon-192.png",
-  "./icons/icon-256.png",
-  "./icons/icon-384.png",
-  "./icons/icon-512.png",
-  "./icons/icon-maskable-512.png",
-  "./icons/apple-touch-icon.png",
-  "./icons/favicon-32.png",
-  "./icons/favicon-16.png"
-];
+<title>Greebtown</title>
 
-// Install: pre-cache the full app shell, then activate immediately
-// so an update doesn't wait for every tab to close.
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
-  );
-});
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b1512">
+<meta name="background-color" content="#0b1512">
 
-// Activate: drop any caches from older versions, then take control
-// of open pages right away.
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys
-          .filter((key) => key.startsWith("boomtown-companion-") && key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
-  );
-});
+<!-- iOS "Add to Home Screen" support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Greebtown!">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 
-// Fetch strategy:
-//  - Same-origin app-shell files: cache-first, so the festival works
-//    with zero signal. Falls back to network, and re-caches the result.
-//  - Navigation requests (e.g. opening index.html): network-first with
-//    a cache fallback, so a connected user always gets the latest build,
-//    while an offline user still gets the last cached version.
-//  - Cross-origin requests (Instagram, app store, etc.): left untouched,
-//    normal network behaviour, no offline promise made for those.
-self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  const url = new URL(req.url);
+<!-- Android / Chrome -->
+<meta name="mobile-web-app-capable" content="yes">
 
-  if (url.origin !== self.location.origin) {
-    return; // don't intercept third-party/external links
-  }
+<!-- Favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 
-  if (req.mode === "navigate") {
-    event.respondWith(
-      fetch(req)
-        .then((networkResponse) => {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-          return networkResponse;
-        })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match("./index.html")))
-    );
-    return;
-  }
+<!-- Styles -->
+<link rel="stylesheet" href="css/style.css">
 
-  event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req).then((networkResponse) => {
-        const clone = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-        return networkResponse;
-      }).catch(() => cached);
-    })
-  );
-});
+<!--
+  Seed script — DO NOT hand-edit this to a real snapshot.
+  This must always stay {} in the copy of index.html that lives in the
+  shared GitHub repo, because every user's browser loads this exact file.
+  If it ever contains real saved values (a meeting point, notes, a
+  schedule, etc.) that data becomes every visitor's fallback/default
+  the first time they open the app — effectively leaking one person's
+  personal data to everyone.
+  The only legitimate way this placeholder gets populated with real
+  data is client-side, inside a file a user generates for themselves via
+  "Download my personal backup" or "Download shareable group copy" in
+  Settings (see buildSnapshotHtml() in js/app.js) — never inside the
+  master index.html that gets committed.
+-->
+<script>window.__boomtownSavedData={};</script>
+</head>
+<body style="padding-bottom: 156px;">
+
+<header class="appbar">
+  <div class="titles">
+    <h1>Boomtown 26</h1>
+    <div>Chapter Five: Radical Redesign · 12&ndash;16&nbsp;Aug</div>
+    <div class="ptr-hint" id="ptrHint">↓ Pull down to refresh &amp; sync</div>
+  </div>
+  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:39</span>
+</header>
+<div id="friendStatusBar" class="friend-status-bar" style="display:none;"></div>
+
+<main>
+
+  <!-- HOME -->
+  <section id="home" class="screen active">
+    <div class="eyebrow">Made for our weekend</div>
+    <h2 style="margin-bottom:14px;">Our Greebtown</h2>
+
+    <div id="newSinceLastOpened"></div>
+    <div id="homeContextBanner"></div>
+
+    <div class="ticket">
+      <h3>Next saved event</h3>
+      <div id="next-event">Nothing saved yet</div>
+    </div>
+
+    <div class="card" id="homeSyncStatus"></div>
+
+    <div class="card">
+      <h3>Countdown</h3>
+      <div id="countdownText" class="empty-note"><span style="font-size:22px; font-weight:700; color:var(--accent-amber);">19d 6h 9m</span><br>until gates open (Wed 12 Aug, approx. lunchtime)</div>
+    </div>
+
+    <div class="card">
+      <h3>Your stats</h3>
+      <div id="statsRow" style="display:flex; gap:10px; flex-wrap:wrap;">
+    <div class="stat"><b>0</b>Artists saved</div>
+    <div class="stat"><b>0/7</b>Districts visited</div>
+    <div class="stat"><b>0</b>Hidden venues logged</div>
+  </div>
+    </div>
+
+    <div class="card" id="addToHomeCard">
+      <span class="tag">Set this up once</span>
+      <h3>📲 Add Greebtown! to your Home Screen</h3>
+      <p>Do this once and it opens like a normal app from then on — full screen, works offline, and keeps syncing with the group in the background. Takes about a minute.</p>
+      <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:10px;">
+        <div style="flex:1; min-width:220px;">
+          <p style="color:var(--accent-teal); font-weight:700; font-size:13px; margin-bottom:4px;">🍏 iPhone — Safari or Chrome</p>
+          <ol style="padding-left:18px; font-size:13px; color:var(--text-muted); line-height:1.6;">
+            <li>Open this in <strong style="color:var(--text-primary);">Safari</strong> (or Chrome — both work), tap the <strong style="color:var(--text-primary);">Share</strong> icon (square, arrow up) in the bottom bar.</li>
+            <li>Scroll down, tap <strong style="color:var(--text-primary);">"Add to Home Screen."</strong></li>
+            <li>Check the name says <strong style="color:var(--text-primary);">"Greebtown!"</strong>, tap <strong style="color:var(--text-primary);">Add</strong>.</li>
+          </ol>
+        </div>
+        <div style="flex:1; min-width:220px;">
+          <p style="color:var(--accent-amber); font-weight:700; font-size:13px; margin-bottom:4px;">🤖 Android — Chrome</p>
+          <ol style="padding-left:18px; font-size:13px; color:var(--text-muted); line-height:1.6;">
+            <li>Open this in <strong style="color:var(--text-primary);">Chrome</strong>, tap the <strong style="color:var(--text-primary);">⋮ menu</strong> top right.</li>
+            <li>Tap <strong style="color:var(--text-primary);">"Add to Home screen"</strong> (or "Install app").</li>
+            <li>Check the name says <strong style="color:var(--text-primary);">"Greebtown!"</strong>, tap <strong style="color:var(--text-primary);">Add</strong>.</li>
+          </ol>
+        </div>
+      </div>
+      <p class="empty-note" style="margin-top:8px;">Already picked your name above? Great — do this next so it keeps syncing without needing the browser open.</p>
+      <button class="ghost" id="dismissAddToHomeBtn" style="margin-top:10px;">Already done this — hide it</button>
+    </div>
+
+    <div class="card" id="homeInfoCard"></div>
+
+    <div class="card">
+      <h3>Links worth keeping</h3>
+      <p>The official app has the real timetable and surveyed map. These socials post lineup drops and in-character story updates. Some individual venues run their own accounts too — see below for the ones that have been verified.</p>
+      <a class="linkbtn" href="https://apps.apple.com/gb/app/boomtown-festival/id6504767448" target="_blank" rel="noopener">iOS app</a>
+      <a class="linkbtn" href="https://play.google.com/store/apps/details?id=uk.co.boomtownfair.events.android" target="_blank" rel="noopener">Android app</a>
+      <a class="linkbtn" href="https://www.instagram.com/boomtownfairofficial/" target="_blank" rel="noopener">Instagram</a>
+      <a class="linkbtn" href="https://x.com/BoomtownFair" target="_blank" rel="noopener">X / Twitter</a>
+      <a class="linkbtn" href="https://www.facebook.com/boomtownofficial" target="_blank" rel="noopener">Facebook</a>
+      <a class="linkbtn" href="https://www.boomtownfair.co.uk/discover" target="_blank" rel="noopener">Story &amp; districts</a>
+      <a class="linkbtn" href="https://www.boomtownfair.co.uk/news" target="_blank" rel="noopener">Official news</a>
+    </div>
+
+    <div class="card">
+      <h3>Story &amp; venue socials</h3>
+      <p>Individual venue accounts aren't centrally listed and change year to year. Here's what's been verified by hand:</p>
+      <a class="linkbtn" href="https://www.instagram.com/boomtownbobbies/" target="_blank" rel="noopener">Boomtown Bobbies</a>
+      <a class="linkbtn" href="https://www.instagram.com/mr.biga/" target="_blank" rel="noopener">Mr Biga</a>
+      <a class="linkbtn" href="https://www.instagram.com/acidleakboomtown/" target="_blank" rel="noopener">Acid Leak</a>
+      <a class="linkbtn" href="https://www.instagram.com/hotel_paradiso_boomtown/" target="_blank" rel="noopener">Hotel Paradiso</a>
+      <a class="linkbtn" href="https://www.instagram.com/shamrock_boomtown/" target="_blank" rel="noopener">Shamrock</a>
+      <a class="linkbtn" href="https://www.instagram.com/postal_posse/" target="_blank" rel="noopener">Postal Posse</a>
+      <a class="linkbtn" href="https://www.instagram.com/soapranos_laundrette/" target="_blank" rel="noopener">Soapranos</a>
+      <a class="linkbtn" href="https://www.instagram.com/theinconveniencestore_uk/" target="_blank" rel="noopener">The Inconvenience Store</a>
+      <a class="linkbtn" href="https://www.instagram.com/botanica_zoo/" target="_blank" rel="noopener">Botanica Zoo</a>
+      <a class="linkbtn" href="https://www.instagram.com/gabber.kebabber/" target="_blank" rel="noopener">Gabber Kebabber</a>
+      <a class="linkbtn" href="https://www.instagram.com/littlepharmaboomtown/" target="_blank" rel="noopener">Little Pharma</a>
+      <a class="linkbtn" href="https://www.instagram.com/yeswepatrickkahn/" target="_blank" rel="noopener">Patrick Kahn (BLIP)</a>
+      <a class="linkbtn" href="https://www.instagram.com/betterverse_/" target="_blank" rel="noopener">Bettercorp™ / Betterverse</a>
+      <a class="linkbtn" href="https://www.instagram.com/hangar_161/" target="_blank" rel="noopener">Hangar 161</a>
+      <a class="linkbtn" href="https://www.instagram.com/tribeoffrog/" target="_blank" rel="noopener">Tribe of Frog</a>
+      <p class="empty-note" style="margin-top:10px;">No other dedicated accounts found for the remaining venues — worth a re-check nearer the date. Spot one live? Add it below.</p>
+      <div class="field" style="margin-top:10px;"><label>Add an account you've found</label><input type="text" id="newSocialName" placeholder="e.g. Great Mother's Temple"></div>
+      <div class="field"><input type="text" id="newSocialUrl" placeholder="Instagram / X link"></div>
+      <button class="action" id="addSocialBtn">Save link</button>
+      <div id="customSocialsList" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>Our little HQ</h3>
+      <p>Boomtown campsites aren't numbered, so jot down a landmark instead — nearest flag, row letter, campsite zone, whatever you'll actually spot at 2am. Also a good spot for meeting points and anything else you don't want to forget.</p>
+      <textarea id="notes" placeholder="e.g. Yellow campsite, near the big oak past the water point
+Meet at the clock tower if separated"></textarea>
+    </div>
+  <div class="card" id="jumpSettings">
+  <h3>⚙️ Settings</h3>
+  <p>Reset saved favourites, plans, notes and district passport on this device. See "Your data, sync &amp; updates" above for how saving and downloading actually works.</p>
+  <button class="ghost" id="settingsToggleBtn">Show settings ▾</button>
+  <div id="settingsBody" style="display:none; margin-top:10px;">
+  <p><strong>My personal backup</strong> — everything on this device, including things that never sync to anyone else (bingo card, character, HQ notes, meeting point). Only ever reopen this on your own device to restore it.</p>
+  <button class="action" id="downloadSnapshot">Download my personal backup</button>
+  <button class="ghost" id="openSnapshotTab" style="margin-top:6px;">If that didn't download: open it in a new tab</button>
+  <button class="ghost" id="copySnapshotHtml" style="margin-top:6px;">Still stuck: copy the whole file as text</button>
+  <p class="empty-note" id="downloadStatusNote" style="margin-top:8px;"></p>
+
+  <p style="margin-top:14px;"><strong>Shareable group copy</strong> — the merged notes, theories, hidden-venue finds and Plan tabs from everyone whose Sync code you've merged in. Leaves out your own bingo card, character and HQ notes, so sharing this file with the group never hands them your personal stuff.</p>
+  <button class="action" id="downloadGroupSnapshot">Download shareable group copy</button>
+  <button class="ghost" id="openGroupSnapshotTab" style="margin-top:6px;">If that didn't download: open it in a new tab</button>
+  <button class="ghost" id="copyGroupSnapshotHtml" style="margin-top:6px;">Still stuck: copy the whole file as text</button>
+  <p class="empty-note" id="downloadGroupStatusNote" style="margin-top:8px;"></p>
+
+  <button class="action danger" id="resetApp" style="margin-top:10px;">Reset app</button>
+  </div>
+</div></section>
+
+  <!-- TODAY -->
+  <section id="today" class="screen">
+    <div class="eyebrow">Right now</div>
+    <h2 style="margin-bottom:14px;">Today</h2>
+    <p class="empty-note" id="todayIntroNote" style="margin-bottom:12px;">Everything below is pulled from your Plan, sync and group data — nothing new to maintain.</p>
+    <div id="todayNow" class="card"></div>
+    <div id="todayNextUp" class="card"></div>
+    <div id="todayGroup" class="card"></div>
+    <div id="todayDecisions" class="card"></div>
+    <div id="todayMeet" class="card"></div>
+    <div class="stagelist" id="todayQuickActions" style="margin:14px 0 4px;">
+      <button data-today-jump="mapscreen">🗺 Map</button>
+      <button data-today-jump="plan">🎵 Plan</button>
+      <button id="todayQuickClashes">⚡ Clashes</button>
+      <button data-today-jump="discover" id="todayQuickFriends">📍 Friends</button>
+      <button id="todayQuickSearch">🔎 Search</button>
+    </div>
+  </section>
+
+  <!-- ARTISTS -->
+  <section id="artists" class="screen">
+    <div class="eyebrow">Full lineup &amp; timetable</div>
+    <h2 style="margin-bottom:14px;">Lineup</h2>
+    <div class="search-row">
+      <input type="text" id="artistSearch" placeholder="Browsing all 1173 artists — use a day/genre chip or search to narrow it down">
+      <button class="ghost" id="clearArtistSearchBtn" style="display:none;">Clear</button>
+    </div>
+    <button class="ghost" id="artistsBrowseAllBtn" style="margin-top:8px;">Browse all artists</button>
+    <div class="stagelist" id="dayChips" style="margin:10px 0 0;"></div>
+    <div class="stagelist" id="genreChips" style="margin:8px 0 0;"><span class="chip" data-g="Acid / Techno">Acid / Techno</span><span class="chip" data-g="Alt / Punk / Metal">Alt / Punk / Metal</span><span class="chip" data-g="Bass / Alt">Bass / Alt</span><span class="chip" data-g="Bass / D&amp;B">Bass / D&amp;B</span><span class="chip" data-g="Bass / Drum &amp; Bass">Bass / Drum &amp; Bass</span><span class="chip" data-g="Bass / Dub / Jungle">Bass / Dub / Jungle</span><span class="chip" data-g="Bass / Hardstyle">Bass / Hardstyle</span><span class="chip" data-g="Bass / Party">Bass / Party</span><span class="chip" data-g="Bass / Rave">Bass / Rave</span><span class="chip" data-g="Breaks / Big Beat">Breaks / Big Beat</span><span class="chip" data-g="Cabaret / Variety">Cabaret / Variety</span><span class="chip" data-g="D&amp;B / Reggae / Headline">D&amp;B / Reggae / Headline</span><span class="chip" data-g="Dub / Bass">Dub / Bass</span><span class="chip" data-g="Dubstep / Bass">Dubstep / Bass</span><span class="chip" data-g="Eclectic / DJ">Eclectic / DJ</span><span class="chip" data-g="Folk / Balkan / Party">Folk / Balkan / Party</span><span class="chip" data-g="Hardcore / Gabber">Hardcore / Gabber</span><span class="chip" data-g="House / Dance">House / Dance</span><span class="chip" data-g="House / Techno">House / Techno</span><span class="chip" data-g="Irish Folk / Trad">Irish Folk / Trad</span><span class="chip" data-g="Live / Alternative">Live / Alternative</span><span class="chip" data-g="Party / Playback Sets">Party / Playback Sets</span><span class="chip" data-g="Party / Variety">Party / Variety</span><span class="chip" data-g="Psytrance / Trance">Psytrance / Trance</span><span class="chip" data-g="Swing / Variety">Swing / Variety</span><span class="chip" data-g="Techno / Electro">Techno / Electro</span><span class="chip" data-g="World / Eclectic">World / Eclectic</span></div>
+    <p class="empty-note" style="margin:10px 0;">Full Wed–Sun times below, sourced from Clashfinder's crowd-maintained Boomtown 26 schedule and cross-checked after Boomtown posted official day splits/set times in the app. Most end times are real, not estimated — anything still marked <strong>(est.)</strong> wasn't in that source and is guessed as "until the next act on that stage." Always worth a final check against the official app once you're on-site, especially for anything added or changed last-minute.</p>
+    <div class="viewtoggle" id="artistsViewToggle">
+      <button id="artistsViewListBtn">List / search</button>
+      <button class="active" id="artistsViewTimelineBtn">Timeline by stage</button>
+    </div>
+
+    <div id="artistsListView" style="display:none;">
+    <div id="artistResults"><p class="empty-note">Start typing a name, stage or genre — or tap a day/genre chip above — to search 1173+ acts across all 5 days.</p></div>
+    </div>
+
+    <div id="artistsTimelineView">
+      <div class="stagelist" id="artistTimelineDayTabs" style="margin-bottom:10px;"></div>
+      <p class="empty-note" style="margin-bottom:8px;">Scroll sideways for time, down for stage. Tap a block to see who's playing and save it.</p>
+      <div class="timeline-outer" id="artistTimelineOuter"><div id="artistTimelineGrid"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Add an artist or clash</h3>
+      <p>Spotted a name on the app that's missing here, or a secret-venue act? Add it — it'll show up in search and can be saved to your Plan.</p>
+      <div class="field"><label>Name</label><input type="text" id="newArtistName" placeholder="Act name"></div>
+      <div class="row2">
+        <div class="field"><label>Stage</label><input type="text" id="newArtistStage" placeholder="e.g. Hidden Woods"></div>
+        <div class="field"><label>Genre</label><input type="text" id="newArtistGenre" placeholder="e.g. Techno"></div>
+      </div>
+      <button class="action" id="addArtistBtn">Add to lineup</button>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="plan" class="screen">
+    <div class="eyebrow">Your timetable</div>
+    <h2 style="margin-bottom:14px;">My Boomtown</h2>
+
+    <div class="stagelist" id="planPersonTabs" style="display:none; margin-bottom:12px;"></div>
+    <p class="empty-note" id="planPersonNote" style="display:none; margin-bottom:10px;"></p>
+
+    <div id="groupDecisionsBox"></div>
+
+    <div class="viewtoggle">
+      <button class="active" id="viewListBtn">List</button>
+      <button id="viewClashBtn">Clashes</button>
+      <button id="viewTimelineBtn">Timeline</button>
+      <button id="viewCompareBtn">Compare</button>
+    </div>
+    <div class="stagelist" id="mustSeeFilterToggle" style="margin:10px 0;">
+      <button class="active" data-filter="all">All saved</button>
+      <button data-filter="mustsee">★ Must-sees only</button>
+    </div>
+    <div id="clashExtras" style="display:none;">
+      <p class="empty-note" id="clashLegend" style="margin-bottom:8px;">🔵 Starred · 🟠 Must-see — both count toward clashes below.</p>
+      <div class="stagelist" id="clashSubViewToggle" style="margin-bottom:10px;">
+        <button class="active" data-sub="list">List</button>
+        <button data-sub="timeline">Timeline</button>
+      </div>
+    </div>
+    <div id="nowNextBanner"></div>
+    <div id="scheduleList"><div class="card"><p class="empty-note">No saved artists yet. Add some from the Lineup tab.</p></div></div>
+
+    <div id="clashTimelineView" style="display:none;">
+      <div class="stagelist" id="clashTimelineDayTabs" style="margin:10px 0;"></div>
+      <p class="empty-note" style="margin-bottom:8px;">Only picks that clash with something else — tap a block for details.</p>
+      <div class="timeline-outer"><div id="clashTimelineGrid"></div></div>
+    </div>
+
+    <div id="planTimelineView" style="display:none;">
+      <div id="timelineBigPicture"></div>
+      <div class="stagelist" id="planTimelineOwnerChips" style="margin:10px 0; display:none;"></div>
+      <div class="stagelist" id="planTimelineDayTabs" style="margin:10px 0;"></div>
+      <p class="empty-note" id="planTimelineHint" style="margin-bottom:8px;">Scroll sideways for time, down for stage. Tap a block to see details.</p>
+      <div class="timeline-outer" id="planTimelineOuter"><div id="planTimelineGrid"></div></div>
+    </div>
+
+    <div id="planCompareView" style="display:none;">
+      <p class="empty-note" style="margin-bottom:8px;">Everyone's picks side by side — merged automatically from each synced teammate (see Discover for how).</p>
+      <div id="compareBigPicture"></div>
+      <div class="stagelist" id="compareFilterChips" style="margin-bottom:10px;"></div>
+      <div id="planCompareList"></div>
+    </div>
+
+    <button class="ghost" id="copyPlanBtn" style="margin-top:12px;">Copy plan as text</button>
+    <button class="ghost" id="sharePlanBtn" style="margin-top:12px;">Share my plan</button>
+    <button class="action" id="browseAllArtistsBtn" style="margin:12px 0 0 8px;">Browse all artists</button>
+    <p class="empty-note" id="sharePlanStatusNote" style="margin-top:6px;"></p>
+  </section>
+
+  <!-- MAP -->
+  <section id="mapscreen" class="screen">
+    <div class="eyebrow">Find your way</div>
+    <h2 style="margin-bottom:14px;">Map</h2>
+    <p class="empty-note" style="margin-bottom:10px;">An illustrated schematic, not the official surveyed map — venue positions inside the city are illustrative, especially with this chapter's redesign. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
+
+    <div class="venue-filters" id="mapNav" style="margin-bottom:14px;">
+      <button data-jump="jumpMapView">🗺 Map</button>
+      <button data-jump="jumpDirectory">📋 Directory</button>
+      <button data-jump="jumpMeetingPoint">📍 Meeting point</button>
+      <button data-jump="jumpLogLandmark">🏕 Log a landmark</button>
+      <button data-jump="jumpLogHidden">🕵 Log a hidden venue</button>
+      <button data-jump="jumpSiteInfo">🕐 Gate &amp; hours</button>
+      <button data-jump="jumpFoodBars">🍺 Food &amp; bars</button>
+    </div>
+
+    <div id="jumpMapView">
+    <div class="venue-filters" id="mapQuickActions" style="margin-bottom:10px;">
+      <button data-quick="next">🎵 Next artist</button>
+      <button data-quick="meeting">📍 Meeting point</button>
+      <button data-quick="friends">📍 Friends</button>
+      <button data-quick="water">💧 Water</button>
+      <button data-quick="toilets">🚻 Toilets</button>
+      <button data-quick="food">🍔 Food</button>
+      <button data-quick="medical">🩹 Medical</button>
+      <button data-quick="camp">🏕 Camp</button>
+    </div>
+    <div class="stagelist" id="mapLayerToggles" style="margin-bottom:8px;">
+      <span class="chip active" data-layer="minor">Other stages</span>
+      <span class="chip" data-layer="secret">Hidden venues &amp; things to find</span>
+      <span class="chip" data-layer="camp">Camping labels</span>
+      <span class="chip" data-layer="landmark">Landmarks</span>
+    </div>
+    <div id="map"></div>
+
+    <div class="legend">
+      <span><span class="dot"></span>District</span>
+      <span><span class="dot teal"></span>Stage</span>
+      <span><span class="dot" style="width:6px;height:6px;background:var(--accent-teal);opacity:.85;"></span>Other stage</span>
+      <span><span class="dot outline"></span>Named hidden venue / thing to find</span>
+      <span><span class="dot" style="border-radius:3px; background:rgba(196,158,110,.85);"></span>Gate</span>
+      <span><span class="dot" style="border-radius:3px; background:rgba(45,168,242,.75);"></span>Landmark</span>
+      <span><span class="line-swatch"></span>Approx. route, not a literal path</span>
+    </div>
+    <div id="mapInfo"></div>
+    </div>
+
+    <div class="card" id="jumpDirectory">
+      <span class="tag">Full directory, incl. your own finds</span>
+      <h3>Every stage, hidden venue &amp; shop we could source</h3>
+      <p>Main stages, confirmed 2026 hidden venues, food &amp; drink, shops, workshops, leisure/rides and support spaces, plus a handful of past-chapter names with no 2026 evidence — clearly marked. "Confirmed" means it appeared in Boomtown's own 2026 lineup/schedule tool or official site copy; "Rumoured" means it's a lead from a past chapter, not a promise; "Your find" is anything your group logs below. Every row also says 🎵 Music / 🔇 No music, so it's clear which entries are genuinely deliberately-hidden venues worth hunting versus places you'll simply walk past (food stalls, welfare, workshops). A 📍 note gives a rough location where we could place one.</p>
+      <div class="search-row" style="margin-bottom:8px;">
+        <input type="text" id="venueSearch" placeholder="Search by name, genre or district...">
+        <button class="ghost" id="clearVenueSearchBtn" style="display:none;">Clear</button>
+      </div>
+      <div class="venue-filters" id="venueStatusFilters">
+        <button class="active" data-status="all">All statuses</button>
+        <button data-status="confirmed">Confirmed only</button>
+        <button data-status="rumoured">Rumoured only</button>
+        <button data-status="logged">Your finds</button>
+      </div>
+      <div class="venue-filters" id="venueTypeFilters">
+        <button class="active" data-type="all">All types</button>
+        <button data-type="Main stage">Main stages</button>
+        <button data-type="Hidden venue">Hidden venues</button>
+        <button data-type="Shop / hidden venue">Shops</button>
+        <button data-type="Workshop / shop">Workshops</button>
+        <button data-type="Welfare / support">Welfare / support</button>
+        <button data-type="Talks / installation">Talks / installations</button>
+        <button data-type="Leisure / ride">Leisure / rides</button>
+        <button data-type="Food & drink">Food &amp; drink</button>
+      </div>
+      <div class="stagelist" id="venuePersonChips" style="display:none; margin:6px 0;"></div>
+      <div class="venue-list" id="venueTableBody"></div>
+      <p class="empty-note" id="venueTableCount" style="margin-top:2px;"></p>
+      <p class="empty-note" style="margin-top:6px;">Best rule: if a storefront, queue or actor feels suspiciously over-designed, investigate — but don't expect last year's exact location to survive the redesign.</p>
+    </div>
+
+    <div class="card" id="jumpMeetingPoint">
+      <h3>📍 Meeting point</h3>
+      <p>Shared with the whole group — set directly here, or tap any stage/district marker above and use "Save as meeting point." Anyone can change or clear it.</p>
+      <div id="currentMeetingDisplay" class="empty-note" style="margin-bottom:8px;"></div>
+      <div class="field"><input type="text" id="meetingPointInput" placeholder="e.g. Grand Central, or 'the big oak by West Camping'"></div>
+      <button class="action" id="setMeetingBtn">Set meeting point</button>
+      <button class="ghost" id="clearMeetingBtn" style="margin-top:6px;">Clear meeting point</button>
+    </div>
+
+    <div class="card" id="jumpLogLandmark">
+      <h3>Log a landmark</h3>
+      <p>Spotted something worth marking that's not in the list — a good water point, a landmark tree, a meetup spot? Add it here; it shows up on the map above and can be removed any time.</p>
+      <div class="field"><label>Name</label><input type="text" id="landmarkName" placeholder="What is it?"></div>
+      <div class="field"><label>Nearest district</label>
+        <select id="landmarkDistrict">
+          <option value="Area 404">Area 404</option>
+          <option value="Botanica">Botanica</option>
+          <option value="Thrutopia">Thrutopia</option>
+          <option value="Copperwood">Copperwood</option>
+          <option value="Oldtown">Oldtown</option>
+          <option value="Letsbe Avenue">Letsbe Avenue</option>
+          <option value="Metropolis">Metropolis</option>
+        </select>
+      </div>
+      <div class="field"><label>Notes (optional)</label><textarea id="landmarkInfo" placeholder="What's here, or why it matters"></textarea></div>
+      <button class="action" id="addLandmarkBtn">Add to map</button>
+    </div>
+    <div id="customLandmarksList"></div>
+
+    <div class="card" id="jumpLogHidden">
+      <h3>Log a hidden venue</h3>
+      <p>Found one of the 50+ secret spots? Save it here — it'll show up in the directory above tagged "Your find", and everyone in your group can copy the list out.</p>
+      <div class="field"><label>Name</label><input type="text" id="hiddenVenueName" placeholder="What was it called?"></div>
+      <div class="field"><label>Type</label>
+        <select id="hiddenVenueType">
+          <option value="Hidden venue">Hidden venue</option>
+          <option value="Main stage">Main stage</option>
+          <option value="Shop / hidden venue">Shop</option>
+          <option value="Workshop / shop">Workshop</option>
+          <option value="Welfare / support">Welfare / support</option>
+          <option value="Talks / installation">Talks / installation</option>
+          <option value="Leisure / ride">Leisure / ride</option>
+        </select>
+      </div>
+      <div class="field"><label>Genre / vibe (optional)</label><input type="text" id="hiddenVenueGenre" placeholder="e.g. hard techno, folk, chill bar"></div>
+      <div class="field"><label>Rough location (optional)</label><input type="text" id="hiddenVenueNear" placeholder="e.g. near Botanica, edge of Hidden Woods"></div>
+      <div class="field"><label>Notes</label><textarea id="hiddenVenueInput" placeholder="What it was like, when you found it..."></textarea></div>
+      <button class="action" id="addHiddenVenueBtn">Save find</button>
+      <button class="ghost" id="copyVenuesBtn" style="margin:8px 6px 0 0;">Copy your finds</button>
+    </div>
+
+    <div class="card">
+      <h3>Hidden venues &amp; things to find</h3>
+      <p>On top of the 18 official stages, Boomtown runs 50+ unlisted hidden venues built by independent collectives inside the districts — some kitted out as a post office, hotel or police station, all deliberately not published anywhere. The named "?" markers on the map above are real past-chapter and 2026 venue names, positioned near the district their theme best fits; the plain "?" markers further out are a reminder there are always more than are named here. None of these positions are surveyed — finding them is the point.</p>
+    </div>
+
+    <div class="card" id="jumpSiteInfo">
+      <h3>🕐 Gate, car park &amp; music hours</h3>
+      <ul class="compact-list">
+        <li><strong>Gates:</strong> Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30.</li>
+        <li><strong>Car parks:</strong> 10:00–21:00 daily.</li>
+        <li><strong>Music hours:</strong> Wed 14:00–23:00 · Thu 12:00–00:00 · Fri–Sat 12:00–04:00 · Sun 12:00–00:00.</li>
+        <li><strong>Medical centres:</strong> 24 hours (Pepperpot Market and Hilltop).</li>
+        <li><strong>Site closes:</strong> Monday 12:00 — everyone off site by then.</li>
+      </ul>
+      <p class="empty-note" style="margin-top:8px;">Individual stage/venue set times aren't published this far out — where this app has a saved set time for a stage, its rough running window shows in the venue directory above.</p>
+    </div>
+
+    <div class="card" id="jumpFoodBars">
+      <h3>🍺 Bars &amp; food — prices &amp; where</h3>
+      <p>No official price list is published in advance and it varies by stall, but as a rough guide from past chapters: pints run about £6–£7, cocktails and mixed drinks £7–£12, and hot food £8–£13 a portion. Everything runs on the cashless wristband, so top up before you're queuing.</p>
+      <p>Every district has its own bars and food stalls in keeping with its theme, rather than one central food court — Letsbe Avenue and Metropolis tend to be the densest for options, and Pepperpot Market is a reliable food-and-drink hub roughly central to the site. Expect more stalls near the bigger stages (Grand Central, Lion's Den, Hydro XL) and around the main camping fields for a morning coffee. Exact stalls and locations for Chapter Five are confirmed on the official app once you're on-site.</p>
+    </div>
+
+    <div class="card">
+      <h3 class="skip-card">What's around site</h3>
+      <p>From past years' site maps — Boomtown typically has these dotted around the whole city and campsites (exact spots shown in the official app on-site once you're there):</p>
+      <div class="stagelist">
+        <span>🩹 Welfare &amp; medic points</span><span>🚰 Water refill points</span><span>🚻 Toilets (incl. accessible)</span>
+        <span>🍺 Bars</span><span>🍔 Food &amp; drink vendors</span><span>🛍 Market stalls</span>
+        <span>ℹ️ Info points</span><span>🔌 Phone charging</span><span>💳 Cashless top-up / bank points</span>
+        <span>🔒 Lockers</span><span>🚿 Showers</span>
+      </div>
+    </div>
+
+  <div class="card">
+  <span class="tag">Food, bars &amp; useful extras</span>
+  <h3>What to look for around the city</h3>
+  <p><strong>2026 food:</strong> the festival has confirmed Indian street food, Caribbean comfort food and burger-van classics, plus a substantial £6 meal deal at selected traders. Exact stalls and pins will appear in the official app, so use it as the final word.</p>
+  <ul class="compact-list">
+    <li><strong>2025 food leads:</strong> Paelleria, Indian Street Food, Burger Shack and Greek Gyros were among last year’s trader-list names. Treat them as examples, not return guarantees.</li>
+    <li><strong>Where to begin:</strong> Pepperpot Market and the larger stage routes were reliable food-and-drink areas in previous chapters; campsite edges were the better morning-coffee bet.</li>
+    <li><strong>Merch:</strong> for 2026 the main stall is next to the info tent, with a second stand opposite Grand Central.</li>
+    <li><strong>VIP / flushing loos:</strong> Camp Orchid and Camp Skylark packages include flushing toilets; Camp Skylark also gives access to the Hide Out Downtown (near Area 404 / the chair-o-plane) and its second 2026 bar in Copper Woods heights. These are package benefits, not a general-pay-per-loo facility.</li>
+  </ul>
+  <a class="linkbtn" href="https://www.boomtownfair.co.uk/news/boomtown-chapter-five-radical-redesign-essential-guide" target="_blank" rel="noopener">VIP &amp; camping facilities</a>
+  <a class="linkbtn" href="https://www.boomtownfair.co.uk/the-retreat" target="_blank" rel="noopener">Spa, sauna &amp; workshops</a>
+</div></section>
+
+  <!-- DISCOVER -->
+  <section id="discover" class="screen">
+    <div class="eyebrow">✨ Discover</div>
+    <h2 style="margin-bottom:14px;">Discover</h2>
+    <p class="empty-note" style="margin-bottom:10px;">A dashboard into everything that isn't the lineup or map — pick a category below, or check what's new for you first.</p>
+
+    <div id="discoverForYou"></div>
+
+    <div id="discoverNav" style="margin-bottom:4px;">
+      <div class="discover-cat">
+        <div class="discover-cat-title">🔥 What's happening</div>
+        <div class="venue-filters">
+          <button data-jump="jumpStory">📖 Today's story</button>
+          <button data-jump="jumpDailyRag">🗞 Latest intel</button>
+          <button data-jump="jumpNotes">👥 New from friends</button>
+          <button data-jump="jumpActivity">🕓 Recent activity</button>
+        </div>
+      </div>
+      <div class="discover-cat">
+        <div class="discover-cat-title">🏙 Explore Boomtown</div>
+        <div class="venue-filters">
+          <button data-jump="jumpDistrictsIntro">🏙 Districts</button>
+          <button data-jump="jumpCharacters">🗣 Characters</button>
+          <button data-jump="jumpDirectory" data-jump-tab="mapscreen">🕵 Hidden venues</button>
+          <button data-jump="jumpBeyondMusic">🎯 Beyond the music</button>
+          <button data-jump="jumpStoryDeep">🕹 How to play it</button>
+          <button data-jump="jumpInvolved">🙋 Get involved</button>
+        </div>
+      </div>
+      <div class="discover-cat">
+        <div class="discover-cat-title">🎮 Our stuff</div>
+        <div class="venue-filters">
+          <button data-jump="jumpBingo">🎲 Bingo</button>
+          <button data-jump="jumpCharacter">🎭 My character</button>
+          <button data-jump="jumpJournal">😂 Quotebook</button>
+          <button data-jump="jumpTheories">🔮 Theories</button>
+        </div>
+      </div>
+      <div class="discover-cat">
+        <div class="discover-cat-title">🧭 Useful</div>
+        <div class="venue-filters">
+          <button data-jump="jumpPacking">🎒 Packing checklist</button>
+          <button data-jump="jumpLogistics">🗓 Logistics</button>
+          <button data-jump="jumpGlossary">📔 Glossary</button>
+          <button data-jump="jumpSync">🤝 Sync</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="daygroup">📖 The story &amp; the day</div>
+
+    <div class="card story-brief" id="jumpStory">
+  <span class="tag">Chapter Five: the clean version</span>
+  <h3>Where the story begins</h3>
+  <div class="story-step"><b>1 — Last chapter's ending</b><p>At the 2025 closing ceremony, The Collector was freed from Mr Biga and Aurora Venturestone and handed leadership of Boomtown to The Network — exactly as the Lion's Gate Portal had foretold, along with the Lion's Den's return to Temple Valley this year. He's barely been seen in person since, bar the odd official broadcast.</p></div>
+  <div class="story-step"><b>2 — The new threat</b><p>Despite their disgrace, Biga and Aurora merged BIGACORP™ and BETTERCORP™ into BBXL™ and launched a corporate space programme, declaring Earth a 'single-use planet' — draining the city's land and water while plenty of residents still queue up for its exclusive VIP clubs.</p></div>
+  <div class="story-step"><b>3 — The complication</b><p>The Network is trying to redesign the city around shared power, but BBXL™ still has customers, VIP clubs and influence everywhere, and every district has its own agenda running in parallel — The Great Mother's ritual, Oldtown's separatism, Copperwood's film empire, Letsbe Avenue's BLIP. The big question this chapter: can ordinary people actually organise before the corporate story wins?</p></div>
+  <div class="story-step"><b>4 — How we play it</b><p>Start in Area 404, Botanica or Letsbe Avenue. Ask what each group wants, who benefits from BBXL™, and what they know about the missing or shifting pieces. Write down names, symbols and promised meetings; the story is deliberately made of overlaps, not a single route.</p></div>
+  <div class="story-step"><b>5 — Beyond the plot</b><p>Not everything this chapter is faction warfare — Thrutopia's workshops, the Cloak of Hope community artwork, and the genuine on-site Observatory research project are all real, non-scripted ways to take part. This chapter's community campaign, Vibe Check, is also worth knowing before you go: look out for each other, and use welfare and Safer Spaces if you need them.</p></div>
+</div>
+
+<div class="card">
+  <span class="tag">For context</span>
+  <h3>📜 The story so far — chapter by chapter</h3>
+  <p>Boomtown's storyline restarted its chapter numbering with the site's post-pandemic return; Chapter Five is the fifth instalment of that run (the festival itself is older — 2026 is its 16th edition overall). Broad strokes only below — treat exact plot beats as a general shape, not a script.</p>
+  <div class="story-step"><b>Chapter One — The Gathering</b><p>The circus first arrived, with the Gypsy King rolling in on an enormous caravan train — the founding moment for the current run of the story.</p></div>
+  <div class="story-step"><b>Chapter Two — The Twin Trail</b><p>A man calling himself The Kaptin arrived seeking to tighten control over what had been a fairly lawless town.</p></div>
+  <div class="story-step"><b>Chapter Three — Revolution of Imagination</b><p>Opened on a sombre note: prominent figures paid tribute to founder Nickolas Boom, who'd gone searching the mountains for hidden treasure and never returned — before the city pushed toward its own revolution.</p></div>
+  <div class="story-step"><b>Chapter Four — Power of Now</b><p>Set up this chapter's central conflict: the Collector was elected in a huge citywide vote hoping for unity, before it emerged the version in power was a deepfake built by Mr Biga and Aurora Venturestone. The real Collector was freed at the closing ceremony and handed leadership to The Network.</p></div>
+  <div class="story-step"><b>Chapter Five — Radical Redesign</b><p>Where we are now: Biga and Venturestone, disgraced but undeterred, have merged their companies into BBXL™ and launched a space programme. The Network is trying to actually redesign the city around shared power — see "Where the story begins" above for the detail.</p></div>
+</div>
+
+<div class="card" id="jumpDailyRag">
+  <span class="tag">Staying up to date</span>
+  <h3>🗞 The Daily Rag &amp; live intel</h3>
+  <p>Developing story beats and venue/site changes only — not the general logistics already covered in Guide. This screen can't scan social media live for you, but the app's own daily auto-update does check Reddit and social media once a day and adds anything genuinely sourced here, clearly marked confirmed or rumour. Nothing below is guessed.</p>
+  <div id="officialLiveIntelList"></div>
+  <p>For anything more current than that, quick-check searches (opens in a new tab):</p>
+  <div class="stagelist" style="margin-top:6px;">
+    <a class="linkbtn" href="https://www.instagram.com/explore/tags/boomtownfair/" target="_blank" rel="noopener">#boomtownfair</a>
+    <a class="linkbtn" href="https://www.instagram.com/explore/tags/boomtown2026/" target="_blank" rel="noopener">#boomtown2026</a>
+    <a class="linkbtn" href="https://www.instagram.com/explore/tags/dailyrag/" target="_blank" rel="noopener">#dailyrag</a>
+    <a class="linkbtn" href="https://www.instagram.com/explore/tags/boomtownfairofficial/" target="_blank" rel="noopener">#boomtownfairofficial</a>
+    <a class="linkbtn" href="https://twitter.com/search?q=boomtown%20secret%20set&f=live" target="_blank" rel="noopener">"boomtown secret set" (X)</a>
+    <a class="linkbtn" href="https://twitter.com/search?q=boomtown%202026&f=live" target="_blank" rel="noopener">"boomtown 2026" (X)</a>
+    <a class="linkbtn" href="https://twitter.com/search?q=boomtown%20update&f=live" target="_blank" rel="noopener">"boomtown update" (X)</a>
+    <a class="linkbtn" href="https://www.tiktok.com/tag/boomtownfair" target="_blank" rel="noopener">#boomtownfair (TikTok)</a>
+    <a class="linkbtn" href="https://www.tiktok.com/tag/boomtown2026" target="_blank" rel="noopener">#boomtown2026 (TikTok)</a>
+  </div>
+  <textarea id="sightingInput" placeholder="e.g. Someone posted Bashy's doing a secret set at NEXUS Friday night" style="margin-top:10px;"></textarea>
+  <div class="field" style="margin-top:8px;"><label>Source (optional)</label><input type="text" id="sightingSource" placeholder="e.g. Instagram story, a mate on-site"></div>
+  <button class="action" id="addSightingBtn">Save it</button>
+  <button class="ghost" id="copySightingsBtn" style="margin:8px 0 0;">Copy the log</button>
+</div>
+<div class="stagelist" id="sightingsPersonChips" style="display:none; margin:6px 0;"></div>
+<div id="sightingsList"></div>
+
+<div class="card" id="jumpDistrictsIntro">
+  <span class="tag">🏙 The districts</span>
+  <h3>Every district this chapter</h3>
+  <p>Who's running each corner of the city, and what's actually going on there.</p>
+  <input type="text" id="districtSearch" placeholder="Search a district, faction or name">
+</div>
+<div id="discoveries"><div class="discovery">
+      <h3>Area 404 ◻️</h3>
+      <p>Industrial-punk district, now the political centre</p>
+      <p>A former outsider district now at the centre of city power. The Guardians police it under Chief Guardian Mr Biga; their boot camp, official fines and work-permit machinery are all worth questioning.</p>
+      <p style="color:var(--accent-teal); font-size:12px; text-transform:uppercase; letter-spacing:.05em; margin-top:8px;">Mr Biga · The Guardians · The Luck Exchange</p>
+      <button class="action">Mark visited</button>
+      <textarea class="clue-input" placeholder="Leads your group has picked up here..."></textarea>
+    </div><div class="discovery">
+      <h3>Botanica ◻️</h3>
+      <p>Plant-covered temple sanctuary</p>
+      <p>The Great Mother is planning an ascension ritual, while the transformed Temple of Zero, Shadow Post, IONA, a stolen Nanco photocopier and missing postal workers form a second, stranger thread.</p>
+      <p style="color:var(--accent-teal); font-size:12px; text-transform:uppercase; letter-spacing:.05em; margin-top:8px;">The Great Mother · Shadow Post · IONA</p>
+      <button class="action">Mark visited</button>
+      <textarea class="clue-input" placeholder="Leads your group has picked up here..."></textarea>
+    </div><div class="discovery">
+      <h3>Thrutopia ◻️</h3>
+      <p>New wellness &amp; workshop zone</p>
+      <p>A new space for talks, workshops and imagining better futures. It is less a story district than a daytime reset and a place for ideas to turn into participation.</p>
+      <p style="color:var(--accent-teal); font-size:12px; text-transform:uppercase; letter-spacing:.05em; margin-top:8px;">Workshop hosts · The Retreat</p>
+      <button class="action">Mark visited</button>
+      <textarea class="clue-input" placeholder="Leads your group has picked up here..."></textarea>
+    </div><div class="discovery">
+      <h3>Copperwood ◻️</h3>
+      <p>1925 roaring-twenties film district</p>
+      <p>Edna Von Vanderhaus has made herself Creative Director and is filming Race to the Red Planet. Copperwood has become a live movie world, including fan settlement Von Vanderland.</p>
+      <p style="color:var(--accent-teal); font-size:12px; text-transform:uppercase; letter-spacing:.05em; margin-top:8px;">Edna Von Vanderhaus · VVH</p>
+      <button class="action">Mark visited</button>
+      <textarea class="clue-input" placeholder="Leads your group has picked up here..."></textarea>
+    </div><div class="discovery">
+      <h3>Oldtown ◻️</h3>
+      <p>Circus &amp; rogues district, rebuilt uphill</p>
+      <p>Rufus the Red and the Den of Dis Order are creating the self-governed People’s Republic of Oldtownia after moving their whole, topsy-turvy district uphill.</p>
+      <p style="color:var(--accent-teal); font-size:12px; text-transform:uppercase; letter-spacing:.05em; margin-top:8px;">Rufus the Red · Den of Dis Order</p>
+      <button class="action">Mark visited</button>
+      <textarea class="clue-input" placeholder="Leads your group has picked up here..."></textarea>
+    </div><div class="discovery">
+      <h3>Letsbe Avenue ◻️</h3>
+      <p>The everyday high street</p>
+      <p>Patrick Kahn’s former BLEP operation is now BLIP: Boomtown Lifestyle Important Product. The product is being pushed to Letsbe Avenue VIPPs — ask what it is really for.</p>
+      <p style="color:var(--accent-teal); font-size:12px; text-transform:uppercase; letter-spacing:.05em; margin-top:8px;">Patrick Kahn · BLIP VIPPs</p>
+      <button class="action">Mark visited</button>
+      <textarea class="clue-input" placeholder="Leads your group has picked up here..."></textarea>
+    </div><div class="discovery">
+      <h3>Metropolis ◻️</h3>
+      <p>Hyper-digital, hedonistic district</p>
+      <p>Bettercorp’s techtopia has left laid-off inGeniuses behind. Aurora’s polished future includes unstable, unofficial Betterverse tours that may trap visitors in Digital Foreverness.</p>
+      <p style="color:var(--accent-teal); font-size:12px; text-transform:uppercase; letter-spacing:.05em; margin-top:8px;">Aurora Venturestone · inGeniuses · Bettercorp™</p>
+      <button class="action">Mark visited</button>
+      <textarea class="clue-input" placeholder="Leads your group has picked up here..."></textarea>
+    </div></div>
+
+    <div class="card" id="jumpInvolved">
+      <h3>🙋 Get involved</h3>
+      <p>Ways to actually take part in this chapter, beyond watching:</p>
+    </div>
+    <div id="getInvolvedList"><div class="item">
+      <div class="item-top">
+        <div>
+          <strong>Cloak of Hope</strong> <br>
+          <small>Stitch a 10–15cm fabric patch expressing a hope for the future — post it in ahead of time or stitch it on-site.</small>
+
+        </div>
+        <button>Mark done</button>
+      </div>
+    </div><div class="item">
+      <div class="item-top">
+        <div>
+          <strong>Thrutopia workshop</strong> <br>
+          <small>Propose your own talk, workshop or session for the new Thrutopia zone.</small>
+          <br><a class="linkbtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfh4w5SDGJQoUsgQ2hRD1yZCZvnVMHwPLIMOVAsavkEzCg6fw/viewform" target="_blank" rel="noopener">Submit a workshop</a>
+        </div>
+        <button>Mark done</button>
+      </div>
+    </div><div class="item">
+      <div class="item-top">
+        <div>
+          <strong>The Retreat</strong> <br>
+          <small>Book in for massage, saunas, hot tubs or sound baths if the pace catches up with you.</small>
+
+        </div>
+        <button>Mark done</button>
+      </div>
+    </div></div>
+
+    <div id="guideStoryContent"></div>
+
+    <div class="daygroup">🎮 Just for fun</div>
+
+    <div class="card" id="jumpCharacter">
+      <h3>🎭 Build your character</h3>
+      <p>Give yourself a name and an angle before you go — actors respond to you a lot better when you're playing along rather than just watching. Doesn't lock in like Bingo; edit it any time. Sync brings in everyone's characters too — see the tabs below to check who's playing who.</p>
+      <div class="tabstrip" id="charPersonTabs" style="display:none; margin-bottom:8px;"></div>
+      <div id="charFormFields">
+        <div class="field"><label>Character name</label><input type="text" id="charName" placeholder="e.g. Delia Voss"></div>
+        <div class="field"><label>District allegiance</label>
+          <select id="charDistrict">
+            <option value="">Undecided / floating</option>
+            <option value="Area 404">Area 404</option>
+            <option value="Botanica">Botanica</option>
+            <option value="Thrutopia">Thrutopia</option>
+            <option value="Copperwood">Copperwood</option>
+            <option value="Oldtown">Oldtown</option>
+            <option value="Letsbe Avenue">Letsbe Avenue</option>
+            <option value="Metropolis">Metropolis</option>
+          </select>
+        </div>
+        <div class="field"><label>A quirk or trait</label><input type="text" id="charQuirk" placeholder="e.g. Convinced everyone owes her a favour"></div>
+        <div class="field"><label>Opening line / catchphrase</label><input type="text" id="charCatchphrase" placeholder="e.g. &quot;I don't do introductions, I do arrivals.&quot;"></div>
+        <div class="field"><label>Backstory (a line or two)</label><textarea id="charBackstory" placeholder="Why is this person in the city right now?"></textarea></div>
+        <button class="action" id="saveCharBtn">Save character</button>
+      </div>
+      <div id="charCardDisplay" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" id="jumpBingo">
+      <h3>🎲 Boomtown bingo</h3>
+      <p>Write your own 24 squares below (one per line) — under 24 and the rest fill from a default list, over 24 and it picks 24 at random from what you wrote. Shuffle as much as you like, then lock it in: the squares are fixed for the weekend after that, but you can still tap any square to cross it off as you go.</p>
+      <p class="empty-note">Sync brings in everyone's cards too, once locked — see the tabs below to check who's locked in and with what. Yours is never touched by anyone else's.</p>
+      <div class="tabstrip" id="bingoPersonTabs" style="display:none; margin-bottom:8px;"></div>
+      <textarea id="bingoCustomInput" placeholder="One idea per line, e.g.
+Find a hidden venue
+Get given Boomtown bucks
+Talk to an actor in character
+..."></textarea>
+      <div id="bingoGrid"></div>
+      <button class="action" id="bingoGenerateBtn">Build/shuffle my card</button>
+      <button class="action danger" id="bingoLockBtn" style="display:none;">Lock in this card</button>
+      <p class="empty-note" id="bingoStatusNote" style="margin-top:8px;"></p>
+    </div>
+
+    <div class="card" id="jumpJournal">
+      <h3>😂 Quotebook</h3>
+      <p>The funny, ridiculous or unhinged things people actually said — the bits you'll want to read back in a year.</p>
+      <textarea id="quoteInput" placeholder="e.g. &quot;I've told the Guardian we're the water inspectors&quot;"></textarea>
+      <div class="field" style="margin-top:8px;"><label>Who said it? (optional)</label><input type="text" id="quoteSaidBy" placeholder="e.g. 'the Mr Biga actor', or a stranger in the queue"></div>
+      <button class="action" id="addQuoteBtn">Save it</button>
+      <button class="ghost" id="copyQuotesBtn" style="margin:8px 0 0;">Copy the quotebook</button>
+    </div>
+    <div class="stagelist" id="journalPersonChips" style="display:none; margin:6px 0;"></div>
+    <div id="quotesList"></div>
+
+    <div class="card" id="jumpTheories">
+      <h3>🔮 Theories</h3>
+      <p>Wild guesses count — log your group's best theories about where this chapter's heading.</p>
+      <textarea id="theoryInput" placeholder="e.g. I reckon the deepfake Collector is Mr Biga in a mask..."></textarea>
+      <button class="action" id="addTheoryBtn">Save theory</button>
+    </div>
+    <div class="stagelist" id="theoriesPersonChips" style="display:none; margin:6px 0;"></div>
+    <div id="theoriesList"></div>
+
+    <div class="card" id="jumpCharacters">
+      <h3>🎭 Characters &amp; factions</h3>
+      <p>Who's who this chapter — handy when an actor drops a name on you and you've got no idea who they mean.</p>
+      <input type="text" id="characterSearch" placeholder="Search a name, faction or district">
+    </div>
+    <div id="characterResults"><div class="item">
+      <strong>Mr Biga</strong><br>
+      <small>Area 404 / BBXL · Area 404</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">Chief Guardian in Area 404 and co-creator of BBXL with Aurora Venturestone. The boot camp, fines and new Guardians make him a useful person to ask about who really holds power.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask what the Guardians are protecting — and who the rules serve.</p>
+    </div><div class="item">
+      <strong>The Collector</strong><br>
+      <small>Area 404 · Missing, presumed imprisoned</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">Freed at the end of the previous chapter, The Collector handed leadership of Boomtown to The Network. Keep an ear out for how citizens think that promise is working out.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask who is making decisions now that leadership has changed hands.</p>
+    </div><div class="item">
+      <strong>The Guardians</strong><br>
+      <small>Area 404 · Area 404</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">Area 404's enforcers, now abusing their power with bogus 'official fines' on residents.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask what a fine is actually for — the answers don't hold up.</p>
+    </div><div class="item">
+      <strong>The Great Mother</strong><br>
+      <small>Botanica · Botanica</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">Leader of the Temple, still seething months on from her election defeat. She's plotting a ritual to sacrifice her followers into her own portal and 'ascend' her community — a direct swipe at the Collector.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask about the ritual, or what 'ascension' actually means to her followers.</p>
+    </div><div class="item">
+      <strong>IONA</strong><br>
+      <small>The Network · Temple of Zero, Botanica</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">A sentient mycelium-network AI leading The Network's investigation into the deepfake and a strange photocopier phenomenon, working alongside the Shadow Post group.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask what the photocopiers are copying, and why.</p>
+    </div><div class="item">
+      <strong>Shadow Post</strong><br>
+      <small>The Network · Temple of Zero, Botanica</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">A shadowy group rumoured to have a deeper connection to Temple of Zero's transformation — allied with IONA and The Network, but keep their own methods close to their chest.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask how they're connected to IONA — the answer tends to shift depending who you ask.</p>
+    </div><div class="item">
+      <strong>The Network</strong><br>
+      <small>Independent · Temple of Zero, Botanica</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">A grassroots group trying to expose the truth about the election and hand power back to the people. This chapter's central question: can they actually pull it off, or do BBXL and the districts' own power plays make it impossible?</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask what they'd need from ordinary citizens to actually succeed.</p>
+    </div><div class="item">
+      <strong>Edna Von Vanderhaus</strong><br>
+      <small>Copperwood · Copperwood</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">Self-appointed 'Creative Director' of Copperwood since her election loss, currently shooting her film 'Race to the Red Planet' as production company VVH. Her fans have built her a whole settlement, Von Vanderland.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask for a walk-on part, or what the film is really about.</p>
+    </div><div class="item">
+      <strong>Rufus the Red</strong><br>
+      <small>Oldtown · Oldtown</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">Leading Oldtown's separatist movement, 'The People's Republic of Oldtownia,' against Area 404's rule.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask what independence would actually look like for Oldtown.</p>
+    </div><div class="item">
+      <strong>Patrick Kahn</strong><br>
+      <small>Letsbe Avenue · Letsbe Avenue</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">Salesman pushing BLIP, a new product exclusive to VIPPs. Nobody's quite sure what it actually does yet.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask to try BLIP, or what makes someone a VIPP.</p>
+    </div><div class="item">
+      <strong>Aurora Venturestone</strong><br>
+      <small>Metropolis / BBXL · Metropolis</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">Chief of Digital Communications, running Metropolis's surveillance and media machine, and co-runs BBXL with Mr Biga.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask about the unemployed inGeniuses wandering Metropolis, or what BBXL is really building.</p>
+    </div><div class="item">
+      <strong>BBXL™</strong><br>
+      <small>Corporate · Site-wide</small>
+      <p style="margin-top:6px; color:var(--text-muted); font-size:14px; line-height:1.5;">The merger of BIGACORP™ and BETTERCORP™ — a corporate space programme threatening to strip Earth's resources. The chapter's main antagonist force, with reps and messaging popping up in every district.</p>
+      <p style="margin-top:6px; color:var(--accent-teal); font-size:12px;">💬 Ask a BBXL rep what the space programme actually costs Earth.</p>
+    </div></div>
+
+    <div class="card" id="jumpBeyondMusic">
+      <h3>🎯 Beyond the music</h3>
+      <p>Not everything worth doing this chapter is a set — genuine, non-scripted ways to take part on-site:</p>
+      <ul class="compact-list" style="padding-left:20px;">
+        <li><strong>Thrutopia's workshops</strong> — talks and workshops imagining better futures, more daytime reset than story beat.</li>
+        <li><strong>Cloak of Hope</strong> — the community artwork: stitch a small fabric patch expressing a hope for the future, ahead of time or on-site. See <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpInvolved')">Get involved</a> for the how-to.</li>
+        <li><strong>The Observatory</strong> — a genuine, real (non-scripted) on-site research project, worth a look even if you're not deep in the story.</li>
+        <li><strong>Vibe Check</strong> — this chapter's community campaign: look out for each other on-site, and use welfare or Safer Spaces if you or a friend need them.</li>
+      </ul>
+    </div>
+    <div id="guideExtrasContent"></div>
+
+    <div class="daygroup">🗓 Logistics &amp; practical stuff</div>
+
+    <div class="card" id="jumpPacking">
+      <h3>🎒 Packing checklist</h3>
+      <p>Emma's rough group checklist — tick off what's packed on this device. Personal to you, not synced, so everyone can tick their own copy without clashing.</p>
+      <input type="text" id="packingSearch" placeholder="Search the checklist, e.g. torch, earplugs">
+      <p class="empty-note" id="packingProgress" style="margin-top:6px;"></p>
+    </div>
+    <div id="packingList"></div>
+
+    <div class="card" id="jumpLogistics">
+      <h3>🗓 Logistics</h3>
+      <p>The practical, day-to-day stuff — full detail lives on the Map tab so it's not duplicated here, but the quick version:</p>
+      <ul class="compact-list" style="padding-left:20px;">
+        <li>Gate times, opening hours and site basics — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSiteInfo','mapscreen')">Gate &amp; hours</a> (Map).</li>
+        <li>Food, bars and where to get supplies — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFoodBars','mapscreen')">Food &amp; bars</a> (Map).</li>
+        <li>Welfare, medic points, water refills and toilets are marked on the map itself, and loggable as landmarks if your group finds a good one.</li>
+        <li>Agreeing where to meet if you get separated — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpMeetingPoint','mapscreen')">Meeting point</a> (Map) syncs across your group automatically.</li>
+      </ul>
+    </div>
+    <div id="guideLogisticsContent"></div>
+
+    <div class="card" id="jumpGlossary">
+      <h3>📔 Glossary</h3>
+      <p>Terms you'll hear around site:</p>
+      <div class="field"><input type="text" id="glossarySearch" placeholder="Search terms, e.g. IONA, BLIP, Kaboodle"></div>
+    </div>
+    <div id="glossaryList"></div>
+
+    <div class="daygroup">🤝 Setup &amp; sharing</div>
+
+    <div class="card" id="jumpActivity">
+      <h3>🕓 Recent group activity</h3>
+      <p class="empty-note" style="margin-bottom:8px;">A quick feed of what's changed — statuses, decisions, the meeting point, hidden-venue finds and theories. Not a chat, just a log.</p>
+      <div id="recentActivityList"></div>
+    </div>
+
+    <div class="card" id="jumpNotes" style="border:1px solid rgba(75,227,172,.45); background:linear-gradient(145deg, rgba(75,227,172,.08), var(--bg-panel));">
+      <span class="tag">👥 One view, whose is whose</span>
+      <h3>🗂 All notes — everyone's, in one place</h3>
+      <p>Everyone's district notes, theories, hidden-venue finds, get-involved progress, memory journal, sightings, found socials and landmarks — synced automatically, all in one place. Defaults to <strong>By person</strong>; tab through names above to see one person's own page. Bingo cards and characters stay personal and never appear here.</p>
+      <button class="ghost" id="consolidatedToggleBtn" style="margin:8px 0;">Show all notes ▾</button>
+      <div id="consolidatedNotesBody" style="display:none;">
+        <div class="venue-filters" id="consolidatedViewToggle">
+          <button data-view="category">By category</button>
+          <button class="active" data-view="person">By person</button>
+        </div>
+        <div class="tabstrip" id="consolidatedPeopleTabs" style="display:none; margin-bottom:8px;"></div>
+        <button class="ghost" id="copyConsolidatedBtn" style="margin:4px 0 10px;">Copy full report</button>
+        <div id="consolidatedNotes"></div>
+      </div>
+    </div>
+
+    <div class="card" id="jumpSync">
+      <h3>🤝 Sync with your group</h3>
+      <p>Shares theories, hidden-venue finds, notes and locked-in bingo cards across everyone — automatically, no copying and pasting needed. This app's room code is already set for us: <strong>medway-massive</strong> — nobody needs to make one up or type it in.</p>
+      <ol class="compact-list" style="padding-left:20px;">
+        <li>Pick your name below — that's the only thing you need to set, and it syncs the moment you pick it (watch the note under the button below for confirmation).</li>
+        <li>After that, it keeps syncing on its own — on open, every few minutes while the app's open, and whenever you come back to it — plus <strong>Sync now</strong> any time for an immediate one. Everyone needs to have done step 1 at least once (with signal) for their picks to show up for the rest of the group.</li>
+      </ol>
+      <div class="field"><label>Who are you?</label>
+        <select id="contributorName">
+          <option value="">Select a name…</option>
+          <option value="Emma">Emma</option>
+          <option value="Dave">Dave</option>
+          <option value="Rob">Rob</option>
+          <option value="Jack">Jack</option>
+          <option value="Lewis">Lewis</option>
+          <option value="Dana">Dana</option>
+          <option value="Rhea">Rhea</option>
+          <option value="__other__">Other…</option>
+        </select>
+      </div>
+      <div class="field" id="contributorOtherField" style="display:none;"><label>Your name</label><input type="text" id="contributorOtherInput" placeholder="Type your name"></div>
+      <p class="empty-note">Group room code: <strong>medway-massive</strong> — fixed for all of us, nothing to type or adjust.</p>
+      <button class="action" id="cloudSyncBtn" style="margin:4px 6px 0 0;">☁️ Sync now</button>
+      <p class="empty-note" id="cloudSyncStatusNote" style="margin-top:6px;"></p>
+      <p style="margin-top:14px;"><strong>No signal?</strong> Copy a code by hand instead — same result:</p>
+      <button class="ghost" id="copySyncCodeBtn" style="margin:4px 6px 0 0;">Copy your sync code</button>
+      <div class="field" style="margin-top:10px;"><label>Paste a teammate's sync code</label><textarea id="syncCodeInput" placeholder="Paste a BTC1:... code here"></textarea></div>
+      <button class="action" id="mergeSyncCodeBtn">Merge it in</button>
+      <p class="empty-note" id="syncStatusNote" style="margin-top:8px;"></p>
+    </div>
+
+    <div class="card" id="jumpDeviceHandoff">
+      <h3>📱 Using someone else's phone?</h3>
+      <p>If your own phone's dead or lost and you're borrowing a teammate's for a bit, this picks up where you left off — pulls in your last-synced saved artists, bingo card and character, and this phone continues as you from here.</p>
+      <p class="empty-note">It can only restore what actually made it to a sync — your own private notes and packing list only ever lived on your original phone, so those can't come back this way (the shared meeting point isn't personal, so that one's unaffected either way). And it needs signal, since it fetches your latest synced data live.</p>
+      <p class="empty-note"><strong>Whoever's using this phone right now — hit Sync now above first,</strong> or whatever's currently on here gets wiped before it ever reaches the cloud.</p>
+      <div class="field"><label>Your name</label><input type="text" id="handoffNameInput" placeholder="e.g. Dave"></div>
+      <button class="action danger" id="handoffSwitchBtn">Wipe this phone &amp; switch to me</button>
+      <p class="empty-note" id="handoffStatusNote" style="margin-top:6px;"></p>
+    </div>
+
+    <div class="card" id="jumpFriendStatus">
+      <h3>📍 Where's everyone?</h3>
+      <p>A quick status, not live tracking — set where you are and it's visible to the group next sync. No GPS, nothing automatic.</p>
+      <div class="field"><label>Where are you?</label>
+        <select id="statusLocationSelect">
+          <option value="">Select a location…</option>
+        </select>
+      </div>
+      <div class="field" id="statusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="statusCustomInput" placeholder="Type where you are"></div>
+      <button class="action" id="statusCustomBtn" style="margin-top:6px;">Set my status</button>
+      <p class="empty-note" id="statusFeedbackNote" style="margin-top:6px;"></p>
+      <div id="friendStatusList" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>📋 Sharing with your group</h3>
+      <p>Everything below saves only to this phone — it's not synced between friends' devices. Use these to paste your progress into your group chat as plain text so everyone stays up to date. Hidden-venue finds have their own log and copy button over on the Map tab. For a proper merge (see below), use Sync above instead of these.</p>
+      <p>Your saved-artist Plan isn't in these plain-text copy buttons — it travels through Sync above instead, into a tab of its own on the Plan screen, never merged into anyone's list.</p>
+      <button class="ghost" id="copyCluesBtn" style="margin:4px 6px 0 0;">Copy district notes</button>
+      <button class="ghost" id="copyTheoriesBtn" style="margin:4px 6px 0 0;">Copy theories</button>
+    </div>
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button class="tab active" data-tab="home"><span class="icon">🏠</span>Home</button>
+  <button class="tab" data-tab="today" id="todayTabBtn"><span class="icon">☀️</span>Today</button>
+  <button class="tab" data-tab="artists"><span class="icon">🎵</span>Lineup</button>
+  <button class="tab" data-tab="plan"><span class="icon">⭐</span>Plan</button>
+  <button class="tab" data-tab="mapscreen"><span class="icon">🗺</span>Map</button>
+  <button class="tab" data-tab="discover"><span class="icon">✨</span>Discover</button>
+</nav>
+
+
+<!-- Cloud sync — optional, no-login. Loaded from CDN; if there's no
+     signal these simply fail to load and the app carries on offline,
+     the manual copy/paste sync code still works either way. -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="js/artist-bios.js"></script>
+<script src="js/artist-previews.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pwa-register.js"></script>
+</body></html>
