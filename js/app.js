@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v108";
-const APP_BUILD_TIME = "2026-07-29T03:07:00Z";
+const APP_CACHE_VERSION = "v109";
+const APP_BUILD_TIME = "2026-07-29T03:15:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5094,6 +5094,10 @@ function renderHomeSyncStatus(){
     <div class="field" id="homeContributorOtherField" style="display:${isOther ? "" : "none"};"><label>Your name</label><input type="text" id="homeContributorOtherInput" placeholder="Type your name"></div>
     <button class="action" id="homeSyncNowBtn" style="margin-top:10px;">☁️ Sync now</button>
     <p class="empty-note" id="homeSyncNowNote" style="margin-top:6px;"></p>
+    <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--text-muted);">📱 <strong>Using someone else's phone?</strong> Restores their last-synced saved artists, bingo card and character here — wipes this device first, so hit Sync now above before switching if there's anything on here worth keeping.</p>
+    <div class="field" style="margin-top:8px;"><label>Their name</label><input type="text" id="homeHandoffNameInput" placeholder="e.g. Dave"></div>
+    <button class="action danger" id="homeHandoffSwitchBtn">Wipe this phone &amp; switch to them</button>
+    <p class="empty-note" id="homeHandoffStatusNote" style="margin-top:6px;"></p>
   `;
   const sel = document.getElementById("homeContributorName");
   const otherInput = document.getElementById("homeContributorOtherInput");
@@ -5102,6 +5106,7 @@ function renderHomeSyncStatus(){
   wireHomeSyncStatusPicker();
   const syncNowBtn = document.getElementById("homeSyncNowBtn");
   if(syncNowBtn) syncNowBtn.onclick = ()=> runManualSync(syncNowBtn, document.getElementById("homeSyncNowNote"));
+  if(typeof wireDeviceHandoffControl === "function") wireDeviceHandoffControl("homeHandoffNameInput", "homeHandoffSwitchBtn", "homeHandoffStatusNote");
 }
 renderHomeSyncStatus();
 
@@ -5446,23 +5451,34 @@ function switchDeviceIdentity(targetId, payload){
   if(typeof syncContributorNameDisplays === "function") syncContributorNameDisplays();
 }
 
-(function setupDeviceHandoff(){
-  const btn = document.getElementById("handoffSwitchBtn");
-  const nameInput = document.getElementById("handoffNameInput");
-  const note = document.getElementById("handoffStatusNote");
-  if(!btn || !nameInput || !note) return;
+// Shared by both the Discover Sync card's controls and Home's own copy
+// of them (Home rebuilds its whole card on every renderHomeSyncStatus()
+// call, so this gets called fresh each time rather than once at load).
+function wireDeviceHandoffControl(nameInputId, btnId, noteId){
+  const btn = document.getElementById(btnId);
+  const nameInput = document.getElementById(nameInputId);
+  if(!btn || !nameInput || !document.getElementById(noteId)) return;
+  // Re-queried by ID on every use rather than captured once — Home's
+  // copy of this control lives inside #homeSyncStatus, which
+  // switchDeviceIdentity() itself causes to fully re-render (via
+  // syncContributorNameDisplays() -> renderHomeSyncStatus()) partway
+  // through this same handler, which would otherwise detach the
+  // originally-captured note/button and silently swallow the final
+  // status message.
+  const setNote = (text)=>{ const el = document.getElementById(noteId); if(el) el.textContent = text; };
+  const setBtnDisabled = (disabled)=>{ const el = document.getElementById(btnId); if(el) el.disabled = disabled; };
   btn.onclick = async ()=>{
     const name = nameInput.value.trim();
-    if(!name){ note.textContent = "Type a name first."; return; }
-    if(!currentRoomCode()){ note.textContent = "No room code set — check Sync above first."; return; }
-    if(!getFirestoreDb()){ note.textContent = "Cloud sync isn't available right now."; return; }
-    if(navigator.onLine === false){ note.textContent = "No signal — this needs to fetch the latest data live, so it can't work offline."; return; }
-    btn.disabled = true;
-    note.textContent = "Looking up…";
+    if(!name){ setNote("Type a name first."); return; }
+    if(!currentRoomCode()){ setNote("No room code set — check Sync above first."); return; }
+    if(!getFirestoreDb()){ setNote("Cloud sync isn't available right now."); return; }
+    if(navigator.onLine === false){ setNote("No signal — this needs to fetch the latest data live, so it can't work offline."); return; }
+    setBtnDisabled(true);
+    setNote("Looking up…");
     try{
       const { matches, error } = await findRoomMembersByName(name);
-      if(error){ note.textContent = "Couldn't look that up right now — check your signal and try again."; return; }
-      if(!matches.length){ note.textContent = `No one named "${escapeHtml(name)}" has synced to this room yet.`; return; }
+      if(error){ setNote("Couldn't look that up right now — check your signal and try again."); return; }
+      if(!matches.length){ setNote(`No one named "${name}" has synced to this room yet.`); return; }
       // More than one device has synced under this exact name — take
       // whichever pushed most recently, since that's the freshest
       // continuation of "them" to hand this phone off to.
@@ -5473,19 +5489,22 @@ function switchDeviceIdentity(targetId, payload){
         `Switch this phone to ${theirName}?\n\n` +
         `This WIPES everything currently saved on this device — its own saved artists, notes, meeting point, packing list, bingo card and character — and replaces it with ${theirName}'s last-synced saved artists, bingo card and character (as of ${seenText}).\n\n` +
         `${theirName}'s own private notes, meeting point and packing list can't be recovered this way — those only ever lived on their original phone.\n\n` +
+        `Make sure whoever's using this phone right now has hit Sync first, or their own current data is what gets wiped without ever reaching the cloud.\n\n` +
         `This can't be undone.`
       );
-      if(!ok){ note.textContent = "Cancelled — nothing changed."; return; }
+      if(!ok){ setNote("Cancelled — nothing changed."); return; }
       switchDeviceIdentity(chosen.id, chosen.data);
-      note.textContent = `Done — this phone is now ${theirName}.`;
-      nameInput.value = "";
+      setNote(`Done — this phone is now ${theirName}.`);
+      const freshInput = document.getElementById(nameInputId);
+      if(freshInput) freshInput.value = "";
     }catch(err){
-      note.textContent = `Couldn't switch (${err && err.message ? err.message : "unknown error"}) — check your signal and try again.`;
+      setNote(`Couldn't switch (${err && err.message ? err.message : "unknown error"}) — check your signal and try again.`);
     }finally{
-      btn.disabled = false;
+      setBtnDisabled(false);
     }
   };
-})();
+}
+wireDeviceHandoffControl("handoffNameInput", "handoffSwitchBtn", "handoffStatusNote");
 
 // Shared by the Discover "Sync now" button and Home's own copy of it
 // (Home added later so status is visible without a trip to Discover) —
