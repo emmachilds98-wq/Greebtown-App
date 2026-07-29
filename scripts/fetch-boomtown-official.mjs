@@ -80,7 +80,20 @@ async function fetchTimetable(eventId, idToken, installationId, appVersion) {
     throw new Error(`Timetable request failed: ${res.status} ${res.statusText}\n${await res.text()}`);
   }
   const data = await res.json();
-  if (!Array.isArray(data)) throw new Error("Unexpected timetable response shape — expected a JSON array");
+  if (!Array.isArray(data)) {
+    // Not the flat {Stage,Start,End,ActName,Artists} shape we've seen in
+    // manual HTTP Toolkit exports — log enough of the real structure to
+    // build the correct transform without guessing field names.
+    console.log("Response is not a flat array. Top-level keys:", Object.keys(data));
+    for (const [key, value] of Object.entries(data)) {
+      if (Array.isArray(value)) {
+        console.log(`  ${key}: array of ${value.length}, sample:`, JSON.stringify(value[0]));
+      } else {
+        console.log(`  ${key}:`, JSON.stringify(value).slice(0, 200));
+      }
+    }
+    throw new Error("Unexpected timetable response shape — see logged structure above");
+  }
   return data;
 }
 
