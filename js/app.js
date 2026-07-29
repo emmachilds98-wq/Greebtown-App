@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v116";
-const APP_BUILD_TIME = "2026-07-29T04:25:00Z";
+const APP_CACHE_VERSION = "v117";
+const APP_BUILD_TIME = "2026-07-29T04:32:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -4380,6 +4380,72 @@ document.getElementById("addLandmarkBtn").onclick = ()=>{
 loadCustomLandmarksList();
 
 loadMap();
+
+// ===============================
+// MAP QUICK ACTIONS — action-oriented shortcuts into the map/directory
+// data that already exists (locations, minorStages, the shared meeting
+// point, friend statuses, the existing site-info/food/around-site
+// cards) rather than a second copy of any of it. Where there's genuinely
+// no pinned data for something (water, toilets — Boomtown never
+// publishes exact spots), this says so honestly instead of inventing a
+// location.
+// ===============================
+function mapQuickAction(kind){
+  const jumpTo = (id)=>{
+    const el = document.getElementById(id);
+    if(el) requestAnimationFrame(()=> el.scrollIntoView({ behavior:"smooth", block:"start" }));
+  };
+  const showMapInfo = (html)=>{
+    if(mapInfo) mapInfo.innerHTML = html;
+    jumpTo("map");
+  };
+
+  if(kind === "next"){
+    const timed = (typeof timedFromSchedule === "function") ? timedFromSchedule(Store.get("schedule")) : [];
+    const nowMin = (typeof nowMinutesSinceFestivalStart === "function") ? nowMinutesSinceFestivalStart() : 0;
+    const next = timed.filter(a=> a.startMin > nowMin).sort((a,b)=> a.startMin - b.startMin)[0] || timed.sort((a,b)=> a.startMin - b.startMin)[0];
+    if(!next){
+      showMapInfo(`<div class="card"><p class="empty-note">Nothing saved yet — add artists from the Lineup tab, then this'll jump straight to their stage.</p></div>`);
+      return;
+    }
+    const stageMatch = [...locations, ...minorStages].find(l=> l.name === next.stage);
+    const marker = stageMatch ? [...document.querySelectorAll(".marker")].find(m=> m.title === stageMatch.name) : null;
+    if(marker){ marker.click(); jumpTo("map"); return; }
+    showMapInfo(`<div class="card"><h3>${escapeHtml(next.name)}</h3><p>${escapeHtml(next.stage)} · ${timeLabel(next)}</p></div>`);
+    return;
+  }
+
+  if(kind === "meeting"){ jumpTo("jumpMeetingPoint"); return; }
+
+  if(kind === "friends"){
+    const entries = (typeof friendStatusEntries === "function") ? friendStatusEntries() : [];
+    const list = entries.length && typeof statusLineHTML === "function" ? entries.map(statusLineHTML).join("") : `<p class="empty-note">No one's set a status yet — see Discover's "Where's everyone?" card.</p>`;
+    showMapInfo(`<div class="card"><h3>📍 Friends</h3>${list}</div>`);
+    return;
+  }
+
+  if(kind === "camp"){
+    const chip = document.querySelector('#mapLayerToggles [data-layer="camp"]');
+    if(chip && !chip.classList.contains("active")) chip.click();
+    jumpTo("map");
+    return;
+  }
+
+  if(kind === "medical"){ jumpTo("jumpSiteInfo"); return; }
+  if(kind === "food"){ jumpTo("jumpFoodBars"); return; }
+  if(kind === "water" || kind === "toilets"){
+    // No exact pinned locations exist for these — Boomtown never
+    // publishes them in advance — so this says so honestly rather than
+    // scrolling to an invented pin.
+    const label = kind === "water" ? "Water refill points" : "Toilets";
+    const icon = kind === "water" ? "💧" : "🚻";
+    showMapInfo(`<div class="card"><h3>${icon} ${label}</h3><p class="empty-note">No exact 2026 locations are published in advance — Boomtown dots ${label.toLowerCase()} around every district and campsite, with exact spots shown on the official app once you're on-site.</p></div>`);
+    return;
+  }
+}
+document.querySelectorAll("#mapQuickActions button").forEach(btn=>{
+  btn.onclick = ()=> mapQuickAction(btn.dataset.quick);
+});
 
 // ===============================
 // VENUE DIRECTORY — filterable card list, merges the researched
