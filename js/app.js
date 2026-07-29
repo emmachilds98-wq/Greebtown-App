@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v98";
-const APP_BUILD_TIME = "2026-07-29T01:53:00Z";
+const APP_CACHE_VERSION = "v99";
+const APP_BUILD_TIME = "2026-07-29T02:06:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -3125,6 +3125,7 @@ function updateNextEvent(){
   } else {
     target.innerHTML = "Nothing saved yet";
   }
+  if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
 }
 
 function renderNowNext(){
@@ -3151,6 +3152,79 @@ function renderNowNext(){
   `;
 }
 renderNowNext();
+
+// ===============================
+// HOME CONTEXT BANNER — a compact, always-visible summary so opening
+// the app answers "what's the situation right now" in one glance,
+// instead of scrolling past countdown/setup/links cards to find it.
+// Built entirely from data the app already has (saved schedule, clash
+// map, per-person last-seen from sync, meeting point) — no new state.
+// ===============================
+function jumpToClashes(){
+  const planTab = document.querySelector('.tab[data-tab="plan"]');
+  if(planTab) planTab.click();
+  const btn = document.getElementById("viewClashBtn");
+  if(btn) btn.click();
+}
+
+function renderHomeContextBanner(){
+  const banner = document.getElementById("homeContextBanner");
+  if(!banner) return;
+  const now = new Date();
+  const dayLabel = now.toLocaleDateString([], { weekday: "short" });
+  const clockLabel = now.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  const name = currentContributorName();
+
+  // Current/next set only means anything once the festival's actually
+  // running — same festival-date window and clock math as
+  // renderNowNext() above, kept separate since this banner also needs
+  // to say something useful before/after that window.
+  const festStart = new Date("2026-08-12T00:00:00");
+  const diffDays = Math.floor((now - festStart) / 86400000);
+  let nowNextLine = "";
+  if(diffDays >= 0 && diffDays <= 5){
+    const nowMin = diffDays * 1440 + now.getHours() * 60 + now.getMinutes();
+    const timed = Store.get("schedule")
+      .map(a=>({ ...a, m: toMinutes(a.day, a.start), em: toMinutes(a.day, a.end) }))
+      .filter(a=> a.m !== null);
+    const current = timed.find(a=> a.em !== null && a.m <= nowMin && nowMin < (a.em > a.m ? a.em : a.em + 1440));
+    const next = timed.filter(a=> a.m > nowMin).sort((a,b)=> a.m - b.m)[0];
+    if(current) nowNextLine = `Now: <strong>${escapeHtml(current.name)}</strong> · ${escapeHtml(current.stage)}`;
+    else if(next) nowNextLine = `Next: <strong>${escapeHtml(next.name)}</strong> ${escapeHtml(next.start)} · ${escapeHtml(next.stage)}`;
+  } else {
+    const timed = Store.get("schedule").map(a=>({...a, m: toMinutes(a.day, a.start)})).filter(a=>a.m!==null).sort((a,b)=>a.m-b.m);
+    const next = timed[0];
+    if(next) nowNextLine = `Next saved: <strong>${escapeHtml(next.name)}</strong> · ${escapeHtml(next.day)} ${escapeHtml(next.start)}`;
+  }
+
+  const clashMap = findClashes(Store.get("schedule"));
+  const clashCount = Object.keys(clashMap).length;
+
+  const peopleLastSeen = Store.get("peopleLastSeen") || {};
+  const friendNames = Object.keys(peopleLastSeen).filter(n=> n !== name);
+  const mostRecent = friendNames.sort((a,b)=> (peopleLastSeen[b]||0) - (peopleLastSeen[a]||0))[0];
+  const friendLine = mostRecent ? `👥 ${escapeHtml(mostRecent)} synced ${formatLastSeen(peopleLastSeen[mostRecent])}` : "";
+
+  const meeting = (Store.get("meeting") || "").trim();
+  const meetingLine = meeting ? `📍 Meet at ${escapeHtml(meeting)}` : "";
+
+  const bottomLine = [friendLine, meetingLine].filter(Boolean).join(" · ");
+
+  banner.innerHTML = `
+    <div class="card home-context-banner">
+      <div class="hcb-top">${escapeHtml(dayLabel)} · ${escapeHtml(clockLabel)}${name ? " · " + escapeHtml(name) : ""}</div>
+      ${nowNextLine ? `<div class="hcb-line">${nowNextLine}</div>` : `<div class="hcb-line hcb-muted">Nothing saved yet — start in Lineup.</div>`}
+      ${clashCount ? `<div class="hcb-line hcb-warn">⚡ ${clashCount} saved artist${clashCount===1?"":"s"} clashing</div>` : ""}
+      ${bottomLine ? `<div class="hcb-line hcb-muted">${bottomLine}</div>` : ""}
+    </div>
+  `;
+  if(clashCount){
+    const warnLine = banner.querySelector(".hcb-warn");
+    if(warnLine){ warnLine.style.cursor = "pointer"; warnLine.onclick = jumpToClashes; }
+  }
+}
+renderHomeContextBanner();
+setInterval(renderHomeContextBanner, 60000);
 
 document.getElementById("copyPlanBtn").onclick = async ()=>{
   const schedule = Store.get("schedule");
@@ -5114,6 +5188,7 @@ function refreshAfterMerge(){
   if(typeof renderPlanCompare === "function" && planView === "compare") renderPlanCompare();
   if(typeof renderBingoPersonTabs === "function"){ renderBingoPersonTabs(); renderBingo(); }
   if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
+  if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
 }
 
 async function pushToCloud(){

@@ -33,6 +33,12 @@
   .card p{color:var(--text-muted); font-size:14px; line-height:1.5;}
   .card p + p{margin-top:8px;}
   .tag{display:inline-block; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent-amber); background:rgba(242,168,60,.12); border:1px solid rgba(242,168,60,.3); padding:2px 8px; border-radius:20px; margin-bottom:8px;}
+  .home-context-banner{background:linear-gradient(135deg, rgba(75,227,172,.1), var(--bg-panel-2)); border-color:rgba(75,227,172,.35); padding:14px;}
+  .hcb-top{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent-teal); font-weight:700; margin-bottom:6px;}
+  .hcb-line{font-size:14px; color:var(--text-primary); line-height:1.5;}
+  .hcb-line + .hcb-line{margin-top:4px;}
+  .hcb-line.hcb-muted{color:var(--text-muted); font-size:13px;}
+  .hcb-line.hcb-warn{color:var(--accent-amber); font-weight:700;}
   .ticket{position:relative; background:linear-gradient(135deg, var(--bg-panel-2), var(--bg-panel)); border:1px dashed rgba(242,168,60,.45); border-radius:16px; padding:20px; margin-bottom:18px; overflow:hidden;}
   .ticket::before, .ticket::after{content:""; position:absolute; width:22px; height:22px; background:var(--bg-deep); border-radius:50%; top:50%; transform:translateY(-50%);}
   .ticket::before{left:-11px;} .ticket::after{right:-11px;}
