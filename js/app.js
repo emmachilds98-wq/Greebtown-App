@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v107";
-const APP_BUILD_TIME = "2026-07-29T02:58:00Z";
+const APP_CACHE_VERSION = "v108";
+const APP_BUILD_TIME = "2026-07-29T03:07:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -308,7 +308,8 @@ const Store = {
       return fallback && typeof fallback === "object" ? JSON.parse(JSON.stringify(fallback)) : fallback;
     }
   },
-  set(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+  set(key, value){ localStorage.setItem(key, JSON.stringify(value)); },
+  remove(key){ localStorage.removeItem(key); }
 };
 
 // ===============================
@@ -5384,6 +5385,107 @@ async function pullFromCloud(){
   });
   return { stats: totals, count };
 }
+
+// ===============================
+// DEVICE HANDOFF — "using someone else's phone" mode. Deliberately
+// destructive and explicit: wipes this device's own current data and
+// makes it continue AS the named person instead, adopting their actual
+// synced deviceId (not a new one) so this becomes a clean continuation
+// of their identity rather than a second, separately-tracked device
+// sharing their name. Only restores what already made it to a sync —
+// schedule, bingo card, character — never the PERSONAL_ONLY_KEYS fields
+// (notes, meeting point, packing list, ...), since those never left
+// their original device in the first place and can't be recovered from
+// here. Always looks up live from Firestore rather than any locally
+// cached snapshot, so it needs signal and always gets their latest.
+async function findRoomMembersByName(name){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room) return { error: "unavailable" };
+  const target = name.trim().toLowerCase();
+  if(!target) return { error: "empty" };
+  const snap = await db.collection("rooms").doc(room).collection("members").get();
+  const matches = [];
+  snap.forEach(doc=>{
+    const data = doc.data();
+    if((data.from || "").trim().toLowerCase() === target) matches.push({ id: doc.id, data });
+  });
+  return { matches };
+}
+
+function switchDeviceIdentity(targetId, payload){
+  // Wipe this device's own personal data — everything that's specific
+  // to whoever was using it before, including their own saved-artist
+  // schedule (not part of PERSONAL_ONLY_KEYS, since that list is about
+  // what's excluded from the *shareable group snapshot*, a different
+  // concern from "what counts as this device's own identity").
+  [...PERSONAL_ONLY_KEYS, "schedule"].forEach(key=> Store.remove(key));
+
+  Store.set("contributorName", payload.from || "Someone");
+  Store.set("deviceId", targetId);
+  Store.set("roomCode", currentRoomCode());
+  Store.set("lastPushedRoomId", currentRoomCode());
+  if(Array.isArray(payload.schedule)) Store.set("schedule", payload.schedule.map(a=>({ ...a })));
+  if(payload.bingo){
+    Store.set("bingoCard", payload.bingo.card || []);
+    Store.set("bingoMarked", payload.bingo.marked || []);
+    Store.set("bingoLocked", !!payload.bingo.locked);
+  }
+  if(payload.character) Store.set("myCharacter", { ...payload.character });
+
+  // They're "mine" now, not a read-only teammate — drop any cached
+  // snapshot under their old personId so they don't also linger as
+  // their own separate person-tab right after taking over.
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen"].forEach(key=>{
+    const map = Store.get(key) || {};
+    if(map[targetId]){ delete map[targetId]; Store.set(key, map); }
+  });
+
+  recordLastSynced();
+  refreshAfterMerge();
+  if(typeof syncContributorNameDisplays === "function") syncContributorNameDisplays();
+}
+
+(function setupDeviceHandoff(){
+  const btn = document.getElementById("handoffSwitchBtn");
+  const nameInput = document.getElementById("handoffNameInput");
+  const note = document.getElementById("handoffStatusNote");
+  if(!btn || !nameInput || !note) return;
+  btn.onclick = async ()=>{
+    const name = nameInput.value.trim();
+    if(!name){ note.textContent = "Type a name first."; return; }
+    if(!currentRoomCode()){ note.textContent = "No room code set — check Sync above first."; return; }
+    if(!getFirestoreDb()){ note.textContent = "Cloud sync isn't available right now."; return; }
+    if(navigator.onLine === false){ note.textContent = "No signal — this needs to fetch the latest data live, so it can't work offline."; return; }
+    btn.disabled = true;
+    note.textContent = "Looking up…";
+    try{
+      const { matches, error } = await findRoomMembersByName(name);
+      if(error){ note.textContent = "Couldn't look that up right now — check your signal and try again."; return; }
+      if(!matches.length){ note.textContent = `No one named "${escapeHtml(name)}" has synced to this room yet.`; return; }
+      // More than one device has synced under this exact name — take
+      // whichever pushed most recently, since that's the freshest
+      // continuation of "them" to hand this phone off to.
+      const chosen = matches.slice().sort((a,b)=> (b.data.updatedAt||0) - (a.data.updatedAt||0))[0];
+      const theirName = chosen.data.from || name;
+      const seenText = chosen.data.updatedAt ? formatLastSeen(chosen.data.updatedAt) : "a while ago";
+      const ok = confirm(
+        `Switch this phone to ${theirName}?\n\n` +
+        `This WIPES everything currently saved on this device — its own saved artists, notes, meeting point, packing list, bingo card and character — and replaces it with ${theirName}'s last-synced saved artists, bingo card and character (as of ${seenText}).\n\n` +
+        `${theirName}'s own private notes, meeting point and packing list can't be recovered this way — those only ever lived on their original phone.\n\n` +
+        `This can't be undone.`
+      );
+      if(!ok){ note.textContent = "Cancelled — nothing changed."; return; }
+      switchDeviceIdentity(chosen.id, chosen.data);
+      note.textContent = `Done — this phone is now ${theirName}.`;
+      nameInput.value = "";
+    }catch(err){
+      note.textContent = `Couldn't switch (${err && err.message ? err.message : "unknown error"}) — check your signal and try again.`;
+    }finally{
+      btn.disabled = false;
+    }
+  };
+})();
 
 // Shared by the Discover "Sync now" button and Home's own copy of it
 // (Home added later so status is visible without a trip to Discover) —
