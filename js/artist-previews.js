@@ -90,7 +90,30 @@ window.ARTIST_PREVIEWS = {
   // couldn't be cross-checked against it, so left out rather than risk
   // playing a different "Jamz Supernova" under her name) — SoundCloud/
   // Instagram only, still real search buttons cover Spotify/YouTube.
-  "Jamz Supernova": { soundcloud: "https://soundcloud.com/jamzsupernova", instagram: "https://www.instagram.com/jamzsupernova/" }
+  "Jamz Supernova": { soundcloud: "https://soundcloud.com/jamzsupernova", instagram: "https://www.instagram.com/jamzsupernova/" },
+  // Second expansion batch (29 Jul) — all cross-checked via Viberate's own
+  // verified profile links (several bios explicitly name Boomtown Fair as
+  // a past festival appearance, an especially strong identity signal).
+  // No audioPreview added here yet — Spotify artist ID lets the embed
+  // player still show real previews on click, just not the inline <audio>
+  // shortcut. Farma G had no plausible Viberate match at all (searched
+  // "Farma G" and close spelling variants) and was left out entirely
+  // rather than guess, per instruction.
+  "Grooverider": { spotifyArtist: "65g8RO3JqCUTigI7YR3dAw", soundcloud: "http://soundcloud.com/djgrooverider1", youtubeChannel: "https://www.youtube.com/channel/UCASsAtmUa0w_kgHodiNFj7g", instagram: "https://www.instagram.com/djgrooverider/" },
+  "Freestylers": { spotifyArtist: "0zg9mF9dX2knvdTKnL22T1", soundcloud: "http://soundcloud.com/freestylers", youtubeChannel: "http://www.youtube.com/user/FreestylersOfficial", instagram: "https://www.instagram.com/thefreestylersofficial/" },
+  "Ellis Dee": { spotifyArtist: "65y2opuUTsGcbU3sNzv0ll", soundcloud: "https://soundcloud.com/djellisdee", instagram: "https://www.instagram.com/djellisdee/" },
+  "Ed Solo": { spotifyArtist: "7jnJgk7LLLdpPhXrOOZXCa", soundcloud: "https://soundcloud.com/edsolo", youtubeChannel: "https://www.youtube.com/channel/UCncK21Jd9rg18jr0-Q64B1A", instagram: "https://www.instagram.com/edsolouk/" },
+  "General Levy": { spotifyArtist: "2bHgAaZ7qbGbMMXwAQm48I", soundcloud: "https://soundcloud.com/general-levy", youtubeChannel: "http://www.youtube.com/channel/UCUrM4ZEpyjw2KhpcKNWJgww", instagram: "https://www.instagram.com/generallevy" },
+  "Break": { spotifyArtist: "7FtCGMC0pcHPlrZWmYe9XM" },
+  "Chimpo": { spotifyArtist: "52daryZMe3vvpHyMyJK6SM", soundcloud: "https://soundcloud.com/chimpo-mcr", instagram: "https://www.instagram.com/chimpomcr" },
+  "Halogenix": { spotifyArtist: "24eQxPRLv3UMwEIo6mawVW", soundcloud: "http://soundcloud.com/halogenix", youtubeChannel: "https://www.youtube.com/channel/UCg-NKd9OuQBM5WscITb8orA", instagram: "https://www.instagram.com/halogenix" },
+  "Ivy Lab": { spotifyArtist: "3VXCvo9Sr0hbZ4mk6VOKBs", soundcloud: "https://soundcloud.com/ivylab", youtubeChannel: "https://www.youtube.com/channel/UCQYIaZoxwtJAzDmkM6mICUg", instagram: "https://www.instagram.com/ivylab/" },
+  "Ray Keith": { spotifyArtist: "6LWmwdaxswnPZCrjexu80I", soundcloud: "https://soundcloud.com/ray-keith", instagram: "https://www.instagram.com/raykeithdread1/" },
+  "Skeptical": { spotifyArtist: "28ee6rnxMl8AqwcroPfivP", soundcloud: "http://soundcloud.com/skeptical", youtubeChannel: "https://www.youtube.com/SkepticalTV", instagram: "https://www.instagram.com/Skepticaluk" },
+  "Top Cat": { spotifyArtist: "3QR3QV1qQuTpcy1DIqOw9j", youtubeChannel: "https://www.youtube.com/channel/UCZW7CdhCKU7s0Qg2K-tj5mg", instagram: "https://www.instagram.com/originaltopcato9/" },
+  "Fliptrix": { spotifyArtist: "5Dm525w7dCfRzudUS4EeQE", soundcloud: "https://soundcloud.com/mrfliptrix", youtubeChannel: "https://www.youtube.com/user/mrfliptrix", instagram: "https://www.instagram.com/mrfliptrix" },
+  "Estère": { spotifyArtist: "1WCaYWO3WfBdA8Dl1OqfZz", soundcloud: "https://soundcloud.com/estere", youtubeChannel: "https://www.youtube.com/channel/UCOgKVnoMYiyS8MNeoBg4-Xw", instagram: "https://www.instagram.com/esterelola/" },
+  "Kasra": { spotifyArtist: "3W1ubrHvNSMltB1l7zo6xt", soundcloud: "https://soundcloud.com/kasra-critical", instagram: "https://www.instagram.com/kasracritical/" }
 };
 
 // Aliases for exact lineup billing text that differs from the plain
@@ -99,16 +122,30 @@ window.ARTIST_PREVIEWS = {
 // exact string match against artist.name, same as artist-bios.js, so
 // these need their own entries even though they're the same act.
 [
+  // Confirmed against the current lineup's exact billing text (checked
+  // 29 Jul — several of these had silently stopped matching after an
+  // official-app re-sync changed the exact punctuation/spelling; kept
+  // both the old and corrected forms since a future re-sync could
+  // plausibly flip back).
   ["Groove Armada DJ Set", "Groove Armada"],
+  ["Groove Armada - DJ Set", "Groove Armada"],
   ["Floating Points Live", "Floating Points"],
+  ["Floating Points - Live", "Floating Points"],
   ["Sampa The Great", "Sampa the Great"],
   ["Shy FX Ft. Rage", "Shy FX"],
   ["Sherelle AV Show", "Sherelle"],
   ["Dutty Moonshine Big Band", "Dutty Moonshine"],
   ["999999999 AV Show", "999999999"],
+  ["999999999 - AV Show", "999999999"],
   ["Sbtrkt DJ Set", "SBTRKT"],
   ["Frankie Stew & Harvey Gunn", "Frankie Stew and Harvey Gunn"],
   ["Alix Perez Ft. Sp:Mc", "Alix Perez"],
+  ["Alix Perez Ft. SP:MC", "Alix Perez"],
+  // Second batch (29 Jul) — bracketed/suffixed billing text for the newly
+  // added artists above, checked against the current lineup the same way.
+  ["Grooverider [Fantazia Takeover]", "Grooverider"],
+  ["General Levy - Live PA", "General Levy"],
+  ["Fliptrix [High Focus Records]", "Fliptrix"],
 ].forEach(([alias, canonical])=>{
   if(window.ARTIST_PREVIEWS[canonical]) window.ARTIST_PREVIEWS[alias] = window.ARTIST_PREVIEWS[canonical];
 });
