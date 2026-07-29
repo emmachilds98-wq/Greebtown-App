@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v111";
-const APP_BUILD_TIME = "2026-07-29T03:44:00Z";
+const APP_CACHE_VERSION = "v112";
+const APP_BUILD_TIME = "2026-07-29T03:54:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -295,7 +295,7 @@ fixBottomClearance();
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -2695,6 +2695,26 @@ function findClashes(schedule){
   return clashMap;
 }
 
+// A personal clash's own resolution (which one to actually go to, or
+// catch half of each) is purely local — it's this one person's call
+// about their own schedule, not something the group needs to weigh in
+// on (that's groupClashPairs()/setGroupDecision() above, for clashes
+// involving 2+ different people). Keyed on day+artist-pair, same
+// stable-identity approach as group decisions, so it survives reorders.
+function personalClashChoiceKey(day, nameA, nameB){
+  return `${day}|${[nameA, nameB].sort().join("__")}`;
+}
+function getPersonalClashChoice(day, nameA, nameB){
+  const choices = Store.get("personalClashChoices") || {};
+  return choices[personalClashChoiceKey(day, nameA, nameB)] || null;
+}
+function setPersonalClashChoice(day, nameA, nameB, choice){
+  const key = personalClashChoiceKey(day, nameA, nameB);
+  const choices = Store.get("personalClashChoices") || {};
+  if(choice) choices[key] = choice; else delete choices[key];
+  Store.set("personalClashChoices", choices);
+}
+
 function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
@@ -2705,6 +2725,22 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
     const otherMustSee = mustSeeSet.has(c.name);
     return `<div>⚠ Clashes with <strong>${escapeHtml(c.name)}</strong>${otherMustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""} at <span class="stage-link" data-stage="${escapeHtml(c.stage)}">${escapeHtml(c.stage)}</span></div>`;
   }).join("");
+  // Only offered for a simple one-other-clash case — a 3+-way personal
+  // clash still shows the warning text above, just without action
+  // buttons, rather than trying to squeeze an n-way picker in here.
+  let choiceHTML = "";
+  if(!readonly && clashes && clashes.length === 1){
+    const other = clashes[0];
+    const choice = getPersonalClashChoice(artist.day, artist.name, other.name);
+    const shortMine = escapeHtml(truncateName(artist.name, 14));
+    const shortOther = escapeHtml(truncateName(other.name, 14));
+    choiceHTML = `
+      <div class="decision-actions personal-clash-actions">
+        <button data-clash-choice="a" title="Go to ${escapeHtml(artist.name)}" class="${choice==="a" ? "active" : ""}">Go: ${shortMine}</button>
+        <button data-clash-choice="b" title="Go to ${escapeHtml(other.name)}" class="${choice==="b" ? "active" : ""}">Go: ${shortOther}</button>
+        <button data-clash-choice="half" class="${choice==="half" ? "active" : ""}">Half &amp; half</button>
+      </div>`;
+  }
   return `
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
       <div class="item-top">
@@ -2723,7 +2759,7 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
           <button class="set-time-btn">Set time</button>
         </div>`}
       </div>
-      ${clashLines ? `<div class="clash-note">${clashLines}</div>` : ""}
+      ${clashLines ? `<div class="clash-note">${clashLines}${choiceHTML}</div>` : ""}
       <div class="edit-slot"></div>
     </div>
   `;
@@ -2903,6 +2939,20 @@ function renderSchedule(){
           updateNextEvent();
         });
       };
+
+      itemEl.querySelectorAll(".personal-clash-actions button").forEach(btn=>{
+        btn.onclick = ()=>{
+          const clashLine = itemEl.querySelector(".clash-note");
+          const otherName = clashLine ? clashLine.querySelector("strong").textContent : null;
+          if(!otherName) return;
+          const clicked = btn.getAttribute("data-clash-choice");
+          const already = getPersonalClashChoice(artist.day, artist.name, otherName);
+          // Tapping the already-active choice clears it — a way to undo
+          // without a separate "clear" control.
+          setPersonalClashChoice(artist.day, artist.name, otherName, already === clicked ? null : clicked);
+          renderSchedule();
+        };
+      });
     });
   }
 
@@ -5518,7 +5568,12 @@ setInterval(renderAllFriendStatusUI, 60000);
 // (not a per-member doc), since a decision belongs to the group, not to
 // whoever happened to record it.
 // ===============================
-function groupClashPairs(){
+// Combines this device's own saved artists with every synced teammate's
+// (peopleSchedules) into one map keyed by day+name, each entry carrying
+// who's interested and whether it's a must-see for them. Shared by
+// group-clash detection below and the Today dashboard's GROUP section —
+// one data path, not two separate ones counting the same thing.
+function buildCombinedArtistInterestMap(){
   const combined = [];
   const myName = currentContributorName() || "You";
   (Store.get("schedule") || []).forEach(a=> combined.push({ ...a, owner: myName }));
@@ -5531,18 +5586,21 @@ function groupClashPairs(){
   const byArtist = {};
   combined.forEach(a=>{
     const startMin = toMinutes(a.day, a.start), endMin = toMinutes(a.day, a.end);
-    if(startMin === null || endMin === null) return;
-    const key = `${a.day}|${a.name}`;
+    const key = `${a.day || "TBC"}|${a.name}`;
     if(!byArtist[key]){
       byArtist[key] = { name: a.name, stage: a.stage, day: a.day, start: a.start, end: a.end,
-        startMin, endMin: (endMin <= startMin ? endMin + 1440 : endMin), interest: {} };
+        startMin, endMin: (startMin !== null && endMin !== null && endMin <= startMin) ? endMin + 1440 : endMin, interest: {} };
     }
     // A person's mustSee flag can differ from another's for the same
     // artist — once true for this artist from any owner, keep it true
     // rather than letting a later, less-starred owner downgrade it.
     if(!(a.owner in byArtist[key].interest) || a.mustSee) byArtist[key].interest[a.owner] = !!a.mustSee;
   });
-  const artists = Object.values(byArtist);
+  return byArtist;
+}
+
+function groupClashPairs(){
+  const artists = Object.values(buildCombinedArtistInterestMap()).filter(a=> a.startMin !== null && a.endMin !== null);
 
   const pairs = [];
   const seen = new Set();
@@ -5551,6 +5609,13 @@ function groupClashPairs(){
       const A = artists[i], B = artists[j];
       if(A.day !== B.day) continue;
       if(A.startMin < B.endMin && B.startMin < A.endMin){
+        // Only a GROUP decision if 2+ different people are involved
+        // across the two artists — one person clashing with themself
+        // (both artists in their own list) is just their personal
+        // clash, already covered by the Plan "Clashes" view, and
+        // doesn't need the group to weigh in.
+        const owners = new Set([...Object.keys(A.interest), ...Object.keys(B.interest)]);
+        if(owners.size < 2) continue;
         const key = A.day + "|" + [A.name, B.name].sort().join("__");
         if(seen.has(key)) continue;
         seen.add(key);
@@ -5607,28 +5672,37 @@ function decisionStatusPillHTML(status){
     needs: { cls: "needs", label: "🟡 Needs decision" },
     together: { cls: "together", label: "🟢 Everyone together" },
     split: { cls: "split", label: "🔵 Split up" },
+    half: { cls: "half", label: "🟣 Half &amp; half" },
     later: { cls: "later", label: "⚪ Decide later" }
   };
   const m = map[status] || map.needs;
   return `<span class="decision-pill ${m.cls}">${m.label}</span>`;
 }
 
+function truncateName(name, max){
+  return name.length > max ? name.slice(0, max - 1).trimEnd() + "…" : name;
+}
+
 function decisionCardHTML(pair, decision){
   const status = decision ? decision.status : "needs";
   const needsDecision = status === "needs" || status === "later";
   const ownerLine = (interest)=> Object.entries(interest).map(([owner, mustSee])=> `${escapeHtml(owner)} ${mustSee ? "★" : "👍"}`).join(" · ") || "no one yet";
+  const shortA = escapeHtml(truncateName(pair.a.name, 16));
+  const shortB = escapeHtml(truncateName(pair.b.name, 16));
   return `
     <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(pair.key)}">
-      <div class="decision-head"><span>⚡ ${escapeHtml(timeLabel(pair.a))} — ${needsDecision ? "Decision needed" : "Resolved"}</span>${decisionStatusPillHTML(status)}</div>
+      <div class="decision-head"><span>⚡ ${escapeHtml(timeLabel(pair.a))}</span>${decisionStatusPillHTML(status)}</div>
       <div class="decision-artist-line"><strong>${escapeHtml(pair.a.name)}</strong> — ${ownerLine(pair.a.interest)}</div>
       <div class="decision-artist-line"><strong>${escapeHtml(pair.b.name)}</strong> — ${ownerLine(pair.b.interest)}</div>
-      ${status === "together" && decision ? `<p class="empty-note">Going together to <strong>${escapeHtml(decision.choice)}</strong> — set by ${escapeHtml(decision.by)}.</p>` : ""}
-      ${status === "split" && decision ? `<p class="empty-note">Splitting up — set by ${escapeHtml(decision.by)}.</p>` : ""}
+      ${status === "together" && decision ? `<p class="empty-note">Together: <strong>${escapeHtml(decision.choice)}</strong> (${escapeHtml(decision.by)})</p>` : ""}
+      ${status === "split" && decision ? `<p class="empty-note">Splitting up (${escapeHtml(decision.by)})</p>` : ""}
+      ${status === "half" && decision ? `<p class="empty-note">Catching half of each (${escapeHtml(decision.by)})</p>` : ""}
       <div class="decision-actions">
-        <button data-action="together-a" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">Everyone together — ${escapeHtml(pair.a.name)}</button>
-        <button data-action="together-b" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">Everyone together — ${escapeHtml(pair.b.name)}</button>
+        <button data-action="together-a" title="Everyone together — ${escapeHtml(pair.a.name)}" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">Together: ${shortA}</button>
+        <button data-action="together-b" title="Everyone together — ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">Together: ${shortB}</button>
         <button data-action="split" class="${decision && decision.status==="split" ? "active" : ""}">Split up</button>
-        <button data-action="later" class="${decision && decision.status==="later" ? "active" : ""}">Decide later</button>
+        <button data-action="half" title="Catch half of ${escapeHtml(pair.a.name)}, half of ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="half" ? "active" : ""}">Half &amp; half</button>
+        <button data-action="later" class="${decision && decision.status==="later" ? "active" : ""}">Later</button>
       </div>
     </div>
   `;
@@ -5645,20 +5719,193 @@ function wireDecisionCard(el, pair){
   });
 }
 
-// Reusable so the same render can populate the Plan tab's box and (once
-// built) Today's DECISIONS section — no separate data path, same
-// groupClashPairs()/groupDecisions Store key either way.
+// Reusable so the same render backs both the Plan tab's box and Today's
+// DECISIONS section — no separate data path, same groupClashPairs()/
+// groupDecisions Store key either way. Capped with a "show more" toggle
+// so a busy lineup with several real group clashes can't crowd out the
+// actual Plan list underneath it.
+let groupDecisionsExpanded = false;
+const GROUP_DECISIONS_CAP = 4;
 function renderGroupDecisions(containerId){
   const box = document.getElementById(containerId || "groupDecisionsBox");
   if(!box) return;
   const pairs = groupClashPairs();
   const decisions = Store.get("groupDecisions") || {};
   if(!pairs.length){ box.innerHTML = ""; return; }
-  box.innerHTML = pairs.map(p=> decisionCardHTML(p, decisions[p.key])).join("");
+  const visible = groupDecisionsExpanded ? pairs : pairs.slice(0, GROUP_DECISIONS_CAP);
+  box.innerHTML = `<h3 style="margin-bottom:6px; font-size:14px;">⚡ Group decisions</h3>`
+    + visible.map(p=> decisionCardHTML(p, decisions[p.key])).join("")
+    + (pairs.length > GROUP_DECISIONS_CAP ? `<button class="ghost" id="groupDecisionsToggle" style="margin-top:2px;">${groupDecisionsExpanded ? "Show fewer" : `Show ${pairs.length - GROUP_DECISIONS_CAP} more`}</button>` : "");
   const cards = box.querySelectorAll(".decision-card");
-  pairs.forEach((p,i)=>{ if(cards[i]) wireDecisionCard(cards[i], p); });
+  visible.forEach((p,i)=>{ if(cards[i]) wireDecisionCard(cards[i], p); });
+  const toggleBtn = document.getElementById("groupDecisionsToggle");
+  if(toggleBtn) toggleBtn.onclick = ()=>{ groupDecisionsExpanded = !groupDecisionsExpanded; renderGroupDecisions(containerId); };
 }
 renderGroupDecisions();
+
+// ===============================
+// TODAY / FESTIVAL MODE — a single-glance "what should we be doing
+// right now" dashboard, built entirely from data the app already has
+// (own Plan, group sync, group decisions, shared meeting point) — no
+// new state of its own beyond which tab is active.
+// ===============================
+const FESTIVAL_START = new Date("2026-08-12T00:00:00");
+const FESTIVAL_END = new Date("2026-08-17T00:00:00"); // exclusive — through end of Sun 16 Aug
+function isFestivalLive(){
+  const now = new Date();
+  return now >= FESTIVAL_START && now < FESTIVAL_END;
+}
+
+function timedFromSchedule(schedule){
+  return (schedule || [])
+    .map(a=>({ ...a, startMin: toMinutes(a.day, a.start), endMin: toMinutes(a.day, a.end) }))
+    .filter(a=> a.startMin !== null && a.endMin !== null)
+    .map(a=> ({ ...a, endMin: a.endMin <= a.startMin ? a.endMin + 1440 : a.endMin }));
+}
+
+function nowMinutesSinceFestivalStart(){
+  const now = new Date();
+  const diffDays = Math.floor((now - FESTIVAL_START) / 86400000);
+  return diffDays * 1440 + now.getHours() * 60 + now.getMinutes();
+}
+
+function renderTodayNow(){
+  const box = document.getElementById("todayNow");
+  if(!box) return;
+  const timed = timedFromSchedule(Store.get("schedule"));
+  const nowMin = nowMinutesSinceFestivalStart();
+  const current = timed.find(a=> a.startMin <= nowMin && nowMin < a.endMin);
+  const next = timed.filter(a=> a.startMin > nowMin).sort((a,b)=> a.startMin - b.startMin)[0];
+  box.innerHTML = `
+    <h3 style="margin-bottom:6px;">NOW</h3>
+    ${current
+      ? `<div class="big">${escapeHtml(current.name)}</div><div class="sub">${escapeHtml(current.stage)} · ${timeLabel(current)}</div>`
+      : `<p class="empty-note">Nothing from your Plan on right now.</p>`}
+    ${next ? `<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">Next: <strong>${escapeHtml(next.name)}</strong> · ${escapeHtml(next.stage)} · ${timeLabel(next)}</p>` : ""}
+  `;
+}
+
+function renderTodayNextUp(){
+  const box = document.getElementById("todayNextUp");
+  if(!box) return;
+  const nowMin = nowMinutesSinceFestivalStart();
+  const byArtist = buildCombinedArtistInterestMap();
+  const upcoming = Object.values(byArtist)
+    .filter(a=> a.startMin !== null && a.endMin !== null && a.startMin > nowMin)
+    .sort((a,b)=>{
+      const aMust = Object.values(a.interest).some(Boolean);
+      const bMust = Object.values(b.interest).some(Boolean);
+      if(aMust !== bMust) return aMust ? -1 : 1;
+      return a.startMin - b.startMin;
+    })
+    .slice(0, 4);
+  box.innerHTML = `
+    <h3 style="margin-bottom:6px;">NEXT UP</h3>
+    ${upcoming.length ? upcoming.map(a=>{
+      const owners = Object.entries(a.interest).map(([o,m])=> `${escapeHtml(o)}${m ? " ★" : ""}`).join(" · ");
+      return `<div class="decision-artist-line"><strong>${escapeHtml(a.name)}</strong> — ${escapeHtml(a.stage)} · ${timeLabel(a)}<br><span style="font-size:12px;">${owners}</span></div>`;
+    }).join("") : `<p class="empty-note">Nothing upcoming saved yet.</p>`}
+  `;
+}
+
+function renderTodayGroup(){
+  const box = document.getElementById("todayGroup");
+  if(!box) return;
+  const byArtist = buildCombinedArtistInterestMap();
+  const all = Object.values(byArtist);
+  const shared = all.filter(a=> Object.keys(a.interest).length >= 2).sort((a,b)=> Object.keys(b.interest).length - Object.keys(a.interest).length);
+  const sharedMustSees = shared.filter(a=> Object.values(a.interest).filter(Boolean).length >= 2);
+  const decisions = Store.get("groupDecisions") || {};
+  const outstandingClashes = groupClashPairs().filter(p=>{
+    const d = decisions[p.key];
+    return !d || d.status === "later";
+  });
+  box.innerHTML = `
+    <h3 style="margin-bottom:6px;">GROUP</h3>
+    <p style="font-size:13px; margin-bottom:6px; color:var(--text-muted);">🔥 ${sharedMustSees.length} shared Must See${sharedMustSees.length===1?"":"s"} · ⚡ ${outstandingClashes.length} clash${outstandingClashes.length===1?"":"es"} needing a decision</p>
+    ${shared.length ? shared.slice(0,4).map(a=>{
+      const owners = Object.entries(a.interest).map(([o,m])=> `${escapeHtml(o)}${m ? " ★" : " 👍"}`).join(" · ");
+      return `<div class="decision-artist-line"><strong>${escapeHtml(a.name)}</strong> — ${owners}</div>`;
+    }).join("") : `<p class="empty-note">No shared picks yet — sync with your group to see them here.</p>`}
+  `;
+}
+
+function renderTodayDecisions(){
+  const box = document.getElementById("todayDecisions");
+  if(!box) return;
+  const decisions = Store.get("groupDecisions") || {};
+  const outstanding = groupClashPairs().filter(p=>{
+    const d = decisions[p.key];
+    return !d || d.status === "later";
+  });
+  box.innerHTML = `
+    <h3 style="margin-bottom:6px;">DECISIONS</h3>
+    ${outstanding.length
+      ? `<p style="font-size:13px; margin-bottom:8px;">⚡ ${outstanding.length} decision${outstanding.length===1?"":"s"} still needed</p>`
+        + outstanding.slice(0,3).map(p=> decisionCardHTML(p, decisions[p.key])).join("")
+        + (outstanding.length > 3 ? `<p class="empty-note">+${outstanding.length-3} more — see Plan.</p>` : "")
+      : `<p class="empty-note">✅ No outstanding decisions.</p>`}
+  `;
+  if(outstanding.length){
+    const cards = box.querySelectorAll(".decision-card");
+    outstanding.slice(0,3).forEach((p,i)=>{ if(cards[i]) wireDecisionCard(cards[i], p); });
+  }
+}
+
+function renderTodayMeet(){
+  const box = document.getElementById("todayMeet");
+  if(!box) return;
+  const m = Store.get("meeting");
+  box.innerHTML = `
+    <h3 style="margin-bottom:6px;">MEET</h3>
+    ${m
+      ? `<p>📍 Meeting at: <strong>${escapeHtml(m)}</strong></p><p class="empty-note">${Store.get("meetingBy") ? "Set by " + escapeHtml(Store.get("meetingBy")) : ""}${Store.get("meetingUpdatedAt") ? " · " + formatLastSeen(Store.get("meetingUpdatedAt")) : ""}</p>`
+      : `<p class="empty-note">No shared meeting point set yet.</p>`}
+  `;
+}
+
+function renderTodayDashboard(){
+  if(!document.getElementById("today")) return;
+  renderTodayNow();
+  renderTodayNextUp();
+  renderTodayGroup();
+  renderTodayDecisions();
+  renderTodayMeet();
+}
+renderTodayDashboard();
+setInterval(renderTodayDashboard, 60000);
+
+document.querySelectorAll('#todayQuickActions [data-today-jump]').forEach(btn=>{
+  btn.onclick = ()=>{
+    const target = document.querySelector(`.tab[data-tab="${btn.getAttribute("data-today-jump")}"]`);
+    if(target) target.click();
+  };
+});
+const todayQuickClashesBtn = document.getElementById("todayQuickClashes");
+if(todayQuickClashesBtn) todayQuickClashesBtn.onclick = ()=>{ if(typeof jumpToClashes === "function") jumpToClashes(); };
+const todayQuickSearchBtn = document.getElementById("todayQuickSearch");
+if(todayQuickSearchBtn) todayQuickSearchBtn.onclick = ()=>{
+  const target = document.querySelector('.tab[data-tab="artists"]');
+  if(target) target.click();
+  setTimeout(()=>{
+    const listBtn = document.getElementById("artistsViewListBtn");
+    if(listBtn) listBtn.click();
+    const input = document.getElementById("artistSearch");
+    if(input) input.focus();
+  }, 100);
+};
+
+// During the festival, Today answers "what should we be doing right
+// now" faster than Home does, so it becomes the tab you land on —
+// without removing Home or anyone's ability to switch back manually
+// mid-session. Before/after the festival, Home stays the default.
+(function setupFestivalModeDefault(){
+  const todayTabBtn = document.getElementById("todayTabBtn");
+  if(!isFestivalLive()) return;
+  if(todayTabBtn) todayTabBtn.classList.add("tab-live");
+  const todayTab = document.querySelector('.tab[data-tab="today"]');
+  if(todayTab) todayTab.click();
+})();
 
 async function pushToCloud(){
   const db = getFirestoreDb();
@@ -7163,7 +7410,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // "meeting" is deliberately absent — it's shared group data (stored on
 // the room doc, not personal), and must survive things like device
 // handoff instead of being wiped along with this device's own notes.
-const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId"];
+const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
