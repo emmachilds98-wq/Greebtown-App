@@ -365,6 +365,18 @@
      Stage list scrolls vertically (unbounded: 12 main stages + 50+ hidden
      venues); time scrolls horizontally (bounded to a single day). ===== */
   .timeline-outer{position:relative; overflow:auto; max-height:68vh; border:1px solid var(--line); border-radius:14px; background:var(--bg-panel); -webkit-overflow-scrolling:touch;}
+  /* Custom vertical scroll-progress bar — the native scrollbar inside a
+     -webkit-overflow-scrolling:touch box is thin, low-contrast, and
+     fades out fast on mobile, which is exactly why "am I near the
+     bottom of this stage list yet" was hard to answer on a long
+     timeline. Sits just inside the right edge, above the grid content
+     (z-index higher than the sticky hour row/stage column), thumb
+     height/position reflects how much is scrolled and how much more
+     there is — a real progress indicator, not just a scrollbar
+     restyle. display:none by default; JS only shows it once there's
+     genuinely more content than fits.  */
+  .timeline-scroll-track{position:absolute; top:8px; bottom:8px; right:4px; width:5px; border-radius:4px; background:rgba(255,255,255,.08); pointer-events:none; z-index:6; display:none;}
+  .timeline-scroll-thumb{position:absolute; left:0; right:0; border-radius:4px; background:var(--accent-teal); box-shadow:0 0 6px rgba(75,227,172,.5);}
   .timeline-grid{position:relative; display:flex; flex-direction:column; min-width:100%; width:max-content;}
   .timeline-hours-row{display:flex; position:sticky; top:0; z-index:3;}
   /* Sticky (frozen) to the left in every timeline view — Artists,
