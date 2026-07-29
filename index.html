@@ -6,6 +6,52 @@
 
 <title>Greebtown</title>
 
+<script>
+// CRASH REPORTER — deliberately the very first thing on the page,
+// before any other script. If something throws anywhere (a real JS
+// error, not just a sync failure) it normally only shows up in a
+// browser console nobody on-site has access to — this makes it show up
+// directly on the screen instead, in plain text, so a hidden crash that
+// silently breaks buttons/features further down the page becomes
+// visible and reportable without needing dev tools. Self-contained on
+// purpose: no dependency on anything else on the page working.
+(function(){
+  var errors = [];
+  function record(msg){
+    errors.push(msg);
+    render();
+  }
+  window.addEventListener("error", function(e){
+    record((e.filename ? e.filename.split("/").pop() + ":" + e.lineno + " — " : "") + (e.message || "Unknown error"));
+  });
+  window.addEventListener("unhandledrejection", function(e){
+    var reason = e.reason;
+    record("Unhandled promise rejection — " + (reason && reason.message ? reason.message : String(reason)));
+  });
+  function render(){
+    if(!errors.length) return;
+    var el = document.getElementById("__crashReporter");
+    if(!el){
+      el = document.createElement("div");
+      el.id = "__crashReporter";
+      el.style.cssText = "position:fixed; top:0; left:0; right:0; z-index:999999; background:#3a0d0d; color:#ffdcdc; font:12px/1.5 monospace; padding:10px 12px; max-height:40vh; overflow:auto; border-bottom:3px solid #ff5555; white-space:pre-wrap;";
+      var title = document.createElement("div");
+      title.textContent = "⚠️ App error detected — screenshot this whole box and send it back:";
+      title.style.cssText = "font-weight:bold; margin-bottom:6px;";
+      el.appendChild(title);
+      var list = document.createElement("div");
+      list.id = "__crashReporterList";
+      el.appendChild(list);
+      (document.body || document.documentElement).appendChild(el);
+    }
+    document.getElementById("__crashReporterList").textContent = errors.join("\n\n");
+  }
+  // documentElement always exists this early, even before <body>.
+  if(document.body) render();
+  else document.addEventListener("DOMContentLoaded", render);
+})();
+</script>
+
 <!-- PWA manifest -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b1512">
