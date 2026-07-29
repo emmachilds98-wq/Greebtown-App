@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v145";
-const APP_BUILD_TIME = "2026-07-29T14:12:00Z";
+const APP_CACHE_VERSION = "v146";
+const APP_BUILD_TIME = "2026-07-29T14:23:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5694,7 +5694,7 @@ function renderHomeSyncStatus(){
     <h3>${name ? `✅ Syncing as ${escapeHtml(name)}` : "⚠️ Pick your name to start syncing"}</h3>
     <p>${name
       ? `Syncs automatically on open, every few minutes, and whenever you pull down from the top ↓ to refresh. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> also has a manual button, any time.`
-      : `Pick who you are to start syncing — one-time, done for good on this device. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover.`}</p>
+      : `Pick who you are to start syncing — one-time, done for good on this device. If this exact name already has synced data from another phone or browser, it's found and pulled in automatically the moment you pick it. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover.`}</p>
     ${name ? `<p style="margin-top:6px; font-size:12px; color:var(--text-muted);">🔄 Data last synced with the group: <strong>${formatLastSynced()}</strong> — not the same as the app-version pill up top, that's about new code shipping, this is about your notes actually reaching everyone.</p>` : ""}
     <div class="field" style="margin-top:10px;"><label>Who are you?</label>
       <select id="homeContributorName">
@@ -5759,9 +5759,12 @@ function renderHomeInfoCard(){
     box.innerHTML = `
       <span class="tag">Read this once</span>
       <h3>💾 Your data, sync &amp; updates</h3>
-      <p>Everything you add saves itself to this device the instant you type or tap — no save button. Once you've picked your name in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a>, this phone syncs itself automatically every time you open the app with signal — no button needed, and no one has to remember. It quietly sends your updates up and pulls everyone else's in behind the scenes; a "Sync now" button is there too for an instant one mid-session.</p>
+      <p>Everything you add saves itself to this device the instant you type or tap — no save button. It also backs up to the cloud within seconds of any change to your saved artists, bingo card or character, not just on a periodic sync — so even if this device's local copy is ever lost, the cloud almost always has the latest version.</p>
+      <p>Once you've picked your name in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a>, this phone syncs itself automatically every time you open the app with signal, every few minutes while it's open, and whenever it comes back to the foreground — no button needed. A "Sync now" button is there too for an instant one mid-session.</p>
       <p>Shared things — theories, hidden-venue finds, quotebook entries, live sightings, district notes, get-involved ticks, found socials, landmarks — combine into one pool everyone sees (Discover's "All notes"). Your Plan, bingo card and character stay yours — sync never merges anyone else's into them — but everyone else's land in their own named tab right next to yours, on the Plan, Bingo and My Character screens, so you can see what your friends have without it touching your own.</p>
-      <p>Want just your own stuff backed up? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
+      <p><strong>Using more than one phone/browser as the same person?</strong> Each one gets tracked separately behind the scenes, so a fresh device (reinstalled, cleared, or just a different browser) can look "empty" at first. Picking your name on it now checks for your existing synced data automatically and pulls it straight in — and if a duplicate ever shows up anyway, <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> has a "Merge all my duplicate tabs" button that fixes it permanently, any time. Nothing gets removed or overwritten by any of this — it only ever adds.</p>
+      <p>If a sync ever looks wrong — something missing, or a device you didn't expect — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','discover')">Backup history</a> in Discover keeps snapshots of your own data (automatic every 20 min, or tap "Back up now" for a permanent one before doing anything risky) that you can step back to.</p>
+      <p>Want just your own stuff backed up locally too? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
       <p>The app itself updates quietly in the background whenever you're online, and keeps working fully offline once it's loaded once — updates never touch anything you've saved.</p>
       <button class="ghost" id="collapseHomeInfoBtn" style="margin-top:10px;">Got it, don't show this in full again</button>
     `;
@@ -5770,7 +5773,7 @@ function renderHomeInfoCard(){
   } else {
     box.innerHTML = `
       <h3 style="margin-bottom:0;">💾 Your data, sync &amp; updates</h3>
-      <p style="margin-top:6px;">Saves itself automatically, syncs itself automatically once you've picked a name — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a> · <a class="inline-link" href="javascript:void(0)" id="expandHomeInfoLink">full explanation</a></p>
+      <p style="margin-top:6px;">Saves itself automatically, backs up to the cloud within seconds, syncs itself once you've picked a name — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','discover')">Backup history</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a> · <a class="inline-link" href="javascript:void(0)" id="expandHomeInfoLink">full explanation</a></p>
     `;
     const expandLink = document.getElementById("expandHomeInfoLink");
     if(expandLink) expandLink.onclick = ()=>{ Store.set("seenHomeInfoCard", false); renderHomeInfoCard(); };
