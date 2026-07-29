@@ -5211,6 +5211,11 @@ function formatLastSeen(ts){
 // below calls to stamp new entries.
 // ===============================
 const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea"];
+// Used by statusLineHTML/renderFriendStatusBar (defined further down) —
+// declared up here since renderHomeSyncStatus() runs at load time and
+// can trigger those before the FRIEND STATUS section below would run.
+const STATUS_STALE_MS = 30 * 60 * 1000; // 30 min — past this, visibly flagged as stale
+const STATUS_DOT_PALETTE = ["🟣","🔵","🟢","🟠","🟡","🔴"];
 const contributorNameInput = document.getElementById("contributorName");
 const contributorOtherField = document.getElementById("contributorOtherField");
 const contributorOtherInput = document.getElementById("contributorOtherInput");
@@ -5633,8 +5638,6 @@ function refreshAfterMerge(){
 // mergeSyncPayload's payload.status / peopleStatus above) — no separate
 // write path or extra Firestore reads needed.
 // ===============================
-const STATUS_STALE_MS = 30 * 60 * 1000; // 30 min — past this, visibly flagged as stale
-const STATUS_DOT_PALETTE = ["🟣","🔵","🟢","🟠","🟡","🔴"];
 function statusDotFor(id){
   let hash = 0;
   const s = String(id || "");
