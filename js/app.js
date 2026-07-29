@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v141";
-const APP_BUILD_TIME = "2026-07-29T13:35:00Z";
+const APP_CACHE_VERSION = "v142";
+const APP_BUILD_TIME = "2026-07-29T13:41:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5474,8 +5474,29 @@ function backfillOwnUnnamedEntries(name){
 // picking a fresh one for this device's own past entries.
 function setContributorName(name){
   const trimmed = (name || "").trim();
+  const previousName = currentContributorName();
   Store.set("contributorName", trimmed);
   backfillOwnUnnamedEntries(trimmed);
+
+  // Heads-up only — deliberately NOT an automatic merge (that was tried
+  // and reverted; too easy to misfire from a device that wasn't even
+  // the one involved, and it made a teammate's own visible tab
+  // disappear from under them). Only fires the moment a name is first
+  // picked on a device with nothing of its own yet, so a duplicate
+  // identity gets noticed and fixed via the manual "Merge into mine"
+  // link (see renderPlanPersonTabs) right away, not days later.
+  if(!previousName && trimmed){
+    const hasOwnData = (Store.get("schedule")||[]).length || (Store.get("bingoCard")||[]).length || Store.get("myCharacter");
+    if(!hasOwnData){
+      const target = trimmed.toLowerCase();
+      const alreadySynced = [Store.get("peopleSchedules")||{}, Store.get("peopleBingo")||{}, Store.get("peopleCharacters")||{}]
+        .some(map=> Object.values(map).some(p=> ((p && p.displayName) || "").trim().toLowerCase() === target));
+      if(alreadySynced){
+        setTimeout(()=> window.alert(`Heads up: ${trimmed} already has saved picks synced from another device.\n\nIf those are yours, go to Plan → the "${trimmed}" tab → "Merge their picks into mine" to bring them into this device. Safe either way — it only adds, never overwrites.`), 300);
+      }
+    }
+  }
+
   if(typeof refreshAfterMerge === "function") refreshAfterMerge();
 }
 
