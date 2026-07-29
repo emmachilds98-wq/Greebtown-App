@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v100";
-const APP_BUILD_TIME = "2026-07-29T02:12:00Z";
+const APP_CACHE_VERSION = "v101";
+const APP_BUILD_TIME = "2026-07-29T02:16:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -3750,9 +3750,9 @@ function loadMap(){
   map.innerHTML = `
     <div id="mapInner"></div>
     <div class="mapZoomControls">
-      <button id="zoomInBtn" title="Zoom in">+</button>
-      <button id="zoomOutBtn" title="Zoom out">−</button>
-      <button id="zoomResetBtn" title="Reset view">⤢</button>
+      <button id="zoomInBtn" title="Zoom in" aria-label="Zoom in">+</button>
+      <button id="zoomOutBtn" title="Zoom out" aria-label="Zoom out">−</button>
+      <button id="zoomResetBtn" title="Reset view" aria-label="Reset map view">⤢</button>
     </div>
     <div class="compass" title="North (approx.)">
       <svg viewBox="0 0 24 24" width="26" height="26">
@@ -5687,7 +5687,7 @@ const characterResults = document.getElementById("characterResults");
 function showCharacters(list){
   characterResults.innerHTML = "";
   if(list.length === 0){
-    characterResults.innerHTML = `<p class="empty-note">No matches.</p>`;
+    characterResults.innerHTML = `<p class="empty-note">No one matches "${escapeHtml(characterSearch ? characterSearch.value.trim() : "")}" — try a district or faction name instead.</p>`;
     return;
   }
   const characterNotes = Store.get("characterNotes") || {};
