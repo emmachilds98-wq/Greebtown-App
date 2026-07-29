@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v114";
-const APP_BUILD_TIME = "2026-07-29T04:10:00Z";
+const APP_CACHE_VERSION = "v115";
+const APP_BUILD_TIME = "2026-07-29T04:17:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -295,7 +295,7 @@ fixBottomClearance();
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -334,6 +334,7 @@ tabs.forEach(tab=>{
     if(tab.dataset.tab === "plan" && typeof renderNowNext === "function") renderNowNext();
     if(tab.dataset.tab === "discover" && typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
     if(tab.dataset.tab === "discover" && typeof renderDiscoverForYou === "function") renderDiscoverForYou();
+    if(tab.dataset.tab === "discover" && typeof renderRecentActivity === "function") renderRecentActivity("recentActivityList");
   };
 });
 
@@ -4936,7 +4937,7 @@ function mergeSyncPayload(payload){
     const key = (t.text || "").trim().toLowerCase();
     if(!key || theoryKeys.has(key)) return;
     theoryKeys.add(key);
-    theories.push({ text: t.text, when: t.when, from });
+    theories.push({ text: t.text, when: t.when, from, ts: t.ts || null });
     stats.theories++;
   });
   Store.set("theories", theories);
@@ -5538,6 +5539,7 @@ function refreshAfterMerge(){
   if(typeof renderAllFriendStatusUI === "function") renderAllFriendStatusUI();
   if(typeof renderGroupDecisions === "function") renderGroupDecisions();
   if(typeof renderDiscoverForYou === "function") renderDiscoverForYou();
+  if(typeof renderRecentActivity === "function") renderRecentActivity("recentActivityList");
 }
 
 // ===============================
@@ -6059,6 +6061,80 @@ function renderDiscoverForYou(){
   box.innerHTML = lines.length ? `<div class="discover-for-you-card"><h3>For you</h3>${lines.join("")}</div>` : "";
 }
 renderDiscoverForYou();
+if(typeof renderRecentActivity === "function") renderRecentActivity("recentActivityList");
+
+// ===============================
+// GROUP ACTIVITY + "NEW SINCE YOU LAST OPENED" — both derived entirely
+// from data already synced (peopleStatus, groupDecisions, the shared
+// meeting point, hiddenVenues/theories timestamps) rather than a
+// separate event log — no new collection, no extra Firestore writes at
+// all. "New since last opened" is purely a local comparison against a
+// personal (never-synced) lastOpenedAt cursor.
+// ===============================
+function buildRecentActivity(){
+  const events = [];
+  const myDeviceId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : null;
+
+  const peopleStatus = Store.get("peopleStatus") || {};
+  Object.entries(peopleStatus).forEach(([id, s])=>{
+    if(s && s.updatedAt && s.place) events.push({ ts: s.updatedAt, text: `${escapeHtml(personDisplayName(s, id))} updated their location to ${escapeHtml(s.place)}`, icon: statusDotFor(id) });
+  });
+  const myStatus = Store.get("myStatus");
+  if(myStatus && myStatus.updatedAt && myStatus.place && myDeviceId){
+    events.push({ ts: myStatus.updatedAt, text: `You updated your location to ${escapeHtml(myStatus.place)}`, icon: statusDotFor(myDeviceId) });
+  }
+
+  const decisions = Store.get("groupDecisions") || {};
+  Object.values(decisions).forEach(d=>{
+    if(!d || !d.updatedAt) return;
+    const label = d.status === "together" ? `decided to go together to ${escapeHtml(d.choice || "")}`
+      : d.status === "split" ? "decided to split up"
+      : d.status === "half" ? "decided to catch half of each"
+      : "marked a clash to decide later";
+    events.push({ ts: d.updatedAt, text: `${escapeHtml(d.by || "Someone")} ${label}`, icon: "⚡" });
+  });
+
+  const meetingUpdatedAt = Store.get("meetingUpdatedAt");
+  if(meetingUpdatedAt){
+    events.push({ ts: meetingUpdatedAt, text: `${escapeHtml(Store.get("meetingBy") || "Someone")} set the meeting point to ${escapeHtml(Store.get("meeting") || "")}`, icon: "📍" });
+  }
+
+  (Store.get("hiddenVenues") || []).forEach(v=>{
+    if(v.ts) events.push({ ts: v.ts, text: `${escapeHtml(v.from || "Someone")} added a hidden venue: ${escapeHtml(v.name || "Untitled find")}`, icon: "🕵" });
+  });
+  (Store.get("theories") || []).forEach(t=>{
+    if(t.ts) events.push({ ts: t.ts, text: `${escapeHtml(t.from || "Someone")} added a theory`, icon: "🔮" });
+  });
+
+  return events.sort((a,b)=> b.ts - a.ts);
+}
+
+function renderRecentActivity(containerId, limit){
+  const box = document.getElementById(containerId);
+  if(!box) return;
+  const events = buildRecentActivity().slice(0, limit || 12);
+  box.innerHTML = events.length
+    ? events.map(e=> `<div class="status-line">${e.icon} ${e.text} <span style="color:var(--text-muted); font-size:11px;">· ${formatLastSeen(e.ts)}</span></div>`).join("")
+    : `<p class="empty-note">Nothing yet — activity shows up here as your group syncs, sets statuses, logs finds and makes decisions.</p>`;
+}
+
+// Compares against the PREVIOUS lastOpenedAt (captured before this call
+// updates it) — so this only ever fires once per fresh app open, not on
+// every render, and needs no server-side "unread" state of its own.
+function renderNewSinceLastOpened(){
+  const box = document.getElementById("newSinceLastOpened");
+  if(!box) return;
+  const previous = Store.get("lastOpenedAt");
+  Store.set("lastOpenedAt", Date.now());
+  if(!previous){ box.innerHTML = ""; return; } // first-ever open — nothing to compare against
+  const events = buildRecentActivity().filter(e=> e.ts > previous);
+  const decisionsCount = (typeof outstandingGroupDecisionsCount === "function") ? outstandingGroupDecisionsCount() : 0;
+  if(!events.length && !decisionsCount){ box.innerHTML = ""; return; }
+  const parts = [];
+  if(events.length) parts.push(`${events.length} update${events.length===1?"":"s"} from your group`);
+  if(decisionsCount) parts.push(`${decisionsCount} decision${decisionsCount===1?"":"s"} still needed`);
+  box.innerHTML = `<div class="card"><span class="tag">Since you last opened</span><p style="margin-top:6px;">🆕 ${parts.join(" · ")}</p></div>`;
+}
 
 async function pushToCloud(){
   const db = getFirestoreDb();
@@ -6354,7 +6430,12 @@ function autoSyncNow(trigger){
     }
   }).catch(err=>{ console.error("Auto-sync failed:", err); /* stays quiet in the UI — no signal, or room not set up yet — but still logged for diagnosis */ });
 }
-autoSyncNow("on open");
+// "New since you last opened" needs to run once the initial sync has
+// had a chance to land — otherwise it'd compare against data that's
+// about to change moments later. Runs regardless of whether the sync
+// succeeded (offline, no room set up yet, etc.) so it's never stuck
+// waiting on signal.
+autoSyncNow("on open").finally(()=>{ if(typeof renderNewSinceLastOpened === "function") renderNewSinceLastOpened(); });
 setInterval(()=> autoSyncNow("periodic"), AUTO_SYNC_INTERVAL_MS);
 document.addEventListener("visibilitychange", ()=>{
   // Guard against firing right on top of the interval or another
@@ -6946,7 +7027,8 @@ document.getElementById("addHiddenVenueBtn").onclick = ()=>{
     near: hiddenVenueNearInput.value.trim(),
     info,
     from: currentContributorName() || "",
-    when: new Date().toLocaleString()
+    when: new Date().toLocaleString(),
+    ts: Date.now()
   });
   Store.set("hiddenVenues", entries);
   hiddenVenueNameInput.value = "";
@@ -6991,7 +7073,7 @@ document.getElementById("addTheoryBtn").onclick = ()=>{
   const text = theoryInput.value.trim();
   if(!text) return;
   const entries = Store.get("theories") || [];
-  entries.push({ text, when: new Date().toLocaleString(), from: currentContributorName() || "" });
+  entries.push({ text, when: new Date().toLocaleString(), from: currentContributorName() || "", ts: Date.now() });
   Store.set("theories", entries);
   theoryInput.value = "";
   loadTheories();
@@ -7567,7 +7649,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // "meeting" is deliberately absent — it's shared group data (stored on
 // the room doc, not personal), and must survive things like device
 // handoff instead of being wiped along with this device's own notes.
-const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices"];
+const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","lastOpenedAt"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
