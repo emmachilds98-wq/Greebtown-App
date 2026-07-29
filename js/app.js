@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v136";
-const APP_BUILD_TIME = "2026-07-29T12:28:00Z";
+const APP_CACHE_VERSION = "v137";
+const APP_BUILD_TIME = "2026-07-29T12:37:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2998,9 +2998,58 @@ function renderPlanPersonTabs(){
       const lastSeenEntry = (Store.get("peopleLastSeen") || {})[planActiveOwner];
       const lastSeenTs = personLastSeenTs(lastSeenEntry);
       const seenText = lastSeenTs ? ` (last synced ${formatLastSeen(lastSeenTs)})` : "";
-      note.textContent = `Viewing ${activeLabel}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list.`;
+      // "Merge into mine" exists for exactly the situation this session
+      // has hit more than once: a device losing track of its own
+      // deviceId (reinstall, cleared storage, ...) ends up as a second,
+      // empty tab under the same name as a teammate's real synced data —
+      // this is the (safe, additive, undoable-by-just-not-syncing-yet)
+      // way to reclaim it as "you" without a destructive device-handoff
+      // wipe-and-replace.
+      note.innerHTML = `Viewing ${escapeHtml(activeLabel)}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list. <a class="inline-link" href="javascript:void(0)" id="mergePersonIntoMineLink">Is this actually you? Merge their picks into mine →</a>`;
+      const mergeLink = document.getElementById("mergePersonIntoMineLink");
+      if(mergeLink) mergeLink.onclick = ()=>{
+        const ok = confirm(`Merge ${activeLabel}'s saved artists, bingo squares and character into your own?\n\nThis only adds — it never removes or overwrites anything already on this device. ${activeLabel}'s separate tab disappears afterwards since it's now part of yours.`);
+        if(!ok) return;
+        const added = mergePersonIntoMine(planActiveOwner);
+        note.textContent = added ? `Merged in — ${added} thing${added===1?"":"s"} added to your own picks.` : "Nothing new to merge in.";
+      };
     }
   }
+}
+
+// See renderPlanPersonTabs' "Merge into mine" link above for why this
+// exists. Reuses mergeOwnCloudCopy's additive-only logic (new saved
+// artists unioned by name, bingo-marked squares unioned, character only
+// fills in if you don't have one) — same safety guarantees as merging
+// in a borrowed phone's newer picks, just from a local person-tab
+// instead of a Firestore fetch. Also used automatically by
+// setContributorName() below when picking a name that already has
+// synced-but-unclaimed data sitting in peopleSchedules/peopleBingo/
+// peopleCharacters, so this class of duplicate never has to be found
+// and fixed by hand again.
+function mergePersonIntoMine(personId){
+  const peopleSchedules = Store.get("peopleSchedules") || {};
+  const peopleBingo = Store.get("peopleBingo") || {};
+  const peopleCharacters = Store.get("peopleCharacters") || {};
+  const payload = {
+    schedule: personSnapshotList(peopleSchedules[personId]),
+    bingo: peopleBingo[personId] || null,
+    character: peopleCharacters[personId] || null
+  };
+  const changed = mergeOwnCloudCopy(payload);
+
+  // Retire the now-absorbed duplicate so it stops showing as a separate
+  // "read-only teammate" version of yourself.
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus"].forEach(key=>{
+    const map = Store.get(key) || {};
+    if(map[personId]){ delete map[personId]; Store.set(key, map); }
+  });
+
+  if(planActiveOwner === personId) planActiveOwner = "mine";
+  refreshAfterMerge();
+  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+  if(typeof pushToCloud === "function") pushToCloud().catch(()=>{});
+  return changed;
 }
 
 function renderSchedule(){
@@ -5393,6 +5442,25 @@ function backfillOwnUnnamedEntries(name){
   }
 }
 
+// Finds a person-tab (peopleSchedules/peopleBingo/peopleCharacters) with
+// this exact display name, if this device already pulled one in as a
+// read-only teammate's snapshot. Used by setContributorName below to
+// catch a device landing on a name that already has synced data
+// elsewhere — most often because this device's own deviceId reset at
+// some point (reinstall, cleared storage, ...), so it looks "new" and
+// empty even though the person picking the name has real history here.
+function findUnclaimedPersonIdByName(name){
+  const target = (name || "").trim().toLowerCase();
+  if(!target) return null;
+  const maps = [Store.get("peopleSchedules") || {}, Store.get("peopleBingo") || {}, Store.get("peopleCharacters") || {}];
+  for(const map of maps){
+    for(const id of Object.keys(map)){
+      if(((map[id] && map[id].displayName) || "").trim().toLowerCase() === target) return id;
+    }
+  }
+  return null;
+}
+
 // Single entry point for "this device's own user just (re)picked their
 // name" — every local picker (Home's inline one, Discover's) should call
 // this rather than writing contributorName to Store directly, so the
@@ -5404,6 +5472,22 @@ function setContributorName(name){
   const trimmed = (name || "").trim();
   Store.set("contributorName", trimmed);
   backfillOwnUnnamedEntries(trimmed);
+
+  // This device has nothing of its own yet, but the room already has
+  // synced data under this exact name sitting in a read-only person-tab
+  // — offer to claim it now rather than leaving a confusing empty
+  // "you" sitting right alongside your own real picks. Additive only,
+  // via the same mergePersonIntoMine used by the manual "Merge into
+  // mine" link on person tabs (see renderPlanPersonTabs).
+  const hasOwnData = (Store.get("schedule")||[]).length || (Store.get("bingoCard")||[]).length || Store.get("myCharacter");
+  if(!hasOwnData && trimmed){
+    const matchId = typeof findUnclaimedPersonIdByName === "function" ? findUnclaimedPersonIdByName(trimmed) : null;
+    if(matchId && typeof mergePersonIntoMine === "function"){
+      const ok = confirm(`${trimmed} already has saved artists, bingo or a character synced from another device.\n\nBring that data into this device? It only adds — nothing already here gets removed or overwritten.`);
+      if(ok) mergePersonIntoMine(matchId);
+    }
+  }
+
   if(typeof refreshAfterMerge === "function") refreshAfterMerge();
 }
 
