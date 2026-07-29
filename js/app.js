@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v103";
-const APP_BUILD_TIME = "2026-07-29T02:27:00Z";
+const APP_CACHE_VERSION = "v104";
+const APP_BUILD_TIME = "2026-07-29T02:36:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -6437,7 +6437,20 @@ loadGlossary();
 // ===============================
 // FESTIVAL GUIDE
 // ===============================
-const guideContent = document.getElementById("guideContent");
+// Split across three containers positioned to match each card's actual
+// topic (story-deep-dive stays with the Story section; extras/logistics
+// render right after their matching summary card in Just for fun /
+// Logistics & practical stuff), instead of one flat container that used
+// to sit only in the Story area — extras and logistics cards had no
+// business rendering there, and their JS-inserted section dividers used
+// to collide with the id of the plain summary cards elsewhere on the
+// page (jumpBeyondMusic, jumpLogistics), silently breaking navigation
+// to whichever one lost the id lookup.
+const GUIDE_CONTAINERS = {
+  story: document.getElementById("guideStoryContent"),
+  extras: document.getElementById("guideExtrasContent"),
+  logistics: document.getElementById("guideLogisticsContent")
+};
 
 const chapterFiveGuide = [
   { section:"story", title:"Chapter Five — the one-page briefing", html:"<p><strong>Then:</strong> The Collector was freed at the 2025 closing ceremony and passed leadership to The Network. <strong>Now:</strong> Mr Biga and Aurora Venturestone have merged their companies into BBXL™ and are pushing a space programme that treats Earth as a ‘single-use planet’. <strong>The pressure point:</strong> BBXL is draining the city’s resources while still attracting citizens into its VIP world. The Network wants a shared, people-led redesign — but that is not yet a victory.</p>" },
@@ -6469,34 +6482,41 @@ const chapterFiveGuide = [
   { section:"logistics", title:"🤝 Getting one shared copy for the group", text:"Each phone saves its own data separately. To end up with one file that has everyone's notes, theories, hidden-venue finds and ticks in it: add your name and copy a Sync code in Discover, send it to a teammate, they paste and merge it in (nothing gets duplicated), and repeat round the group. Whoever's phone ends up with everyone merged in is the one to hit 'Download shareable group copy' on — that file is the group's master copy with personal things (bingo card, character, HQ notes) left out, so it's safe to actually hand round, and Discover's Consolidated Notes card shows you everything that's in it at a glance before you do." }
 ];
 
+// Only "story" gets its own divider/heading — it needs to visually
+// separate from the "Get involved" card above it. Extras and logistics
+// cards render directly into their container with no divider, since the
+// summary card immediately above each container already introduces the
+// topic; a second heading repeating the same title would be exactly the
+// kind of duplicate-looking clutter this split was meant to fix.
 const GUIDE_SECTION_LABELS = {
-  story: "📖 The story, in depth",
-  extras: "🎯 Beyond the music",
-  logistics: "🗓 Logistics for the day"
+  story: "📖 The story, in depth"
 };
 const GUIDE_SECTION_IDS = {
-  story: "jumpStoryDeep",
-  extras: "jumpBeyondMusic",
-  logistics: "jumpLogistics"
+  story: "jumpStoryDeep"
 };
 
 function loadGuide(){
-  guideContent.innerHTML = "";
+  Object.values(GUIDE_CONTAINERS).forEach(el=>{ if(el) el.innerHTML = ""; });
   let lastSection = null;
   chapterFiveGuide.forEach(section=>{
+    const container = GUIDE_CONTAINERS[section.section];
+    if(!container) return;
     if(section.section && section.section !== lastSection){
       lastSection = section.section;
-      const divider = document.createElement("div");
-      divider.className = "daygroup";
-      divider.id = GUIDE_SECTION_IDS[lastSection] || "";
-      divider.textContent = GUIDE_SECTION_LABELS[lastSection] || lastSection;
-      guideContent.appendChild(divider);
+      const label = GUIDE_SECTION_LABELS[lastSection];
+      if(label){
+        const divider = document.createElement("div");
+        divider.className = "daygroup";
+        divider.id = GUIDE_SECTION_IDS[lastSection] || "";
+        divider.textContent = label;
+        container.appendChild(divider);
+      }
     }
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `<h3>${section.title}</h3>${section.html || `<p>${section.text}</p>`}`;
     linkifyKeyTerms(card);
-    guideContent.appendChild(card);
+    container.appendChild(card);
   });
 }
 
