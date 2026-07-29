@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v127";
-const APP_BUILD_TIME = "2026-07-29T12:10:00Z";
+const APP_CACHE_VERSION = "v128";
+const APP_BUILD_TIME = "2026-07-29T12:25:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5414,20 +5414,23 @@ function renderHomeSyncStatus(){
     <div class="field" id="homeContributorOtherField" style="display:${isOther ? "" : "none"};"><label>Your name</label><input type="text" id="homeContributorOtherInput" placeholder="Type your name"></div>
     <button class="action" id="homeSyncNowBtn" style="margin-top:10px;">☁️ Sync now</button>
     <p class="empty-note" id="homeSyncNowNote" style="margin-top:6px;"></p>
+    <div style="margin-top:14px; padding:12px; border:1px solid rgba(242,168,60,.4); border-radius:10px; background:rgba(242,168,60,.08);">
+      <strong style="color:var(--accent-amber);">📍 Where are you right now?</strong>
+      <p style="margin-top:4px; font-size:13px; color:var(--text-muted);">Moved since you last opened the app? Update it here every time — it's how the group actually knows where everyone is.</p>
+      <div class="field" style="margin-top:8px;"><label>Where are you?</label>
+        <select id="homeStatusLocationSelect">
+          <option value="">Select a location…</option>
+        </select>
+      </div>
+      <div class="field" id="homeStatusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
+      <button class="action" id="homeStatusCustomBtn" style="margin-top:6px;">Set my status</button>
+      <p class="empty-note" id="homeStatusFeedbackNote" style="margin-top:6px;"></p>
+    </div>
+    <div id="homeFriendStatusList" style="margin-top:12px;"></div>
     <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--text-muted);">📱 <strong>Using someone else's phone?</strong> Restores their last-synced saved artists, bingo card and character here — wipes this device first, so hit Sync now above before switching if there's anything on here worth keeping.</p>
     <div class="field" style="margin-top:8px;"><label>Their name</label><input type="text" id="homeHandoffNameInput" placeholder="e.g. Dave"></div>
     <button class="action danger" id="homeHandoffSwitchBtn">Wipe this phone &amp; switch to them</button>
     <p class="empty-note" id="homeHandoffStatusNote" style="margin-top:6px;"></p>
-    <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--text-muted);">📍 <strong>Where are you?</strong> A quick status for the group, not live tracking.</p>
-    <div class="field" style="margin-top:8px;"><label>Where are you?</label>
-      <select id="homeStatusLocationSelect">
-        <option value="">Select a location…</option>
-      </select>
-    </div>
-    <div class="field" id="homeStatusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
-    <button class="action" id="homeStatusCustomBtn" style="margin-top:6px;">Set my status</button>
-    <p class="empty-note" id="homeStatusFeedbackNote" style="margin-top:6px;"></p>
-    <div id="homeFriendStatusList" style="margin-top:12px;"></div>
   `;
   const sel = document.getElementById("homeContributorName");
   const otherInput = document.getElementById("homeContributorOtherInput");
@@ -5689,7 +5692,32 @@ function statusLineHTML(entry){
   const stale = entry.updatedAt && (Date.now() - entry.updatedAt) > STATUS_STALE_MS;
   const label = entry.isMe ? `${escapeHtml(entry.displayName)} (you)` : escapeHtml(entry.displayName);
   const syncedLine = entry.lastSyncedTs ? `<br><span style="font-size:11px; color:var(--text-muted);">Last online ${formatLastSeen(entry.lastSyncedTs)}</span>` : "";
-  return `<div class="status-line${stale ? " status-stale" : ""}">${statusDotFor(entry.id)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Location set ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}${syncedLine}</div>`;
+  // Only other people's statuses get a remove button — clearing your own
+  // is done by just setting a new one. Mainly here for ghost/stale
+  // entries left over from before sync worked properly.
+  const removeBtn = entry.isMe ? "" : ` <button type="button" class="status-remove-btn" onclick="removeFriendStatus('${entry.id}')" title="Remove this status" aria-label="Remove ${escapeHtml(entry.displayName)}'s status" style="border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:13px; padding:0 4px;">✕</button>`;
+  return `<div class="status-line${stale ? " status-stale" : ""}">${statusDotFor(entry.id)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Location set ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}${removeBtn}${syncedLine}</div>`;
+}
+
+// Clears a stale/ghost friend status — local cache first (so the UI
+// updates immediately) and then best-effort deletes that person's
+// member doc from the shared room, so a future sync pull doesn't just
+// bring the same stale entry straight back.
+function removeFriendStatus(id){
+  if(!id) return;
+  const peopleStatus = Store.get("peopleStatus") || {};
+  delete peopleStatus[id];
+  Store.set("peopleStatus", peopleStatus);
+  const peopleLastSeen = Store.get("peopleLastSeen") || {};
+  delete peopleLastSeen[id];
+  Store.set("peopleLastSeen", peopleLastSeen);
+  renderAllFriendStatusUI();
+  if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+  const db = (typeof getFirestoreDb === "function") ? getFirestoreDb() : null;
+  const roomId = (typeof currentRoomCode === "function") ? currentRoomCode() : "";
+  if(db && roomId){
+    db.collection("rooms").doc(roomId).collection("members").doc(id).delete().catch(()=>{});
+  }
 }
 
 function renderFriendStatusList(containerId){
