@@ -56,6 +56,7 @@
   </div>
   <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:39</span>
 </header>
+<div id="friendStatusBar" class="friend-status-bar" style="display:none;"></div>
 
 <main>
 
@@ -341,10 +342,11 @@ Meet at the clock tower if separated"></textarea>
 
     <div class="card" id="jumpMeetingPoint">
       <h3>📍 Meeting point</h3>
-      <p>Set directly here, or tap any stage/district marker above and use "Save as meeting point."</p>
+      <p>Shared with the whole group — set directly here, or tap any stage/district marker above and use "Save as meeting point." Anyone can change or clear it.</p>
       <div id="currentMeetingDisplay" class="empty-note" style="margin-bottom:8px;"></div>
       <div class="field"><input type="text" id="meetingPointInput" placeholder="e.g. Grand Central, or 'the big oak by West Camping'"></div>
       <button class="action" id="setMeetingBtn">Set meeting point</button>
+      <button class="ghost" id="clearMeetingBtn" style="margin-top:6px;">Clear meeting point</button>
     </div>
 
     <div class="card" id="jumpLogLandmark">
@@ -827,11 +829,24 @@ Talk to an actor in character
     <div class="card" id="jumpDeviceHandoff">
       <h3>📱 Using someone else's phone?</h3>
       <p>If your own phone's dead or lost and you're borrowing a teammate's for a bit, this picks up where you left off — pulls in your last-synced saved artists, bingo card and character, and this phone continues as you from here.</p>
-      <p class="empty-note">It can only restore what actually made it to a sync — your own private notes, meeting point and packing list only ever lived on your original phone, so those can't come back this way. And it needs signal, since it fetches your latest synced data live.</p>
+      <p class="empty-note">It can only restore what actually made it to a sync — your own private notes and packing list only ever lived on your original phone, so those can't come back this way (the shared meeting point isn't personal, so that one's unaffected either way). And it needs signal, since it fetches your latest synced data live.</p>
       <p class="empty-note"><strong>Whoever's using this phone right now — hit Sync now above first,</strong> or whatever's currently on here gets wiped before it ever reaches the cloud.</p>
       <div class="field"><label>Your name</label><input type="text" id="handoffNameInput" placeholder="e.g. Dave"></div>
       <button class="action danger" id="handoffSwitchBtn">Wipe this phone &amp; switch to me</button>
       <p class="empty-note" id="handoffStatusNote" style="margin-top:6px;"></p>
+    </div>
+
+    <div class="card" id="jumpFriendStatus">
+      <h3>📍 Where's everyone?</h3>
+      <p>A quick status, not live tracking — set where you are and it's visible to the group next sync. No GPS, nothing automatic.</p>
+      <div class="stagelist" id="statusPresetButtons">
+        <button type="button" data-status-preset="Grand Central">Grand Central</button>
+        <button type="button" data-status-preset="Botanica">Botanica</button>
+        <button type="button" data-status-preset="Camp">Camp</button>
+      </div>
+      <div class="field" style="margin-top:8px;"><label>Other</label><input type="text" id="statusCustomInput" placeholder="Type where you are"></div>
+      <button class="action" id="statusCustomBtn">Set my status</button>
+      <div id="friendStatusList" style="margin-top:12px;"></div>
     </div>
 
     <div class="card">
