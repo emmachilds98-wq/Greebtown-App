@@ -1,0 +1,51 @@
+name: Sync Boomtown lineup (official app)
+
+# Manual-only for now — enable the schedule below once BOOMTOWN_REFRESH_TOKEN
+# etc. are confirmed working end-to-end (see scripts/fetch-boomtown-official.mjs
+# for what each secret is and why).
+on:
+  workflow_dispatch: {}
+  # schedule:
+  #   - cron: "17 6 * * *"
+  #   - cron: "5 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: emmachilds98-wq-patch-2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install libsodium-wrappers --no-save
+
+      - name: Fetch latest lineup from the official app and regenerate js/app.js
+        env:
+          BOOMTOWN_FIREBASE_API_KEY: ${{ secrets.BOOMTOWN_FIREBASE_API_KEY }}
+          BOOMTOWN_REFRESH_TOKEN: ${{ secrets.BOOMTOWN_REFRESH_TOKEN }}
+          BOOMTOWN_EVENT_ID: ${{ vars.BOOMTOWN_EVENT_ID }}
+          # Needs "Secrets: write" repo permission — the default GITHUB_TOKEN
+          # can't manage repo secrets — so it can persist a rotated
+          # BOOMTOWN_REFRESH_TOKEN for the next scheduled run.
+          GH_SECRETS_PAT: ${{ secrets.GH_SECRETS_PAT }}
+        run: node scripts/fetch-boomtown-official.mjs
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name "boomtown-lineup-sync[bot]"
+          git config user.email "actions@users.noreply.github.com"
+          git add js/app.js service-worker.js
+          git commit -m "Auto-sync Boomtown lineup from official app"
+          git push origin HEAD:emmachilds98-wq-patch-2
