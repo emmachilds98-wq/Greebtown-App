@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v149";
-const APP_BUILD_TIME = "2026-07-29T14:52:00Z";
+const APP_CACHE_VERSION = "v150";
+const APP_BUILD_TIME = "2026-07-29T15:05:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -2516,6 +2516,21 @@ function buildTimelineHTML(items, opts){
   const savedNames = opts.savedNames || null;
   const mustSeeNames = opts.mustSeeNames || null;
 
+  // "Now" line — only when opts.day is the day actually showing on the
+  // device's own clock right now (never guessed, never shown against
+  // the wrong day), and only when that falls within the plotted time
+  // range. Computed fresh on every render, straight off new Date(), so
+  // this is accurate for real once the festival's actually on — not a
+  // hand-set time that needs remembering to update.
+  let nowLineLeft = null;
+  if(opts.day && typeof currentFestivalDayLabel === "function" && currentFestivalDayLabel() === opts.day){
+    const now = new Date();
+    let nowMinOfDay = now.getHours()*60 + now.getMinutes();
+    if(now.getHours() < 6) nowMinOfDay += 1440; // same overnight-tail shift as _start/_end above
+    if(nowMinOfDay >= minMin && nowMinOfDay <= maxMin) nowLineLeft = (nowMinOfDay - minMin) * pxPerMin;
+  }
+  const nowLineHTML = nowLineLeft !== null ? `<div class="timeline-now-line" style="left:${nowLineLeft}px;"></div>` : "";
+
   let hourLabels = "", hourLines = "";
   for(let m=minMin; m<=maxMin; m+=60){
     const left = (m-minMin)*pxPerMin;
@@ -2551,11 +2566,17 @@ function buildTimelineHTML(items, opts){
         : "";
       return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
-    return `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${rowHeight}px;">${hourLines}${blocks}</div></div>`;
+    return `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${rowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
   }).join("");
 
+  // Same line repeated into every row-body above (each positioned in
+  // that row's own coordinate space, same as the blocks) reads as one
+  // continuous vertical line down the whole grid; this one extra copy
+  // in the hours row is just to carry the "NOW" tag at the top.
+  const nowLabelHTML = nowLineLeft !== null ? `<div class="timeline-now-line" style="left:${nowLineLeft}px;"><span class="timeline-now-label">NOW</span></div>` : "";
+
   const html = `<div class="timeline-grid">
-    <div class="timeline-hours-row"><div class="timeline-row-head">&nbsp;</div><div class="timeline-hours-body" style="width:${totalWidth}px;">${hourLabels}</div></div>
+    <div class="timeline-hours-row"><div class="timeline-row-head">&nbsp;</div><div class="timeline-hours-body" style="width:${totalWidth}px;">${hourLabels}${nowLabelHTML}</div></div>
     ${rows}
   </div>`;
   return { html, stages };
@@ -2641,7 +2662,7 @@ function renderArtistsTimeline(){
   const dayItems = allArtists().filter(a=> a.day === artistsTimelineDay && a.start);
   const savedNames = new Set(Store.get("schedule").map(s=>s.name));
   const mustSeeNames = new Set(Store.get("schedule").filter(s=>s.mustSee).map(s=>s.name));
-  const { html } = buildTimelineHTML(dayItems, { savedNames, mustSeeNames });
+  const { html } = buildTimelineHTML(dayItems, { day: artistsTimelineDay, savedNames, mustSeeNames });
   grid.innerHTML = html;
   grid.querySelectorAll(".timeline-block").forEach(b=>{
     b.onclick = ()=>{
@@ -3008,6 +3029,18 @@ function renderPlanPersonTabs(){
   const myName = (Store.get("contributorName") || "").trim();
   const myLabel = myName ? `⭐ ${myName}` : "⭐ Mine";
 
+  // Timeline and Compare have their own person-selection UI (multi-select
+  // owner chips, and "everyone at once" respectively) — showing this
+  // single-select tab strip on top of those as well just duplicates the
+  // same names in two controls with different selection behaviour. Only
+  // List and Clashes actually use planActiveOwner to pick whose data to
+  // show, so this strip only needs to be visible there.
+  const relevantHere = planView === "list" || planView === "clash";
+  if(!relevantHere){
+    box.style.display = "none";
+    if(note) note.style.display = "none";
+    return;
+  }
   box.style.display = "";
   box.className = "tabstrip";
   box.innerHTML = `<button class="${planActiveOwner==="mine"?"active":""}" data-owner="mine">${escapeHtml(myLabel)}</button>` +
@@ -3258,6 +3291,7 @@ function updateClashSubViewVisibility(){
 
 function setPlanView(view){
   planView = view;
+  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
   ["viewListBtn","viewClashBtn","viewTimelineBtn","viewCompareBtn"].forEach(id=>{
     const btn = document.getElementById(id);
     if(btn) btn.classList.remove("active");
@@ -3587,7 +3621,7 @@ function renderPlanTimeline(){
 
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
-  const { html } = buildTimelineHTML(dayItems, { readonly, savedNames, mustSeeNames, showOwnerBadges: combined });
+  const { html } = buildTimelineHTML(dayItems, { day: planTimelineDay, readonly, savedNames, mustSeeNames, showOwnerBadges: combined });
   grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">${planMustSeeFilter ? `No must-sees with a set time saved for ${planTimelineDay} yet.` : `Nothing with a set time saved for ${planTimelineDay} yet.`}</p>`;
 
   const hint = document.getElementById("planTimelineHint");
@@ -3637,7 +3671,7 @@ function renderClashTimeline(){
     .map(({a})=>a);
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
-  const { html } = buildTimelineHTML(dayItems, { readonly, savedNames, mustSeeNames });
+  const { html } = buildTimelineHTML(dayItems, { day: clashTimelineDay, readonly, savedNames, mustSeeNames });
   grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">No clashes on ${clashTimelineDay}${planMustSeeFilter ? " among your must-sees" : ""}.</p>`;
 
   grid.querySelectorAll(".timeline-block").forEach(b=>{
@@ -4727,7 +4761,15 @@ function mapQuickAction(kind){
   }
 
   if(kind === "medical"){ jumpTo("jumpSiteInfo"); return; }
-  if(kind === "food"){ jumpTo("jumpFoodBars"); return; }
+  if(kind === "food"){
+    // No single "the food stall" pin exists — every district has its own
+    // spread — so this goes straight to the named/rumoured Food & drink
+    // rows in the Directory rather than pointing at one marker on a map
+    // that can't show them all yet.
+    if(typeof jumpToDirectoryType === "function") jumpToDirectoryType("Food & drink");
+    else jumpTo("jumpFoodBars");
+    return;
+  }
   if(kind === "water" || kind === "toilets"){
     // No exact pinned locations exist for these — Boomtown never
     // publishes them in advance — so this says so honestly rather than
@@ -5061,6 +5103,28 @@ function linkifyKeyTerms(container){
 // Jump here from an artist's stage name (Artists list, Plan, Timeline)
 // to see that venue's directory entry — resets other filters, uses the
 // same search box so only the matching row(s) show, and scrolls to it.
+// Jump to the full Directory, pre-filtered to one type (e.g. "Food & drink").
+// Used wherever a quick-lookup can't point at an exact map pin — the map's
+// district/stage markers are illustrative, not surveyed, so anything that
+// doesn't have one fixed named spot (food stalls, welfare points, market
+// stalls) is better served by scrolling straight to the searchable list of
+// named/rumoured entries than by guessing at a marker to highlight.
+function jumpToDirectoryType(type){
+  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  venueStatusFilter = "all";
+  venueSearchTerm = "";
+  if(venueSearchInput) venueSearchInput.value = "";
+  updateClearVenueSearchBtn();
+  document.querySelectorAll("#venueStatusFilters button").forEach(b=> b.classList.toggle("active", b.dataset.status === "all"));
+  venueTypeFilter = type;
+  document.querySelectorAll("#venueTypeFilters button").forEach(b=> b.classList.toggle("active", b.dataset.type === type));
+  renderVenueTable();
+  requestAnimationFrame(()=>{
+    const dir = document.getElementById("jumpDirectory");
+    if(dir) dir.scrollIntoView({ behavior:"smooth", block:"start" });
+  });
+}
+
 function jumpToStageDirectory(stageName){
   document.querySelector('.tab[data-tab="mapscreen"]').click();
   venueStatusFilter = "all";
@@ -6340,6 +6404,16 @@ function isFestivalLive(){
   return now >= FESTIVAL_START && now < FESTIVAL_END;
 }
 
+// Which DAY_ORDER label "right now" actually falls on, or null if the
+// festival isn't currently live — used by buildTimelineHTML's now-line
+// so it only ever appears on the day you're actually viewing when
+// that's genuinely today, never guessed or left on for the wrong day.
+function currentFestivalDayLabel(){
+  if(!isFestivalLive()) return null;
+  const diffDays = Math.floor((new Date() - FESTIVAL_START) / 86400000);
+  return DAY_ORDER[diffDays] || null;
+}
+
 function timedFromSchedule(schedule){
   return (schedule || [])
     .map(a=>({ ...a, startMin: toMinutes(a.day, a.start), endMin: toMinutes(a.day, a.end) }))
@@ -6400,7 +6474,7 @@ function renderTodayNextUp(){
         `<span class="nextup-owner${m ? " mustsee" : ""}">${escapeHtml(o)}${m ? " ★" : ""}</span>`
       ).join("");
       return `<div class="nextup-row">
-        <div class="nextup-time">${escapeHtml(a.start || "")}<span class="nextup-countdown">${nextUpCountdownLabel(a.startMin, nowMin)}</span></div>
+        <div class="nextup-time"><span class="nextup-day">${escapeHtml(a.day || "")}</span>${escapeHtml(a.start || "")}<span class="nextup-countdown">${nextUpCountdownLabel(a.startMin, nowMin)}</span></div>
         <div class="nextup-info">
           <div class="nextup-name">${escapeHtml(a.name)}</div>
           <div class="nextup-stage">${escapeHtml(a.stage)}</div>
