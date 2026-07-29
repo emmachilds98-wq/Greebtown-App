@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v97";
-const APP_BUILD_TIME = "2026-07-29T01:38:00Z";
+const APP_CACHE_VERSION = "v98";
+const APP_BUILD_TIME = "2026-07-29T01:53:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -287,7 +287,7 @@ fixBottomClearance();
 //    instead, kept separate per contributor, shown only in their own
 //    person-tab on the Plan, Bingo, and My Character cards. Sync must
 //    never read or write other personal fields: meeting, notes, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [] };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [] };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -2743,10 +2743,12 @@ function renderPlanPersonTabs(){
     note.style.display = "";
     if(names.length === 0){
       note.textContent = "Nobody's synced in yet — a teammate's picks will show up as their own tab here (and in Compare below) once they have. Pick your name in Discover if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
+    } else if(planActiveOwner === "mine"){
+      note.textContent = "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours. See everyone at once in the Compare view below.";
     } else {
-      note.textContent = planActiveOwner === "mine"
-        ? "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours. See everyone at once in the Compare view below."
-        : `Viewing ${planActiveOwner}'s saved artists from their last sync — read-only, and it hasn't changed or added anything to your own list.`;
+      const lastSeen = (Store.get("peopleLastSeen") || {})[planActiveOwner];
+      const seenText = lastSeen ? ` (last synced ${formatLastSeen(lastSeen)})` : "";
+      note.textContent = `Viewing ${planActiveOwner}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list.`;
     }
   }
 }
@@ -4739,7 +4741,34 @@ function mergeSyncPayload(payload){
     stats.character = 1;
   }
 
+  // "Online" in a live/real-time sense isn't something a periodic,
+  // offline-first pull-based sync can honestly claim without an
+  // always-on listener (which runs against the Spark-plan-usage goal
+  // elsewhere in this file) — so this tracks "last seen," meaning the
+  // timestamp of that person's own last successful push, piggybacked
+  // on data already being pulled rather than a separate read.
+  if(payload.updatedAt){
+    const peopleLastSeen = Store.get("peopleLastSeen") || {};
+    peopleLastSeen[from] = payload.updatedAt;
+    Store.set("peopleLastSeen", peopleLastSeen);
+  }
+
   return { stats, from };
+}
+
+// Shared formatting for a person's last-seen timestamp — same relative/
+// absolute split as formatLastSynced() above, so the two read
+// consistently wherever they appear together.
+function formatLastSeen(ts){
+  if(!ts) return null;
+  const diffMs = Date.now() - ts;
+  const mins = Math.round(diffMs / 60000);
+  if(mins < 1) return "just now";
+  if(mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if(hours < 24) return `${hours}h ago`;
+  const d = new Date(ts);
+  return d.toLocaleDateString([], { day:"numeric", month:"short" });
 }
 
 // ===============================
@@ -4748,7 +4777,7 @@ function mergeSyncPayload(payload){
 // free-text field. currentContributorName() is what every "add" handler
 // below calls to stamp new entries.
 // ===============================
-const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana"];
+const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea"];
 const contributorNameInput = document.getElementById("contributorName");
 const contributorOtherField = document.getElementById("contributorOtherField");
 const contributorOtherInput = document.getElementById("contributorOtherInput");
@@ -4898,6 +4927,7 @@ function renderHomeSyncStatus(){
         <option value="Jack">Jack</option>
         <option value="Lewis">Lewis</option>
         <option value="Dana">Dana</option>
+        <option value="Rhea">Rhea</option>
         <option value="__other__">Other…</option>
       </select>
     </div>
@@ -5016,6 +5046,16 @@ function getFirestoreDb(){
   try{
     if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     _firestoreDb = firebase.firestore();
+    // Persistent (IndexedDB-backed) offline cache, synchronized across
+    // any tabs this app is open in at once — without this, Firestore's
+    // cache is memory-only and a reload while offline loses anything
+    // that hadn't already round-tripped to the server. Best-effort: a
+    // browser without IndexedDB, or a `synchronizeTabs`-incompatible
+    // multi-tab situation, just falls back to the same memory-only
+    // behaviour this already had, so this never blocks sync working.
+    _firestoreDb.enablePersistence({ synchronizeTabs: true }).catch(err=>{
+      console.warn("Firestore offline persistence not enabled:", err && err.code);
+    });
     return _firestoreDb;
   }catch(err){
     return null;
