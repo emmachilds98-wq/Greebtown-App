@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v99";
-const APP_BUILD_TIME = "2026-07-29T02:06:00Z";
+const APP_CACHE_VERSION = "v100";
+const APP_BUILD_TIME = "2026-07-29T02:12:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2163,8 +2163,40 @@ function updateGenreChipHighlights(){
   document.querySelectorAll("#genreChips .chip").forEach(c=> c.classList.toggle("active", selectedGenres.has(c.dataset.g)));
 }
 
+// Day chips — same multi-select, AND-combined pattern as genre chips
+// above, so Lineup search can filter by day without switching to the
+// Timeline view (which only shows one day at a time).
+let selectedDays = new Set();
+
+function toggleDayChip(d){
+  if(selectedDays.has(d)) selectedDays.delete(d); else selectedDays.add(d);
+}
+
+function clearDayChips(){
+  selectedDays.clear();
+}
+
+function updateDayChipHighlights(){
+  document.querySelectorAll("#dayChips .chip").forEach(c=> c.classList.toggle("active", selectedDays.has(c.dataset.d)));
+}
+
+function loadDayChips(){
+  const box = document.getElementById("dayChips");
+  if(!box) return;
+  box.innerHTML = DAY_ORDER.map(d=>`<span class="chip" data-d="${d}">${d}</span>`).join("");
+  updateDayChipHighlights();
+  box.querySelectorAll(".chip[data-d]").forEach(s=>{
+    s.onclick = ()=>{
+      toggleDayChip(s.dataset.d);
+      updateDayChipHighlights();
+      updateClearArtistSearchBtn();
+      renderArtistSearchResults();
+    };
+  });
+}
+
 function hasActiveArtistFilters(){
-  return artistSearch.value.trim().length > 0 || selectedGenres.size > 0;
+  return artistSearch.value.trim().length > 0 || selectedGenres.size > 0 || selectedDays.size > 0;
 }
 
 function updateClearArtistSearchBtn(){
@@ -2215,14 +2247,15 @@ function currentFilteredArtists(){
       artist.stage.toLowerCase().includes(term) ||
       genreOf(artist).toLowerCase().includes(term);
     const matchesGenres = selectedGenres.size === 0 || selectedGenres.has(genreOf(artist));
-    return matchesTerm && matchesGenres;
+    const matchesDays = selectedDays.size === 0 || selectedDays.has(artist.day);
+    return matchesTerm && matchesGenres && matchesDays;
   });
 }
 
 // With 1000+ acts across the full 5-day dataset, dumping everything to
 // the DOM on load is slow on older phones — search-first instead.
 function promptArtistSearch(){
-  artistResults.innerHTML = `<p class="empty-note">Start typing a name, stage or genre — or tap one or more genre chips above — to search ${allArtists().length} acts across all 5 days.</p>`;
+  artistResults.innerHTML = `<p class="empty-note">Start typing a name, stage or genre — or tap one or more day/genre chips above — to search ${allArtists().length} acts across all 5 days.</p>`;
 }
 function renderArtistSearchResults(){
   if(!hasActiveArtistFilters()){ promptArtistSearch(); return; }
@@ -2239,6 +2272,8 @@ if(clearArtistSearchBtn){
     artistSearch.value = "";
     clearGenreChips();
     updateGenreChipHighlights();
+    clearDayChips();
+    updateDayChipHighlights();
     updateClearArtistSearchBtn();
     promptArtistSearch();
   };
@@ -2476,6 +2511,7 @@ function loadGenreChips(){
   if(toggleBtn) toggleBtn.onclick = ()=>{ genreChipsExpanded = !genreChipsExpanded; loadGenreChips(); };
 }
 loadGenreChips();
+loadDayChips();
 
 // ===============================
 // ADD YOUR OWN ARTIST
@@ -3298,9 +3334,11 @@ function browseAllArtists(){
   artistSearch.value = "";
   clearGenreChips();
   updateGenreChipHighlights();
+  clearDayChips();
+  updateDayChipHighlights();
   updateClearArtistSearchBtn();
   showArtists(allArtists());
-  artistSearch.placeholder = `Browsing all ${allArtists().length} artists — use a genre chip or search to narrow it down`;
+  artistSearch.placeholder = `Browsing all ${allArtists().length} artists — use a day/genre chip or search to narrow it down`;
   window.scrollTo(0, 0);
 }
 document.getElementById("browseAllArtistsBtn").onclick = browseAllArtists;
