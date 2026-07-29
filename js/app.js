@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v109";
-const APP_BUILD_TIME = "2026-07-29T03:15:00Z";
+const APP_CACHE_VERSION = "v110";
+const APP_BUILD_TIME = "2026-07-29T03:33:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -289,8 +289,13 @@ fixBottomClearance();
 //    ensureDeviceId()/personDisplayName() further down), kept separate
 //    per contributor, shown only in their own person-tab on the Plan,
 //    Bingo, and My Character cards. Sync must never read or write other
-//    personal fields: meeting, notes, roomCode.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
+//    personal fields: notes, roomCode.
+//    Note: "meeting" is deliberately NOT personal — it's the group's one
+//    shared meeting point, stored directly on the room document (not a
+//    per-member doc) since there's only ever one value for the whole
+//    group, not one per person. "myStatus"/"peopleStatus" follow the
+//    same per-person-snapshot pattern as schedule/bingo/character above.
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -4131,16 +4136,25 @@ function setupMapZoomPan(){
 }
 
 function saveMeeting(name){
-  Store.set("meeting", name);
-  mapInfo.innerHTML = `<div class="card"><p class="empty-note">Meeting point saved: <strong style="color:var(--accent-amber)">${name}</strong></p></div>`;
-  renderCurrentMeeting();
+  pushSharedMeeting(name);
+  mapInfo.innerHTML = `<div class="card"><p class="empty-note">Meeting point saved for the group: <strong style="color:var(--accent-amber)">${escapeHtml(name)}</strong></p></div>`;
 }
 
+// The meeting point is shared, group-wide state (see pushSharedMeeting/
+// applyMeetingFromRoomData near pullFromCloud) — this just renders
+// whatever's currently cached locally, which every sync keeps fresh.
 function renderCurrentMeeting(){
   const box = document.getElementById("currentMeetingDisplay");
   if(!box) return;
   const m = Store.get("meeting");
-  box.textContent = m ? `Current meeting point: ${m}` : "No meeting point set yet.";
+  if(!m){
+    box.textContent = "No meeting point set yet.";
+    return;
+  }
+  const by = Store.get("meetingBy");
+  const ts = Store.get("meetingUpdatedAt");
+  const meta = [by ? `set by ${by}` : "", ts ? formatLastSeen(ts) : ""].filter(Boolean).join(" · ");
+  box.innerHTML = `📍 Meeting at: <strong style="color:var(--accent-amber)">${escapeHtml(m)}</strong>${meta ? `<br><span style="font-size:12px;">${escapeHtml(meta)}</span>` : ""}`;
 }
 
 const meetingPointInput = document.getElementById("meetingPointInput");
@@ -4149,6 +4163,11 @@ document.getElementById("setMeetingBtn").onclick = ()=>{
   if(!val) return;
   saveMeeting(val);
   meetingPointInput.value = "";
+};
+const clearMeetingBtn = document.getElementById("clearMeetingBtn");
+if(clearMeetingBtn) clearMeetingBtn.onclick = ()=>{
+  if(!confirm("Clear the group's meeting point for everyone?")) return;
+  pushSharedMeeting("");
 };
 renderCurrentMeeting();
 
@@ -4701,7 +4720,12 @@ function buildSyncPayload(){
     // Same read-only-snapshot treatment again — lands in
     // peopleCharacters[from], viewable in its own tab, never merged
     // into or overwriting your own myCharacter.
-    character: Store.get("myCharacter") || null
+    character: Store.get("myCharacter") || null,
+    // Lightweight "where am I" status — a preset or custom place plus
+    // when it was set. Same read-only-snapshot treatment: lands in
+    // peopleStatus[personId] on the receiving end, never merged into
+    // anyone else's own myStatus.
+    status: Store.get("myStatus") || null
   };
 }
 
@@ -4901,6 +4925,15 @@ function mergeSyncPayload(payload){
     stats.character = 1;
   }
 
+  // Same replace-snapshot treatment for "where am I" status — replaces
+  // that person's own entry each resync, never touches this device's
+  // own myStatus.
+  if(payload.status && payload.status.place){
+    const peopleStatus = Store.get("peopleStatus") || {};
+    peopleStatus[personId] = { displayName: from, place: payload.status.place, updatedAt: payload.status.updatedAt || payload.updatedAt || Date.now() };
+    Store.set("peopleStatus", peopleStatus);
+  }
+
   // "Online" in a live/real-time sense isn't something a periodic,
   // offline-first pull-based sync can honestly claim without an
   // always-on listener (which runs against the Spark-plan-usage goal
@@ -5098,6 +5131,15 @@ function renderHomeSyncStatus(){
     <div class="field" style="margin-top:8px;"><label>Their name</label><input type="text" id="homeHandoffNameInput" placeholder="e.g. Dave"></div>
     <button class="action danger" id="homeHandoffSwitchBtn">Wipe this phone &amp; switch to them</button>
     <p class="empty-note" id="homeHandoffStatusNote" style="margin-top:6px;"></p>
+    <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--text-muted);">📍 <strong>Where are you?</strong> A quick status for the group, not live tracking.</p>
+    <div class="stagelist" id="homeStatusPresetButtons">
+      <button type="button" data-status-preset="Grand Central">Grand Central</button>
+      <button type="button" data-status-preset="Botanica">Botanica</button>
+      <button type="button" data-status-preset="Camp">Camp</button>
+    </div>
+    <div class="field" style="margin-top:8px;"><label>Other</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
+    <button class="action" id="homeStatusCustomBtn">Set my status</button>
+    <div id="homeFriendStatusList" style="margin-top:12px;"></div>
   `;
   const sel = document.getElementById("homeContributorName");
   const otherInput = document.getElementById("homeContributorOtherInput");
@@ -5107,6 +5149,8 @@ function renderHomeSyncStatus(){
   const syncNowBtn = document.getElementById("homeSyncNowBtn");
   if(syncNowBtn) syncNowBtn.onclick = ()=> runManualSync(syncNowBtn, document.getElementById("homeSyncNowNote"));
   if(typeof wireDeviceHandoffControl === "function") wireDeviceHandoffControl("homeHandoffNameInput", "homeHandoffSwitchBtn", "homeHandoffStatusNote");
+  if(typeof wireStatusControl === "function") wireStatusControl("homeStatusPresetButtons", "homeStatusCustomInput", "homeStatusCustomBtn");
+  if(typeof renderFriendStatusList === "function") renderFriendStatusList("homeFriendStatusList");
 }
 renderHomeSyncStatus();
 
@@ -5338,7 +5382,106 @@ function refreshAfterMerge(){
   if(typeof renderBingoPersonTabs === "function"){ renderBingoPersonTabs(); renderBingo(); }
   if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+  if(typeof renderAllFriendStatusUI === "function") renderAllFriendStatusUI();
 }
+
+// ===============================
+// FRIEND STATUS — a lightweight, manually-set "where am I" per person,
+// not continuous location tracking. Rides along on the same per-member
+// sync doc as schedule/bingo/character (see buildSyncPayload/
+// mergeSyncPayload's payload.status / peopleStatus above) — no separate
+// write path or extra Firestore reads needed.
+// ===============================
+const STATUS_STALE_MS = 30 * 60 * 1000; // 30 min — past this, visibly flagged as stale
+const STATUS_DOT_PALETTE = ["🟣","🔵","🟢","🟠","🟡","🔴"];
+function statusDotFor(id){
+  let hash = 0;
+  const s = String(id || "");
+  for(let i=0;i<s.length;i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+  return STATUS_DOT_PALETTE[hash % STATUS_DOT_PALETTE.length];
+}
+
+function setMyStatus(place){
+  const trimmed = (place || "").trim();
+  if(!trimmed) return;
+  Store.set("myStatus", { place: trimmed, updatedAt: Date.now() });
+  renderAllFriendStatusUI();
+  if(typeof autoSyncNow === "function") autoSyncNow("status changed");
+}
+
+// Own status plus everyone else's cached-from-sync status, newest first.
+function friendStatusEntries(){
+  const peopleStatus = Store.get("peopleStatus") || {};
+  const myDeviceId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : null;
+  const entries = Object.entries(peopleStatus)
+    .filter(([id])=> id !== myDeviceId)
+    .map(([id, s])=> ({ id, displayName: personDisplayName(s, id), place: s.place, updatedAt: s.updatedAt }));
+  const myStatus = Store.get("myStatus");
+  if(myStatus && myStatus.place && myDeviceId){
+    entries.push({ id: myDeviceId, displayName: currentContributorName() || "You", place: myStatus.place, updatedAt: myStatus.updatedAt, isMe: true });
+  }
+  return entries.sort((a,b)=> (b.updatedAt||0) - (a.updatedAt||0));
+}
+
+function statusLineHTML(entry){
+  const stale = entry.updatedAt && (Date.now() - entry.updatedAt) > STATUS_STALE_MS;
+  const label = entry.isMe ? `${escapeHtml(entry.displayName)} (you)` : escapeHtml(entry.displayName);
+  return `<div class="status-line${stale ? " status-stale" : ""}">${statusDotFor(entry.id)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Updated ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}</div>`;
+}
+
+function renderFriendStatusList(containerId){
+  const box = document.getElementById(containerId);
+  if(!box) return;
+  const entries = friendStatusEntries();
+  box.innerHTML = entries.length ? entries.map(statusLineHTML).join("") : `<p class="empty-note">No one's set a status yet.</p>`;
+}
+
+// The persistent top banner — visible on every tab, not just Discover/
+// Home — so "where's everyone" doesn't need a trip anywhere. Only shows
+// teammates, not your own status, and hides entirely if nobody's set one.
+function renderFriendStatusBar(){
+  const bar = document.getElementById("friendStatusBar");
+  if(!bar) return;
+  const entries = friendStatusEntries().filter(e=> !e.isMe);
+  if(!entries.length){ bar.innerHTML = ""; bar.style.display = "none"; return; }
+  bar.style.display = "";
+  bar.innerHTML = entries.map(e=>{
+    const stale = e.updatedAt && (Date.now() - e.updatedAt) > STATUS_STALE_MS;
+    return `<span class="status-chip${stale ? " status-stale" : ""}">${statusDotFor(e.id)} ${escapeHtml(e.displayName)} · ${escapeHtml(e.place)}</span>`;
+  }).join("");
+}
+
+function renderAllFriendStatusUI(){
+  renderFriendStatusList("friendStatusList");
+  renderFriendStatusList("homeFriendStatusList");
+  renderFriendStatusBar();
+}
+
+// Shared by Discover's status card and Home's own copy of it — Home
+// rebuilds its whole card on every renderHomeSyncStatus() call, so this
+// gets (re)wired fresh each time rather than once at load, same pattern
+// as wireDeviceHandoffControl above.
+function wireStatusControl(presetContainerId, customInputId, customBtnId){
+  const presetContainer = document.getElementById(presetContainerId);
+  if(presetContainer){
+    presetContainer.querySelectorAll("button[data-status-preset]").forEach(btn=>{
+      btn.onclick = ()=> setMyStatus(btn.getAttribute("data-status-preset"));
+    });
+  }
+  const customBtn = document.getElementById(customBtnId);
+  const customInput = document.getElementById(customInputId);
+  if(customBtn && customInput){
+    customBtn.onclick = ()=>{
+      const val = customInput.value.trim();
+      if(!val) return;
+      setMyStatus(val);
+      customInput.value = "";
+    };
+  }
+}
+wireStatusControl("statusPresetButtons", "statusCustomInput", "statusCustomBtn");
+renderAllFriendStatusUI();
+setInterval(renderAllFriendStatusUI, 60000);
 
 async function pushToCloud(){
   const db = getFirestoreDb();
@@ -5374,12 +5517,50 @@ async function pushToCloud(){
   if(name) db.collection("rooms").doc(room).collection("members").doc(name).delete().catch(()=>{});
 }
 
+// The shared meeting point lives directly on the room document (not a
+// per-member doc) — there's one value for the whole group, not one per
+// person, so it doesn't fit the per-member snapshot pattern the rest of
+// sync uses. Cloud is the source of truth: whatever's there on a pull
+// simply replaces the local cache, same last-write-wins model as every
+// other shared field.
+function applyMeetingFromRoomData(roomData){
+  const meeting = (roomData && roomData.meeting) || null;
+  Store.set("meeting", meeting ? (meeting.place || "") : "");
+  Store.set("meetingBy", meeting ? (meeting.by || "") : "");
+  Store.set("meetingUpdatedAt", meeting ? (meeting.updatedAt || null) : null);
+  if(typeof renderCurrentMeeting === "function") renderCurrentMeeting();
+}
+
+async function pushSharedMeeting(place){
+  const trimmed = (place || "").trim();
+  const name = currentContributorName() || "Someone";
+  const meeting = trimmed ? { place: trimmed, by: name, updatedAt: Date.now() } : null;
+  Store.set("meeting", trimmed);
+  Store.set("meetingBy", trimmed ? name : "");
+  Store.set("meetingUpdatedAt", trimmed ? meeting.updatedAt : null);
+  if(typeof renderCurrentMeeting === "function") renderCurrentMeeting();
+  if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room) return false;
+  try{
+    await db.collection("rooms").doc(room).set({ meeting }, { merge: true });
+    return true;
+  }catch(err){
+    return false;
+  }
+}
+
 async function pullFromCloud(){
   const db = getFirestoreDb();
   const room = currentRoomCode();
   if(!db || !room) return { stats: null, count: 0 };
   const deviceId = ensureDeviceId();
-  const snap = await db.collection("rooms").doc(room).collection("members").get();
+  const [snap, roomDoc] = await Promise.all([
+    db.collection("rooms").doc(room).collection("members").get(),
+    db.collection("rooms").doc(room).get().catch(()=> null)
+  ]);
+  if(roomDoc) applyMeetingFromRoomData(roomDoc.exists ? roomDoc.data() : null);
   const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   let count = 0;
   snap.forEach(doc=>{
@@ -5437,11 +5618,12 @@ function switchDeviceIdentity(targetId, payload){
     Store.set("bingoLocked", !!payload.bingo.locked);
   }
   if(payload.character) Store.set("myCharacter", { ...payload.character });
+  if(payload.status) Store.set("myStatus", { ...payload.status });
 
   // They're "mine" now, not a read-only teammate — drop any cached
   // snapshot under their old personId so they don't also linger as
   // their own separate person-tab right after taking over.
-  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen"].forEach(key=>{
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus"].forEach(key=>{
     const map = Store.get(key) || {};
     if(map[targetId]){ delete map[targetId]; Store.set(key, map); }
   });
@@ -6797,7 +6979,10 @@ document.getElementById("resetApp").onclick = ()=>{
 // MODEL note near Store/DEFAULTS above) — also left out of the
 // shareable group snapshot below, so handing that file to the group
 // can never leak one person's bingo card, character or private notes.
-const PERSONAL_ONLY_KEYS = ["meeting","notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId"];
+// "meeting" is deliberately absent — it's shared group data (stored on
+// the room doc, not personal), and must survive things like device
+// handoff instead of being wiped along with this device's own notes.
+const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
