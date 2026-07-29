@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v160";
-const APP_BUILD_TIME = "2026-07-29T21:35:24Z";
+const APP_CACHE_VERSION = "v161";
+const APP_BUILD_TIME = "2026-07-29T21:47:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -481,6 +481,15 @@ const tabs = document.querySelectorAll(".tab");
 // navigation, not a "look something up and return" trip.
 let navReturnStack = [];
 let suppressNavClear = false;
+// Per-tab scroll memory — separate from navReturnStack above, which is
+// only for "jump" links returning to an exact origin. This covers the
+// plainer case: tapping a bottom-nav tab directly should land back
+// where you last scrolled to on that tab, not reset to the top every
+// time. In-memory only (not persisted to localStorage) — resets on a
+// fresh app load/reinstall, same as how most native apps' tab bars
+// behave, and avoids restoring a scroll offset that no longer makes
+// sense after the page's own content has changed shape.
+let tabScrollPositions = {};
 
 function updateNavBackButton(){
   const btn = document.getElementById("navBackBtn");
@@ -509,10 +518,11 @@ if(navBackBtn) navBackBtn.onclick = ()=>{
     suppressNavClear = true;
     btn.click();
   }
-  // Double rAF: the tab click's own handler already forces scroll to 0,0
-  // synchronously — wait a frame (plus one more for any screen's own
-  // render-on-activate work) before overriding it with the remembered
-  // position.
+  // Double rAF: the tab click's own handler already forces a scroll
+  // position synchronously (that tab's own remembered position, which
+  // isn't necessarily where this jump came from) — wait a frame (plus
+  // one more for any screen's own render-on-activate work) before
+  // overriding it with the jump's specific remembered position.
   requestAnimationFrame(()=> requestAnimationFrame(()=>{
     window.scrollTo(0, entry.scrollY);
     if(document.scrollingElement) document.scrollingElement.scrollTop = entry.scrollY;
@@ -523,12 +533,18 @@ tabs.forEach(tab=>{
   tab.onclick = ()=>{
     if(!suppressNavClear){ navReturnStack = []; updateNavBackButton(); }
     suppressNavClear = false;
+    // Remember where you were on the tab you're leaving, before
+    // switching away from it, so tapping back to it later (via the
+    // bottom nav, not just the back button) lands where you left off.
+    const outgoingTab = document.querySelector(".tab.active");
+    if(outgoingTab) tabScrollPositions[outgoingTab.dataset.tab] = window.scrollY;
     screens.forEach(s=>s.classList.remove("active"));
     tabs.forEach(t=>t.classList.remove("active"));
     document.getElementById(tab.dataset.tab).classList.add("active");
     tab.classList.add("active");
-    window.scrollTo(0, 0);
-    if(document.scrollingElement) document.scrollingElement.scrollTop = 0;
+    const restoreY = tabScrollPositions[tab.dataset.tab] || 0;
+    window.scrollTo(0, restoreY);
+    if(document.scrollingElement) document.scrollingElement.scrollTop = restoreY;
     if(tab.dataset.tab === "home" && typeof updateStats === "function") updateStats();
     if(tab.dataset.tab === "plan" && typeof renderNowNext === "function") renderNowNext();
     if(tab.dataset.tab === "discover" && typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
