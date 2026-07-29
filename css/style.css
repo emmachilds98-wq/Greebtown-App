@@ -216,6 +216,19 @@
   .status-pill2.confirmed{background:rgba(75,227,172,.14); color:var(--accent-teal); border:1px solid rgba(75,227,172,.35);}
   .status-pill2.rumoured{background:rgba(226,131,106,.14); color:var(--accent-red); border:1px solid rgba(226,131,106,.35);}
   .status-pill2.logged{background:rgba(242,168,60,.14); color:var(--accent-amber); border:1px solid rgba(242,168,60,.35);}
+  .decision-card{border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--bg-panel-2); margin-bottom:10px;}
+  .decision-card.decision-needed{border-color:rgba(242,168,60,.5);}
+  .decision-head{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; font-weight:700; font-size:13px;}
+  .decision-pill{display:inline-block; font-size:10px; padding:2px 8px; border-radius:20px; white-space:nowrap; font-weight:700; letter-spacing:.02em; flex-shrink:0;}
+  .decision-pill.needs{background:rgba(242,168,60,.14); color:var(--accent-amber); border:1px solid rgba(242,168,60,.35);}
+  .decision-pill.together{background:rgba(75,227,172,.14); color:var(--accent-teal); border:1px solid rgba(75,227,172,.35);}
+  .decision-pill.split{background:rgba(90,150,230,.14); color:#7fb3f0; border:1px solid rgba(90,150,230,.35);}
+  .decision-pill.later{background:rgba(255,255,255,.08); color:var(--text-muted); border:1px solid var(--line);}
+  .decision-artist-line{font-size:13px; margin:4px 0; color:var(--text-muted);}
+  .decision-artist-line strong{color:var(--text-primary);}
+  .decision-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+  .decision-actions button{font-size:12px; padding:6px 10px; border-radius:10px; border:1px solid var(--line); background:transparent; color:var(--text-primary); cursor:pointer;}
+  .decision-actions button.active{background:rgba(75,227,172,.14); border-color:rgba(75,227,172,.4); color:var(--accent-teal);}
   .venue-filters{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;}
   .venue-filters button{background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-muted); font-size:12px; padding:6px 12px; border-radius:20px; cursor:pointer;}
   .venue-filters button.active{color:var(--accent-amber); border-color:var(--accent-amber);}

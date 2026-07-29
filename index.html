@@ -227,6 +227,8 @@ Meet at the clock tower if separated"></textarea>
     <div class="stagelist" id="planPersonTabs" style="display:none; margin-bottom:12px;"></div>
     <p class="empty-note" id="planPersonNote" style="display:none; margin-bottom:10px;"></p>
 
+    <div id="groupDecisionsBox"></div>
+
     <div class="viewtoggle">
       <button class="active" id="viewListBtn">List</button>
       <button id="viewClashBtn">Clashes</button>
@@ -839,13 +841,23 @@ Talk to an actor in character
     <div class="card" id="jumpFriendStatus">
       <h3>📍 Where's everyone?</h3>
       <p>A quick status, not live tracking — set where you are and it's visible to the group next sync. No GPS, nothing automatic.</p>
-      <div class="stagelist" id="statusPresetButtons">
-        <button type="button" data-status-preset="Grand Central">Grand Central</button>
-        <button type="button" data-status-preset="Botanica">Botanica</button>
-        <button type="button" data-status-preset="Camp">Camp</button>
+      <div class="field"><label>Where are you?</label>
+        <select id="statusLocationSelect">
+          <option value="">Select a location…</option>
+          <option value="Area 404">Area 404</option>
+          <option value="Botanica">Botanica</option>
+          <option value="Thrutopia">Thrutopia</option>
+          <option value="Copperwood">Copperwood</option>
+          <option value="Oldtown">Oldtown</option>
+          <option value="Letsbe Avenue">Letsbe Avenue</option>
+          <option value="Metropolis">Metropolis</option>
+          <option value="Grand Central">Grand Central</option>
+          <option value="Camp">Camp</option>
+          <option value="__other__">Other…</option>
+        </select>
       </div>
-      <div class="field" style="margin-top:8px;"><label>Other</label><input type="text" id="statusCustomInput" placeholder="Type where you are"></div>
-      <button class="action" id="statusCustomBtn">Set my status</button>
+      <div class="field" id="statusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="statusCustomInput" placeholder="Type where you are"></div>
+      <button class="action" id="statusCustomBtn" style="margin-top:6px;">Set my status</button>
       <div id="friendStatusList" style="margin-top:12px;"></div>
     </div>
 
