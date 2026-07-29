@@ -73,7 +73,24 @@ window.ARTIST_PREVIEWS = {
   "Ross From Friends": { spotifyArtist: "1Ma3pJzPIrAyYPNRkp3SUF", audioPreview: "https://p.scdn.co/mp3-preview/b556b8c3dfeec157f8d110b82ed165cb10e3da83.mp3", soundcloud: "https://soundcloud.com/rossfromfriends", youtubeChannel: "https://www.youtube.com/channel/UCQF0bMNU7G-F07QuLJEJ0GQ", instagram: "https://www.instagram.com/rossfromfriends/" },
   "Folamour": { spotifyArtist: "6pJY5At9SiMpAOBrw9YosS", audioPreview: "https://p.scdn.co/mp3-preview/38bd2c8e4202e34d8e28ff2b14e3899ebbfc085f.mp3", soundcloud: "https://soundcloud.com/folamour", youtubeChannel: "https://www.youtube.com/channel/UC6cU5MIwHhDe-83ycfHEbyA", instagram: "https://www.instagram.com/folamour_fhuo/" },
   "Alix Perez": { spotifyArtist: "4e6pQ61gYReORJoXcrQH1Z", audioPreview: "https://p.scdn.co/mp3-preview/7a478f81909ab518da71370088690d6ab4702fe9.mp3", soundcloud: "http://soundcloud.com/alixperez", instagram: "https://www.instagram.com/alixperez1985/" },
-  "Hamdi": { spotifyArtist: "7vvicoei9BbKpZix8qSeLg", audioPreview: "https://p.scdn.co/mp3-preview/23247364e332aa630d303b3ab649116265cf8263.mp3", soundcloud: "https://soundcloud.com/hamdiofficialmusic", youtubeChannel: "https://www.youtube.com/channel/UCsvs03ZW_Mko0LP4HerZG_w", instagram: "https://www.instagram.com/hamdimusic/" }
+  "Hamdi": { spotifyArtist: "7vvicoei9BbKpZix8qSeLg", audioPreview: "https://p.scdn.co/mp3-preview/23247364e332aa630d303b3ab649116265cf8263.mp3", soundcloud: "https://soundcloud.com/hamdiofficialmusic", youtubeChannel: "https://www.youtube.com/channel/UCsvs03ZW_Mko0LP4HerZG_w", instagram: "https://www.instagram.com/hamdimusic/" },
+  // Cross-checked via Viberate (spotify/soundcloud/youtube/instagram links
+  // straight off each artist's own verified profile) — audioPreview only
+  // added where a Spotify track search's own subtitle/bio cross-reference
+  // confirmed it's genuinely that artist (Viberate's own bio text names the
+  // exact same song for Ott/The Nextmen/Kaotik Kartel/Beans On Toast, so
+  // those are trustworthy; Sub Focus's is a well-known, unambiguous single).
+  "Ott": { spotifyArtist: "1F102kNzMqsmOpF7AfFmm5", audioPreview: "https://p.scdn.co/mp3-preview/4bbf32e5223da7dfab7d90378d631141fdcdf091.mp3", soundcloud: "https://soundcloud.com/ottsonic", youtubeChannel: "http://www.youtube.com/channel/UC8nm5_vE1TjJ41jpW2HmZzQ", instagram: "https://www.instagram.com/ottsonic/" },
+  "Sub Focus": { spotifyArtist: "0QaSiI5TLA4N7mcsdxShDO", audioPreview: "https://p.scdn.co/mp3-preview/0c2e5d786c898e78c68c1db614bb4cd08f7a7bdf.mp3", soundcloud: "https://soundcloud.com/subfocus", youtubeChannel: "https://www.youtube.com/user/subfocustv", instagram: "https://www.instagram.com/subfocus/" },
+  "The Nextmen": { spotifyArtist: "465IoLV7sBVtMQ3WJ756BL", audioPreview: "https://p.scdn.co/mp3-preview/29119b2939a04bc9180f380fa2ba62a48ac51b38.mp3", soundcloud: "https://soundcloud.com/thenextmen", youtubeChannel: "https://www.youtube.com/channel/UCz21UKb86TYBBmD157xtZug", instagram: "https://www.instagram.com/thenextmenofficial/" },
+  "Kaotik Kartel": { spotifyArtist: "5UKrxYnStlbD0aVYSx9KM1", audioPreview: "https://p.scdn.co/mp3-preview/91e1cf41a9e0053ba1fabc67243a7380bf58bf68.mp3", soundcloud: "https://soundcloud.com/kaotikkartel", youtubeChannel: "https://www.youtube.com/channel/UCnN-Qlh3f99ygw53RYOP5uw", instagram: "https://www.instagram.com/kaotik_kartel/" },
+  "Beans on Toast": { spotifyArtist: "6fVeXD7D2RpFoR6bzNEDPo", audioPreview: "https://p.scdn.co/mp3-preview/45ddff2385374c45fcfd3651ff5d7696f7da57b7.mp3", soundcloud: "https://soundcloud.com/beans-on-toast", youtubeChannel: "http://www.youtube.com/channel/UCk7CBqtSSmuJIBAFJPv8z4Q", instagram: "https://www.instagram.com/beans.on.toast/" },
+  // No Spotify link on file in Viberate's own verified profile for this
+  // exact artist (the plausible-looking Spotify search hit for the name
+  // couldn't be cross-checked against it, so left out rather than risk
+  // playing a different "Jamz Supernova" under her name) — SoundCloud/
+  // Instagram only, still real search buttons cover Spotify/YouTube.
+  "Jamz Supernova": { soundcloud: "https://soundcloud.com/jamzsupernova", instagram: "https://www.instagram.com/jamzsupernova/" }
 };
 
 // Aliases for exact lineup billing text that differs from the plain

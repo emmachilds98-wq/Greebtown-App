@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v160";
-const APP_BUILD_TIME = "2026-07-29T21:35:24Z";
+const APP_CACHE_VERSION = "v161";
+const APP_BUILD_TIME = "2026-07-29T21:45:12Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -845,7 +845,10 @@ function previewLinkOutValue(entry, platformKey){
 function previewEmbedHtml(platform, entry){
   let src = null, height = 120;
   if(platform === "spotify" && entry.audioPreview){
-    return `<audio controls preload="none" src="${entry.audioPreview}" style="width:100%; margin-top:6px;"></audio>`;
+    return `<div class="audio-preview-card">
+      <div class="audio-preview-label">🟢 30-second Spotify preview</div>
+      <audio controls preload="none" src="${entry.audioPreview}"></audio>
+    </div>`;
   } else if(platform === "spotify"){
     const id = entry.spotifyTrack || entry.spotifyArtist;
     if(id) src = `https://open.spotify.com/embed/${entry.spotifyTrack ? "track" : "artist"}/${encodeURIComponent(id)}`;
@@ -857,7 +860,7 @@ function previewEmbedHtml(platform, entry){
     height = 180;
   }
   if(!src) return "";
-  return `<iframe src="${src}" width="100%" height="${height}" frameborder="0" allow="autoplay; encrypted-media" loading="lazy" style="border-radius:10px; margin-top:6px;"></iframe>`;
+  return `<iframe class="preview-iframe" src="${src}" width="100%" height="${height}" frameborder="0" allow="autoplay; encrypted-media" loading="lazy"></iframe>`;
 }
 
 // One platform-button row (+ its own embed slot) for a single name.
@@ -869,9 +872,9 @@ function previewRowHtml(name, entry, showLabel){
   entry = entry || {};
   const buttons = PREVIEW_PLATFORMS.map(p=>{
     const verified = !!(previewEmbeddableValue(entry, p.key) || previewLinkOutValue(entry, p.key));
-    return `<button class="preview-btn" data-platform="${p.key}" data-artist="${escapeHtml(name)}">${p.icon} ${p.label}${verified ? " ▶" : ""}</button>`;
+    return `<button class="preview-btn${verified ? " verified" : ""}" data-platform="${p.key}" data-artist="${escapeHtml(name)}">${p.icon} ${p.label}${verified ? " ▶" : ""}</button>`;
   }).join("");
-  const instaBtn = entry.instagram ? `<button class="preview-btn" data-platform="instagram" data-artist="${escapeHtml(name)}">📸 Instagram</button>` : "";
+  const instaBtn = entry.instagram ? `<button class="preview-btn verified" data-platform="instagram" data-artist="${escapeHtml(name)}">📸 Instagram</button>` : "";
   const label = showLabel ? `<div class="empty-note" style="margin-top:6px; font-size:11px; font-weight:700;">${escapeHtml(name)}</div>` : "";
   return `${label}<div class="preview-row">${buttons}${instaBtn}</div><div class="preview-embed" style="display:none;"></div>`;
 }
