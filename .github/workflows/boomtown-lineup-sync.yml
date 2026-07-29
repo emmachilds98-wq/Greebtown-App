@@ -1,14 +1,13 @@
 name: Sync Boomtown lineup
 
+# Scheduled runs are paused: the lineup is now sourced from a direct capture
+# of the official Boomtown app's own API (see scripts/import-boomtown-official.mjs)
+# rather than Clashfinder, and re-enabling a recurring Clashfinder overwrite
+# here would clobber that more accurate data on the next scheduled tick.
+# Re-add a `schedule:` block once we've settled on an accurate recurring
+# source. Manual runs (workflow_dispatch) still work if needed.
 on:
   workflow_dispatch: {}
-  schedule:
-    # Daily baseline, all year round.
-    - cron: "17 6 * * *"
-    # Hourly attempt — the job below skips itself outside festival week
-    # (2026-08-12 to 2026-08-16 inclusive, UK local dates) so this doesn't
-    # spam commits the rest of the year.
-    - cron: "5 * * * *"
 
 permissions:
   contents: write
@@ -17,29 +16,15 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Skip hourly run outside festival week
-        if: github.event.schedule == '5 * * * *'
-        env:
-          TZ: Europe/London
-        run: |
-          today=$(date +%Y-%m-%d)
-          if [[ "$today" < "2026-08-12" || "$today" > "2026-08-16" ]]; then
-            echo "Not festival week ($today) — skipping hourly run."
-            echo "SKIP=true" >> "$GITHUB_ENV"
-          fi
-
       - uses: actions/checkout@v4
-        if: env.SKIP != 'true'
         with:
           ref: emmachilds98-wq-patch-2
 
       - uses: actions/setup-node@v4
-        if: env.SKIP != 'true'
         with:
           node-version: "22"
 
       - name: Fetch latest lineup and regenerate js/app.js
-        if: env.SKIP != 'true'
         env:
           CLASHFINDER_USERNAME: ${{ secrets.CLASHFINDER_USERNAME }}
           CLASHFINDER_PRIVATE_KEY: ${{ secrets.CLASHFINDER_PRIVATE_KEY }}
@@ -47,7 +32,6 @@ jobs:
         run: node scripts/sync-boomtown-lineup.mjs
 
       - name: Commit and push if changed
-        if: env.SKIP != 'true'
         run: |
           if git diff --quiet; then
             echo "No changes."
