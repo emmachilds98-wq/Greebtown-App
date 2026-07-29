@@ -137,6 +137,26 @@ If a sync ever wipes or corrupts a device's own data (accidental clear, a bad me
 
 Want a specific moment saved right now instead of waiting on the 20-minute throttle — before testing something risky, say? Tap **Back up now** in that same card. It bypasses the throttle and writes the snapshot with `pinned: true`, which the automatic pruning above always skips — a pinned backup is kept indefinitely rather than eventually rotating out with the ordinary ones.
 
+## 9. Keeping the lineup auto-synced from Clashfinder
+
+Boomtown doesn't publish a public API for their official app, so there's nothing to poll directly. `.github/workflows/boomtown-lineup-sync.yml` instead pulls the same Boomtown timetable from [Clashfinder](https://clashfinder.com), which does have a documented API, and regenerates the `artists` array in `js/app.js` (between the `AUTO-GENERATED:LINEUP` markers) whenever it changes — daily year-round, hourly during festival week (12–16 Aug 2026).
+
+**One-time setup, before this can run:**
+
+1. Create a free account at [clashfinder.com](https://clashfinder.com) if you don't have one.
+2. Get your API private key — see [clashfinder.com/pages/api](https://clashfinder.com/pages/api/) (you'll need to be logged in; the page explains how the key is generated from your account).
+3. In this repo's GitHub settings → **Secrets and variables → Actions**, add:
+   - `CLASHFINDER_USERNAME` (secret) — your Clashfinder account username.
+   - `CLASHFINDER_PRIVATE_KEY` (secret) — your Clashfinder private key.
+   - `CLASHFINDER_SLUG` (variable, optional) — the clashfinder's id, from its URL (`https://clashfinder.com/s/<slug>/`). Defaults to `boomtown26` if unset.
+4. That's it — the workflow runs on schedule from then on, or trigger it manually from the Actions tab (**Run workflow**) to test it immediately.
+
+It commits straight to `emmachilds98-wq-patch-2` (this project's live branch) only when the fetched lineup actually differs from what's currently in `js/app.js`, and only after `node --check js/app.js` passes — a failed check fails the workflow run instead of pushing a broken file. Each real change also bumps `APP_CACHE_VERSION`/`CACHE_VERSION` and `APP_BUILD_TIME`, so everyone's app shows the "update available" pill.
+
+Saved personal/group schedules aren't disturbed by a wholesale lineup refresh — `reconcileSavedArtists()` in `js/app.js` already re-matches every saved artist by name against the current `artists` list on load, and anything you've added yourself through the app's own "custom artist" feature lives in a separate store key untouched by this sync.
+
+**Going further — the real official app's data:** Clashfinder is a community-maintained mirror, not Boomtown's own feed, so it can occasionally lag or diverge from the official app. If you want to sync from the official app's actual data instead (or as well), that needs its private API traffic captured from your own phone (e.g. with [HTTP Toolkit](https://httptoolkit.com/) or mitmproxy while using the app), since it isn't publicly documented anywhere — happy to help wire that in as a second source once you've got a capture.
+
 **This adds a new allowed field to `firestore.rules`** (`pinned` on a backup doc) — if the rules were already published for the original Backup history feature, they need **re-publishing again** for this specific change, or "Back up now" will fail with `permission-denied` (harmless — same as before, ordinary sync and automatic backups are unaffected either way).
 
 **One-time setup step:** the rules above (section 7) only cover the `members` documents themselves. This feature adds a `backups` subcollection under each member doc, and `firestore.rules` in this repo has been updated to allow it — but like the rest of `firestore.rules`, that file isn't automatically applied by pushing to GitHub. Re-publish it once in the Firebase console (**Build → Firestore Database → Rules**, paste the current contents of `firestore.rules`, **Publish**) or backups will silently fail with a `permission-denied` error (harmless — sync itself still works either way, you just won't get backup history until the rules are published).
