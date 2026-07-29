@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v123";
-const APP_BUILD_TIME = "2026-07-29T10:08:00Z";
+const APP_CACHE_VERSION = "v124";
+const APP_BUILD_TIME = "2026-07-29T10:21:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -6450,6 +6450,88 @@ async function runManualSync(btn, note){
 
 const cloudSyncBtn = document.getElementById("cloudSyncBtn");
 if(cloudSyncBtn) cloudSyncBtn.onclick = ()=> runManualSync(cloudSyncBtn, document.getElementById("cloudSyncStatusNote"));
+
+// ===============================
+// SYNC DIAGNOSTICS — when "Sync now" appears to do nothing at all (not
+// even the instant "Syncing…" text), that's not a network problem, it's
+// something failing before the normal flow even gets a chance to show
+// anything. This runs each step in isolation with its own try/catch and
+// prints a plain-text report of exactly which one failed and why —
+// completely separate code path from runManualSync, so it can't be
+// silently swallowed by whatever's blocking the normal button.
+// ===============================
+async function runSyncDiagnostics(){
+  const box = document.getElementById("syncDiagnosticsResults");
+  if(!box) return;
+  const lines = [];
+  const log = (ok, label, detail)=>{
+    lines.push(`${ok ? "✅" : "❌"} ${label}${detail ? " — " + detail : ""}`);
+    box.textContent = lines.join("\n");
+  };
+
+  log(true, "Diagnostics started", new Date().toLocaleTimeString());
+
+  try{
+    const fbLoaded = typeof firebase !== "undefined" && !!firebase.initializeApp;
+    log(fbLoaded, "Firebase SDK loaded", fbLoaded ? "" : "firebase is undefined — the CDN scripts (gstatic.com) likely didn't load. Check for a content/ad blocker, VPN, or firewall blocking Google's CDN.");
+    if(!fbLoaded) return;
+  }catch(err){
+    log(false, "Firebase SDK check threw an error", err && err.message);
+    return;
+  }
+
+  log(navigator.onLine !== false, "Device reports online", `navigator.onLine = ${navigator.onLine}`);
+
+  const room = (typeof currentRoomCode === "function") ? currentRoomCode() : "";
+  log(!!room, "Room code set", room || "(empty)");
+
+  const name = (typeof currentContributorName === "function") ? currentContributorName() : "";
+  log(!!name, "Name picked", name || "(none — pushing your own update needs this, but pulling doesn't)");
+
+  let db;
+  try{
+    db = (typeof getFirestoreDb === "function") ? getFirestoreDb() : null;
+    log(!!db, "Firestore connection created", db ? "" : "getFirestoreDb() returned null");
+    if(!db) return;
+  }catch(err){
+    log(false, "Firestore connection threw an error", (err && err.message) + (err && err.code ? ` [${err.code}]` : ""));
+    return;
+  }
+
+  if(name && room){
+    try{
+      const deviceId = ensureDeviceId();
+      const payload = buildSyncPayload();
+      payload.updatedAt = Date.now();
+      await db.collection("rooms").doc(room).collection("members").doc(deviceId).set(JSON.parse(JSON.stringify(payload)));
+      log(true, "Test write to Firestore succeeded", "your data was sent");
+    }catch(err){
+      log(false, "Test write to Firestore FAILED", `${err && err.message ? err.message : "unknown error"}${err && err.code ? ` [${err.code}]` : ""}`);
+      log(true, "This is the real error — screenshot this and send it back");
+      return;
+    }
+  } else {
+    log(true, "Skipped test write", "no name/room set");
+  }
+
+  try{
+    const snap = await db.collection("rooms").doc(room).collection("members").get();
+    let count = 0;
+    snap.forEach(()=> count++);
+    log(true, "Test read from Firestore succeeded", `${count} device${count===1?"":"s"} found in this room`);
+  }catch(err){
+    log(false, "Test read from Firestore FAILED", `${err && err.message ? err.message : "unknown error"}${err && err.code ? ` [${err.code}]` : ""}`);
+    log(true, "This is the real error — screenshot this and send it back");
+    return;
+  }
+
+  log(true, "All checks passed", "sync itself works from here — if the normal Sync now button still shows no reaction, it's specifically a button/tap issue, not a sync issue. Try tapping directly on the button text.");
+}
+const syncDiagnosticsBtn = document.getElementById("syncDiagnosticsBtn");
+if(syncDiagnosticsBtn) syncDiagnosticsBtn.onclick = ()=>{
+  syncDiagnosticsBtn.disabled = true;
+  runSyncDiagnostics().finally(()=>{ syncDiagnosticsBtn.disabled = false; });
+};
 // Home's own "Sync now" button lives inside #homeSyncStatus, which
 // renderHomeSyncStatus() fully rebuilds on every call (new name picked,
 // after a merge, etc.) — wiring it there, not here, so it's re-attached
