@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v166";
-const APP_BUILD_TIME = "2026-07-29T22:10:32Z";
+const APP_CACHE_VERSION = "v167";
+const APP_BUILD_TIME = "2026-07-29T22:13:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -431,7 +431,14 @@ function updateTimelineScrollThumb(outerId){
   track.style.display = "block";
   const inset = 8;
   const trackHeight = rect.height - inset * 2;
-  track.style.left = (rect.right - 9) + "px";
+  // Left side, not right — sits just past the sticky stage-name column
+  // (measured live since its width changes at the mobile breakpoint),
+  // so it's still visible under a right-hand thumb doing the actual
+  // scrolling instead of being covered by it, and doesn't sit on top
+  // of the stage names themselves.
+  const headEl = outer.querySelector(".timeline-row-head");
+  const headWidth = headEl ? headEl.offsetWidth : 88;
+  track.style.left = (rect.left + headWidth + 4) + "px";
   track.style.top = (rect.top + inset) + "px";
   track.style.height = trackHeight + "px";
   const thumbHeight = Math.max(24, (outer.clientHeight / outer.scrollHeight) * trackHeight);
