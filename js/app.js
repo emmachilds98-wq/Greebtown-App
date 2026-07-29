@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v129";
-const APP_BUILD_TIME = "2026-07-29T11:30:00Z";
+const APP_CACHE_VERSION = "v130";
+const APP_BUILD_TIME = "2026-07-29T11:37:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5266,6 +5266,50 @@ function currentContributorName(){
   return (Store.get("contributorName") || "").trim();
 }
 
+// Anything logged via the various "add" buttons before a name was ever
+// picked gets stamped with from:"" at creation time (see addHiddenVenueBtn
+// etc.) — there's no live lookup, it's baked in per-entry. That leaves
+// otherwise-real entries permanently unattributed and invisible to any
+// "filter by person" view, even after the person picks their name later.
+// Since these are always this device's own past entries (nobody else
+// could have written to this device's local storage), it's always safe
+// to claim any blank one for whoever just picked their name.
+function backfillOwnUnnamedEntries(name){
+  if(!name) return;
+  ["theories", "quotes", "sightings", "customLandmarks", "hiddenVenues"].forEach(key=>{
+    const list = Store.get(key);
+    if(!Array.isArray(list) || !list.length) return;
+    let changed = false;
+    list.forEach(entry=>{
+      if(entry && !(entry.from || "").trim()){ entry.from = name; changed = true; }
+    });
+    if(changed) Store.set(key, list);
+  });
+  const involved = Store.get("involvedDone");
+  if(Array.isArray(involved) && involved.length){
+    let changed = false;
+    const updated = involved.map(entry=>{
+      if(typeof entry === "object" && entry && !(entry.from || "").trim()){ changed = true; return { ...entry, from: name }; }
+      return entry;
+    });
+    if(changed) Store.set("involvedDone", updated);
+  }
+}
+
+// Single entry point for "this device's own user just (re)picked their
+// name" — every local picker (Home's inline one, Discover's) should call
+// this rather than writing contributorName to Store directly, so the
+// unnamed-entry backfill above always runs alongside it. Not used by
+// switchDeviceIdentity()'s device-handoff flow, which sets a name as
+// part of adopting someone else's already-attributed synced data, not
+// picking a fresh one for this device's own past entries.
+function setContributorName(name){
+  const trimmed = (name || "").trim();
+  Store.set("contributorName", trimmed);
+  backfillOwnUnnamedEntries(trimmed);
+  if(typeof refreshAfterMerge === "function") refreshAfterMerge();
+}
+
 // Keeps the Discover Sync card's picker and Home's inline picker (built
 // below) showing the same value, whichever one someone actually used —
 // both write to the same Store key, this just keeps the two displays
@@ -5300,10 +5344,10 @@ if(contributorNameInput){
   contributorNameInput.onchange = ()=>{
     if(contributorNameInput.value === "__other__"){
       contributorOtherField.style.display = "";
-      Store.set("contributorName", contributorOtherInput.value.trim());
+      setContributorName(contributorOtherInput.value.trim());
     } else {
       contributorOtherField.style.display = "none";
-      Store.set("contributorName", contributorNameInput.value);
+      setContributorName(contributorNameInput.value);
     }
     syncContributorNameDisplays();
     // Picking a name from the dropdown is the one moment a first-time
@@ -5315,7 +5359,7 @@ if(contributorNameInput){
     if(contributorNameInput.value !== "__other__" && typeof autoSyncNow === "function") autoSyncNow("name picked");
   };
   contributorOtherInput.oninput = ()=>{
-    if(contributorNameInput.value === "__other__") Store.set("contributorName", contributorOtherInput.value.trim());
+    if(contributorNameInput.value === "__other__") setContributorName(contributorOtherInput.value.trim());
     syncContributorNameDisplays();
   };
   contributorOtherInput.onblur = ()=>{
@@ -5367,18 +5411,18 @@ function wireHomeSyncStatusPicker(){
       // clobber the saved name with an empty string until there's
       // actually something to save.
       otherField.style.display = "";
-      if(otherInput.value.trim()) Store.set("contributorName", otherInput.value.trim());
+      if(otherInput.value.trim()) setContributorName(otherInput.value.trim());
       if(contributorNameInput){ contributorNameInput.value = "__other__"; }
       if(contributorOtherField){ contributorOtherField.style.display = ""; }
       updateHomeSyncStatusText();
     } else {
       otherField.style.display = "none";
-      Store.set("contributorName", sel.value);
+      setContributorName(sel.value);
       syncContributorNameDisplays();
     }
   };
   otherInput.oninput = ()=>{
-    Store.set("contributorName", otherInput.value.trim());
+    setContributorName(otherInput.value.trim());
     if(contributorOtherInput){ contributorOtherInput.value = otherInput.value; }
     if(contributorNameInput){ contributorNameInput.value = "__other__"; }
     if(contributorOtherField){ contributorOtherField.style.display = ""; }
