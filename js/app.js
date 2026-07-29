@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v163";
-const APP_BUILD_TIME = "2026-07-29T21:55:00Z";
+const APP_CACHE_VERSION = "v164";
+const APP_BUILD_TIME = "2026-07-29T21:59:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -377,6 +377,57 @@ fixBottomClearance();
   document.querySelectorAll(".tab").forEach(t=> t.addEventListener("click", ()=> setTimeout(updateVisibility, 50)));
   updateVisibility();
 })();
+
+// ===============================
+// TIMELINE SCROLL PROGRESS — a visible vertical scroll indicator inside
+// each .timeline-outer box (Lineup/Plan/Clash timelines), which scrolls
+// both ways in a fixed-height (68vh) container. The native scrollbar
+// there is easy to miss (thin, low-contrast, fades fast on
+// -webkit-overflow-scrolling:touch), which is exactly why "am I near
+// the bottom of this stage list yet" was hard to tell on a long one.
+// setupTimelineScrollProgress() builds the track+thumb once per
+// container (idempotent — safe to call again); refreshTimelineScrollProgress()
+// recomputes size/position/visibility and must be called after any
+// render that can change the container's scrollable content (a new
+// day, a filter, etc.), since scrollHeight only updates once new
+// content is actually in the DOM.
+// ===============================
+function setupTimelineScrollProgress(outerId){
+  const outer = document.getElementById(outerId);
+  if(!outer || outer.querySelector(".timeline-scroll-track")) return;
+  const track = document.createElement("div");
+  track.className = "timeline-scroll-track";
+  const thumb = document.createElement("div");
+  thumb.className = "timeline-scroll-thumb";
+  track.appendChild(thumb);
+  outer.appendChild(track);
+  outer.addEventListener("scroll", ()=> updateTimelineScrollThumb(outerId), { passive: true });
+}
+
+function updateTimelineScrollThumb(outerId){
+  const outer = document.getElementById(outerId);
+  const track = outer && outer.querySelector(".timeline-scroll-track");
+  const thumb = track && track.querySelector(".timeline-scroll-thumb");
+  if(!outer || !track || !thumb) return;
+  const overflow = outer.scrollHeight - outer.clientHeight;
+  // Only worth showing once there's genuinely more than a screenful —
+  // a short day/filtered view shouldn't get a progress bar with
+  // nowhere to go.
+  if(overflow < 24){ track.style.display = "none"; return; }
+  track.style.display = "block";
+  const trackHeight = track.clientHeight;
+  const thumbHeight = Math.max(24, (outer.clientHeight / outer.scrollHeight) * trackHeight);
+  const thumbTop = (outer.scrollTop / overflow) * (trackHeight - thumbHeight);
+  thumb.style.height = thumbHeight + "px";
+  thumb.style.top = thumbTop + "px";
+}
+
+function refreshTimelineScrollProgress(outerId){
+  setupTimelineScrollProgress(outerId);
+  // Content just changed — layout needs a tick to settle before
+  // scrollHeight reflects the new grid.
+  requestAnimationFrame(()=> updateTimelineScrollThumb(outerId));
+}
 
 // ===============================
 // STORAGE HELPER
@@ -3455,6 +3506,7 @@ function renderArtistsTimeline(){
     };
   });
   wireStageLinks(grid);
+  refreshTimelineScrollProgress("artistTimelineOuter");
 }
 
 const artistsViewListBtn = document.getElementById("artistsViewListBtn");
@@ -4645,6 +4697,7 @@ function renderPlanTimeline(){
     };
   });
   wireStageLinks(grid);
+  refreshTimelineScrollProgress("planTimelineOuter");
 }
 
 // ===============================
@@ -4692,6 +4745,7 @@ function renderClashTimeline(){
     };
   });
   wireStageLinks(grid);
+  refreshTimelineScrollProgress("clashTimelineOuter");
 }
 
 // ===============================
