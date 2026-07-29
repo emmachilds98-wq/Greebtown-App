@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v137";
-const APP_BUILD_TIME = "2026-07-29T12:37:00Z";
+const APP_CACHE_VERSION = "v138";
+const APP_BUILD_TIME = "2026-07-29T12:44:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5442,25 +5442,6 @@ function backfillOwnUnnamedEntries(name){
   }
 }
 
-// Finds a person-tab (peopleSchedules/peopleBingo/peopleCharacters) with
-// this exact display name, if this device already pulled one in as a
-// read-only teammate's snapshot. Used by setContributorName below to
-// catch a device landing on a name that already has synced data
-// elsewhere — most often because this device's own deviceId reset at
-// some point (reinstall, cleared storage, ...), so it looks "new" and
-// empty even though the person picking the name has real history here.
-function findUnclaimedPersonIdByName(name){
-  const target = (name || "").trim().toLowerCase();
-  if(!target) return null;
-  const maps = [Store.get("peopleSchedules") || {}, Store.get("peopleBingo") || {}, Store.get("peopleCharacters") || {}];
-  for(const map of maps){
-    for(const id of Object.keys(map)){
-      if(((map[id] && map[id].displayName) || "").trim().toLowerCase() === target) return id;
-    }
-  }
-  return null;
-}
-
 // Single entry point for "this device's own user just (re)picked their
 // name" — every local picker (Home's inline one, Discover's) should call
 // this rather than writing contributorName to Store directly, so the
@@ -5472,22 +5453,6 @@ function setContributorName(name){
   const trimmed = (name || "").trim();
   Store.set("contributorName", trimmed);
   backfillOwnUnnamedEntries(trimmed);
-
-  // This device has nothing of its own yet, but the room already has
-  // synced data under this exact name sitting in a read-only person-tab
-  // — offer to claim it now rather than leaving a confusing empty
-  // "you" sitting right alongside your own real picks. Additive only,
-  // via the same mergePersonIntoMine used by the manual "Merge into
-  // mine" link on person tabs (see renderPlanPersonTabs).
-  const hasOwnData = (Store.get("schedule")||[]).length || (Store.get("bingoCard")||[]).length || Store.get("myCharacter");
-  if(!hasOwnData && trimmed){
-    const matchId = typeof findUnclaimedPersonIdByName === "function" ? findUnclaimedPersonIdByName(trimmed) : null;
-    if(matchId && typeof mergePersonIntoMine === "function"){
-      const ok = confirm(`${trimmed} already has saved artists, bingo or a character synced from another device.\n\nBring that data into this device? It only adds — nothing already here gets removed or overwritten.`);
-      if(ok) mergePersonIntoMine(matchId);
-    }
-  }
-
   if(typeof refreshAfterMerge === "function") refreshAfterMerge();
 }
 
@@ -5901,6 +5866,13 @@ function setMyStatus(place){
 }
 
 // Own status plus everyone else's cached-from-sync status, newest first.
+// One entry per PERSON (by name), not per device — the same duplicate-
+// identity situation that shows up as two Plan person-tabs (see
+// mergePersonIntoMine) shows up here too if someone's synced status
+// under more than one deviceId, and a status list showing two different
+// locations for the same person, one stale, is actively misleading
+// rather than just cosmetic clutter like a duplicate Plan tab. Keeps
+// only the most recently updated entry per name.
 function friendStatusEntries(){
   const peopleStatus = Store.get("peopleStatus") || {};
   const peopleLastSeen = Store.get("peopleLastSeen") || {};
@@ -5915,7 +5887,13 @@ function friendStatusEntries(){
   if(myStatus && myStatus.place && myDeviceId){
     entries.push({ id: myDeviceId, displayName: currentContributorName() || "You", place: myStatus.place, updatedAt: myStatus.updatedAt, lastSyncedTs: Store.get("lastSyncedAt"), isMe: true });
   }
-  return entries.sort((a,b)=> (b.updatedAt||0) - (a.updatedAt||0));
+  const byName = new Map();
+  entries.forEach(e=>{
+    const key = (e.displayName || "").trim().toLowerCase();
+    const existing = byName.get(key);
+    if(!existing || (e.updatedAt||0) > (existing.updatedAt||0)) byName.set(key, e);
+  });
+  return [...byName.values()].sort((a,b)=> (b.updatedAt||0) - (a.updatedAt||0));
 }
 
 function statusLineHTML(entry){
