@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v104";
-const APP_BUILD_TIME = "2026-07-29T02:36:00Z";
+const APP_CACHE_VERSION = "v105";
+const APP_BUILD_TIME = "2026-07-29T02:40:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -3199,12 +3199,26 @@ function renderClashTimeline(){
 // ===============================
 // DASHBOARD NEXT EVENT
 // ===============================
-// The "next saved event" ticket this used to update lived on Home
-// standalone, duplicating the now/next line the context banner already
-// shows — removed, but the function name stays (it's called from every
-// save/unsave/set-time handler) since its real remaining job is
-// refreshing that banner whenever the saved schedule changes.
 function updateNextEvent(){
+  const target = document.getElementById("next-event");
+  if(target){
+    const schedule = Store.get("schedule");
+    const timed = schedule
+      .map(a=>({...a, m: toMinutes(a.day, a.start)}))
+      .filter(a=> a.m !== null)
+      .sort((a,b)=> a.m - b.m);
+
+    const next = timed[0] || schedule[0];
+
+    if(next){
+      target.innerHTML = `
+        <div class="big">${next.name}</div>
+        <div class="sub">${next.stage} · ${timeLabel(next)}</div>
+      `;
+    } else {
+      target.innerHTML = "Nothing saved yet";
+    }
+  }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
 }
 
@@ -3255,28 +3269,9 @@ function renderHomeContextBanner(){
   const clockLabel = now.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
   const name = currentContributorName();
 
-  // Current/next set only means anything once the festival's actually
-  // running — same festival-date window and clock math as
-  // renderNowNext() above, kept separate since this banner also needs
-  // to say something useful before/after that window.
-  const festStart = new Date("2026-08-12T00:00:00");
-  const diffDays = Math.floor((now - festStart) / 86400000);
-  let nowNextLine = "";
-  if(diffDays >= 0 && diffDays <= 5){
-    const nowMin = diffDays * 1440 + now.getHours() * 60 + now.getMinutes();
-    const timed = Store.get("schedule")
-      .map(a=>({ ...a, m: toMinutes(a.day, a.start), em: toMinutes(a.day, a.end) }))
-      .filter(a=> a.m !== null);
-    const current = timed.find(a=> a.em !== null && a.m <= nowMin && nowMin < (a.em > a.m ? a.em : a.em + 1440));
-    const next = timed.filter(a=> a.m > nowMin).sort((a,b)=> a.m - b.m)[0];
-    if(current) nowNextLine = `Now: <strong>${escapeHtml(current.name)}</strong> · ${escapeHtml(current.stage)}`;
-    else if(next) nowNextLine = `Next: <strong>${escapeHtml(next.name)}</strong> ${escapeHtml(next.start)} · ${escapeHtml(next.stage)}`;
-  } else {
-    const timed = Store.get("schedule").map(a=>({...a, m: toMinutes(a.day, a.start)})).filter(a=>a.m!==null).sort((a,b)=>a.m-b.m);
-    const next = timed[0];
-    if(next) nowNextLine = `Next saved: <strong>${escapeHtml(next.name)}</strong> · ${escapeHtml(next.day)} ${escapeHtml(next.start)} · ${escapeHtml(next.stage)}`;
-  }
-
+  // Now/next set info lives in the dedicated "Next saved event" ticket
+  // above this banner instead — kept out of here so the two don't say
+  // the same thing twice in different words.
   const clashMap = findClashes(Store.get("schedule"));
   const clashCount = Object.keys(clashMap).length;
 
@@ -3293,7 +3288,6 @@ function renderHomeContextBanner(){
   banner.innerHTML = `
     <div class="card home-context-banner">
       <div class="hcb-top">${escapeHtml(dayLabel)} · ${escapeHtml(clockLabel)}${name ? " · " + escapeHtml(name) : ""}</div>
-      ${nowNextLine ? `<div class="hcb-line">${nowNextLine}</div>` : `<div class="hcb-line hcb-muted">Nothing saved yet — start in Lineup.</div>`}
       ${clashCount ? `<div class="hcb-line hcb-warn">⚡ ${clashCount} saved artist${clashCount===1?"":"s"} clashing</div>` : ""}
       ${bottomLine ? `<div class="hcb-line hcb-muted">${bottomLine}</div>` : ""}
     </div>
