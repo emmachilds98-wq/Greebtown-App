@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v135";
-const APP_BUILD_TIME = "2026-07-29T12:18:00Z";
+const APP_CACHE_VERSION = "v136";
+const APP_BUILD_TIME = "2026-07-29T12:28:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -250,12 +250,16 @@ setTimeout(fixBottomClearance, 300);
 fixBottomClearance();
 
 // ===============================
-// BACK TO TOP (Discover) — Discover is by far the longest screen, so a
-// floating button to jump back to its top nav is worth having. Position
-// is drag-to-move and remembered (plain localStorage, not Store — this
-// is a device-local UI preference, not festival data, so it's
-// deliberately kept out of the sync/backup system entirely). Only shown
-// once you've actually scrolled down a bit, and only on Discover.
+// BACK TO TOP — floating button to jump back to the top of whichever
+// screen is active. Started Discover-only (by far the longest screen at
+// the time), generalized to every screen since Plan/Lineup/Map can all
+// get just as long once someone's filled them in — the SHOW_AFTER_PX
+// threshold below already means it only ever appears once a screen is
+// genuinely scrolled a meaningful amount, so it naturally stays hidden
+// on short ones without needing a per-screen allowlist. Position is
+// drag-to-move and remembered (plain localStorage, not Store — this is
+// a device-local UI preference, not festival data, so it's deliberately
+// kept out of the sync/backup system entirely).
 // ===============================
 (function setupBackToTop(){
   const POS_KEY = "btt_pos_v1";
@@ -291,13 +295,8 @@ fixBottomClearance();
     return null;
   }
 
-  function isDiscoverActive(){
-    const el = document.getElementById("discover");
-    return !!el && el.classList.contains("active");
-  }
-
   function updateVisibility(){
-    const shouldShow = isDiscoverActive() && (document.scrollingElement || document.documentElement).scrollTop > SHOW_AFTER_PX;
+    const shouldShow = (document.scrollingElement || document.documentElement).scrollTop > SHOW_AFTER_PX;
     btn.style.display = shouldShow ? "flex" : "none";
     btn.style.alignItems = "center";
     btn.style.justifyContent = "center";
@@ -3144,6 +3143,10 @@ function setPlanView(view){
 
   if(view === "timeline"){
     if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("timelineBigPicture");
+    // Only jump off the currently selected day if it's genuinely empty —
+    // never overrides a day someone's deliberately looking at.
+    const mine = Store.get("schedule");
+    if(!mine.some(a=> a.day === planTimelineDay && a.start)) planTimelineDay = pickDefaultTimelineDay(mine);
     renderPlanTimelineOwnerChips();
     renderPlanTimelineDayTabs();
     renderPlanTimeline();
@@ -3358,6 +3361,21 @@ function renderBigPictureSummary(containerId){
 // ===============================
 let planTimelineDay = "Wed";
 let planTimelineSelectedOwners = new Set(["mine"]);
+
+// Timeline is filtered to one day at a time (a.day === planTimelineDay),
+// same as Clash Timeline below — correct and intentional, since it's a
+// time-of-day grid. But defaulting to a fixed "Wed" meant anyone whose
+// saved artists happened to fall on a different day landed on what
+// looked like a completely empty, broken timeline (their List view
+// showed everything fine, since that's day-unfiltered) until they
+// noticed the day tabs and tapped through. Picks the first day that
+// actually has something with a set time instead.
+function pickDefaultTimelineDay(list){
+  for(const d of DAY_ORDER){
+    if(list.some(a=> a && a.day === d && a.start)) return d;
+  }
+  return "Wed";
+}
 
 function renderPlanTimelineDayTabs(){
   const box = document.getElementById("planTimelineDayTabs");
