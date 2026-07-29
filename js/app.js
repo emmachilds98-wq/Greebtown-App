@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v143";
-const APP_BUILD_TIME = "2026-07-29T13:50:30Z";
+const APP_CACHE_VERSION = "v144";
+const APP_BUILD_TIME = "2026-07-29T14:02:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3248,6 +3248,10 @@ function setPlanView(view){
     renderPlanTimeline();
   } else if(view === "compare"){
     if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("compareBigPicture");
+    // Moved here (out of always-visible at the top of every Plan view) so
+    // the default List view isn't cluttered by a section that's only
+    // actually relevant once you're comparing everyone's picks.
+    if(typeof renderGroupDecisions === "function") renderGroupDecisions();
     renderCompareFilterChips();
     renderPlanCompare();
   } else if(view === "clash"){
@@ -6593,7 +6597,10 @@ async function pushToCloud(){
 //    Firestore;
 //  - skipped entirely if the data hasn't actually changed since the last
 //    snapshot (one extra read, no write);
-//  - pruned to the newest BACKUP_MAX_SNAPSHOTS afterwards (oldest first).
+//  - pruned to the newest BACKUP_MAX_SNAPSHOTS afterwards (oldest first) —
+//    pinned snapshots (see takeManualBackupNow below) are never counted
+//    or pruned here, so a manually-taken "keep this one for good" backup
+//    can't get silently rotated out by ordinary automatic ones.
 async function snapshotBackupIfDue(db, room, deviceId, payload){
   const now = Date.now();
   const lastAttempt = Store.get("lastBackupAttemptAt") || 0;
@@ -6605,8 +6612,27 @@ async function snapshotBackupIfDue(db, room, deviceId, payload){
   if(!latest.empty && JSON.stringify(latest.docs[0].data().payload) === payloadJson) return; // nothing's changed — skip the write
   await backupsRef.doc(String(now)).set({ takenAt: now, payload });
   const all = await backupsRef.orderBy("takenAt", "desc").get();
-  const extra = all.docs.slice(BACKUP_MAX_SNAPSHOTS);
+  const extra = all.docs.filter(d=> !d.data().pinned).slice(BACKUP_MAX_SNAPSHOTS);
   await Promise.all(extra.map(d=> d.ref.delete()));
+}
+
+// Manual, on-demand backup — for testing, or just wanting a known-good
+// point saved right now rather than waiting on the throttle above.
+// Bypasses BACKUP_MIN_INTERVAL_MS and the "skip if unchanged" check (the
+// whole point is "save this exact moment, regardless"), and is written
+// pinned:true so the automatic pruning above can never rotate it out.
+// Kept indefinitely — there's no manual delete for a single snapshot,
+// only cleanup of a whole device's doc (e.g. via mergePersonIntoMine).
+async function takeManualBackupNow(){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room) throw new Error("No room code set — check Sync above first.");
+  const deviceId = ensureDeviceId();
+  const payload = JSON.parse(JSON.stringify(buildSyncPayload()));
+  payload.updatedAt = Date.now();
+  const now = Date.now();
+  await db.collection("rooms").doc(room).collection("members").doc(deviceId).collection("backups").doc(String(now)).set({ takenAt: now, payload, pinned: true });
+  return now;
 }
 
 // Lists this device's own backup snapshots, newest first, for the
@@ -6617,7 +6643,7 @@ async function listMyBackups(){
   if(!db || !room) return [];
   const deviceId = ensureDeviceId();
   const snap = await db.collection("rooms").doc(room).collection("members").doc(deviceId).collection("backups").orderBy("takenAt", "desc").get();
-  return snap.docs.map(d=> ({ id: d.id, takenAt: d.data().takenAt, payload: d.data().payload }));
+  return snap.docs.map(d=> ({ id: d.id, takenAt: d.data().takenAt, payload: d.data().payload, pinned: !!d.data().pinned }));
 }
 
 // Restores one of this device's own backup snapshots: overwrites (not
@@ -7099,17 +7125,18 @@ async function renderBackupHistoryList(){
     const backups = await listMyBackups();
     if(!backups.length){
       box.innerHTML = "";
-      if(note) note.textContent = "No backups yet — one's taken automatically in the background as you sync (at most once every 20 minutes, and only when something's actually changed).";
+      if(note) note.textContent = "No backups yet — one's taken automatically in the background as you sync (at most once every 20 minutes, and only when something's actually changed), or tap \"Back up now\" to save this exact moment.";
       return;
     }
-    if(note) note.textContent = `${backups.length} snapshot${backups.length===1?"":"s"} kept, newest first.`;
+    const pinnedCount = backups.filter(b=> b.pinned).length;
+    if(note) note.textContent = `${backups.length} snapshot${backups.length===1?"":"s"} kept, newest first${pinnedCount ? ` (${pinnedCount} pinned — kept indefinitely, never auto-pruned)` : ""}.`;
     box.innerHTML = backups.map(b=>{
       const d = new Date(b.takenAt);
       const now = new Date();
       const time = d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
       const when = d.toDateString() === now.toDateString() ? `Today, ${time}` : `${d.toLocaleDateString([], { day:"numeric", month:"short" })}, ${time}`;
       return `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--line);">
-        <span>${escapeHtml(when)}</span>
+        <span>${b.pinned ? "📌 " : ""}${escapeHtml(when)}${b.pinned ? ` <span style="color:var(--text-muted); font-size:11px;">(pinned)</span>` : ""}</span>
         <button class="ghost restoreBackupBtn" data-id="${escapeHtml(b.id)}" style="flex-shrink:0;">Restore this version</button>
       </div>`;
     }).join("");
@@ -7141,6 +7168,22 @@ const refreshBackupHistoryBtn = document.getElementById("refreshBackupHistoryBtn
 if(refreshBackupHistoryBtn) refreshBackupHistoryBtn.onclick = ()=>{
   refreshBackupHistoryBtn.disabled = true;
   renderBackupHistoryList().finally(()=>{ refreshBackupHistoryBtn.disabled = false; });
+};
+const takeBackupNowBtn = document.getElementById("takeBackupNowBtn");
+if(takeBackupNowBtn) takeBackupNowBtn.onclick = async ()=>{
+  const note = document.getElementById("backupHistoryNote");
+  takeBackupNowBtn.disabled = true;
+  if(note) note.textContent = "Backing up…";
+  try{
+    await takeManualBackupNow();
+    if(note) note.textContent = "Backed up — pinned, kept indefinitely.";
+    renderBackupHistoryList();
+  }catch(err){
+    console.error("Manual backup failed:", err);
+    if(note) note.textContent = `Couldn't back up (${err && err.message ? err.message : "unknown error"}).`;
+  }finally{
+    takeBackupNowBtn.disabled = false;
+  }
 };
 
 // Auto-sync — on open, every few minutes while the app stays open, and
