@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v101";
-const APP_BUILD_TIME = "2026-07-29T02:16:00Z";
+const APP_CACHE_VERSION = "v102";
+const APP_BUILD_TIME = "2026-07-29T02:22:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2356,7 +2356,13 @@ function buildTimelineHTML(items, opts){
       const isSaved = savedNames ? savedNames.has(p.name) : false;
       const isMustSeeBlock = mustSeeNames ? mustSeeNames.has(p.name) : false;
       const cls = "timeline-block" + (isSaved ? " saved" : "") + (isMustSeeBlock ? " mustsee" : "") + (opts.readonly ? " readonly" : "");
-      return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}"><b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
+      // Combined multi-person timelines (see renderPlanTimeline) tag each
+      // merged block with who picked it — initials only, kept compact
+      // since blocks can be as narrow as 60px.
+      const ownerBadge = (opts.showOwnerBadges && p._owners && p._owners.length)
+        ? `<span class="tb-owners" title="${escapeHtml(p._owners.join(", "))}">${p._owners.map(o=>escapeHtml((o[0]||"?").toUpperCase())).join("")}</span>`
+        : "";
+      return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
     return `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${rowHeight}px;">${hourLines}${blocks}</div></div>`;
   }).join("");
@@ -2914,6 +2920,7 @@ function setPlanView(view){
   listEls.forEach(el=> el && (el.style.display = (view==="list"||(view==="clash"&&clashSubView==="list")) ? "" : "none"));
 
   if(view === "timeline"){
+    renderPlanTimelineOwnerChips();
     renderPlanTimelineDayTabs();
     renderPlanTimeline();
   } else if(view === "compare"){
@@ -3050,9 +3057,13 @@ function renderPlanCompare(){
 // ===============================
 // SAVED-ARTIST TIMELINE (Plan) — same scrollable stage/time grid as the
 // Artists screen's Timeline view, but scoped to whichever person's tab
-// (mine or a synced teammate's) is currently selected above.
+// (mine, or one or more synced teammates picked below) is currently
+// selected. Picking more than one merges everyone's picks into a single
+// grid — a shared pick shows as one block tagged with everyone who
+// chose it, rather than one block per person.
 // ===============================
 let planTimelineDay = "Wed";
+let planTimelineSelectedOwners = new Set(["mine"]);
 
 function renderPlanTimelineDayTabs(){
   const box = document.getElementById("planTimelineDayTabs");
@@ -3068,26 +3079,72 @@ function renderPlanTimelineDayTabs(){
   });
 }
 
+function renderPlanTimelineOwnerChips(){
+  const box = document.getElementById("planTimelineOwnerChips");
+  if(!box) return;
+  const people = comparePeopleList();
+  if(people.length < 2){ box.style.display = "none"; box.innerHTML = ""; return; }
+  box.style.display = "";
+  box.innerHTML = people.map(p=>
+    `<span class="chip${planTimelineSelectedOwners.has(p.key) ? " active" : ""}" data-owner="${escapeHtml(p.key)}">${escapeHtml(p.label)}</span>`
+  ).join("");
+  box.querySelectorAll(".chip").forEach(c=>{
+    c.onclick = ()=>{
+      const key = c.dataset.owner;
+      if(planTimelineSelectedOwners.has(key)){
+        // Always leave at least one person selected — an empty grid
+        // isn't a useful state to land in from a tap.
+        if(planTimelineSelectedOwners.size > 1) planTimelineSelectedOwners.delete(key);
+      } else {
+        planTimelineSelectedOwners.add(key);
+      }
+      renderPlanTimelineOwnerChips();
+      renderPlanTimeline();
+    };
+  });
+}
+
 function renderPlanTimeline(){
   const grid = document.getElementById("planTimelineGrid");
   if(!grid) return;
-  const readonly = planActiveOwner !== "mine";
-  const schedule = activeScheduleData();
-  const dayItems = schedule.filter(a=> a.day === planTimelineDay && a.start && (!planMustSeeFilter || a.mustSee));
+  const people = comparePeopleList();
+  const peopleByKey = new Map(people.map(p=>[p.key, p]));
+  const owners = [...planTimelineSelectedOwners].filter(k=> peopleByKey.has(k));
+  const activeOwners = owners.length ? owners : ["mine"];
+  const combined = activeOwners.length > 1;
+  const readonly = combined || activeOwners[0] !== "mine";
+
+  // Merge each selected person's picks for this day, grouping identical
+  // picks (same name+stage+start) into one block tagged with everyone
+  // who chose it, so a shared pick shows once, not twice.
+  const merged = new Map();
+  activeOwners.forEach(ownerKey=>{
+    const person = peopleByKey.get(ownerKey);
+    if(!person) return;
+    person.list
+      .filter(a=> a.day === planTimelineDay && a.start && (!planMustSeeFilter || a.mustSee))
+      .forEach(a=>{
+        const key = `${a.name}|${a.day}|${a.stage}|${a.start}`;
+        if(!merged.has(key)) merged.set(key, { ...a, _owners: [] });
+        merged.get(key)._owners.push(person.label);
+      });
+  });
+  const dayItems = [...merged.values()];
+
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
-  const { html } = buildTimelineHTML(dayItems, { readonly, savedNames, mustSeeNames });
+  const { html } = buildTimelineHTML(dayItems, { readonly, savedNames, mustSeeNames, showOwnerBadges: combined });
   grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">${planMustSeeFilter ? `No must-sees with a set time saved for ${planTimelineDay} yet.` : `Nothing with a set time saved for ${planTimelineDay} yet.`}</p>`;
 
   const hint = document.getElementById("planTimelineHint");
-  if(hint) hint.textContent = readonly
-    ? "Scroll sideways for time, down for stage. Tap a block to see details."
-    : "Scroll sideways for time, down for stage. Tap a block to see details or unsave it.";
+  if(hint) hint.textContent = combined
+    ? `Combined view of ${activeOwners.map(k=>peopleByKey.get(k)?.label || k).join(" + ")} — tap a block for details. Shared picks are marked with everyone's initials.`
+    : (readonly ? "Scroll sideways for time, down for stage. Tap a block to see details." : "Scroll sideways for time, down for stage. Tap a block to see details or unsave it.");
 
   grid.querySelectorAll(".timeline-block").forEach(b=>{
     b.onclick = ()=>{
       const name = b.dataset.name, day = b.dataset.day;
-      const artist = schedule.find(a=>a.name===name && a.day===day);
+      const artist = dayItems.find(a=>a.name===name && a.day===day);
       if(artist) showTimelineDetailModal(artist, { readonly, onSaveToggle: renderPlanTimeline });
     };
   });
@@ -5224,6 +5281,7 @@ function refreshAfterMerge(){
   if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
   if(typeof renderCompareFilterChips === "function") renderCompareFilterChips();
   if(typeof renderPlanCompare === "function" && planView === "compare") renderPlanCompare();
+  if(typeof renderPlanTimelineOwnerChips === "function" && planView === "timeline"){ renderPlanTimelineOwnerChips(); renderPlanTimeline(); }
   if(typeof renderBingoPersonTabs === "function"){ renderBingoPersonTabs(); renderBingo(); }
   if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();

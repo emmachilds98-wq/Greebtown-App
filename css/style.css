@@ -288,6 +288,7 @@
   .timeline-block b{display:block; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .timeline-block .tb-time{display:block; color:var(--text-muted); font-size:9.5px; margin-top:1px; white-space:nowrap;}
   .timeline-block.readonly{cursor:default;}
+  .timeline-block .tb-owners{position:absolute; top:2px; right:3px; font-size:8px; font-weight:700; letter-spacing:.03em; color:var(--accent-teal); background:rgba(11,21,18,.55); border-radius:6px; padding:1px 3px; line-height:1.2;}
   @media (max-width:420px){
     .timeline-row-head{width:72px; font-size:10px; padding:8px 5px;}
     .timeline-block{font-size:9.5px;}
