@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v110";
-const APP_BUILD_TIME = "2026-07-29T03:33:00Z";
+const APP_CACHE_VERSION = "v111";
+const APP_BUILD_TIME = "2026-07-29T03:44:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -295,7 +295,7 @@ fixBottomClearance();
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 const Store = {
@@ -3260,6 +3260,7 @@ function updateNextEvent(){
     }
   }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
 }
 
 function renderNowNext(){
@@ -3314,6 +3315,7 @@ function renderHomeContextBanner(){
   // the same thing twice in different words.
   const clashMap = findClashes(Store.get("schedule"));
   const clashCount = Object.keys(clashMap).length;
+  const decisionCount = (typeof outstandingGroupDecisionsCount === "function") ? outstandingGroupDecisionsCount() : 0;
 
   const peopleLastSeen = Store.get("peopleLastSeen") || {};
   const myDeviceId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : null;
@@ -3332,12 +3334,17 @@ function renderHomeContextBanner(){
     <div class="card home-context-banner">
       <div class="hcb-top">${escapeHtml(dayLabel)} · ${escapeHtml(clockLabel)}${name ? " · " + escapeHtml(name) : ""}</div>
       ${clashCount ? `<div class="hcb-line hcb-warn">⚡ ${clashCount} saved artist${clashCount===1?"":"s"} clashing</div>` : ""}
+      ${decisionCount ? `<div class="hcb-line hcb-warn hcb-decisions">⚡ ${decisionCount} group decision${decisionCount===1?"":"s"} still needed</div>` : ""}
       ${bottomLine ? `<div class="hcb-line hcb-muted">${bottomLine}</div>` : ""}
     </div>
   `;
   if(clashCount){
-    const warnLine = banner.querySelector(".hcb-warn");
+    const warnLine = banner.querySelector(".hcb-warn:not(.hcb-decisions)");
     if(warnLine){ warnLine.style.cursor = "pointer"; warnLine.onclick = jumpToClashes; }
+  }
+  if(decisionCount){
+    const decisionLine = banner.querySelector(".hcb-decisions");
+    if(decisionLine){ decisionLine.style.cursor = "pointer"; decisionLine.onclick = jumpToClashes; }
   }
 }
 renderHomeContextBanner();
@@ -5132,13 +5139,23 @@ function renderHomeSyncStatus(){
     <button class="action danger" id="homeHandoffSwitchBtn">Wipe this phone &amp; switch to them</button>
     <p class="empty-note" id="homeHandoffStatusNote" style="margin-top:6px;"></p>
     <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--text-muted);">📍 <strong>Where are you?</strong> A quick status for the group, not live tracking.</p>
-    <div class="stagelist" id="homeStatusPresetButtons">
-      <button type="button" data-status-preset="Grand Central">Grand Central</button>
-      <button type="button" data-status-preset="Botanica">Botanica</button>
-      <button type="button" data-status-preset="Camp">Camp</button>
+    <div class="field" style="margin-top:8px;"><label>Where are you?</label>
+      <select id="homeStatusLocationSelect">
+        <option value="">Select a location…</option>
+        <option value="Area 404">Area 404</option>
+        <option value="Botanica">Botanica</option>
+        <option value="Thrutopia">Thrutopia</option>
+        <option value="Copperwood">Copperwood</option>
+        <option value="Oldtown">Oldtown</option>
+        <option value="Letsbe Avenue">Letsbe Avenue</option>
+        <option value="Metropolis">Metropolis</option>
+        <option value="Grand Central">Grand Central</option>
+        <option value="Camp">Camp</option>
+        <option value="__other__">Other…</option>
+      </select>
     </div>
-    <div class="field" style="margin-top:8px;"><label>Other</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
-    <button class="action" id="homeStatusCustomBtn">Set my status</button>
+    <div class="field" id="homeStatusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
+    <button class="action" id="homeStatusCustomBtn" style="margin-top:6px;">Set my status</button>
     <div id="homeFriendStatusList" style="margin-top:12px;"></div>
   `;
   const sel = document.getElementById("homeContributorName");
@@ -5149,7 +5166,7 @@ function renderHomeSyncStatus(){
   const syncNowBtn = document.getElementById("homeSyncNowBtn");
   if(syncNowBtn) syncNowBtn.onclick = ()=> runManualSync(syncNowBtn, document.getElementById("homeSyncNowNote"));
   if(typeof wireDeviceHandoffControl === "function") wireDeviceHandoffControl("homeHandoffNameInput", "homeHandoffSwitchBtn", "homeHandoffStatusNote");
-  if(typeof wireStatusControl === "function") wireStatusControl("homeStatusPresetButtons", "homeStatusCustomInput", "homeStatusCustomBtn");
+  if(typeof wireStatusControl === "function") wireStatusControl("homeStatusLocationSelect", "homeStatusOtherField", "homeStatusCustomInput", "homeStatusCustomBtn");
   if(typeof renderFriendStatusList === "function") renderFriendStatusList("homeFriendStatusList");
 }
 renderHomeSyncStatus();
@@ -5383,6 +5400,7 @@ function refreshAfterMerge(){
   if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
   if(typeof renderAllFriendStatusUI === "function") renderAllFriendStatusUI();
+  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
 }
 
 // ===============================
@@ -5460,28 +5478,187 @@ function renderAllFriendStatusUI(){
 // Shared by Discover's status card and Home's own copy of it — Home
 // rebuilds its whole card on every renderHomeSyncStatus() call, so this
 // gets (re)wired fresh each time rather than once at load, same pattern
-// as wireDeviceHandoffControl above.
-function wireStatusControl(presetContainerId, customInputId, customBtnId){
-  const presetContainer = document.getElementById(presetContainerId);
-  if(presetContainer){
-    presetContainer.querySelectorAll("button[data-status-preset]").forEach(btn=>{
-      btn.onclick = ()=> setMyStatus(btn.getAttribute("data-status-preset"));
-    });
-  }
-  const customBtn = document.getElementById(customBtnId);
-  const customInput = document.getElementById(customInputId);
-  if(customBtn && customInput){
-    customBtn.onclick = ()=>{
-      const val = customInput.value.trim();
-      if(!val) return;
-      setMyStatus(val);
-      customInput.value = "";
-    };
-  }
+// as wireDeviceHandoffControl above. A dropdown of known locations, not
+// free text, so status entries can't drift into misspellings/near-dupes
+// of the same place — "Other…" still opens a text field for anywhere
+// not in the list (e.g. a meetup spot), same picker pattern as the
+// contributor-name "Other…" select elsewhere in this file.
+function wireStatusControl(selectId, otherFieldId, otherInputId, btnId){
+  const sel = document.getElementById(selectId);
+  const otherField = document.getElementById(otherFieldId);
+  const otherInput = document.getElementById(otherInputId);
+  const btn = document.getElementById(btnId);
+  if(!sel || !btn) return;
+  sel.onchange = ()=>{
+    if(otherField) otherField.style.display = sel.value === "__other__" ? "" : "none";
+  };
+  btn.onclick = ()=>{
+    let place = sel.value;
+    if(place === "__other__") place = (otherInput && otherInput.value.trim()) || "";
+    if(!place) return;
+    setMyStatus(place);
+    sel.value = "";
+    if(otherField) otherField.style.display = "none";
+    if(otherInput) otherInput.value = "";
+  };
 }
-wireStatusControl("statusPresetButtons", "statusCustomInput", "statusCustomBtn");
+wireStatusControl("statusLocationSelect", "statusOtherField", "statusCustomInput", "statusCustomBtn");
 renderAllFriendStatusUI();
 setInterval(renderAllFriendStatusUI, 60000);
+
+// ===============================
+// GROUP DECISIONS — clash resolution across the WHOLE GROUP's saved
+// artists, not just this device's own (that's the existing
+// findClashes() above, used by the Plan "Clashes" view). A group clash
+// is two different saved artists overlapping in time where at least one
+// person is interested in each. The artists themselves (day + name) are
+// the stable identity a decision is keyed on — not a list index, which
+// differs per person and reshuffles as people add/remove picks.
+// Persisted like the shared meeting point: one map on the room document
+// (not a per-member doc), since a decision belongs to the group, not to
+// whoever happened to record it.
+// ===============================
+function groupClashPairs(){
+  const combined = [];
+  const myName = currentContributorName() || "You";
+  (Store.get("schedule") || []).forEach(a=> combined.push({ ...a, owner: myName }));
+  const peopleSchedules = Store.get("peopleSchedules") || {};
+  Object.entries(peopleSchedules).forEach(([id, entry])=>{
+    const displayName = personDisplayName(entry, id);
+    personSnapshotList(entry).forEach(a=> combined.push({ ...a, owner: displayName }));
+  });
+
+  const byArtist = {};
+  combined.forEach(a=>{
+    const startMin = toMinutes(a.day, a.start), endMin = toMinutes(a.day, a.end);
+    if(startMin === null || endMin === null) return;
+    const key = `${a.day}|${a.name}`;
+    if(!byArtist[key]){
+      byArtist[key] = { name: a.name, stage: a.stage, day: a.day, start: a.start, end: a.end,
+        startMin, endMin: (endMin <= startMin ? endMin + 1440 : endMin), interest: {} };
+    }
+    // A person's mustSee flag can differ from another's for the same
+    // artist — once true for this artist from any owner, keep it true
+    // rather than letting a later, less-starred owner downgrade it.
+    if(!(a.owner in byArtist[key].interest) || a.mustSee) byArtist[key].interest[a.owner] = !!a.mustSee;
+  });
+  const artists = Object.values(byArtist);
+
+  const pairs = [];
+  const seen = new Set();
+  for(let i=0;i<artists.length;i++){
+    for(let j=i+1;j<artists.length;j++){
+      const A = artists[i], B = artists[j];
+      if(A.day !== B.day) continue;
+      if(A.startMin < B.endMin && B.startMin < A.endMin){
+        const key = A.day + "|" + [A.name, B.name].sort().join("__");
+        if(seen.has(key)) continue;
+        seen.add(key);
+        pairs.push({ key, day: A.day, a: A, b: B });
+      }
+    }
+  }
+  return pairs.sort((p1,p2)=> p1.a.startMin - p2.a.startMin);
+}
+
+function outstandingGroupDecisionsCount(){
+  const decisions = Store.get("groupDecisions") || {};
+  return groupClashPairs().filter(p=>{
+    const d = decisions[p.key];
+    return !d || d.status === "later";
+  }).length;
+}
+
+async function setGroupDecision(decisionKey, status, choiceName){
+  const name = currentContributorName() || "Someone";
+  const entry = { status, choice: choiceName || null, by: name, updatedAt: Date.now() };
+  const decisions = Store.get("groupDecisions") || {};
+  decisions[decisionKey] = entry;
+  Store.set("groupDecisions", decisions);
+  renderGroupDecisions();
+  if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room) return false;
+  try{
+    // Read-merge-write scoped to just this one key, so setting your own
+    // decision can't silently clobber someone else's concurrent decision
+    // on a DIFFERENT clash. The only remaining race is two people
+    // deciding the exact same clash at once, which is an accepted
+    // last-write-wins — same as every other shared single-value field.
+    const doc = await db.collection("rooms").doc(room).get();
+    const cloudDecisions = (doc.exists && doc.data() && doc.data().decisions) || {};
+    cloudDecisions[decisionKey] = entry;
+    await db.collection("rooms").doc(room).set({ decisions: cloudDecisions }, { merge: true });
+    return true;
+  }catch(err){
+    return false;
+  }
+}
+
+function applyDecisionsFromRoomData(roomData){
+  Store.set("groupDecisions", (roomData && roomData.decisions) || {});
+  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+  if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+}
+
+function decisionStatusPillHTML(status){
+  const map = {
+    needs: { cls: "needs", label: "🟡 Needs decision" },
+    together: { cls: "together", label: "🟢 Everyone together" },
+    split: { cls: "split", label: "🔵 Split up" },
+    later: { cls: "later", label: "⚪ Decide later" }
+  };
+  const m = map[status] || map.needs;
+  return `<span class="decision-pill ${m.cls}">${m.label}</span>`;
+}
+
+function decisionCardHTML(pair, decision){
+  const status = decision ? decision.status : "needs";
+  const needsDecision = status === "needs" || status === "later";
+  const ownerLine = (interest)=> Object.entries(interest).map(([owner, mustSee])=> `${escapeHtml(owner)} ${mustSee ? "★" : "👍"}`).join(" · ") || "no one yet";
+  return `
+    <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(pair.key)}">
+      <div class="decision-head"><span>⚡ ${escapeHtml(timeLabel(pair.a))} — ${needsDecision ? "Decision needed" : "Resolved"}</span>${decisionStatusPillHTML(status)}</div>
+      <div class="decision-artist-line"><strong>${escapeHtml(pair.a.name)}</strong> — ${ownerLine(pair.a.interest)}</div>
+      <div class="decision-artist-line"><strong>${escapeHtml(pair.b.name)}</strong> — ${ownerLine(pair.b.interest)}</div>
+      ${status === "together" && decision ? `<p class="empty-note">Going together to <strong>${escapeHtml(decision.choice)}</strong> — set by ${escapeHtml(decision.by)}.</p>` : ""}
+      ${status === "split" && decision ? `<p class="empty-note">Splitting up — set by ${escapeHtml(decision.by)}.</p>` : ""}
+      <div class="decision-actions">
+        <button data-action="together-a" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">Everyone together — ${escapeHtml(pair.a.name)}</button>
+        <button data-action="together-b" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">Everyone together — ${escapeHtml(pair.b.name)}</button>
+        <button data-action="split" class="${decision && decision.status==="split" ? "active" : ""}">Split up</button>
+        <button data-action="later" class="${decision && decision.status==="later" ? "active" : ""}">Decide later</button>
+      </div>
+    </div>
+  `;
+}
+
+function wireDecisionCard(el, pair){
+  el.querySelectorAll(".decision-actions button").forEach(btn=>{
+    btn.onclick = ()=>{
+      const action = btn.getAttribute("data-action");
+      if(action === "together-a") setGroupDecision(pair.key, "together", pair.a.name);
+      else if(action === "together-b") setGroupDecision(pair.key, "together", pair.b.name);
+      else setGroupDecision(pair.key, action, null);
+    };
+  });
+}
+
+// Reusable so the same render can populate the Plan tab's box and (once
+// built) Today's DECISIONS section — no separate data path, same
+// groupClashPairs()/groupDecisions Store key either way.
+function renderGroupDecisions(containerId){
+  const box = document.getElementById(containerId || "groupDecisionsBox");
+  if(!box) return;
+  const pairs = groupClashPairs();
+  const decisions = Store.get("groupDecisions") || {};
+  if(!pairs.length){ box.innerHTML = ""; return; }
+  box.innerHTML = pairs.map(p=> decisionCardHTML(p, decisions[p.key])).join("");
+  const cards = box.querySelectorAll(".decision-card");
+  pairs.forEach((p,i)=>{ if(cards[i]) wireDecisionCard(cards[i], p); });
+}
+renderGroupDecisions();
 
 async function pushToCloud(){
   const db = getFirestoreDb();
@@ -5560,7 +5737,11 @@ async function pullFromCloud(){
     db.collection("rooms").doc(room).collection("members").get(),
     db.collection("rooms").doc(room).get().catch(()=> null)
   ]);
-  if(roomDoc) applyMeetingFromRoomData(roomDoc.exists ? roomDoc.data() : null);
+  if(roomDoc){
+    const roomData = roomDoc.exists ? roomDoc.data() : null;
+    applyMeetingFromRoomData(roomData);
+    applyDecisionsFromRoomData(roomData);
+  }
   const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   let count = 0;
   snap.forEach(doc=>{
