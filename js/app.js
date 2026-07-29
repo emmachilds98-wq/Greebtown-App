@@ -11,14 +11,19 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v151";
-const APP_BUILD_TIME = "2026-07-29T15:19:00Z";
+const APP_CACHE_VERSION = "v152";
+const APP_BUILD_TIME = "2026-07-29T16:39:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
 // call chain, same TDZ-safety reason as STATUS_STALE_MS/_firestoreDb.
 let groupDecisionsExpanded = false;
 const GROUP_DECISIONS_CAP = 4;
+// Collapsed by default — Group decisions used to sit permanently full-
+// height above Compare's own list, effectively hiding it. Starts
+// collapsed to a one-line summary so Compare is visible without an
+// extra tap, same TDZ-safety reason as groupDecisionsExpanded above.
+let groupDecisionsCollapsed = true;
 
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
@@ -416,7 +421,7 @@ fixBottomClearance();
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -2205,7 +2210,486 @@ const artists = [
   {name:"Olive F",stage:"Infinity",day:"Sun",start:"17:00",end:"18:30"},
   {name:"Storm Mollison",stage:"Infinity",day:"Sun",start:"18:30",end:"20:00"},
   {name:"Pbr Streetgang",stage:"Infinity",day:"Sun",start:"20:00",end:"21:30"},
-  {name:"Gina Breeze",stage:"Infinity",day:"Sun",start:"21:30",end:"23:00"}
+  {name:"Gina Breeze",stage:"Infinity",day:"Sun",start:"21:30",end:"23:00"},
+
+  // ================= ADDITIONAL VENUES: TALKS, WORKSHOPS, WELLNESS & WELFARE =================
+  // Pulled from Clashfinder's Boomtown 26 schedule (2026-07-29) — these hidden/support/
+  // talks venues had directory entries but no set-time data yet.
+  // --- Wed ---
+  // Reel News
+  {name:"Wondergupta",stage:"Reel News",day:"Wed",start:"13:15",end:"14:15"},
+  {name:"Warrior Tales & Demloxx",stage:"Reel News",day:"Wed",start:"14:15",end:"14:45"},
+  {name:"Brockwell Park Rangers",stage:"Reel News",day:"Wed",start:"14:45",end:"15:15"},
+  {name:"O'Connell & Co",stage:"Reel News",day:"Wed",start:"15:15",end:"16:15"},
+  {name:"Music in my underpants",stage:"Reel News",day:"Wed",start:"16:15",end:"17:00"},
+  {name:"Taygeta & Seb",stage:"Reel News",day:"Wed",start:"17:00",end:"18:00"},
+  {name:"Nowt",stage:"Reel News",day:"Wed",start:"18:00",end:"18:45"},
+  {name:"GDSMRCY",stage:"Reel News",day:"Wed",start:"18:45",end:"19:30"},
+  {name:"Break the Code",stage:"Reel News",day:"Wed",start:"19:30",end:"21:00"},
+  // Circus Tent
+  {name:"Contemporary Dance",stage:"Circus Tent",day:"Wed",start:"11:00",end:"12:00"},
+  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Wed",start:"12:00",end:"14:00"},
+  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Wed",start:"14:00",end:"16:00"},
+  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Wed",start:"16:00",end:"18:00"},
+  {name:"Bubblology",stage:"Circus Tent",day:"Wed",start:"18:00",end:"19:00"},
+  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Wed",start:"21:00",end:"22:00"},
+  // XR
+  {name:"Cassandra the Oracle",stage:"XR",day:"Wed",start:"14:00",end:"16:00"},
+  {name:"Strictly Burning Ballroom",stage:"XR",day:"Wed",start:"18:00",end:"18:30"},
+  // Climate Live
+  {name:"Climate Live Opening",stage:"Climate Live",day:"Wed",start:"12:00",end:"14:00"},
+  {name:"Radical Rosettes",stage:"Climate Live",day:"Wed",start:"15:00",end:"16:00"},
+  {name:"Doof Stick Making",stage:"Climate Live",day:"Wed",start:"16:15",end:"17:15"},
+  {name:"Finding Joy & Climate Connection Through Dance",stage:"Climate Live",day:"Wed",start:"17:30",end:"18:30"},
+  // Rebel Girls Club
+  {name:"Opening Ceremony with Everglowing & Find Your Flow",stage:"Rebel Girls Club",day:"Wed",start:"16:00",end:"16:40"},
+  {name:"Psycosomatic yoga with Yuliet",stage:"Rebel Girls Club",day:"Wed",start:"17:00",end:"18:00"},
+  {name:"Somatic dance to Twerk with Sofia & Ivy",stage:"Rebel Girls Club",day:"Wed",start:"18:30",end:"19:30"},
+  // Permaculture
+  {name:"Touch grass: An arrival circle for gorunding and connection",stage:"Permaculture",day:"Wed",start:"12:00",end:"13:00"},
+  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Wed",start:"13:30",end:"15:00"},
+  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Wed",start:"15:30",end:"16:30"},
+  {name:"Beyond bosses: Practical tools for more human workplaces",stage:"Permaculture",day:"Wed",start:"17:00",end:"18:00"},
+  // Ancient Futures
+  {name:"Ancient Futures Opening Ceremony",stage:"Ancient Futures",day:"Wed",start:"15:00",end:"16:00"},
+  {name:"Opening cermony",stage:"Ancient Futures",day:"Wed",start:"16:00",end:"17:00"},
+  {name:"Breathe Reconnect",stage:"Ancient Futures",day:"Wed",start:"17:00",end:"19:00"},
+  {name:"Flow dance",stage:"Ancient Futures",day:"Wed",start:"19:00",end:"21:00"},
+  // Airetiko
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Wed",start:"13:00",end:"15:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Wed",start:"15:00",end:"17:00"},
+  // Craft Tent
+  {name:"Craft workshops inc: Junk Jewelery, Hitty Hitty Bang Bang & Botanical Fascinators",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
+  // Narcotics Anonymous
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Wed",start:"08:00",end:"09:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Wed",start:"13:00",end:"14:00"},
+  // Energy Garden
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Wed",start:"12:00",end:"13:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Wed",start:"13:00",end:"15:00"},
+  // Cocaine Anonymous
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Wed",start:"11:00",end:"12:00"},
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Wed",start:"18:00",end:"19:00"},
+  // Spinney Hollow
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop & Banquet of Art table",stage:"Spinney Hollow",day:"Wed",start:"10:00",end:"18:00"},
+  // Tinker Station
+  {name:"Tinker Station",stage:"Tinker Station",day:"Wed",start:"10:00",end:"18:00"},
+  // The Magic Teapot
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Wed",start:"12:00",end:"00:00"},
+  // Hapitat
+  {name:"Hapitat",stage:"Hapitat",day:"Wed",start:"10:00",end:"18:00"},
+  // Garden
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Wed",start:"10:00",end:"18:00"},
+  // Games Lounge
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Wed",start:"12:00",end:"00:00"},
+  // Crafty Rascals
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Wed",start:"10:00",end:"18:00"},
+  // Blink Mental Health
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Wed",start:"10:00",end:"19:30"},
+  // Reparium
+  {name:"Repairium",stage:"Reparium",day:"Wed",start:"14:00",end:"18:00"},
+  // Cas's Costumes
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Wed",start:"10:00",end:"18:00"},
+  // --- Thu ---
+  // Reel News
+  {name:"Drugs, Friends & Music: What does a safe festival need?",stage:"Reel News",day:"Thu",start:"10:30",end:"11:30"},
+  {name:"No Pasaran! How to stop the far right",stage:"Reel News",day:"Thu",start:"11:30",end:"12:30"},
+  {name:"Luddite Punk",stage:"Reel News",day:"Thu",start:"12:30",end:"13:30"},
+  {name:"AGONY & ECSTASY: HOW FOOTBALL HOOLIGANS STARTED RAVING",stage:"Reel News",day:"Thu",start:"13:30",end:"14:00"},
+  {name:"ACORN for a Bailiff Free Britain!",stage:"Reel News",day:"Thu",start:"14:00",end:"14:45"},
+  {name:"The Global Politics of Food",stage:"Reel News",day:"Thu",start:"14:45",end:"15:45"},
+  {name:"Power to the Workersâ€”with AI",stage:"Reel News",day:"Thu",start:"15:45",end:"16:30"},
+  {name:"Small Axe: When Underground Music Meets Grassroots Activism",stage:"Reel News",day:"Thu",start:"16:30",end:"17:15"},
+  {name:"Thick Richard",stage:"Reel News",day:"Thu",start:"17:15",end:"17:45"},
+  {name:"South Lebanon - Frontlines of Resistance",stage:"Reel News",day:"Thu",start:"17:45",end:"18:45"},
+  {name:"FILM: Sir No Sir",stage:"Reel News",day:"Thu",start:"18:45",end:"20:10"},
+  // Circus Tent
+  {name:"Energising Yoga",stage:"Circus Tent",day:"Thu",start:"09:00",end:"10:00"},
+  {name:"Belly Dance",stage:"Circus Tent",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Contemporary Dance",stage:"Circus Tent",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Thu",start:"12:00",end:"14:00"},
+  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Thu",start:"14:00",end:"16:00"},
+  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Thu",start:"16:00",end:"18:00"},
+  {name:"Inspired Breath",stage:"Circus Tent",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Thu",start:"21:00",end:"22:00"},
+  // XR
+  {name:"Cassandra the Oracle",stage:"XR",day:"Thu",start:"11:00",end:"12:00"},
+  {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Thu",start:"12:00",end:"13:00"},
+  {name:"Drumming Workshop",stage:"XR",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Big Oil Drumming Parade",stage:"XR",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Thu",start:"15:10",end:"16:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Thu",start:"16:00",end:"18:00"},
+  {name:"Strictly Burning Ballroom",stage:"XR",day:"Thu",start:"18:00",end:"18:30"},
+  // Climate Live
+  {name:"Bag Charm Making - Weaving Change",stage:"Climate Live",day:"Thu",start:"10:30",end:"11:30"},
+  {name:"Beads & Breathe",stage:"Climate Live",day:"Thu",start:"11:45",end:"12:45"},
+  {name:"Music X Climate Zine-Making",stage:"Climate Live",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Thu",start:"14:15",end:"15:15"},
+  {name:"Collective Climate Collage Making - Quirky Academy CIC",stage:"Climate Live",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"Jewellery & Trinket Making with Recycled Cans - EVA",stage:"Climate Live",day:"Thu",start:"16:45",end:"17:45"},
+  {name:"Cocaine Anonymous Meeting",stage:"Climate Live",day:"Thu",start:"18:00",end:"19:00"},
+  // Rebel Girls Club
+  {name:"Morning Yoga with Sofia (Find Your Flow)",stage:"Rebel Girls Club",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Movement: Heart - womb connection with Lauren",stage:"Rebel Girls Club",day:"Thu",start:"11:00",end:"12:15"},
+  {name:"Nipple Tassel Making with Maisie",stage:"Rebel Girls Club",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Twerk with Ivy Rose (Everglowing)",stage:"Rebel Girls Club",day:"Thu",start:"14:30",end:"15:30"},
+  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Thu",start:"16:00",end:"16:40"},
+  {name:"Herbal Balm Making with Spider",stage:"Rebel Girls Club",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Traditional Burlesque with Everglowing",stage:"Rebel Girls Club",day:"Thu",start:"18:30",end:"19:30"},
+  // Permaculture
+  {name:"Drawn from the ground: Natural inks, charcoal and figure drawing",stage:"Permaculture",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Thu",start:"11:30",end:"12:30"},
+  {name:"The inner compass: Tarot, symbolism and self-trust",stage:"Permaculture",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Mushroom magic: Low-tech growing for curious humans",stage:"Permaculture",day:"Thu",start:"14:30",end:"15:30"},
+  {name:"Wild adornment: Willow crowns and headpieces by hand",stage:"Permaculture",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"Wearable folklore: Crafting ear cuffs from scrap, wire and found objects",stage:"Permaculture",day:"Thu",start:"17:00",end:"18:00"},
+  // Ancient Futures
+  {name:"Yoga Sound Baths",stage:"Ancient Futures",day:"Thu",start:"09:00",end:"11:00"},
+  {name:"Scroll Loop Bingo",stage:"Ancient Futures",day:"Thu",start:"11:30",end:"12:30"},
+  {name:"Divine union in a divide world",stage:"Ancient Futures",day:"Thu",start:"13:00",end:"15:00"},
+  {name:"The Extraordinary Ordinary",stage:"Ancient Futures",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"Social psychedelics: Spirit and science",stage:"Ancient Futures",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Medicine dance journey",stage:"Ancient Futures",day:"Thu",start:"18:30",end:"20:30"},
+  // Observatory
+  {name:"The Observatory Opening",stage:"Observatory",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Your Brain On Yoga",stage:"Observatory",day:"Thu",start:"11:30",end:"12:30"},
+  {name:"Abdominal Attunement",stage:"Observatory",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Feeling Seen & Seeing Feeling: Eeg & The Future Of Emotional Design",stage:"Observatory",day:"Thu",start:"14:30",end:"15:30"},
+  {name:"Fear & Loathing In Boomtown",stage:"Observatory",day:"Thu",start:"16:00",end:"17:00"},
+  {name:"Celebratory Reset Ritual",stage:"Observatory",day:"Thu",start:"17:30",end:"18:30"},
+  // Airetiko
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Thu",start:"11:00",end:"13:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Thu",start:"13:00",end:"15:00"},
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Thu",start:"15:00",end:"17:00"},
+  // Craft Tent
+  {name:"Craft workshops inc: Junk Jewelery, Hitty Hitty Bang Bang & Botanical Fascinators",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
+  // Narcotics Anonymous
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Thu",start:"08:00",end:"09:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Thu",start:"13:00",end:"14:00"},
+  // Energy Garden
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Thu",start:"12:00",end:"22:00"},
+  // Cocaine Anonymous
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Thu",start:"11:00",end:"12:00"},
+  // Spinney Hollow
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop & Banquet of Art table",stage:"Spinney Hollow",day:"Thu",start:"10:00",end:"18:00"},
+  // Tinker Station
+  {name:"Tinker Station",stage:"Tinker Station",day:"Thu",start:"10:00",end:"18:00"},
+  // The Magic Teapot
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Thu",start:"12:00",end:"00:00"},
+  // Hapitat
+  {name:"Hapitat",stage:"Hapitat",day:"Thu",start:"10:00",end:"18:00"},
+  // Garden
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Thu",start:"10:00",end:"18:00"},
+  // Games Lounge
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Thu",start:"12:00",end:"00:00"},
+  // Crafty Rascals
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Thu",start:"10:00",end:"18:00"},
+  // Blink Mental Health
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Thu",start:"10:00",end:"19:30"},
+  // Reparium
+  {name:"Repairium",stage:"Reparium",day:"Thu",start:"10:00",end:"18:00"},
+  // Cas's Costumes
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Thu",start:"10:00",end:"18:00"},
+  // --- Fri ---
+  // Reel News
+  {name:"The Violence of Extraction Economies",stage:"Reel News",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Reports from Rojava  - Frontlines of Resistance",stage:"Reel News",day:"Fri",start:"12:00",end:"12:45"},
+  {name:"Operation Recomply: Democracy on Trial",stage:"Reel News",day:"Fri",start:"12:45",end:"14:45"},
+  {name:"The school to prison pipeline",stage:"Reel News",day:"Fri",start:"14:45",end:"15:30"},
+  {name:"Confronting institutional misogyny and oppression",stage:"Reel News",day:"Fri",start:"15:30",end:"16:30"},
+  {name:"Spycops",stage:"Reel News",day:"Fri",start:"16:30",end:"17:15"},
+  {name:"Demand the Impossible: using theatre in struggles for justice",stage:"Reel News",day:"Fri",start:"17:15",end:"18:15"},
+  {name:"Club Commons: Moving Bodies to Grow Movements in Queer Nightlife",stage:"Reel News",day:"Fri",start:"18:15",end:"19:00"},
+  // Circus Tent
+  {name:"Energising Yoga",stage:"Circus Tent",day:"Fri",start:"09:00",end:"10:00"},
+  {name:"Belly Dance",stage:"Circus Tent",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Contemporary Dance",stage:"Circus Tent",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Fri",start:"12:00",end:"14:00"},
+  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Fri",start:"14:00",end:"16:00"},
+  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Fri",start:"16:00",end:"18:00"},
+  {name:"Inspired Breath",stage:"Circus Tent",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Fri",start:"21:00",end:"22:00"},
+  // XR
+  {name:"Last Chance Salon",stage:"XR",day:"Fri",start:"11:00",end:"19:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Art Blocking",stage:"XR",day:"Fri",start:"11:00",end:"18:30"},
+  {name:"Drumming Workshop",stage:"XR",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Fri",start:"14:00",end:"16:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
+  {name:"Costume Pimping",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
+  {name:"Strictly Burning Ballroom",stage:"XR",day:"Fri",start:"18:00",end:"18:30"},
+  // Climate Live
+  {name:"Beads & Breathe",stage:"Climate Live",day:"Fri",start:"10:30",end:"11:30"},
+  {name:"Jewellery & Trinket Making with Recycled Cans - EVA",stage:"Climate Live",day:"Fri",start:"11:45",end:"12:45"},
+  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"USB Decorating: No Dance Music Without Diversity",stage:"Climate Live",day:"Fri",start:"14:15",end:"15:15"},
+  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Fri",start:"15:30",end:"16:30"},
+  {name:"Doof Stick Making",stage:"Climate Live",day:"Fri",start:"16:45",end:"17:45"},
+  // Rebel Girls Club
+  {name:"Morning Yoga with Emma",stage:"Rebel Girls Club",day:"Fri",start:"10:00",end:"11:00"},
+  {name:"Meeting Warrior Self with Molly",stage:"Rebel Girls Club",day:"Fri",start:"11:00",end:"12:15"},
+  {name:"Cunting - Cunt Bunting Making with Maisie",stage:"Rebel Girls Club",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Lets be Fools: A Creative Wellbeing Workshop with Alena",stage:"Rebel Girls Club",day:"Fri",start:"14:30",end:"15:30"},
+  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Fri",start:"16:00",end:"16:40"},
+  {name:"Burlesque Life Drawing with Alissa",stage:"Rebel Girls Club",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"Neo Burlesque Partner workshop with Everglowing",stage:"Rebel Girls Club",day:"Fri",start:"18:30",end:"19:30"},
+  // Permaculture
+  {name:"Green the cracks: Reclaiming neglected spaces for food and wildlife",stage:"Permaculture",day:"Fri",start:"10:00",end:"11:00"},
+  {name:"Not a single-use planet: Mushroom ecology, rot and radical redesign",stage:"Permaculture",day:"Fri",start:"11:30",end:"12:30"},
+  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"What actually helps when the world feels cooked? A panel on living well in strange times",stage:"Permaculture",day:"Fri",start:"14:30",end:"16:30"},
+  {name:"Wearable folklore: Crafting ear cuffs from scrap, wire and found objects",stage:"Permaculture",day:"Fri",start:"17:00",end:"18:00"},
+  // Ancient Futures
+  {name:"Flow Yoga",stage:"Ancient Futures",day:"Fri",start:"09:00",end:"11:00"},
+  {name:"DNBreathe Breathwork - Raise Your Frequency",stage:"Ancient Futures",day:"Fri",start:"11:30",end:"13:00"},
+  {name:"Coming Home To Yourself: The Art of Conscious Communication",stage:"Ancient Futures",day:"Fri",start:"13:30",end:"15:00"},
+  {name:"Breathwork & Somatic Workshop for Emotional Regulation & Processing",stage:"Ancient Futures",day:"Fri",start:"15:30",end:"17:00"},
+  {name:"Rave as ritual: how the festival space can heal us",stage:"Ancient Futures",day:"Fri",start:"17:30",end:"18:00"},
+  {name:"Ecstatic Dance",stage:"Ancient Futures",day:"Fri",start:"19:00",end:"21:00"},
+  // Observatory
+  {name:"Your Brain On Yoga",stage:"Observatory",day:"Fri",start:"10:00",end:"11:00"},
+  {name:"Drug Testing & Safety With The Loop'S Potty Professor & Crazy Chemist",stage:"Observatory",day:"Fri",start:"11:30",end:"12:30"},
+  {name:"How To Create Reality... In Your Dreams",stage:"Observatory",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Fear & Loathing In Boomtown",stage:"Observatory",day:"Fri",start:"14:30",end:"15:30"},
+  {name:"Gather: An Embodied Connection Workshop",stage:"Observatory",day:"Fri",start:"16:00",end:"17:00"},
+  {name:"Women And Psychedelics - Science, Stories And Embodiment",stage:"Observatory",day:"Fri",start:"17:30",end:"18:30"},
+  // Airetiko
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Fri",start:"11:00",end:"13:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Fri",start:"13:00",end:"15:00"},
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Fri",start:"15:00",end:"17:00"},
+  // Craft Tent
+  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
+  // Narcotics Anonymous
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Fri",start:"08:00",end:"09:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Fri",start:"13:00",end:"14:00"},
+  // Energy Garden
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Fri",start:"12:00",end:"22:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Fri",start:"13:00",end:"15:00"},
+  // Cocaine Anonymous
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Fri",start:"18:00",end:"19:00"},
+  // Spinney Hollow
+  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Fri",start:"10:00",end:"18:00"},
+  // Tinker Station
+  {name:"Tinker Station",stage:"Tinker Station",day:"Fri",start:"10:00",end:"18:00"},
+  // The Magic Teapot
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Fri",start:"12:00",end:"00:00"},
+  // Hapitat
+  {name:"Hapitat",stage:"Hapitat",day:"Fri",start:"10:00",end:"18:00"},
+  // Garden
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Fri",start:"10:00",end:"18:00"},
+  // Games Lounge
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Fri",start:"12:00",end:"00:00"},
+  // Crafty Rascals
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Fri",start:"10:00",end:"18:00"},
+  // Blink Mental Health
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Fri",start:"10:00",end:"19:30"},
+  // Cas's Costumes
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Fri",start:"10:00",end:"18:00"},
+  // --- Sat ---
+  // Reel News
+  {name:"The Art of Protest",stage:"Reel News",day:"Sat",start:"10:30",end:"11:30"},
+  {name:"Past struggles for land, hidden geographies and imagining a different future",stage:"Reel News",day:"Sat",start:"11:30",end:"12:15"},
+  {name:"Speakeasy & Open Mic with Beadyman",stage:"Reel News",day:"Sat",start:"12:15",end:"13:15"},
+  {name:"\"Fire Walk With Me\" Red Flag workers' theatre",stage:"Reel News",day:"Sat",start:"13:15",end:"13:45"},
+  {name:"Banner Theatre LIVE: \"A Just Transition - Jobs, People, Planet\" Part 1",stage:"Reel News",day:"Sat",start:"13:45",end:"14:45"},
+  {name:"Banner Theatre LIVE: \"A Just Transition - Jobs, People, Planet\" Part 2",stage:"Reel News",day:"Sat",start:"14:45",end:"15:45"},
+  {name:"Birmingham Bin workers strike",stage:"Reel News",day:"Sat",start:"15:45",end:"16:45"},
+  {name:"UNITE Hospitality Glasgow - better pay, enjoyment & working conditions",stage:"Reel News",day:"Sat",start:"16:45",end:"17:30"},
+  {name:"Saturama: Tales of an Albion Rainforest",stage:"Reel News",day:"Sat",start:"17:30",end:"18:30"},
+  // Circus Tent
+  {name:"Energising Yoga",stage:"Circus Tent",day:"Sat",start:"09:00",end:"10:00"},
+  {name:"Belly Dance",stage:"Circus Tent",day:"Sat",start:"10:00",end:"11:00"},
+  {name:"Wye Circus Skills, Juggling, Dapo Star",stage:"Circus Tent",day:"Sat",start:"12:00",end:"14:00"},
+  {name:"Wye Circus Skills, Hoop",stage:"Circus Tent",day:"Sat",start:"14:00",end:"16:00"},
+  {name:"Wye Circus Skills, Poi, Staff, Flower Stick",stage:"Circus Tent",day:"Sat",start:"16:00",end:"18:00"},
+  {name:"Inspired Breath",stage:"Circus Tent",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Sat",start:"21:00",end:"22:00"},
+  // XR
+  {name:"Art Blocking",stage:"XR",day:"Sat",start:"11:00",end:"18:30"},
+  {name:"Last Chance Salon",stage:"XR",day:"Sat",start:"11:00",end:"19:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Sat",start:"11:00",end:"12:00"},
+  {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Sat",start:"12:00",end:"13:00"},
+  {name:"Drumming Workshop",stage:"XR",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Costume Pimping",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
+  {name:"Big Oil Drumming Parade",stage:"XR",day:"Sat",start:"14:00",end:"15:30"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Sat",start:"14:00",end:"16:00"},
+  {name:"Strictly Burning Ballroom",stage:"XR",day:"Sat",start:"18:00",end:"18:30"},
+  // Climate Live
+  {name:"Climate Live Opening",stage:"Climate Live",day:"Sat",start:"10:00",end:"20:00"},
+  {name:"Patch It For The Planet: Upcycled Patch Making - The Mend",stage:"Climate Live",day:"Sat",start:"10:30",end:"11:30"},
+  {name:"Beads & Breathe",stage:"Climate Live",day:"Sat",start:"11:45",end:"12:45"},
+  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Mediterranean Herb Repotting - Grounds for Growth",stage:"Climate Live",day:"Sat",start:"14:15",end:"15:15"},
+  {name:"Collective Climate Collage Making - Quirky Academy CIC",stage:"Climate Live",day:"Sat",start:"15:30",end:"16:30"},
+  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Sat",start:"16:45",end:"17:45"},
+  // Rebel Girls Club
+  {name:"Morning Yoga with Sofia (Find Your Flow)",stage:"Rebel Girls Club",day:"Sat",start:"10:00",end:"11:00"},
+  {name:"â€œThe Art of Refusing Neutrality: Why Creatives Must Take Sides.â€ with the Sumud Collective.",stage:"Rebel Girls Club",day:"Sat",start:"11:00",end:"12:15"},
+  {name:"THE DIVINE FEMININE Paint Your Power - Take Up Space with CreatedbyBillie",stage:"Rebel Girls Club",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Reclaim Your Voice with Amelie",stage:"Rebel Girls Club",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Sat",start:"16:00",end:"16:40"},
+  {name:"Vulva Painting with Phoebe Grace",stage:"Rebel Girls Club",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"Sensual Embodiment led by Scarlett",stage:"Rebel Girls Club",day:"Sat",start:"18:30",end:"19:30"},
+  // Permaculture
+  {name:"Flags for the feral: Wild plant printing on recycled cloth",stage:"Permaculture",day:"Sat",start:"10:00",end:"11:00"},
+  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Sat",start:"11:30",end:"12:30"},
+  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Hack the hardware: DIY electronics for land, plants and low cost automation",stage:"Permaculture",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Sat",start:"15:30",end:"16:30"},
+  {name:"Wild adornment: Willow crowns and headpieces by hand",stage:"Permaculture",day:"Sat",start:"17:00",end:"18:00"},
+  // Ancient Futures
+  {name:"The Healing Breath",stage:"Ancient Futures",day:"Sat",start:"09:00",end:"11:00"},
+  {name:"Deep Chill Yoga",stage:"Ancient Futures",day:"Sat",start:"11:30",end:"13:30"},
+  {name:"The Future of Cannabis",stage:"Ancient Futures",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"Multidimensional Workshop",stage:"Ancient Futures",day:"Sat",start:"15:30",end:"16:30"},
+  {name:"Science for wellness",stage:"Ancient Futures",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"Rhythmic Release",stage:"Ancient Futures",day:"Sat",start:"18:30",end:"20:30"},
+  // Observatory
+  {name:"The Taste Test: Exploring Food Preferences",stage:"Observatory",day:"Sat",start:"10:00",end:"11:00"},
+  {name:"The Taste Test: Exploring Food Preferences",stage:"Observatory",day:"Sat",start:"11:30",end:"12:30"},
+  {name:"Conspiracy Kitchen: Come Cook With Us",stage:"Observatory",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Music Is Medicine",stage:"Observatory",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Move Together, Decide Together: Dancing Towards A New Democracy",stage:"Observatory",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Celebratory Reset Ritual",stage:"Observatory",day:"Sat",start:"17:30",end:"18:30"},
+  // Airetiko
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sat",start:"11:00",end:"13:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sat",start:"13:00",end:"15:00"},
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sat",start:"15:00",end:"17:00"},
+  // Craft Tent
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
+  // Narcotics Anonymous
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sat",start:"08:00",end:"09:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sat",start:"13:00",end:"14:00"},
+  // Energy Garden
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Sat",start:"12:00",end:"22:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Sat",start:"13:00",end:"15:00"},
+  // Cocaine Anonymous
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sat",start:"11:00",end:"12:00"},
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sat",start:"18:00",end:"19:00"},
+  // Spinney Hollow
+  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
+  // Tinker Station
+  {name:"Tinker Station",stage:"Tinker Station",day:"Sat",start:"10:00",end:"18:00"},
+  // The Magic Teapot
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sat",start:"12:00",end:"00:00"},
+  // Hapitat
+  {name:"Hapitat",stage:"Hapitat",day:"Sat",start:"10:00",end:"18:00"},
+  // Garden
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Sat",start:"10:00",end:"18:00"},
+  // Games Lounge
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Sat",start:"12:00",end:"00:00"},
+  // Crafty Rascals
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Sat",start:"10:00",end:"18:00"},
+  // Blink Mental Health
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Sat",start:"10:00",end:"19:30"},
+  // Reparium
+  {name:"Repairium",stage:"Reparium",day:"Sat",start:"10:00",end:"18:00"},
+  // Cas's Costumes
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Sat",start:"10:00",end:"18:00"},
+  // --- Sun ---
+  // Reel News
+  {name:"Film: The people's revolution in Myanmar",stage:"Reel News",day:"Sun",start:"10:30",end:"11:30"},
+  {name:"The Myth of Migration",stage:"Reel News",day:"Sun",start:"11:30",end:"12:15"},
+  {name:"Palantir and the fight against military tech in the NHS",stage:"Reel News",day:"Sun",start:"12:15",end:"13:00"},
+  {name:"Reports from the Assata Shakur Brigade: Solidarity With Cuba",stage:"Reel News",day:"Sun",start:"13:00",end:"13:45"},
+  {name:"Film: Grenada Revolution",stage:"Reel News",day:"Sun",start:"13:45",end:"14:30"},
+  {name:"Repoliticising DIY Culture - book launch",stage:"Reel News",day:"Sun",start:"14:30",end:"15:15"},
+  {name:"Jack Block",stage:"Reel News",day:"Sun",start:"15:15",end:"15:45"},
+  {name:"Doctur Normul",stage:"Reel News",day:"Sun",start:"15:45",end:"16:15"},
+  {name:"Nathan Tuft: working with youth",stage:"Reel News",day:"Sun",start:"16:15",end:"17:15"},
+  {name:"Liv Wynter",stage:"Reel News",day:"Sun",start:"17:15",end:"18:15"},
+  // Circus Tent
+  {name:"Energising Yoga",stage:"Circus Tent",day:"Sun",start:"10:00",end:"11:00"},
+  {name:"Wye Circus Skills, Hoop",stage:"Circus Tent",day:"Sun",start:"11:00",end:"13:00"},
+  {name:"Wye Circus Skills, Poi, Staff",stage:"Circus Tent",day:"Sun",start:"13:00",end:"15:00"},
+  {name:"Wye Circus Skills, Juggling",stage:"Circus Tent",day:"Sun",start:"15:00",end:"17:00"},
+  {name:"Bubblology",stage:"Circus Tent",day:"Sun",start:"17:00",end:"18:00"},
+  // XR
+  {name:"Last Chance Salon",stage:"XR",day:"Sun",start:"11:00",end:"16:00"},
+  {name:"Art Blocking and Costume Pimping",stage:"XR",day:"Sun",start:"11:00",end:"16:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Sun",start:"11:00",end:"12:00"},
+  {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Sun",start:"12:00",end:"13:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Sun",start:"14:00",end:"16:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Sun",start:"14:00",end:"16:00"},
+  // Climate Live
+  {name:"Climate Live Opening",stage:"Climate Live",day:"Sun",start:"10:00",end:"20:00"},
+  {name:"Radical Rosettes",stage:"Climate Live",day:"Sun",start:"10:30",end:"11:30"},
+  {name:"Music X Climate Zine-Making",stage:"Climate Live",day:"Sun",start:"11:45",end:"12:45"},
+  {name:"Bag Charm Making - Weaving Change",stage:"Climate Live",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Patch It For The Planet: Upcycled Patch Making - The Mend",stage:"Climate Live",day:"Sun",start:"14:15",end:"15:15"},
+  {name:"Mediterranean Herb Repotting - Grounds for Growth",stage:"Climate Live",day:"Sun",start:"15:30",end:"16:30"},
+  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Sun",start:"16:45",end:"17:45"},
+  // Rebel Girls Club
+  {name:"Morning Yoga with Emma",stage:"Rebel Girls Club",day:"Sun",start:"10:00",end:"11:00"},
+  {name:"Self-love Sensuality with Beth (Find Your Flow)",stage:"Rebel Girls Club",day:"Sun",start:"11:00",end:"12:15"},
+  {name:"Body painting with Ivy",stage:"Rebel Girls Club",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Rebel Girls Rehab",stage:"Rebel Girls Club",day:"Sun",start:"14:30",end:"16:00"},
+  {name:"Closing Ceremony with Everglowing & Find Your Flow",stage:"Rebel Girls Club",day:"Sun",start:"16:00",end:"17:00"},
+  // Permaculture
+  {name:"Drawn in: Zentangle, slow lines and shared attention",stage:"Permaculture",day:"Sun",start:"10:00",end:"11:00"},
+  {name:"Drawn from the ground: Natural inks, charcoal and figure drawing",stage:"Permaculture",day:"Sun",start:"11:30",end:"12:30"},
+  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Soft rebellion: Seed balls for pollinators and wild edges",stage:"Permaculture",day:"Sun",start:"14:30",end:"15:30"},
+  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Sun",start:"15:30",end:"16:30"},
+  {name:"Flags for the feral: Wild plant printing on recycled cloth",stage:"Permaculture",day:"Sun",start:"17:00",end:"18:00"},
+  // Ancient Futures
+  {name:"4BEAT Yoga",stage:"Ancient Futures",day:"Sun",start:"09:00",end:"11:00"},
+  {name:"Breath & Bass",stage:"Ancient Futures",day:"Sun",start:"11:30",end:"13:30"},
+  {name:"Laughter Meditation",stage:"Ancient Futures",day:"Sun",start:"14:00",end:"15:00"},
+  {name:"Nervous System Reset",stage:"Ancient Futures",day:"Sun",start:"15:30",end:"17:30"},
+  {name:"Ancient Futures Closing Ceremony",stage:"Ancient Futures",day:"Sun",start:"18:00",end:"19:00"},
+  // Observatory
+  {name:"Professor Dinger's Miracle Hangover Cure Experiment",stage:"Observatory",day:"Sun",start:"10:00",end:"11:00"},
+  {name:"Your Brain On Yoga",stage:"Observatory",day:"Sun",start:"11:30",end:"12:30"},
+  {name:"Music Is Medicine",stage:"Observatory",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Exploring The Neurodivergent Festival Goer Experience",stage:"Observatory",day:"Sun",start:"14:30",end:"15:30"},
+  {name:"Fear & Loathing In Boomtownâ€¦ A Study Of Attitudes & Experiences",stage:"Observatory",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"Grief, Belonging And Integration",stage:"Observatory",day:"Sun",start:"17:30",end:"18:30"},
+  // Airetiko
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sun",start:"11:00",end:"13:00"},
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sun",start:"13:00",end:"15:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sun",start:"15:00",end:"17:00"},
+  // Craft Tent
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
+  // Narcotics Anonymous
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sun",start:"08:00",end:"09:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sun",start:"13:00",end:"14:00"},
+  // Energy Garden
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Sun",start:"12:00",end:"20:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Sun",start:"13:00",end:"15:00"},
+  // Cocaine Anonymous
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sun",start:"11:00",end:"12:00"},
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sun",start:"18:00",end:"19:00"},
+  // Spinney Hollow
+  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
+  // Tinker Station
+  {name:"Tinker Station",stage:"Tinker Station",day:"Sun",start:"10:00",end:"18:00"},
+  // The Magic Teapot
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sun",start:"12:00",end:"00:00"},
+  // Hapitat
+  {name:"Hapitat",stage:"Hapitat",day:"Sun",start:"10:00",end:"18:00"},
+  // Garden
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Sun",start:"10:00",end:"18:00"},
+  // Games Lounge
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Sun",start:"12:00",end:"00:00"},
+  // Crafty Rascals
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Sun",start:"10:00",end:"18:00"},
+  // Blink Mental Health
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Sun",start:"10:00",end:"19:30"},
+  // Reparium
+  {name:"Repairium",stage:"Reparium",day:"Sun",start:"10:00",end:"18:00"},
+  // Cas's Costumes
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Sun",start:"10:00",end:"18:00"}
 ];
 
 const DAY_ORDER = ["Wed","Thu","Fri","Sat","Sun"];
@@ -2904,6 +3388,64 @@ function setPersonalClashChoice(day, nameA, nameB, choice){
   Store.set("personalClashChoices", choices);
 }
 
+// Which of a "half & half" pair you're catching FIRST — purely local,
+// same day+sorted-names key as the choice itself above, so it lines up
+// with both a personal clash's own half&half AND a shared group
+// decision's half&half. Never synced (see PERSONAL_ONLY_KEYS), and
+// never shown on anyone else's device or read-only tab — only used to
+// order/label things in your own Plan.
+function getHalfOrderChoice(day, nameA, nameB){
+  const orders = Store.get("halfOrderChoices") || {};
+  return orders[personalClashChoiceKey(day, nameA, nameB)] || null;
+}
+function setHalfOrderChoice(day, nameA, nameB, firstName){
+  const key = personalClashChoiceKey(day, nameA, nameB);
+  const orders = Store.get("halfOrderChoices") || {};
+  if(firstName) orders[key] = firstName; else delete orders[key];
+  Store.set("halfOrderChoices", orders);
+}
+
+function closeHalfOrderModal(){
+  const existing = document.getElementById("halfOrderModal");
+  if(existing) existing.remove();
+}
+
+// Asked whenever "half & half" is picked for a clashing pair — since a
+// clash means the two sets overlap, catching "half of each" only makes
+// sense with a real first/second order (leave one early, catch the
+// back half of the other), and guessing wrong there is exactly the kind
+// of thing that ruins the plan on the day. onChoose(firstName|null) —
+// null if skipped, which just means the half&half status is set with no
+// order recorded (fine, just less specific).
+function showHalfOrderModal(day, a, b, onChoose){
+  closeHalfOrderModal();
+  const backdrop = document.createElement("div");
+  backdrop.id = "halfOrderModal";
+  backdrop.style.cssText = "position:fixed; inset:0; z-index:65; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
+  backdrop.innerHTML = `
+    <div class="card" style="position:relative; width:100%; max-width:380px; margin:0;">
+      <h3 style="margin-bottom:6px;">Catching half of each — which one first?</h3>
+      <p class="empty-note" style="margin-bottom:10px;">Just for your own Plan — this doesn't change what anyone else sees, and you can change it any time.</p>
+      <button class="action half-order-btn" data-pick="a" style="margin-bottom:8px; text-align:left; display:block;">
+        <strong>${escapeHtml(a.name)}</strong><br><span style="font-weight:400; font-size:12px;">${escapeHtml(a.stage)} · ${escapeHtml(timeLabel(a))}</span>
+      </button>
+      <button class="action half-order-btn" data-pick="b" style="text-align:left; display:block;">
+        <strong>${escapeHtml(b.name)}</strong><br><span style="font-weight:400; font-size:12px;">${escapeHtml(b.stage)} · ${escapeHtml(timeLabel(b))}</span>
+      </button>
+      <button class="ghost" id="halfOrderSkipBtn" style="margin-top:10px;">Skip — decide later</button>
+    </div>
+  `;
+  backdrop.onclick = (e)=>{ if(e.target === backdrop) closeHalfOrderModal(); };
+  document.body.appendChild(backdrop);
+  backdrop.querySelectorAll(".half-order-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      onChoose(btn.getAttribute("data-pick") === "a" ? a.name : b.name);
+      closeHalfOrderModal();
+    };
+  });
+  document.getElementById("halfOrderSkipBtn").onclick = ()=>{ onChoose(null); closeHalfOrderModal(); };
+}
+
 function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
@@ -2923,12 +3465,14 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
     const choice = getPersonalClashChoice(artist.day, artist.name, other.name);
     const shortMine = escapeHtml(truncateName(artist.name, 14));
     const shortOther = escapeHtml(truncateName(other.name, 14));
+    const halfOrder = choice === "half" ? getHalfOrderChoice(artist.day, artist.name, other.name) : null;
     choiceHTML = `
       <div class="decision-actions personal-clash-actions">
         <button data-clash-choice="a" title="Go to ${escapeHtml(artist.name)}" class="${choice==="a" ? "active" : ""}">Go: ${shortMine}</button>
         <button data-clash-choice="b" title="Go to ${escapeHtml(other.name)}" class="${choice==="b" ? "active" : ""}">Go: ${shortOther}</button>
         <button data-clash-choice="half" class="${choice==="half" ? "active" : ""}">Half &amp; half</button>
-      </div>`;
+      </div>
+      ${halfOrder ? `<p class="empty-note" style="margin-top:4px;">Catching <strong>${escapeHtml(halfOrder)}</strong> first</p>` : ""}`;
   }
   return `
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
@@ -3252,9 +3796,23 @@ function renderSchedule(){
           if(!otherName) return;
           const clicked = btn.getAttribute("data-clash-choice");
           const already = getPersonalClashChoice(artist.day, artist.name, otherName);
+          if(clicked === "half" && already !== "half"){
+            // Both sides of a personal clash are things you saved
+            // yourself, so the other one's full time/stage is right
+            // there in your own schedule — no separate lookup needed.
+            const other = Store.get("schedule").find(x=> x.name === otherName && x.day === artist.day) || { name: otherName, stage: "", day: artist.day, start: "", end: "" };
+            showHalfOrderModal(artist.day, artist, other, (firstName)=>{
+              setHalfOrderChoice(artist.day, artist.name, otherName, firstName);
+              setPersonalClashChoice(artist.day, artist.name, otherName, "half");
+              renderSchedule();
+            });
+            return;
+          }
           // Tapping the already-active choice clears it — a way to undo
           // without a separate "clear" control.
-          setPersonalClashChoice(artist.day, artist.name, otherName, already === clicked ? null : clicked);
+          const next = already === clicked ? null : clicked;
+          setPersonalClashChoice(artist.day, artist.name, otherName, next);
+          if(next !== "half") setHalfOrderChoice(artist.day, artist.name, otherName, null);
           renderSchedule();
         };
       });
@@ -3762,9 +4320,12 @@ function renderHomeContextBanner(){
   // Now/next set info lives in the dedicated "Next saved event" ticket
   // above this banner instead — kept out of here so the two don't say
   // the same thing twice in different words.
+  // Only your own personal clashes alert here — group "decisions needed"
+  // used to also show on this banner, but that's a nag for something
+  // you'll pick a time for yourselves, not an urgent home-screen alert;
+  // it still lives on the Today tab and in Plan → Compare.
   const clashMap = findClashes(Store.get("schedule"));
   const clashCount = Object.keys(clashMap).length;
-  const decisionCount = (typeof outstandingGroupDecisionsCount === "function") ? outstandingGroupDecisionsCount() : 0;
 
   // Only shows for someone who's actually set a location (peopleStatus)
   // — not just "synced recently," which used to fire for anyone who'd
@@ -3788,17 +4349,12 @@ function renderHomeContextBanner(){
     <div class="card home-context-banner">
       <div class="hcb-top">${escapeHtml(dayLabel)} · ${escapeHtml(clockLabel)}${name ? " · " + escapeHtml(name) : ""}</div>
       ${clashCount ? `<div class="hcb-line hcb-warn">⚡ ${clashCount} saved artist${clashCount===1?"":"s"} clashing</div>` : ""}
-      ${decisionCount ? `<div class="hcb-line hcb-warn hcb-decisions">⚡ ${decisionCount} group decision${decisionCount===1?"":"s"} still needed</div>` : ""}
       ${bottomLine ? `<div class="hcb-line hcb-muted">${bottomLine}</div>` : ""}
     </div>
   `;
   if(clashCount){
-    const warnLine = banner.querySelector(".hcb-warn:not(.hcb-decisions)");
+    const warnLine = banner.querySelector(".hcb-warn");
     if(warnLine){ warnLine.style.cursor = "pointer"; warnLine.onclick = jumpToClashes; }
-  }
-  if(decisionCount){
-    const decisionLine = banner.querySelector(".hcb-decisions");
-    if(decisionLine){ decisionLine.style.cursor = "pointer"; decisionLine.onclick = jumpToClashes; }
   }
 }
 renderHomeContextBanner();
@@ -6303,13 +6859,25 @@ function outstandingGroupDecisionsCount(){
 // handling above for how it actually gets to everyone else (piggybacked
 // on the same per-member document that's always worked, not a separate
 // document with its own permissions to worry about).
-async function setGroupDecision(decisionKey, status, choiceName){
+// detail is an optional free-text note ("going alone", "meeting X
+// there") — omitted (undefined) keeps whatever detail was already
+// saved, so tapping a status button never wipes out a note someone
+// already added; pass "" explicitly to clear it.
+async function setGroupDecision(decisionKey, status, choiceName, detail){
   const name = currentContributorName() || "Someone";
-  const entry = { status, choice: choiceName || null, by: name, updatedAt: Date.now() };
   const decisions = Store.get("groupDecisions") || {};
+  const prev = decisions[decisionKey];
+  const entry = {
+    status,
+    choice: choiceName || null,
+    by: name,
+    updatedAt: Date.now(),
+    detail: detail !== undefined ? (detail.trim() || null) : ((prev && prev.detail) || null)
+  };
   decisions[decisionKey] = entry;
   Store.set("groupDecisions", decisions);
   renderGroupDecisions();
+  if(typeof renderTodayDecisions === "function") renderTodayDecisions();
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
   if(typeof pushToCloud === "function"){
     try{ await pushToCloud(); return true; }catch(err){ return false; }
@@ -6339,34 +6907,70 @@ function decisionCardHTML(pair, decision){
   const ownerLine = (interest)=> Object.entries(interest).map(([owner, mustSee])=> `${escapeHtml(owner)} ${mustSee ? "★" : "👍"}`).join(" · ") || "no one yet";
   const shortA = escapeHtml(truncateName(pair.a.name, 16));
   const shortB = escapeHtml(truncateName(pair.b.name, 16));
+  const halfOrder = status === "half" ? getHalfOrderChoice(pair.day, pair.a.name, pair.b.name) : null;
+  const statusNote = status === "together" && decision ? `Together: <strong>${escapeHtml(decision.choice)}</strong>`
+    : status === "split" && decision ? `Splitting up`
+    : status === "half" && decision ? `Catching half of each${halfOrder ? ` — <strong>${escapeHtml(halfOrder)}</strong> first` : ""}`
+    : "";
   return `
-    <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(pair.key)}">
+    <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(pair.key)}" data-day="${escapeHtml(pair.day)}">
       <div class="decision-head"><span>⚡ ${escapeHtml(timeLabel(pair.a))}</span>${decisionStatusPillHTML(status)}</div>
-      <div class="decision-artist-line"><strong>${escapeHtml(pair.a.name)}</strong> — ${ownerLine(pair.a.interest)}</div>
-      <div class="decision-artist-line"><strong>${escapeHtml(pair.b.name)}</strong> — ${ownerLine(pair.b.interest)}</div>
-      ${status === "together" && decision ? `<p class="empty-note">Together: <strong>${escapeHtml(decision.choice)}</strong> (${escapeHtml(decision.by)})</p>` : ""}
-      ${status === "split" && decision ? `<p class="empty-note">Splitting up (${escapeHtml(decision.by)})</p>` : ""}
-      ${status === "half" && decision ? `<p class="empty-note">Catching half of each (${escapeHtml(decision.by)})</p>` : ""}
-      <div class="decision-actions">
-        <button data-action="together-a" title="Everyone together — ${escapeHtml(pair.a.name)}" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">Together: ${shortA}</button>
-        <button data-action="together-b" title="Everyone together — ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">Together: ${shortB}</button>
-        <button data-action="split" class="${decision && decision.status==="split" ? "active" : ""}">Split up</button>
-        <button data-action="half" title="Catch half of ${escapeHtml(pair.a.name)}, half of ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="half" ? "active" : ""}">Half &amp; half</button>
-        <button data-action="later" class="${decision && decision.status==="later" ? "active" : ""}">Later</button>
+      <div class="decision-vs">
+        <div class="decision-vs-side"><strong>${escapeHtml(pair.a.name)}</strong><span class="decision-vs-stage">${escapeHtml(pair.a.stage)}</span><span class="decision-vs-owners">${ownerLine(pair.a.interest)}</span></div>
+        <div class="decision-vs-divider">vs</div>
+        <div class="decision-vs-side"><strong>${escapeHtml(pair.b.name)}</strong><span class="decision-vs-stage">${escapeHtml(pair.b.stage)}</span><span class="decision-vs-owners">${ownerLine(pair.b.interest)}</span></div>
       </div>
+      ${statusNote || (decision && decision.detail) ? `<p class="empty-note decision-status-note">${statusNote}${statusNote && decision.detail ? " · " : ""}${decision && decision.detail ? `📝 ${escapeHtml(decision.detail)}` : ""}${decision ? ` <span class="decision-by">(${escapeHtml(decision.by)})</span>` : ""}</p>` : ""}
+      <div class="decision-actions">
+        <div class="decision-actions-row decision-actions-together">
+          <button data-action="together-a" title="Everyone together — ${escapeHtml(pair.a.name)}" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">👥 ${shortA}</button>
+          <button data-action="together-b" title="Everyone together — ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">👥 ${shortB}</button>
+        </div>
+        <div class="decision-actions-row">
+          <button data-action="split" class="${decision && decision.status==="split" ? "active" : ""}">↔️ Split up</button>
+          <button data-action="half" title="Catch half of ${escapeHtml(pair.a.name)}, half of ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="half" ? "active" : ""}">◐ Half &amp; half</button>
+          <button data-action="later" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Later</button>
+        </div>
+      </div>
+      ${decision ? `<div class="decision-detail-row">
+        <input type="text" class="decision-detail-input" placeholder="Add detail — e.g. going alone (optional)" value="${escapeHtml(decision.detail || "")}">
+        <button class="ghost decision-detail-save">Save</button>
+      </div>` : ""}
     </div>
   `;
 }
 
 function wireDecisionCard(el, pair){
+  const performAction = (action)=>{
+    if(action === "together-a") return setGroupDecision(pair.key, "together", pair.a.name);
+    if(action === "together-b") return setGroupDecision(pair.key, "together", pair.b.name);
+    if(action === "half"){
+      // Always asks (even re-confirming an existing half&half) — that's
+      // also how you'd come back and change your mind about which one's
+      // first.
+      showHalfOrderModal(pair.day, pair.a, pair.b, (firstName)=>{
+        setHalfOrderChoice(pair.day, pair.a.name, pair.b.name, firstName);
+        setGroupDecision(pair.key, "half", null);
+      });
+      return;
+    }
+    return setGroupDecision(pair.key, action, null);
+  };
   el.querySelectorAll(".decision-actions button").forEach(btn=>{
-    btn.onclick = ()=>{
-      const action = btn.getAttribute("data-action");
-      if(action === "together-a") setGroupDecision(pair.key, "together", pair.a.name);
-      else if(action === "together-b") setGroupDecision(pair.key, "together", pair.b.name);
-      else setGroupDecision(pair.key, action, null);
-    };
+    btn.onclick = ()=> performAction(btn.getAttribute("data-action"));
   });
+  const detailInput = el.querySelector(".decision-detail-input");
+  const detailSaveBtn = el.querySelector(".decision-detail-save");
+  if(detailInput && detailSaveBtn){
+    const decisions = Store.get("groupDecisions") || {};
+    const current = decisions[pair.key];
+    const save = ()=>{
+      if(!current) return;
+      setGroupDecision(pair.key, current.status, current.choice, detailInput.value);
+    };
+    detailSaveBtn.onclick = save;
+    detailInput.onkeydown = (e)=>{ if(e.key === "Enter"){ e.preventDefault(); save(); } };
+  }
 }
 
 // Reusable so the same render backs both the Plan tab's box and Today's
@@ -6379,11 +6983,27 @@ function renderGroupDecisions(containerId){
   if(!box) return;
   const pairs = groupClashPairs();
   const decisions = Store.get("groupDecisions") || {};
-  if(!pairs.length){ box.innerHTML = ""; return; }
+  if(!pairs.length){ box.innerHTML = ""; box.style.display = "none"; return; }
+  box.style.display = "";
+  const outstanding = pairs.filter(p=>{ const d = decisions[p.key]; return !d || d.status === "later"; }).length;
+  // Collapsed to one summary line by default — this used to sit full-
+  // height above Compare's own list every time, effectively hiding the
+  // thing Compare is actually for. The header/toggle is a "card" of its
+  // own so it reads as collapsible rather than as a heading.
+  const collapseHeader = `<div class="decisions-box-header${groupDecisionsCollapsed ? "" : " expanded"}" id="groupDecisionsCollapseToggle">
+    <h3 style="margin:0; font-size:14px;">⚡ Group decisions <span class="empty-note" style="font-weight:400;">${pairs.length} clash${pairs.length===1?"":"es"}${outstanding ? ` · ${outstanding} still needed` : " · all set"}</span></h3>
+    <span class="decisions-box-chevron">${groupDecisionsCollapsed ? "▾" : "▴"}</span>
+  </div>`;
+  if(groupDecisionsCollapsed){
+    box.innerHTML = collapseHeader;
+    document.getElementById("groupDecisionsCollapseToggle").onclick = ()=>{ groupDecisionsCollapsed = false; renderGroupDecisions(containerId); };
+    return;
+  }
   const visible = groupDecisionsExpanded ? pairs : pairs.slice(0, GROUP_DECISIONS_CAP);
-  box.innerHTML = `<h3 style="margin-bottom:6px; font-size:14px;">⚡ Group decisions</h3>`
+  box.innerHTML = collapseHeader
     + visible.map(p=> decisionCardHTML(p, decisions[p.key])).join("")
     + (pairs.length > GROUP_DECISIONS_CAP ? `<button class="ghost" id="groupDecisionsToggle" style="margin-top:2px;">${groupDecisionsExpanded ? "Show fewer" : `Show ${pairs.length - GROUP_DECISIONS_CAP} more`}</button>` : "");
+  document.getElementById("groupDecisionsCollapseToggle").onclick = ()=>{ groupDecisionsCollapsed = true; renderGroupDecisions(containerId); };
   const cards = box.querySelectorAll(".decision-card");
   visible.forEach((p,i)=>{ if(cards[i]) wireDecisionCard(cards[i], p); });
   const toggleBtn = document.getElementById("groupDecisionsToggle");
@@ -6476,7 +7096,7 @@ function renderTodayNextUp(){
       return `<div class="nextup-row">
         <div class="nextup-time"><span class="nextup-day">${escapeHtml(a.day || "")}</span>${escapeHtml(a.start || "")}<span class="nextup-countdown">${nextUpCountdownLabel(a.startMin, nowMin)}</span></div>
         <div class="nextup-info">
-          <div class="nextup-name">${escapeHtml(a.name)}</div>
+          <div class="nextup-name">${escapeHtml(a.name)}${a.end ? ` <span class="nextup-fullwindow">(${escapeHtml(a.start || "")}–${escapeHtml(a.end)})</span>` : ""}</div>
           <div class="nextup-stage">${escapeHtml(a.stage)}</div>
           ${owners ? `<div class="nextup-owners">${owners}</div>` : ""}
         </div>
@@ -6625,12 +7245,10 @@ renderDiscoverForYou();
 if(typeof renderRecentActivity === "function") renderRecentActivity("recentActivityList");
 
 // ===============================
-// GROUP ACTIVITY + "NEW SINCE YOU LAST OPENED" — both derived entirely
-// from data already synced (peopleStatus, groupDecisions, the shared
-// meeting point, hiddenVenues/theories timestamps) rather than a
-// separate event log — no new collection, no extra Firestore writes at
-// all. "New since last opened" is purely a local comparison against a
-// personal (never-synced) lastOpenedAt cursor.
+// GROUP ACTIVITY — derived entirely from data already synced
+// (peopleStatus, groupDecisions, the shared meeting point,
+// hiddenVenues/theories timestamps) rather than a separate event log —
+// no new collection, no extra Firestore writes at all.
 // ===============================
 function buildRecentActivity(){
   const events = [];
@@ -6652,7 +7270,8 @@ function buildRecentActivity(){
       : d.status === "split" ? "decided to split up"
       : d.status === "half" ? "decided to catch half of each"
       : "marked a clash to decide later";
-    events.push({ ts: d.updatedAt, text: `${escapeHtml(d.by || "Someone")} ${label}`, icon: "⚡" });
+    const detailSuffix = d.detail ? ` — ${escapeHtml(d.detail)}` : "";
+    events.push({ ts: d.updatedAt, text: `${escapeHtml(d.by || "Someone")} ${label}${detailSuffix}`, icon: "⚡" });
   });
 
   const meetingUpdatedAt = Store.get("meetingUpdatedAt");
@@ -6677,24 +7296,6 @@ function renderRecentActivity(containerId, limit){
   box.innerHTML = events.length
     ? events.map(e=> `<div class="status-line">${e.icon} ${e.text} <span style="color:var(--text-muted); font-size:11px;">· ${formatLastSeen(e.ts)}</span></div>`).join("")
     : `<p class="empty-note">Nothing yet — activity shows up here as your group syncs, sets statuses, logs finds and makes decisions.</p>`;
-}
-
-// Compares against the PREVIOUS lastOpenedAt (captured before this call
-// updates it) — so this only ever fires once per fresh app open, not on
-// every render, and needs no server-side "unread" state of its own.
-function renderNewSinceLastOpened(){
-  const box = document.getElementById("newSinceLastOpened");
-  if(!box) return;
-  const previous = Store.get("lastOpenedAt");
-  Store.set("lastOpenedAt", Date.now());
-  if(!previous){ box.innerHTML = ""; return; } // first-ever open — nothing to compare against
-  const events = buildRecentActivity().filter(e=> e.ts > previous);
-  const decisionsCount = (typeof outstandingGroupDecisionsCount === "function") ? outstandingGroupDecisionsCount() : 0;
-  if(!events.length && !decisionsCount){ box.innerHTML = ""; return; }
-  const parts = [];
-  if(events.length) parts.push(`${events.length} update${events.length===1?"":"s"} from your group`);
-  if(decisionsCount) parts.push(`${decisionsCount} decision${decisionsCount===1?"":"s"} still needed`);
-  box.innerHTML = `<div class="card"><span class="tag">Since you last opened</span><p style="margin-top:6px;">🆕 ${parts.join(" · ")}</p></div>`;
 }
 
 async function pushToCloud(){
@@ -7396,12 +7997,7 @@ function autoSyncNow(trigger){
     }
   });
 }
-// "New since you last opened" needs to run once the initial sync has
-// had a chance to land — otherwise it'd compare against data that's
-// about to change moments later. Runs regardless of whether the sync
-// succeeded (offline, no room set up yet, etc.) so it's never stuck
-// waiting on signal.
-autoSyncNow("on open").finally(()=>{ if(typeof renderNewSinceLastOpened === "function") renderNewSinceLastOpened(); });
+autoSyncNow("on open");
 setInterval(()=> autoSyncNow("periodic"), AUTO_SYNC_INTERVAL_MS);
 document.addEventListener("visibilitychange", ()=>{
   // Guard against firing right on top of the interval or another
@@ -8626,7 +9222,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // "meeting" is deliberately absent — it's shared group data (stored on
 // the room doc, not personal), and must survive things like device
 // handoff instead of being wiped along with this device's own notes.
-const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","lastOpenedAt"];
+const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","halfOrderChoices","lastOpenedAt"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
