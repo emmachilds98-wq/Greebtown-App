@@ -73,7 +73,80 @@ window.ARTIST_PREVIEWS = {
   "Ross From Friends": { spotifyArtist: "1Ma3pJzPIrAyYPNRkp3SUF", audioPreview: "https://p.scdn.co/mp3-preview/b556b8c3dfeec157f8d110b82ed165cb10e3da83.mp3", soundcloud: "https://soundcloud.com/rossfromfriends", youtubeChannel: "https://www.youtube.com/channel/UCQF0bMNU7G-F07QuLJEJ0GQ", instagram: "https://www.instagram.com/rossfromfriends/" },
   "Folamour": { spotifyArtist: "6pJY5At9SiMpAOBrw9YosS", audioPreview: "https://p.scdn.co/mp3-preview/38bd2c8e4202e34d8e28ff2b14e3899ebbfc085f.mp3", soundcloud: "https://soundcloud.com/folamour", youtubeChannel: "https://www.youtube.com/channel/UC6cU5MIwHhDe-83ycfHEbyA", instagram: "https://www.instagram.com/folamour_fhuo/" },
   "Alix Perez": { spotifyArtist: "4e6pQ61gYReORJoXcrQH1Z", audioPreview: "https://p.scdn.co/mp3-preview/7a478f81909ab518da71370088690d6ab4702fe9.mp3", soundcloud: "http://soundcloud.com/alixperez", instagram: "https://www.instagram.com/alixperez1985/" },
-  "Hamdi": { spotifyArtist: "7vvicoei9BbKpZix8qSeLg", audioPreview: "https://p.scdn.co/mp3-preview/23247364e332aa630d303b3ab649116265cf8263.mp3", soundcloud: "https://soundcloud.com/hamdiofficialmusic", youtubeChannel: "https://www.youtube.com/channel/UCsvs03ZW_Mko0LP4HerZG_w", instagram: "https://www.instagram.com/hamdimusic/" }
+  "Hamdi": { spotifyArtist: "7vvicoei9BbKpZix8qSeLg", audioPreview: "https://p.scdn.co/mp3-preview/23247364e332aa630d303b3ab649116265cf8263.mp3", soundcloud: "https://soundcloud.com/hamdiofficialmusic", youtubeChannel: "https://www.youtube.com/channel/UCsvs03ZW_Mko0LP4HerZG_w", instagram: "https://www.instagram.com/hamdimusic/" },
+  // Cross-checked via Viberate (spotify/soundcloud/youtube/instagram links
+  // straight off each artist's own verified profile) — audioPreview only
+  // added where a Spotify track search's own subtitle/bio cross-reference
+  // confirmed it's genuinely that artist (Viberate's own bio text names the
+  // exact same song for Ott/The Nextmen/Kaotik Kartel/Beans On Toast, so
+  // those are trustworthy; Sub Focus's is a well-known, unambiguous single).
+  "Ott": { spotifyArtist: "1F102kNzMqsmOpF7AfFmm5", audioPreview: "https://p.scdn.co/mp3-preview/4bbf32e5223da7dfab7d90378d631141fdcdf091.mp3", soundcloud: "https://soundcloud.com/ottsonic", youtubeChannel: "http://www.youtube.com/channel/UC8nm5_vE1TjJ41jpW2HmZzQ", instagram: "https://www.instagram.com/ottsonic/" },
+  "Sub Focus": { spotifyArtist: "0QaSiI5TLA4N7mcsdxShDO", audioPreview: "https://p.scdn.co/mp3-preview/0c2e5d786c898e78c68c1db614bb4cd08f7a7bdf.mp3", soundcloud: "https://soundcloud.com/subfocus", youtubeChannel: "https://www.youtube.com/user/subfocustv", instagram: "https://www.instagram.com/subfocus/" },
+  "The Nextmen": { spotifyArtist: "465IoLV7sBVtMQ3WJ756BL", audioPreview: "https://p.scdn.co/mp3-preview/29119b2939a04bc9180f380fa2ba62a48ac51b38.mp3", soundcloud: "https://soundcloud.com/thenextmen", youtubeChannel: "https://www.youtube.com/channel/UCz21UKb86TYBBmD157xtZug", instagram: "https://www.instagram.com/thenextmenofficial/" },
+  "Kaotik Kartel": { spotifyArtist: "5UKrxYnStlbD0aVYSx9KM1", audioPreview: "https://p.scdn.co/mp3-preview/91e1cf41a9e0053ba1fabc67243a7380bf58bf68.mp3", soundcloud: "https://soundcloud.com/kaotikkartel", youtubeChannel: "https://www.youtube.com/channel/UCnN-Qlh3f99ygw53RYOP5uw", instagram: "https://www.instagram.com/kaotik_kartel/" },
+  "Beans on Toast": { spotifyArtist: "6fVeXD7D2RpFoR6bzNEDPo", audioPreview: "https://p.scdn.co/mp3-preview/45ddff2385374c45fcfd3651ff5d7696f7da57b7.mp3", soundcloud: "https://soundcloud.com/beans-on-toast", youtubeChannel: "http://www.youtube.com/channel/UCk7CBqtSSmuJIBAFJPv8z4Q", instagram: "https://www.instagram.com/beans.on.toast/" },
+  // No Spotify link on file in Viberate's own verified profile for this
+  // exact artist (the plausible-looking Spotify search hit for the name
+  // couldn't be cross-checked against it, so left out rather than risk
+  // playing a different "Jamz Supernova" under her name) — SoundCloud/
+  // Instagram only, still real search buttons cover Spotify/YouTube.
+  "Jamz Supernova": { soundcloud: "https://soundcloud.com/jamzsupernova", instagram: "https://www.instagram.com/jamzsupernova/" },
+  // Second expansion batch (29 Jul) — all cross-checked via Viberate's own
+  // verified profile links (several bios explicitly name Boomtown Fair as
+  // a past festival appearance, an especially strong identity signal).
+  // No audioPreview added here yet — Spotify artist ID lets the embed
+  // player still show real previews on click, just not the inline <audio>
+  // shortcut. Farma G had no plausible Viberate match at all (searched
+  // "Farma G" and close spelling variants) and was left out entirely
+  // rather than guess, per instruction.
+  "Grooverider": { spotifyArtist: "65g8RO3JqCUTigI7YR3dAw", soundcloud: "http://soundcloud.com/djgrooverider1", youtubeChannel: "https://www.youtube.com/channel/UCASsAtmUa0w_kgHodiNFj7g", instagram: "https://www.instagram.com/djgrooverider/" },
+  "Freestylers": { spotifyArtist: "0zg9mF9dX2knvdTKnL22T1", soundcloud: "http://soundcloud.com/freestylers", youtubeChannel: "http://www.youtube.com/user/FreestylersOfficial", instagram: "https://www.instagram.com/thefreestylersofficial/" },
+  "Ellis Dee": { spotifyArtist: "65y2opuUTsGcbU3sNzv0ll", soundcloud: "https://soundcloud.com/djellisdee", instagram: "https://www.instagram.com/djellisdee/" },
+  "Ed Solo": { spotifyArtist: "7jnJgk7LLLdpPhXrOOZXCa", soundcloud: "https://soundcloud.com/edsolo", youtubeChannel: "https://www.youtube.com/channel/UCncK21Jd9rg18jr0-Q64B1A", instagram: "https://www.instagram.com/edsolouk/" },
+  "General Levy": { spotifyArtist: "2bHgAaZ7qbGbMMXwAQm48I", soundcloud: "https://soundcloud.com/general-levy", youtubeChannel: "http://www.youtube.com/channel/UCUrM4ZEpyjw2KhpcKNWJgww", instagram: "https://www.instagram.com/generallevy" },
+  "Break": { spotifyArtist: "7FtCGMC0pcHPlrZWmYe9XM" },
+  "Chimpo": { spotifyArtist: "52daryZMe3vvpHyMyJK6SM", soundcloud: "https://soundcloud.com/chimpo-mcr", instagram: "https://www.instagram.com/chimpomcr" },
+  "Halogenix": { spotifyArtist: "24eQxPRLv3UMwEIo6mawVW", soundcloud: "http://soundcloud.com/halogenix", youtubeChannel: "https://www.youtube.com/channel/UCg-NKd9OuQBM5WscITb8orA", instagram: "https://www.instagram.com/halogenix" },
+  "Ivy Lab": { spotifyArtist: "3VXCvo9Sr0hbZ4mk6VOKBs", soundcloud: "https://soundcloud.com/ivylab", youtubeChannel: "https://www.youtube.com/channel/UCQYIaZoxwtJAzDmkM6mICUg", instagram: "https://www.instagram.com/ivylab/" },
+  "Ray Keith": { spotifyArtist: "6LWmwdaxswnPZCrjexu80I", soundcloud: "https://soundcloud.com/ray-keith", instagram: "https://www.instagram.com/raykeithdread1/" },
+  "Skeptical": { spotifyArtist: "28ee6rnxMl8AqwcroPfivP", soundcloud: "http://soundcloud.com/skeptical", youtubeChannel: "https://www.youtube.com/SkepticalTV", instagram: "https://www.instagram.com/Skepticaluk" },
+  "Top Cat": { spotifyArtist: "3QR3QV1qQuTpcy1DIqOw9j", youtubeChannel: "https://www.youtube.com/channel/UCZW7CdhCKU7s0Qg2K-tj5mg", instagram: "https://www.instagram.com/originaltopcato9/" },
+  "Fliptrix": { spotifyArtist: "5Dm525w7dCfRzudUS4EeQE", soundcloud: "https://soundcloud.com/mrfliptrix", youtubeChannel: "https://www.youtube.com/user/mrfliptrix", instagram: "https://www.instagram.com/mrfliptrix" },
+  "Estère": { spotifyArtist: "1WCaYWO3WfBdA8Dl1OqfZz", soundcloud: "https://soundcloud.com/estere", youtubeChannel: "https://www.youtube.com/channel/UCOgKVnoMYiyS8MNeoBg4-Xw", instagram: "https://www.instagram.com/esterelola/" },
+  "Kasra": { spotifyArtist: "3W1ubrHvNSMltB1l7zo6xt", soundcloud: "https://soundcloud.com/kasra-critical", instagram: "https://www.instagram.com/kasracritical/" },
+  // Third expansion batch (29 Jul) — same Viberate cross-check discipline.
+  // Silkie, yung singh, Woody Cook had no verified Spotify link on file in
+  // Viberate itself, so left off rather than guessed from a search hit.
+  "Talib Kweli": { spotifyArtist: "0lEssBAxQl2In4RpaB1C2Y", soundcloud: "https://soundcloud.com/talibkweli", youtubeChannel: "http://www.youtube.com/channel/UCF4EQffE1WIaWfAyOnlXngw", instagram: "https://www.instagram.com/talibkweli" },
+  "Camo & Krooked": { spotifyArtist: "2N8IPNZTiNo3nj4mreOlHU", soundcloud: "http://soundcloud.com/camokrooked", youtubeChannel: "https://www.youtube.com/user/CamoKrooked", instagram: "https://www.instagram.com/camokrooked" },
+  "K-Klass": { spotifyArtist: "4O1s9iVG46lSn1mD9ek1ES", soundcloud: "https://soundcloud.com/k-klass", youtubeChannel: "http://www.youtube.com/channel/UCu0TZipc0D8jOJzy_PPS9Ig", instagram: "https://www.instagram.com/paulkklass/" },
+  "Altern 8": { spotifyArtist: "4rOv05Duzyn6YkBfQepDYC", soundcloud: "https://soundcloud.com/altern8official", youtubeChannel: "https://www.youtube.com/user/altern8official", instagram: "https://www.instagram.com/altern8official/" },
+  "Darren Styles": { spotifyArtist: "2gZzTzeACSwFqkMroVxmnm", soundcloud: "http://soundcloud.com/darren-styles", youtubeChannel: "https://www.youtube.com/user/darrenstylesuk", instagram: "https://www.instagram.com/darrenstylesuk/" },
+  "Slipmatt": { spotifyArtist: "0F71ra6iKMvn6ndmnaM2Lr", soundcloud: "https://soundcloud.com/slipmatt-1", youtubeChannel: "http://www.youtube.com/channel/UCEchrER0ErQmkBW4tvrXXsw", instagram: "https://www.instagram.com/slipmatt/" },
+  "Skindred": { spotifyArtist: "3jTlKw98Ql1jGRPYqhqHap", soundcloud: "https://soundcloud.com/skindred", youtubeChannel: "https://www.youtube.com/channel/UCYehkfWFUgpMAkchZN_MlOw", instagram: "https://www.instagram.com/skindredmusic" },
+  "Antony Szmierek": { spotifyArtist: "1odn2oz1bEsGWugQ8W3zhn", youtubeChannel: "https://www.youtube.com/channel/UC-VwXR6M4HD4Wo1UpTBi4SA", instagram: "https://www.instagram.com/antonyszmierek/" },
+  "Miss Kaninna": { spotifyArtist: "1ODboExevbfXfgKz7NPKxz", soundcloud: "https://soundcloud.com/miss-kaninna", instagram: "https://www.instagram.com/misskaninna" },
+  "Donae'o": { spotifyArtist: "3xcx9CcYTM4M1890B8o9Bp", soundcloud: "https://soundcloud.com/donaeo", youtubeChannel: "http://www.youtube.com/channel/UC8Fx-MB3tV5Hiur0b79y0kg", instagram: "https://www.instagram.com/donaeo" },
+  "J:Kenzo": { spotifyArtist: "2vnlhEYTh2K1O3NZE2ONiz", soundcloud: "https://soundcloud.com/jkenzo", youtubeChannel: "https://www.youtube.com/user/kenzobeats", instagram: "https://www.instagram.com/jkenzomusic" },
+  "Plastician": { spotifyArtist: "6p41GgJajkf3W2YXAzL8xC", soundcloud: "https://soundcloud.com/plastician", instagram: "https://www.instagram.com/plastician/" },
+  "Mala": { spotifyArtist: "0QTEYauMG3DrAVPXCYMseu", soundcloud: "https://soundcloud.com/maladmz", youtubeChannel: "https://www.youtube.com/user/maladmz" },
+  "Commodo": { spotifyArtist: "2ZUJPPIpRK31hReRC22ZmT", soundcloud: "http://soundcloud.com/commodo", instagram: "https://www.instagram.com/commodough/" },
+  "Pinch": { spotifyArtist: "09S8AYFuaa9PQKSNsXxweW", soundcloud: "http://soundcloud.com/dj-pinch", instagram: "https://www.instagram.com/pinch_tectonic/" },
+  "Silkie": { soundcloud: "https://soundcloud.com/silkie" },
+  "yung singh": { soundcloud: "https://soundcloud.com/yungsingh35ol", instagram: "https://www.instagram.com/yungsingh35ol/" },
+  "DJ Die": { spotifyArtist: "3kekxNoUNHgl8dXW3yjC8a", soundcloud: "https://soundcloud.com/dj_die", instagram: "https://www.instagram.com/djdie_gutterfunk/" },
+  "Benny Page": { spotifyArtist: "602tBNQHNIZL6tsB2RHAV1", soundcloud: "https://soundcloud.com/bennypagemusic", youtubeChannel: "https://www.youtube.com/user/bennypagemusic", instagram: "https://www.instagram.com/bennypagemusic/" },
+  "DJ Krust": { spotifyArtist: "6WPeOlm3f3UGoO1l6OPOUO", soundcloud: "https://soundcloud.com/rebel-instinct", youtubeChannel: "https://www.youtube.com/channel/UCPf-dufDIRGUiWUvdD-52-A", instagram: "https://www.instagram.com/dj_krust/" },
+  "Fox Stevenson": { spotifyArtist: "2BQWHuvxG4kMYnfghdaCIy", soundcloud: "http://soundcloud.com/foxstevenson", youtubeChannel: "https://www.youtube.com/channel/UClAxKFEVmERwGhcUhpCzlWw", instagram: "https://www.instagram.com/foxstevenson" },
+  "Plump DJs": { spotifyArtist: "1daC6WKGAm52YZbL5G7zYg", soundcloud: "http://soundcloud.com/plump-djs", youtubeChannel: "http://www.youtube.com/user/PlumpTV", instagram: "https://www.instagram.com/plump_djs/" },
+  "Woody Cook": { soundcloud: "https://soundcloud.com/user-67350370", instagram: "https://www.instagram.com/woody_cook/" },
+  "Sir Spyro": { spotifyArtist: "620OB54yrIruI9dcHX41zT", soundcloud: "https://soundcloud.com/djsirspyro", youtubeChannel: "https://www.youtube.com/user/TheSIRSPYRO", instagram: "https://www.instagram.com/sirspyro/" },
+  "Hollie Cook": { spotifyArtist: "1fwuUuFbqXJx3B17PUhFCE", soundcloud: "https://soundcloud.com/holliecookie", youtubeChannel: "http://www.youtube.com/channel/UC-vfc1N1ElmctxLNYAYUUaw", instagram: "https://www.instagram.com/holliecookie/" },
+  "Micky Finn": { spotifyArtist: "56L8IWLGA2CN4K09ZCt4Fx", soundcloud: "https://soundcloud.com/micky-finn-1", instagram: "https://www.instagram.com/djmickyfinn/" },
+  "Brockie": { spotifyArtist: "7BSQlRwokSuRQUeBtS4b59", instagram: "https://www.instagram.com/djbrockie/" },
+  "Mefjus": { spotifyArtist: "54qqaSH6byJIb8eFWxe3Pj", soundcloud: "http://soundcloud.com/mefjus", youtubeChannel: "https://www.youtube.com/channel/UCWsmzgAxx9g0yEOTRnynWdA/", instagram: "https://www.instagram.com/martinmefjus" },
+  "Melé": { spotifyArtist: "6EZO7Baz0SIFskWTO1GHqX", soundcloud: "https://soundcloud.com/ukmele", youtubeChannel: "http://www.youtube.com/channel/UCSDr4poiKlJ785QJl3mwO7A", instagram: "https://www.instagram.com/mele/" },
+  "Young Franco": { spotifyArtist: "6mK0vAO13gT8jWYANyoXAl", soundcloud: "https://soundcloud.com/yfrnco", youtubeChannel: "https://www.youtube.com/channel/UCtKOEkhnxDMycTdnzW1ppnA", instagram: "https://www.instagram.com/yngfrnco" }
 };
 
 // Aliases for exact lineup billing text that differs from the plain
@@ -82,16 +155,33 @@ window.ARTIST_PREVIEWS = {
 // exact string match against artist.name, same as artist-bios.js, so
 // these need their own entries even though they're the same act.
 [
+  // Confirmed against the current lineup's exact billing text (checked
+  // 29 Jul — several of these had silently stopped matching after an
+  // official-app re-sync changed the exact punctuation/spelling; kept
+  // both the old and corrected forms since a future re-sync could
+  // plausibly flip back).
   ["Groove Armada DJ Set", "Groove Armada"],
+  ["Groove Armada - DJ Set", "Groove Armada"],
   ["Floating Points Live", "Floating Points"],
+  ["Floating Points - Live", "Floating Points"],
   ["Sampa The Great", "Sampa the Great"],
   ["Shy FX Ft. Rage", "Shy FX"],
   ["Sherelle AV Show", "Sherelle"],
   ["Dutty Moonshine Big Band", "Dutty Moonshine"],
   ["999999999 AV Show", "999999999"],
+  ["999999999 - AV Show", "999999999"],
   ["Sbtrkt DJ Set", "SBTRKT"],
   ["Frankie Stew & Harvey Gunn", "Frankie Stew and Harvey Gunn"],
   ["Alix Perez Ft. Sp:Mc", "Alix Perez"],
+  ["Alix Perez Ft. SP:MC", "Alix Perez"],
+  // Second batch (29 Jul) — bracketed/suffixed billing text for the newly
+  // added artists above, checked against the current lineup the same way.
+  ["Grooverider [Fantazia Takeover]", "Grooverider"],
+  ["General Levy - Live PA", "General Levy"],
+  ["Fliptrix [High Focus Records]", "Fliptrix"],
+  // Third batch (29 Jul).
+  ["Fox Stevenson - Live", "Fox Stevenson"],
+  ["Plump DJ's", "Plump DJs"],
 ].forEach(([alias, canonical])=>{
   if(window.ARTIST_PREVIEWS[canonical]) window.ARTIST_PREVIEWS[alias] = window.ARTIST_PREVIEWS[canonical];
 });
