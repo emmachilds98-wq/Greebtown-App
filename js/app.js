@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v156";
-const APP_BUILD_TIME = "2026-07-29T19:17:37Z";
+const APP_CACHE_VERSION = "v157";
+const APP_BUILD_TIME = "2026-07-29T20:54:40Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3540,7 +3540,7 @@ function showHalfOrderModal(day, a, b, onChoose){
   document.getElementById("halfOrderSkipBtn").onclick = ()=>{ onChoose(null); closeHalfOrderModal(); };
 }
 
-function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
+function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
   const genre = genreOf(artist);
@@ -3574,7 +3574,7 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
         <div>
           <strong>${artist.name}</strong>${mustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""}<br>
           <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
-          <span class="time-label">${timeLabel(artist)}</span>
+          <span class="time-label">${timeLabel(artist)}</span>${owners && owners.length > 1 ? ` <span class="tb-owners-inline">· ${escapeHtml(owners.join(", "))}</span>` : ""}
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
         </div>
@@ -3619,12 +3619,25 @@ function openTimeEditor(container, artist, onSave){
 // ===============================
 // PLAN — WHOSE SCHEDULE AM I LOOKING AT
 // ===============================
+// One shared multi-select — List, Clashes, Timeline and Compare all read
+// from this same selection instead of each keeping its own person-picker.
 // "mine" is always this device's own Store.get("schedule") — the only
 // one that's ever editable, saved to, or counted in stats/next-event.
 // Anything else is a name key into peopleSchedules, a read-only snapshot
-// that arrived via a teammate's Sync code. Switching tabs never copies
-// or merges one into the other.
-let planActiveOwner = "mine";
+// that arrived via a teammate's Sync code. Selecting more than one merges
+// their picks into a single read-only combined view (same pick from two
+// people collapses into one entry tagged with both) rather than showing
+// one person's list at a time.
+let planSelectedOwners = new Set(["mine"]);
+
+// The set of owner keys actually in play right now — prunes any stale
+// selection (a teammate who's since stopped showing up in peopleSchedules)
+// and always falls back to ["mine"] rather than leaving the view empty.
+function activeOwnersList(){
+  const peopleByKey = new Map(comparePeopleList().map(p=>[p.key,p]));
+  const owners = [...planSelectedOwners].filter(k=> peopleByKey.has(k));
+  return owners.length ? owners : ["mine"];
+}
 
 // Shared by every per-person snapshot map (peopleSchedules/peopleBingo/
 // peopleCharacters/peopleLastSeen) — all keyed by stable personId now,
@@ -3643,86 +3656,125 @@ function personLastSeenTs(entry){
   return (entry && typeof entry === "object") ? entry.ts : entry;
 }
 
+// Merges every selected owner's picks into one array. A single owner of
+// "mine" returns the live Store.get("schedule") reference (unwrapped) so
+// existing index-based edit/remove/set-time code keeps working exactly as
+// before; any other selection (a single teammate, or several people at
+// once) is always read-only, and 2+ owners get deduped by identical pick
+// (same name+day+stage+start) into one entry tagged with everyone who
+// chose it via `_owners`.
 function activeScheduleData(){
-  if(planActiveOwner === "mine") return Store.get("schedule");
-  const people = Store.get("peopleSchedules") || {};
-  return personSnapshotList(people[planActiveOwner]).slice();
+  const owners = activeOwnersList();
+  if(owners.length === 1 && owners[0] === "mine") return Store.get("schedule");
+
+  const peopleByKey = new Map(comparePeopleList().map(p=>[p.key,p]));
+  const merged = new Map();
+  owners.forEach(ownerKey=>{
+    const person = peopleByKey.get(ownerKey);
+    if(!person) return;
+    person.list.forEach(a=>{
+      const key = `${a.name}|${a.day}|${a.stage}|${a.start}`;
+      if(!merged.has(key)) merged.set(key, { ...a, _owners: [] });
+      merged.get(key)._owners.push(person.label);
+    });
+  });
+  return [...merged.values()];
 }
 
-function renderPlanPersonTabs(){
+// Re-renders whichever Plan sub-view is currently showing — called
+// whenever the shared owner selector changes, since List/Clashes/
+// Timeline/Compare each read from the same selection now.
+function rerenderActivePlanView(){
+  if(planView === "timeline"){
+    renderPlanTimeline();
+  } else if(planView === "compare"){
+    renderCompareFilterChips();
+    renderPlanCompare();
+    if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("compareBigPicture");
+    if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+  } else if(planView === "clash"){
+    updateClashSubViewVisibility();
+  } else {
+    renderSchedule();
+  }
+}
+
+function renderPlanOwnerSelector(){
   const box = document.getElementById("planPersonTabs");
   const note = document.getElementById("planPersonNote");
   if(!box) return;
-  const people = Store.get("peopleSchedules") || {};
-  const personIds = Object.keys(people).filter(id=> personSnapshotList(people[id]).length > 0);
-  // If the previously-active friend has since disappeared from
-  // peopleSchedules (nothing saved, or never actually synced), fall
-  // back to your own tab rather than pointing at a button that's about
-  // to stop existing.
-  if(planActiveOwner !== "mine" && !personIds.includes(planActiveOwner)) planActiveOwner = "mine";
+  const people = comparePeopleList(); // [{key:"mine",label,list}, ...synced teammates]
 
-  // Your own tab is always shown, even with zero friends synced in yet —
+  // Drop any selected teammate who's since disappeared from
+  // peopleSchedules (nothing saved, or never actually synced) rather than
+  // leaving a selection pointed at someone who's about to stop existing.
+  [...planSelectedOwners].forEach(k=>{ if(!people.some(p=>p.key===k)) planSelectedOwners.delete(k); });
+  if(planSelectedOwners.size === 0) planSelectedOwners.add("mine");
+
+  // Your own chip is always shown, even with zero friends synced in yet —
   // labelled with your own picked name (matching what a friend would see
   // for you on their device) once you've set one, "Mine" until then.
   const myName = (Store.get("contributorName") || "").trim();
   const myLabel = myName ? `⭐ ${myName}` : "⭐ Mine";
 
-  // Timeline and Compare have their own person-selection UI (multi-select
-  // owner chips, and "everyone at once" respectively) — showing this
-  // single-select tab strip on top of those as well just duplicates the
-  // same names in two controls with different selection behaviour. Only
-  // List and Clashes actually use planActiveOwner to pick whose data to
-  // show, so this strip only needs to be visible there.
-  const relevantHere = planView === "list" || planView === "clash";
-  if(!relevantHere){
-    box.style.display = "none";
-    if(note) note.style.display = "none";
-    return;
-  }
   box.style.display = "";
-  box.className = "tabstrip";
-  box.innerHTML = `<button class="${planActiveOwner==="mine"?"active":""}" data-owner="mine">${escapeHtml(myLabel)}</button>` +
-    personIds.map(id=>`<button class="person ${planActiveOwner===id?"active":""}" data-owner="${escapeHtml(id)}">${escapeHtml(personDisplayName(people[id], id))}</button>`).join("");
-  box.querySelectorAll("button").forEach(btn=>{
-    btn.onclick = ()=>{
-      planActiveOwner = btn.dataset.owner;
-      renderPlanPersonTabs();
-      renderSchedule();
-      if(planView === "timeline") renderPlanTimeline();
+  box.className = "stagelist";
+  box.innerHTML = people.map(p=>{
+    const label = p.key === "mine" ? myLabel : escapeHtml(p.label);
+    return `<span class="chip${planSelectedOwners.has(p.key) ? " active" : ""}" data-owner="${escapeHtml(p.key)}">${label}</span>`;
+  }).join("");
+  box.querySelectorAll(".chip").forEach(c=>{
+    c.onclick = ()=>{
+      const key = c.dataset.owner;
+      if(planSelectedOwners.has(key)){
+        // Always leave at least one person selected — an empty view
+        // isn't a useful state to land in from a tap.
+        if(planSelectedOwners.size > 1) planSelectedOwners.delete(key);
+      } else {
+        planSelectedOwners.add(key);
+      }
+      renderPlanOwnerSelector();
+      rerenderActivePlanView();
     };
   });
-  if(note){
+
+  if(!note) return;
+  const owners = activeOwnersList();
+  if(people.length < 2){
     note.style.display = "";
-    if(personIds.length === 0){
-      note.textContent = "Nobody's synced in yet — a teammate's picks will show up as their own tab here (and in Compare below) once they have. Pick your name in Discover if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
-    } else if(planActiveOwner === "mine"){
-      note.textContent = "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours. See everyone at once in the Compare view below.";
-    } else {
-      const activeEntry = people[planActiveOwner];
-      const activeLabel = personDisplayName(activeEntry, planActiveOwner);
-      const lastSeenEntry = (Store.get("peopleLastSeen") || {})[planActiveOwner];
-      const lastSeenTs = personLastSeenTs(lastSeenEntry);
-      const seenText = lastSeenTs ? ` (last synced ${formatLastSeen(lastSeenTs)})` : "";
-      // "Merge into mine" exists for exactly the situation this session
-      // has hit more than once: a device losing track of its own
-      // deviceId (reinstall, cleared storage, ...) ends up as a second,
-      // empty tab under the same name as a teammate's real synced data —
-      // this is the (safe, additive, undoable-by-just-not-syncing-yet)
-      // way to reclaim it as "you" without a destructive device-handoff
-      // wipe-and-replace.
-      note.innerHTML = `Viewing ${escapeHtml(activeLabel)}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list. <a class="inline-link" href="javascript:void(0)" id="mergePersonIntoMineLink">Is this actually you? Merge their picks into mine →</a>`;
-      const mergeLink = document.getElementById("mergePersonIntoMineLink");
-      if(mergeLink) mergeLink.onclick = ()=>{
-        const ok = confirm(`Merge ${activeLabel}'s saved artists, bingo squares and character into your own?\n\nThis only adds — it never removes or overwrites anything already on this device. ${activeLabel}'s separate tab disappears afterwards since it's now part of yours.`);
-        if(!ok) return;
-        const added = mergePersonIntoMine(planActiveOwner);
-        note.textContent = added ? `Merged in — ${added} thing${added===1?"":"s"} added to your own picks.` : "Nothing new to merge in.";
-      };
-    }
+    note.textContent = "Nobody's synced in yet — a teammate's picks will show up as another chip here once they have. Pick your name in Discover if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
+  } else if(owners.length === 1 && owners[0] !== "mine"){
+    // "Merge into mine" exists for exactly the situation this session
+    // has hit more than once: a device losing track of its own
+    // deviceId (reinstall, cleared storage, ...) ends up as a second,
+    // empty chip under the same name as a teammate's real synced data —
+    // this is the (safe, additive, undoable-by-just-not-syncing-yet)
+    // way to reclaim it as "you" without a destructive device-handoff
+    // wipe-and-replace.
+    const personId = owners[0];
+    const peopleSchedules = Store.get("peopleSchedules") || {};
+    const activeEntry = peopleSchedules[personId];
+    const activeLabel = personDisplayName(activeEntry, personId);
+    const lastSeenEntry = (Store.get("peopleLastSeen") || {})[personId];
+    const lastSeenTs = personLastSeenTs(lastSeenEntry);
+    const seenText = lastSeenTs ? ` (last synced ${formatLastSeen(lastSeenTs)})` : "";
+    note.style.display = "";
+    note.innerHTML = `Viewing ${escapeHtml(activeLabel)}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list. <a class="inline-link" href="javascript:void(0)" id="mergePersonIntoMineLink">Is this actually you? Merge their picks into mine →</a>`;
+    const mergeLink = document.getElementById("mergePersonIntoMineLink");
+    if(mergeLink) mergeLink.onclick = ()=>{
+      const ok = confirm(`Merge ${activeLabel}'s saved artists, bingo squares and character into your own?\n\nThis only adds — it never removes or overwrites anything already on this device. ${activeLabel}'s separate chip disappears afterwards since it's now part of yours.`);
+      if(!ok) return;
+      const added = mergePersonIntoMine(personId);
+      note.textContent = added ? `Merged in — ${added} thing${added===1?"":"s"} added to your own picks.` : "Nothing new to merge in.";
+      renderPlanOwnerSelector();
+      rerenderActivePlanView();
+    };
+  } else {
+    note.style.display = "none";
   }
 }
 
-// See renderPlanPersonTabs' "Merge into mine" link above for why this
+// See renderPlanOwnerSelector's "Merge into mine" link above for why this
 // exists. Reuses mergeOwnCloudCopy's additive-only logic (new saved
 // artists unioned by name, bingo-marked squares unioned, character only
 // fills in if you don't have one) — same safety guarantees as merging
@@ -3750,9 +3802,9 @@ function mergePersonIntoMine(personId){
     if(map[personId]){ delete map[personId]; Store.set(key, map); }
   });
 
-  if(planActiveOwner === personId) planActiveOwner = "mine";
+  if(planSelectedOwners.has(personId)){ planSelectedOwners.delete(personId); planSelectedOwners.add("mine"); }
   refreshAfterMerge();
-  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+  if(typeof renderPlanOwnerSelector === "function") renderPlanOwnerSelector();
   if(typeof pushToCloud === "function") pushToCloud().catch(()=>{});
   // Without this, the duplicate keeps coming back: the merge above only
   // clears this device's own LOCAL copy of the duplicate's data, but the
@@ -3814,10 +3866,14 @@ if(mergeAllDuplicatesBtn) mergeAllDuplicatesBtn.onclick = ()=>{
 
 function renderSchedule(){
   const fullSchedule = activeScheduleData();
-  const readonly = planActiveOwner !== "mine";
+  const owners = activeOwnersList();
+  const combined = owners.length > 1;
+  const readonly = combined || owners[0] !== "mine";
 
   if(fullSchedule.length === 0){
-    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${readonly ? `${escapeHtml(planActiveOwner)} hasn't saved any artists yet.` : "No saved artists yet. Add some from the Lineup tab."}</p></div>`;
+    const peopleByKey = new Map(comparePeopleList().map(p=>[p.key,p]));
+    const ownerLabel = owners.map(k=> (peopleByKey.get(k) || {}).label || k).join(", ");
+    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${readonly ? `${escapeHtml(ownerLabel)} hasn't saved any artists yet.` : "No saved artists yet. Add some from the Lineup tab."}</p></div>`;
     return;
   }
 
@@ -3825,7 +3881,9 @@ function renderSchedule(){
   // Keep each entry's ORIGINAL index into the full (unfiltered) schedule
   // even when the must-sees-only filter is on — remove/set-time/star
   // wiring below reads .dataset.idx straight into Store.get("schedule"),
-  // so a filtered-array position would point at the wrong artist.
+  // so a filtered-array position would point at the wrong artist. Only
+  // meaningful when !readonly (i.e. owners is exactly ["mine"]), where
+  // fullSchedule *is* Store.get("schedule") itself.
   const shown = fullSchedule.map((a,i)=>({a,i})).filter(({a})=> !planMustSeeFilter || a.mustSee);
 
   if(shown.length === 0){
@@ -3834,7 +3892,7 @@ function renderSchedule(){
   }
 
   if(planView === "list"){
-    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet)).join("");
+    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet,a._owners)).join("");
   } else {
     const clashMap = findClashes(fullSchedule);
     const byDay = {};
@@ -3851,7 +3909,7 @@ function renderSchedule(){
       // "23:30", not before it as "0..." vs "2..." would alphabetically.
       const items = byDay[day].sort((x,y)=> (toMinutes(x.a.day, x.a.start) ?? 999999) - (toMinutes(y.a.day, y.a.start) ?? 999999));
       html += `<div class="daygroup">${day}</div>`;
-      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet));
+      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet,a._owners));
     });
     scheduleList.innerHTML = html;
   }
@@ -3943,7 +4001,7 @@ function updateClashSubViewVisibility(){
 
 function setPlanView(view){
   planView = view;
-  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+  if(typeof renderPlanOwnerSelector === "function") renderPlanOwnerSelector();
   ["viewListBtn","viewClashBtn","viewTimelineBtn","viewCompareBtn"].forEach(id=>{
     const btn = document.getElementById(id);
     if(btn) btn.classList.remove("active");
@@ -3969,9 +4027,8 @@ function setPlanView(view){
     if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("timelineBigPicture");
     // Only jump off the currently selected day if it's genuinely empty —
     // never overrides a day someone's deliberately looking at.
-    const mine = Store.get("schedule");
-    if(!mine.some(a=> a.day === planTimelineDay && a.start)) planTimelineDay = pickDefaultTimelineDay(mine);
-    renderPlanTimelineOwnerChips();
+    const current = activeScheduleData();
+    if(!current.some(a=> a.day === planTimelineDay && a.start)) planTimelineDay = pickDefaultTimelineDay(current);
     renderPlanTimelineDayTabs();
     renderPlanTimeline();
   } else if(view === "compare"){
@@ -4057,10 +4114,20 @@ function renderCompareFilterChips(){
 function renderPlanCompare(){
   const box = document.getElementById("planCompareList");
   if(!box) return;
-  const people = comparePeopleList();
+  const allPeople = comparePeopleList();
+
+  if(allPeople.length < 2){
+    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — pick your name in Discover and it syncs automatically whenever you've both got signal (no signal, there's a manual backup code there too). Once they've synced, their picks show up here alongside yours.</p></div>`;
+    return;
+  }
+
+  // Compare respects the same shared owner selector as List/Clashes/
+  // Timeline — pick who's showing up top, and Compare narrows to just them.
+  const owners = new Set(activeOwnersList());
+  const people = allPeople.filter(p=> owners.has(p.key));
 
   if(people.length < 2){
-    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — pick your name in Discover and it syncs automatically whenever you've both got signal (no signal, there's a manual backup code there too). Once they've synced, their picks show up here alongside yours.</p></div>`;
+    box.innerHTML = `<div class="card"><p class="empty-note">Select more people up top to compare picks — add a teammate's chip alongside yours.</p></div>`;
     return;
   }
 
@@ -4181,14 +4248,13 @@ function renderBigPictureSummary(containerId){
 
 // ===============================
 // SAVED-ARTIST TIMELINE (Plan) — same scrollable stage/time grid as the
-// Artists screen's Timeline view, but scoped to whichever person's tab
-// (mine, or one or more synced teammates picked below) is currently
-// selected. Picking more than one merges everyone's picks into a single
-// grid — a shared pick shows as one block tagged with everyone who
-// chose it, rather than one block per person.
+// Artists screen's Timeline view, scoped to whichever owner(s) are
+// selected in the shared top selector (renderPlanOwnerSelector). Selecting
+// more than one merges everyone's picks into a single grid — a shared
+// pick shows as one block tagged with everyone who chose it, rather than
+// one block per person.
 // ===============================
 let planTimelineDay = "Wed";
-let planTimelineSelectedOwners = new Set(["mine"]);
 
 // Timeline is filtered to one day at a time (a.day === planTimelineDay),
 // same as Clash Timeline below — correct and intentional, since it's a
@@ -4219,57 +4285,18 @@ function renderPlanTimelineDayTabs(){
   });
 }
 
-function renderPlanTimelineOwnerChips(){
-  const box = document.getElementById("planTimelineOwnerChips");
-  if(!box) return;
-  const people = comparePeopleList();
-  if(people.length < 2){ box.style.display = "none"; box.innerHTML = ""; return; }
-  box.style.display = "";
-  box.innerHTML = people.map(p=>
-    `<span class="chip${planTimelineSelectedOwners.has(p.key) ? " active" : ""}" data-owner="${escapeHtml(p.key)}">${escapeHtml(p.label)}</span>`
-  ).join("");
-  box.querySelectorAll(".chip").forEach(c=>{
-    c.onclick = ()=>{
-      const key = c.dataset.owner;
-      if(planTimelineSelectedOwners.has(key)){
-        // Always leave at least one person selected — an empty grid
-        // isn't a useful state to land in from a tap.
-        if(planTimelineSelectedOwners.size > 1) planTimelineSelectedOwners.delete(key);
-      } else {
-        planTimelineSelectedOwners.add(key);
-      }
-      renderPlanTimelineOwnerChips();
-      renderPlanTimeline();
-    };
-  });
-}
-
 function renderPlanTimeline(){
   const grid = document.getElementById("planTimelineGrid");
   if(!grid) return;
-  const people = comparePeopleList();
-  const peopleByKey = new Map(people.map(p=>[p.key, p]));
-  const owners = [...planTimelineSelectedOwners].filter(k=> peopleByKey.has(k));
-  const activeOwners = owners.length ? owners : ["mine"];
-  const combined = activeOwners.length > 1;
-  const readonly = combined || activeOwners[0] !== "mine";
+  const owners = activeOwnersList();
+  const combined = owners.length > 1;
+  const readonly = combined || owners[0] !== "mine";
 
-  // Merge each selected person's picks for this day, grouping identical
-  // picks (same name+stage+start) into one block tagged with everyone
-  // who chose it, so a shared pick shows once, not twice.
-  const merged = new Map();
-  activeOwners.forEach(ownerKey=>{
-    const person = peopleByKey.get(ownerKey);
-    if(!person) return;
-    person.list
-      .filter(a=> a.day === planTimelineDay && a.start && (!planMustSeeFilter || a.mustSee))
-      .forEach(a=>{
-        const key = `${a.name}|${a.day}|${a.stage}|${a.start}`;
-        if(!merged.has(key)) merged.set(key, { ...a, _owners: [] });
-        merged.get(key)._owners.push(person.label);
-      });
-  });
-  const dayItems = [...merged.values()];
+  // activeScheduleData() already merges every selected owner's picks
+  // (deduped by name+day+stage+start, tagged with _owners) — just filter
+  // down to this one day.
+  const full = activeScheduleData();
+  const dayItems = full.filter(a=> a.day === planTimelineDay && a.start && (!planMustSeeFilter || a.mustSee));
 
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
@@ -4277,9 +4304,12 @@ function renderPlanTimeline(){
   grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">${planMustSeeFilter ? `No must-sees with a set time saved for ${planTimelineDay} yet.` : `Nothing with a set time saved for ${planTimelineDay} yet.`}</p>`;
 
   const hint = document.getElementById("planTimelineHint");
-  if(hint) hint.textContent = combined
-    ? `Combined view of ${activeOwners.map(k=>peopleByKey.get(k)?.label || k).join(" + ")} — tap a block for details. Shared picks are marked with everyone's initials.`
-    : (readonly ? "Scroll sideways for time, down for stage. Tap a block to see details." : "Scroll sideways for time, down for stage. Tap a block to see details or unsave it.");
+  if(hint){
+    const peopleByKey = new Map(comparePeopleList().map(p=>[p.key,p]));
+    hint.textContent = combined
+      ? `Combined view of ${owners.map(k=>peopleByKey.get(k)?.label || k).join(" + ")} — tap a block for details. Shared picks are marked with everyone's initials.`
+      : (readonly ? "Scroll sideways for time, down for stage. Tap a block to see details." : "Scroll sideways for time, down for stage. Tap a block to see details or unsave it.");
+  }
 
   grid.querySelectorAll(".timeline-block").forEach(b=>{
     b.onclick = ()=>{
@@ -4313,7 +4343,8 @@ function renderClashTimelineDayTabs(){
 function renderClashTimeline(){
   const grid = document.getElementById("clashTimelineGrid");
   if(!grid) return;
-  const readonly = planActiveOwner !== "mine";
+  const owners = activeOwnersList();
+  const readonly = owners.length > 1 || owners[0] !== "mine";
   const fullSchedule = activeScheduleData();
   const clashMap = findClashes(fullSchedule);
   const clashingIdx = new Set(Object.keys(clashMap).map(Number));
@@ -4537,7 +4568,7 @@ document.getElementById("browseAllArtistsBtn").onclick = browseAllArtists;
 const artistsBrowseAllBtn = document.getElementById("artistsBrowseAllBtn");
 if(artistsBrowseAllBtn) artistsBrowseAllBtn.onclick = browseAllArtists;
 
-renderPlanPersonTabs();
+renderPlanOwnerSelector();
 renderSchedule();
 updateNextEvent();
 
@@ -6676,10 +6707,10 @@ function refreshAfterMerge(){
   if(typeof loadCustomLandmarksList === "function") loadCustomLandmarksList();
   if(typeof loadMap === "function") loadMap();
   if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
-  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+  if(typeof renderPlanOwnerSelector === "function") renderPlanOwnerSelector();
   if(typeof renderCompareFilterChips === "function") renderCompareFilterChips();
   if(typeof renderPlanCompare === "function" && planView === "compare") renderPlanCompare();
-  if(typeof renderPlanTimelineOwnerChips === "function" && planView === "timeline"){ renderPlanTimelineOwnerChips(); renderPlanTimeline(); }
+  if(typeof renderPlanTimeline === "function" && planView === "timeline") renderPlanTimeline();
   if(typeof renderBingoPersonTabs === "function"){ renderBingoPersonTabs(); renderBingo(); }
   if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
