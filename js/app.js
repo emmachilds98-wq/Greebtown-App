@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v126";
-const APP_BUILD_TIME = "2026-07-29T10:34:00Z";
+const APP_CACHE_VERSION = "v127";
+const APP_BUILD_TIME = "2026-07-29T12:10:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -61,6 +61,48 @@ function checkForStaleCopy(){
     .catch(()=> false); /* offline, or the request itself got served from a cache we can't bypass — leave the static label as-is */
 }
 checkForStaleCopy();
+
+// ===============================
+// CLOUD SYNC (Firebase init) — deliberately placed at the very top of
+// this file, ahead of every other feature, because getFirestoreDb() can
+// be reached by load-time code (auto-sync-on-open, room-code handling,
+// etc.) below. FIREBASE_CONFIG/_firestoreDb/getFirestoreDb must be fully
+// initialized before anything else in this file runs, or an early call
+// hits _firestoreDb mid-TDZ and throws "Cannot access before
+// initialization." See the full CLOUD SYNC feature comment further down
+// this file, near where room codes are handled.
+// ===============================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAgiBfNu3IpTCpumJQrYkFOh03VNFTWOVQ",
+  authDomain: "greebtown.firebaseapp.com",
+  projectId: "greebtown",
+  storageBucket: "greebtown.firebasestorage.app",
+  messagingSenderId: "944940862671",
+  appId: "1:944940862671:web:f84ece4e66b052b4f97bba"
+};
+
+let _firestoreDb = null;
+function getFirestoreDb(){
+  if(_firestoreDb) return _firestoreDb;
+  if(typeof firebase === "undefined" || !firebase.initializeApp) return null;
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _firestoreDb = firebase.firestore();
+    // Persistent (IndexedDB-backed) offline cache, synchronized across
+    // any tabs this app is open in at once — without this, Firestore's
+    // cache is memory-only and a reload while offline loses anything
+    // that hadn't already round-tripped to the server. Best-effort: a
+    // browser without IndexedDB, or a `synchronizeTabs`-incompatible
+    // multi-tab situation, just falls back to the same memory-only
+    // behaviour this already had, so this never blocks sync working.
+    _firestoreDb.enablePersistence({ synchronizeTabs: true }).catch(err=>{
+      console.warn("Firestore offline persistence not enabled:", err && err.code);
+    });
+    return _firestoreDb;
+  }catch(err){
+    return null;
+  }
+}
 
 // ===============================
 // PULL TO REFRESH — installed/standalone PWAs don't get the browser's
@@ -5211,6 +5253,11 @@ function formatLastSeen(ts){
 // below calls to stamp new entries.
 // ===============================
 const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea"];
+// Used by statusLineHTML/renderFriendStatusBar (defined further down) —
+// declared up here since renderHomeSyncStatus() runs at load time and
+// can trigger those before the FRIEND STATUS section below would run.
+const STATUS_STALE_MS = 30 * 60 * 1000; // 30 min — past this, visibly flagged as stale
+const STATUS_DOT_PALETTE = ["🟣","🔵","🟢","🟠","🟡","🔴"];
 const contributorNameInput = document.getElementById("contributorName");
 const contributorOtherField = document.getElementById("contributorOtherField");
 const contributorOtherInput = document.getElementById("contributorOtherInput");
@@ -5479,38 +5526,11 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
 // box uses, so the no-duplicates/no-silent-overwrite guarantees are
 // identical either way. Fails quietly back to the manual flow if there's
 // no signal or the Firebase scripts didn't load (e.g. fully offline).
+// (FIREBASE_CONFIG/_firestoreDb/getFirestoreDb live at the very top of
+// this file, not here — see the CLOUD SYNC block near the top. Kept
+// there so nothing that runs at load time can reach getFirestoreDb()
+// before it's initialized.)
 // ===============================
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAgiBfNu3IpTCpumJQrYkFOh03VNFTWOVQ",
-  authDomain: "greebtown.firebaseapp.com",
-  projectId: "greebtown",
-  storageBucket: "greebtown.firebasestorage.app",
-  messagingSenderId: "944940862671",
-  appId: "1:944940862671:web:f84ece4e66b052b4f97bba"
-};
-
-let _firestoreDb = null;
-function getFirestoreDb(){
-  if(_firestoreDb) return _firestoreDb;
-  if(typeof firebase === "undefined" || !firebase.initializeApp) return null;
-  try{
-    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-    _firestoreDb = firebase.firestore();
-    // Persistent (IndexedDB-backed) offline cache, synchronized across
-    // any tabs this app is open in at once — without this, Firestore's
-    // cache is memory-only and a reload while offline loses anything
-    // that hadn't already round-tripped to the server. Best-effort: a
-    // browser without IndexedDB, or a `synchronizeTabs`-incompatible
-    // multi-tab situation, just falls back to the same memory-only
-    // behaviour this already had, so this never blocks sync working.
-    _firestoreDb.enablePersistence({ synchronizeTabs: true }).catch(err=>{
-      console.warn("Firestore offline persistence not enabled:", err && err.code);
-    });
-    return _firestoreDb;
-  }catch(err){
-    return null;
-  }
-}
 
 // This group's shared room code is fixed — not something anyone types
 // in or can accidentally clear. No editable field for it any more (an
@@ -5633,8 +5653,6 @@ function refreshAfterMerge(){
 // mergeSyncPayload's payload.status / peopleStatus above) — no separate
 // write path or extra Firestore reads needed.
 // ===============================
-const STATUS_STALE_MS = 30 * 60 * 1000; // 30 min — past this, visibly flagged as stale
-const STATUS_DOT_PALETTE = ["🟣","🔵","🟢","🟠","🟡","🔴"];
 function statusDotFor(id){
   let hash = 0;
   const s = String(id || "");
