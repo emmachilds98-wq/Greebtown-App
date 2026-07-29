@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v115";
-const APP_BUILD_TIME = "2026-07-29T04:17:00Z";
+const APP_CACHE_VERSION = "v116";
+const APP_BUILD_TIME = "2026-07-29T04:25:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -4281,9 +4281,9 @@ function saveMeeting(name){
   mapInfo.innerHTML = `<div class="card"><p class="empty-note">Meeting point saved for the group: <strong style="color:var(--accent-amber)">${escapeHtml(name)}</strong></p></div>`;
 }
 
-// The meeting point is shared, group-wide state (see pushSharedMeeting/
-// applyMeetingFromRoomData near pullFromCloud) — this just renders
-// whatever's currently cached locally, which every sync keeps fresh.
+// The meeting point is shared, group-wide state (see pushSharedMeeting
+// near pullFromCloud) — this just renders whatever's currently cached
+// locally, which every sync keeps fresh.
 function renderCurrentMeeting(){
   const box = document.getElementById("currentMeetingDisplay");
   if(!box) return;
@@ -4866,7 +4866,15 @@ function buildSyncPayload(){
     // when it was set. Same read-only-snapshot treatment: lands in
     // peopleStatus[personId] on the receiving end, never merged into
     // anyone else's own myStatus.
-    status: Store.get("myStatus") || null
+    status: Store.get("myStatus") || null,
+    // The shared meeting point and group decisions aren't per-device —
+    // every device just carries its own last-known copy of them here,
+    // piggybacking on this same already-working per-member write. On
+    // merge, whichever copy has the newest updatedAt wins (see
+    // mergeSyncPayload below) — a simple last-write-wins spread across
+    // however many devices happen to sync, no separate document needed.
+    meeting: Store.get("meetingUpdatedAt") ? { place: Store.get("meeting") || "", by: Store.get("meetingBy") || "", updatedAt: Store.get("meetingUpdatedAt") } : null,
+    decisions: Store.get("groupDecisions") || {}
   };
 }
 
@@ -5073,6 +5081,26 @@ function mergeSyncPayload(payload){
     const peopleStatus = Store.get("peopleStatus") || {};
     peopleStatus[personId] = { displayName: from, place: payload.status.place, updatedAt: payload.status.updatedAt || payload.updatedAt || Date.now() };
     Store.set("peopleStatus", peopleStatus);
+  }
+
+  // The shared meeting point and group decisions ride along on every
+  // device's own payload (see buildSyncPayload above) rather than a
+  // separate document — last-write-wins by comparing updatedAt against
+  // whatever's already cached locally, same as every other shared
+  // single-value field in this app.
+  if(payload.meeting && (payload.meeting.updatedAt || 0) > (Store.get("meetingUpdatedAt") || 0)){
+    Store.set("meeting", payload.meeting.place || "");
+    Store.set("meetingBy", payload.meeting.by || "");
+    Store.set("meetingUpdatedAt", payload.meeting.updatedAt);
+  }
+  if(payload.decisions && typeof payload.decisions === "object"){
+    const decisions = Store.get("groupDecisions") || {};
+    Object.entries(payload.decisions).forEach(([key, incoming])=>{
+      if(!incoming) return;
+      const existing = decisions[key];
+      if(!existing || (incoming.updatedAt || 0) > (existing.updatedAt || 0)) decisions[key] = incoming;
+    });
+    Store.set("groupDecisions", decisions);
   }
 
   // "Online" in a live/real-time sense isn't something a periodic,
@@ -5435,18 +5463,6 @@ function currentRoomCode(){
   return normalizeRoomCode(Store.get("roomCode"));
 }
 
-// The shared meeting point and group decisions are room-wide, not
-// per-device, but the deployed Firestore rules only grant read/write on
-// documents INSIDE rooms/{roomId}/members/ — not the rooms/{roomId}
-// parent document itself. Writing there was silently failing for
-// everyone with "Missing or insufficient permissions." Rather than
-// change security rules blind (no way to inspect or redeploy them from
-// here), these live as two reserved documents in that same members
-// collection instead — real deviceIds are always crypto.randomUUID()
-// strings, so these fixed IDs can never collide with an actual member.
-const SHARED_MEETING_DOC_ID = "__shared_meeting__";
-const SHARED_DECISIONS_DOC_ID = "__shared_decisions__";
-const RESERVED_MEMBER_DOC_IDS = [SHARED_MEETING_DOC_ID, SHARED_DECISIONS_DOC_ID];
 
 // A stable per-device identity, generated once and never re-derived from
 // anything the user can retype (name, room code) — the whole point is
@@ -5746,6 +5762,12 @@ function outstandingGroupDecisionsCount(){
   }).length;
 }
 
+// Sets it locally, then pushes this device's own regular sync doc right
+// away so it reaches the group without waiting for the next periodic
+// auto-sync — see buildSyncPayload/mergeSyncPayload's `decisions`
+// handling above for how it actually gets to everyone else (piggybacked
+// on the same per-member document that's always worked, not a separate
+// document with its own permissions to worry about).
 async function setGroupDecision(decisionKey, status, choiceName){
   const name = currentContributorName() || "Someone";
   const entry = { status, choice: choiceName || null, by: name, updatedAt: Date.now() };
@@ -5754,33 +5776,10 @@ async function setGroupDecision(decisionKey, status, choiceName){
   Store.set("groupDecisions", decisions);
   renderGroupDecisions();
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
-  const db = getFirestoreDb();
-  const room = currentRoomCode();
-  if(!db || !room) return false;
-  try{
-    // Read-merge-write scoped to just this one key, so setting your own
-    // decision can't silently clobber someone else's concurrent decision
-    // on a DIFFERENT clash. The only remaining race is two people
-    // deciding the exact same clash at once, which is an accepted
-    // last-write-wins — same as every other shared single-value field.
-    // Lives in the members collection under a reserved doc ID (see
-    // SHARED_DECISIONS_DOC_ID above) — the rooms/{roomId} document
-    // itself isn't writable under the deployed security rules.
-    const ref = db.collection("rooms").doc(room).collection("members").doc(SHARED_DECISIONS_DOC_ID);
-    const doc = await ref.get();
-    const cloudDecisions = (doc.exists && doc.data() && doc.data().decisions) || {};
-    cloudDecisions[decisionKey] = entry;
-    await ref.set({ decisions: cloudDecisions });
-    return true;
-  }catch(err){
-    return false;
+  if(typeof pushToCloud === "function"){
+    try{ await pushToCloud(); return true; }catch(err){ return false; }
   }
-}
-
-function applyDecisionsFromRoomData(roomData){
-  Store.set("groupDecisions", (roomData && roomData.decisions) || {});
-  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
-  if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+  return false;
 }
 
 function decisionStatusPillHTML(status){
@@ -6170,41 +6169,26 @@ async function pushToCloud(){
   if(name) db.collection("rooms").doc(room).collection("members").doc(name).delete().catch(()=>{});
 }
 
-// The shared meeting point lives directly on the room document (not a
-// per-member doc) — there's one value for the whole group, not one per
-// person, so it doesn't fit the per-member snapshot pattern the rest of
-// sync uses. Cloud is the source of truth: whatever's there on a pull
-// simply replaces the local cache, same last-write-wins model as every
-// other shared field.
-function applyMeetingFromRoomData(roomData){
-  const meeting = (roomData && roomData.meeting) || null;
-  Store.set("meeting", meeting ? (meeting.place || "") : "");
-  Store.set("meetingBy", meeting ? (meeting.by || "") : "");
-  Store.set("meetingUpdatedAt", meeting ? (meeting.updatedAt || null) : null);
-  if(typeof renderCurrentMeeting === "function") renderCurrentMeeting();
-}
-
+// Sets it locally (including clearing — an empty place still stamps a
+// fresh updatedAt, so the "clear" itself wins the last-write-wins
+// comparison on other devices rather than silently being ignored), then
+// pushes this device's own regular sync doc right away. See
+// buildSyncPayload/mergeSyncPayload's `meeting` handling above for how
+// it reaches the group — piggybacked on the same per-member document
+// that's always worked, not a separate document with its own
+// permissions to worry about.
 async function pushSharedMeeting(place){
   const trimmed = (place || "").trim();
   const name = currentContributorName() || "Someone";
-  const meeting = trimmed ? { place: trimmed, by: name, updatedAt: Date.now() } : null;
   Store.set("meeting", trimmed);
-  Store.set("meetingBy", trimmed ? name : "");
-  Store.set("meetingUpdatedAt", trimmed ? meeting.updatedAt : null);
+  Store.set("meetingBy", name);
+  Store.set("meetingUpdatedAt", Date.now());
   if(typeof renderCurrentMeeting === "function") renderCurrentMeeting();
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
-  const db = getFirestoreDb();
-  const room = currentRoomCode();
-  if(!db || !room) return false;
-  try{
-    // Same reserved-doc-in-members-collection approach as group
-    // decisions above — the rooms/{roomId} document itself isn't
-    // writable under the deployed security rules.
-    await db.collection("rooms").doc(room).collection("members").doc(SHARED_MEETING_DOC_ID).set({ meeting });
-    return true;
-  }catch(err){
-    return false;
+  if(typeof pushToCloud === "function"){
+    try{ await pushToCloud(); return true; }catch(err){ return false; }
   }
+  return false;
 }
 
 async function pullFromCloud(){
@@ -6212,23 +6196,19 @@ async function pullFromCloud(){
   const room = currentRoomCode();
   if(!db || !room) return { stats: null, count: 0 };
   const deviceId = ensureDeviceId();
-  // Meeting point and group decisions ride along in this same members
-  // collection fetch now (see SHARED_MEETING_DOC_ID/SHARED_DECISIONS_DOC_ID
-  // above) — no separate rooms/{roomId} document read needed.
   const snap = await db.collection("rooms").doc(room).collection("members").get();
-  let meetingData = null, decisionsData = null;
   const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   let count = 0;
   snap.forEach(doc=>{
-    if(doc.id === SHARED_MEETING_DOC_ID){ meetingData = doc.data(); return; }
-    if(doc.id === SHARED_DECISIONS_DOC_ID){ decisionsData = doc.data(); return; }
     if(doc.id === deviceId) return; // never merge your own payload back into yourself
+    // Meeting point and group decisions merge here too now — see
+    // buildSyncPayload/mergeSyncPayload's `meeting`/`decisions` handling
+    // above — piggybacked on this same per-member document fetch.
     const { stats } = mergeSyncPayload(doc.data());
     Object.keys(totals).forEach(k=> totals[k] += stats[k] || 0);
     count++;
   });
-  applyMeetingFromRoomData(meetingData);
-  applyDecisionsFromRoomData(decisionsData);
+  if(typeof renderCurrentMeeting === "function") renderCurrentMeeting();
   return { stats: totals, count };
 }
 
@@ -6253,7 +6233,6 @@ async function findRoomMembersByName(name){
   const snap = await db.collection("rooms").doc(room).collection("members").get();
   const matches = [];
   snap.forEach(doc=>{
-    if(RESERVED_MEMBER_DOC_IDS.includes(doc.id)) return;
     const data = doc.data();
     if((data.from || "").trim().toLowerCase() === target) matches.push({ id: doc.id, data });
   });
