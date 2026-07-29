@@ -135,6 +135,10 @@ Alongside the live sync doc, each device's own data is also snapshotted automati
 
 If a sync ever wipes or corrupts a device's own data (accidental clear, a bad merge, more than one bad sync in a row), open **Discover → 🗄️ Backup history**, tap **Refresh list**, and restore an earlier snapshot. Restoring only ever replaces that one device's own data and re-pushes it to the cloud — it never reaches into or removes anything already synced from a teammate's device.
 
+Want a specific moment saved right now instead of waiting on the 20-minute throttle — before testing something risky, say? Tap **Back up now** in that same card. It bypasses the throttle and writes the snapshot with `pinned: true`, which the automatic pruning above always skips — a pinned backup is kept indefinitely rather than eventually rotating out with the ordinary ones.
+
+**This adds a new allowed field to `firestore.rules`** (`pinned` on a backup doc) — if the rules were already published for the original Backup history feature, they need **re-publishing again** for this specific change, or "Back up now" will fail with `permission-denied` (harmless — same as before, ordinary sync and automatic backups are unaffected either way).
+
 **One-time setup step:** the rules above (section 7) only cover the `members` documents themselves. This feature adds a `backups` subcollection under each member doc, and `firestore.rules` in this repo has been updated to allow it — but like the rest of `firestore.rules`, that file isn't automatically applied by pushing to GitHub. Re-publish it once in the Firebase console (**Build → Firestore Database → Rules**, paste the current contents of `firestore.rules`, **Publish**) or backups will silently fail with a `permission-denied` error (harmless — sync itself still works either way, you just won't get backup history until the rules are published).
 
 ---
