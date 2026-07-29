@@ -11,8 +11,15 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v138";
-const APP_BUILD_TIME = "2026-07-29T12:44:00Z";
+const APP_CACHE_VERSION = "v139";
+const APP_BUILD_TIME = "2026-07-29T12:52:00Z";
+
+// Used by renderGroupDecisions (defined much further down) — declared up
+// here since updateNextEvent() (called at load time) reaches it via a
+// call chain, same TDZ-safety reason as STATUS_STALE_MS/_firestoreDb.
+let groupDecisionsExpanded = false;
+const GROUP_DECISIONS_CAP = 4;
+
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -6179,8 +6186,6 @@ function wireDecisionCard(el, pair){
 // groupDecisions Store key either way. Capped with a "show more" toggle
 // so a busy lineup with several real group clashes can't crowd out the
 // actual Plan list underneath it.
-let groupDecisionsExpanded = false;
-const GROUP_DECISIONS_CAP = 4;
 function renderGroupDecisions(containerId){
   const box = document.getElementById(containerId || "groupDecisionsBox");
   if(!box) return;
