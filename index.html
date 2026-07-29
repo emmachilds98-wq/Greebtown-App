@@ -464,27 +464,50 @@ Meet at the clock tower if separated"></textarea>
 
   <!-- DISCOVER -->
   <section id="discover" class="screen">
-    <div class="eyebrow">Story, games &amp; guide</div>
+    <div class="eyebrow">✨ Discover</div>
     <h2 style="margin-bottom:14px;">Discover</h2>
-    <p class="empty-note" style="margin-bottom:10px;">Everything that isn't the lineup or map lives here — the story, day-to-day logistics, the games, and lookup reference — grouped below so it's easy to find the bit you actually want.</p>
+    <p class="empty-note" style="margin-bottom:10px;">A dashboard into everything that isn't the lineup or map — pick a category below, or check what's new for you first.</p>
 
-    <div class="venue-filters" id="discoverNav" style="margin-bottom:14px;">
-      <button data-jump="jumpStory">📖 The story</button>
-      <button data-jump="jumpDailyRag">🗞 Live intel</button>
-      <button data-jump="jumpDistrictsIntro">🏙 Districts</button>
-      <button data-jump="jumpInvolved">🙋 Get involved</button>
-      <button data-jump="jumpStoryDeep">🕹 How to play it</button>
-      <button data-jump="jumpCharacter">🎭 My character</button>
-      <button data-jump="jumpBingo">🎲 Bingo</button>
-      <button data-jump="jumpJournal">😂 Quotebook</button>
-      <button data-jump="jumpTheories">🔮 Theories</button>
-      <button data-jump="jumpCharacters">🗣 Characters</button>
-      <button data-jump="jumpBeyondMusic">🎯 Beyond the music</button>
-      <button data-jump="jumpPacking">🎒 Packing checklist</button>
-      <button data-jump="jumpLogistics">🗓 Logistics</button>
-      <button data-jump="jumpGlossary">📔 Glossary</button>
-      <button data-jump="jumpNotes">👥 All notes</button>
-      <button data-jump="jumpSync">🤝 Sync</button>
+    <div id="discoverForYou"></div>
+
+    <div id="discoverNav" style="margin-bottom:4px;">
+      <div class="discover-cat">
+        <div class="discover-cat-title">🔥 What's happening</div>
+        <div class="venue-filters">
+          <button data-jump="jumpStory">📖 Today's story</button>
+          <button data-jump="jumpDailyRag">🗞 Latest intel</button>
+          <button data-jump="jumpNotes">👥 New from friends</button>
+        </div>
+      </div>
+      <div class="discover-cat">
+        <div class="discover-cat-title">🏙 Explore Boomtown</div>
+        <div class="venue-filters">
+          <button data-jump="jumpDistrictsIntro">🏙 Districts</button>
+          <button data-jump="jumpCharacters">🗣 Characters</button>
+          <button data-jump="jumpDirectory" data-jump-tab="mapscreen">🕵 Hidden venues</button>
+          <button data-jump="jumpBeyondMusic">🎯 Beyond the music</button>
+          <button data-jump="jumpStoryDeep">🕹 How to play it</button>
+          <button data-jump="jumpInvolved">🙋 Get involved</button>
+        </div>
+      </div>
+      <div class="discover-cat">
+        <div class="discover-cat-title">🎮 Our stuff</div>
+        <div class="venue-filters">
+          <button data-jump="jumpBingo">🎲 Bingo</button>
+          <button data-jump="jumpCharacter">🎭 My character</button>
+          <button data-jump="jumpJournal">😂 Quotebook</button>
+          <button data-jump="jumpTheories">🔮 Theories</button>
+        </div>
+      </div>
+      <div class="discover-cat">
+        <div class="discover-cat-title">🧭 Useful</div>
+        <div class="venue-filters">
+          <button data-jump="jumpPacking">🎒 Packing checklist</button>
+          <button data-jump="jumpLogistics">🗓 Logistics</button>
+          <button data-jump="jumpGlossary">📔 Glossary</button>
+          <button data-jump="jumpSync">🤝 Sync</button>
+        </div>
+      </div>
     </div>
 
     <div class="daygroup">📖 The story &amp; the day</div>
@@ -865,16 +888,6 @@ Talk to an actor in character
       <div class="field"><label>Where are you?</label>
         <select id="statusLocationSelect">
           <option value="">Select a location…</option>
-          <option value="Area 404">Area 404</option>
-          <option value="Botanica">Botanica</option>
-          <option value="Thrutopia">Thrutopia</option>
-          <option value="Copperwood">Copperwood</option>
-          <option value="Oldtown">Oldtown</option>
-          <option value="Letsbe Avenue">Letsbe Avenue</option>
-          <option value="Metropolis">Metropolis</option>
-          <option value="Grand Central">Grand Central</option>
-          <option value="Camp">Camp</option>
-          <option value="__other__">Other…</option>
         </select>
       </div>
       <div class="field" id="statusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="statusCustomInput" placeholder="Type where you are"></div>
