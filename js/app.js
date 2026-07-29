@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v164";
-const APP_BUILD_TIME = "2026-07-29T21:59:00Z";
+const APP_CACHE_VERSION = "v165";
+const APP_BUILD_TIME = "2026-07-29T22:05:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -379,43 +379,61 @@ fixBottomClearance();
 })();
 
 // ===============================
-// TIMELINE SCROLL PROGRESS — a visible vertical scroll indicator inside
+// TIMELINE SCROLL PROGRESS — a visible vertical scroll indicator beside
 // each .timeline-outer box (Lineup/Plan/Clash timelines), which scrolls
 // both ways in a fixed-height (68vh) container. The native scrollbar
 // there is easy to miss (thin, low-contrast, fades fast on
 // -webkit-overflow-scrolling:touch), which is exactly why "am I near
 // the bottom of this stage list yet" was hard to tell on a long one.
+//
+// position:fixed, positioned in JS from the box's own
+// getBoundingClientRect() — NOT position:absolute as a child of the
+// scrolling box itself, which was the first attempt and visibly broke:
+// an absolutely-positioned descendant of an overflow:auto box is still
+// part of that box's scrolled content, so it drifted sideways with the
+// timeline's own horizontal (time-axis) scrolling instead of staying
+// pinned to the right edge. Fixed positioning, recomputed from the
+// box's real on-screen rect, is the same technique already used for
+// the pull-to-refresh indicator elsewhere in this file.
+//
 // setupTimelineScrollProgress() builds the track+thumb once per
-// container (idempotent — safe to call again); refreshTimelineScrollProgress()
-// recomputes size/position/visibility and must be called after any
-// render that can change the container's scrollable content (a new
-// day, a filter, etc.), since scrollHeight only updates once new
-// content is actually in the DOM.
+// container (idempotent). refreshTimelineScrollProgress() recomputes
+// everything and must be called after any render that can change the
+// container's scrollable content (a new day, a filter, etc.), since
+// scrollHeight only updates once new content is actually in the DOM.
 // ===============================
+const TIMELINE_SCROLL_OUTER_IDS = ["artistTimelineOuter", "planTimelineOuter", "clashTimelineOuter"];
+
 function setupTimelineScrollProgress(outerId){
   const outer = document.getElementById(outerId);
-  if(!outer || outer.querySelector(".timeline-scroll-track")) return;
+  if(!outer || document.getElementById(outerId + "_scrollTrack")) return;
   const track = document.createElement("div");
   track.className = "timeline-scroll-track";
+  track.id = outerId + "_scrollTrack";
   const thumb = document.createElement("div");
   thumb.className = "timeline-scroll-thumb";
   track.appendChild(thumb);
-  outer.appendChild(track);
+  document.body.appendChild(track);
   outer.addEventListener("scroll", ()=> updateTimelineScrollThumb(outerId), { passive: true });
 }
 
 function updateTimelineScrollThumb(outerId){
   const outer = document.getElementById(outerId);
-  const track = outer && outer.querySelector(".timeline-scroll-track");
-  const thumb = track && track.querySelector(".timeline-scroll-thumb");
+  const track = document.getElementById(outerId + "_scrollTrack");
+  const thumb = track && track.firstElementChild;
   if(!outer || !track || !thumb) return;
+  const rect = outer.getBoundingClientRect();
   const overflow = outer.scrollHeight - outer.clientHeight;
-  // Only worth showing once there's genuinely more than a screenful —
-  // a short day/filtered view shouldn't get a progress bar with
-  // nowhere to go.
-  if(overflow < 24){ track.style.display = "none"; return; }
+  // Hidden (wrong sub-view active, off-screen, etc.) or nothing
+  // meaningful to scroll — a short/filtered day shouldn't get a
+  // progress bar with nowhere to go.
+  if(rect.height < 1 || overflow < 24){ track.style.display = "none"; return; }
   track.style.display = "block";
-  const trackHeight = track.clientHeight;
+  const inset = 8;
+  const trackHeight = rect.height - inset * 2;
+  track.style.left = (rect.right - 9) + "px";
+  track.style.top = (rect.top + inset) + "px";
+  track.style.height = trackHeight + "px";
   const thumbHeight = Math.max(24, (outer.clientHeight / outer.scrollHeight) * trackHeight);
   const thumbTop = (outer.scrollTop / overflow) * (trackHeight - thumbHeight);
   thumb.style.height = thumbHeight + "px";
@@ -425,9 +443,27 @@ function updateTimelineScrollThumb(outerId){
 function refreshTimelineScrollProgress(outerId){
   setupTimelineScrollProgress(outerId);
   // Content just changed — layout needs a tick to settle before
-  // scrollHeight reflects the new grid.
+  // scrollHeight/getBoundingClientRect reflect the new grid.
   requestAnimationFrame(()=> updateTimelineScrollThumb(outerId));
 }
+
+// The box's on-screen position also changes on ordinary page scroll
+// (this is a fixed-height box inside a normally-scrolling page) and on
+// resize/orientation change — neither fires the box's own scroll
+// event, so both need their own listener to keep the track from
+// drifting away from the box it's meant to sit beside.
+let _timelineScrollRepositionQueued = false;
+function repositionAllTimelineScrollThumbs(){
+  if(_timelineScrollRepositionQueued) return;
+  _timelineScrollRepositionQueued = true;
+  requestAnimationFrame(()=>{
+    _timelineScrollRepositionQueued = false;
+    TIMELINE_SCROLL_OUTER_IDS.forEach(updateTimelineScrollThumb);
+  });
+}
+window.addEventListener("scroll", repositionAllTimelineScrollThumbs, { passive: true });
+window.addEventListener("resize", repositionAllTimelineScrollThumbs);
+window.addEventListener("orientationchange", repositionAllTimelineScrollThumbs);
 
 // ===============================
 // STORAGE HELPER
