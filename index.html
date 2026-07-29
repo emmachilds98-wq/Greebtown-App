@@ -65,6 +65,7 @@
     <div class="eyebrow">Made for our weekend</div>
     <h2 style="margin-bottom:14px;">Our Greebtown</h2>
 
+    <div id="newSinceLastOpened"></div>
     <div id="homeContextBanner"></div>
 
     <div class="ticket">
@@ -477,6 +478,7 @@ Meet at the clock tower if separated"></textarea>
           <button data-jump="jumpStory">📖 Today's story</button>
           <button data-jump="jumpDailyRag">🗞 Latest intel</button>
           <button data-jump="jumpNotes">👥 New from friends</button>
+          <button data-jump="jumpActivity">🕓 Recent activity</button>
         </div>
       </div>
       <div class="discover-cat">
@@ -823,6 +825,12 @@ Talk to an actor in character
     <div id="glossaryList"></div>
 
     <div class="daygroup">🤝 Setup &amp; sharing</div>
+
+    <div class="card" id="jumpActivity">
+      <h3>🕓 Recent group activity</h3>
+      <p class="empty-note" style="margin-bottom:8px;">A quick feed of what's changed — statuses, decisions, the meeting point, hidden-venue finds and theories. Not a chat, just a log.</p>
+      <div id="recentActivityList"></div>
+    </div>
 
     <div class="card" id="jumpNotes" style="border:1px solid rgba(75,227,172,.45); background:linear-gradient(145deg, rgba(75,227,172,.08), var(--bg-panel));">
       <span class="tag">👥 One view, whose is whose</span>
