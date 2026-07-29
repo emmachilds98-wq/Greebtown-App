@@ -353,18 +353,9 @@ Meet at the clock tower if separated"></textarea>
     <h2 style="margin-bottom:14px;">Map</h2>
     <p class="empty-note" style="margin-bottom:10px;">An illustrated schematic, not the official surveyed map — venue positions inside the city are illustrative, especially with this chapter's redesign. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
 
-    <div class="venue-filters" id="mapNav" style="margin-bottom:14px;">
-      <button data-jump="jumpMapView">🗺 Map</button>
-      <button data-jump="jumpDirectory">📋 Directory</button>
-      <button data-jump="jumpMeetingPoint">📍 Meeting point</button>
-      <button data-jump="jumpLogLandmark">🏕 Log a landmark</button>
-      <button data-jump="jumpLogHidden">🕵 Log a hidden venue</button>
-      <button data-jump="jumpSiteInfo">🕐 Gate &amp; hours</button>
-      <button data-jump="jumpFoodBars">🍺 Food &amp; bars</button>
-    </div>
-
     <div id="jumpMapView">
-    <div class="venue-filters" id="mapQuickActions" style="margin-bottom:10px;">
+    <p style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:4px;">On-the-spot lookups</p>
+    <div class="venue-filters" id="mapQuickActions" style="margin-bottom:14px;">
       <button data-quick="next">🎵 Next artist</button>
       <button data-quick="meeting">📍 Meeting point</button>
       <button data-quick="friends">📍 Friends</button>
@@ -373,6 +364,15 @@ Meet at the clock tower if separated"></textarea>
       <button data-quick="food">🍔 Food</button>
       <button data-quick="medical">🩹 Medical</button>
       <button data-quick="camp">🏕 Camp</button>
+    </div>
+
+    <p style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:4px;">Jump to</p>
+    <div class="venue-filters" id="mapNav" style="margin-bottom:14px;">
+      <button data-jump="jumpDirectory">📋 Directory</button>
+      <button data-jump="jumpLogLandmark">🏕 Log a landmark</button>
+      <button data-jump="jumpLogHidden">🕵 Log a hidden venue</button>
+      <button data-jump="jumpSiteInfo">🕐 Gate &amp; hours</button>
+      <button data-jump="jumpFoodBars">🍺 Food &amp; bars</button>
     </div>
     <div class="stagelist" id="mapLayerToggles" style="margin-bottom:8px;">
       <span class="chip active" data-layer="minor">Other stages</span>

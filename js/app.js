@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v147";
-const APP_BUILD_TIME = "2026-07-29T14:31:00Z";
+const APP_CACHE_VERSION = "v148";
+const APP_BUILD_TIME = "2026-07-29T14:44:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -4236,6 +4236,7 @@ function loadMap(){
     marker.style.left = place.x;
     marker.style.top = place.y;
     marker.title = place.name;
+    marker.dataset.name = place.name;
     marker.onclick = ()=>{
       mapInfo.innerHTML = `
         <div class="card">
@@ -4263,7 +4264,12 @@ function loadMap(){
     marker.className = "marker stage minor" + (isRumoured ? " rumoured" : "");
     marker.style.left = place.x;
     marker.style.top = place.y;
+    // Kept separate from .title (used for the browser hover tooltip,
+    // which appends the "rumoured" caveat) so anything that needs to
+    // find this exact marker by name — mapQuickAction's "Next artist",
+    // jumpToDistrictOnMap — can match reliably regardless of tooltip text.
     marker.title = place.name + (isRumoured ? " (rumoured — no 2026 confirmation)" : "");
+    marker.dataset.name = place.name;
     marker.onclick = ()=>{
       mapInfo.innerHTML = `
         <div class="card">
@@ -4290,6 +4296,7 @@ function loadMap(){
     marker.style.top = spot.y;
     marker.textContent = "?";
     marker.title = spot.name;
+    marker.dataset.name = spot.name;
     marker.onclick = ()=>{
       mapInfo.innerHTML = `
         <div class="card">
@@ -4335,6 +4342,7 @@ function loadMap(){
     marker.style.left = place.x;
     marker.style.top = place.y;
     marker.title = place.name;
+    marker.dataset.name = place.name;
     marker.onclick = ()=>{
       mapInfo.innerHTML = `
         <div class="card">
@@ -4382,6 +4390,7 @@ function loadMap(){
     marker.style.left = place.x;
     marker.style.top = place.y;
     marker.title = place.name;
+    marker.dataset.name = place.name;
     marker.onclick = ()=>{
       mapInfo.innerHTML = `
         <div class="card">
@@ -4695,7 +4704,7 @@ function mapQuickAction(kind){
       return;
     }
     const stageMatch = [...locations, ...minorStages].find(l=> l.name === next.stage);
-    const marker = stageMatch ? [...document.querySelectorAll(".marker")].find(m=> m.title === stageMatch.name) : null;
+    const marker = stageMatch ? [...document.querySelectorAll(".marker")].find(m=> m.dataset.name === stageMatch.name) : null;
     if(marker){ marker.click(); jumpTo("map"); return; }
     showMapInfo(`<div class="card"><h3>${escapeHtml(next.name)}</h3><p>${escapeHtml(next.stage)} · ${timeLabel(next)}</p></div>`);
     return;
@@ -4946,7 +4955,7 @@ function jumpToId(id, tab){
 function jumpToDistrictOnMap(name){
   document.querySelector('.tab[data-tab="mapscreen"]').click();
   requestAnimationFrame(()=>{
-    const marker = [...document.querySelectorAll("#mapInner .marker")].find(m=> m.title === name);
+    const marker = [...document.querySelectorAll("#mapInner .marker")].find(m=> m.dataset.name === name);
     if(marker) marker.click();
     const info = document.getElementById("mapInfo");
     if(info) info.scrollIntoView({ behavior:"smooth", block:"start" });
