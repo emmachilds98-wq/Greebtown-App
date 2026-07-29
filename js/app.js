@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v118";
-const APP_BUILD_TIME = "2026-07-29T04:42:00Z";
+const APP_CACHE_VERSION = "v119";
+const APP_BUILD_TIME = "2026-07-29T04:44:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5656,13 +5656,17 @@ function setMyStatus(place){
 // Own status plus everyone else's cached-from-sync status, newest first.
 function friendStatusEntries(){
   const peopleStatus = Store.get("peopleStatus") || {};
+  const peopleLastSeen = Store.get("peopleLastSeen") || {};
   const myDeviceId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : null;
   const entries = Object.entries(peopleStatus)
     .filter(([id])=> id !== myDeviceId)
-    .map(([id, s])=> ({ id, displayName: personDisplayName(s, id), place: s.place, updatedAt: s.updatedAt }));
+    // lastSyncedTs is separate from updatedAt (when they last SET their
+    // location) — a device can sync more recently than it last changed
+    // its status, so these two times can genuinely differ.
+    .map(([id, s])=> ({ id, displayName: personDisplayName(s, id), place: s.place, updatedAt: s.updatedAt, lastSyncedTs: personLastSeenTs(peopleLastSeen[id]) }));
   const myStatus = Store.get("myStatus");
   if(myStatus && myStatus.place && myDeviceId){
-    entries.push({ id: myDeviceId, displayName: currentContributorName() || "You", place: myStatus.place, updatedAt: myStatus.updatedAt, isMe: true });
+    entries.push({ id: myDeviceId, displayName: currentContributorName() || "You", place: myStatus.place, updatedAt: myStatus.updatedAt, lastSyncedTs: Store.get("lastSyncedAt"), isMe: true });
   }
   return entries.sort((a,b)=> (b.updatedAt||0) - (a.updatedAt||0));
 }
@@ -5670,7 +5674,8 @@ function friendStatusEntries(){
 function statusLineHTML(entry){
   const stale = entry.updatedAt && (Date.now() - entry.updatedAt) > STATUS_STALE_MS;
   const label = entry.isMe ? `${escapeHtml(entry.displayName)} (you)` : escapeHtml(entry.displayName);
-  return `<div class="status-line${stale ? " status-stale" : ""}">${statusDotFor(entry.id)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Updated ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}</div>`;
+  const syncedLine = entry.lastSyncedTs ? `<br><span style="font-size:11px; color:var(--text-muted);">Last online ${formatLastSeen(entry.lastSyncedTs)}</span>` : "";
+  return `<div class="status-line${stale ? " status-stale" : ""}">${statusDotFor(entry.id)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Location set ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}${syncedLine}</div>`;
 }
 
 function renderFriendStatusList(containerId){
