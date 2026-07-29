@@ -36,5 +36,12 @@ Before telling the user a fix is ready to test:
    `js/app.js`, and `CACHE_VERSION` in `service-worker.js`, so the
    in-app "update available" pill fires and users actually get the new
    code instead of a cached copy.
+   `APP_BUILD_TIME` is a UTC (`Z`-suffixed) timestamp that the pill
+   converts to the viewer's own local time — get the real current UTC
+   time (e.g. `date -u`) before setting it, never hand-guess or
+   increment from the previous value. A guessed timestamp that's ahead
+   of real UTC shows up to a UK viewer as *more than* an hour ahead
+   (their local BST offset stacked on top of the guess error) — this
+   has already happened once.
 3. Grep the diff's changed identifiers for any other load-time call
    site that reaches them, per the TDZ rule above.
