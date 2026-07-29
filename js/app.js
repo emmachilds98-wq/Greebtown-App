@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v142";
-const APP_BUILD_TIME = "2026-07-29T13:41:00Z";
+const APP_CACHE_VERSION = "v143";
+const APP_BUILD_TIME = "2026-07-29T13:50:30Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3072,7 +3072,31 @@ function mergePersonIntoMine(personId){
   refreshAfterMerge();
   if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
   if(typeof pushToCloud === "function") pushToCloud().catch(()=>{});
+  // Without this, the duplicate keeps coming back: the merge above only
+  // clears this device's own LOCAL copy of the duplicate's data, but the
+  // duplicate's own doc is still sitting in Firestore under its own old
+  // deviceId — the very next pull (autoSyncNow runs every 3 minutes) would
+  // fetch it again and repopulate peopleSchedules/etc. right back. Deleting
+  // the stale doc (and any backup snapshots under it) is what actually
+  // makes the merge stick.
+  if(typeof deleteStaleRoomMember === "function") deleteStaleRoomMember(personId).catch(err=>{
+    console.warn("Deleting merged-in duplicate's cloud doc failed (non-fatal — it may just come back on next sync):", err);
+  });
   return changed;
+}
+
+// See mergePersonIntoMine's comment above for why this exists. Best-effort:
+// a failure here (offline, etc.) leaves the stale doc in place to be
+// cleaned up on some future successful attempt — it never undoes the local
+// merge that's already happened.
+async function deleteStaleRoomMember(personId){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room || !personId) return;
+  const memberRef = db.collection("rooms").doc(room).collection("members").doc(personId);
+  const backups = await memberRef.collection("backups").get();
+  await Promise.all(backups.docs.map(d=> d.ref.delete()));
+  await memberRef.delete();
 }
 
 function renderSchedule(){
