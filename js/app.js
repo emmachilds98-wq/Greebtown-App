@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v124";
-const APP_BUILD_TIME = "2026-07-29T10:21:00Z";
+const APP_CACHE_VERSION = "v125";
+const APP_BUILD_TIME = "2026-07-29T10:28:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -6373,7 +6373,6 @@ function wireDeviceHandoffControl(nameInputId, btnId, noteId){
     if(!name){ setNote("Type a name first."); return; }
     if(!currentRoomCode()){ setNote("No room code set — check Sync above first."); return; }
     if(!getFirestoreDb()){ setNote("Cloud sync isn't available right now."); return; }
-    if(navigator.onLine === false){ setNote("No signal — this needs to fetch the latest data live, so it can't work offline."); return; }
     setBtnDisabled(true);
     setNote("Looking up…");
     try{
@@ -6415,7 +6414,6 @@ async function runManualSync(btn, note){
   const haveName = !!currentContributorName();
   if(!currentRoomCode()){ if(note) note.textContent = "Type your group's room code above first."; return; }
   if(!getFirestoreDb()){ if(note) note.textContent = "Cloud sync isn't available right now — use the manual code box in Discover instead."; return; }
-  if(navigator.onLine === false){ if(note) note.textContent = "No signal — use the manual code box in Discover, or try Sync now again once you're back online."; return; }
   if(btn) btn.disabled = true;
   if(note) note.textContent = "Syncing…";
   try{
@@ -6549,7 +6547,6 @@ if(syncDiagnosticsBtn) syncDiagnosticsBtn.onclick = ()=>{
 const AUTO_SYNC_INTERVAL_MS = 3 * 60 * 1000;
 let _lastAutoSyncAttempt = 0;
 function autoSyncNow(trigger){
-  if(navigator.onLine === false) return Promise.resolve();
   if(!currentRoomCode()) return Promise.resolve();
   if(!getFirestoreDb()) return Promise.resolve();
   _lastAutoSyncAttempt = Date.now();
