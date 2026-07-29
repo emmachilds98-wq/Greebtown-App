@@ -180,6 +180,25 @@ Meet at the clock tower if separated"></textarea>
   </div>
 </div></section>
 
+  <!-- TODAY -->
+  <section id="today" class="screen">
+    <div class="eyebrow">Right now</div>
+    <h2 style="margin-bottom:14px;">Today</h2>
+    <p class="empty-note" id="todayIntroNote" style="margin-bottom:12px;">Everything below is pulled from your Plan, sync and group data — nothing new to maintain.</p>
+    <div id="todayNow" class="card"></div>
+    <div id="todayNextUp" class="card"></div>
+    <div id="todayGroup" class="card"></div>
+    <div id="todayDecisions" class="card"></div>
+    <div id="todayMeet" class="card"></div>
+    <div class="stagelist" id="todayQuickActions" style="margin:14px 0 4px;">
+      <button data-today-jump="mapscreen">🗺 Map</button>
+      <button data-today-jump="plan">🎵 Plan</button>
+      <button id="todayQuickClashes">⚡ Clashes</button>
+      <button data-today-jump="discover" id="todayQuickFriends">📍 Friends</button>
+      <button id="todayQuickSearch">🔎 Search</button>
+    </div>
+  </section>
+
   <!-- ARTISTS -->
   <section id="artists" class="screen">
     <div class="eyebrow">Full lineup &amp; timetable</div>
@@ -873,6 +892,7 @@ Talk to an actor in character
 </main>
 
 <nav class="tabbar">
+  <button class="tab" data-tab="today" id="todayTabBtn"><span class="icon">☀️</span>Today</button>
   <button class="tab active" data-tab="home"><span class="icon">🏠</span>Home</button>
   <button class="tab" data-tab="artists"><span class="icon">🎵</span>Lineup</button>
   <button class="tab" data-tab="plan"><span class="icon">⭐</span>Plan</button>
