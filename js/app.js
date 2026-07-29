@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v106";
-const APP_BUILD_TIME = "2026-07-29T02:47:00Z";
+const APP_CACHE_VERSION = "v107";
+const APP_BUILD_TIME = "2026-07-29T02:58:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -283,10 +283,13 @@ fixBottomClearance();
 //    "schedule", bingo card, and built character ride along in the same
 //    payload, but none is ever merged into your own
 //    "schedule"/bingoCard/myCharacter — they land under
-//    peopleSchedules[name]/peopleBingo[name]/peopleCharacters[name]
-//    instead, kept separate per contributor, shown only in their own
-//    person-tab on the Plan, Bingo, and My Character cards. Sync must
-//    never read or write other personal fields: meeting, notes, roomCode.
+//    peopleSchedules[deviceId]/peopleBingo[deviceId]/peopleCharacters[deviceId]
+//    instead (each keyed by the contributor's stable per-device id, with
+//    a displayName field carrying whatever they currently go by — see
+//    ensureDeviceId()/personDisplayName() further down), kept separate
+//    per contributor, shown only in their own person-tab on the Plan,
+//    Bingo, and My Character cards. Sync must never read or write other
+//    personal fields: meeting, notes, roomCode.
 const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, discoveries: [], meeting: null, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "" };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
@@ -2126,8 +2129,18 @@ function reconcileSavedArtists(){
   const people = Store.get("peopleSchedules") || {};
   let peopleChanged = false;
   Object.keys(people).forEach(person=>{
-    const r = reconciled(people[person] || []);
-    if(r.changed){ people[person] = r.list; peopleChanged = true; }
+    // Tolerates a device's pre-existing local data in the old flat-array
+    // shape (from before per-person snapshots carried a displayName
+    // field) as well as the current { displayName, list } shape — the
+    // next real sync naturally replaces any legacy entry with the new
+    // shape anyway, so this is just about not crashing on old data.
+    const entry = people[person];
+    const list = Array.isArray(entry) ? entry : (entry && entry.list) || [];
+    const r = reconciled(list);
+    if(r.changed){
+      people[person] = Array.isArray(entry) ? r.list : { ...entry, list: r.list };
+      peopleChanged = true;
+    }
   });
   if(peopleChanged) Store.set("peopleSchedules", people);
 }
@@ -2744,10 +2757,27 @@ function openTimeEditor(container, artist, onSave){
 // or merges one into the other.
 let planActiveOwner = "mine";
 
+// Shared by every per-person snapshot map (peopleSchedules/peopleBingo/
+// peopleCharacters/peopleLastSeen) — all keyed by stable personId now,
+// each entry carrying its own displayName. Also tolerates a device's
+// pre-existing local data in the old flat shape (array for schedule,
+// raw timestamp for lastSeen) so nothing crashes on data written before
+// this change; the next real sync naturally replaces it with the
+// current shape.
+function personSnapshotList(entry){
+  return Array.isArray(entry) ? entry : (entry && entry.list) || [];
+}
+function personDisplayName(entry, fallbackId){
+  return (entry && entry.displayName) || fallbackId;
+}
+function personLastSeenTs(entry){
+  return (entry && typeof entry === "object") ? entry.ts : entry;
+}
+
 function activeScheduleData(){
   if(planActiveOwner === "mine") return Store.get("schedule");
   const people = Store.get("peopleSchedules") || {};
-  return (people[planActiveOwner] || []).slice();
+  return personSnapshotList(people[planActiveOwner]).slice();
 }
 
 function renderPlanPersonTabs(){
@@ -2755,12 +2785,12 @@ function renderPlanPersonTabs(){
   const note = document.getElementById("planPersonNote");
   if(!box) return;
   const people = Store.get("peopleSchedules") || {};
-  const names = Object.keys(people).filter(n=> (people[n]||[]).length > 0);
+  const personIds = Object.keys(people).filter(id=> personSnapshotList(people[id]).length > 0);
   // If the previously-active friend has since disappeared from
   // peopleSchedules (nothing saved, or never actually synced), fall
   // back to your own tab rather than pointing at a button that's about
   // to stop existing.
-  if(planActiveOwner !== "mine" && !names.includes(planActiveOwner)) planActiveOwner = "mine";
+  if(planActiveOwner !== "mine" && !personIds.includes(planActiveOwner)) planActiveOwner = "mine";
 
   // Your own tab is always shown, even with zero friends synced in yet —
   // labelled with your own picked name (matching what a friend would see
@@ -2771,7 +2801,7 @@ function renderPlanPersonTabs(){
   box.style.display = "";
   box.className = "tabstrip";
   box.innerHTML = `<button class="${planActiveOwner==="mine"?"active":""}" data-owner="mine">${escapeHtml(myLabel)}</button>` +
-    names.map(n=>`<button class="person ${planActiveOwner===n?"active":""}" data-owner="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join("");
+    personIds.map(id=>`<button class="person ${planActiveOwner===id?"active":""}" data-owner="${escapeHtml(id)}">${escapeHtml(personDisplayName(people[id], id))}</button>`).join("");
   box.querySelectorAll("button").forEach(btn=>{
     btn.onclick = ()=>{
       planActiveOwner = btn.dataset.owner;
@@ -2782,14 +2812,17 @@ function renderPlanPersonTabs(){
   });
   if(note){
     note.style.display = "";
-    if(names.length === 0){
+    if(personIds.length === 0){
       note.textContent = "Nobody's synced in yet — a teammate's picks will show up as their own tab here (and in Compare below) once they have. Pick your name in Discover if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
     } else if(planActiveOwner === "mine"){
       note.textContent = "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours. See everyone at once in the Compare view below.";
     } else {
-      const lastSeen = (Store.get("peopleLastSeen") || {})[planActiveOwner];
-      const seenText = lastSeen ? ` (last synced ${formatLastSeen(lastSeen)})` : "";
-      note.textContent = `Viewing ${planActiveOwner}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list.`;
+      const activeEntry = people[planActiveOwner];
+      const activeLabel = personDisplayName(activeEntry, planActiveOwner);
+      const lastSeenEntry = (Store.get("peopleLastSeen") || {})[planActiveOwner];
+      const lastSeenTs = personLastSeenTs(lastSeenEntry);
+      const seenText = lastSeenTs ? ` (last synced ${formatLastSeen(lastSeenTs)})` : "";
+      note.textContent = `Viewing ${activeLabel}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list.`;
     }
   }
 }
@@ -2967,8 +3000,9 @@ let compareOnlyShared = false;
 function comparePeopleList(){
   const people = [{ key:"mine", label:"You", list: Store.get("schedule") }];
   const peopleSchedules = Store.get("peopleSchedules") || {};
-  Object.keys(peopleSchedules).forEach(n=>{
-    if((peopleSchedules[n]||[]).length) people.push({ key:n, label:n, list:peopleSchedules[n] });
+  Object.keys(peopleSchedules).forEach(id=>{
+    const list = personSnapshotList(peopleSchedules[id]);
+    if(list.length) people.push({ key:id, label:personDisplayName(peopleSchedules[id], id), list });
   });
   return people;
 }
@@ -3276,9 +3310,12 @@ function renderHomeContextBanner(){
   const clashCount = Object.keys(clashMap).length;
 
   const peopleLastSeen = Store.get("peopleLastSeen") || {};
-  const friendNames = Object.keys(peopleLastSeen).filter(n=> n !== name);
-  const mostRecent = friendNames.sort((a,b)=> (peopleLastSeen[b]||0) - (peopleLastSeen[a]||0))[0];
-  const friendLine = mostRecent ? `👥 ${escapeHtml(mostRecent)} synced ${formatLastSeen(peopleLastSeen[mostRecent])}` : "";
+  const myDeviceId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : null;
+  const friendIds = Object.keys(peopleLastSeen).filter(id=> id !== myDeviceId);
+  const mostRecentId = friendIds.sort((a,b)=> (personLastSeenTs(peopleLastSeen[b])||0) - (personLastSeenTs(peopleLastSeen[a])||0))[0];
+  const friendLine = mostRecentId
+    ? `👥 ${escapeHtml(personDisplayName(peopleLastSeen[mostRecentId], mostRecentId))} synced ${formatLastSeen(personLastSeenTs(peopleLastSeen[mostRecentId]))}`
+    : "";
 
   const meeting = (Store.get("meeting") || "").trim();
   const meetingLine = meeting ? `📍 Meet at ${escapeHtml(meeting)}` : "";
@@ -4631,6 +4668,11 @@ document.getElementById("copyVenuesBtn").onclick = (e)=>{
 function buildSyncPayload(){
   return {
     v: 1,
+    // Stable per-device identity — see ensureDeviceId() further down.
+    // Included in the payload itself (not just used as the Firestore doc
+    // ID) so the manual copy/paste sync-code path gets the same
+    // collision-proof per-person keying as the automatic cloud sync does.
+    deviceId: (typeof ensureDeviceId === "function") ? ensureDeviceId() : "",
     from: (Store.get("contributorName") || "").trim() || "Someone",
     clues: Store.get("clues") || {},
     characterNotes: Store.get("characterNotes") || {},
@@ -4678,6 +4720,11 @@ function decodeSyncCode(code){
 function mergeSyncPayload(payload){
   const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   const from = payload.from || "Someone";
+  // The stable identity to key per-person snapshots by, wherever one's
+  // available — falls back to the display name only for payloads from
+  // before deviceId existed (an old manual sync code someone still has
+  // saved), so those don't just silently fail to merge.
+  const personId = payload.deviceId || from;
 
   // Clue notes are freeform multi-line text per district, and an incoming
   // payload may itself already contain lines merged in from earlier syncs
@@ -4820,7 +4867,11 @@ function mergeSyncPayload(payload){
   // own "schedule" key.
   if(Array.isArray(payload.schedule)){
     const people = Store.get("peopleSchedules") || {};
-    people[from] = payload.schedule.map(a=>({ ...a }));
+    // Keyed by personId (stable per device), with displayName kept as
+    // its own field — so two different people/devices that happen to
+    // type the same name never overlap into one tab, and renaming
+    // yourself updates this same entry instead of orphaning it.
+    people[personId] = { displayName: from, list: payload.schedule.map(a=>({ ...a })) };
     Store.set("peopleSchedules", people);
     stats.schedule = payload.schedule.length;
   }
@@ -4830,7 +4881,8 @@ function mergeSyncPayload(payload){
   // this device's own bingoCard/bingoMarked/bingoLocked.
   if(payload.bingo && Array.isArray(payload.bingo.card) && payload.bingo.card.length){
     const peopleBingo = Store.get("peopleBingo") || {};
-    peopleBingo[from] = {
+    peopleBingo[personId] = {
+      displayName: from,
       card: payload.bingo.card.slice(),
       marked: Array.isArray(payload.bingo.marked) ? payload.bingo.marked.slice() : [],
       locked: !!payload.bingo.locked
@@ -4843,7 +4895,7 @@ function mergeSyncPayload(payload){
   // entry each resync, never touches this device's own myCharacter.
   if(payload.character && payload.character.name){
     const peopleCharacters = Store.get("peopleCharacters") || {};
-    peopleCharacters[from] = { ...payload.character };
+    peopleCharacters[personId] = { displayName: from, ...payload.character };
     Store.set("peopleCharacters", peopleCharacters);
     stats.character = 1;
   }
@@ -4856,7 +4908,7 @@ function mergeSyncPayload(payload){
   // on data already being pulled rather than a separate read.
   if(payload.updatedAt){
     const peopleLastSeen = Store.get("peopleLastSeen") || {};
-    peopleLastSeen[from] = payload.updatedAt;
+    peopleLastSeen[personId] = { displayName: from, ts: payload.updatedAt };
     Store.set("peopleLastSeen", peopleLastSeen);
   }
 
@@ -5438,14 +5490,17 @@ let charFormForcedOpen = false;
 
 function myCharacterPeopleNames(){
   const people = Store.get("peopleCharacters") || {};
-  return Object.keys(people).filter(n=> people[n] && people[n].name).sort((a,b)=> a.localeCompare(b));
+  return Object.keys(people)
+    .filter(id=> people[id] && people[id].name)
+    .sort((a,b)=> personDisplayName(people[a], a).localeCompare(personDisplayName(people[b], b)));
 }
 
 function renderMyCharacterPersonTabs(){
   const box = document.getElementById("charPersonTabs");
   if(!box) return;
-  const names = myCharacterPeopleNames();
-  if(names.length === 0){
+  const people = Store.get("peopleCharacters") || {};
+  const personIds = myCharacterPeopleNames();
+  if(personIds.length === 0){
     box.style.display = "none";
     myCharacterActiveOwner = "mine";
     return;
@@ -5453,7 +5508,7 @@ function renderMyCharacterPersonTabs(){
   box.style.display = "";
   box.className = "tabstrip";
   box.innerHTML = `<button class="${myCharacterActiveOwner==="mine"?"active":""}" data-owner="mine">⭐ Mine</button>` +
-    names.map(n=>`<button class="person ${myCharacterActiveOwner===n?"active":""}" data-owner="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join("");
+    personIds.map(id=>`<button class="person ${myCharacterActiveOwner===id?"active":""}" data-owner="${escapeHtml(id)}">${escapeHtml(personDisplayName(people[id], id))}</button>`).join("");
   box.querySelectorAll("button").forEach(btn=>{
     btn.onclick = ()=>{
       myCharacterActiveOwner = btn.dataset.owner;
@@ -5475,7 +5530,7 @@ function renderMyCharacter(){
     if(!c || !c.name){ box.innerHTML = `<p class="empty-note">No character saved yet.</p>`; return; }
     box.innerHTML = `
       <div class="char-card">
-        <div style="font-size:12px; color:var(--accent-teal);">${escapeHtml(myCharacterActiveOwner)}'s character — read-only</div>
+        <div style="font-size:12px; color:var(--accent-teal);">${escapeHtml(personDisplayName(c, myCharacterActiveOwner))}'s character — read-only</div>
         <div style="font-size:16px; font-weight:700; color:var(--accent-amber); margin-top:4px;">${escapeHtml(c.name)}</div>
         <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">${c.district ? escapeHtml(c.district) : "Undecided / floating"}</div>
         ${c.quirk ? `<p style="margin-top:8px; font-size:14px;"><strong>Quirk:</strong> ${escapeHtml(c.quirk)}</p>` : ""}
@@ -5595,14 +5650,17 @@ let bingoActiveOwner = "mine";
 
 function bingoPeopleNames(){
   const people = Store.get("peopleBingo") || {};
-  return Object.keys(people).filter(n=> ((people[n] && people[n].card) || []).length > 0).sort((a,b)=> a.localeCompare(b));
+  return Object.keys(people)
+    .filter(id=> ((people[id] && people[id].card) || []).length > 0)
+    .sort((a,b)=> personDisplayName(people[a], a).localeCompare(personDisplayName(people[b], b)));
 }
 
 function renderBingoPersonTabs(){
   const box = document.getElementById("bingoPersonTabs");
   if(!box) return;
-  const names = bingoPeopleNames();
-  if(names.length === 0){
+  const people = Store.get("peopleBingo") || {};
+  const personIds = bingoPeopleNames();
+  if(personIds.length === 0){
     box.style.display = "none";
     bingoActiveOwner = "mine";
     return;
@@ -5610,7 +5668,7 @@ function renderBingoPersonTabs(){
   box.style.display = "";
   box.className = "tabstrip";
   box.innerHTML = `<button class="${bingoActiveOwner==="mine"?"active":""}" data-owner="mine">⭐ Mine</button>` +
-    names.map(n=>`<button class="person ${bingoActiveOwner===n?"active":""}" data-owner="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join("");
+    personIds.map(id=>`<button class="person ${bingoActiveOwner===id?"active":""}" data-owner="${escapeHtml(id)}">${escapeHtml(personDisplayName(people[id], id))}</button>`).join("");
   box.querySelectorAll("button").forEach(btn=>{
     btn.onclick = ()=>{
       bingoActiveOwner = btn.dataset.owner;
@@ -5631,6 +5689,7 @@ function renderBingo(){
   if(bingoActiveOwner !== "mine"){
     const people = Store.get("peopleBingo") || {};
     const data = people[bingoActiveOwner] || { card: [], marked: [], locked: false };
+    const label = personDisplayName(data, bingoActiveOwner);
     if(customInput) customInput.style.display = "none";
     generateBtn.style.display = "none";
     lockBtn.style.display = "none";
@@ -5645,8 +5704,8 @@ function renderBingo(){
     }).join("");
     grid.querySelectorAll(".bingo-cell").forEach(cell=>{ cell.onclick = null; });
     note.textContent = data.locked
-      ? `🔒 ${bingoActiveOwner} locked in — ${(data.marked || []).length}/24 crossed off. Read-only — this is their card, not yours.`
-      : `${bingoActiveOwner} hasn't locked in yet — showing their card as last synced, still subject to change.`;
+      ? `🔒 ${label} locked in — ${(data.marked || []).length}/24 crossed off. Read-only — this is their card, not yours.`
+      : `${label} hasn't locked in yet — showing their card as last synced, still subject to change.`;
     return;
   }
 
@@ -6303,7 +6362,20 @@ function buildConsolidatedReportByPerson(){
 // Never merged into anything; purely for display here.
 function planLinesForPerson(name){
   const isMine = name === currentContributorName();
-  const schedule = isMine ? (Store.get("schedule") || []) : ((Store.get("peopleSchedules") || {})[name] || []);
+  let schedule;
+  if(isMine){
+    schedule = Store.get("schedule") || [];
+  }else{
+    // peopleSchedules is keyed by stable personId, not name — this report
+    // is grouped by display name instead, so find whichever synced
+    // person currently goes by it. Ambiguous only if two different
+    // people share the exact same typed name, in which case this shows
+    // the first match — same ambiguity a plain name-keyed lookup would
+    // have had, just no longer able to silently overwrite the other.
+    const people = Store.get("peopleSchedules") || {};
+    const match = Object.values(people).find(entry=> personDisplayName(entry, null) === name);
+    schedule = match ? personSnapshotList(match) : [];
+  }
   if(!schedule.length) return [];
   return schedule
     .slice()
@@ -6317,7 +6389,11 @@ function planLinesForPerson(name){
 function consolidatedPeopleNames(){
   const names = new Set();
   buildConsolidatedReportByPerson().forEach(s=>{ if(s.heading !== "Unassigned") names.add(s.heading); });
-  Object.keys(Store.get("peopleSchedules") || {}).forEach(n=> names.add(n));
+  const peopleSchedules = Store.get("peopleSchedules") || {};
+  Object.keys(peopleSchedules).forEach(id=>{
+    const label = personDisplayName(peopleSchedules[id], null);
+    if(label) names.add(label);
+  });
   const mine = currentContributorName();
   if(mine && ((Store.get("schedule")||[]).length || names.has(mine))) names.add(mine);
   return [...names].sort((a,b)=> a.localeCompare(b));
