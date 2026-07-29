@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v146";
-const APP_BUILD_TIME = "2026-07-29T14:23:00Z";
+const APP_CACHE_VERSION = "v147";
+const APP_BUILD_TIME = "2026-07-29T14:31:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -2525,10 +2525,21 @@ function buildTimelineHTML(items, opts){
   }
 
   const rows = stages.map(stage=>{
-    const stageItems = parsed.filter(p=>p.stage===stage);
-    const blocks = stageItems.map(p=>{
+    // Sorted by start time so each block can be clamped against the next
+    // one on the same row — without this, a short set (padded up to the
+    // 60px minimum below so its text has room) could extend past where
+    // the next act on that stage actually starts, visually overlapping
+    // its text even though their real time slots don't overlap at all.
+    const stageItems = parsed.filter(p=>p.stage===stage).sort((a,b)=> a._start - b._start);
+    const blocks = stageItems.map((p, i)=>{
       const left = (p._start-minMin)*pxPerMin;
-      const width = Math.max((p._end-p._start)*pxPerMin, 60);
+      const desiredWidth = Math.max((p._end-p._start)*pxPerMin, 60);
+      const next = stageItems[i+1];
+      // 2px breathing room before the next block's left edge; floors at
+      // 20px rather than letting two back-to-back/overlapping-in-data
+      // acts collapse to zero or negative width.
+      const gapLimit = next ? Math.max((next._start-minMin)*pxPerMin - left - 2, 20) : Infinity;
+      const width = Math.min(desiredWidth, gapLimit);
       const isSaved = savedNames ? savedNames.has(p.name) : false;
       const isMustSeeBlock = mustSeeNames ? mustSeeNames.has(p.name) : false;
       const cls = "timeline-block" + (isSaved ? " saved" : "") + (isMustSeeBlock ? " mustsee" : "") + (opts.readonly ? " readonly" : "");
