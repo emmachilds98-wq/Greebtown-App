@@ -4,8 +4,13 @@
     --text-primary:#eef6f1; --text-muted:#8fa89c; --line:#24403a;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{min-height:100%; overflow-x:hidden; scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
-  body{min-height:100%; overflow-x:hidden; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
+  /* touch-action:manipulation site-wide disables the double-tap-to-zoom
+     gesture (mobile Safari/Chrome both zoom on a fast double-tap by
+     default, which is easy to trigger by mistake tapping buttons/cards
+     quickly) while still permitting normal panning and pinch-zoom —
+     more specific touch-action rules elsewhere (e.g. #map) still win. */
+  html{min-height:100%; overflow-x:hidden; scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:manipulation;}
+  body{min-height:100%; overflow-x:hidden; -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:manipulation;}
   body{
     background:
       radial-gradient(circle at 15% 20%, rgba(242,168,60,0.10), transparent 40%),
