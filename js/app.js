@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v153";
-const APP_BUILD_TIME = "2026-07-29T16:46:00Z";
+const APP_CACHE_VERSION = "v154";
+const APP_BUILD_TIME = "2026-07-29T16:52:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7505,6 +7505,7 @@ async function pullFromCloud(){
   const snap = await db.collection("rooms").doc(room).collection("members").get();
   const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   let count = 0;
+  const seenIds = new Set();
   snap.forEach(doc=>{
     if(doc.id === deviceId){
       // Only a genuinely different, later push counts — this device's
@@ -7516,6 +7517,7 @@ async function pullFromCloud(){
       if((data.updatedAt || 0) > lastSynced && mergeOwnCloudCopy(data) > 0) count++;
       return;
     }
+    seenIds.add(doc.id);
     // Meeting point and group decisions merge here too now — see
     // buildSyncPayload/mergeSyncPayload's `meeting`/`decisions` handling
     // above — piggybacked on this same per-member document fetch.
@@ -7523,8 +7525,32 @@ async function pullFromCloud(){
     Object.keys(totals).forEach(k=> totals[k] += stats[k] || 0);
     count++;
   });
+  // Every pull fetches the FULL, current member list — never a cached or
+  // partial one — so any deviceId this device previously synced in as a
+  // teammate's tab, but that's now missing from the snapshot entirely,
+  // is genuinely gone from the cloud (merged away, deleted, whatever),
+  // not just quiet this cycle. Without this, a merge/cleanup on one
+  // person's device (which deletes their old duplicate's cloud doc)
+  // never reaches anyone else — every other device keeps showing that
+  // duplicate's tab forever, since nothing ever told it the doc was
+  // gone. Only prunes read-only teammate copies, never "mine".
+  let pruned = false;
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus"].forEach(key=>{
+    const map = Store.get(key) || {};
+    let changed = false;
+    Object.keys(map).forEach(id=>{
+      if(!seenIds.has(id)){ delete map[id]; changed = true; }
+    });
+    if(changed){ Store.set(key, map); pruned = true; }
+  });
   if(typeof renderCurrentMeeting === "function") renderCurrentMeeting();
-  return { stats: totals, count };
+  // Count a pruned duplicate as "something changed" too — otherwise a
+  // pull that ONLY cleans up a now-gone duplicate (no new data from
+  // anyone) looks like a no-op to autoSyncNow, which skips its UI
+  // refresh when count is 0. The duplicate tab would then only
+  // disappear next time something else happens to trigger a re-render,
+  // not right away.
+  return { stats: totals, count: pruned ? Math.max(count, 1) : count };
 }
 
 // ===============================
