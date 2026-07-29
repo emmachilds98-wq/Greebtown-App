@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v130";
-const APP_BUILD_TIME = "2026-07-29T11:37:00Z";
+const APP_CACHE_VERSION = "v131";
+const APP_BUILD_TIME = "2026-07-29T11:42:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -340,6 +340,25 @@ fixBottomClearance();
 const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
+// Saved artists, bingo card and character are otherwise only backed up
+// to the cloud by periodic auto-sync or an explicit "Sync now" tap —
+// meaning a device that never taps Sync (or one whose local storage
+// gets wiped, e.g. by a device-handoff mistake) can lose real festival
+// picks with no copy anywhere else. Debounced so a run of rapid changes
+// (starring several artists in a row) triggers one push, not one per
+// change; pushToCloud() itself is a hoisted function declaration and a
+// safe no-op with no name/room/signal set, so this is safe to call from
+// here even though pushToCloud is defined much later in this file.
+let _autoBackupTimer = null;
+const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter"]);
+function scheduleAutoBackup(){
+  if(_autoBackupTimer) clearTimeout(_autoBackupTimer);
+  _autoBackupTimer = setTimeout(()=>{
+    _autoBackupTimer = null;
+    if(typeof pushToCloud === "function") pushToCloud().catch(()=>{});
+  }, 4000);
+}
+
 const Store = {
   get(key){
     const raw = localStorage.getItem(key);
@@ -355,7 +374,10 @@ const Store = {
       return fallback && typeof fallback === "object" ? JSON.parse(JSON.stringify(fallback)) : fallback;
     }
   },
-  set(key, value){ localStorage.setItem(key, JSON.stringify(value)); },
+  set(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+    if(AUTO_BACKUP_KEYS.has(key)) scheduleAutoBackup();
+  },
   remove(key){ localStorage.removeItem(key); }
 };
 
@@ -6483,6 +6505,15 @@ function wireDeviceHandoffControl(nameInputId, btnId, noteId){
         `This can't be undone.`
       );
       if(!ok){ setNote("Cancelled — nothing changed."); return; }
+      // Best-effort safety net for the warning above — don't just rely on
+      // whoever's using this phone remembering to hit Sync themselves.
+      // Whatever's currently on this device (if it already has a name of
+      // its own) gets one last push to the cloud before it's wiped, so
+      // it's recoverable via this same restore-by-name flow later even
+      // if they forgot.
+      if(currentContributorName() && typeof pushToCloud === "function"){
+        try{ await pushToCloud(); }catch(err){}
+      }
       switchDeviceIdentity(chosen.id, chosen.data);
       setNote(`Done — this phone is now ${theirName}.`);
       const freshInput = document.getElementById(nameInputId);
