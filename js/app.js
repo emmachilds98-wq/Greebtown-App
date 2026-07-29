@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v132";
-const APP_BUILD_TIME = "2026-07-29T11:50:00Z";
+const APP_CACHE_VERSION = "v133";
+const APP_BUILD_TIME = "2026-07-29T12:00:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5766,9 +5766,14 @@ function statusLineHTML(entry){
 }
 
 // Clears a stale/ghost friend status — local cache first (so the UI
-// updates immediately) and then best-effort deletes that person's
-// member doc from the shared room, so a future sync pull doesn't just
-// bring the same stale entry straight back.
+// updates immediately) and then best-effort clears ONLY the status
+// field on that person's member doc in the shared room, so a future
+// sync pull doesn't just bring the same stale entry straight back.
+// Must never delete the whole doc — it also holds that device's
+// schedule, bingo card, character and notes, none of which this button
+// has anything to do with. (This used to call .delete() on the whole
+// document, which wiped all of it — fixed after it took someone's
+// synced picks out with it.)
 function removeFriendStatus(id){
   if(!id) return;
   const peopleStatus = Store.get("peopleStatus") || {};
@@ -5781,8 +5786,10 @@ function removeFriendStatus(id){
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
   const db = (typeof getFirestoreDb === "function") ? getFirestoreDb() : null;
   const roomId = (typeof currentRoomCode === "function") ? currentRoomCode() : "";
-  if(db && roomId){
-    db.collection("rooms").doc(roomId).collection("members").doc(id).delete().catch(()=>{});
+  if(db && roomId && typeof firebase !== "undefined" && firebase.firestore && firebase.firestore.FieldValue){
+    db.collection("rooms").doc(roomId).collection("members").doc(id)
+      .update({ status: firebase.firestore.FieldValue.delete() })
+      .catch(()=>{}); // no-op if the doc doesn't exist or is unreachable — never worth surfacing an error for a best-effort cleanup
   }
 }
 
