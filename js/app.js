@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v122";
-const APP_BUILD_TIME = "2026-07-29T09:55:00Z";
+const APP_CACHE_VERSION = "v123";
+const APP_BUILD_TIME = "2026-07-29T10:08:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5647,7 +5647,6 @@ function setMyStatus(place){
   if(!trimmed) return;
   Store.set("myStatus", { place: trimmed, updatedAt: Date.now() });
   renderAllFriendStatusUI();
-  if(typeof autoSyncNow === "function") autoSyncNow("status changed");
 }
 
 // Own status plus everyone else's cached-from-sync status, newest first.
@@ -5744,7 +5743,7 @@ function wireStatusControl(selectId, otherFieldId, otherInputId, btnId, noteId){
   sel.onchange = ()=>{
     if(otherField) otherField.style.display = sel.value === "__other__" ? "" : "none";
   };
-  btn.onclick = ()=>{
+  btn.onclick = async ()=>{
     let place = sel.value;
     if(place === "__other__") place = (otherInput && otherInput.value.trim()) || "";
     if(!place){ setNote("Pick a location above first."); return; }
@@ -5752,7 +5751,12 @@ function wireStatusControl(selectId, otherFieldId, otherInputId, btnId, noteId){
     sel.value = "";
     if(otherField) otherField.style.display = "none";
     if(otherInput) otherInput.value = "";
-    setNote(`Done — set your status to ${place}.`);
+    // Actually sync it out (push + pull), not just save it locally and
+    // hope the next background auto-sync picks it up — same full cycle
+    // as the "Sync now" button, with feedback right here so it's clear
+    // whether it actually reached the group or not.
+    const noteEl = noteId ? document.getElementById(noteId) : null;
+    if(typeof runManualSync === "function") await runManualSync(btn, noteEl);
   };
 }
 wireStatusControl("statusLocationSelect", "statusOtherField", "statusCustomInput", "statusCustomBtn", "statusFeedbackNote");
