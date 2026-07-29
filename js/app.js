@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v131";
-const APP_BUILD_TIME = "2026-07-29T11:42:00Z";
+const APP_CACHE_VERSION = "v132";
+const APP_BUILD_TIME = "2026-07-29T11:50:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -6382,6 +6382,46 @@ async function pushSharedMeeting(place){
   return false;
 }
 
+// Device handoff (below) deliberately makes a borrowed phone adopt the
+// original owner's actual deviceId rather than a new one, so it reads
+// here as the SAME device continuing — meaning when that person later
+// reopens their own original phone, its own pushed doc (same deviceId)
+// may now hold newer picks than this phone ever saw locally. Additive
+// only — never overwrites this device's own local data, since the
+// borrowed phone might have started from an older snapshot and this
+// device could since have its own newer edits too. Schedule merges by
+// artist name (cloud-only artists get added), bingo by unioning marked
+// squares (a card layout is only adopted if this device has none yet),
+// character only fills in if this device doesn't already have one.
+function mergeOwnCloudCopy(payload){
+  let changed = 0;
+  if(Array.isArray(payload.schedule) && payload.schedule.length){
+    const mine = Store.get("schedule") || [];
+    const mineNames = new Set(mine.map(a=> a && a.name));
+    let added = 0;
+    payload.schedule.forEach(a=>{
+      if(a && a.name && !mineNames.has(a.name)){ mine.push({ ...a }); mineNames.add(a.name); added++; }
+    });
+    if(added){ Store.set("schedule", mine); changed += added; }
+  }
+  if(payload.bingo){
+    const myMarked = new Set(Store.get("bingoMarked") || []);
+    const before = myMarked.size;
+    (payload.bingo.marked || []).forEach(m=> myMarked.add(m));
+    if(myMarked.size !== before){ Store.set("bingoMarked", [...myMarked]); changed += (myMarked.size - before); }
+    const myCard = Store.get("bingoCard") || [];
+    if(!myCard.length && Array.isArray(payload.bingo.card) && payload.bingo.card.length){
+      Store.set("bingoCard", payload.bingo.card);
+      changed++;
+    }
+  }
+  if(payload.character && !Store.get("myCharacter")){
+    Store.set("myCharacter", { ...payload.character });
+    changed++;
+  }
+  return changed;
+}
+
 async function pullFromCloud(){
   const db = getFirestoreDb();
   const room = currentRoomCode();
@@ -6391,7 +6431,16 @@ async function pullFromCloud(){
   const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   let count = 0;
   snap.forEach(doc=>{
-    if(doc.id === deviceId) return; // never merge your own payload back into yourself
+    if(doc.id === deviceId){
+      // Only a genuinely different, later push counts — this device's
+      // own just-completed push already advanced lastSyncedAt to at or
+      // after that same timestamp, so this never re-merges this same
+      // device's own reflection back into itself.
+      const lastSynced = Store.get("lastSyncedAt") || 0;
+      const data = doc.data();
+      if((data.updatedAt || 0) > lastSynced && mergeOwnCloudCopy(data) > 0) count++;
+      return;
+    }
     // Meeting point and group decisions merge here too now — see
     // buildSyncPayload/mergeSyncPayload's `meeting`/`decisions` handling
     // above — piggybacked on this same per-member document fetch.
@@ -6543,8 +6592,13 @@ async function runManualSync(btn, note){
     // under. So without a name picked yet, this still pulls (you can see
     // synced teammates' tabs straight away), it just can't push you into
     // the room for them to see back.
-    if(haveName) await pushToCloud();
+    //
+    // Pull BEFORE push — see autoSyncNow for why: pushing first would
+    // overwrite a newer cloud copy of this same identity (e.g. from a
+    // device-handoff phone sharing this deviceId) before pull ever got
+    // the chance to merge it in via mergeOwnCloudCopy.
     const { stats, count } = await pullFromCloud();
+    if(haveName) await pushToCloud();
     recordLastSynced();
     refreshAfterMerge();
     const namePrefix = haveName ? "" : "Pick who you are above to send your own update. ";
@@ -6675,8 +6729,16 @@ function autoSyncNow(trigger){
   // never needs your own name set — only pushing your own update does,
   // since that's what it gets filed under. So this still runs and still
   // shows you their tabs even before you've picked who you are.
+  //
+  // Pull BEFORE push, not after — pullFromCloud() also merges in this
+  // device's own cloud copy if it's newer (see mergeOwnCloudCopy: a
+  // device-handoff phone deliberately shares the original owner's
+  // deviceId, so it can push newer picks under that same id). Pushing
+  // first would overwrite that newer cloud copy with this device's own
+  // stale local state before pull ever got a chance to merge it in,
+  // permanently losing whatever the other device had added.
   const haveName = !!currentContributorName();
-  return (haveName ? pushToCloud() : Promise.resolve()).then(()=> pullFromCloud()).then(({ stats, count })=>{
+  return pullFromCloud().then(({ stats, count })=> (haveName ? pushToCloud() : Promise.resolve()).then(()=> ({ stats, count }))).then(({ stats, count })=>{
     recordLastSynced();
     const note = document.getElementById("cloudSyncStatusNote");
     const prefix = haveName ? `Auto-synced (${trigger}): sent your update, ` : `Auto-synced (${trigger}, pick who you are above to send your own update): `;
