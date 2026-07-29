@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v117";
-const APP_BUILD_TIME = "2026-07-29T04:32:00Z";
+const APP_CACHE_VERSION = "v118";
+const APP_BUILD_TIME = "2026-07-29T04:42:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -3451,12 +3451,17 @@ function renderHomeContextBanner(){
   const clashCount = Object.keys(clashMap).length;
   const decisionCount = (typeof outstandingGroupDecisionsCount === "function") ? outstandingGroupDecisionsCount() : 0;
 
-  const peopleLastSeen = Store.get("peopleLastSeen") || {};
+  // Only shows for someone who's actually set a location (peopleStatus)
+  // — not just "synced recently," which used to fire for anyone who'd
+  // ever opened the app with signal, regardless of whether they'd told
+  // the group anything. Reuses the same friend-status data as the
+  // "Where's everyone?" card, no separate tracking.
+  const peopleStatus = Store.get("peopleStatus") || {};
   const myDeviceId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : null;
-  const friendIds = Object.keys(peopleLastSeen).filter(id=> id !== myDeviceId);
-  const mostRecentId = friendIds.sort((a,b)=> (personLastSeenTs(peopleLastSeen[b])||0) - (personLastSeenTs(peopleLastSeen[a])||0))[0];
+  const friendIds = Object.keys(peopleStatus).filter(id=> id !== myDeviceId && peopleStatus[id] && peopleStatus[id].place);
+  const mostRecentId = friendIds.sort((a,b)=> (peopleStatus[b].updatedAt||0) - (peopleStatus[a].updatedAt||0))[0];
   const friendLine = mostRecentId
-    ? `👥 ${escapeHtml(personDisplayName(peopleLastSeen[mostRecentId], mostRecentId))} synced ${formatLastSeen(personLastSeenTs(peopleLastSeen[mostRecentId]))}`
+    ? `👥 ${escapeHtml(personDisplayName(peopleStatus[mostRecentId], mostRecentId))} — ${escapeHtml(peopleStatus[mostRecentId].place)} · ${formatLastSeen(peopleStatus[mostRecentId].updatedAt)}`
     : "";
 
   const meeting = (Store.get("meeting") || "").trim();
