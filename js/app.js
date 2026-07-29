@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v157";
-const APP_BUILD_TIME = "2026-07-29T20:54:40Z";
+const APP_CACHE_VERSION = "v158";
+const APP_BUILD_TIME = "2026-07-29T21:06:32Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -470,8 +470,59 @@ const Store = {
 // ===============================
 const screens = document.querySelectorAll(".screen");
 const tabs = document.querySelectorAll(".tab");
+
+// "Jump" links (a stage name, a district mention, "Hidden venues" from
+// Discover, etc.) switch tabs out from under whatever you were looking
+// at, with no way back except re-finding your place by hand. Every jump
+// function below routes through jumpToTab() instead of clicking a tab
+// button directly, which remembers where you were (tab + scroll
+// position) so navBackBtn can return you there. Tapping a bottom-nav tab
+// directly (not via a jump) clears this — that's a deliberate fresh
+// navigation, not a "look something up and return" trip.
+let navReturnStack = [];
+let suppressNavClear = false;
+
+function updateNavBackButton(){
+  const btn = document.getElementById("navBackBtn");
+  if(!btn) return;
+  btn.style.display = navReturnStack.length ? "" : "none";
+}
+
+function jumpToTab(tabId){
+  const activeTab = document.querySelector(".tab.active");
+  if(activeTab && activeTab.dataset.tab !== tabId){
+    navReturnStack.push({ tab: activeTab.dataset.tab, scrollY: window.scrollY });
+    updateNavBackButton();
+  }
+  suppressNavClear = true;
+  const btn = document.querySelector(`.tab[data-tab="${tabId}"]`);
+  if(btn) btn.click();
+}
+
+const navBackBtn = document.getElementById("navBackBtn");
+if(navBackBtn) navBackBtn.onclick = ()=>{
+  const entry = navReturnStack.pop();
+  if(!entry) return;
+  updateNavBackButton();
+  const btn = document.querySelector(`.tab[data-tab="${entry.tab}"]`);
+  if(btn){
+    suppressNavClear = true;
+    btn.click();
+  }
+  // Double rAF: the tab click's own handler already forces scroll to 0,0
+  // synchronously — wait a frame (plus one more for any screen's own
+  // render-on-activate work) before overriding it with the remembered
+  // position.
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{
+    window.scrollTo(0, entry.scrollY);
+    if(document.scrollingElement) document.scrollingElement.scrollTop = entry.scrollY;
+  }));
+};
+
 tabs.forEach(tab=>{
   tab.onclick = ()=>{
+    if(!suppressNavClear){ navReturnStack = []; updateNavBackButton(); }
+    suppressNavClear = false;
     screens.forEach(s=>s.classList.remove("active"));
     tabs.forEach(t=>t.classList.remove("active"));
     document.getElementById(tab.dataset.tab).classList.add("active");
@@ -3137,10 +3188,13 @@ function buildTimelineHTML(items, opts){
       const isMustSeeBlock = mustSeeNames ? mustSeeNames.has(p.name) : false;
       const cls = "timeline-block" + (isSaved ? " saved" : "") + (isMustSeeBlock ? " mustsee" : "") + (opts.readonly ? " readonly" : "");
       // Combined multi-person timelines (see renderPlanTimeline) tag each
-      // merged block with who picked it — initials only, kept compact
-      // since blocks can be as narrow as 60px.
+      // merged block with who picked it — one small coloured circle per
+      // person (colour + initial, not just a bare letter) so two people
+      // whose names start with the same letter (e.g. Dana and Dave) still
+      // read as clearly different at a glance, kept compact since blocks
+      // can be as narrow as 60px.
       const ownerBadge = (opts.showOwnerBadges && p._owners && p._owners.length)
-        ? `<span class="tb-owners" title="${escapeHtml(p._owners.join(", "))}">${p._owners.map(o=>escapeHtml((o[0]||"?").toUpperCase())).join("")}</span>`
+        ? `<span class="tb-owners" title="${escapeHtml(p._owners.join(", "))}">${p._owners.map(o=>`<span class="tb-owner-dot" style="background:${personColor(o)}">${escapeHtml((o[0]||"?").toUpperCase())}</span>`).join("")}</span>`
         : "";
       return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
@@ -4077,13 +4131,26 @@ document.querySelectorAll("#clashSubViewToggle button").forEach(btn=>{
 // anywhere else.
 // ===============================
 function comparePeopleList(){
-  const people = [{ key:"mine", label:"You", list: Store.get("schedule") }];
+  // Own label uses your actual picked name (matching buildCombinedArtistInterestMap's
+  // convention) so Compare/Timeline badges show "Emma"/"E" instead of a
+  // generic "You"/"Y" once you've set one in Discover.
+  const people = [{ key:"mine", label: currentContributorName() || "You", list: Store.get("schedule") }];
   const peopleSchedules = Store.get("peopleSchedules") || {};
   Object.keys(peopleSchedules).forEach(id=>{
     const list = personSnapshotList(peopleSchedules[id]);
     if(list.length) people.push({ key:id, label:personDisplayName(peopleSchedules[id], id), list });
   });
   return people;
+}
+
+// Deterministic colour per person, by their stable position in
+// comparePeopleList() — index-based (not a name hash) so two people never
+// collide just because their names happen to start with the same letter
+// (e.g. "Dana" and "Dave" both showing initial "D").
+const PERSON_BADGE_COLORS = ["#4be3ac","#2f9bff","#f2a83c","#e2836a","#c792ea","#f06292","#ffd54f"];
+function personColor(label){
+  const idx = comparePeopleList().findIndex(p=>p.label === label);
+  return PERSON_BADGE_COLORS[(idx === -1 ? 0 : idx) % PERSON_BADGE_COLORS.length];
 }
 
 const COMPARE_FILTER_MODES = [
@@ -4183,7 +4250,8 @@ function renderPlanCompare(){
     const peopleChips = people.map(p=>{
       const has = p.key in e.interest;
       const mustSee = e.interest[p.key];
-      return `<span class="compare-person${has ? " in" : ""}">${escapeHtml(p.label)}${has ? (mustSee ? " ★" : " 👍") : ""}</span>`;
+      const dot = `<span class="tb-owner-dot" style="background:${personColor(p.label)}">${escapeHtml((p.label[0]||"?").toUpperCase())}</span>`;
+      return `<span class="compare-person${has ? " in" : ""}">${dot} ${escapeHtml(p.label)}${has ? (mustSee ? " ★" : " 👍") : ""}</span>`;
     }).join("");
     return `
       <div class="item">
@@ -4428,8 +4496,7 @@ renderNowNext();
 // map, per-person last-seen from sync, meeting point) — no new state.
 // ===============================
 function jumpToClashes(){
-  const planTab = document.querySelector('.tab[data-tab="plan"]');
-  if(planTab) planTab.click();
+  jumpToTab("plan");
   const btn = document.getElementById("viewClashBtn");
   if(btn) btn.click();
 }
@@ -4552,7 +4619,7 @@ if(sharePlanBtn){
 }
 
 function browseAllArtists(){
-  document.querySelector('.tab[data-tab="artists"]').click();
+  jumpToTab("artists");
   if(artistsView !== "list" && artistsViewListBtn) artistsViewListBtn.click();
   artistSearch.value = "";
   clearGenreChips();
@@ -5647,7 +5714,7 @@ renderVenueTable();
 // into view. Every screen is always in the DOM (hidden via CSS, not
 // removed), so no delay is needed between the two.
 function jumpToId(id, tab){
-  if(tab) document.querySelector(`.tab[data-tab="${tab}"]`).click();
+  if(tab) jumpToTab(tab);
   // Settings folds up by default (see setupSettingsToggle()) — jumping
   // to it from a link elsewhere should open it, not scroll to what'd
   // look like an empty card.
@@ -5676,7 +5743,7 @@ function jumpToId(id, tab){
 // Jump straight to a district's own marker/card on the map, from a
 // mention of its name anywhere else in the app (guide text, etc.).
 function jumpToDistrictOnMap(name){
-  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  jumpToTab("mapscreen");
   requestAnimationFrame(()=>{
     const marker = [...document.querySelectorAll("#mapInner .marker")].find(m=> m.dataset.name === name);
     if(marker) marker.click();
@@ -5686,7 +5753,7 @@ function jumpToDistrictOnMap(name){
 }
 
 function jumpToGlossaryTerm(term){
-  document.querySelector('.tab[data-tab="discover"]').click();
+  jumpToTab("discover");
   requestAnimationFrame(()=>{
     const box = document.getElementById("jumpGlossary");
     if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
@@ -5695,7 +5762,7 @@ function jumpToGlossaryTerm(term){
 }
 
 function jumpToCharacter(name){
-  document.querySelector('.tab[data-tab="discover"]').click();
+  jumpToTab("discover");
   requestAnimationFrame(()=>{
     const box = document.getElementById("jumpCharacters");
     if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
@@ -5765,7 +5832,7 @@ function linkifyKeyTerms(container){
         a.className = "inline-link";
         a.href = "javascript:void(0)";
         a.textContent = word;
-        if(isGeneric) a.onclick = ()=> document.querySelector('.tab[data-tab="mapscreen"]').click();
+        if(isGeneric) a.onclick = ()=> jumpToTab("mapscreen");
         else if(entry.type === "district") a.onclick = ()=> jumpToDistrictOnMap(entry.label);
         else if(entry.type === "character") a.onclick = ()=> jumpToCharacter(entry.label);
         else a.onclick = ()=> jumpToGlossaryTerm(entry.label);
@@ -5791,7 +5858,7 @@ function linkifyKeyTerms(container){
 // stalls) is better served by scrolling straight to the searchable list of
 // named/rumoured entries than by guessing at a marker to highlight.
 function jumpToDirectoryType(type){
-  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  jumpToTab("mapscreen");
   venueStatusFilter = "all";
   venueSearchTerm = "";
   if(venueSearchInput) venueSearchInput.value = "";
@@ -5807,7 +5874,7 @@ function jumpToDirectoryType(type){
 }
 
 function jumpToStageDirectory(stageName){
-  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  jumpToTab("mapscreen");
   venueStatusFilter = "all";
   venueTypeFilter = "all";
   document.querySelectorAll("#venueStatusFilters button").forEach(b=> b.classList.toggle("active", b.dataset.status === "all"));
@@ -7298,17 +7365,13 @@ renderTodayDashboard();
 setInterval(renderTodayDashboard, 60000);
 
 document.querySelectorAll('#todayQuickActions [data-today-jump]').forEach(btn=>{
-  btn.onclick = ()=>{
-    const target = document.querySelector(`.tab[data-tab="${btn.getAttribute("data-today-jump")}"]`);
-    if(target) target.click();
-  };
+  btn.onclick = ()=> jumpToTab(btn.getAttribute("data-today-jump"));
 });
 const todayQuickClashesBtn = document.getElementById("todayQuickClashes");
 if(todayQuickClashesBtn) todayQuickClashesBtn.onclick = ()=>{ if(typeof jumpToClashes === "function") jumpToClashes(); };
 const todayQuickSearchBtn = document.getElementById("todayQuickSearch");
 if(todayQuickSearchBtn) todayQuickSearchBtn.onclick = ()=>{
-  const target = document.querySelector('.tab[data-tab="artists"]');
-  if(target) target.click();
+  jumpToTab("artists");
   setTimeout(()=>{
     const listBtn = document.getElementById("artistsViewListBtn");
     if(listBtn) listBtn.click();
