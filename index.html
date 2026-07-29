@@ -568,7 +568,16 @@ Meet at the clock tower if separated"></textarea>
           <button data-jump="jumpPacking">🎒 Packing checklist</button>
           <button data-jump="jumpLogistics">🗓 Logistics</button>
           <button data-jump="jumpGlossary">📔 Glossary</button>
+          <button data-jump="jumpFriendStatus">📍 Where's everyone</button>
+        </div>
+      </div>
+      <div class="discover-cat">
+        <div class="discover-cat-title">☁️ Sync &amp; data</div>
+        <div class="venue-filters">
           <button data-jump="jumpSync">🤝 Sync</button>
+          <button data-jump="jumpSyncDiagnostics">🔧 Sync diagnostics</button>
+          <button data-jump="jumpBackupHistory">🗄️ Backup history</button>
+          <button data-jump="jumpDeviceHandoff">📱 Using someone else's phone</button>
         </div>
       </div>
     </div>
@@ -933,6 +942,9 @@ Talk to an actor in character
       <p class="empty-note">Group room code: <strong>medway-massive</strong> — fixed for all of us, nothing to type or adjust.</p>
       <button class="action" id="cloudSyncBtn" style="margin:4px 6px 0 0;">☁️ Sync now</button>
       <p class="empty-note" id="cloudSyncStatusNote" style="margin-top:6px;"></p>
+      <p class="empty-note" style="margin-top:10px;">Ended up with more than one tab under your own name (e.g. after a reinstall)? This finds every one of them and folds them all into this device in one go — same safe additive merge as doing it tab-by-tab.</p>
+      <button class="ghost" id="mergeAllDuplicatesBtn" style="margin:4px 0;">Merge all my duplicate tabs</button>
+      <p class="empty-note" id="mergeAllDuplicatesNote" style="margin-top:6px;"></p>
       <p style="margin-top:14px;"><strong>No signal?</strong> Copy a code by hand instead — same result:</p>
       <button class="ghost" id="copySyncCodeBtn" style="margin:4px 6px 0 0;">Copy your sync code</button>
       <div class="field" style="margin-top:10px;"><label>Paste a teammate's sync code</label><textarea id="syncCodeInput" placeholder="Paste a BTC1:... code here"></textarea></div>
