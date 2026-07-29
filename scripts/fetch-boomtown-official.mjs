@@ -63,6 +63,37 @@ async function refreshIdToken(apiKey, refreshToken) {
   return { idToken, refreshToken: data.refresh_token || refreshToken };
 }
 
+// The real endpoint (confirmed against live data — matches exactly the
+// 63 stages / 1623 acts already in js/app.js) returns a relational shape,
+// not the flat {Stage,Start,End,ActName,Artists} rows a manual HTTP Toolkit
+// capture had already denormalised: { artists: [{id,name,...}], stages:
+// [{id,name,...}], acts: [{id,startTime,endTime (epoch ms),stageId,
+// artistIds[],name,...}] }. Flattens it to the same row shape
+// buildArtistsBlock() expects so both the live fetch and the file-based
+// importer share one transform.
+function londonTimestamp(epochMs) {
+  const fmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  });
+  const parts = Object.fromEntries(fmt.formatToParts(new Date(epochMs)).map((p) => [p.type, p.value]));
+  const hour = parts.hour === "24" ? "00" : parts.hour;
+  return `${parts.year}-${parts.month}-${parts.day} ${hour}:${parts.minute}`;
+}
+
+function flattenTimetable({ artists, stages, acts }) {
+  const artistsById = new Map(artists.map((a) => [a.id, a.name]));
+  const stagesById = new Map(stages.map((s) => [s.id, s.name]));
+  return acts.map((act) => ({
+    Stage: stagesById.get(act.stageId) || "",
+    Start: londonTimestamp(act.startTime),
+    End: londonTimestamp(act.endTime),
+    ActName: act.name || "",
+    Artists: (act.artistIds || []).map((id) => artistsById.get(id)).filter(Boolean).join(", "),
+  }));
+}
+
 async function fetchTimetable(eventId, idToken, installationId, appVersion) {
   const url = `https://boomtown.api.amplify.one/events/${encodeURIComponent(eventId)}/timetable`;
   const res = await fetch(url, {
@@ -80,21 +111,11 @@ async function fetchTimetable(eventId, idToken, installationId, appVersion) {
     throw new Error(`Timetable request failed: ${res.status} ${res.statusText}\n${await res.text()}`);
   }
   const data = await res.json();
-  if (!Array.isArray(data)) {
-    // Not the flat {Stage,Start,End,ActName,Artists} shape we've seen in
-    // manual HTTP Toolkit exports — log enough of the real structure to
-    // build the correct transform without guessing field names.
-    console.log("Response is not a flat array. Top-level keys:", Object.keys(data));
-    for (const [key, value] of Object.entries(data)) {
-      if (Array.isArray(value)) {
-        console.log(`  ${key}: array of ${value.length}, sample:`, JSON.stringify(value[0]));
-      } else {
-        console.log(`  ${key}:`, JSON.stringify(value).slice(0, 200));
-      }
-    }
-    throw new Error("Unexpected timetable response shape — see logged structure above");
+  if (Array.isArray(data)) return data; // already-flat shape, if that ever comes back
+  if (!data || !Array.isArray(data.acts) || !Array.isArray(data.artists) || !Array.isArray(data.stages)) {
+    throw new Error(`Unexpected timetable response shape: ${JSON.stringify(Object.keys(data || {}))}`);
   }
-  return data;
+  return flattenTimetable(data);
 }
 
 async function main() {
