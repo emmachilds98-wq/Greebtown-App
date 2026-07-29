@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v154";
-const APP_BUILD_TIME = "2026-07-29T16:52:00Z";
+const APP_CACHE_VERSION = "v160";
+const APP_BUILD_TIME = "2026-07-29T21:35:24Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -421,7 +421,7 @@ fixBottomClearance();
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [] };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -434,7 +434,7 @@ const EMBEDDED_DATA = window.__boomtownSavedData || {};
 // safe no-op with no name/room/signal set, so this is safe to call from
 // here even though pushToCloud is defined much later in this file.
 let _autoBackupTimer = null;
-const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter"]);
+const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter", "seenArtists"]);
 function scheduleAutoBackup(){
   if(_autoBackupTimer) clearTimeout(_autoBackupTimer);
   _autoBackupTimer = setTimeout(()=>{
@@ -470,8 +470,59 @@ const Store = {
 // ===============================
 const screens = document.querySelectorAll(".screen");
 const tabs = document.querySelectorAll(".tab");
+
+// "Jump" links (a stage name, a district mention, "Hidden venues" from
+// Discover, etc.) switch tabs out from under whatever you were looking
+// at, with no way back except re-finding your place by hand. Every jump
+// function below routes through jumpToTab() instead of clicking a tab
+// button directly, which remembers where you were (tab + scroll
+// position) so navBackBtn can return you there. Tapping a bottom-nav tab
+// directly (not via a jump) clears this — that's a deliberate fresh
+// navigation, not a "look something up and return" trip.
+let navReturnStack = [];
+let suppressNavClear = false;
+
+function updateNavBackButton(){
+  const btn = document.getElementById("navBackBtn");
+  if(!btn) return;
+  btn.style.display = navReturnStack.length ? "flex" : "none";
+}
+
+function jumpToTab(tabId){
+  const activeTab = document.querySelector(".tab.active");
+  if(activeTab && activeTab.dataset.tab !== tabId){
+    navReturnStack.push({ tab: activeTab.dataset.tab, scrollY: window.scrollY });
+    updateNavBackButton();
+  }
+  suppressNavClear = true;
+  const btn = document.querySelector(`.tab[data-tab="${tabId}"]`);
+  if(btn) btn.click();
+}
+
+const navBackBtn = document.getElementById("navBackBtn");
+if(navBackBtn) navBackBtn.onclick = ()=>{
+  const entry = navReturnStack.pop();
+  if(!entry) return;
+  updateNavBackButton();
+  const btn = document.querySelector(`.tab[data-tab="${entry.tab}"]`);
+  if(btn){
+    suppressNavClear = true;
+    btn.click();
+  }
+  // Double rAF: the tab click's own handler already forces scroll to 0,0
+  // synchronously — wait a frame (plus one more for any screen's own
+  // render-on-activate work) before overriding it with the remembered
+  // position.
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{
+    window.scrollTo(0, entry.scrollY);
+    if(document.scrollingElement) document.scrollingElement.scrollTop = entry.scrollY;
+  }));
+};
+
 tabs.forEach(tab=>{
   tab.onclick = ()=>{
+    if(!suppressNavClear){ navReturnStack = []; updateNavBackButton(); }
+    suppressNavClear = false;
     screens.forEach(s=>s.classList.remove("active"));
     tabs.forEach(t=>t.classList.remove("active"));
     document.getElementById(tab.dataset.tab).classList.add("active");
@@ -885,8 +936,61 @@ function artistDescriptor(a){
   return bits.join(" · ");
 }
 
+// AUTO-GENERATED:LINEUP:START — regenerated by scripts/sync-boomtown-lineup.mjs
 const artists = [
-  // ================= WEDNESDAY =================
+  // ================= WED =================
+  // --- Wed: Agents of Change HQ ---
+  {name:"Agents of Change HQ",stage:"Agents of Change HQ",day:"Wed",start:"10:00",end:"20:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Wed",start:"11:00",end:"14:00"},
+  {name:"Weaving Change",stage:"Agents of Change HQ",day:"Wed",start:"12:00",end:"18:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Wed",start:"16:00",end:"19:00"},
+  // --- Wed: Airetiko ---
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Wed",start:"13:00",end:"15:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Wed",start:"15:00",end:"17:00"},
+  // --- Wed: Ancient Futures ---
+  {name:"Ancient Futures Opening Ceremony",stage:"Ancient Futures",day:"Wed",start:"15:00",end:"16:00"},
+  {name:"Opening cermony",stage:"Ancient Futures",day:"Wed",start:"16:00",end:"17:00"},
+  {name:"Breathe Reconnect",stage:"Ancient Futures",day:"Wed",start:"17:00",end:"19:00"},
+  {name:"Flow dance",stage:"Ancient Futures",day:"Wed",start:"19:00",end:"21:00"},
+  {name:"Yoga Sound Baths",stage:"Ancient Futures",day:"Wed",start:"09:00",end:"11:00"},
+  // --- Wed: Blink Mental Health ---
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Wed",start:"10:00",end:"19:30"},
+  // --- Wed: Cas's Costumes ---
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Wed",start:"10:00",end:"18:00"},
+  // --- Wed: Circus Tent ---
+  {name:"Contemporary Dance",stage:"Circus Tent",day:"Wed",start:"11:00",end:"12:00"},
+  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Wed",start:"12:00",end:"14:00"},
+  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Wed",start:"14:00",end:"16:00"},
+  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Wed",start:"16:00",end:"18:00"},
+  {name:"Bubblology",stage:"Circus Tent",day:"Wed",start:"18:00",end:"19:00"},
+  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Wed",start:"21:00",end:"22:00"},
+  {name:"Energising Yoga",stage:"Circus Tent",day:"Wed",start:"09:00",end:"10:00"},
+  // --- Wed: Climate Live ---
+  {name:"Climate Live Opening",stage:"Climate Live",day:"Wed",start:"12:00",end:"20:00"},
+  {name:"Radical Rosettes",stage:"Climate Live",day:"Wed",start:"15:00",end:"16:00"},
+  {name:"Doof Stick Making",stage:"Climate Live",day:"Wed",start:"16:15",end:"17:15"},
+  {name:"Finding Joy & Climate Connection Through Dance",stage:"Climate Live",day:"Wed",start:"17:30",end:"18:30"},
+  // --- Wed: Cocaine Anonymous ---
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Wed",start:"11:00",end:"12:00"},
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Wed",start:"18:00",end:"19:00"},
+  // --- Wed: Community Fire ---
+  {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Wed",start:"12:00",end:"00:00"},
+  {name:"Thrutopia Fire Opening Ceremony",stage:"Community Fire",day:"Wed",start:"13:00",end:"13:45"},
+  // --- Wed: Craft Tent ---
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
+  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
+  // --- Wed: Crafty Rascals ---
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Wed",start:"10:00",end:"18:00"},
+  // --- Wed: Energy Garden ---
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Wed",start:"12:00",end:"22:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Wed",start:"13:00",end:"15:00"},
+  // --- Wed: Games Lounge ---
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Wed",start:"12:00",end:"00:00"},
+  // --- Wed: Garden ---
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Wed",start:"10:00",end:"18:00"},
+  // --- Wed: Hapitat ---
+  {name:"Hapitat",stage:"Hapitat",day:"Wed",start:"10:00",end:"18:00"},
   // --- Wed: Hidden Woods ---
   {name:"Cal Jader (Movimientos)",stage:"Hidden Woods",day:"Wed",start:"16:00",end:"17:30"},
   {name:"Bryte & Burland",stage:"Hidden Woods",day:"Wed",start:"17:30",end:"18:30"},
@@ -894,6 +998,33 @@ const artists = [
   {name:"The Nextmen",stage:"Hidden Woods",day:"Wed",start:"19:30",end:"21:00"},
   {name:"OneDa",stage:"Hidden Woods",day:"Wed",start:"21:00",end:"22:00"},
   {name:"Aziza Jaye",stage:"Hidden Woods",day:"Wed",start:"22:00",end:"23:00"},
+  // --- Wed: Narcotics Anonymous ---
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Wed",start:"13:00",end:"14:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Wed",start:"08:00",end:"09:00"},
+  // --- Wed: Permaculture ---
+  {name:"Touch grass: An arrival circle for gorunding and connection",stage:"Permaculture",day:"Wed",start:"12:00",end:"13:00"},
+  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Wed",start:"13:30",end:"15:00"},
+  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Wed",start:"15:30",end:"16:30"},
+  {name:"Beyond bosses: Practical tools for more human workplaces",stage:"Permaculture",day:"Wed",start:"17:00",end:"18:00"},
+  // --- Wed: Rebel Girls Club ---
+  {name:"Opening Ceremony with Everglowing & Find Your Flow",stage:"Rebel Girls Club",day:"Wed",start:"16:00",end:"16:40"},
+  {name:"Psycosomatic yoga with Yuliet",stage:"Rebel Girls Club",day:"Wed",start:"17:00",end:"18:00"},
+  {name:"Somatic dance to Twerk with Sofia & Ivy",stage:"Rebel Girls Club",day:"Wed",start:"18:30",end:"19:30"},
+  // --- Wed: Reel News ---
+  {name:"Wondergupta",stage:"Reel News",day:"Wed",start:"13:15",end:"14:15"},
+  {name:"Warrior Tales & Demloxx",stage:"Reel News",day:"Wed",start:"14:15",end:"14:45"},
+  {name:"Brockwell Park Rangers",stage:"Reel News",day:"Wed",start:"14:45",end:"15:15"},
+  {name:"O'Connell & Co",stage:"Reel News",day:"Wed",start:"15:15",end:"16:15"},
+  {name:"Music in my underpants",stage:"Reel News",day:"Wed",start:"16:15",end:"17:00"},
+  {name:"Taygeta & Seb",stage:"Reel News",day:"Wed",start:"17:00",end:"18:00"},
+  {name:"Nowt",stage:"Reel News",day:"Wed",start:"18:00",end:"18:45"},
+  {name:"GDSMRCY",stage:"Reel News",day:"Wed",start:"18:45",end:"19:30"},
+  {name:"Break the Code",stage:"Reel News",day:"Wed",start:"19:30",end:"21:00"},
+  // --- Wed: Reparium ---
+  {name:"Repairium",stage:"Reparium",day:"Wed",start:"14:00",end:"18:00"},
+  // --- Wed: Spinney Hollow ---
+  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Wed",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Wed",start:"10:00",end:"18:00"},
   // --- Wed: Tangled Roots ---
   {name:"Lionpulse x Sinai",stage:"Tangled Roots",day:"Wed",start:"16:00",end:"17:00"},
   {name:"Roots Ginjah",stage:"Tangled Roots",day:"Wed",start:"17:00",end:"18:00"},
@@ -901,74 +1032,25 @@ const artists = [
   {name:"Jam Jah Sound",stage:"Tangled Roots",day:"Wed",start:"19:00",end:"20:00"},
   {name:"Vixen Sound",stage:"Tangled Roots",day:"Wed",start:"20:00",end:"21:00"},
   {name:"An Dannsa Dub (Live Dub Set) Ft. Wends",stage:"Tangled Roots",day:"Wed",start:"21:00",end:"22:00"},
+  // --- Wed: The Magic Teapot ---
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Wed",start:"12:00",end:"00:00"},
+  // --- Wed: Tinker Station ---
+  {name:"Tinker Station",stage:"Tinker Station",day:"Wed",start:"10:00",end:"18:00"},
   // --- Wed: Twisted Time Machine (Bad Apple Bar) ---
-  {name:"One Direction Welcome Party",stage:"Twisted Time Machine",day:"Wed",start:"16:00",end:"17:00"},
-  {name:"Far Out Man: Psychedelic 60s",stage:"Twisted Time Machine",day:"Wed",start:"17:00",end:"18:00"},
-  {name:"Linkin Park: Hybrid Theory Album Playback",stage:"Twisted Time Machine",day:"Wed",start:"18:00",end:"19:00"},
-  {name:"Funk & Seoul: K-Pop Rave",stage:"Twisted Time Machine",day:"Wed",start:"19:00",end:"20:00"},
-  {name:"Alan Clusive's Eurotrash Mini Disco",stage:"Twisted Time Machine",day:"Wed",start:"20:00",end:"21:00"},
-  {name:"Knight Club: Medieval Rave",stage:"Twisted Time Machine",day:"Wed",start:"21:00",end:"22:00"},
-  {name:"Cider Drinkers Assembly",stage:"Twisted Time Machine",day:"Wed",start:"22:00",end:"23:00"},
-
-  // ================= THURSDAY =================
-  // --- Thu: Hidden Woods ---
-  {name:"Kaotik Kartel",stage:"Hidden Woods",day:"Thu",start:"13:00",end:"14:30"},
-  {name:"Bubski B2B Siraya",stage:"Hidden Woods",day:"Thu",start:"14:30",end:"15:30"},
-  {name:"Rea",stage:"Hidden Woods",day:"Thu",start:"15:30",end:"16:30"},
-  {name:"Messie",stage:"Hidden Woods",day:"Thu",start:"16:30",end:"17:30"},
-  {name:"Baalti",stage:"Hidden Woods",day:"Thu",start:"17:30",end:"18:30"},
-  {name:"Hitty",stage:"Hidden Woods",day:"Thu",start:"18:30",end:"19:30"},
-  {name:"Jamz Supernova",stage:"Hidden Woods",day:"Thu",start:"19:30",end:"20:30"},
-  {name:"Osmosis Jones",stage:"Hidden Woods",day:"Thu",start:"20:30",end:"21:30"},
-  {name:"Papa Nugs",stage:"Hidden Woods",day:"Thu",start:"21:30",end:"22:30"},
-  {name:"Eats Everything B2B Wonka",stage:"Hidden Woods",day:"Thu",start:"22:30",end:"00:00"},
-  // --- Thu: Tangled Roots ---
-  {name:"Lionpulse x Sinai",stage:"Tangled Roots",day:"Thu",start:"12:00",end:"13:00"},
-  {name:"Daddy Nature B2B DJ Dansey",stage:"Tangled Roots",day:"Thu",start:"13:00",end:"14:00"},
-  {name:"Cuppa T & Johnny Scratch Lee",stage:"Tangled Roots",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"Twende Takeover",stage:"Tangled Roots",day:"Thu",start:"15:00",end:"16:00"},
-  {name:"Marla Kether",stage:"Tangled Roots",day:"Thu",start:"16:00",end:"17:00"},
-  {name:"Ru Robinson",stage:"Tangled Roots",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Hiphoppapotamus B2B Fizzy Gillespie",stage:"Tangled Roots",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Jinx In Dub",stage:"Tangled Roots",day:"Thu",start:"19:00",end:"20:00"},
-  {name:"Cheza Lucina",stage:"Tangled Roots",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Ekula & Mista Jago",stage:"Tangled Roots",day:"Thu",start:"21:00",end:"22:00"},
-  // --- Thu: Anara Forest ---
-  {name:"Jimbitch B2B Stan Da Man",stage:"Anara Forest",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"Astar B2B Kaisha",stage:"Anara Forest",day:"Thu",start:"15:00",end:"16:00"},
-  {name:"G-Class B2B RJD",stage:"Anara Forest",day:"Thu",start:"16:00",end:"17:00"},
-  {name:"Bassi B2B Charli Brix",stage:"Anara Forest",day:"Thu",start:"17:00",end:"18:30"},
-  {name:"Para B2B Umbra Ft. Strategy",stage:"Anara Forest",day:"Thu",start:"18:30",end:"20:00"},
-  {name:"Sydney Bryce Live PA",stage:"Anara Forest",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"QZB Ft. Ellis Esco",stage:"Anara Forest",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"TeeBee Ft. MC Fokus",stage:"Anara Forest",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"Amoss Ft. MC Fokus",stage:"Anara Forest",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Tribe of Frog ---
-  {name:"Ott",stage:"Tribe of Frog",day:"Thu",start:"14:00",end:"15:30"},
-  {name:"Jakkar",stage:"Tribe of Frog",day:"Thu",start:"15:30",end:"17:00"},
-  {name:"Ebru Al",stage:"Tribe of Frog",day:"Thu",start:"17:00",end:"18:30"},
-  {name:"Minali",stage:"Tribe of Frog",day:"Thu",start:"18:30",end:"20:00"},
-  {name:"Liquid Ross",stage:"Tribe of Frog",day:"Thu",start:"20:00",end:"21:30"},
-  {name:"Neutron",stage:"Tribe of Frog",day:"Thu",start:"21:30",end:"23:00"},
-  {name:"D-Ther",stage:"Tribe of Frog",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Nexus ---
-  {name:"?",stage:"Nexus",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"RWKUS: 91-94 Jungle Review",stage:"Nexus",day:"Thu",start:"15:30",end:"16:30"},
-  {name:"JayaHadADream",stage:"Nexus",day:"Thu",start:"17:00",end:"17:45"},
-  {name:"Joe Yorke",stage:"Nexus",day:"Thu",start:"18:30",end:"19:30"},
-  {name:"Gurriers",stage:"Nexus",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Komfortrauschen",stage:"Nexus",day:"Thu",start:"21:30",end:"22:30"},
-  {name:"Keeno Live Ft. Vibre Strings",stage:"Nexus",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Spectrum 360 ---
-  {name:"Holly Warcup B2B Miss Cabbage",stage:"Spectrum 360",day:"Thu",start:"15:00",end:"16:00"},
-  {name:"Karlie Marx",stage:"Spectrum 360",day:"Thu",start:"16:00",end:"17:00"},
-  {name:"Egg On Toast B2B Syntax",stage:"Spectrum 360",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Cicely B2B Hypershé",stage:"Spectrum 360",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Peppa B2B Shirley Temper",stage:"Spectrum 360",day:"Thu",start:"19:00",end:"20:00"},
-  {name:"Mollie Rush",stage:"Spectrum 360",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Promis3",stage:"Spectrum 360",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"Stinny Stone",stage:"Spectrum 360",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"Somniac One",stage:"Spectrum 360",day:"Thu",start:"23:00",end:"00:00"},
+  {name:"ONE DIRECTION / ONE WELCOME PARTY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"16:00",end:"17:00"},
+  {name:"FAR OUT MAN :  PSYCHADELIC 60S",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"17:00",end:"18:00"},
+  {name:"LINKIN PARK : HYBRID THEORY (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"18:00",end:"19:00"},
+  {name:"FUNK & SEOUL : K-POP RAVE",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"19:00",end:"20:00"},
+  {name:"ALAN CLUSIVE'S EUROTRASH MINI DISCO",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"20:00",end:"21:00"},
+  {name:"KNIGHT CLUB : THE MEDIEVAL RAVE",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"21:00",end:"22:00"},
+  {name:"CIDER DRINKERS ASSEMBLY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"22:00",end:"23:00"},
+  // --- Wed: XR ---
+  {name:"Last Chance Salon",stage:"XR",day:"Wed",start:"13:00",end:"19:00"},
+  {name:"Art Blocking and Costume Pimping",stage:"XR",day:"Wed",start:"13:00",end:"18:30"},
+  {name:"Tea Ladies",stage:"XR",day:"Wed",start:"14:00",end:"18:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Wed",start:"14:00",end:"16:00"},
+  {name:"Strictly Burning Ballroom",stage:"XR",day:"Wed",start:"18:00",end:"18:30"},
+  // ================= THU =================
   // --- Thu: Acid Leak ---
   {name:"DJ Zeno",stage:"Acid Leak",day:"Thu",start:"14:00",end:"15:00"},
   {name:"Trooper",stage:"Acid Leak",day:"Thu",start:"15:00",end:"16:00"},
@@ -980,41 +1062,101 @@ const artists = [
   {name:"Benji303",stage:"Acid Leak",day:"Thu",start:"21:00",end:"22:00"},
   {name:"Mattykore",stage:"Acid Leak",day:"Thu",start:"22:00",end:"23:00"},
   {name:"Cyber Steve",stage:"Acid Leak",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Rose and Clown ---
-  {name:"Rose & Clown Opening Pilates Warmup",stage:"Rose and Clown",day:"Thu",start:"14:00",end:"14:30"},
-  {name:"Loopy Takeover",stage:"Rose and Clown",day:"Thu",start:"14:30",end:"15:30"},
-  {name:"Meg McHugh",stage:"Rose and Clown",day:"Thu",start:"15:30",end:"16:30"},
-  {name:"The Third Nipple",stage:"Rose and Clown",day:"Thu",start:"16:30",end:"17:30"},
-  {name:"Anna Prank B2B Ellament",stage:"Rose and Clown",day:"Thu",start:"17:30",end:"18:30"},
-  {name:"Gorilla Tactics Rinseout",stage:"Rose and Clown",day:"Thu",start:"18:30",end:"19:15"},
-  {name:"Raze Takeover",stage:"Rose and Clown",day:"Thu",start:"19:15",end:"20:00"},
-  {name:"Octoposse",stage:"Rose and Clown",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"OneDa",stage:"Rose and Clown",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"Gorilla Tactics Rinseout",stage:"Rose and Clown",day:"Thu",start:"22:00",end:"22:45"},
-  {name:"Mad Apple Circus",stage:"Rose and Clown",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Hangar 161 ---
-  {name:"Music In Our Underpants",stage:"Hangar 161",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Dakka Skanks",stage:"Hangar 161",day:"Thu",start:"18:30",end:"19:30"},
-  {name:"Pizzatramp",stage:"Hangar 161",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"The Menstrual Cramps",stage:"Hangar 161",day:"Thu",start:"21:30",end:"22:30"},
-  {name:"Meryl Streek",stage:"Hangar 161",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: The Fools Leap ---
-  {name:"shunTA!",stage:"The Fools Leap",day:"Thu",start:"12:00",end:"13:30"},
-  {name:"The Sneak Eazies",stage:"The Fools Leap",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"Shanghai Treason",stage:"The Fools Leap",day:"Thu",start:"15:30",end:"16:30"},
-  {name:"Fraser Morgan",stage:"The Fools Leap",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Girl In The Year Above",stage:"The Fools Leap",day:"Thu",start:"18:50",end:"19:30"},
-  {name:"Scottish Fish",stage:"The Fools Leap",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Smag På Dig Selv",stage:"The Fools Leap",day:"Thu",start:"21:30",end:"22:30"},
-  {name:"Clada",stage:"The Fools Leap",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Full Moon Ballroom ---
-  {name:"Mad Apple Circus",stage:"Full Moon Ballroom",day:"Thu",start:"13:15",end:"14:15"},
-  {name:"She's Got Brass",stage:"Full Moon Ballroom",day:"Thu",start:"14:45",end:"15:45"},
-  {name:"Girl In The Year Above",stage:"Full Moon Ballroom",day:"Thu",start:"16:20",end:"17:00"},
-  {name:"GrooveLine",stage:"Full Moon Ballroom",day:"Thu",start:"17:45",end:"18:45"},
-  {name:"Clada",stage:"Full Moon Ballroom",day:"Thu",start:"19:15",end:"20:15"},
-  {name:"Agbeko",stage:"Full Moon Ballroom",day:"Thu",start:"20:45",end:"22:00"},
-  {name:"Franz Von",stage:"Full Moon Ballroom",day:"Thu",start:"22:30",end:"00:00"},
+  // --- Thu: Agents of Change HQ ---
+  {name:"Agents of Change HQ",stage:"Agents of Change HQ",day:"Thu",start:"10:00",end:"20:00"},
+  {name:"Weaving Change",stage:"Agents of Change HQ",day:"Thu",start:"10:00",end:"18:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Thu",start:"16:00",end:"19:00"},
+  // --- Thu: Airetiko ---
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Thu",start:"11:00",end:"13:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Thu",start:"13:00",end:"15:00"},
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Thu",start:"15:00",end:"17:00"},
+  // --- Thu: Anara Forest ---
+  {name:"Jimbitch B2B Stan Da Man [Uncommon Records Takeover]",stage:"Anara Forest",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"Astar B2B Kaisha [Uncommon Records Takeover]",stage:"Anara Forest",day:"Thu",start:"15:00",end:"16:00"},
+  {name:"G-Class B2B RJD [Uncommon Records Takeover]",stage:"Anara Forest",day:"Thu",start:"16:00",end:"17:00"},
+  {name:"Bassi B2B Charli Brix [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"17:00",end:"18:30"},
+  {name:"Para B2B Umbra Ft. Strategy [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"18:30",end:"20:00"},
+  {name:"Sydney Bryce - Live PA [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"QZB Ft. Ellis Esco [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"TeeBee Ft. MC Fokus [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"Amoss Ft. MC Fokus [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: Ancient Futures ---
+  {name:"Scroll Loop Bingo",stage:"Ancient Futures",day:"Thu",start:"11:30",end:"12:30"},
+  {name:"Divine union in a divide world",stage:"Ancient Futures",day:"Thu",start:"13:00",end:"15:00"},
+  {name:"The Extraordinary Ordinary",stage:"Ancient Futures",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"Social psychedelics: Spirit and science",stage:"Ancient Futures",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Medicine dance journey",stage:"Ancient Futures",day:"Thu",start:"18:30",end:"20:30"},
+  {name:"Flow Yoga",stage:"Ancient Futures",day:"Thu",start:"09:00",end:"11:00"},
+  // --- Thu: Blink Mental Health ---
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Thu",start:"10:00",end:"19:30"},
+  // --- Thu: Botanica Zoo ---
+  {name:"DJ Lessons",stage:"Botanica Zoo",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"Court Jester B2B Daddy Dopamine",stage:"Botanica Zoo",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"Niki Louder VS James Cunt",stage:"Botanica Zoo",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"DJ Dizzle B2B Peggy Vienetta [Lively Up takeover]",stage:"Botanica Zoo",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"Denis The Menis [Lively Up takeover]",stage:"Botanica Zoo",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"Slanty [Lively Up takeover]",stage:"Botanica Zoo",day:"Thu",start:"23:00",end:"23:55"},
+  // --- Thu: Busker's Wharf ---
+  {name:"The Lobster Cabaret",stage:"Busker's Wharf",day:"Thu",start:"19:30",end:"21:00"},
+  // --- Thu: Cas's Costumes ---
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Thu",start:"10:00",end:"18:00"},
+  // --- Thu: Circus Tent ---
+  {name:"Belly Dance",stage:"Circus Tent",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Contemporary Dance",stage:"Circus Tent",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Thu",start:"12:00",end:"14:00"},
+  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Thu",start:"14:00",end:"16:00"},
+  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Thu",start:"16:00",end:"18:00"},
+  {name:"Inspired Breath",stage:"Circus Tent",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"Energising Yoga",stage:"Circus Tent",day:"Thu",start:"09:00",end:"10:00"},
+  // --- Thu: Climate Live ---
+  {name:"Bag Charm Making - Weaving Change",stage:"Climate Live",day:"Thu",start:"10:30",end:"11:30"},
+  {name:"Beads & Breathe",stage:"Climate Live",day:"Thu",start:"11:45",end:"12:45"},
+  {name:"Climate Live Opening",stage:"Climate Live",day:"Thu",start:"12:00",end:"20:00"},
+  {name:"Music X Climate Zine-Making",stage:"Climate Live",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Thu",start:"14:15",end:"15:15"},
+  {name:"Collective Climate Collage Making - Quirky Academy CIC",stage:"Climate Live",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"Jewellery & Trinket Making with Recycled Cans - EVA",stage:"Climate Live",day:"Thu",start:"16:45",end:"17:45"},
+  {name:"Cocaine Anonymous Meeting",stage:"Climate Live",day:"Thu",start:"18:00",end:"19:00"},
+  // --- Thu: Cocaine Anonymous ---
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Thu",start:"11:00",end:"12:00"},
+  // --- Thu: Community Fire ---
+  {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Thu",start:"12:00",end:"00:00"},
+  // --- Thu: Craft Tent ---
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
+  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
+  // --- Thu: Crafty Rascals ---
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Thu",start:"10:00",end:"18:00"},
+  // --- Thu: Deviant Lounge ---
+  {name:"Wrong'un Crew",stage:"Deviant Lounge",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"Church of Donkology",stage:"Deviant Lounge",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"DJ Safe N Sound",stage:"Deviant Lounge",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"3DMA",stage:"Deviant Lounge",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: E Numbers ---
+  {name:"Kid Cosmit",stage:"E Numbers",day:"Thu",start:"19:00",end:"19:45"},
+  {name:"Lounicorn",stage:"E Numbers",day:"Thu",start:"19:45",end:"20:30"},
+  {name:"Theia's Orbit",stage:"E Numbers",day:"Thu",start:"20:30",end:"21:15"},
+  {name:"Fuck Bees",stage:"E Numbers",day:"Thu",start:"21:15",end:"21:45"},
+  {name:"D0LLSW4G",stage:"E Numbers",day:"Thu",start:"21:45",end:"22:30"},
+  {name:"Babiest Baby",stage:"E Numbers",day:"Thu",start:"22:30",end:"23:15"},
+  {name:"Charles the Princess the DJ",stage:"E Numbers",day:"Thu",start:"23:15",end:"00:00"},
+  // --- Thu: End of the Line ---
+  {name:"Fiddler on the Doof",stage:"End of the Line",day:"Thu",start:"14:00",end:"14:50"},
+  {name:"Top of the Donks featuring Kitty & Tiggy (DONKLINE TAKEOVER)",stage:"End of the Line",day:"Thu",start:"14:50",end:"15:40"},
+  {name:"RedSKare b2b Misterrcha (DONKLINE TAKEOVER)",stage:"End of the Line",day:"Thu",start:"15:40",end:"16:30"},
+  {name:"Gash b2b Bubble07",stage:"End of the Line",day:"Thu",start:"16:30",end:"17:20"},
+  {name:"Gash b2b Bubble07 (DONKLINE TAKEOVER)",stage:"End of the Line",day:"Thu",start:"17:20",end:"18:10"},
+  {name:"Tdawgwillywacka b2b Deadbeat UK",stage:"End of the Line",day:"Thu",start:"17:20",end:"18:10"},
+  {name:"Finessa and DJ Wii Sports ft. Reptile B",stage:"End of the Line",day:"Thu",start:"18:10",end:"19:00"},
+  {name:"Foreigna",stage:"End of the Line",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"DJ Shnoo",stage:"End of the Line",day:"Thu",start:"20:00",end:"20:45"},
+  {name:"Merkäta",stage:"End of the Line",day:"Thu",start:"20:45",end:"21:30"},
+  {name:"Nego",stage:"End of the Line",day:"Thu",start:"21:30",end:"22:15"},
+  {name:"Riguana",stage:"End of the Line",day:"Thu",start:"22:15",end:"23:00"},
+  {name:"NORTY",stage:"End of the Line",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: Energy Garden ---
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Thu",start:"12:00",end:"22:00"},
   // --- Thu: Foggers Mill ---
   {name:"The Back Wood Redeemers",stage:"Foggers Mill",day:"Thu",start:"13:00",end:"13:40"},
   {name:"Gurt Dog",stage:"Foggers Mill",day:"Thu",start:"14:00",end:"15:00"},
@@ -1024,23 +1166,45 @@ const artists = [
   {name:"The Back Wood Redeemers",stage:"Foggers Mill",day:"Thu",start:"20:00",end:"21:00"},
   {name:"The Showhawk Duo",stage:"Foggers Mill",day:"Thu",start:"21:30",end:"22:30"},
   {name:"Shanghai Treason",stage:"Foggers Mill",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: The Boomtown Bobbies ---
-  {name:"Scotland Yard Takeover",stage:"The Boomtown Bobbies",day:"Thu",start:"14:00",end:"17:00"},
-  {name:"Merkata",stage:"The Boomtown Bobbies",day:"Thu",start:"17:00",end:"17:40"},
-  {name:"Zamurai",stage:"The Boomtown Bobbies",day:"Thu",start:"18:20",end:"19:00"},
-  {name:"Ka B2B Tomu",stage:"The Boomtown Bobbies",day:"Thu",start:"19:00",end:"20:00"},
-  {name:"Kaisha",stage:"The Boomtown Bobbies",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Kelvin 373",stage:"The Boomtown Bobbies",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"Banshee",stage:"The Boomtown Bobbies",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"Zapya",stage:"The Boomtown Bobbies",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Soapranos Laundrette ---
-  {name:"Lexii",stage:"Soapranos Laundrette",day:"Thu",start:"13:00",end:"14:00"},
-  {name:"DJ Amber Rose",stage:"Soapranos Laundrette",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"Bumpah Takeover - Cheza Lucina",stage:"Soapranos Laundrette",day:"Thu",start:"15:00",end:"16:00"},
-  {name:"Bumpah Takeover - Princess Xixi",stage:"Soapranos Laundrette",day:"Thu",start:"16:00",end:"17:00"},
-  {name:"Bumpah Takeover - Thempress",stage:"Soapranos Laundrette",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Betsy Mae",stage:"Soapranos Laundrette",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Morgane",stage:"Soapranos Laundrette",day:"Thu",start:"19:00",end:"20:00"},
+  // --- Thu: Full Moon Ballroom ---
+  {name:"Mad Apple Circus",stage:"Full Moon Ballroom",day:"Thu",start:"13:15",end:"14:15"},
+  {name:"She's Got Brass",stage:"Full Moon Ballroom",day:"Thu",start:"14:45",end:"15:45"},
+  {name:"Girl In The Year Above",stage:"Full Moon Ballroom",day:"Thu",start:"16:20",end:"17:00"},
+  {name:"GrooveLine",stage:"Full Moon Ballroom",day:"Thu",start:"17:45",end:"18:45"},
+  {name:"CLADA",stage:"Full Moon Ballroom",day:"Thu",start:"19:15",end:"20:15"},
+  {name:"Agbeko",stage:"Full Moon Ballroom",day:"Thu",start:"20:45",end:"22:00"},
+  {name:"Franz Von",stage:"Full Moon Ballroom",day:"Thu",start:"22:30",end:"00:00"},
+  // --- Thu: Games Lounge ---
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Thu",start:"12:00",end:"00:00"},
+  // --- Thu: Garden ---
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Thu",start:"10:00",end:"18:00"},
+  // --- Thu: Hangar 161 ---
+  {name:"Music In Our Underpants",stage:"Hangar 161",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Dakka Skanks",stage:"Hangar 161",day:"Thu",start:"18:30",end:"19:30"},
+  {name:"Pizzatramp",stage:"Hangar 161",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"The Menstrual Cramps",stage:"Hangar 161",day:"Thu",start:"21:30",end:"22:30"},
+  {name:"Meryl Streek",stage:"Hangar 161",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: Hapitat ---
+  {name:"Hapitat",stage:"Hapitat",day:"Thu",start:"10:00",end:"18:00"},
+  {name:"Giant Triplets",stage:"Hapitat",day:"Thu",start:"11:00",end:"14:00"},
+  // --- Thu: Helix ---
+  {name:"ZE:NA",stage:"Helix",day:"Thu",start:"15:00",end:"16:00"},
+  {name:"Music from the Mothership",stage:"Helix",day:"Thu",start:"16:00",end:"18:00"},
+  {name:"Artemis B2B Esme Banks B2B Fluro",stage:"Helix",day:"Thu",start:"18:00",end:"19:30"},
+  {name:"Cheetah B2B Janaway",stage:"Helix",day:"Thu",start:"19:30",end:"21:00"},
+  {name:"Toby Ross",stage:"Helix",day:"Thu",start:"21:00",end:"22:30"},
+  {name:"Ed Solo",stage:"Helix",day:"Thu",start:"22:30",end:"00:00"},
+  // --- Thu: Hidden Woods ---
+  {name:"Kaotik Kartel",stage:"Hidden Woods",day:"Thu",start:"13:00",end:"14:30"},
+  {name:"Bubski B2B Siraya",stage:"Hidden Woods",day:"Thu",start:"14:30",end:"15:30"},
+  {name:"Rea",stage:"Hidden Woods",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"Messie",stage:"Hidden Woods",day:"Thu",start:"16:30",end:"17:30"},
+  {name:"Baalti",stage:"Hidden Woods",day:"Thu",start:"17:30",end:"18:30"},
+  {name:"Hitty",stage:"Hidden Woods",day:"Thu",start:"18:30",end:"19:30"},
+  {name:"Jamz Supernova",stage:"Hidden Woods",day:"Thu",start:"19:30",end:"20:30"},
+  {name:"Osmosis Jones",stage:"Hidden Woods",day:"Thu",start:"20:30",end:"21:30"},
+  {name:"Papa Nugs",stage:"Hidden Woods",day:"Thu",start:"21:30",end:"22:30"},
+  {name:"Eats Everything B2B Wonka",stage:"Hidden Woods",day:"Thu",start:"22:30",end:"00:00"},
   // --- Thu: Hotel Paradiso ---
   {name:"DJ Business Lady & Direct Debbie",stage:"Hotel Paradiso",day:"Thu",start:"18:00",end:"19:00"},
   {name:"Asher Ray & Goodfella",stage:"Hotel Paradiso",day:"Thu",start:"19:00",end:"20:00"},
@@ -1048,16 +1212,169 @@ const artists = [
   {name:"DJ Hiphoppapotamus & Friends",stage:"Hotel Paradiso",day:"Thu",start:"21:00",end:"22:00"},
   {name:"Kaptin & Dregz",stage:"Hotel Paradiso",day:"Thu",start:"22:00",end:"23:00"},
   {name:"Daddy Skitz & Joe Burn",stage:"Hotel Paradiso",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: Infinity ---
+  {name:"Desiato DJs",stage:"Infinity",day:"Thu",start:"14:00",end:"16:00"},
+  {name:"Hayliegh",stage:"Infinity",day:"Thu",start:"16:00",end:"17:30"},
+  {name:"[Paradisco] Brad Bradley B2B Burly Chassis",stage:"Infinity",day:"Thu",start:"17:30",end:"19:30"},
+  {name:"[Paradisco] Faith B2B SPICYIVY",stage:"Infinity",day:"Thu",start:"19:30",end:"21:00"},
+  {name:"Lips Sealed Club",stage:"Infinity",day:"Thu",start:"21:00",end:"22:30"},
+  {name:"Sean Rudz",stage:"Infinity",day:"Thu",start:"22:30",end:"00:00"},
   // --- Thu: Luck Exchange Casino ---
   {name:"Chattering Teeth Races",stage:"Luck Exchange Casino",day:"Thu",start:"19:05",end:"19:10"},
   {name:"Hold Your Horses",stage:"Luck Exchange Casino",day:"Thu",start:"19:10",end:"19:15"},
   {name:"Only Pools And Horses",stage:"Luck Exchange Casino",day:"Thu",start:"19:15",end:"19:20"},
+  {name:"Dick Fran Dyke",stage:"Luck Exchange Casino",day:"Thu",start:"19:20",end:"19:25"},
   {name:"Play Your Cards Shite",stage:"Luck Exchange Casino",day:"Thu",start:"19:25",end:"19:40"},
   {name:"Beyblade Tournament",stage:"Luck Exchange Casino",day:"Thu",start:"19:40",end:"19:50"},
   {name:"Is It Piss?",stage:"Luck Exchange Casino",day:"Thu",start:"19:50",end:"20:00"},
+  {name:"Dick Fran Dyke",stage:"Luck Exchange Casino",day:"Thu",start:"20:00",end:"20:05"},
   {name:"Wave",stage:"Luck Exchange Casino",day:"Thu",start:"20:05",end:"20:25"},
-  {name:"Ayvbp",stage:"Luck Exchange Casino",day:"Thu",start:"20:25",end:"20:40"},
-  {name:"Toybox",stage:"Luck Exchange Casino",day:"Thu",start:"20:40",end:"21:10"},
+  {name:"AYVBP",stage:"Luck Exchange Casino",day:"Thu",start:"20:25",end:"20:40"},
+  {name:"TOYBOX",stage:"Luck Exchange Casino",day:"Thu",start:"20:40",end:"21:10"},
+  // --- Thu: Mining for (g)Old Town ---
+  {name:"DJ Shoulda Learnt The Clarinet",stage:"Mining for (g)Old Town",day:"Thu",start:"13:30",end:"14:30"},
+  {name:"DJ Sarah Tonin",stage:"Mining for (g)Old Town",day:"Thu",start:"14:30",end:"16:00"},
+  {name:"WildSoul",stage:"Mining for (g)Old Town",day:"Thu",start:"16:00",end:"17:30"},
+  {name:"MAGGS",stage:"Mining for (g)Old Town",day:"Thu",start:"17:30",end:"19:00"},
+  // --- Thu: Nachtlicker ---
+  {name:"SHAGGY FX",stage:"Nachtlicker",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"SIÂNAGEDDON",stage:"Nachtlicker",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"NUKS",stage:"Nachtlicker",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"RIZZY & THE GENTS [live]",stage:"Nachtlicker",day:"Thu",start:"20:00",end:"20:45"},
+  {name:"THEO SHELDRAKE",stage:"Nachtlicker",day:"Thu",start:"20:45",end:"22:00"},
+  {name:"DJ HEADTORCH",stage:"Nachtlicker",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"AIRBENDER",stage:"Nachtlicker",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: Narcotics Anonymous ---
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Thu",start:"08:00",end:"09:00"},
+  // --- Thu: Nexus ---
+  {name:"Bloco B",stage:"Nexus",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"RWKUS: 91 - 94 Jungle Review",stage:"Nexus",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"JayaHadADream",stage:"Nexus",day:"Thu",start:"17:00",end:"17:45"},
+  {name:"Joe Yorke",stage:"Nexus",day:"Thu",start:"18:30",end:"19:30"},
+  {name:"Gurriers",stage:"Nexus",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"Komfortrauschen",stage:"Nexus",day:"Thu",start:"21:30",end:"22:30"},
+  {name:"Keeno Live Ft. Vibre Strings",stage:"Nexus",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: Observatory ---
+  {name:"The Observatory Opening",stage:"Observatory",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Your Brain On Yoga",stage:"Observatory",day:"Thu",start:"11:30",end:"12:30"},
+  {name:"Move Together, Decide Together: Dancing Towards A New Democracy, Isabella Roberts",stage:"Observatory",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Feeling Seen & Seeing Feeling: Eeg & The Future Of Emotional Design",stage:"Observatory",day:"Thu",start:"14:30",end:"15:30"},
+  {name:"Fear & Loathing In Boomtown",stage:"Observatory",day:"Thu",start:"16:00",end:"17:00"},
+  {name:"Celebratory Reset Ritual",stage:"Observatory",day:"Thu",start:"17:30",end:"18:30"},
+  // --- Thu: Permaculture ---
+  {name:"Drawn from the ground: Natural inks, charcoal and figure drawing",stage:"Permaculture",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Thu",start:"11:30",end:"12:30"},
+  {name:"The inner compass: Tarot, symbolism and self-trust",stage:"Permaculture",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Mushroom magic: Low-tech growing for curious humans",stage:"Permaculture",day:"Thu",start:"14:30",end:"15:30"},
+  {name:"Wild adornment: Willow crowns and headpieces by hand",stage:"Permaculture",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"Wearable folklore: Crafting ear cuffs from scrap, wire and found objects",stage:"Permaculture",day:"Thu",start:"17:00",end:"18:00"},
+  // --- Thu: PFP Robot ---
+  {name:"Tripl3 B",stage:"PFP Robot",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"Audio Gutter",stage:"PFP Robot",day:"Thu",start:"15:00",end:"16:00"},
+  {name:"AGENT SCULLY",stage:"PFP Robot",day:"Thu",start:"16:00",end:"17:00"},
+  {name:"TEOTEK",stage:"PFP Robot",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Special Guest",stage:"PFP Robot",day:"Thu",start:"18:00",end:"19:00"},
+  // --- Thu: Rebel Girls Club ---
+  {name:"Morning Yoga with Sofia (Find Your Flow)",stage:"Rebel Girls Club",day:"Thu",start:"10:00",end:"11:00"},
+  {name:"Movement: Heart - womb connection with Lauren",stage:"Rebel Girls Club",day:"Thu",start:"11:00",end:"12:15"},
+  {name:"Nipple Tassel Making with Maisie",stage:"Rebel Girls Club",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Twerk with Ivy Rose (Everglowing)",stage:"Rebel Girls Club",day:"Thu",start:"14:30",end:"15:30"},
+  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Thu",start:"16:00",end:"16:40"},
+  {name:"Herbal Balm Making with Spider",stage:"Rebel Girls Club",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Traditional Burlesque with Everglowing",stage:"Rebel Girls Club",day:"Thu",start:"18:30",end:"19:30"},
+  // --- Thu: Reel News ---
+  {name:"Drugs, Friends & Music: What does a safe festival need?",stage:"Reel News",day:"Thu",start:"10:30",end:"11:30"},
+  {name:"No Pasaran! How to stop the far right",stage:"Reel News",day:"Thu",start:"11:30",end:"12:30"},
+  {name:"Luddite Punk",stage:"Reel News",day:"Thu",start:"12:30",end:"13:30"},
+  {name:"AGONY & ECSTASY: HOW FOOTBALL HOOLIGANS STARTED RAVING",stage:"Reel News",day:"Thu",start:"13:30",end:"14:00"},
+  {name:"ACORN for a Bailiff Free Britain!",stage:"Reel News",day:"Thu",start:"14:00",end:"14:45"},
+  {name:"The Global Politics of Food",stage:"Reel News",day:"Thu",start:"14:45",end:"15:45"},
+  {name:"Power to the Workers—with AI",stage:"Reel News",day:"Thu",start:"15:45",end:"16:30"},
+  {name:"Small Axe: When Underground Music Meets Grassroots Activism",stage:"Reel News",day:"Thu",start:"16:30",end:"17:15"},
+  {name:"Thick Richard",stage:"Reel News",day:"Thu",start:"17:15",end:"17:45"},
+  {name:"South Lebanon - Frontlines of Resistance",stage:"Reel News",day:"Thu",start:"17:45",end:"18:45"},
+  {name:"FILM: Sir No Sir",stage:"Reel News",day:"Thu",start:"18:45",end:"20:10"},
+  // --- Thu: Reparium ---
+  {name:"Repairium",stage:"Reparium",day:"Thu",start:"10:00",end:"18:00"},
+  // --- Thu: Rose and Clown ---
+  {name:"Rose & Clown Opening Pilates Warmup Session",stage:"Rose and Clown",day:"Thu",start:"14:00",end:"14:30"},
+  {name:"Loopy Takeover Ft. Ambi, Grandma Wubplate, & Shardy Bumpa",stage:"Rose and Clown",day:"Thu",start:"14:30",end:"15:30"},
+  {name:"Meg McHugh",stage:"Rose and Clown",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"The Third Nipple (Old School Rave Set)",stage:"Rose and Clown",day:"Thu",start:"16:30",end:"17:30"},
+  {name:"Anna Prank B2B Ellament",stage:"Rose and Clown",day:"Thu",start:"17:30",end:"18:30"},
+  {name:"Gorilla Tactics Rinseout Ft. Rivibes",stage:"Rose and Clown",day:"Thu",start:"18:30",end:"19:15"},
+  {name:"Raze Takeover",stage:"Rose and Clown",day:"Thu",start:"19:15",end:"20:00"},
+  {name:"Octoposse",stage:"Rose and Clown",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"OneDa",stage:"Rose and Clown",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"Gorilla Tactics Rinseout Ft. Rivibes",stage:"Rose and Clown",day:"Thu",start:"22:00",end:"22:45"},
+  {name:"Mad Apple Circus",stage:"Rose and Clown",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: Sharing Circles ---
+  {name:"Sharing Circles - Workshop",stage:"Sharing Circles",day:"Thu",start:"11:00",end:"19:00"},
+  // --- Thu: Sibín Beag ---
+  {name:"Fáilte Isteach (FAWL-che ISH-takh) Welcome In",stage:"Sibín Beag",day:"Thu",start:"14:00",end:"14:45"},
+  {name:"Aurora Engine",stage:"Sibín Beag",day:"Thu",start:"15:15",end:"16:00"},
+  {name:"FFTP",stage:"Sibín Beag",day:"Thu",start:"16:30",end:"17:15"},
+  {name:"All for Jolly",stage:"Sibín Beag",day:"Thu",start:"17:45",end:"18:30"},
+  {name:"The Groggy Dogs",stage:"Sibín Beag",day:"Thu",start:"18:30",end:"19:15"},
+  {name:"Trad Folkin' Rocks House Band",stage:"Sibín Beag",day:"Thu",start:"20:30",end:"22:30"},
+  // --- Thu: Soapranos Laundrette ---
+  {name:"LEXII",stage:"Soapranos Laundrette",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"DJ Amber Rose",stage:"Soapranos Laundrette",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"Bumpah Takeover -  Cheza Lucina",stage:"Soapranos Laundrette",day:"Thu",start:"15:00",end:"16:00"},
+  {name:"Bumpah Takeover -  princess xixi",stage:"Soapranos Laundrette",day:"Thu",start:"16:00",end:"17:00"},
+  {name:"Bumpah Takeover - thempress",stage:"Soapranos Laundrette",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Betsy Mae",stage:"Soapranos Laundrette",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"Morgane",stage:"Soapranos Laundrette",day:"Thu",start:"19:00",end:"20:00"},
+  // --- Thu: Spectrum 360 ---
+  {name:"Holly Warcup B2B Miss Cabbage",stage:"Spectrum 360",day:"Thu",start:"15:00",end:"16:00"},
+  {name:"Karlie Marx [Not Bad For A Girl Takeover]",stage:"Spectrum 360",day:"Thu",start:"16:00",end:"17:00"},
+  {name:"Egg On Toast B2B Syntax [Not Bad For A Girl Takeover]",stage:"Spectrum 360",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Cicely B2B Hypershé",stage:"Spectrum 360",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"Peppa B2B Shirley Temper",stage:"Spectrum 360",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"Mollie Rush",stage:"Spectrum 360",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"Promis3",stage:"Spectrum 360",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"Stinny Stone",stage:"Spectrum 360",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"Somniac One",stage:"Spectrum 360",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: Spinney Hollow ---
+  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Thu",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Thu",start:"10:00",end:"18:00"},
+  // --- Thu: Sub Lab ---
+  {name:"Bennett Ft Sylla, Limmz & P****",stage:"Sub Lab",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"Stasis",stage:"Sub Lab",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"Nio B",stage:"Sub Lab",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"Akira ft Cola B",stage:"Sub Lab",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"Jaz Imsky Ft Special Guest MC",stage:"Sub Lab",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"1+1=?? (Special Guest)",stage:"Sub Lab",day:"Thu",start:"23:00",end:"23:59"},
+  // --- Thu: Tangled Roots ---
+  {name:"Lionpulse x Sinai",stage:"Tangled Roots",day:"Thu",start:"12:00",end:"13:00"},
+  {name:"Daddy Nature B2B DJ Dansey (Rompa's Reggae Shack)",stage:"Tangled Roots",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Cuppa T & Johnny Scratch Lee",stage:"Tangled Roots",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"Twende Takeover Ft. Alex Twende, Joeti & Sojebe",stage:"Tangled Roots",day:"Thu",start:"15:00",end:"16:00"},
+  {name:"Marla Kether",stage:"Tangled Roots",day:"Thu",start:"16:00",end:"17:00"},
+  {name:"Ru Robinson",stage:"Tangled Roots",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Hiphoppapotamus B2B Fizzy Gillespie",stage:"Tangled Roots",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"Jinx In Dub",stage:"Tangled Roots",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"Cheza Lucina",stage:"Tangled Roots",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"Ekula & Mista Jago",stage:"Tangled Roots",day:"Thu",start:"21:00",end:"22:00"},
+  // --- Thu: The Boomtown Bobbies ---
+  {name:"Scotland Yard Takeover",stage:"The Boomtown Bobbies",day:"Thu",start:"14:00",end:"17:00"},
+  {name:"Merkata",stage:"The Boomtown Bobbies",day:"Thu",start:"17:00",end:"17:40"},
+  {name:"Zamurai",stage:"The Boomtown Bobbies",day:"Thu",start:"18:20",end:"19:00"},
+  {name:"Ka b2b Tomu",stage:"The Boomtown Bobbies",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"Kaisha",stage:"The Boomtown Bobbies",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"Kelvin 373",stage:"The Boomtown Bobbies",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"Banshee - Rua Tui, Kathika, Maria, Maddy V",stage:"The Boomtown Bobbies",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"Zapya",stage:"The Boomtown Bobbies",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: The Fools Leap ---
+  {name:"shunTA!",stage:"The Fools Leap",day:"Thu",start:"12:00",end:"13:30"},
+  {name:"The Sneak Eazies",stage:"The Fools Leap",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"Shanghai Treason",stage:"The Fools Leap",day:"Thu",start:"15:30",end:"16:30"},
+  {name:"Fraser Morgan",stage:"The Fools Leap",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Girl In The Year Above",stage:"The Fools Leap",day:"Thu",start:"18:50",end:"19:30"},
+  {name:"Scottish Fish",stage:"The Fools Leap",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"Smag På Dig Selv",stage:"The Fools Leap",day:"Thu",start:"21:30",end:"22:30"},
+  {name:"CLADA",stage:"The Fools Leap",day:"Thu",start:"23:00",end:"00:00"},
   // --- Thu: The Garden Centre ---
   {name:"Funkmaster General",stage:"The Garden Centre",day:"Thu",start:"14:00",end:"15:00"},
   {name:"Redpeppa",stage:"The Garden Centre",day:"Thu",start:"15:00",end:"16:00"},
@@ -1066,17 +1383,25 @@ const artists = [
   {name:"Phillax",stage:"The Garden Centre",day:"Thu",start:"18:00",end:"19:00"},
   {name:"Dec",stage:"The Garden Centre",day:"Thu",start:"19:00",end:"20:00"},
   {name:"Astyx",stage:"The Garden Centre",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Diversion Audio Takeover",stage:"The Garden Centre",day:"Thu",start:"21:00",end:"23:00"},
+  {name:"[Diversion Audio Takeover] Jay-Mo B2B Pinks B2B Randoma B2B Tianna Franxx Ft. Multiplex MC",stage:"The Garden Centre",day:"Thu",start:"21:00",end:"23:00"},
   {name:"Nizan",stage:"The Garden Centre",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Botanica Zoo ---
-  {name:"DJ Lessons",stage:"Botanica Zoo",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Court Jester B2B Daddy Dopamine",stage:"Botanica Zoo",day:"Thu",start:"19:00",end:"20:00"},
-  {name:"Niki Louder VS James Cunt",stage:"Botanica Zoo",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"DJ Dizzle B2B Peggy Vienetta",stage:"Botanica Zoo",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"Denis The Menis",stage:"Botanica Zoo",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"Slanty",stage:"Botanica Zoo",day:"Thu",start:"23:00",end:"23:55"},
   // --- Thu: The Immortal Children of the Eternal Seed ---
-  {name:"Loose Forms Takeover",stage:"The Immortal Children of the Eternal Seed",day:"Thu",start:"20:00",end:"00:00"},
+  {name:"Loose forms Takeover ft NiPS/Spilla/Doctor Onion/Clackman Duke & Hi MC",stage:"The Immortal Children of the Eternal Seed",day:"Thu",start:"20:00",end:"00:00"},
+  // --- Thu: The Magic Teapot ---
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Thu",start:"12:00",end:"00:00"},
+  // --- Thu: The Pomegranate Parlour ---
+  {name:"Cassia",stage:"The Pomegranate Parlour",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"SCARBA",stage:"The Pomegranate Parlour",day:"Thu",start:"15:00",end:"16:00"},
+  {name:"Mattana",stage:"The Pomegranate Parlour",day:"Thu",start:"16:00",end:"17:00"},
+  {name:"Ban Dalan",stage:"The Pomegranate Parlour",day:"Thu",start:"17:00",end:"18:00"},
+  {name:"Somatic",stage:"The Pomegranate Parlour",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"DmTree",stage:"The Pomegranate Parlour",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"Emma Ash",stage:"The Pomegranate Parlour",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"Buddha",stage:"The Pomegranate Parlour",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"DJ Shakey",stage:"The Pomegranate Parlour",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"Illexxandra",stage:"The Pomegranate Parlour",day:"Thu",start:"23:00",end:"23:55"},
+  // --- Thu: Tinker Station ---
+  {name:"Tinker Station",stage:"Tinker Station",day:"Thu",start:"10:00",end:"18:00"},
   // --- Thu: Topsy Turvy Trims ---
   {name:"Black Board Soundsystem",stage:"Topsy Turvy Trims",day:"Thu",start:"13:00",end:"16:00"},
   {name:"Goose",stage:"Topsy Turvy Trims",day:"Thu",start:"16:00",end:"17:00"},
@@ -1086,120 +1411,206 @@ const artists = [
   {name:"Frazr Musica",stage:"Topsy Turvy Trims",day:"Thu",start:"21:00",end:"22:00"},
   {name:"Merchant",stage:"Topsy Turvy Trims",day:"Thu",start:"22:00",end:"23:00"},
   {name:"She's Got Brass",stage:"Topsy Turvy Trims",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: PFP Robot ---
-  {name:"Tripl3 B",stage:"PFP Robot",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"Audio Gutter",stage:"PFP Robot",day:"Thu",start:"15:00",end:"16:00"},
-  {name:"Agent Scully",stage:"PFP Robot",day:"Thu",start:"16:00",end:"17:00"},
-  {name:"Teotek",stage:"PFP Robot",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Special Guest",stage:"PFP Robot",day:"Thu",start:"18:00",end:"19:00"},
-  // --- Thu: Sub Lab ---
-  {name:"Bennett Ft Sylla, Limmz & Guest",stage:"Sub Lab",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Stasis",stage:"Sub Lab",day:"Thu",start:"19:00",end:"20:00"},
-  {name:"Nio B",stage:"Sub Lab",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Akira Ft Cola B",stage:"Sub Lab",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"Jaz Imsky Ft Special Guest MC",stage:"Sub Lab",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"1+1=??",stage:"Sub Lab",day:"Thu",start:"23:00",end:"23:59"},
-  // --- Thu: Nachtlicker ---
-  {name:"Shaggy FX",stage:"Nachtlicker",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Sînageddon",stage:"Nachtlicker",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Nuks",stage:"Nachtlicker",day:"Thu",start:"19:00",end:"20:00"},
-  {name:"Rizzy & The Gents Live",stage:"Nachtlicker",day:"Thu",start:"20:00",end:"20:45"},
-  {name:"Theo Sheldrake",stage:"Nachtlicker",day:"Thu",start:"20:45",end:"22:00"},
-  {name:"DJ Headtorch",stage:"Nachtlicker",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"Airbender",stage:"Nachtlicker",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Deviant Lounge ---
-  {name:"Wrong'un Crew",stage:"Deviant Lounge",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Church of Donkology",stage:"Deviant Lounge",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"DJ Safe N Sound",stage:"Deviant Lounge",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"3dma",stage:"Deviant Lounge",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: E Numbers ---
-  {name:"Kid Cosmit",stage:"E Numbers",day:"Thu",start:"19:00",end:"19:45"},
-  {name:"Lounicorn",stage:"E Numbers",day:"Thu",start:"19:45",end:"20:30"},
-  {name:"Theia's Orbit",stage:"E Numbers",day:"Thu",start:"20:30",end:"21:15"},
-  {name:"D0llsw4g",stage:"E Numbers",day:"Thu",start:"21:45",end:"22:30"},
-  {name:"Babiest Baby",stage:"E Numbers",day:"Thu",start:"22:30",end:"23:15"},
-  {name:"Charles the Princess the DJ",stage:"E Numbers",day:"Thu",start:"23:15",end:"00:00"},
-  // --- Thu: The Pomegranate Parlour ---
-  {name:"Cassia",stage:"The Pomegranate Parlour",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"Scarba",stage:"The Pomegranate Parlour",day:"Thu",start:"15:00",end:"16:00"},
-  {name:"Mattana",stage:"The Pomegranate Parlour",day:"Thu",start:"16:00",end:"17:00"},
-  {name:"Me Miles & I",stage:"The Pomegranate Parlour",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Somatic",stage:"The Pomegranate Parlour",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Dmtree",stage:"The Pomegranate Parlour",day:"Thu",start:"19:00",end:"20:00"},
-  {name:"Emma Ash",stage:"The Pomegranate Parlour",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Buddha",stage:"The Pomegranate Parlour",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"DJ Shakey",stage:"The Pomegranate Parlour",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"Illexxandra",stage:"The Pomegranate Parlour",day:"Thu",start:"23:00",end:"23:55"},
-  // --- Thu: Busker's Wharf ---
-  {name:"The Lobster Cabaret",stage:"Busker's Wharf",day:"Thu",start:"19:30",end:"21:00"},
+  // --- Thu: Tribe of Frog ---
+  {name:"Ott",stage:"Tribe of Frog",day:"Thu",start:"14:00",end:"15:30"},
+  {name:"Jakkar",stage:"Tribe of Frog",day:"Thu",start:"15:30",end:"17:00"},
+  {name:"Ebru Al",stage:"Tribe of Frog",day:"Thu",start:"17:00",end:"18:30"},
+  {name:"Minali",stage:"Tribe of Frog",day:"Thu",start:"18:30",end:"20:00"},
+  {name:"Liquid Ross",stage:"Tribe of Frog",day:"Thu",start:"20:00",end:"21:30"},
+  {name:"Neutron",stage:"Tribe of Frog",day:"Thu",start:"21:30",end:"23:00"},
+  {name:"D-Ther",stage:"Tribe of Frog",day:"Thu",start:"23:00",end:"00:00"},
   // --- Thu: Twisted Time Machine (Bad Apple Bar) ---
-  {name:"The Abba Party",stage:"Twisted Time Machine",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"Tom Shanx & Rhi n B Live",stage:"Twisted Time Machine",day:"Thu",start:"15:00",end:"16:00"},
-  {name:"Don't Diss My Ability",stage:"Twisted Time Machine",day:"Thu",start:"16:00",end:"18:00"},
-  {name:"Guilty Pleasures Rewind Society",stage:"Twisted Time Machine",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Very Daft Very Punk",stage:"Twisted Time Machine",day:"Thu",start:"19:00",end:"20:00"},
-  {name:"Make EDM Great Again",stage:"Twisted Time Machine",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"Basic Pleasure Model",stage:"Twisted Time Machine",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"The Fleetwood Mac Celebration",stage:"Twisted Time Machine",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"My Chemical Hoemance",stage:"Twisted Time Machine",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Síbín Beag ---
-  {name:"Fáilte Isteach Welcome In",stage:"Síbín Beag",day:"Thu",start:"14:00",end:"14:45"},
-  {name:"Aurora Engine",stage:"Síbín Beag",day:"Thu",start:"15:15",end:"16:00"},
-  {name:"FFTP",stage:"Síbín Beag",day:"Thu",start:"16:30",end:"17:15"},
-  {name:"All for Jolly",stage:"Síbín Beag",day:"Thu",start:"17:45",end:"18:30"},
-  {name:"The Groggy Dogs",stage:"Síbín Beag",day:"Thu",start:"18:30",end:"19:15"},
-  {name:"Trad Folkin' Rocks House Band",stage:"Síbín Beag",day:"Thu",start:"20:30",end:"22:30"},
-  // --- Thu: Helix ---
-  {name:"Ze:Na",stage:"Helix",day:"Thu",start:"15:00",end:"16:00"},
-  {name:"Music from the Mothership",stage:"Helix",day:"Thu",start:"16:00",end:"18:00"},
-  {name:"Artemis B2B Esme Banks B2B Fluro",stage:"Helix",day:"Thu",start:"18:00",end:"19:30"},
-  {name:"Cheetah B2B Janaway",stage:"Helix",day:"Thu",start:"19:30",end:"21:00"},
-  {name:"Toby Ross",stage:"Helix",day:"Thu",start:"21:00",end:"22:30"},
-  {name:"Ed Solo",stage:"Helix",day:"Thu",start:"22:30",end:"00:00"},
-  // --- Thu: Mining for (g)Old Town ---
-  {name:"DJ Shoulda Learnt The Clarinet",stage:"Mining for (g)Old Town",day:"Thu",start:"13:30",end:"14:30"},
-  {name:"DJ Sarah Tonin",stage:"Mining for (g)Old Town",day:"Thu",start:"14:30",end:"16:00"},
-  {name:"Wildsoul",stage:"Mining for (g)Old Town",day:"Thu",start:"16:00",end:"17:30"},
-  {name:"Maggs",stage:"Mining for (g)Old Town",day:"Thu",start:"17:30",end:"19:00"},
-  // --- Thu: End of the Line ---
-  {name:"Donkline Takeover",stage:"End of the Line",day:"Thu",start:"14:00",end:"19:00"},
-  {name:"DJ Shnoo",stage:"End of the Line",day:"Thu",start:"20:00",end:"20:45"},
-  {name:"Merkata",stage:"End of the Line",day:"Thu",start:"20:45",end:"21:30"},
-  {name:"Nego",stage:"End of the Line",day:"Thu",start:"21:30",end:"22:15"},
-  {name:"Riguana",stage:"End of the Line",day:"Thu",start:"22:15",end:"23:00"},
-  {name:"Norty",stage:"End of the Line",day:"Thu",start:"23:00",end:"00:00"},
-  // --- Thu: Infinity ---
-  {name:"Desiato DJs",stage:"Infinity",day:"Thu",start:"14:00",end:"16:00"},
-  {name:"Hayliegh",stage:"Infinity",day:"Thu",start:"16:00",end:"17:30"},
-  {name:"Paradisco Brad Bradley B2B Burly Chassis",stage:"Infinity",day:"Thu",start:"17:30",end:"19:30"},
-  {name:"Paradisco Faith B2B Spicyivy",stage:"Infinity",day:"Thu",start:"19:30",end:"21:00"},
-  {name:"Lips Sealed Club",stage:"Infinity",day:"Thu",start:"21:00",end:"22:30"},
-  {name:"Sean Rudz",stage:"Infinity",day:"Thu",start:"22:30",end:"00:00"},
-
-  // ================= FRIDAY =================
-  // --- Fri: The Lion's Den ---
-  {name:"Opening Ceremony",stage:"The Lion's Den",day:"Fri",start:"12:00",end:"12:30"},
-  {name:"Madness",stage:"The Lion's Den",day:"Fri",start:"12:30",end:"13:50"},
-  {name:"Shy FX Ft. Rage",stage:"The Lion's Den",day:"Fri",start:"14:05",end:"15:30"},
-  {name:"Sub Focus",stage:"The Lion's Den",day:"Fri",start:"15:30",end:"16:30"},
-  {name:"Alborosie & Shengen Clan",stage:"The Lion's Den",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Gentleman's Dub Club & Friends",stage:"The Lion's Den",day:"Fri",start:"18:30",end:"20:00"},
-  {name:"Ren",stage:"The Lion's Den",day:"Fri",start:"20:30",end:"21:30"},
-  {name:"Kneecap",stage:"The Lion's Den",day:"Fri",start:"22:00",end:"23:15"},
-  {name:"Wilkinson Ft. MC AD-APT",stage:"The Lion's Den",day:"Fri",start:"23:15",end:"00:30"},
-  {name:"Camo & Krooked B2B Mefjus Ft. Daxta",stage:"The Lion's Den",day:"Fri",start:"00:30",end:"02:00"},
-  // --- Fri: Hydro XL ---
-  {name:"Opening Ceremony",stage:"Hydro XL",day:"Fri",start:"12:00",end:"12:30"},
-  {name:"Groove Armada DJ Set",stage:"Hydro XL",day:"Fri",start:"12:30",end:"14:00"},
-  {name:"DJ EZ",stage:"Hydro XL",day:"Fri",start:"14:00",end:"15:30"},
-  {name:"Notion",stage:"Hydro XL",day:"Fri",start:"15:30",end:"17:00"},
-  {name:"Diffrent",stage:"Hydro XL",day:"Fri",start:"17:00",end:"18:30"},
-  {name:"Faster Horses B2B Y U QT",stage:"Hydro XL",day:"Fri",start:"18:30",end:"20:00"},
-  {name:"Eats Everything B2B Tsha",stage:"Hydro XL",day:"Fri",start:"20:00",end:"21:30"},
-  {name:"Effy B2B Ross From Friends",stage:"Hydro XL",day:"Fri",start:"21:30",end:"23:00"},
-  {name:"999999999 AV Show",stage:"Hydro XL",day:"Fri",start:"23:00",end:"00:30"},
-  {name:"Oguz",stage:"Hydro XL",day:"Fri",start:"00:30",end:"02:00"},
-  {name:"Ivy vs Safyre",stage:"Hydro XL",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"THE ABBA PARTY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"14:00",end:"15:00"},
+  {name:"TOM SHANX & RHI n B (LIVE)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"15:00",end:"16:00"},
+  {name:"DON'T DISS MY ABILITY : TRIBUTE TO DJ FLOOD",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"16:00",end:"18:00"},
+  {name:"GUILTY PLEASURES REWIND SOCIETY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"18:00",end:"19:00"},
+  {name:"VERY DAFT VERY PUNK",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"19:00",end:"20:00"},
+  {name:"MAKE EDM GREAT AGAIN",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"20:00",end:"21:00"},
+  {name:"BASIC PLEASURE MODEL",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"21:00",end:"22:00"},
+  {name:"THE FLEETWOOD MAC CELEBRATION",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"22:00",end:"23:00"},
+  {name:"MY CHEMICAL HOEMANCE",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Thu",start:"23:00",end:"00:00"},
+  // --- Thu: XR ---
+  {name:"Cassandra the Oracle",stage:"XR",day:"Thu",start:"11:00",end:"12:00"},
+  {name:"Last Chance Salon",stage:"XR",day:"Thu",start:"11:00",end:"19:00"},
+  {name:"Art Blocking",stage:"XR",day:"Thu",start:"11:00",end:"18:30"},
+  {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Thu",start:"12:00",end:"13:00"},
+  {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Thu",start:"12:00",end:"13:00"},
+  {name:"Drumming Workshop",stage:"XR",day:"Thu",start:"13:00",end:"14:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Thu",start:"14:00",end:"16:00"},
+  {name:"Big Oil Drumming Parade",stage:"XR",day:"Thu",start:"14:00",end:"15:30"},
+  {name:"Costume Pimping",stage:"XR",day:"Thu",start:"14:00",end:"18:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Thu",start:"16:00",end:"18:00"},
+  {name:"Strictly Burning Ballroom",stage:"XR",day:"Thu",start:"18:00",end:"18:30"},
+  // ================= FRI =================
+  // --- Fri: Acid Leak ---
+  {name:"John Tuxman",stage:"Acid Leak",day:"Fri",start:"13:00",end:"14:30"},
+  {name:"One Dirty Ape",stage:"Acid Leak",day:"Fri",start:"14:30",end:"16:00"},
+  {name:"Dynamic Intervention",stage:"Acid Leak",day:"Fri",start:"16:00",end:"17:30"},
+  {name:"A.P.",stage:"Acid Leak",day:"Fri",start:"17:30",end:"19:00"},
+  {name:"David Oblivion",stage:"Acid Leak",day:"Fri",start:"19:00",end:"20:30"},
+  {name:"D.A.V.E The Drummer",stage:"Acid Leak",day:"Fri",start:"20:30",end:"22:00"},
+  {name:"Bad Boy Pete",stage:"Acid Leak",day:"Fri",start:"22:00",end:"23:30"},
+  {name:"Eddie Santini",stage:"Acid Leak",day:"Fri",start:"23:30",end:"01:00"},
+  {name:"Sterling Moss",stage:"Acid Leak",day:"Fri",start:"01:00",end:"02:30"},
+  {name:"DJ Smay",stage:"Acid Leak",day:"Fri",start:"02:30",end:"04:00"},
+  // --- Fri: Agents of Change HQ ---
+  {name:"Weaving Change",stage:"Agents of Change HQ",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Agents of Change HQ",stage:"Agents of Change HQ",day:"Fri",start:"10:00",end:"20:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Fri",start:"11:00",end:"14:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Fri",start:"16:00",end:"19:00"},
+  // --- Fri: Airetiko ---
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Fri",start:"11:00",end:"13:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Fri",start:"13:00",end:"15:00"},
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Fri",start:"15:00",end:"17:00"},
+  // --- Fri: Anara Forest ---
+  {name:"Kaya Ft. Limmz",stage:"Anara Forest",day:"Fri",start:"15:00",end:"16:00"},
+  {name:"Sin & Brook",stage:"Anara Forest",day:"Fri",start:"16:00",end:"17:00"},
+  {name:"Young Franco",stage:"Anara Forest",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"PJ Bridger",stage:"Anara Forest",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Mary Droppinz",stage:"Anara Forest",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"G33 B2B Plastician",stage:"Anara Forest",day:"Fri",start:"20:00",end:"21:30"},
+  {name:"Champion",stage:"Anara Forest",day:"Fri",start:"21:30",end:"22:30"},
+  {name:"SBTRKT - DJ Set",stage:"Anara Forest",day:"Fri",start:"22:30",end:"00:00"},
+  {name:"Ahadadream",stage:"Anara Forest",day:"Fri",start:"00:00",end:"01:30"},
+  {name:"Hamdi B2B Mala",stage:"Anara Forest",day:"Fri",start:"01:30",end:"03:00"},
+  // --- Fri: Ancient Futures ---
+  {name:"DNBreathe Breathwork - Raise Your Frequency",stage:"Ancient Futures",day:"Fri",start:"11:30",end:"13:00"},
+  {name:"Coming Home To Yourself: The Art of Conscious Communication",stage:"Ancient Futures",day:"Fri",start:"13:30",end:"15:00"},
+  {name:"Breathwork & Somatic Workshop for Emotional Regulation & Processing",stage:"Ancient Futures",day:"Fri",start:"15:30",end:"17:00"},
+  {name:"Rave as ritual: how the festival space can heal us",stage:"Ancient Futures",day:"Fri",start:"17:30",end:"18:00"},
+  {name:"Ecstatic Dance",stage:"Ancient Futures",day:"Fri",start:"19:00",end:"21:00"},
+  {name:"The Healing Breath",stage:"Ancient Futures",day:"Fri",start:"09:00",end:"11:00"},
+  // --- Fri: Blink Mental Health ---
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Fri",start:"10:00",end:"19:30"},
+  // --- Fri: Botanica Zoo ---
+  {name:"Cheza Lucina [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"15:00",end:"15:50"},
+  {name:"Pia Collada w/ Blythe [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"15:50",end:"16:40"},
+  {name:"Misfit 'n' Kamer [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"16:40",end:"17:30"},
+  {name:"Zak Smiff B2B Joel Deep w/ Rivibes [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"17:30",end:"18:20"},
+  {name:"Yasmine [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"18:20",end:"19:10"},
+  {name:"Bennie B2B DJ Hybrid (World exclusive 140 set w/ Killa P) [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"19:10",end:"20:05"},
+  {name:"Meltout Crew [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"20:05",end:"21:00"},
+  {name:"DFUSE w/ HAM [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"???? w/ Rivibes [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"N-Type B2B Ekula B2B Sheba Q w/ Nav & HAM [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"23:00",end:"01:00"},
+  {name:"Ezra B2B Serkus w/ Mista Jago [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"01:00",end:"02:00"},
+  {name:"Iller Instinct [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"Humb B2B HIGHLANDER [All Colours takeover]",stage:"Botanica Zoo",day:"Fri",start:"03:00",end:"04:00"},
+  // --- Fri: Busker's Wharf ---
+  {name:"The Pussy Catbaret",stage:"Busker's Wharf",day:"Fri",start:"19:30",end:"20:30"},
+  {name:"The Lobster Cabaret",stage:"Busker's Wharf",day:"Fri",start:"21:00",end:"22:00"},
+  // --- Fri: Cas's Costumes ---
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Fri",start:"10:00",end:"18:00"},
+  // --- Fri: Circus Tent ---
+  {name:"Belly Dance",stage:"Circus Tent",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Contemporary Dance",stage:"Circus Tent",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Fri",start:"12:00",end:"14:00"},
+  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Fri",start:"14:00",end:"16:00"},
+  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Fri",start:"16:00",end:"18:00"},
+  {name:"Inspired Breath",stage:"Circus Tent",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"Energising Yoga",stage:"Circus Tent",day:"Fri",start:"09:00",end:"10:00"},
+  // --- Fri: Climate Live ---
+  {name:"Climate Live Opening",stage:"Climate Live",day:"Fri",start:"10:00",end:"20:00"},
+  {name:"Beads & Breathe",stage:"Climate Live",day:"Fri",start:"10:30",end:"11:30"},
+  {name:"Jewellery & Trinket Making with Recycled Cans - EVA",stage:"Climate Live",day:"Fri",start:"11:45",end:"12:45"},
+  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"USB Decorating: No Dance Music Without Diversity",stage:"Climate Live",day:"Fri",start:"14:15",end:"15:15"},
+  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Fri",start:"15:30",end:"16:30"},
+  {name:"Doof Stick Making",stage:"Climate Live",day:"Fri",start:"16:45",end:"17:45"},
+  // --- Fri: Cocaine Anonymous ---
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Fri",start:"18:00",end:"19:00"},
+  // --- Fri: Community Fire ---
+  {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Fri",start:"12:00",end:"00:00"},
+  // --- Fri: Craft Tent ---
+  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
+  // --- Fri: Crafty Rascals ---
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Fri",start:"10:00",end:"18:00"},
+  // --- Fri: Deviant Lounge ---
+  {name:"Can't Stop Won't Stop",stage:"Deviant Lounge",day:"Fri",start:"20:00",end:"21:00"},
+  {name:"Maui Pink",stage:"Deviant Lounge",day:"Fri",start:"21:00",end:"21:45"},
+  {name:"Princ3ss Charming",stage:"Deviant Lounge",day:"Fri",start:"21:45",end:"22:30"},
+  {name:"Grandma Wubplate b2b DJ Noodz",stage:"Deviant Lounge",day:"Fri",start:"22:30",end:"23:30"},
+  {name:"BBY GOOSE",stage:"Deviant Lounge",day:"Fri",start:"23:30",end:"00:30"},
+  {name:"Cicely Ft. MC STONE",stage:"Deviant Lounge",day:"Fri",start:"00:30",end:"01:30"},
+  {name:"Gullyteen b2b Iffyhype b2b Hurtdeer",stage:"Deviant Lounge",day:"Fri",start:"01:30",end:"03:00"},
+  {name:"Scottish Gabber Punk",stage:"Deviant Lounge",day:"Fri",start:"03:00",end:"04:00"},
+  // --- Fri: E Numbers ---
+  {name:"Silent Disco",stage:"E Numbers",day:"Fri",start:"13:00",end:"19:00"},
+  {name:"Dr Rat",stage:"E Numbers",day:"Fri",start:"19:00",end:"19:45"},
+  {name:"chlow333",stage:"E Numbers",day:"Fri",start:"19:45",end:"20:30"},
+  {name:"GOLDENAXE",stage:"E Numbers",day:"Fri",start:"20:30",end:"21:15"},
+  {name:"Mollie Rush",stage:"E Numbers",day:"Fri",start:"21:15",end:"22:00"},
+  {name:"DJ Gash Presents: Sherbert Sessions",stage:"E Numbers",day:"Fri",start:"22:00",end:"22:45"},
+  {name:"Girldick",stage:"E Numbers",day:"Fri",start:"22:45",end:"23:30"},
+  {name:"DJ Noeyedear",stage:"E Numbers",day:"Fri",start:"23:30",end:"00:15"},
+  {name:"Sam Tearout",stage:"E Numbers",day:"Fri",start:"00:15",end:"01:00"},
+  {name:"Lil Data",stage:"E Numbers",day:"Fri",start:"01:00",end:"01:45"},
+  {name:"N4TS: Danny Stranger",stage:"E Numbers",day:"Fri",start:"01:45",end:"02:30"},
+  {name:"N4TS: Dolfinboy",stage:"E Numbers",day:"Fri",start:"02:30",end:"03:15"},
+  {name:"N4TS: Secret Set",stage:"E Numbers",day:"Fri",start:"03:15",end:"04:00"},
+  // --- Fri: End of the Line ---
+  {name:"Unfoldance",stage:"End of the Line",day:"Fri",start:"20:00",end:"20:45"},
+  {name:"Lunae",stage:"End of the Line",day:"Fri",start:"20:45",end:"21:30"},
+  {name:"Sticky Ricky",stage:"End of the Line",day:"Fri",start:"21:30",end:"22:15"},
+  {name:"Loutan",stage:"End of the Line",day:"Fri",start:"22:15",end:"23:00"},
+  {name:"Agent Scully",stage:"End of the Line",day:"Fri",start:"23:00",end:"23:45"},
+  {name:"Scandal!st B2B Yoste",stage:"End of the Line",day:"Fri",start:"23:45",end:"00:45"},
+  {name:"DansFleur",stage:"End of the Line",day:"Fri",start:"00:45",end:"01:15"},
+  {name:"Grandma Wubplate",stage:"End of the Line",day:"Fri",start:"01:15",end:"02:00"},
+  {name:"Minor Science",stage:"End of the Line",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"DROMEK",stage:"End of the Line",day:"Fri",start:"03:00",end:"04:00"},
+  // --- Fri: Energy Garden ---
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Fri",start:"12:00",end:"22:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Fri",start:"13:00",end:"15:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Fri",start:"13:00",end:"15:00"},
+  // --- Fri: Foggers Mill ---
+  {name:"Razzomo",stage:"Foggers Mill",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Hawkeye and Hoe",stage:"Foggers Mill",day:"Fri",start:"14:30",end:"15:30"},
+  {name:"Hightown Crows",stage:"Foggers Mill",day:"Fri",start:"16:00",end:"17:00"},
+  {name:"Quinn's Quinny",stage:"Foggers Mill",day:"Fri",start:"17:30",end:"18:30"},
+  {name:"Bitter Lemons",stage:"Foggers Mill",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"Rotten Boroughs",stage:"Foggers Mill",day:"Fri",start:"20:30",end:"21:30"},
+  {name:"Pronghorn",stage:"Foggers Mill",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"The Bad Actors",stage:"Foggers Mill",day:"Fri",start:"23:30",end:"00:30"},
+  {name:"Whiskey Rebellion",stage:"Foggers Mill",day:"Fri",start:"01:00",end:"02:00"},
+  // --- Fri: Full Moon Ballroom ---
+  {name:"The Showhawk Duo",stage:"Full Moon Ballroom",day:"Fri",start:"13:15",end:"14:15"},
+  {name:"Heavy Beat Brass Band",stage:"Full Moon Ballroom",day:"Fri",start:"14:45",end:"15:45"},
+  {name:"New Car Smell",stage:"Full Moon Ballroom",day:"Fri",start:"16:15",end:"17:15"},
+  {name:"Big Band of Boom",stage:"Full Moon Ballroom",day:"Fri",start:"17:45",end:"18:45"},
+  {name:"Vibe Roulette",stage:"Full Moon Ballroom",day:"Fri",start:"19:15",end:"20:45"},
+  {name:"DOGSHOW",stage:"Full Moon Ballroom",day:"Fri",start:"21:15",end:"22:15"},
+  {name:"Direct Debbie B2B DJ Business Lady",stage:"Full Moon Ballroom",day:"Fri",start:"22:45",end:"00:00"},
+  {name:"Extra Medium B2B WBBL (Thick Boy Records) Ft. Kathika",stage:"Full Moon Ballroom",day:"Fri",start:"00:00",end:"01:15"},
+  {name:"Mr Fitz & Mr Woodnote Ft. Limmz",stage:"Full Moon Ballroom",day:"Fri",start:"01:15",end:"02:30"},
+  {name:"Swing & Bass (10 Year Anniversary): Fizzy Gillespie B2B Mista Trick Ft. She's Got Brass",stage:"Full Moon Ballroom",day:"Fri",start:"02:30",end:"04:00"},
+  // --- Fri: Gabber Kebabber ---
+  {name:"2 Sick Puppiez",stage:"Gabber Kebabber",day:"Fri",start:"12:00",end:"13:00"},
+  {name:"REDDEM",stage:"Gabber Kebabber",day:"Fri",start:"13:00",end:"13:45"},
+  {name:"Uptempo Anonymous",stage:"Gabber Kebabber",day:"Fri",start:"13:45",end:"14:30"},
+  {name:"John Michelle Jarg",stage:"Gabber Kebabber",day:"Fri",start:"14:30",end:"15:30"},
+  {name:"Dee Jay Say La Vee b2b Stripe N Co",stage:"Gabber Kebabber",day:"Fri",start:"15:30",end:"16:15"},
+  {name:"Chef Bland",stage:"Gabber Kebabber",day:"Fri",start:"16:15",end:"17:00"},
+  {name:"DJ Cilit Bang",stage:"Gabber Kebabber",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"Kebabbaret",stage:"Gabber Kebabber",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Foulmouth",stage:"Gabber Kebabber",day:"Fri",start:"19:00",end:"19:45"},
+  {name:"Bubble 07",stage:"Gabber Kebabber",day:"Fri",start:"19:45",end:"20:30"},
+  {name:"Matt Scratch",stage:"Gabber Kebabber",day:"Fri",start:"20:30",end:"21:15"},
+  {name:"Kalisae",stage:"Gabber Kebabber",day:"Fri",start:"21:15",end:"22:00"},
+  {name:"Mumhole",stage:"Gabber Kebabber",day:"Fri",start:"22:15",end:"23:00"},
+  {name:"Iffyhype",stage:"Gabber Kebabber",day:"Fri",start:"23:00",end:"00:00"},
+  {name:"Ditchsplitter",stage:"Gabber Kebabber",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"dj osu!",stage:"Gabber Kebabber",day:"Fri",start:"01:00",end:"02:00"},
+  {name:"Obsidian 23",stage:"Gabber Kebabber",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"Izzy Bolt",stage:"Gabber Kebabber",day:"Fri",start:"03:00",end:"04:00"},
+  // --- Fri: Games Lounge ---
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Fri",start:"12:00",end:"00:00"},
+  // --- Fri: Garden ---
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Fri",start:"10:00",end:"18:00"},
   // --- Fri: Grand Central ---
   {name:"Dutty Moonshine Big Band",stage:"Grand Central",day:"Fri",start:"12:30",end:"14:00"},
   {name:"Frankie Stew & Harvey Gunn",stage:"Grand Central",day:"Fri",start:"14:30",end:"15:30"},
@@ -1208,6 +1619,28 @@ const artists = [
   {name:"Kae Tempest",stage:"Grand Central",day:"Fri",start:"19:00",end:"20:00"},
   {name:"High Vis",stage:"Grand Central",day:"Fri",start:"20:30",end:"21:30"},
   {name:"L'Entourloop",stage:"Grand Central",day:"Fri",start:"22:00",end:"23:00"},
+  // --- Fri: Hangar 161 ---
+  {name:"The Screaming Dolls [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"13:00",end:"13:40"},
+  {name:"Ruena [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"14:00",end:"14:40"},
+  {name:"Baddy Issues [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"15:00",end:"15:40"},
+  {name:"Crae Wolf [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"16:00",end:"17:00"},
+  {name:"Ward XVI [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"17:30",end:"18:30"},
+  {name:"Vexed [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"Cody Frost [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"20:30",end:"21:30"},
+  {name:"Nightlives [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"Hyphen [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"23:30",end:"00:30"},
+  {name:"PENGSHUi [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"01:00",end:"02:00"},
+  // --- Fri: Hapitat ---
+  {name:"Hapitat",stage:"Hapitat",day:"Fri",start:"10:00",end:"18:00"},
+  // --- Fri: Helix ---
+  {name:"Dave Trotter B2B Tom Tucker",stage:"Helix",day:"Fri",start:"15:00",end:"16:30"},
+  {name:"Freestylers",stage:"Helix",day:"Fri",start:"16:30",end:"18:00"},
+  {name:"JFB",stage:"Helix",day:"Fri",start:"18:00",end:"19:30"},
+  {name:"Burt Cope",stage:"Helix",day:"Fri",start:"19:30",end:"21:00"},
+  {name:"A.Skillz",stage:"Helix",day:"Fri",start:"21:00",end:"22:30"},
+  {name:"Plump DJ's",stage:"Helix",day:"Fri",start:"22:30",end:"00:00"},
+  {name:"Deekline",stage:"Helix",day:"Fri",start:"00:00",end:"01:30"},
+  {name:"Madame Electrifie",stage:"Helix",day:"Fri",start:"01:30",end:"03:00"},
   // --- Fri: Hidden Woods ---
   {name:"Emily Dust",stage:"Hidden Woods",day:"Fri",start:"12:30",end:"14:00"},
   {name:"Juls",stage:"Hidden Woods",day:"Fri",start:"14:00",end:"16:00"},
@@ -1219,25 +1652,268 @@ const artists = [
   {name:"S.P.Y Ft. MC LowQui",stage:"Hidden Woods",day:"Fri",start:"23:30",end:"01:00"},
   {name:"Kasra B2B Samurai Breaks Ft. Strategy",stage:"Hidden Woods",day:"Fri",start:"01:00",end:"02:30"},
   {name:"Lens Ft. Dread MC",stage:"Hidden Woods",day:"Fri",start:"02:30",end:"04:00"},
+  // --- Fri: Hotel Paradiso ---
+  {name:"Karyo",stage:"Hotel Paradiso",day:"Fri",start:"20:00",end:"21:00"},
+  {name:"Dougie No Pain (Mungo's HiFi)",stage:"Hotel Paradiso",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"TBC",stage:"Hotel Paradiso",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"Aziza Jaye & DJ Kyla C",stage:"Hotel Paradiso",day:"Fri",start:"23:00",end:"00:00"},
+  {name:"JFB",stage:"Hotel Paradiso",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"Dazee",stage:"Hotel Paradiso",day:"Fri",start:"01:00",end:"02:00"},
+  // --- Fri: Hydro XL ---
+  {name:"Boomtown Opening Ceremony",stage:"Hydro XL",day:"Fri",start:"12:00",end:"12:30"},
+  {name:"Groove Armada - DJ Set",stage:"Hydro XL",day:"Fri",start:"12:30",end:"14:00"},
+  {name:"DJ EZ",stage:"Hydro XL",day:"Fri",start:"14:00",end:"15:30"},
+  {name:"Notion",stage:"Hydro XL",day:"Fri",start:"15:30",end:"17:00"},
+  {name:"Diffrent",stage:"Hydro XL",day:"Fri",start:"17:00",end:"18:30"},
+  {name:"Faster Horses B2B Y U QT",stage:"Hydro XL",day:"Fri",start:"18:30",end:"20:00"},
+  {name:"Eats Everything B2B TSHA",stage:"Hydro XL",day:"Fri",start:"20:00",end:"21:30"},
+  {name:"Effy B2B Ross From Friends",stage:"Hydro XL",day:"Fri",start:"21:30",end:"23:00"},
+  {name:"999999999 - AV Show",stage:"Hydro XL",day:"Fri",start:"23:00",end:"00:30"},
+  {name:"Oguz",stage:"Hydro XL",day:"Fri",start:"00:30",end:"02:00"},
+  {name:"[IVY] vs [SAFYRE]",stage:"Hydro XL",day:"Fri",start:"02:00",end:"03:00"},
+  // --- Fri: Infinity ---
+  {name:"Menu Music Presents: Salt B2B Stolen & WHOS JORDAN",stage:"Infinity",day:"Fri",start:"18:00",end:"20:30"},
+  {name:"ARLO",stage:"Infinity",day:"Fri",start:"20:30",end:"22:00"},
+  {name:"Jeremy Sylvester",stage:"Infinity",day:"Fri",start:"22:00",end:"23:30"},
+  {name:"A for Alpha B2B Dani Wylie",stage:"Infinity",day:"Fri",start:"23:30",end:"01:00"},
+  {name:"Dr Dubplate",stage:"Infinity",day:"Fri",start:"01:00",end:"02:30"},
+  {name:"James Wonka B2B Paree",stage:"Infinity",day:"Fri",start:"02:30",end:"04:00"},
+  // --- Fri: Luck Exchange Casino ---
+  {name:"Teckno Pixxy",stage:"Luck Exchange Casino",day:"Fri",start:"19:05",end:"19:15"},
+  {name:"Jesty Quinn",stage:"Luck Exchange Casino",day:"Fri",start:"19:15",end:"19:25"},
+  {name:"Dick Fran Dyke",stage:"Luck Exchange Casino",day:"Fri",start:"19:25",end:"19:30"},
+  {name:"Magic The Gabbering",stage:"Luck Exchange Casino",day:"Fri",start:"19:30",end:"19:45"},
+  {name:"Dead Lorry, Yellow Lorry",stage:"Luck Exchange Casino",day:"Fri",start:"19:50",end:"19:55"},
+  {name:"Teckno Pixxy",stage:"Luck Exchange Casino",day:"Fri",start:"19:55",end:"20:05"},
+  {name:"Dick Fran Dyke",stage:"Luck Exchange Casino",day:"Fri",start:"20:15",end:"20:20"},
+  {name:"The Sex Cripples",stage:"Luck Exchange Casino",day:"Fri",start:"20:20",end:"20:50"},
+  {name:"Iffyhype",stage:"Luck Exchange Casino",day:"Fri",start:"20:50",end:"21:20"},
+  // --- Fri: Mining for (g)Old Town ---
+  {name:"Flails",stage:"Mining for (g)Old Town",day:"Fri",start:"13:30",end:"15:00"},
+  {name:"Father Lynch",stage:"Mining for (g)Old Town",day:"Fri",start:"15:00",end:"16:30"},
+  {name:"light gal",stage:"Mining for (g)Old Town",day:"Fri",start:"16:30",end:"18:00"},
+  {name:"Emma Ash",stage:"Mining for (g)Old Town",day:"Fri",start:"18:00",end:"19:00"},
+  // --- Fri: Nachtlicker ---
+  {name:"SAV.",stage:"Nachtlicker",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"PINKS feat MC ZIRA FLO",stage:"Nachtlicker",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"THEO SHELDRAKE b2b TOM CROOME",stage:"Nachtlicker",day:"Fri",start:"20:00",end:"21:00"},
+  {name:"SAVANNAH",stage:"Nachtlicker",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"CYBER STEVE",stage:"Nachtlicker",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"PJ PEEK",stage:"Nachtlicker",day:"Fri",start:"23:00",end:"00:00"},
+  {name:"DYVR [live]",stage:"Nachtlicker",day:"Fri",start:"00:00",end:"00:30"},
+  {name:"JACK JUKES",stage:"Nachtlicker",day:"Fri",start:"00:30",end:"01:30"},
+  {name:"GOFF",stage:"Nachtlicker",day:"Fri",start:"01:30",end:"02:45"},
+  {name:"SLOPPY SPICE",stage:"Nachtlicker",day:"Fri",start:"02:45",end:"04:00"},
+  // --- Fri: Narcotics Anonymous ---
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Fri",start:"08:00",end:"09:00"},
+  // --- Fri: Nexus ---
+  {name:"Bongo's Bingo",stage:"Nexus",day:"Fri",start:"13:30",end:"14:30"},
+  {name:"Pozzy",stage:"Nexus",day:"Fri",start:"15:00",end:"16:00"},
+  {name:"BexBlu & Paul Stephan",stage:"Nexus",day:"Fri",start:"16:30",end:"17:30"},
+  {name:"Mr Williamz & Friendly Fire Band",stage:"Nexus",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Nubiyan Twist",stage:"Nexus",day:"Fri",start:"19:30",end:"20:30"},
+  {name:"House Gospel Choir",stage:"Nexus",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"Donae'o",stage:"Nexus",day:"Fri",start:"22:30",end:"23:30"},
+  {name:"The Skinner Brothers",stage:"Nexus",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"Fox Stevenson - Live",stage:"Nexus",day:"Fri",start:"01:30",end:"02:30"},
+  // --- Fri: Observatory ---
+  {name:"Your Brain On Yoga",stage:"Observatory",day:"Fri",start:"10:00",end:"11:00"},
+  {name:"Drug Testing & Safety With The Loop'S Potty Professor & Crazy Chemist",stage:"Observatory",day:"Fri",start:"11:30",end:"12:30"},
+  {name:"How To Create Reality... In Your Dreams",stage:"Observatory",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Fear & Loathing In Boomtown",stage:"Observatory",day:"Fri",start:"14:30",end:"15:30"},
+  {name:"Gather: An Embodied Connection Workshop",stage:"Observatory",day:"Fri",start:"16:00",end:"17:00"},
+  {name:"Women And Psychedelics - Science, Stories And Embodiment",stage:"Observatory",day:"Fri",start:"17:30",end:"18:30"},
+  // --- Fri: Permaculture ---
+  {name:"Green the cracks: Reclaiming neglected spaces for food and wildlife",stage:"Permaculture",day:"Fri",start:"10:00",end:"11:00"},
+  {name:"Not a single-use planet: Mushroom ecology, rot and radical redesign",stage:"Permaculture",day:"Fri",start:"11:30",end:"12:30"},
+  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"What actually helps when the world feels cooked? A panel on living well in strange times",stage:"Permaculture",day:"Fri",start:"14:30",end:"16:30"},
+  {name:"Wearable folklore: Crafting ear cuffs from scrap, wire and found objects",stage:"Permaculture",day:"Fri",start:"17:00",end:"18:00"},
+  // --- Fri: PFP Robot ---
+  {name:"Comp Winner",stage:"PFP Robot",day:"Fri",start:"15:00",end:"15:45"},
+  {name:"Darth Leng",stage:"PFP Robot",day:"Fri",start:"15:30",end:"16:30"},
+  {name:"Indecline",stage:"PFP Robot",day:"Fri",start:"16:30",end:"17:30"},
+  {name:"Roland K",stage:"PFP Robot",day:"Fri",start:"17:30",end:"18:30"},
+  // --- Fri: Rebel Girls Club ---
+  {name:"Morning Yoga with Emma",stage:"Rebel Girls Club",day:"Fri",start:"10:00",end:"11:00"},
+  {name:"Meeting Warrior Self with Molly",stage:"Rebel Girls Club",day:"Fri",start:"11:00",end:"12:15"},
+  {name:"Cunting - Cunt Bunting Making with Maisie",stage:"Rebel Girls Club",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Lets be Fools: A Creative Wellbeing Workshop with Alena",stage:"Rebel Girls Club",day:"Fri",start:"14:30",end:"15:30"},
+  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Fri",start:"16:00",end:"16:40"},
+  {name:"Burlesque Life Drawing with Alissa",stage:"Rebel Girls Club",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"Neo Burlesque Partner workshop with Everglowing",stage:"Rebel Girls Club",day:"Fri",start:"18:30",end:"19:30"},
+  // --- Fri: Reel News ---
+  {name:"The Violence of Extraction Economies",stage:"Reel News",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Reports from Rojava  - Frontlines of Resistance",stage:"Reel News",day:"Fri",start:"12:00",end:"12:45"},
+  {name:"Operation Recomply: Democracy on Trial",stage:"Reel News",day:"Fri",start:"12:45",end:"14:45"},
+  {name:"The school to prison pipeline",stage:"Reel News",day:"Fri",start:"14:45",end:"15:30"},
+  {name:"Confronting institutional misogyny and oppression",stage:"Reel News",day:"Fri",start:"15:30",end:"16:30"},
+  {name:"Spycops",stage:"Reel News",day:"Fri",start:"16:30",end:"17:15"},
+  {name:"Demand the Impossible: using theatre in struggles for justice",stage:"Reel News",day:"Fri",start:"17:15",end:"18:15"},
+  {name:"Club Commons: Moving Bodies to Grow Movements in Queer Nightlife",stage:"Reel News",day:"Fri",start:"18:15",end:"19:00"},
+  // --- Fri: Rose and Clown ---
+  {name:"Strictly Chumps Dancing",stage:"Rose and Clown",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Boomtown's Got Talent",stage:"Rose and Clown",day:"Fri",start:"14:00",end:"15:00"},
+  {name:"An Dannsa Dub (Live Dub Set) Ft. Wends",stage:"Rose and Clown",day:"Fri",start:"15:00",end:"16:30"},
+  {name:"Maddy V [Sika Studios]",stage:"Rose and Clown",day:"Fri",start:"16:30",end:"16:45"},
+  {name:"Datkid & Mylo Stone [Sika Studios]",stage:"Rose and Clown",day:"Fri",start:"16:45",end:"17:00"},
+  {name:"Creatures of Habit [Sika Studios]",stage:"Rose and Clown",day:"Fri",start:"17:00",end:"17:15"},
+  {name:"Illinformed Illin for Meds Showcase Ft. Babylon Dead, Creatures Of Habit, Datkid, Eric The Red, Fliptrix, Gaza Glock​, Jack Jetson, Mylo Stone, Sean Peng, Smellington Piff, Verb T [Sika Studios]",stage:"Rose and Clown",day:"Fri",start:"17:15",end:"17:55"},
+  {name:"Babylon Dead [Sika Studios]",stage:"Rose and Clown",day:"Fri",start:"17:55",end:"18:10"},
+  {name:"Sika Studios 140 Showcase Ft. Rez, Jman, Local, Slowie & Special Guests [Sika Studios]",stage:"Rose and Clown",day:"Fri",start:"18:10",end:"18:30"},
+  {name:"Binksy",stage:"Rose and Clown",day:"Fri",start:"18:30",end:"19:15"},
+  {name:"RWKUS",stage:"Rose and Clown",day:"Fri",start:"19:30",end:"20:30"},
+  {name:"Molly Sellors (Oboe EDM Queen)",stage:"Rose and Clown",day:"Fri",start:"20:30",end:"21:00"},
+  {name:"She's Got Brass",stage:"Rose and Clown",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"Jam Salad",stage:"Rose and Clown",day:"Fri",start:"22:00",end:"22:30"},
+  {name:"Big Wett",stage:"Rose and Clown",day:"Fri",start:"22:30",end:"23:30"},
+  {name:"Hang The DJs B2B Lobsta B",stage:"Rose and Clown",day:"Fri",start:"23:30",end:"01:00"},
+  {name:"Jungyals and Gays (Peppa B2B Shirley Temper)",stage:"Rose and Clown",day:"Fri",start:"01:00",end:"02:00"},
+  {name:"OKO",stage:"Rose and Clown",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"The Neuroheadz Ft. Keenan",stage:"Rose and Clown",day:"Fri",start:"03:00",end:"04:00"},
+  // --- Fri: Sharing Circles ---
+  {name:"Sharing Circles - Workshop",stage:"Sharing Circles",day:"Fri",start:"11:00",end:"19:00"},
+  // --- Fri: Sibín Beag ---
+  {name:"Green Diesel",stage:"Sibín Beag",day:"Fri",start:"14:00",end:"14:45"},
+  {name:"John Kelly",stage:"Sibín Beag",day:"Fri",start:"15:15",end:"16:00"},
+  {name:"Roof Cats",stage:"Sibín Beag",day:"Fri",start:"16:30",end:"17:15"},
+  {name:"No Murder No Moustache",stage:"Sibín Beag",day:"Fri",start:"17:45",end:"18:30"},
+  {name:"The Kahunas",stage:"Sibín Beag",day:"Fri",start:"19:00",end:"19:45"},
+  {name:"Craic Man Fancy Dan",stage:"Sibín Beag",day:"Fri",start:"20:15",end:"21:00"},
+  {name:"Trad Folkin' Rocks House Band",stage:"Sibín Beag",day:"Fri",start:"21:30",end:"23:30"},
+  {name:"Trad Folkin' Rave DJ's (Annie Craic & Dalba)",stage:"Sibín Beag",day:"Fri",start:"00:00",end:"00:45"},
+  // --- Fri: Soapranos Laundrette ---
+  {name:"Borderline Massive",stage:"Soapranos Laundrette",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Soapranos & Team Pink present: A Soddy Sock Off",stage:"Soapranos Laundrette",day:"Fri",start:"14:00",end:"15:00"},
+  {name:"MSG",stage:"Soapranos Laundrette",day:"Fri",start:"15:00",end:"16:00"},
+  {name:"Empressplay",stage:"Soapranos Laundrette",day:"Fri",start:"16:00",end:"17:00"},
+  {name:"G33",stage:"Soapranos Laundrette",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"Mina B2B BLCK Stream",stage:"Soapranos Laundrette",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Bubski B2B REA",stage:"Soapranos Laundrette",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"Buntai: Mahnoor",stage:"Soapranos Laundrette",day:"Fri",start:"20:00",end:"21:00"},
+  {name:"Buntai: Akira B2B Milzy",stage:"Soapranos Laundrette",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"Buntai: Nio B B2B Skye",stage:"Soapranos Laundrette",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"Buntai: Jaz Imsky B2B Felixculprah ft Cola B",stage:"Soapranos Laundrette",day:"Fri",start:"23:00",end:"00:00"},
+  // --- Fri: Spectrum 360 ---
+  {name:"Draggernauts",stage:"Spectrum 360",day:"Fri",start:"16:00",end:"18:00"},
+  {name:"Samurai Breaks B2B Swaglord Savannah",stage:"Spectrum 360",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Mandidextrous Ft. Special Guest",stage:"Spectrum 360",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"Laze B2B Saku Sahara",stage:"Spectrum 360",day:"Fri",start:"20:00",end:"22:00"},
+  {name:"Darren Styles",stage:"Spectrum 360",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"Raybay",stage:"Spectrum 360",day:"Fri",start:"23:00",end:"00:00"},
+  {name:"Venjent",stage:"Spectrum 360",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"Bish Ft. Carasel",stage:"Spectrum 360",day:"Fri",start:"01:00",end:"02:00"},
+  {name:"Starjunk 95",stage:"Spectrum 360",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"Deadheads: Mandidextrous & Matt Scratch",stage:"Spectrum 360",day:"Fri",start:"03:00",end:"04:00"},
+  // --- Fri: Spinney Hollow ---
+  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Fri",start:"10:00",end:"18:00"},
+  // --- Fri: Sub Lab ---
+  {name:"Matteo",stage:"Sub Lab",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Tacktile",stage:"Sub Lab",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"Panix",stage:"Sub Lab",day:"Fri",start:"20:00",end:"21:00"},
+  {name:"Chad Dubz B2B Lotu Ft Slowie",stage:"Sub Lab",day:"Fri",start:"21:00",end:"22:30"},
+  {name:"Breakfake",stage:"Sub Lab",day:"Fri",start:"22:30",end:"23:30"},
+  {name:"Rea Ft Sylla",stage:"Sub Lab",day:"Fri",start:"23:30",end:"00:30"},
+  {name:"Hijinx",stage:"Sub Lab",day:"Fri",start:"00:30",end:"01:30"},
+  {name:"GLM",stage:"Sub Lab",day:"Fri",start:"01:30",end:"02:30"},
+  {name:"Special Guest",stage:"Sub Lab",day:"Fri",start:"02:30",end:"03:59"},
   // --- Fri: Tangled Roots ---
   {name:"Lionpulse x Sinai",stage:"Tangled Roots",day:"Fri",start:"12:00",end:"13:00"},
-  {name:"Akira B2B Jaz Imsky (Buntai)",stage:"Tangled Roots",day:"Fri",start:"13:00",end:"14:30"},
-  {name:"Skalah",stage:"Tangled Roots",day:"Fri",start:"14:30",end:"16:00"},
-  {name:"Darkai B2B Felixculpah",stage:"Tangled Roots",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"Commodo B2B Pinch",stage:"Tangled Roots",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Silkie",stage:"Tangled Roots",day:"Fri",start:"18:00",end:"19:30"},
-  {name:"Mala",stage:"Tangled Roots",day:"Fri",start:"19:30",end:"21:00"},
-  // --- Fri: Anara Forest ---
-  {name:"Kaya Ft. Limmz",stage:"Anara Forest",day:"Fri",start:"15:00",end:"16:00"},
-  {name:"Sin & Brook",stage:"Anara Forest",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"Young Franco",stage:"Anara Forest",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"PJ Bridger",stage:"Anara Forest",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Mary Droppinz",stage:"Anara Forest",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"G33 B2B Plastician",stage:"Anara Forest",day:"Fri",start:"20:00",end:"21:30"},
-  {name:"Champion",stage:"Anara Forest",day:"Fri",start:"21:30",end:"22:30"},
-  {name:"Sbtrkt DJ Set",stage:"Anara Forest",day:"Fri",start:"22:30",end:"00:00"},
-  {name:"Ahadadream",stage:"Anara Forest",day:"Fri",start:"00:00",end:"01:30"},
-  {name:"Hamdi B2B Mala",stage:"Anara Forest",day:"Fri",start:"01:30",end:"03:00"},
+  {name:"Akira B2B Jaz Imsky (Buntai) Ft. Cunning MC [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"13:00",end:"14:30"},
+  {name:"Skalah [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"14:30",end:"16:00"},
+  {name:"Darkai B2B Felixculpah [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"16:00",end:"17:00"},
+  {name:"Commodo B2B Pinch [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"Silkie [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"18:00",end:"19:30"},
+  {name:"Mala [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"19:30",end:"21:00"},
+  // --- Fri: The Boomtown Bobbies ---
+  {name:"Music from the Mothership",stage:"The Boomtown Bobbies",day:"Fri",start:"15:00",end:"16:30"},
+  {name:"Uncle Boomy",stage:"The Boomtown Bobbies",day:"Fri",start:"16:30",end:"17:15"},
+  {name:"Elle b2b Frax",stage:"The Boomtown Bobbies",day:"Fri",start:"17:15",end:"18:00"},
+  {name:"Frisbee Aerobics",stage:"The Boomtown Bobbies",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Aries",stage:"The Boomtown Bobbies",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"Amelia Leigh",stage:"The Boomtown Bobbies",day:"Fri",start:"20:00",end:"20:40"},
+  {name:"Simmo",stage:"The Boomtown Bobbies",day:"Fri",start:"20:40",end:"21:20"},
+  {name:"Villain",stage:"The Boomtown Bobbies",day:"Fri",start:"21:20",end:"22:00"},
+  {name:"Bugsy",stage:"The Boomtown Bobbies",day:"Fri",start:"22:00",end:"22:40"},
+  {name:"Illgroove",stage:"The Boomtown Bobbies",day:"Fri",start:"22:40",end:"00:00"},
+  {name:"Euphonique",stage:"The Boomtown Bobbies",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"Zimma b2b Dox",stage:"The Boomtown Bobbies",day:"Fri",start:"01:00",end:"02:00"},
+  {name:"Demolition Squad",stage:"The Boomtown Bobbies",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"Militant Music w MC Stezzy",stage:"The Boomtown Bobbies",day:"Fri",start:"03:00",end:"04:00"},
+  // --- Fri: The Fools Leap ---
+  {name:"Nuala",stage:"The Fools Leap",day:"Fri",start:"12:00",end:"13:00"},
+  {name:"The Balkan Wanderers",stage:"The Fools Leap",day:"Fri",start:"13:30",end:"14:30"},
+  {name:"Moonshine Malarkey",stage:"The Fools Leap",day:"Fri",start:"15:00",end:"16:00"},
+  {name:"Blue Bottle Club",stage:"The Fools Leap",day:"Fri",start:"16:30",end:"17:30"},
+  {name:"New Age Collective",stage:"The Fools Leap",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"The Groggy Dogs",stage:"The Fools Leap",day:"Fri",start:"19:30",end:"20:30"},
+  {name:"Rum Buffalo",stage:"The Fools Leap",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"Mista Trick's Balkan Bass",stage:"The Fools Leap",day:"Fri",start:"22:30",end:"23:30"},
+  {name:"ZooBlasters",stage:"The Fools Leap",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"Baltic Balkan",stage:"The Fools Leap",day:"Fri",start:"01:30",end:"02:45"},
+  {name:"C@ In The H@'s Balkan Beats & Gypsy Bangers",stage:"The Fools Leap",day:"Fri",start:"02:45",end:"04:00"},
+  // --- Fri: The Garden Centre ---
+  {name:"Heman",stage:"The Garden Centre",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Sidetrakka",stage:"The Garden Centre",day:"Fri",start:"14:00",end:"15:15"},
+  {name:"Cassia",stage:"The Garden Centre",day:"Fri",start:"15:15",end:"16:30"},
+  {name:"The Blister Pack",stage:"The Garden Centre",day:"Fri",start:"16:30",end:"18:00"},
+  {name:"Michael Joyce",stage:"The Garden Centre",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"The Regional Manager's Garden Show",stage:"The Garden Centre",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"Strawberry Jams",stage:"The Garden Centre",day:"Fri",start:"22:00",end:"22:30"},
+  {name:"WildSoul",stage:"The Garden Centre",day:"Fri",start:"22:30",end:"23:30"},
+  {name:"Charlie Power",stage:"The Garden Centre",day:"Fri",start:"23:30",end:"00:30"},
+  {name:"Prolifix",stage:"The Garden Centre",day:"Fri",start:"00:30",end:"01:30"},
+  {name:"basshead",stage:"The Garden Centre",day:"Fri",start:"01:30",end:"02:45"},
+  {name:"The Prophet",stage:"The Garden Centre",day:"Fri",start:"02:45",end:"04:00"},
+  // --- Fri: The Immortal Children of the Eternal Seed ---
+  {name:"Ikamba",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"Vic Tandy",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"23:00",end:"00:00"},
+  {name:"MontiColombi",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"Minki",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"01:00",end:"02:00"},
+  {name:"Chinese Daughter",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"Mowgli b2b Slewy",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"03:00",end:"04:00"},
+  // --- Fri: The Lion's Den ---
+  {name:"Boomtown Opening Ceremony",stage:"The Lion's Den",day:"Fri",start:"12:00",end:"12:30"},
+  {name:"Madness",stage:"The Lion's Den",day:"Fri",start:"12:30",end:"13:50"},
+  {name:"Shy FX Ft. Rage",stage:"The Lion's Den",day:"Fri",start:"14:05",end:"15:30"},
+  {name:"Sub Focus",stage:"The Lion's Den",day:"Fri",start:"15:30",end:"16:30"},
+  {name:"Alborosie & Shengen Clan",stage:"The Lion's Den",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"Gentleman's Dub Club & Friends",stage:"The Lion's Den",day:"Fri",start:"18:30",end:"20:00"},
+  {name:"Ren",stage:"The Lion's Den",day:"Fri",start:"20:30",end:"21:30"},
+  {name:"Kneecap",stage:"The Lion's Den",day:"Fri",start:"22:15",end:"23:30"},
+  {name:"Wilkinson Ft. MC AD-APT",stage:"The Lion's Den",day:"Fri",start:"23:15",end:"00:30"},
+  {name:"Camo & Krooked B2B Mefjus Ft. Daxta",stage:"The Lion's Den",day:"Fri",start:"00:30",end:"02:00"},
+  // --- Fri: The Magic Teapot ---
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Fri",start:"12:00",end:"00:00"},
+  // --- Fri: The Pomegranate Parlour ---
+  {name:"Estère",stage:"The Pomegranate Parlour",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Tanti",stage:"The Pomegranate Parlour",day:"Fri",start:"14:00",end:"15:00"},
+  {name:"Hiphoppapotamus B2B Burland",stage:"The Pomegranate Parlour",day:"Fri",start:"15:00",end:"17:00"},
+  {name:"Sweet Chilli",stage:"The Pomegranate Parlour",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"Flibble",stage:"The Pomegranate Parlour",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"Ikamba",stage:"The Pomegranate Parlour",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"Mattana",stage:"The Pomegranate Parlour",day:"Fri",start:"20:00",end:"21:00"},
+  {name:"DJ Shakey",stage:"The Pomegranate Parlour",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"Somatic",stage:"The Pomegranate Parlour",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"LuDec",stage:"The Pomegranate Parlour",day:"Fri",start:"23:00",end:"00:00"},
+  {name:"Gypsyndicate",stage:"The Pomegranate Parlour",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"Illexxandra",stage:"The Pomegranate Parlour",day:"Fri",start:"01:00",end:"02:00"},
+  {name:"Charlie Power",stage:"The Pomegranate Parlour",day:"Fri",start:"02:00",end:"03:00"},
+  {name:"Pablo Dutta",stage:"The Pomegranate Parlour",day:"Fri",start:"03:00",end:"03:55"},
+  // --- Fri: Tinker Station ---
+  {name:"Tinker Station",stage:"Tinker Station",day:"Fri",start:"10:00",end:"18:00"},
+  // --- Fri: Topsy Turvy Trims ---
+  {name:"Black Board Soundsystem",stage:"Topsy Turvy Trims",day:"Fri",start:"13:00",end:"15:00"},
+  {name:"TBA",stage:"Topsy Turvy Trims",day:"Fri",start:"15:00",end:"17:00"},
+  {name:"Hokey Cokey Cabaret",stage:"Topsy Turvy Trims",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"Ignoring Izzy",stage:"Topsy Turvy Trims",day:"Fri",start:"19:00",end:"21:00"},
+  {name:"Ed Spinna",stage:"Topsy Turvy Trims",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"Merchant",stage:"Topsy Turvy Trims",day:"Fri",start:"22:00",end:"00:00"},
+  {name:"Goose",stage:"Topsy Turvy Trims",day:"Fri",start:"00:00",end:"01:00"},
+  {name:"TBA",stage:"Topsy Turvy Trims",day:"Fri",start:"01:00",end:"01:30"},
+  {name:"BitchSlap",stage:"Topsy Turvy Trims",day:"Fri",start:"01:30",end:"02:30"},
   // --- Fri: Tribe of Frog ---
   {name:"Velor",stage:"Tribe of Frog",day:"Fri",start:"12:00",end:"13:30"},
   {name:"Cheska Onyx",stage:"Tribe of Frog",day:"Fri",start:"13:30",end:"15:00"},
@@ -1251,341 +1927,200 @@ const artists = [
   {name:"Altruism",stage:"Tribe of Frog",day:"Fri",start:"00:30",end:"01:30"},
   {name:"Athzira",stage:"Tribe of Frog",day:"Fri",start:"01:30",end:"02:30"},
   {name:"Stryker",stage:"Tribe of Frog",day:"Fri",start:"02:30",end:"04:00"},
-  // --- Fri: Nexus ---
-  {name:"Bongo's Bingo",stage:"Nexus",day:"Fri",start:"13:30",end:"14:30"},
-  {name:"Pozzy",stage:"Nexus",day:"Fri",start:"15:00",end:"16:00"},
-  {name:"Bexblu & Paul Stephan",stage:"Nexus",day:"Fri",start:"16:30",end:"17:30"},
-  {name:"Mr Williamz & Friendly Fire Band",stage:"Nexus",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Nubiyan Twist",stage:"Nexus",day:"Fri",start:"19:30",end:"20:30"},
-  {name:"House Gospel Choir",stage:"Nexus",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Donae'o",stage:"Nexus",day:"Fri",start:"22:30",end:"23:30"},
-  {name:"The Skinner Brothers",stage:"Nexus",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Fox Stevenson Live",stage:"Nexus",day:"Fri",start:"01:30",end:"02:30"},
-  // --- Fri: Spectrum 360 ---
-  {name:"Draggernauts",stage:"Spectrum 360",day:"Fri",start:"16:00",end:"18:00"},
-  {name:"Samurai Breaks B2B Swaglord Savannah",stage:"Spectrum 360",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Mandidextrous Ft. Special Guest",stage:"Spectrum 360",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Laze B2B Saku Sahara",stage:"Spectrum 360",day:"Fri",start:"20:00",end:"22:00"},
-  {name:"Darren Styles",stage:"Spectrum 360",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"Raybay",stage:"Spectrum 360",day:"Fri",start:"23:00",end:"00:00"},
-  {name:"Venjent",stage:"Spectrum 360",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Bish Ft. Carasel",stage:"Spectrum 360",day:"Fri",start:"01:00",end:"02:00"},
-  {name:"Starjunk 95",stage:"Spectrum 360",day:"Fri",start:"02:00",end:"03:00"},
-  {name:"Deadheads: Mandidextrous & Matt Scratch",stage:"Spectrum 360",day:"Fri",start:"03:00",end:"04:00"},
-  // --- Fri: Acid Leak ---
-  {name:"John Tuxman",stage:"Acid Leak",day:"Fri",start:"13:00",end:"14:30"},
-  {name:"One Dirty Ape",stage:"Acid Leak",day:"Fri",start:"14:30",end:"16:00"},
-  {name:"Dynamic Intervention",stage:"Acid Leak",day:"Fri",start:"16:00",end:"17:30"},
-  {name:"A.P.",stage:"Acid Leak",day:"Fri",start:"17:30",end:"19:00"},
-  {name:"David Oblivion",stage:"Acid Leak",day:"Fri",start:"19:00",end:"20:30"},
-  {name:"D.A.V.E The Drummer",stage:"Acid Leak",day:"Fri",start:"20:30",end:"22:00"},
-  {name:"Bad Boy Pete",stage:"Acid Leak",day:"Fri",start:"22:00",end:"23:30"},
-  {name:"Eddie Santini",stage:"Acid Leak",day:"Fri",start:"23:30",end:"01:00"},
-  {name:"Sterling Moss",stage:"Acid Leak",day:"Fri",start:"01:00",end:"02:30"},
-  {name:"DJ Smay",stage:"Acid Leak",day:"Fri",start:"02:30",end:"04:00"},
-  // --- Fri: Rose and Clown ---
-  {name:"Strictly Chumps Dancing",stage:"Rose and Clown",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Boomtown's Got Talent",stage:"Rose and Clown",day:"Fri",start:"14:00",end:"15:00"},
-  {name:"An Dannsa Dub Live Dub Set",stage:"Rose and Clown",day:"Fri",start:"15:00",end:"16:30"},
-  {name:"Illinformed Illin for Meds Showcase",stage:"Rose and Clown",day:"Fri",start:"17:15",end:"17:55"},
-  {name:"Sika Studios 140 Showcase",stage:"Rose and Clown",day:"Fri",start:"18:10",end:"18:30"},
-  {name:"Binksy",stage:"Rose and Clown",day:"Fri",start:"18:30",end:"19:15"},
-  {name:"Rwkus",stage:"Rose and Clown",day:"Fri",start:"19:30",end:"20:30"},
-  {name:"Molly Sellors",stage:"Rose and Clown",day:"Fri",start:"20:30",end:"21:00"},
-  {name:"She's Got Brass",stage:"Rose and Clown",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Jam Salad",stage:"Rose and Clown",day:"Fri",start:"22:00",end:"22:30"},
-  {name:"Big Wett",stage:"Rose and Clown",day:"Fri",start:"22:30",end:"23:30"},
-  {name:"Hang The Djs B2B Lobsta B",stage:"Rose and Clown",day:"Fri",start:"23:30",end:"01:00"},
-  {name:"Jungyals and Gays",stage:"Rose and Clown",day:"Fri",start:"01:00",end:"02:00"},
-  {name:"Oko",stage:"Rose and Clown",day:"Fri",start:"02:00",end:"03:00"},
-  {name:"The Neuroheadz Ft. Keenan",stage:"Rose and Clown",day:"Fri",start:"03:00",end:"04:00"},
-  // --- Fri: Hangar 161 ---
-  {name:"The Screaming Dolls",stage:"Hangar 161",day:"Fri",start:"13:00",end:"13:40"},
-  {name:"Ruena",stage:"Hangar 161",day:"Fri",start:"14:00",end:"14:40"},
-  {name:"Baddy Issues",stage:"Hangar 161",day:"Fri",start:"15:00",end:"15:40"},
-  {name:"Crae Wolf",stage:"Hangar 161",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"Ward Xvi",stage:"Hangar 161",day:"Fri",start:"17:30",end:"18:30"},
-  {name:"Vexed",stage:"Hangar 161",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Cody Frost",stage:"Hangar 161",day:"Fri",start:"20:30",end:"21:30"},
-  {name:"Nightlives",stage:"Hangar 161",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"Hyphen",stage:"Hangar 161",day:"Fri",start:"23:30",end:"00:30"},
-  {name:"Pengshui",stage:"Hangar 161",day:"Fri",start:"01:00",end:"02:00"},
-  // --- Fri: The Fools Leap ---
-  {name:"Nuala",stage:"The Fools Leap",day:"Fri",start:"12:00",end:"13:00"},
-  {name:"The Balkan Wanderers",stage:"The Fools Leap",day:"Fri",start:"13:30",end:"14:30"},
-  {name:"Moonshine Malarkey",stage:"The Fools Leap",day:"Fri",start:"15:00",end:"16:00"},
-  {name:"Blue Bottle Club",stage:"The Fools Leap",day:"Fri",start:"16:30",end:"17:30"},
-  {name:"New Age Collective",stage:"The Fools Leap",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"The Groggy Dogs",stage:"The Fools Leap",day:"Fri",start:"19:30",end:"20:30"},
-  {name:"Rum Buffalo",stage:"The Fools Leap",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Mista Trick's Balkan Bass",stage:"The Fools Leap",day:"Fri",start:"22:30",end:"23:30"},
-  {name:"Zooblasters",stage:"The Fools Leap",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Baltic Balkan",stage:"The Fools Leap",day:"Fri",start:"01:30",end:"02:45"},
-  {name:"C@ In The H@'s Balkan Beats & Gypsy Bangers",stage:"The Fools Leap",day:"Fri",start:"02:45",end:"04:00"},
-  // --- Fri: Full Moon Ballroom ---
-  {name:"The Showhawk Duo",stage:"Full Moon Ballroom",day:"Fri",start:"13:15",end:"14:15"},
-  {name:"Heavy Beat Brass Band",stage:"Full Moon Ballroom",day:"Fri",start:"14:45",end:"15:45"},
-  {name:"New Car Smell",stage:"Full Moon Ballroom",day:"Fri",start:"16:15",end:"17:15"},
-  {name:"Big Band of Boom",stage:"Full Moon Ballroom",day:"Fri",start:"17:45",end:"18:45"},
-  {name:"Vibe Roulette",stage:"Full Moon Ballroom",day:"Fri",start:"19:15",end:"20:45"},
-  {name:"Dogshow",stage:"Full Moon Ballroom",day:"Fri",start:"21:15",end:"22:15"},
-  {name:"Direct Debbie B2B DJ Business Lady",stage:"Full Moon Ballroom",day:"Fri",start:"22:45",end:"00:00"},
-  {name:"Extra Medium B2B Wbbl",stage:"Full Moon Ballroom",day:"Fri",start:"00:00",end:"01:15"},
-  {name:"Mr Fitz & Mr Woodnote Ft. Limmz",stage:"Full Moon Ballroom",day:"Fri",start:"01:15",end:"02:30"},
-  {name:"Swing & Bass: Fizzy Gillespie B2B Mista Trick Ft. She's Got Brass",stage:"Full Moon Ballroom",day:"Fri",start:"02:30",end:"04:00"},
-  // --- Fri: Foggers Mill ---
-  {name:"Razzomo",stage:"Foggers Mill",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Hawkeye and Hoe",stage:"Foggers Mill",day:"Fri",start:"14:30",end:"15:30"},
-  {name:"Hightown Crows",stage:"Foggers Mill",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"Quinn's Quinny",stage:"Foggers Mill",day:"Fri",start:"17:30",end:"18:30"},
-  {name:"Bitter Lemons",stage:"Foggers Mill",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Rotten Boroughs",stage:"Foggers Mill",day:"Fri",start:"20:30",end:"21:30"},
-  {name:"Pronghorn",stage:"Foggers Mill",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"The Bad Actors",stage:"Foggers Mill",day:"Fri",start:"23:30",end:"00:30"},
-  {name:"Whiskey Rebellion",stage:"Foggers Mill",day:"Fri",start:"01:00",end:"02:00"},
-  // --- Fri: The Boomtown Bobbies ---
-  {name:"Music from the Mothership",stage:"The Boomtown Bobbies",day:"Fri",start:"15:00",end:"16:30"},
-  {name:"Uncle Boomy",stage:"The Boomtown Bobbies",day:"Fri",start:"16:30",end:"17:15"},
-  {name:"Elle B2B Frax",stage:"The Boomtown Bobbies",day:"Fri",start:"17:15",end:"18:00"},
-  {name:"Aries",stage:"The Boomtown Bobbies",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Amelia Leigh",stage:"The Boomtown Bobbies",day:"Fri",start:"20:00",end:"20:40"},
-  {name:"Simmo",stage:"The Boomtown Bobbies",day:"Fri",start:"20:40",end:"21:20"},
-  {name:"Villain",stage:"The Boomtown Bobbies",day:"Fri",start:"21:20",end:"22:00"},
-  {name:"Bugsy",stage:"The Boomtown Bobbies",day:"Fri",start:"22:00",end:"22:40"},
-  {name:"Illgroove",stage:"The Boomtown Bobbies",day:"Fri",start:"22:40",end:"00:00"},
-  {name:"Euphonique",stage:"The Boomtown Bobbies",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Zimma B2B Dox",stage:"The Boomtown Bobbies",day:"Fri",start:"01:00",end:"02:00"},
-  {name:"Demolition Squad",stage:"The Boomtown Bobbies",day:"Fri",start:"02:00",end:"03:00"},
-  {name:"Militant Music w MC Stezzy",stage:"The Boomtown Bobbies",day:"Fri",start:"03:00",end:"04:00"},
-  // --- Fri: Soapranos Laundrette ---
-  {name:"Borderline Massive",stage:"Soapranos Laundrette",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Msg",stage:"Soapranos Laundrette",day:"Fri",start:"15:00",end:"16:00"},
-  {name:"Empressplay",stage:"Soapranos Laundrette",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"G33",stage:"Soapranos Laundrette",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Mina B2B Blck Stream",stage:"Soapranos Laundrette",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Bubski B2B Rea",stage:"Soapranos Laundrette",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Buntai: Mahnoor",stage:"Soapranos Laundrette",day:"Fri",start:"20:00",end:"21:00"},
-  {name:"Buntai: Akira B2B Milzy",stage:"Soapranos Laundrette",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Buntai: Nio B B2B Skye",stage:"Soapranos Laundrette",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"Buntai: Jaz Imsky B2B Felixculprah Ft Cola B",stage:"Soapranos Laundrette",day:"Fri",start:"23:00",end:"00:00"},
-  // --- Fri: Hotel Paradiso ---
-  {name:"Karyo",stage:"Hotel Paradiso",day:"Fri",start:"20:00",end:"21:00"},
-  {name:"Dougie No Pain",stage:"Hotel Paradiso",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Aziza Jaye & DJ Kyla C",stage:"Hotel Paradiso",day:"Fri",start:"23:00",end:"00:00"},
-  {name:"Jfb",stage:"Hotel Paradiso",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Dazee",stage:"Hotel Paradiso",day:"Fri",start:"01:00",end:"02:00"},
-  // --- Fri: Luck Exchange Casino ---
-  {name:"Teckno Pixxy",stage:"Luck Exchange Casino",day:"Fri",start:"19:05",end:"19:15"},
-  {name:"Jesty Quinn",stage:"Luck Exchange Casino",day:"Fri",start:"19:15",end:"19:25"},
-  {name:"Magic The Gabbering",stage:"Luck Exchange Casino",day:"Fri",start:"19:30",end:"19:45"},
-  {name:"Dead Lorry, Yellow Lorry",stage:"Luck Exchange Casino",day:"Fri",start:"19:50",end:"19:55"},
-  {name:"The Sex Cripples",stage:"Luck Exchange Casino",day:"Fri",start:"20:20",end:"20:50"},
-  {name:"Iffyhype",stage:"Luck Exchange Casino",day:"Fri",start:"20:50",end:"21:20"},
-  // --- Fri: The Garden Centre ---
-  {name:"Heman",stage:"The Garden Centre",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Sidetrakka",stage:"The Garden Centre",day:"Fri",start:"14:00",end:"15:15"},
-  {name:"Cassia",stage:"The Garden Centre",day:"Fri",start:"15:15",end:"16:30"},
-  {name:"The Blister Pack",stage:"The Garden Centre",day:"Fri",start:"16:30",end:"18:00"},
-  {name:"Michael Joyce",stage:"The Garden Centre",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"The Regional Manager's Garden Show",stage:"The Garden Centre",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Strawberry Jams",stage:"The Garden Centre",day:"Fri",start:"22:00",end:"22:30"},
-  {name:"Wild Soul",stage:"The Garden Centre",day:"Fri",start:"22:30",end:"23:30"},
-  {name:"Charlie Power",stage:"The Garden Centre",day:"Fri",start:"23:30",end:"00:30"},
-  {name:"Prolifix",stage:"The Garden Centre",day:"Fri",start:"00:30",end:"01:30"},
-  {name:"Basshead",stage:"The Garden Centre",day:"Fri",start:"01:30",end:"02:45"},
-  {name:"The Prophet",stage:"The Garden Centre",day:"Fri",start:"02:45",end:"04:00"},
-  // --- Fri: Botanica Zoo ---
-  {name:"Cheza Lucina",stage:"Botanica Zoo",day:"Fri",start:"15:00",end:"15:50"},
-  {name:"Pia Collada",stage:"Botanica Zoo",day:"Fri",start:"15:50",end:"16:40"},
-  {name:"Misfit 'n' Kamer w/ Blythe",stage:"Botanica Zoo",day:"Fri",start:"16:40",end:"17:30"},
-  {name:"Zak Smiff B2B Joel Deep w/ Rivibes",stage:"Botanica Zoo",day:"Fri",start:"17:30",end:"18:20"},
-  {name:"Yasmine",stage:"Botanica Zoo",day:"Fri",start:"18:20",end:"19:10"},
-  {name:"Bennie B2B DJ Hybrid 140 Set w/ Killa P",stage:"Botanica Zoo",day:"Fri",start:"19:10",end:"20:05"},
-  {name:"Meltout Crew",stage:"Botanica Zoo",day:"Fri",start:"20:05",end:"21:00"},
-  {name:"Dfuse w/ Ham",stage:"Botanica Zoo",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"???? w/ Rivibes",stage:"Botanica Zoo",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"N-Type B2B Ekula B2B Sheba Q w/ Nav & Ham",stage:"Botanica Zoo",day:"Fri",start:"23:00",end:"01:00"},
-  {name:"Ezra B2B Serkus w/ Mista Jago",stage:"Botanica Zoo",day:"Fri",start:"01:00",end:"02:00"},
-  {name:"Iller Instinct",stage:"Botanica Zoo",day:"Fri",start:"02:00",end:"03:00"},
-  {name:"Humb B2B Highlander",stage:"Botanica Zoo",day:"Fri",start:"03:00",end:"04:00"},
-  // --- Fri: The Immortal Children of the Eternal Seed ---
-  {name:"Ikamba",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"Vic Tandy",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"23:00",end:"00:00"},
-  {name:"Monticolombi",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Minki",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"01:00",end:"02:00"},
-  {name:"Chinese Daughter",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"02:00",end:"03:00"},
-  {name:"Mowgli B2B Slewy",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"03:00",end:"04:00"},
-  // --- Fri: Topsy Turvy Trims ---
-  {name:"Black Board Soundsystem",stage:"Topsy Turvy Trims",day:"Fri",start:"13:00",end:"15:00"},
-  {name:"Hokey Cokey Cabaret",stage:"Topsy Turvy Trims",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Ignoring Izzy",stage:"Topsy Turvy Trims",day:"Fri",start:"19:00",end:"21:00"},
-  {name:"Ed Spinna",stage:"Topsy Turvy Trims",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Merchant",stage:"Topsy Turvy Trims",day:"Fri",start:"22:00",end:"00:00"},
-  {name:"Goose",stage:"Topsy Turvy Trims",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Bitchslap",stage:"Topsy Turvy Trims",day:"Fri",start:"01:30",end:"02:30"},
-  // --- Fri: PFP Robot ---
-  {name:"Comp Winner",stage:"PFP Robot",day:"Fri",start:"15:00",end:"15:30"},
-  {name:"Darth Leng",stage:"PFP Robot",day:"Fri",start:"15:30",end:"16:30"},
-  {name:"Indecline",stage:"PFP Robot",day:"Fri",start:"16:30",end:"17:30"},
-  {name:"Roland K",stage:"PFP Robot",day:"Fri",start:"17:30",end:"18:30"},
-  // --- Fri: Sub Lab ---
-  {name:"Matteo",stage:"Sub Lab",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Tacktile",stage:"Sub Lab",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Panix",stage:"Sub Lab",day:"Fri",start:"20:00",end:"21:00"},
-  {name:"Chad Dubz B2B Lotu Ft Slowie",stage:"Sub Lab",day:"Fri",start:"21:00",end:"22:30"},
-  {name:"Breakfake",stage:"Sub Lab",day:"Fri",start:"22:30",end:"23:30"},
-  {name:"Rea Ft Sylla",stage:"Sub Lab",day:"Fri",start:"23:30",end:"00:30"},
-  {name:"Hijinx",stage:"Sub Lab",day:"Fri",start:"00:30",end:"01:30"},
-  {name:"Glm",stage:"Sub Lab",day:"Fri",start:"01:30",end:"02:30"},
-  {name:"Special Guest",stage:"Sub Lab",day:"Fri",start:"02:30",end:"03:59"},
-  // --- Fri: Nachtlicker ---
-  {name:"Sav.",stage:"Nachtlicker",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Pinks Feat Mc Zira Flo",stage:"Nachtlicker",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Theo Sheldrake B2B Tom Croome",stage:"Nachtlicker",day:"Fri",start:"20:00",end:"21:00"},
-  {name:"Savannah",stage:"Nachtlicker",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Cyber Steve",stage:"Nachtlicker",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"PJ Peek",stage:"Nachtlicker",day:"Fri",start:"23:00",end:"00:00"},
-  {name:"Jack Jukes",stage:"Nachtlicker",day:"Fri",start:"00:30",end:"01:30"},
-  {name:"Goff",stage:"Nachtlicker",day:"Fri",start:"01:30",end:"02:45"},
-  {name:"Sloppy Spice",stage:"Nachtlicker",day:"Fri",start:"02:45",end:"04:00"},
-  // --- Fri: Deviant Lounge ---
-  {name:"Can't Stop Won't Stop",stage:"Deviant Lounge",day:"Fri",start:"20:00",end:"21:00"},
-  {name:"Maui Pink",stage:"Deviant Lounge",day:"Fri",start:"21:00",end:"21:45"},
-  {name:"Princ3ss Charming",stage:"Deviant Lounge",day:"Fri",start:"21:45",end:"22:30"},
-  {name:"Grandma Wubplate B2B DJ Noodz",stage:"Deviant Lounge",day:"Fri",start:"22:30",end:"23:30"},
-  {name:"Bby Goose",stage:"Deviant Lounge",day:"Fri",start:"23:30",end:"00:30"},
-  {name:"Cicely",stage:"Deviant Lounge",day:"Fri",start:"00:30",end:"01:30"},
-  {name:"Gullyteen B2B Iffyhype B2B Audio Gutter",stage:"Deviant Lounge",day:"Fri",start:"01:30",end:"03:00"},
-  {name:"Scottish Gabber Punk",stage:"Deviant Lounge",day:"Fri",start:"03:00",end:"04:00"},
-  // --- Fri: Gabber Kebabber ---
-  {name:"2 Sick Puppiez",stage:"Gabber Kebabber",day:"Fri",start:"12:00",end:"13:00"},
-  {name:"Reddem",stage:"Gabber Kebabber",day:"Fri",start:"13:00",end:"13:45"},
-  {name:"Uptempo Anonymous",stage:"Gabber Kebabber",day:"Fri",start:"13:45",end:"14:30"},
-  {name:"John Michelle Jarg",stage:"Gabber Kebabber",day:"Fri",start:"14:30",end:"15:30"},
-  {name:"Dee Jay Say La Vee B2B Stripe N Co",stage:"Gabber Kebabber",day:"Fri",start:"15:30",end:"16:15"},
-  {name:"Chef Bland",stage:"Gabber Kebabber",day:"Fri",start:"16:15",end:"17:00"},
-  {name:"DJ Cilit Bang",stage:"Gabber Kebabber",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Kebabbaret",stage:"Gabber Kebabber",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Foulmouth",stage:"Gabber Kebabber",day:"Fri",start:"19:00",end:"19:45"},
-  {name:"Bubble 07",stage:"Gabber Kebabber",day:"Fri",start:"19:45",end:"20:30"},
-  {name:"Matt Scratch",stage:"Gabber Kebabber",day:"Fri",start:"20:30",end:"21:15"},
-  {name:"Kalisae",stage:"Gabber Kebabber",day:"Fri",start:"21:15",end:"22:00"},
-  {name:"Mumhole",stage:"Gabber Kebabber",day:"Fri",start:"22:15",end:"23:00"},
-  {name:"Iffyhype",stage:"Gabber Kebabber",day:"Fri",start:"23:00",end:"00:00"},
-  {name:"Ditchsplitter",stage:"Gabber Kebabber",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Dj Osu!",stage:"Gabber Kebabber",day:"Fri",start:"01:00",end:"02:00"},
-  {name:"Obsidian 23",stage:"Gabber Kebabber",day:"Fri",start:"02:00",end:"03:00"},
-  {name:"Izzy Bolt",stage:"Gabber Kebabber",day:"Fri",start:"03:00",end:"04:00"},
-  // --- Fri: E Numbers ---
-  {name:"Dr Rat",stage:"E Numbers",day:"Fri",start:"19:00",end:"19:45"},
-  {name:"Chlow333",stage:"E Numbers",day:"Fri",start:"19:45",end:"20:30"},
-  {name:"Goldenaxe",stage:"E Numbers",day:"Fri",start:"20:30",end:"21:15"},
-  {name:"Mollie Rush",stage:"E Numbers",day:"Fri",start:"21:15",end:"22:00"},
-  {name:"DJ Gash Presents: Sherbert Sessions",stage:"E Numbers",day:"Fri",start:"22:00",end:"22:45"},
-  {name:"Girldick",stage:"E Numbers",day:"Fri",start:"22:45",end:"23:30"},
-  {name:"DJ Noeyedear",stage:"E Numbers",day:"Fri",start:"23:30",end:"00:15"},
-  {name:"Sam Tearout",stage:"E Numbers",day:"Fri",start:"00:15",end:"01:00"},
-  {name:"Lil Data",stage:"E Numbers",day:"Fri",start:"01:00",end:"01:45"},
-  {name:"N4ts: Danny Stranger",stage:"E Numbers",day:"Fri",start:"01:45",end:"02:30"},
-  {name:"N4ts: Dolfinboy",stage:"E Numbers",day:"Fri",start:"02:30",end:"03:15"},
-  {name:"N4ts: Secret Set",stage:"E Numbers",day:"Fri",start:"03:15",end:"04:00"},
-  // --- Fri: The Pomegranate Parlour ---
-  {name:"Estère",stage:"The Pomegranate Parlour",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Tanti",stage:"The Pomegranate Parlour",day:"Fri",start:"14:00",end:"15:00"},
-  {name:"Hiphoppapotamus B2B Burland",stage:"The Pomegranate Parlour",day:"Fri",start:"15:00",end:"17:00"},
-  {name:"Sweet Chilli",stage:"The Pomegranate Parlour",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Flibble",stage:"The Pomegranate Parlour",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Ikamba",stage:"The Pomegranate Parlour",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Mattana",stage:"The Pomegranate Parlour",day:"Fri",start:"20:00",end:"21:00"},
-  {name:"DJ Shakey",stage:"The Pomegranate Parlour",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Somatic",stage:"The Pomegranate Parlour",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"Ludec",stage:"The Pomegranate Parlour",day:"Fri",start:"23:00",end:"00:00"},
-  {name:"Gypsyndicate",stage:"The Pomegranate Parlour",day:"Fri",start:"00:00",end:"01:00"},
-  {name:"Illexxandra",stage:"The Pomegranate Parlour",day:"Fri",start:"01:00",end:"02:00"},
-  {name:"Charlie Power",stage:"The Pomegranate Parlour",day:"Fri",start:"02:00",end:"03:00"},
-  {name:"Pablo Dutta",stage:"The Pomegranate Parlour",day:"Fri",start:"03:00",end:"03:55"},
-  // --- Fri: Busker's Wharf ---
-  {name:"The Pussy Catbaret",stage:"Busker's Wharf",day:"Fri",start:"19:30",end:"20:30"},
-  {name:"The Lobster Cabaret",stage:"Busker's Wharf",day:"Fri",start:"21:00",end:"22:00"},
   // --- Fri: Twisted Time Machine (Bad Apple Bar) ---
-  {name:"Unkle - Psyence Fiction Album Playback",stage:"Twisted Time Machine",day:"Fri",start:"12:00",end:"13:00"},
-  {name:"The Fugees - The Score Album Playback",stage:"Twisted Time Machine",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Zzzonked: Enter Shikari Power Hour",stage:"Twisted Time Machine",day:"Fri",start:"15:00",end:"16:00"},
-  {name:"Sabrina Carpentry",stage:"Twisted Time Machine",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"That Disney Party!",stage:"Twisted Time Machine",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Slayyyter: Worst Girl in America Album Playback",stage:"Twisted Time Machine",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Cybertease: Boomtown Baddies",stage:"Twisted Time Machine",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Boomtown Pride: Britney Spears Appreciation Society Part V",stage:"Twisted Time Machine",day:"Fri",start:"20:00",end:"21:00"},
-  {name:"Boomtown Pride: Opening Ceremony with DJ Gaylord",stage:"Twisted Time Machine",day:"Fri",start:"21:00",end:"22:00"},
-  {name:"Boomtown Pride: Queer House Party",stage:"Twisted Time Machine",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"Boomtown Pride: Bendy Wendy",stage:"Twisted Time Machine",day:"Fri",start:"23:00",end:"00:00"},
-  {name:"Boomtown Pride: Donk If You're Horny",stage:"Twisted Time Machine",day:"Fri",start:"00:00",end:"00:45"},
-  {name:"Boomtown Pride: Uokhuns Hen Do",stage:"Twisted Time Machine",day:"Fri",start:"00:45",end:"01:45"},
-  {name:"Boomtown Pride: Figs Presents Europhobia",stage:"Twisted Time Machine",day:"Fri",start:"01:45",end:"02:30"},
-  {name:"Boomtown Pride: Full Throttle Hard House",stage:"Twisted Time Machine",day:"Fri",start:"02:30",end:"03:15"},
-  {name:"Boomtown Pride: Lg:Bx:T: Hard Pride",stage:"Twisted Time Machine",day:"Fri",start:"03:15",end:"04:00"},
-  // --- Fri: Síbín Beag ---
-  {name:"Green Diesel",stage:"Síbín Beag",day:"Fri",start:"14:00",end:"14:45"},
-  {name:"John Kelly",stage:"Síbín Beag",day:"Fri",start:"15:15",end:"16:00"},
-  {name:"Roof Cats",stage:"Síbín Beag",day:"Fri",start:"16:30",end:"17:15"},
-  {name:"No Murder No Moustache",stage:"Síbín Beag",day:"Fri",start:"17:45",end:"18:30"},
-  {name:"The Kahunas",stage:"Síbín Beag",day:"Fri",start:"19:00",end:"19:45"},
-  {name:"Craic Man Fancy Dan",stage:"Síbín Beag",day:"Fri",start:"20:15",end:"21:00"},
-  {name:"Trad Folkin' Rocks House Band",stage:"Síbín Beag",day:"Fri",start:"21:30",end:"23:30"},
-  {name:"Trad Folkin' Rave Dj's",stage:"Síbín Beag",day:"Fri",start:"00:00",end:"00:45"},
-  // --- Fri: Helix ---
-  {name:"Dave Trotter B2B Tom Tucker",stage:"Helix",day:"Fri",start:"15:00",end:"16:30"},
-  {name:"Freestylers",stage:"Helix",day:"Fri",start:"16:30",end:"18:00"},
-  {name:"Jfb",stage:"Helix",day:"Fri",start:"18:00",end:"19:30"},
-  {name:"Burt Cope",stage:"Helix",day:"Fri",start:"19:30",end:"21:00"},
-  {name:"A.Skillz",stage:"Helix",day:"Fri",start:"21:00",end:"22:30"},
-  {name:"Plump Dj's",stage:"Helix",day:"Fri",start:"22:30",end:"00:00"},
-  {name:"Deekline",stage:"Helix",day:"Fri",start:"00:00",end:"01:30"},
-  {name:"Madame Electrifie",stage:"Helix",day:"Fri",start:"01:30",end:"03:00"},
-  // --- Fri: Mining for (g)Old Town ---
-  {name:"Flails",stage:"Mining for (g)Old Town",day:"Fri",start:"13:30",end:"15:00"},
-  {name:"Father Lynch",stage:"Mining for (g)Old Town",day:"Fri",start:"15:00",end:"16:30"},
-  {name:"Light Gal",stage:"Mining for (g)Old Town",day:"Fri",start:"16:30",end:"18:00"},
-  {name:"Emma Ash",stage:"Mining for (g)Old Town",day:"Fri",start:"18:00",end:"19:00"},
-  // --- Fri: End of the Line ---
-  {name:"Unfoldance",stage:"End of the Line",day:"Fri",start:"20:00",end:"20:45"},
-  {name:"Lunae",stage:"End of the Line",day:"Fri",start:"20:45",end:"21:30"},
-  {name:"Sticky Ricky",stage:"End of the Line",day:"Fri",start:"21:30",end:"22:15"},
-  {name:"Loutan",stage:"End of the Line",day:"Fri",start:"22:15",end:"23:00"},
-  {name:"Agent Scully",stage:"End of the Line",day:"Fri",start:"23:00",end:"23:45"},
-  {name:"Scandal!st B2B Yoste",stage:"End of the Line",day:"Fri",start:"23:45",end:"00:45"},
-  {name:"Dansfleur",stage:"End of the Line",day:"Fri",start:"00:45",end:"01:15"},
-  {name:"Grandma Wubplate",stage:"End of the Line",day:"Fri",start:"01:15",end:"02:00"},
-  {name:"Minor Science",stage:"End of the Line",day:"Fri",start:"02:00",end:"03:00"},
-  {name:"Dromek",stage:"End of the Line",day:"Fri",start:"03:00",end:"04:00"},
-  // --- Fri: Infinity ---
-  {name:"Menu Music Presents: Salt B2B Stolen & Whos Jordan",stage:"Infinity",day:"Fri",start:"18:00",end:"20:30"},
-  {name:"Arlo",stage:"Infinity",day:"Fri",start:"20:30",end:"22:00"},
-  {name:"Jeremy Sylvester",stage:"Infinity",day:"Fri",start:"22:00",end:"23:30"},
-  {name:"A For Alpha B2B Dani Wylie",stage:"Infinity",day:"Fri",start:"23:30",end:"01:00"},
-  {name:"Dr Dubplate",stage:"Infinity",day:"Fri",start:"01:00",end:"02:30"},
-  {name:"James Wonka B2B Paree",stage:"Infinity",day:"Fri",start:"02:30",end:"04:00"},
-
-  // ================= SATURDAY =================
-  // --- Sat: The Lion's Den ---
-  {name:"Crossy B2B Gray B2B Harriet Jaxxon Ft. Spyda",stage:"The Lion's Den",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Benny L B2B Break B2B Skeptical Ft. MC Gq & MC Det",stage:"The Lion's Den",day:"Sat",start:"14:00",end:"15:00"},
-  {name:"Kings Of The Rollers Present: Royal Rumble",stage:"The Lion's Den",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"Brockie B2B Micky Finn B2B Ray Keith Ft. Jolie P & Shabba D",stage:"The Lion's Den",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Mungo's Hi Fi Allstars Ft. Aziza Jaye, Charlie P, Eva Lazarus, Flowdan, Gardna, Killa P, Magugu & Solo Banton",stage:"The Lion's Den",day:"Sat",start:"17:00",end:"19:00"},
-  {name:"Shaggy",stage:"The Lion's Den",day:"Sat",start:"19:30",end:"20:30"},
-  {name:"Scooter",stage:"The Lion's Den",day:"Sat",start:"21:00",end:"22:10"},
-  {name:"Alix Perez Ft. Sp:Mc",stage:"The Lion's Den",day:"Sat",start:"22:30",end:"00:00"},
-  {name:"Andy C Presents: Nightlife",stage:"The Lion's Den",day:"Sat",start:"00:00",end:"02:00"},
-  {name:"A.M.C Ft Phantom",stage:"The Lion's Den",day:"Sat",start:"02:00",end:"03:00"},
-  // --- Sat: Hydro XL ---
-  {name:"Melé B2B Olive F",stage:"Hydro XL",day:"Sat",start:"17:00",end:"18:30"},
-  {name:"Folamour",stage:"Hydro XL",day:"Sat",start:"18:30",end:"20:00"},
-  {name:"Rossi. B2B Silva Bumpa",stage:"Hydro XL",day:"Sat",start:"20:00",end:"21:15"},
-  {name:"Floating Points Live",stage:"Hydro XL",day:"Sat",start:"21:25",end:"22:25"},
-  {name:"Four Tet",stage:"Hydro XL",day:"Sat",start:"22:35",end:"00:05"},
-  {name:"Brutalismus 3000",stage:"Hydro XL",day:"Sat",start:"00:15",end:"01:30"},
-  {name:"Azyr",stage:"Hydro XL",day:"Sat",start:"01:40",end:"03:00"},
+  {name:"UNKLE - PSYENCE FICTION (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"12:00",end:"13:00"},
+  {name:"THE FUGEES - THE SCORE (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"DAY TRIPPING : ALBUM PLAYBACKS with PAPA DISCO",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"14:00",end:"15:00"},
+  {name:"ZZZONKED : ENTER SHIKARI POWER HOUR",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"15:00",end:"16:00"},
+  {name:"SABRINA CARPENTRY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"16:00",end:"17:00"},
+  {name:"THAT DISNEY PARTY!",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"17:00",end:"18:00"},
+  {name:"SLAYYYTER : Worst Girl In America Album Playback",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"18:00",end:"19:00"},
+  {name:"CYBERTEASE : Boomtown Baddies",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"19:00",end:"20:00"},
+  {name:"BOOMTOWN PRIDE : BRITNEY SPEARS APPRECIATION SOCIETY PART V",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"20:00",end:"21:00"},
+  {name:"BOOMTOWN PRIDE : OPENING CEREMONY WITH DJ GAYLORD",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"21:00",end:"22:00"},
+  {name:"BOOMTOWN PRIDE : QUEER HOUSE PARTY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"22:00",end:"23:00"},
+  {name:"BOOMTOWN PRIDE : BENDY WENDY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"23:00",end:"00:00"},
+  {name:"BOOMTOWN PRIDE : DONK IF YOU'RE HORNY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"00:00",end:"00:45"},
+  {name:"BOOMTOWN PRIDE : UOKHUNS HEN DO",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"00:45",end:"01:45"},
+  {name:"BOOMTOWN PRIDE : FIGS presents EUROPHOBIA",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"01:45",end:"02:30"},
+  {name:"BOOMTOWN PRIDE :  FULL THROTTLE HARD HOUSE with TEDDY LAMBORGHINI",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"02:30",end:"03:15"},
+  {name:"BOOMTOWN PRIDE :  LG:Bx:T : Hard Pride :",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"03:15",end:"04:00"},
+  // --- Fri: XR ---
+  {name:"Last Chance Salon",stage:"XR",day:"Fri",start:"11:00",end:"19:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Art Blocking",stage:"XR",day:"Fri",start:"11:00",end:"18:30"},
+  {name:"Drumming Workshop",stage:"XR",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Drumming Workshop",stage:"XR",day:"Fri",start:"13:00",end:"14:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Fri",start:"14:00",end:"16:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
+  {name:"Costume Pimping",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
+  {name:"Strictly Burning Ballroom",stage:"XR",day:"Fri",start:"18:00",end:"18:30"},
+  // ================= SAT =================
+  // --- Sat: Acid Leak ---
+  {name:"Neutron (TIP Records)",stage:"Acid Leak",day:"Sat",start:"13:00",end:"14:30"},
+  {name:"Mark EG",stage:"Acid Leak",day:"Sat",start:"14:30",end:"16:00"},
+  {name:"Tassid",stage:"Acid Leak",day:"Sat",start:"16:00",end:"17:30"},
+  {name:"Aaron Liberator",stage:"Acid Leak",day:"Sat",start:"17:30",end:"19:00"},
+  {name:"Birinight",stage:"Acid Leak",day:"Sat",start:"19:00",end:"20:30"},
+  {name:"Chris Liberator",stage:"Acid Leak",day:"Sat",start:"20:30",end:"22:00"},
+  {name:"Acid Mutant",stage:"Acid Leak",day:"Sat",start:"22:00",end:"23:30"},
+  {name:"James Kinetec",stage:"Acid Leak",day:"Sat",start:"23:30",end:"01:00"},
+  {name:"Brooksie",stage:"Acid Leak",day:"Sat",start:"01:00",end:"02:30"},
+  {name:"Matt Acidic",stage:"Acid Leak",day:"Sat",start:"02:30",end:"04:00"},
+  // --- Sat: Agents of Change HQ ---
+  {name:"Agents of Change HQ",stage:"Agents of Change HQ",day:"Sat",start:"10:00",end:"20:00"},
+  {name:"Weaving Change",stage:"Agents of Change HQ",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Sat",start:"11:00",end:"14:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Sat",start:"16:00",end:"19:00"},
+  // --- Sat: Airetiko ---
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sat",start:"11:00",end:"13:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sat",start:"13:00",end:"15:00"},
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sat",start:"15:00",end:"17:00"},
+  // --- Sat: Anara Forest ---
+  {name:"ELOQ B2B ESC",stage:"Anara Forest",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"HiTech",stage:"Anara Forest",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"Pete Cannon - Live",stage:"Anara Forest",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Ivy Lab",stage:"Anara Forest",day:"Sat",start:"17:00",end:"18:30"},
+  {name:"Buunshin",stage:"Anara Forest",day:"Sat",start:"18:30",end:"19:45"},
+  {name:"J:Kenzo B2B Skeptical (140 Set) Ft. SP:MC [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"19:45",end:"21:15"},
+  {name:"Breakage B2B Flight [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"21:15",end:"22:45"},
+  {name:"Mantra B2B Tim Reaper [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"22:45",end:"00:15"},
+  {name:"Double O B2B SHERELLE [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"00:15",end:"01:45"},
+  {name:"DJ Die B2B Krust [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"01:45",end:"03:00"},
+  // --- Sat: Ancient Futures ---
+  {name:"Deep Chill Yoga",stage:"Ancient Futures",day:"Sat",start:"11:30",end:"13:30"},
+  {name:"The Future of Cannabis",stage:"Ancient Futures",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"Multidimensional Workshop",stage:"Ancient Futures",day:"Sat",start:"15:30",end:"16:30"},
+  {name:"Science for wellness",stage:"Ancient Futures",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"Rhythmic Release",stage:"Ancient Futures",day:"Sat",start:"18:30",end:"20:30"},
+  {name:"4BEAT Yoga",stage:"Ancient Futures",day:"Sat",start:"09:00",end:"11:00"},
+  // --- Sat: Blink Mental Health ---
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Sat",start:"10:00",end:"19:30"},
+  // --- Sat: Botanica Zoo ---
+  {name:"SIS:DEM TAKEN OVER: Anything but Becky B2B es.kay B2B Megwan B2B Siraya B2B MSG",stage:"Botanica Zoo",day:"Sat",start:"15:00",end:"17:00"},
+  {name:"Lady Lena w/ Nav [Only Rave Handles takeover]",stage:"Botanica Zoo",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"Scorpio B2B Fendi K [Only Rave Handles takeover]",stage:"Botanica Zoo",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Origin8a & Propa B2B A.N.T [Only Rave Handles takeover]",stage:"Botanica Zoo",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"Dwarde B2B Tim Reaper B2B Abby Daze w/ MC Punched Face & The Daisy Roots Movement Dancers [Only Rave Handles takeover]",stage:"Botanica Zoo",day:"Sat",start:"20:00",end:"22:00"},
+  {name:"Mike Freear (Slamboree DJ set) [Cranked Soundsystem takeover]",stage:"Botanica Zoo",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"CICELY [Cranked Soundsystem takeover]",stage:"Botanica Zoo",day:"Sat",start:"23:00",end:"00:00"},
+  {name:"Alk-M-E B2B Malware (100% own-productions set) [Cranked Soundsystem takeover]",stage:"Botanica Zoo",day:"Sat",start:"00:00",end:"01:00"},
+  {name:"Crank (vinyl set) w/ MC Stretch [Cranked Soundsystem takeover]",stage:"Botanica Zoo",day:"Sat",start:"01:00",end:"02:00"},
+  {name:"E-Coli [Cranked Soundsystem takeover]",stage:"Botanica Zoo",day:"Sat",start:"02:00",end:"03:00"},
+  {name:"Asher Ashan",stage:"Botanica Zoo",day:"Sat",start:"03:00",end:"03:55"},
+  // --- Sat: Busker's Wharf ---
+  {name:"The Pussy Catbaret",stage:"Busker's Wharf",day:"Sat",start:"19:30",end:"20:30"},
+  {name:"The Lobster Cabaret",stage:"Busker's Wharf",day:"Sat",start:"21:00",end:"22:00"},
+  // --- Sat: Cas's Costumes ---
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Sat",start:"10:00",end:"18:00"},
+  // --- Sat: Circus Tent ---
+  {name:"Belly Dance",stage:"Circus Tent",day:"Sat",start:"10:00",end:"11:00"},
+  {name:"Wye Circus Skills, Juggling, Dapo Star",stage:"Circus Tent",day:"Sat",start:"12:00",end:"14:00"},
+  {name:"Wye Circus Skills, Hoop",stage:"Circus Tent",day:"Sat",start:"14:00",end:"16:00"},
+  {name:"Wye Circus Skills, Poi, Staff, Flower Stick",stage:"Circus Tent",day:"Sat",start:"16:00",end:"18:00"},
+  {name:"Inspired Breath",stage:"Circus Tent",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Sat",start:"21:00",end:"22:00"},
+  // --- Sat: Climate Live ---
+  {name:"Climate Live Opening",stage:"Climate Live",day:"Sat",start:"10:00",end:"20:00"},
+  {name:"Patch It For The Planet: Upcycled Patch Making - The Mend",stage:"Climate Live",day:"Sat",start:"10:30",end:"11:30"},
+  {name:"Beads & Breathe",stage:"Climate Live",day:"Sat",start:"11:45",end:"12:45"},
+  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Mediterranean Herb Repotting - Grounds for Growth",stage:"Climate Live",day:"Sat",start:"14:15",end:"15:15"},
+  {name:"Collective Climate Collage Making - Quirky Academy CIC",stage:"Climate Live",day:"Sat",start:"15:30",end:"16:30"},
+  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Sat",start:"16:45",end:"17:45"},
+  // --- Sat: Cocaine Anonymous ---
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sat",start:"11:00",end:"12:00"},
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sat",start:"18:00",end:"19:00"},
+  // --- Sat: Community Fire ---
+  {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Sat",start:"12:00",end:"00:00"},
+  // --- Sat: Craft Tent ---
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
+  // --- Sat: Crafty Rascals ---
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Sat",start:"10:00",end:"18:00"},
+  // --- Sat: Deviant Lounge ---
+  {name:"Charles the Princess b2b Pretty Patel",stage:"Deviant Lounge",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"Plughole Takeover (PSYCHO-SIS b2b FKATITS)",stage:"Deviant Lounge",day:"Sat",start:"21:00",end:"22:00"},
+  {name:"Miss Bee Spinner b2b Promiscuous Piggy",stage:"Deviant Lounge",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"DJ Elsa From Frozen",stage:"Deviant Lounge",day:"Sat",start:"23:00",end:"23:30"},
+  {name:"Bunn13",stage:"Deviant Lounge",day:"Sat",start:"23:30",end:"00:10"},
+  {name:"Kake",stage:"Deviant Lounge",day:"Sat",start:"00:10",end:"00:50"},
+  {name:"Skrub",stage:"Deviant Lounge",day:"Sat",start:"00:50",end:"01:30"},
+  {name:"Goosey",stage:"Deviant Lounge",day:"Sat",start:"01:30",end:"02:15"},
+  {name:"Mums Against Donk Takeover (Pissxie)",stage:"Deviant Lounge",day:"Sat",start:"02:15",end:"03:00"},
+  {name:"Mums Against Donk Takeover (Alterum)",stage:"Deviant Lounge",day:"Sat",start:"03:00",end:"04:00"},
+  // --- Sat: E Numbers ---
+  {name:"Silent Disco",stage:"E Numbers",day:"Sat",start:"13:00",end:"19:00"},
+  {name:"Dance Mums",stage:"E Numbers",day:"Sat",start:"19:00",end:"19:45"},
+  {name:"Dykes on Decks",stage:"E Numbers",day:"Sat",start:"19:45",end:"21:15"},
+  {name:"C.EXE",stage:"E Numbers",day:"Sat",start:"21:15",end:"22:00"},
+  {name:"Mannequins: Tommy Tempo",stage:"E Numbers",day:"Sat",start:"22:00",end:"22:45"},
+  {name:"Mannequins: Yoyo",stage:"E Numbers",day:"Sat",start:"22:45",end:"23:30"},
+  {name:"ÆON: Muzhit",stage:"E Numbers",day:"Sat",start:"23:30",end:"00:15"},
+  {name:"ÆON: VAQERO",stage:"E Numbers",day:"Sat",start:"00:15",end:"01:00"},
+  {name:"ÆON: Sissy Cinnamon",stage:"E Numbers",day:"Sat",start:"01:00",end:"01:45"},
+  {name:"ÆON: Spinks",stage:"E Numbers",day:"Sat",start:"01:45",end:"02:30"},
+  {name:"ÆON: nohexcode",stage:"E Numbers",day:"Sat",start:"02:30",end:"03:15"},
+  {name:"ÆON: CITYTRONIX",stage:"E Numbers",day:"Sat",start:"03:15",end:"04:00"},
+  // --- Sat: End of the Line ---
+  {name:"DJ OSU!",stage:"End of the Line",day:"Sat",start:"20:00",end:"20:45"},
+  {name:"Clara",stage:"End of the Line",day:"Sat",start:"20:40",end:"21:20"},
+  {name:"Waxtek",stage:"End of the Line",day:"Sat",start:"21:20",end:"22:00"},
+  {name:"Mollie Rush",stage:"End of the Line",day:"Sat",start:"22:00",end:"22:45"},
+  {name:"Gabba Banoush",stage:"End of the Line",day:"Sat",start:"22:45",end:"23:25"},
+  {name:"Charlie Power",stage:"End of the Line",day:"Sat",start:"23:25",end:"00:05"},
+  {name:"Seppa",stage:"End of the Line",day:"Sat",start:"00:05",end:"01:05"},
+  {name:"Gullyteen",stage:"End of the Line",day:"Sat",start:"01:05",end:"01:50"},
+  {name:"N1PP1LLS",stage:"End of the Line",day:"Sat",start:"01:50",end:"02:30"},
+  {name:"Kalisae",stage:"End of the Line",day:"Sat",start:"02:30",end:"03:15"},
+  {name:"Iffyhype",stage:"End of the Line",day:"Sat",start:"03:15",end:"04:00"},
+  // --- Sat: Energy Garden ---
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Sat",start:"12:00",end:"22:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Sat",start:"13:00",end:"15:00"},
+  // --- Sat: Foggers Mill ---
+  {name:"Dr Beatroot",stage:"Foggers Mill",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Toast",stage:"Foggers Mill",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Monkey Bizzle",stage:"Foggers Mill",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Samantics",stage:"Foggers Mill",day:"Sat",start:"17:30",end:"18:30"},
+  {name:"Bratakus",stage:"Foggers Mill",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"Good Health Good Wealth",stage:"Foggers Mill",day:"Sat",start:"20:30",end:"21:30"},
+  {name:"Scustin",stage:"Foggers Mill",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"Toby Spin",stage:"Foggers Mill",day:"Sat",start:"23:30",end:"00:30"},
+  {name:"The Destroyers",stage:"Foggers Mill",day:"Sat",start:"01:00",end:"02:00"},
+  // --- Sat: Full Moon Ballroom ---
+  {name:"Funky Drummer Collective",stage:"Full Moon Ballroom",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Daraa Tribes",stage:"Full Moon Ballroom",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Malavita!",stage:"Full Moon Ballroom",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Kotoa",stage:"Full Moon Ballroom",day:"Sat",start:"17:30",end:"18:30"},
+  {name:"Pachango",stage:"Full Moon Ballroom",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"Gnawa Blues All Stars",stage:"Full Moon Ballroom",day:"Sat",start:"20:30",end:"21:30"},
+  {name:"Okailey",stage:"Full Moon Ballroom",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"PCHA",stage:"Full Moon Ballroom",day:"Sat",start:"23:30",end:"00:30"},
+  {name:"Raz & Afla",stage:"Full Moon Ballroom",day:"Sat",start:"01:00",end:"02:00"},
+  {name:"Hippo Sound System & S.I.M.O",stage:"Full Moon Ballroom",day:"Sat",start:"02:30",end:"04:00"},
+  // --- Sat: Gabber Kebabber ---
+  {name:"Jungyals and Gays Takeover",stage:"Gabber Kebabber",day:"Sat",start:"13:00",end:"15:00"},
+  {name:"Shirley Temper b2b Syntax",stage:"Gabber Kebabber",day:"Sat",start:"15:00",end:"15:45"},
+  {name:"Scottish Gabber Punk",stage:"Gabber Kebabber",day:"Sat",start:"15:45",end:"16:15"},
+  {name:"Petrol Hoers",stage:"Gabber Kebabber",day:"Sat",start:"16:15",end:"16:45"},
+  {name:"Phetcore",stage:"Gabber Kebabber",day:"Sat",start:"16:45",end:"17:30"},
+  {name:"Audio Gutter",stage:"Gabber Kebabber",day:"Sat",start:"17:30",end:"18:30"},
+  {name:"Dirty Chronic",stage:"Gabber Kebabber",day:"Sat",start:"18:30",end:"19:30"},
+  {name:"Smifcour",stage:"Gabber Kebabber",day:"Sat",start:"19:30",end:"20:30"},
+  {name:"Mikey Motion",stage:"Gabber Kebabber",day:"Sat",start:"20:30",end:"21:30"},
+  {name:"Bobby Starchild",stage:"Gabber Kebabber",day:"Sat",start:"21:30",end:"22:30"},
+  {name:"Manrat",stage:"Gabber Kebabber",day:"Sat",start:"22:30",end:"23:30"},
+  {name:"MCAT",stage:"Gabber Kebabber",day:"Sat",start:"23:30",end:"00:10"},
+  {name:"NICE’N’SPICY",stage:"Gabber Kebabber",day:"Sat",start:"00:10",end:"00:50"},
+  {name:"HERBIE",stage:"Gabber Kebabber",day:"Sat",start:"00:50",end:"01:30"},
+  {name:"GINNY",stage:"Gabber Kebabber",day:"Sat",start:"01:30",end:"02:15"},
+  {name:"INDECLINE",stage:"Gabber Kebabber",day:"Sat",start:"02:15",end:"03:15"},
+  {name:"Mollie Rush",stage:"Gabber Kebabber",day:"Sat",start:"03:15",end:"04:00"},
+  // --- Sat: Games Lounge ---
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Sat",start:"12:00",end:"00:00"},
+  // --- Sat: Garden ---
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Sat",start:"10:00",end:"18:00"},
   // --- Sat: Grand Central ---
   {name:"Hak Baker",stage:"Grand Central",day:"Sat",start:"13:00",end:"14:00"},
   {name:"Rose Gray",stage:"Grand Central",day:"Sat",start:"14:30",end:"15:30"},
@@ -1595,98 +2130,6 @@ const artists = [
   {name:"Princess Nokia",stage:"Grand Central",day:"Sat",start:"20:30",end:"21:30"},
   {name:"Ashnikko",stage:"Grand Central",day:"Sat",start:"22:00",end:"23:00"},
   {name:"Peaches",stage:"Grand Central",day:"Sat",start:"23:30",end:"00:30"},
-  // --- Sat: Hidden Woods ---
-  {name:"Rebel Clash",stage:"Hidden Woods",day:"Sat",start:"12:00",end:"13:30"},
-  {name:"DJ Hype: Reggae 2 Jungle",stage:"Hidden Woods",day:"Sat",start:"13:30",end:"15:00"},
-  {name:"General Levy Live PA",stage:"Hidden Woods",day:"Sat",start:"15:00",end:"15:30"},
-  {name:"Sir Spyro Ft. Killa P & Lady Chann",stage:"Hidden Woods",day:"Sat",start:"15:30",end:"17:00"},
-  {name:"Saint Ludo",stage:"Hidden Woods",day:"Sat",start:"17:00",end:"18:00"},
-  {name:"Arthi",stage:"Hidden Woods",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Bakey B2B Mia Koden",stage:"Hidden Woods",day:"Sat",start:"19:00",end:"20:30"},
-  {name:"Ryota B2B Yung Singh",stage:"Hidden Woods",day:"Sat",start:"20:30",end:"22:00"},
-  {name:"Neffa-T Ft. D Double E",stage:"Hidden Woods",day:"Sat",start:"22:00",end:"23:30"},
-  {name:"Cesco B2B Halogenix Ft. Strategy",stage:"Hidden Woods",day:"Sat",start:"23:30",end:"01:00"},
-  {name:"Zero",stage:"Hidden Woods",day:"Sat",start:"01:00",end:"02:30"},
-  {name:"Voltage - Jungle Classics Ft. Shabba D",stage:"Hidden Woods",day:"Sat",start:"02:30",end:"04:00"},
-  // --- Sat: Tangled Roots ---
-  {name:"Channel One Sound System",stage:"Tangled Roots",day:"Sat",start:"12:00",end:"14:00"},
-  {name:"Aba Shanti-I",stage:"Tangled Roots",day:"Sat",start:"14:00",end:"16:00"},
-  {name:"10000 Lions",stage:"Tangled Roots",day:"Sat",start:"16:00",end:"18:00"},
-  {name:"Firmly Rooted X Lionpulse X Sinai",stage:"Tangled Roots",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Sasha Steppa",stage:"Tangled Roots",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Omega Nebula",stage:"Tangled Roots",day:"Sat",start:"20:00",end:"21:00"},
-  // --- Sat: Anara Forest ---
-  {name:"Eloq B2B Esc",stage:"Anara Forest",day:"Sat",start:"14:00",end:"15:00"},
-  {name:"Hitech",stage:"Anara Forest",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"Pete Cannon Live",stage:"Anara Forest",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Ivy Lab",stage:"Anara Forest",day:"Sat",start:"17:00",end:"18:30"},
-  {name:"Buunshin",stage:"Anara Forest",day:"Sat",start:"18:30",end:"19:45"},
-  {name:"J:Kenzo B2B Skeptical 140 Set Ft. Sp:Mc",stage:"Anara Forest",day:"Sat",start:"19:45",end:"21:15"},
-  {name:"Breakage B2B Flight",stage:"Anara Forest",day:"Sat",start:"21:15",end:"22:45"},
-  {name:"Mantra B2B Tim Reaper",stage:"Anara Forest",day:"Sat",start:"22:45",end:"00:15"},
-  {name:"Double O B2B Sherelle",stage:"Anara Forest",day:"Sat",start:"00:15",end:"01:45"},
-  {name:"DJ Die B2B Krust",stage:"Anara Forest",day:"Sat",start:"01:45",end:"03:00"},
-  // --- Sat: Tribe of Frog ---
-  {name:"Dr.G",stage:"Tribe of Frog",day:"Sat",start:"12:00",end:"14:00"},
-  {name:"Xenoben",stage:"Tribe of Frog",day:"Sat",start:"14:00",end:"15:30"},
-  {name:"Typeone",stage:"Tribe of Frog",day:"Sat",start:"15:30",end:"17:00"},
-  {name:"Psibindi",stage:"Tribe of Frog",day:"Sat",start:"17:00",end:"18:00"},
-  {name:"Tresh",stage:"Tribe of Frog",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Atacama",stage:"Tribe of Frog",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Florescence",stage:"Tribe of Frog",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"Pieman",stage:"Tribe of Frog",day:"Sat",start:"21:00",end:"22:00"},
-  {name:"Transient Disorder",stage:"Tribe of Frog",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"K.I.M",stage:"Tribe of Frog",day:"Sat",start:"23:00",end:"00:00"},
-  {name:"Imaginarium",stage:"Tribe of Frog",day:"Sat",start:"00:00",end:"01:00"},
-  {name:"Dickster",stage:"Tribe of Frog",day:"Sat",start:"01:00",end:"02:30"},
-  {name:"Avalon",stage:"Tribe of Frog",day:"Sat",start:"02:30",end:"04:00"},
-  // --- Sat: Nexus ---
-  {name:"Bongo's Bingo",stage:"Nexus",day:"Sat",start:"14:00",end:"15:00"},
-  {name:"Miss Kaninna",stage:"Nexus",day:"Sat",start:"15:30",end:"16:30"},
-  {name:"High Focus Records Showcase",stage:"Nexus",day:"Sat",start:"16:40",end:"19:40"},
-  {name:"Lynks",stage:"Nexus",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"Henge",stage:"Nexus",day:"Sat",start:"23:00",end:"00:00"},
-  {name:"Beardyman",stage:"Nexus",day:"Sat",start:"00:30",end:"01:30"},
-  {name:"Daft Funk Live",stage:"Nexus",day:"Sat",start:"02:00",end:"03:00"},
-  // --- Sat: Spectrum 360 ---
-  {name:"Draggernauts",stage:"Spectrum 360",day:"Sat",start:"16:00",end:"18:00"},
-  {name:"Hang The Dj's",stage:"Spectrum 360",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Koarse",stage:"Spectrum 360",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"DJ Sarah Bonito",stage:"Spectrum 360",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"DJ G2g",stage:"Spectrum 360",day:"Sat",start:"21:00",end:"22:00"},
-  {name:"Panteros666",stage:"Spectrum 360",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"Trampsta",stage:"Spectrum 360",day:"Sat",start:"23:00",end:"00:00"},
-  {name:"Gonzi",stage:"Spectrum 360",day:"Sat",start:"00:00",end:"01:00"},
-  {name:"Meg Mchugh",stage:"Spectrum 360",day:"Sat",start:"01:00",end:"02:00"},
-  {name:"Sterling Moss",stage:"Spectrum 360",day:"Sat",start:"02:00",end:"03:00"},
-  {name:"Fish56octagon",stage:"Spectrum 360",day:"Sat",start:"03:00",end:"04:00"},
-  // --- Sat: Acid Leak ---
-  {name:"Neutron (Tip Records)",stage:"Acid Leak",day:"Sat",start:"13:00",end:"14:30"},
-  {name:"Mark Eg",stage:"Acid Leak",day:"Sat",start:"14:30",end:"16:00"},
-  {name:"Tassid",stage:"Acid Leak",day:"Sat",start:"16:00",end:"17:30"},
-  {name:"Aaron Liberator",stage:"Acid Leak",day:"Sat",start:"17:30",end:"19:00"},
-  {name:"Birinight",stage:"Acid Leak",day:"Sat",start:"19:00",end:"20:30"},
-  {name:"Chris Liberator",stage:"Acid Leak",day:"Sat",start:"20:30",end:"22:00"},
-  {name:"Acid Mutant",stage:"Acid Leak",day:"Sat",start:"22:00",end:"23:30"},
-  {name:"James Kinetec",stage:"Acid Leak",day:"Sat",start:"23:30",end:"01:00"},
-  {name:"Brooksie",stage:"Acid Leak",day:"Sat",start:"01:00",end:"02:30"},
-  {name:"Matt Acidic",stage:"Acid Leak",day:"Sat",start:"02:30",end:"04:00"},
-  // --- Sat: Rose and Clown ---
-  {name:"Reggaeoke",stage:"Rose and Clown",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Boomtown's Got Talent",stage:"Rose and Clown",day:"Sat",start:"14:00",end:"15:00"},
-  {name:"The Showhawk Duo",stage:"Rose and Clown",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"No Blacks No Irish DJ Set",stage:"Rose and Clown",day:"Sat",start:"16:00",end:"17:30"},
-  {name:"Shabba Banks",stage:"Rose and Clown",day:"Sat",start:"17:30",end:"18:30"},
-  {name:"Numa Crew",stage:"Rose and Clown",day:"Sat",start:"18:30",end:"19:45"},
-  {name:"Flash Bang Brass",stage:"Rose and Clown",day:"Sat",start:"19:45",end:"20:45"},
-  {name:"Amengyaldem",stage:"Rose and Clown",day:"Sat",start:"20:45",end:"21:45"},
-  {name:"Jamu",stage:"Rose and Clown",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"Singularity Takeover: Silva Snipa B2B The Bass Injector",stage:"Rose and Clown",day:"Sat",start:"23:00",end:"00:00"},
-  {name:"Cheetah B2B Jenny Sparks",stage:"Rose and Clown",day:"Sat",start:"00:00",end:"01:00"},
-  {name:"Anaïs B2B Anton B2B Latte 140 Set",stage:"Rose and Clown",day:"Sat",start:"01:00",end:"02:00"},
-  {name:"Bish",stage:"Rose and Clown",day:"Sat",start:"02:00",end:"03:00"},
-  {name:"Diagnostix 140 & Ukg Set",stage:"Rose and Clown",day:"Sat",start:"03:00",end:"03:30"},
-  {name:"Gray's Free Party Karaoke",stage:"Rose and Clown",day:"Sat",start:"03:30",end:"04:00"},
   // --- Sat: Hangar 161 ---
   {name:"Hot Squash",stage:"Hangar 161",day:"Sat",start:"13:00",end:"13:40"},
   {name:"Pussy Liquor",stage:"Hangar 161",day:"Sat",start:"14:00",end:"14:40"},
@@ -1699,44 +2142,214 @@ const artists = [
   {name:"Svetlanas",stage:"Hangar 161",day:"Sat",start:"22:00",end:"23:00"},
   {name:"China Shop Bull",stage:"Hangar 161",day:"Sat",start:"23:30",end:"00:30"},
   {name:"Silverwingkiller",stage:"Hangar 161",day:"Sat",start:"01:00",end:"02:00"},
-  // --- Sat: The Fools Leap ---
-  {name:"Fftp",stage:"The Fools Leap",day:"Sat",start:"12:00",end:"13:00"},
-  {name:"Tropanka",stage:"The Fools Leap",day:"Sat",start:"13:30",end:"14:30"},
-  {name:"Fidget & The Twitchers",stage:"The Fools Leap",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"Alphalfa",stage:"The Fools Leap",day:"Sat",start:"16:30",end:"17:30"},
-  {name:"45s",stage:"The Fools Leap",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Cam Cole",stage:"The Fools Leap",day:"Sat",start:"19:30",end:"20:30"},
-  {name:"3 Daft Monkeys",stage:"The Fools Leap",day:"Sat",start:"21:00",end:"22:00"},
-  {name:"Daraa Tribes",stage:"The Fools Leap",day:"Sat",start:"22:30",end:"23:30"},
-  {name:"?",stage:"The Fools Leap",day:"Sat",start:"00:00",end:"01:00"},
-  {name:"Dogshow",stage:"The Fools Leap",day:"Sat",start:"01:30",end:"02:30"},
-  {name:"Fizzy Gillespie's Big Balkan Bash",stage:"The Fools Leap",day:"Sat",start:"03:00",end:"04:00"},
-  // --- Sat: Full Moon Ballroom ---
-  {name:"Funky Drummer Collective",stage:"Full Moon Ballroom",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Daraa Tribes",stage:"Full Moon Ballroom",day:"Sat",start:"14:30",end:"15:30"},
-  {name:"Malavita!",stage:"Full Moon Ballroom",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Kotoa",stage:"Full Moon Ballroom",day:"Sat",start:"17:30",end:"18:30"},
-  {name:"Pachango",stage:"Full Moon Ballroom",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Gnawa Blues All Stars",stage:"Full Moon Ballroom",day:"Sat",start:"20:30",end:"21:30"},
-  {name:"Okailey",stage:"Full Moon Ballroom",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"Pcha",stage:"Full Moon Ballroom",day:"Sat",start:"23:30",end:"00:30"},
-  {name:"Raz & Afla",stage:"Full Moon Ballroom",day:"Sat",start:"01:00",end:"02:00"},
-  {name:"Hippo Sound System & S.I.M.O",stage:"Full Moon Ballroom",day:"Sat",start:"02:30",end:"04:00"},
-  // --- Sat: Foggers Mill ---
-  {name:"Dr Beatroot",stage:"Foggers Mill",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Toast",stage:"Foggers Mill",day:"Sat",start:"14:30",end:"15:30"},
-  {name:"Monkey Bizzle",stage:"Foggers Mill",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Samantics",stage:"Foggers Mill",day:"Sat",start:"17:30",end:"18:30"},
-  {name:"Bratakus",stage:"Foggers Mill",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Good Health Good Wealth",stage:"Foggers Mill",day:"Sat",start:"20:30",end:"21:30"},
-  {name:"Scustin",stage:"Foggers Mill",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"Toby Spin",stage:"Foggers Mill",day:"Sat",start:"23:30",end:"00:30"},
-  {name:"The Destroyers",stage:"Foggers Mill",day:"Sat",start:"01:00",end:"02:00"},
+  // --- Sat: Hapitat ---
+  {name:"Hapitat",stage:"Hapitat",day:"Sat",start:"10:00",end:"18:00"},
+  // --- Sat: Helix ---
+  {name:"Josephine Gyasi",stage:"Helix",day:"Sat",start:"16:30",end:"17:30"},
+  {name:"Joe Sonar B2B Rose Holland",stage:"Helix",day:"Sat",start:"17:30",end:"19:00"},
+  {name:"Steady",stage:"Helix",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"LemTom",stage:"Helix",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"Brown Excellence",stage:"Helix",day:"Sat",start:"21:00",end:"22:30"},
+  {name:"JIALING",stage:"Helix",day:"Sat",start:"22:30",end:"00:00"},
+  {name:"Jay Carder",stage:"Helix",day:"Sat",start:"00:00",end:"01:30"},
+  {name:"DJ Cosworth B2B Oldboy",stage:"Helix",day:"Sat",start:"01:30",end:"03:00"},
+  // --- Sat: Hidden Woods ---
+  {name:"Rebel Clash",stage:"Hidden Woods",day:"Sat",start:"12:00",end:"13:30"},
+  {name:"DJ Hype: Reggae 2 Jungle",stage:"Hidden Woods",day:"Sat",start:"13:30",end:"15:00"},
+  {name:"General Levy - Live PA",stage:"Hidden Woods",day:"Sat",start:"15:00",end:"15:30"},
+  {name:"Sir Spyro Ft. Killa P & Lady Chann",stage:"Hidden Woods",day:"Sat",start:"15:30",end:"17:00"},
+  {name:"Saint Ludo",stage:"Hidden Woods",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"Arthi",stage:"Hidden Woods",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Bakey B2B Mia Koden",stage:"Hidden Woods",day:"Sat",start:"19:00",end:"20:30"},
+  {name:"Ryota B2B Yung Singh",stage:"Hidden Woods",day:"Sat",start:"20:30",end:"22:00"},
+  {name:"Neffa-T Ft. D Double E",stage:"Hidden Woods",day:"Sat",start:"22:00",end:"23:30"},
+  {name:"Cesco B2B Halogenix Ft. Strategy",stage:"Hidden Woods",day:"Sat",start:"23:30",end:"01:00"},
+  {name:"Zero",stage:"Hidden Woods",day:"Sat",start:"01:00",end:"02:30"},
+  {name:"Voltage - Jungle Classics Ft. Shabba D",stage:"Hidden Woods",day:"Sat",start:"02:30",end:"04:00"},
+  // --- Sat: Hotel Paradiso ---
+  {name:"Vibe Roulette",stage:"Hotel Paradiso",day:"Sat",start:"19:30",end:"21:30"},
+  {name:"DJ Andres Cervero",stage:"Hotel Paradiso",day:"Sat",start:"21:30",end:"22:00"},
+  {name:"Malavita!",stage:"Hotel Paradiso",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"DJ Andres Cervero",stage:"Hotel Paradiso",day:"Sat",start:"23:00",end:"00:00"},
+  {name:"Tripl3 B & The Trouble Makers",stage:"Hotel Paradiso",day:"Sat",start:"00:00",end:"01:00"},
+  {name:"Banshee takeover: Rua Tui ft Kathika, Maddy V + Savvy B",stage:"Hotel Paradiso",day:"Sat",start:"01:00",end:"02:00"},
+  // --- Sat: Hydro XL ---
+  {name:"Melé B2B Olive F",stage:"Hydro XL",day:"Sat",start:"17:00",end:"18:30"},
+  {name:"Folamour",stage:"Hydro XL",day:"Sat",start:"18:30",end:"20:00"},
+  {name:"Rossi. B2B Silva Bumpa",stage:"Hydro XL",day:"Sat",start:"20:00",end:"21:15"},
+  {name:"Floating Points - Live",stage:"Hydro XL",day:"Sat",start:"21:25",end:"22:25"},
+  {name:"Four Tet",stage:"Hydro XL",day:"Sat",start:"22:35",end:"00:05"},
+  {name:"Brutalismus 3000",stage:"Hydro XL",day:"Sat",start:"00:15",end:"01:30"},
+  {name:"Azyr",stage:"Hydro XL",day:"Sat",start:"01:40",end:"03:00"},
+  // --- Sat: Infinity ---
+  {name:"[Queer House Party Takeover] Bledi",stage:"Infinity",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"[Queer House Party Takeover] Bambi",stage:"Infinity",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"[Queer House Party Takeover] Dykes on Decks",stage:"Infinity",day:"Sat",start:"20:00",end:"21:30"},
+  {name:"[Queer House Party Takeover] UOKHUN",stage:"Infinity",day:"Sat",start:"21:30",end:"23:00"},
+  {name:"[Queer House Party Takeover] Rose Gray - DJ Set",stage:"Infinity",day:"Sat",start:"23:00",end:"00:00"},
+  {name:"[Queer House Party Takeover] I. JORDAN",stage:"Infinity",day:"Sat",start:"00:00",end:"02:00"},
+  {name:"[Queer House Party Takeover] Harry Gay B2B Meg Ward",stage:"Infinity",day:"Sat",start:"02:00",end:"04:00"},
+  {name:"Queer House Party",stage:"Infinity",day:"Sat",start:"03:00",end:"04:00"},
+  // --- Sat: Luck Exchange Casino ---
+  {name:"Deal Of Fortune",stage:"Luck Exchange Casino",day:"Sat",start:"19:05",end:"19:20"},
+  {name:"Dick Fran Dyke",stage:"Luck Exchange Casino",day:"Sat",start:"19:20",end:"19:25"},
+  {name:"Air Horny",stage:"Luck Exchange Casino",day:"Sat",start:"19:25",end:"19:35"},
+  {name:"DJ Buckaroo",stage:"Luck Exchange Casino",day:"Sat",start:"19:35",end:"19:50"},
+  {name:"Carrot And Dick",stage:"Luck Exchange Casino",day:"Sat",start:"19:55",end:"20:00"},
+  {name:"Dick Fran Dyke",stage:"Luck Exchange Casino",day:"Sat",start:"20:00",end:"20:05"},
+  {name:"Rate My Horse Drawing",stage:"Luck Exchange Casino",day:"Sat",start:"20:05",end:"20:15"},
+  {name:"The Paul Taylor Experience",stage:"Luck Exchange Casino",day:"Sat",start:"20:15",end:"20:45"},
+  {name:"DJ Noeyedear",stage:"Luck Exchange Casino",day:"Sat",start:"20:45",end:"21:15"},
+  {name:"Petrol Hoers",stage:"Luck Exchange Casino",day:"Sat",start:"21:15",end:"21:45"},
+  // --- Sat: Mining for (g)Old Town ---
+  {name:"MAGGS",stage:"Mining for (g)Old Town",day:"Sat",start:"13:30",end:"15:00"},
+  {name:"Father Lynch",stage:"Mining for (g)Old Town",day:"Sat",start:"15:00",end:"16:30"},
+  {name:"Emma Ash",stage:"Mining for (g)Old Town",day:"Sat",start:"16:30",end:"17:30"},
+  {name:"WildSoul",stage:"Mining for (g)Old Town",day:"Sat",start:"17:30",end:"19:00"},
+  // --- Sat: Nachtlicker ---
+  {name:"JACKDOESJUNGLE",stage:"Nachtlicker",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"PEPPA",stage:"Nachtlicker",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"PJ PEEK",stage:"Nachtlicker",day:"Sat",start:"20:00",end:"21:15"},
+  {name:"RIZZY & THE GENTS [live]",stage:"Nachtlicker",day:"Sat",start:"21:15",end:"22:00"},
+  {name:"MILITANT MUSIC",stage:"Nachtlicker",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"GOFF feat BABY SOL",stage:"Nachtlicker",day:"Sat",start:"23:00",end:"00:15"},
+  {name:"Shirley Temper",stage:"Nachtlicker",day:"Sat",start:"00:15",end:"01:30"},
+  {name:"THE BASS INJECTOR",stage:"Nachtlicker",day:"Sat",start:"01:30",end:"02:30"},
+  {name:"KELLS",stage:"Nachtlicker",day:"Sat",start:"02:30",end:"04:00"},
+  // --- Sat: Narcotics Anonymous ---
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sat",start:"08:00",end:"09:00"},
+  // --- Sat: Nexus ---
+  {name:"Bongo's Bingo",stage:"Nexus",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"Miss Kaninna",stage:"Nexus",day:"Sat",start:"15:30",end:"16:30"},
+  {name:"Verbz & Mr Slipz [High Focus Records]",stage:"Nexus",day:"Sat",start:"16:40",end:"17:00"},
+  {name:"Farma G [High Focus Records]",stage:"Nexus",day:"Sat",start:"17:00",end:"17:20"},
+  {name:"Onoe Caponoe [High Focus Records]",stage:"Nexus",day:"Sat",start:"17:20",end:"17:40"},
+  {name:"Truemendous [High Focus Records]",stage:"Nexus",day:"Sat",start:"17:40",end:"18:00"},
+  {name:"Ramson Badbonez [High Focus Records]",stage:"Nexus",day:"Sat",start:"18:00",end:"18:20"},
+  {name:"Verb T [High Focus Records]",stage:"Nexus",day:"Sat",start:"18:20",end:"18:40"},
+  {name:"Fliptrix [High Focus Records]",stage:"Nexus",day:"Sat",start:"18:40",end:"19:00"},
+  {name:"Dabbla [High Focus Records]",stage:"Nexus",day:"Sat",start:"19:00",end:"19:20"},
+  {name:"High Focus Records Showcase",stage:"Nexus",day:"Sat",start:"19:20",end:"19:40"},
+  {name:"LYNKS",stage:"Nexus",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"HENGE",stage:"Nexus",day:"Sat",start:"23:00",end:"00:00"},
+  {name:"Beardyman",stage:"Nexus",day:"Sat",start:"00:30",end:"01:30"},
+  {name:"Daft Funk - Live",stage:"Nexus",day:"Sat",start:"02:00",end:"03:00"},
+  // --- Sat: Observatory ---
+  {name:"The Taste Test: Exploring Food Preferences",stage:"Observatory",day:"Sat",start:"10:00",end:"11:00"},
+  {name:"The Taste Test: Exploring Food Preferences",stage:"Observatory",day:"Sat",start:"11:30",end:"12:30"},
+  {name:"Conspiracy Kitchen: Come Cook With Us",stage:"Observatory",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Music Is Medicine",stage:"Observatory",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Move Together, Decide Together: Dancing Towards A New Democracy",stage:"Observatory",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Celebratory Reset Ritual",stage:"Observatory",day:"Sat",start:"17:30",end:"18:30"},
+  // --- Sat: Permaculture ---
+  {name:"Flags for the feral: Wild plant printing on recycled cloth",stage:"Permaculture",day:"Sat",start:"10:00",end:"11:00"},
+  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Sat",start:"11:30",end:"12:30"},
+  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Hack the hardware: DIY electronics for land, plants and low cost automation",stage:"Permaculture",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Sat",start:"15:30",end:"16:30"},
+  {name:"Wild adornment: Willow crowns and headpieces by hand",stage:"Permaculture",day:"Sat",start:"17:00",end:"18:00"},
+  // --- Sat: PFP Robot ---
+  {name:"THE BLISTER PACK",stage:"PFP Robot",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"JAZ IMSKY B2B COCO DUBZ",stage:"PFP Robot",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"ELOQUIN B2B PJ BRIDGER",stage:"PFP Robot",day:"Sat",start:"17:00",end:"18:00"},
+  // --- Sat: Rebel Girls Club ---
+  {name:"Morning Yoga with Sofia (Find Your Flow)",stage:"Rebel Girls Club",day:"Sat",start:"10:00",end:"11:00"},
+  {name:"“The Art of Refusing Neutrality: Why Creatives Must Take Sides.” with the Sumud Collective.",stage:"Rebel Girls Club",day:"Sat",start:"11:00",end:"12:15"},
+  {name:"THE DIVINE FEMININE Paint Your Power - Take Up Space with CreatedbyBillie",stage:"Rebel Girls Club",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Reclaim Your Voice with Amelie",stage:"Rebel Girls Club",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Sat",start:"16:00",end:"16:40"},
+  {name:"Vulva Painting with Phoebe Grace",stage:"Rebel Girls Club",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"Sensual Embodiment led by Scarlett",stage:"Rebel Girls Club",day:"Sat",start:"18:30",end:"19:30"},
+  // --- Sat: Reel News ---
+  {name:"The Art of Protest",stage:"Reel News",day:"Sat",start:"10:30",end:"11:30"},
+  {name:"Past struggles for land, hidden geographies and imagining a different future",stage:"Reel News",day:"Sat",start:"11:30",end:"12:15"},
+  {name:"Speakeasy & Open Mic with Beadyman",stage:"Reel News",day:"Sat",start:"12:15",end:"13:15"},
+  {name:"\"Fire Walk With Me\" Red Flag workers' theatre",stage:"Reel News",day:"Sat",start:"13:15",end:"13:45"},
+  {name:"Banner Theatre LIVE: \"A Just Transition - Jobs, People, Planet\" Part 1",stage:"Reel News",day:"Sat",start:"13:45",end:"14:45"},
+  {name:"Banner Theatre LIVE: \"A Just Transition - Jobs, People, Planet\" Part 2",stage:"Reel News",day:"Sat",start:"14:45",end:"15:45"},
+  {name:"Birmingham Bin workers strike",stage:"Reel News",day:"Sat",start:"15:45",end:"16:45"},
+  {name:"UNITE Hospitality Glasgow - better pay, enjoyment & working conditions",stage:"Reel News",day:"Sat",start:"16:45",end:"17:30"},
+  {name:"Saturama: Tales of an Albion Rainforest",stage:"Reel News",day:"Sat",start:"17:30",end:"18:30"},
+  // --- Sat: Reparium ---
+  {name:"Repairium",stage:"Reparium",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Repairium",stage:"Reparium",day:"Sat",start:"10:00",end:"18:00"},
+  // --- Sat: Rose and Clown ---
+  {name:"Reggaeoke",stage:"Rose and Clown",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Boomtown's Got Talent",stage:"Rose and Clown",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"The Showhawk Duo",stage:"Rose and Clown",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"No Blacks No Irish (DJ Set)",stage:"Rose and Clown",day:"Sat",start:"16:00",end:"17:30"},
+  {name:"Shabba Banks",stage:"Rose and Clown",day:"Sat",start:"17:30",end:"18:30"},
+  {name:"Numa Crew",stage:"Rose and Clown",day:"Sat",start:"18:30",end:"19:30"},
+  {name:"Flash Bang Brass",stage:"Rose and Clown",day:"Sat",start:"19:45",end:"20:45"},
+  {name:"Amengyaldem",stage:"Rose and Clown",day:"Sat",start:"20:45",end:"21:45"},
+  {name:"JAMU",stage:"Rose and Clown",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"Singularity Takeover: Silva Snipa B2B The Bass Injector",stage:"Rose and Clown",day:"Sat",start:"23:00",end:"00:00"},
+  {name:"Cheetah B2B Jenny Sparks",stage:"Rose and Clown",day:"Sat",start:"00:00",end:"01:00"},
+  {name:"Anaïs B2B Anton B2B Latte (140 Set) [Bish's House Party]",stage:"Rose and Clown",day:"Sat",start:"01:00",end:"02:00"},
+  {name:"Bish [Bish's House Party]",stage:"Rose and Clown",day:"Sat",start:"02:00",end:"03:00"},
+  {name:"Diagnostix (140 & UKG Set) [Bish's House Party]",stage:"Rose and Clown",day:"Sat",start:"03:00",end:"03:30"},
+  {name:"Gray's Free Party Karaoke [Bish's House Party]",stage:"Rose and Clown",day:"Sat",start:"03:30",end:"04:00"},
+  // --- Sat: Sharing Circles ---
+  {name:"Sharing Circles - Workshop",stage:"Sharing Circles",day:"Sat",start:"11:00",end:"19:00"},
+  // --- Sat: Sibín Beag ---
+  {name:"Autonemy",stage:"Sibín Beag",day:"Sat",start:"14:00",end:"14:45"},
+  {name:"The Deltones",stage:"Sibín Beag",day:"Sat",start:"15:15",end:"16:00"},
+  {name:"The Deadshots",stage:"Sibín Beag",day:"Sat",start:"16:30",end:"17:15"},
+  {name:"Tootinska Moon",stage:"Sibín Beag",day:"Sat",start:"17:45",end:"18:30"},
+  {name:"Ria Rua",stage:"Sibín Beag",day:"Sat",start:"19:00",end:"19:45"},
+  {name:"Fancy Dan",stage:"Sibín Beag",day:"Sat",start:"20:15",end:"21:00"},
+  {name:"Trad Folkin' Rocks House Band",stage:"Sibín Beag",day:"Sat",start:"21:30",end:"23:30"},
+  {name:"Trad Folkin' Rave (Annie Craic & Dalba)",stage:"Sibín Beag",day:"Sat",start:"00:00",end:"02:00"},
+  // --- Sat: Soapranos Laundrette ---
+  {name:"Selextorhood",stage:"Soapranos Laundrette",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Rose Holland",stage:"Soapranos Laundrette",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"Laundry Night Live with Soapranos & SNTV",stage:"Soapranos Laundrette",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"Kundarini",stage:"Soapranos Laundrette",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Aura",stage:"Soapranos Laundrette",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"ESC",stage:"Soapranos Laundrette",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Alina",stage:"Soapranos Laundrette",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"SIMMS",stage:"Soapranos Laundrette",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"DOMINATOR PRESENTS: Caliban",stage:"Soapranos Laundrette",day:"Sat",start:"21:00",end:"22:00"},
+  {name:"Dominator Presents: Special Guest",stage:"Soapranos Laundrette",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"DOMINATOR PRESENTS: Meduse Noir",stage:"Soapranos Laundrette",day:"Sat",start:"23:00",end:"00:00"},
+  // --- Sat: Spectrum 360 ---
+  {name:"Draggernauts",stage:"Spectrum 360",day:"Sat",start:"16:00",end:"18:00"},
+  {name:"Hang The DJs",stage:"Spectrum 360",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Koarse",stage:"Spectrum 360",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"DJ Sarah Bonito",stage:"Spectrum 360",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"DJ G2G",stage:"Spectrum 360",day:"Sat",start:"21:00",end:"22:00"},
+  {name:"Panteros666",stage:"Spectrum 360",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"Trampsta",stage:"Spectrum 360",day:"Sat",start:"23:00",end:"00:00"},
+  {name:"Gonzi",stage:"Spectrum 360",day:"Sat",start:"00:00",end:"01:00"},
+  {name:"Meg McHugh",stage:"Spectrum 360",day:"Sat",start:"01:00",end:"02:00"},
+  {name:"Sterling Moss",stage:"Spectrum 360",day:"Sat",start:"02:00",end:"03:00"},
+  {name:"Fish56Octagon",stage:"Spectrum 360",day:"Sat",start:"03:00",end:"04:00"},
+  // --- Sat: Spinney Hollow ---
+  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
+  // --- Sat: Sub Lab ---
+  {name:"Anything But Becky",stage:"Sub Lab",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Bubski",stage:"Sub Lab",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"AAEE",stage:"Sub Lab",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"Samba",stage:"Sub Lab",day:"Sat",start:"21:00",end:"22:00"},
+  {name:"Ruggz b2b Sonia Sol",stage:"Sub Lab",day:"Sat",start:"22:00",end:"23:30"},
+  {name:"Sis:Dem",stage:"Sub Lab",day:"Sat",start:"23:30",end:"01:00"},
+  {name:"Mystic State",stage:"Sub Lab",day:"Sat",start:"01:00",end:"02:00"},
+  {name:"Numa Crew",stage:"Sub Lab",day:"Sat",start:"02:00",end:"03:00"},
+  {name:"Rotate",stage:"Sub Lab",day:"Sat",start:"03:00",end:"03:59"},
+  // --- Sat: Tangled Roots ---
+  {name:"Channel One Sound System",stage:"Tangled Roots",day:"Sat",start:"12:00",end:"14:00"},
+  {name:"Aba Shanti-I",stage:"Tangled Roots",day:"Sat",start:"14:00",end:"16:00"},
+  {name:"10000 Lions",stage:"Tangled Roots",day:"Sat",start:"16:00",end:"18:00"},
+  {name:"Firmly Rooted x Lionpulse x Sinai",stage:"Tangled Roots",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Sasha Steppa",stage:"Tangled Roots",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"Omega Nebula",stage:"Tangled Roots",day:"Sat",start:"20:00",end:"21:00"},
   // --- Sat: The Boomtown Bobbies ---
   {name:"Kick Bandit",stage:"The Boomtown Bobbies",day:"Sat",start:"15:00",end:"16:00"},
   {name:"Maddx",stage:"The Boomtown Bobbies",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Millz B2B Kleu B2B Kivi",stage:"The Boomtown Bobbies",day:"Sat",start:"17:00",end:"18:00"},
-  {name:"DJ Hybrid B2B Origin8a & Propa",stage:"The Boomtown Bobbies",day:"Sat",start:"18:00",end:"18:50"},
+  {name:"Millz b2b Kleu b2b Kivi",stage:"The Boomtown Bobbies",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"DJ Hybrid b2b Origin8a & Propa",stage:"The Boomtown Bobbies",day:"Sat",start:"18:00",end:"18:50"},
   {name:"Ed Solo",stage:"The Boomtown Bobbies",day:"Sat",start:"18:50",end:"19:30"},
   {name:"Benny Page",stage:"The Boomtown Bobbies",day:"Sat",start:"19:30",end:"20:15"},
   {name:"Deekline",stage:"The Boomtown Bobbies",day:"Sat",start:"20:15",end:"21:00"},
@@ -1747,140 +2360,50 @@ const artists = [
   {name:"Zone 1",stage:"The Boomtown Bobbies",day:"Sat",start:"01:00",end:"02:00"},
   {name:"Betsy Mae",stage:"The Boomtown Bobbies",day:"Sat",start:"02:00",end:"03:00"},
   {name:"Checkmate",stage:"The Boomtown Bobbies",day:"Sat",start:"03:00",end:"04:00"},
-  // --- Sat: Soapranos Laundrette ---
-  {name:"Selextorhood",stage:"Soapranos Laundrette",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Rose Holland",stage:"Soapranos Laundrette",day:"Sat",start:"14:00",end:"15:00"},
-  {name:"Laundry Night Live",stage:"Soapranos Laundrette",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"Kundarini",stage:"Soapranos Laundrette",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Aura",stage:"Soapranos Laundrette",day:"Sat",start:"17:00",end:"18:00"},
-  {name:"Esc",stage:"Soapranos Laundrette",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Alina",stage:"Soapranos Laundrette",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Simms",stage:"Soapranos Laundrette",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"Dominator Presents: Caliban",stage:"Soapranos Laundrette",day:"Sat",start:"21:00",end:"22:00"},
-  {name:"Dominator Presents: Special Guest",stage:"Soapranos Laundrette",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"Dominator Presents: Meduse Noir",stage:"Soapranos Laundrette",day:"Sat",start:"23:00",end:"00:00"},
-  // --- Sat: Hotel Paradiso ---
-  {name:"Vibe Roulette",stage:"Hotel Paradiso",day:"Sat",start:"19:30",end:"21:30"},
-  {name:"DJ Andres Cervero",stage:"Hotel Paradiso",day:"Sat",start:"21:30",end:"22:00"},
-  {name:"Malavita!",stage:"Hotel Paradiso",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"DJ Andres Cervero",stage:"Hotel Paradiso",day:"Sat",start:"23:00",end:"00:00"},
-  {name:"Tripl3 B & The Trouble Makers",stage:"Hotel Paradiso",day:"Sat",start:"00:00",end:"01:00"},
-  {name:"Banshee Takeover",stage:"Hotel Paradiso",day:"Sat",start:"01:00",end:"02:00"},
-  // --- Sat: Luck Exchange Casino ---
-  {name:"Deal Of Fortune",stage:"Luck Exchange Casino",day:"Sat",start:"19:05",end:"19:20"},
-  {name:"Air Horny",stage:"Luck Exchange Casino",day:"Sat",start:"19:25",end:"19:35"},
-  {name:"DJ Buckaroo",stage:"Luck Exchange Casino",day:"Sat",start:"19:35",end:"19:50"},
-  {name:"Carrot And Dick",stage:"Luck Exchange Casino",day:"Sat",start:"19:55",end:"20:00"},
-  {name:"Rate My Horse Drawing",stage:"Luck Exchange Casino",day:"Sat",start:"20:05",end:"20:15"},
-  {name:"The Paul Taylor Experience",stage:"Luck Exchange Casino",day:"Sat",start:"20:15",end:"20:45"},
-  {name:"DJ Noeyedear",stage:"Luck Exchange Casino",day:"Sat",start:"20:45",end:"21:15"},
-  {name:"Petrol Hoers",stage:"Luck Exchange Casino",day:"Sat",start:"21:15",end:"21:45"},
+  // --- Sat: The Fools Leap ---
+  {name:"FFTP",stage:"The Fools Leap",day:"Sat",start:"12:00",end:"13:00"},
+  {name:"Tropanka",stage:"The Fools Leap",day:"Sat",start:"13:30",end:"14:30"},
+  {name:"Fidget & The Twitchers",stage:"The Fools Leap",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"Alphalfa",stage:"The Fools Leap",day:"Sat",start:"16:30",end:"17:30"},
+  {name:"45s",stage:"The Fools Leap",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Cam Cole",stage:"The Fools Leap",day:"Sat",start:"19:30",end:"20:30"},
+  {name:"3 Daft Monkeys",stage:"The Fools Leap",day:"Sat",start:"21:00",end:"22:00"},
+  {name:"Daraa Tribes",stage:"The Fools Leap",day:"Sat",start:"22:30",end:"23:30"},
+  {name:"CHEWY SHE",stage:"The Fools Leap",day:"Sat",start:"00:00",end:"01:00"},
+  {name:"DOGSHOW",stage:"The Fools Leap",day:"Sat",start:"01:30",end:"02:30"},
+  {name:"Fizzy Gillespie's Big Balkan Bash",stage:"The Fools Leap",day:"Sat",start:"03:00",end:"04:00"},
   // --- Sat: The Garden Centre ---
   {name:"DJ Mozzarella Stix",stage:"The Garden Centre",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Yellowsix",stage:"The Garden Centre",day:"Sat",start:"14:00",end:"15:00"},
-  {name:"Dky",stage:"The Garden Centre",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"YellowSix",stage:"The Garden Centre",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"DKY",stage:"The Garden Centre",day:"Sat",start:"15:00",end:"16:00"},
   {name:"Ravermonkey",stage:"The Garden Centre",day:"Sat",start:"16:00",end:"17:30"},
   {name:"Gnome Gala Ft. Smooches",stage:"The Garden Centre",day:"Sat",start:"17:30",end:"19:00"},
   {name:"The Regional Manager's Garden Show",stage:"The Garden Centre",day:"Sat",start:"21:00",end:"22:00"},
   {name:"Strawberry Jams",stage:"The Garden Centre",day:"Sat",start:"22:00",end:"22:30"},
   {name:"Fireworks Factory",stage:"The Garden Centre",day:"Sat",start:"22:30",end:"23:30"},
   {name:"Konetix",stage:"The Garden Centre",day:"Sat",start:"23:30",end:"00:30"},
-  {name:"Hide The Soul",stage:"The Garden Centre",day:"Sat",start:"00:30",end:"01:30"},
+  {name:"Hide the Soul",stage:"The Garden Centre",day:"Sat",start:"00:30",end:"01:30"},
   {name:"Medusa",stage:"The Garden Centre",day:"Sat",start:"01:30",end:"02:45"},
   {name:"Cheska Onyx",stage:"The Garden Centre",day:"Sat",start:"02:45",end:"04:00"},
-  // --- Sat: Botanica Zoo ---
-  {name:"Sis:Dem Taken Over",stage:"Botanica Zoo",day:"Sat",start:"15:00",end:"17:00"},
-  {name:"Lady Lena w/ Nav",stage:"Botanica Zoo",day:"Sat",start:"17:00",end:"18:00"},
-  {name:"Scorpio B2B Fendi K",stage:"Botanica Zoo",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Origin8a & Propa B2B A.N.T",stage:"Botanica Zoo",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Dwarde B2B Tim Reaper B2B Abby Daze",stage:"Botanica Zoo",day:"Sat",start:"20:00",end:"22:00"},
-  {name:"Mike Frear",stage:"Botanica Zoo",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"Cicely",stage:"Botanica Zoo",day:"Sat",start:"23:00",end:"00:00"},
-  {name:"Alk-M-E B2B Malware",stage:"Botanica Zoo",day:"Sat",start:"00:00",end:"01:00"},
-  {name:"Crank Vinyl Set w/ MC Stretch",stage:"Botanica Zoo",day:"Sat",start:"01:00",end:"02:00"},
-  {name:"E-Coli",stage:"Botanica Zoo",day:"Sat",start:"02:00",end:"03:00"},
-  {name:"Asher Ashan",stage:"Botanica Zoo",day:"Sat",start:"03:00",end:"03:55"},
   // --- Sat: The Immortal Children of the Eternal Seed ---
   {name:"Kritical Mass",stage:"The Immortal Children of the Eternal Seed",day:"Sat",start:"22:00",end:"23:00"},
   {name:"Safe N Sound",stage:"The Immortal Children of the Eternal Seed",day:"Sat",start:"23:00",end:"00:00"},
   {name:"Baithead",stage:"The Immortal Children of the Eternal Seed",day:"Sat",start:"00:00",end:"01:00"},
-  {name:"Glume B2B Phossa B2B Samba",stage:"The Immortal Children of the Eternal Seed",day:"Sat",start:"01:00",end:"03:00"},
+  {name:"Glume b2b Phossa b2b Samba",stage:"The Immortal Children of the Eternal Seed",day:"Sat",start:"01:00",end:"03:00"},
   {name:"Ellament",stage:"The Immortal Children of the Eternal Seed",day:"Sat",start:"03:00",end:"04:00"},
-  // --- Sat: Topsy Turvy Trims ---
-  {name:"Kandy D. Licious",stage:"Topsy Turvy Trims",day:"Sat",start:"13:00",end:"13:30"},
-  {name:"Merchant",stage:"Topsy Turvy Trims",day:"Sat",start:"13:30",end:"15:00"},
-  {name:"Frazr Musica",stage:"Topsy Turvy Trims",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"Hokey Cokey Cabaret",stage:"Topsy Turvy Trims",day:"Sat",start:"17:00",end:"18:00"},
-  {name:"Goose",stage:"Topsy Turvy Trims",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Woody Cook",stage:"Topsy Turvy Trims",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"DJ Borat",stage:"Topsy Turvy Trims",day:"Sat",start:"21:00",end:"22:00"},
-  {name:"Tickety Boo",stage:"Topsy Turvy Trims",day:"Sat",start:"22:00",end:"00:00"},
-  {name:"Black Board Soundsystem",stage:"Topsy Turvy Trims",day:"Sat",start:"00:00",end:"02:00"},
-  // --- Sat: PFP Robot ---
-  {name:"The Blister Pack",stage:"PFP Robot",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"Jaz Imsky B2B Coco Dubz",stage:"PFP Robot",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Eloquin B2B PJ Bridger",stage:"PFP Robot",day:"Sat",start:"17:00",end:"18:00"},
-  // --- Sat: Sub Lab ---
-  {name:"Supplya",stage:"Sub Lab",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Bubski",stage:"Sub Lab",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Aaee",stage:"Sub Lab",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"Anything But Becky",stage:"Sub Lab",day:"Sat",start:"21:00",end:"22:00"},
-  {name:"Ruggz B2B Sonia Sol",stage:"Sub Lab",day:"Sat",start:"22:00",end:"23:30"},
-  {name:"Sis:Dem",stage:"Sub Lab",day:"Sat",start:"23:30",end:"01:00"},
-  {name:"Mystic State",stage:"Sub Lab",day:"Sat",start:"01:00",end:"02:00"},
-  {name:"Numa Crew",stage:"Sub Lab",day:"Sat",start:"02:00",end:"03:00"},
-  {name:"Rotate",stage:"Sub Lab",day:"Sat",start:"03:00",end:"03:59"},
-  // --- Sat: Nachtlicker ---
-  {name:"Jackdoesjungle",stage:"Nachtlicker",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Peppa",stage:"Nachtlicker",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"PJ Peek",stage:"Nachtlicker",day:"Sat",start:"20:00",end:"21:15"},
-  {name:"Rizzy & The Gents Live",stage:"Nachtlicker",day:"Sat",start:"21:15",end:"22:00"},
-  {name:"Militant Music",stage:"Nachtlicker",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"Goff Feat Baby Sol",stage:"Nachtlicker",day:"Sat",start:"23:00",end:"00:15"},
-  {name:"Shirley Temper",stage:"Nachtlicker",day:"Sat",start:"00:15",end:"01:30"},
-  {name:"The Bass Injector",stage:"Nachtlicker",day:"Sat",start:"01:30",end:"02:30"},
-  {name:"Kells",stage:"Nachtlicker",day:"Sat",start:"02:30",end:"04:00"},
-  // --- Sat: Deviant Lounge ---
-  {name:"Charles The Princess B2B Pretty Patel",stage:"Deviant Lounge",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"Plughole Takeover",stage:"Deviant Lounge",day:"Sat",start:"21:00",end:"22:00"},
-  {name:"Miss Bee Spinner B2B Promiscuous Piggy",stage:"Deviant Lounge",day:"Sat",start:"22:00",end:"23:00"},
-  {name:"DJ Elsa From Frozen",stage:"Deviant Lounge",day:"Sat",start:"23:00",end:"23:30"},
-  {name:"Bunn13",stage:"Deviant Lounge",day:"Sat",start:"23:30",end:"00:10"},
-  {name:"Kake",stage:"Deviant Lounge",day:"Sat",start:"00:10",end:"00:50"},
-  {name:"Skrub",stage:"Deviant Lounge",day:"Sat",start:"00:50",end:"01:30"},
-  {name:"Goosey",stage:"Deviant Lounge",day:"Sat",start:"01:30",end:"02:15"},
-  {name:"Mums Against Donk Takeover (Pissxie)",stage:"Deviant Lounge",day:"Sat",start:"02:15",end:"03:00"},
-  {name:"Mums Against Donk Takeover (Alterum)",stage:"Deviant Lounge",day:"Sat",start:"03:00",end:"04:00"},
-  // --- Sat: Gabber Kebabber ---
-  {name:"Jungyals and Gays Takeover",stage:"Gabber Kebabber",day:"Sat",start:"13:00",end:"15:00"},
-  {name:"Shirley Temper B2B Syntax",stage:"Gabber Kebabber",day:"Sat",start:"15:00",end:"15:45"},
-  {name:"Scottish Gabber Punk",stage:"Gabber Kebabber",day:"Sat",start:"15:45",end:"16:15"},
-  {name:"Petrol Hoers",stage:"Gabber Kebabber",day:"Sat",start:"16:15",end:"16:45"},
-  {name:"Phetcore",stage:"Gabber Kebabber",day:"Sat",start:"16:45",end:"17:30"},
-  {name:"Audio Gutter",stage:"Gabber Kebabber",day:"Sat",start:"17:30",end:"18:30"},
-  {name:"Dirty Chronic",stage:"Gabber Kebabber",day:"Sat",start:"18:30",end:"19:30"},
-  {name:"Smifcour",stage:"Gabber Kebabber",day:"Sat",start:"19:30",end:"20:30"},
-  {name:"Mikey Motion",stage:"Gabber Kebabber",day:"Sat",start:"20:30",end:"21:30"},
-  {name:"Bobby Starchild",stage:"Gabber Kebabber",day:"Sat",start:"21:30",end:"22:30"},
-  {name:"Manrat",stage:"Gabber Kebabber",day:"Sat",start:"22:30",end:"23:30"},
-  {name:"Mcat",stage:"Gabber Kebabber",day:"Sat",start:"23:30",end:"00:10"},
-  {name:"Nice'n'Spicy",stage:"Gabber Kebabber",day:"Sat",start:"00:10",end:"00:50"},
-  {name:"Herbie",stage:"Gabber Kebabber",day:"Sat",start:"00:50",end:"01:30"},
-  {name:"Ginny",stage:"Gabber Kebabber",day:"Sat",start:"01:30",end:"02:15"},
-  {name:"Indecline",stage:"Gabber Kebabber",day:"Sat",start:"02:15",end:"03:15"},
-  {name:"Mollie Rush",stage:"Gabber Kebabber",day:"Sat",start:"03:15",end:"04:00"},
-  // --- Sat: E Numbers ---
-  {name:"Dance Mums",stage:"E Numbers",day:"Sat",start:"19:00",end:"19:45"},
-  {name:"Dykes On Decks",stage:"E Numbers",day:"Sat",start:"19:45",end:"21:15"},
-  {name:"C.Exe",stage:"E Numbers",day:"Sat",start:"21:15",end:"22:00"},
-  {name:"Mannequins: Tommy Tempo",stage:"E Numbers",day:"Sat",start:"22:00",end:"22:45"},
-  {name:"Mannequins: Yoyo",stage:"E Numbers",day:"Sat",start:"22:45",end:"23:30"},
-  {name:"Æon: Muzhit",stage:"E Numbers",day:"Sat",start:"23:30",end:"00:15"},
-  {name:"Æon: Vaqero",stage:"E Numbers",day:"Sat",start:"00:15",end:"01:00"},
-  {name:"Æon: Sissy Cinnamon",stage:"E Numbers",day:"Sat",start:"01:00",end:"01:45"},
-  {name:"Æon: Spinks",stage:"E Numbers",day:"Sat",start:"01:45",end:"02:30"},
-  {name:"Æon: Nohexcode",stage:"E Numbers",day:"Sat",start:"02:30",end:"03:15"},
-  {name:"Æon: Citytronix",stage:"E Numbers",day:"Sat",start:"03:15",end:"04:00"},
+  // --- Sat: The Lion's Den ---
+  {name:"Crossy B2B Gray B2B Harriet Jaxxon Ft. Spyda [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Benny L B2B Break B2B Skeptical Ft. MC GQ & MC Det [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"Kings of the Rollers Present: Royal Rumble",stage:"The Lion's Den",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"Brockie B2B Micky Finn B2B Ray Keith Ft. Jolie P & Shabba D [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Mungo's Hi Fi Allstars Ft. Aziza Jaye, Charlie P, Eva Lazarus, Flowdan, Gardna, Killa P, Magugu & Solo Banton",stage:"The Lion's Den",day:"Sat",start:"17:00",end:"19:00"},
+  {name:"Shaggy",stage:"The Lion's Den",day:"Sat",start:"19:30",end:"20:30"},
+  {name:"Scooter",stage:"The Lion's Den",day:"Sat",start:"21:00",end:"22:10"},
+  {name:"Alix Perez Ft. SP:MC",stage:"The Lion's Den",day:"Sat",start:"22:30",end:"00:00"},
+  {name:"Andy C Presents: Nightlife",stage:"The Lion's Den",day:"Sat",start:"00:00",end:"02:00"},
+  {name:"A.M.C Ft Phantom",stage:"The Lion's Den",day:"Sat",start:"02:00",end:"03:00"},
+  // --- Sat: The Magic Teapot ---
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sat",start:"12:00",end:"00:00"},
   // --- Sat: The Pomegranate Parlour ---
   {name:"Poppi",stage:"The Pomegranate Parlour",day:"Sat",start:"14:00",end:"15:00"},
   {name:"Fizzy Gillespie",stage:"The Pomegranate Parlour",day:"Sat",start:"15:00",end:"16:00"},
@@ -1893,152 +2416,63 @@ const artists = [
   {name:"Me Miles & I",stage:"The Pomegranate Parlour",day:"Sat",start:"22:00",end:"23:00"},
   {name:"Scarba",stage:"The Pomegranate Parlour",day:"Sat",start:"23:00",end:"00:00"},
   {name:"Cassia",stage:"The Pomegranate Parlour",day:"Sat",start:"00:00",end:"01:00"},
-  {name:"Lizaza",stage:"The Pomegranate Parlour",day:"Sat",start:"01:00",end:"02:00"},
+  {name:"LIZAZA",stage:"The Pomegranate Parlour",day:"Sat",start:"01:00",end:"02:00"},
   {name:"Omadhaun",stage:"The Pomegranate Parlour",day:"Sat",start:"02:00",end:"03:00"},
   {name:"Nego",stage:"The Pomegranate Parlour",day:"Sat",start:"03:00",end:"03:55"},
-  // --- Sat: Busker's Wharf ---
-  {name:"The Pussy Catbaret",stage:"Busker's Wharf",day:"Sat",start:"19:30",end:"20:30"},
-  {name:"The Lobster Cabaret",stage:"Busker's Wharf",day:"Sat",start:"21:00",end:"22:00"},
+  // --- Sat: Tinker Station ---
+  {name:"Tinker Station",stage:"Tinker Station",day:"Sat",start:"10:00",end:"18:00"},
+  // --- Sat: Topsy Turvy Trims ---
+  {name:"Kandy D. Licious",stage:"Topsy Turvy Trims",day:"Sat",start:"13:00",end:"13:30"},
+  {name:"Merchant",stage:"Topsy Turvy Trims",day:"Sat",start:"13:30",end:"15:00"},
+  {name:"Frazr Musica",stage:"Topsy Turvy Trims",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"TBA",stage:"Topsy Turvy Trims",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Hokey Cokey Cabaret",stage:"Topsy Turvy Trims",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"Goose",stage:"Topsy Turvy Trims",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"Woody Cook",stage:"Topsy Turvy Trims",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"DJ Borat",stage:"Topsy Turvy Trims",day:"Sat",start:"21:00",end:"22:00"},
+  {name:"Tickety Boo",stage:"Topsy Turvy Trims",day:"Sat",start:"22:00",end:"00:00"},
+  {name:"Black Board Soundsystem",stage:"Topsy Turvy Trims",day:"Sat",start:"00:00",end:"02:00"},
+  // --- Sat: Tribe of Frog ---
+  {name:"Dr.G",stage:"Tribe of Frog",day:"Sat",start:"12:00",end:"14:00"},
+  {name:"Xenoben",stage:"Tribe of Frog",day:"Sat",start:"14:00",end:"15:30"},
+  {name:"TypeOne",stage:"Tribe of Frog",day:"Sat",start:"15:30",end:"17:00"},
+  {name:"Psibindi",stage:"Tribe of Frog",day:"Sat",start:"17:00",end:"18:00"},
+  {name:"Tresh",stage:"Tribe of Frog",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"Atacama",stage:"Tribe of Frog",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"Florescence",stage:"Tribe of Frog",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"Pieman",stage:"Tribe of Frog",day:"Sat",start:"21:00",end:"22:00"},
+  {name:"Transient Disorder",stage:"Tribe of Frog",day:"Sat",start:"22:00",end:"23:00"},
+  {name:"K.I.M",stage:"Tribe of Frog",day:"Sat",start:"23:00",end:"00:00"},
+  {name:"Imaginarium",stage:"Tribe of Frog",day:"Sat",start:"00:00",end:"01:00"},
+  {name:"Dickster",stage:"Tribe of Frog",day:"Sat",start:"01:00",end:"02:30"},
+  {name:"Avalon",stage:"Tribe of Frog",day:"Sat",start:"02:30",end:"04:00"},
   // --- Sat: Twisted Time Machine (Bad Apple Bar) ---
-  {name:"Aim - Cold Water Music Album Playback",stage:"Twisted Time Machine",day:"Sat",start:"12:00",end:"13:00"},
-  {name:"Ocean Colour Scene - Mosley Shoals Album Playback",stage:"Twisted Time Machine",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"The Musicals Party",stage:"Twisted Time Machine",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"The Council Of Bens",stage:"Twisted Time Machine",day:"Sat",start:"16:00",end:"18:00"},
-  {name:"2djs2many",stage:"Twisted Time Machine",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"DJ Work Experience",stage:"Twisted Time Machine",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"4 Ur Mindz Jadey C N Friends",stage:"Twisted Time Machine",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"Disco Exotic Presents",stage:"Twisted Time Machine",day:"Sat",start:"21:00",end:"23:00"},
-  {name:"Only Oasis",stage:"Twisted Time Machine",day:"Sat",start:"23:00",end:"00:00"},
-  {name:"Dubtendo Presents: Just Dance Live",stage:"Twisted Time Machine",day:"Sat",start:"00:00",end:"00:30"},
-  {name:"Twisted Time Machine X Dubtendo",stage:"Twisted Time Machine",day:"Sat",start:"00:30",end:"02:00"},
-  {name:"Big Daddy Woof Woof",stage:"Twisted Time Machine",day:"Sat",start:"02:00",end:"03:00"},
-  {name:"Pink Floyd - The Dark Side Of The Moon",stage:"Twisted Time Machine",day:"Sat",start:"03:00",end:"04:00"},
-  // --- Sat: Síbín Beag ---
-  {name:"Autonemy",stage:"Síbín Beag",day:"Sat",start:"14:00",end:"14:45"},
-  {name:"The Deltones",stage:"Síbín Beag",day:"Sat",start:"15:15",end:"16:00"},
-  {name:"The Deadshots",stage:"Síbín Beag",day:"Sat",start:"16:30",end:"17:15"},
-  {name:"Tootinska Moon",stage:"Síbín Beag",day:"Sat",start:"17:45",end:"18:30"},
-  {name:"Ria Rua",stage:"Síbín Beag",day:"Sat",start:"19:00",end:"19:45"},
-  {name:"Fancy Dan",stage:"Síbín Beag",day:"Sat",start:"20:15",end:"21:00"},
-  {name:"Trad Folkin' Rocks House Band",stage:"Síbín Beag",day:"Sat",start:"21:30",end:"23:30"},
-  {name:"Trad Folkin' Rave",stage:"Síbín Beag",day:"Sat",start:"00:00",end:"02:00"},
-  // --- Sat: Helix ---
-  {name:"Josephine Gyasi",stage:"Helix",day:"Sat",start:"16:30",end:"17:30"},
-  {name:"Joe Sonar B2B Rose Holland",stage:"Helix",day:"Sat",start:"17:30",end:"19:00"},
-  {name:"Steady",stage:"Helix",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Lemtom",stage:"Helix",day:"Sat",start:"20:00",end:"21:00"},
-  {name:"Brown Excellence",stage:"Helix",day:"Sat",start:"21:00",end:"22:30"},
-  {name:"Jialing",stage:"Helix",day:"Sat",start:"22:30",end:"00:00"},
-  {name:"Jay Carder",stage:"Helix",day:"Sat",start:"00:00",end:"01:30"},
-  {name:"DJ Cosworth B2B Oldboy",stage:"Helix",day:"Sat",start:"01:30",end:"03:00"},
-  // --- Sat: Mining for (g)Old Town ---
-  {name:"Maggs",stage:"Mining for (g)Old Town",day:"Sat",start:"13:30",end:"15:00"},
-  {name:"Father Lynch",stage:"Mining for (g)Old Town",day:"Sat",start:"15:00",end:"16:30"},
-  {name:"Emma Ash",stage:"Mining for (g)Old Town",day:"Sat",start:"16:30",end:"17:30"},
-  {name:"Wildsoul",stage:"Mining for (g)Old Town",day:"Sat",start:"17:30",end:"19:00"},
-  // --- Sat: End of the Line ---
-  {name:"DJ Osu!",stage:"End of the Line",day:"Sat",start:"19:55",end:"20:35"},
-  {name:"Clara",stage:"End of the Line",day:"Sat",start:"20:35",end:"21:15"},
-  {name:"Waxtek",stage:"End of the Line",day:"Sat",start:"21:20",end:"22:00"},
-  {name:"Mollie Rush",stage:"End of the Line",day:"Sat",start:"22:00",end:"22:45"},
-  {name:"Gabba Banoush",stage:"End of the Line",day:"Sat",start:"22:45",end:"23:25"},
-  {name:"Charlie Power",stage:"End of the Line",day:"Sat",start:"23:25",end:"00:05"},
-  {name:"Seppa",stage:"End of the Line",day:"Sat",start:"00:05",end:"01:05"},
-  {name:"Gullyteen",stage:"End of the Line",day:"Sat",start:"01:05",end:"01:50"},
-  {name:"N1pp1lls",stage:"End of the Line",day:"Sat",start:"01:50",end:"02:30"},
-  {name:"Kalisae",stage:"End of the Line",day:"Sat",start:"02:30",end:"03:15"},
-  {name:"Iffyhype",stage:"End of the Line",day:"Sat",start:"03:15",end:"04:00"},
-  // --- Sat: Infinity ---
-  {name:"Queer House Party Takeover: Bledi",stage:"Infinity",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Queer House Party Takeover: Bambi",stage:"Infinity",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Queer House Party Takeover: Dykes On Decks",stage:"Infinity",day:"Sat",start:"20:00",end:"21:30"},
-  {name:"Queer House Party Takeover: Uokhun",stage:"Infinity",day:"Sat",start:"21:30",end:"23:00"},
-  {name:"Queer House Party Takeover: Rose Gray",stage:"Infinity",day:"Sat",start:"23:00",end:"00:00"},
-  {name:"Queer House Party Takeover: I. Jordan",stage:"Infinity",day:"Sat",start:"00:00",end:"02:00"},
-  {name:"Queer House Party Takeover: Harry Gay B2B Meg Ward",stage:"Infinity",day:"Sat",start:"02:00",end:"04:00"},
-
-  // ================= SUNDAY =================
-  // --- Sun: The Lion's Den ---
-  {name:"David Rodigan Presents: Ram Jam Ft D Double E, Hollie Cook & Irah",stage:"The Lion's Den",day:"Sun",start:"14:30",end:"15:45"},
-  {name:"Vengaboys",stage:"The Lion's Den",day:"Sun",start:"16:00",end:"16:50"},
-  {name:"Eve",stage:"The Lion's Den",day:"Sun",start:"17:10",end:"18:10"},
-  {name:"Fcukers",stage:"The Lion's Den",day:"Sun",start:"18:40",end:"19:40"},
-  {name:"Scissor Sisters",stage:"The Lion's Den",day:"Sun",start:"20:10",end:"21:40"},
-  {name:"Faithless",stage:"The Lion's Den",day:"Sun",start:"22:15",end:"23:45"},
-  {name:"Closing Ceremony",stage:"The Lion's Den",day:"Sun",start:"23:50",end:"00:00"},
-  // --- Sun: Hydro XL ---
-  {name:"Nimino Live",stage:"Hydro XL",day:"Sun",start:"15:00",end:"16:20"},
-  {name:"Kilimanjaro B2B Oppidan",stage:"Hydro XL",day:"Sun",start:"16:30",end:"18:00"},
-  {name:"Vtss",stage:"Hydro XL",day:"Sun",start:"18:00",end:"19:30"},
-  {name:"Marlon Hoffstadt",stage:"Hydro XL",day:"Sun",start:"19:30",end:"21:00"},
-  {name:"Sherelle AV Show",stage:"Hydro XL",day:"Sun",start:"21:00",end:"22:30"},
-  {name:"Skrillex",stage:"Hydro XL",day:"Sun",start:"22:30",end:"23:50"},
-  {name:"Closing Ceremony",stage:"Hydro XL",day:"Sun",start:"23:50",end:"00:00"},
-  // --- Sun: Grand Central ---
-  {name:"Dub Pistols",stage:"Grand Central",day:"Sun",start:"14:00",end:"15:00"},
-  {name:"Beans On Toast",stage:"Grand Central",day:"Sun",start:"15:30",end:"16:30"},
-  {name:"Elvana",stage:"Grand Central",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Dr Meaker Live",stage:"Grand Central",day:"Sun",start:"18:30",end:"19:30"},
-  {name:"Less Than Jake",stage:"Grand Central",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Skindred",stage:"Grand Central",day:"Sun",start:"21:30",end:"22:30"},
-  // --- Sun: Hidden Woods ---
-  {name:"Grooverider",stage:"Hidden Woods",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Shades Of Rhythm",stage:"Hidden Woods",day:"Sun",start:"14:00",end:"15:00"},
-  {name:"K-Klass B2B Morgan Seatree",stage:"Hidden Woods",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Sonique",stage:"Hidden Woods",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Kings Of The Rave",stage:"Hidden Woods",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Pete Cannon B2B Time To Rush",stage:"Hidden Woods",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Ratty & Serum Ft. Mad P",stage:"Hidden Woods",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Cheff The Boy B2B Hypershé B2B Origin8a & Propa",stage:"Hidden Woods",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Altern 8 B2B Slipmatt Ft. Dread MC",stage:"Hidden Woods",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Anz B2B Special Request",stage:"Hidden Woods",day:"Sun",start:"22:00",end:"23:00"},
-  {name:"Ratpack",stage:"Hidden Woods",day:"Sun",start:"23:00",end:"00:00"},
-  // --- Sun: Tangled Roots ---
-  {name:"Lionpulse X Sinai",stage:"Tangled Roots",day:"Sun",start:"12:00",end:"13:00"},
-  {name:"Aziza Jaye",stage:"Tangled Roots",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Cheshire Cat",stage:"Tangled Roots",day:"Sun",start:"14:00",end:"15:00"},
-  {name:"Ras Demo Aka Demolition Man",stage:"Tangled Roots",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Top Cat",stage:"Tangled Roots",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Jolie P",stage:"Tangled Roots",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Simms",stage:"Tangled Roots",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Aries Jungle Set Ft. Carasel",stage:"Tangled Roots",day:"Sun",start:"19:00",end:"20:15"},
-  {name:"Irah",stage:"Tangled Roots",day:"Sun",start:"20:15",end:"21:00"},
-  // --- Sun: Anara Forest ---
-  {name:"Silva Snipa B2B Vxrgo",stage:"Anara Forest",day:"Sun",start:"14:00",end:"15:30"},
-  {name:"Sabrina Ft. Dread MC",stage:"Anara Forest",day:"Sun",start:"15:30",end:"16:30"},
-  {name:"Skantia Ft. Strategy",stage:"Anara Forest",day:"Sun",start:"16:30",end:"18:00"},
-  {name:"Kyrist B2B Waeys Ft. Strategy",stage:"Anara Forest",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Molecular B2B Wingz Ft. Jakes",stage:"Anara Forest",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Visages Ft. Sp:Mc",stage:"Anara Forest",day:"Sun",start:"20:00",end:"21:30"},
-  {name:"Mandidextrous Ft. Maddy V",stage:"Anara Forest",day:"Sun",start:"21:30",end:"23:00"},
-  {name:"Simula Ft. Jakes",stage:"Anara Forest",day:"Sun",start:"23:00",end:"00:00"},
-  // --- Sun: Tribe of Frog ---
-  {name:"Rob Ótico",stage:"Tribe of Frog",day:"Sun",start:"12:00",end:"13:30"},
-  {name:"Piou-Piou",stage:"Tribe of Frog",day:"Sun",start:"13:30",end:"15:00"},
-  {name:"Skeptic",stage:"Tribe of Frog",day:"Sun",start:"15:00",end:"16:30"},
-  {name:"Krosis",stage:"Tribe of Frog",day:"Sun",start:"16:30",end:"18:00"},
-  {name:"Roen",stage:"Tribe of Frog",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Divination",stage:"Tribe of Frog",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Psychosonic",stage:"Tribe of Frog",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Trubble",stage:"Tribe of Frog",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Celli",stage:"Tribe of Frog",day:"Sun",start:"22:00",end:"23:00"},
-  // --- Sun: Nexus ---
-  {name:"Bongo's Bingo",stage:"Nexus",day:"Sun",start:"14:30",end:"15:30"},
-  {name:"The League Of Rebelz",stage:"Nexus",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Hollie Cook",stage:"Nexus",day:"Sun",start:"17:30",end:"18:30"},
-  {name:"Talib Kweli",stage:"Nexus",day:"Sun",start:"19:15",end:"20:15"},
-  {name:"Kibo",stage:"Nexus",day:"Sun",start:"20:40",end:"21:40"},
-  {name:"Killowen",stage:"Nexus",day:"Sun",start:"22:00",end:"23:00"},
-  // --- Sun: Spectrum 360 ---
-  {name:"Peggy Vienetta Ft. MC Stone",stage:"Spectrum 360",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Lobsta B",stage:"Spectrum 360",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"DJ Can't Say No",stage:"Spectrum 360",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Keptek",stage:"Spectrum 360",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Gullyteen",stage:"Spectrum 360",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Darth Leng B2B Slinks",stage:"Spectrum 360",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Roland K B2B Savage States B2B T-Menace",stage:"Spectrum 360",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Spongebob Squarewave",stage:"Spectrum 360",day:"Sun",start:"22:00",end:"23:00"},
-  {name:"Perceval",stage:"Spectrum 360",day:"Sun",start:"23:00",end:"00:00"},
+  {name:"AIM - COLD WATER MUSIC (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"12:00",end:"13:00"},
+  {name:"OCEAN COLOUR SCENE - MOSLEY SHOALS (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"DAY TRIPPING : ALBUM PLAYBACKS with PAPA DISCO",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"14:00",end:"15:00"},
+  {name:"THE MUSICALS PARTY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"15:00",end:"16:00"},
+  {name:"THE COUNCIL OF BENS",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"16:00",end:"18:00"},
+  {name:"2DJS2MANY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"18:00",end:"19:00"},
+  {name:"DJ WORK EXPERIENCE : MY FIRST SOCA SET",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"19:00",end:"20:00"},
+  {name:"4 UR MINDz Jadey C n Friends",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"20:00",end:"21:00"},
+  {name:"DISCO EXOTIC presents: Sue from HR's Office Disco",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"21:00",end:"23:00"},
+  {name:"ONLY OASIS",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"23:00",end:"00:00"},
+  {name:"DUBTENDO presents: JUST DANCE LIVE",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"00:00",end:"00:30"},
+  {name:"Twisted Time Machine x DUBTENDO presents: RAVE & GAME",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"00:30",end:"02:00"},
+  {name:"BIG DADDY WOOF WOOF presents: THE DOG POUND PARTY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"02:00",end:"03:00"},
+  {name:"PINK FLOYD - THE DARK SIDE OF THE MOON (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"03:00",end:"04:00"},
+  // --- Sat: XR ---
+  {name:"Art Blocking",stage:"XR",day:"Sat",start:"11:00",end:"18:30"},
+  {name:"Last Chance Salon",stage:"XR",day:"Sat",start:"11:00",end:"19:00"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Sat",start:"11:00",end:"12:00"},
+  {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Sat",start:"12:00",end:"13:00"},
+  {name:"Drumming Workshop",stage:"XR",day:"Sat",start:"13:00",end:"14:00"},
+  {name:"Costume Pimping",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
+  {name:"Big Oil Drumming Parade",stage:"XR",day:"Sat",start:"14:00",end:"15:30"},
+  {name:"Cassandra the Oracle",stage:"XR",day:"Sat",start:"14:00",end:"16:00"},
+  {name:"Strictly Burning Ballroom",stage:"XR",day:"Sat",start:"18:00",end:"18:30"},
+  // ================= SUN =================
   // --- Sun: Acid Leak ---
   {name:"Deelicious",stage:"Acid Leak",day:"Sun",start:"14:00",end:"15:00"},
   {name:"Serious Soundz",stage:"Acid Leak",day:"Sun",start:"15:00",end:"16:00"},
@@ -2049,17 +2483,122 @@ const artists = [
   {name:"Filthy Kitten B2B Karl Davies",stage:"Acid Leak",day:"Sun",start:"21:00",end:"22:00"},
   {name:"Lisa Pin-Up",stage:"Acid Leak",day:"Sun",start:"22:00",end:"23:00"},
   {name:"Craig Mac",stage:"Acid Leak",day:"Sun",start:"23:00",end:"00:00"},
-  // --- Sun: Rose and Clown ---
-  {name:"Boomtown's Got Talent",stage:"Rose and Clown",day:"Sun",start:"13:00",end:"15:00"},
-  {name:"Sonia Sol",stage:"Rose and Clown",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Nigel Garage",stage:"Rose and Clown",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Robbieoke Williams",stage:"Rose and Clown",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"The 900 (Tony Hawk Tribute)",stage:"Rose and Clown",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Annie Craic",stage:"Rose and Clown",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Phatworld",stage:"Rose and Clown",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"DJ Lord Of The Rings",stage:"Rose and Clown",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Haych & Movin Whata's",stage:"Rose and Clown",day:"Sun",start:"22:00",end:"23:00"},
-  {name:"Crack Street Boys",stage:"Rose and Clown",day:"Sun",start:"23:00",end:"00:00"},
+  // --- Sun: Agents of Change HQ ---
+  {name:"Agents of Change HQ",stage:"Agents of Change HQ",day:"Sun",start:"10:00",end:"20:00"},
+  {name:"Weaving Change",stage:"Agents of Change HQ",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Sun",start:"11:00",end:"14:00"},
+  {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Sun",start:"16:00",end:"19:00"},
+  // --- Sun: Airetiko ---
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sun",start:"11:00",end:"13:00"},
+  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sun",start:"13:00",end:"15:00"},
+  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sun",start:"15:00",end:"17:00"},
+  // --- Sun: Anara Forest ---
+  {name:"Silva Snipa B2B VXRGO",stage:"Anara Forest",day:"Sun",start:"14:00",end:"15:30"},
+  {name:"Sabrina Ft. Dread MC",stage:"Anara Forest",day:"Sun",start:"15:30",end:"16:30"},
+  {name:"Skantia Ft. Strategy",stage:"Anara Forest",day:"Sun",start:"16:30",end:"18:00"},
+  {name:"Kyrist B2B Waeys Ft. Strategy [Overview Takeover]",stage:"Anara Forest",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Molecular B2B Wingz Ft. Jakes [Overview Takeover]",stage:"Anara Forest",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"Visages Ft. SP:MC",stage:"Anara Forest",day:"Sun",start:"20:00",end:"21:30"},
+  {name:"Mandidextrous Ft. Maddy V",stage:"Anara Forest",day:"Sun",start:"21:30",end:"23:00"},
+  {name:"Simula Ft. Jakes",stage:"Anara Forest",day:"Sun",start:"23:00",end:"00:00"},
+  // --- Sun: Ancient Futures ---
+  {name:"Breath & Bass",stage:"Ancient Futures",day:"Sun",start:"11:30",end:"13:30"},
+  {name:"Laughter Meditation",stage:"Ancient Futures",day:"Sun",start:"14:00",end:"15:00"},
+  {name:"Nervous System Reset",stage:"Ancient Futures",day:"Sun",start:"15:30",end:"17:30"},
+  {name:"Ancient Futures Closing Ceremony",stage:"Ancient Futures",day:"Sun",start:"18:00",end:"19:00"},
+  // --- Sun: Blink Mental Health ---
+  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Sun",start:"10:00",end:"19:30"},
+  // --- Sun: Botanica Zoo ---
+  {name:"Now That's Not What I Call Music w/ Ratbag",stage:"Botanica Zoo",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"Clifford Junior B2B Ironic Thug w/ Blythe",stage:"Botanica Zoo",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"Dizzkid",stage:"Botanica Zoo",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"Secret Sexy Lady takeover",stage:"Botanica Zoo",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"LS Dare",stage:"Botanica Zoo",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"insectcrusha w/ Taz-B [Motive Hunter takeover]",stage:"Botanica Zoo",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"OS:MAN w/ MC Steezy [Motive Hunter takeover]",stage:"Botanica Zoo",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"SIMMS B2B OS:MAN (first ever live B2B) [Motive Hunter takeover]",stage:"Botanica Zoo",day:"Sun",start:"22:00",end:"23:00"},
+  {name:"Tashphrodisiac B2B Asset B2B Karmae T w/ MC Deadman",stage:"Botanica Zoo",day:"Sun",start:"23:00",end:"23:55"},
+  // --- Sun: Busker's Wharf ---
+  {name:"The Pussy Catbaret",stage:"Busker's Wharf",day:"Sun",start:"19:30",end:"21:00"},
+  // --- Sun: Cas's Costumes ---
+  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Sun",start:"10:00",end:"18:00"},
+  // --- Sun: Circus Tent ---
+  {name:"Energising Yoga",stage:"Circus Tent",day:"Sun",start:"10:00",end:"11:00"},
+  {name:"Wye Circus Skills, Hoop",stage:"Circus Tent",day:"Sun",start:"11:00",end:"13:00"},
+  {name:"Wye Circus Skills, Poi, Staff",stage:"Circus Tent",day:"Sun",start:"13:00",end:"15:00"},
+  {name:"Wye Circus Skills, Juggling",stage:"Circus Tent",day:"Sun",start:"15:00",end:"17:00"},
+  {name:"Bubblology",stage:"Circus Tent",day:"Sun",start:"17:00",end:"18:00"},
+  // --- Sun: Climate Live ---
+  {name:"Climate Live Opening",stage:"Climate Live",day:"Sun",start:"10:00",end:"20:00"},
+  {name:"Radical Rosettes",stage:"Climate Live",day:"Sun",start:"10:30",end:"11:30"},
+  {name:"Music X Climate Zine-Making",stage:"Climate Live",day:"Sun",start:"11:45",end:"12:45"},
+  {name:"Bag Charm Making - Weaving Change",stage:"Climate Live",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Patch It For The Planet: Upcycled Patch Making - The Mend",stage:"Climate Live",day:"Sun",start:"14:15",end:"15:15"},
+  {name:"Mediterranean Herb Repotting - Grounds for Growth",stage:"Climate Live",day:"Sun",start:"15:30",end:"16:30"},
+  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Sun",start:"16:45",end:"17:45"},
+  // --- Sun: Cocaine Anonymous ---
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sun",start:"11:00",end:"12:00"},
+  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sun",start:"18:00",end:"19:00"},
+  // --- Sun: Community Fire ---
+  {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Sun",start:"12:00",end:"00:00"},
+  // --- Sun: Craft Tent ---
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
+  // --- Sun: Crafty Rascals ---
+  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Sun",start:"10:00",end:"18:00"},
+  // --- Sun: Deviant Lounge ---
+  {name:"Half Broken Kru",stage:"Deviant Lounge",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"Juicy Goose b2b Froggy",stage:"Deviant Lounge",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"Captain Chaos b2b Queerdo",stage:"Deviant Lounge",day:"Sun",start:"22:00",end:"23:00"},
+  {name:"DJ Bax",stage:"Deviant Lounge",day:"Sun",start:"23:00",end:"00:00"},
+  // --- Sun: E Numbers ---
+  {name:"Xmas Party & Charles The Princess' Sweet 16",stage:"E Numbers",day:"Sun",start:"14:00",end:"18:00"},
+  {name:"Bungzo",stage:"E Numbers",day:"Sun",start:"18:00",end:"18:45"},
+  {name:"Hannza",stage:"E Numbers",day:"Sun",start:"18:45",end:"19:30"},
+  {name:"Climaxxx: gwlucas",stage:"E Numbers",day:"Sun",start:"19:30",end:"20:15"},
+  {name:"Climaxxx: BMOL",stage:"E Numbers",day:"Sun",start:"20:15",end:"21:00"},
+  {name:"Climaxxx: Princess Elf Bar",stage:"E Numbers",day:"Sun",start:"21:00",end:"21:45"},
+  // --- Sun: End of the Line ---
+  {name:"SUFI",stage:"End of the Line",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"LOOPY",stage:"End of the Line",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"Omadhaun",stage:"End of the Line",day:"Sun",start:"22:00",end:"23:00"},
+  {name:"Jenny Sparks",stage:"End of the Line",day:"Sun",start:"23:00",end:"00:00"},
+  // --- Sun: Energy Garden ---
+  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Sun",start:"12:00",end:"20:00"},
+  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Sun",start:"13:00",end:"15:00"},
+  // --- Sun: Foggers Mill ---
+  {name:"Easydread",stage:"Foggers Mill",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Vegetable Collective",stage:"Foggers Mill",day:"Sun",start:"14:30",end:"15:30"},
+  {name:"Year of The Dog",stage:"Foggers Mill",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"Hot Squash",stage:"Foggers Mill",day:"Sun",start:"17:30",end:"18:30"},
+  {name:"Tree House Fire",stage:"Foggers Mill",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"The Guns of Navarone",stage:"Foggers Mill",day:"Sun",start:"20:30",end:"21:30"},
+  // --- Sun: Full Moon Ballroom ---
+  {name:"Tripl3 B & The Troubl3 Makers",stage:"Full Moon Ballroom",day:"Sun",start:"13:30",end:"14:30"},
+  {name:"LFay",stage:"Full Moon Ballroom",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"House of Pantha",stage:"Full Moon Ballroom",day:"Sun",start:"16:30",end:"17:15"},
+  {name:"Cable Street Collective",stage:"Full Moon Ballroom",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"The Gulls",stage:"Full Moon Ballroom",day:"Sun",start:"19:30",end:"20:30"},
+  {name:"Wanton String Band",stage:"Full Moon Ballroom",day:"Sun",start:"21:00",end:"22:00"},
+  // --- Sun: Gabber Kebabber ---
+  {name:"Rhi Mysterio",stage:"Gabber Kebabber",day:"Sun",start:"14:00",end:"14:45"},
+  {name:"Super Han",stage:"Gabber Kebabber",day:"Sun",start:"14:45",end:"15:30"},
+  {name:"Adi",stage:"Gabber Kebabber",day:"Sun",start:"15:30",end:"16:30"},
+  {name:"Riguana",stage:"Gabber Kebabber",day:"Sun",start:"16:30",end:"17:15"},
+  {name:"ZEN",stage:"Gabber Kebabber",day:"Sun",start:"17:15",end:"18:00"},
+  {name:"Boltcropper Takeover",stage:"Gabber Kebabber",day:"Sun",start:"18:00",end:"22:00"},
+  // --- Sun: Games Lounge ---
+  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Sun",start:"12:00",end:"00:00"},
+  // --- Sun: Garden ---
+  {name:"Wildflower Fortunes",stage:"Garden",day:"Sun",start:"10:00",end:"18:00"},
+  // --- Sun: Grand Central ---
+  {name:"Dub Pistols",stage:"Grand Central",day:"Sun",start:"14:00",end:"15:00"},
+  {name:"Beans on Toast",stage:"Grand Central",day:"Sun",start:"15:30",end:"16:30"},
+  {name:"Elvana",stage:"Grand Central",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"Dr Meaker - Live",stage:"Grand Central",day:"Sun",start:"18:30",end:"19:30"},
+  {name:"Less Than Jake",stage:"Grand Central",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"Skindred",stage:"Grand Central",day:"Sun",start:"21:30",end:"22:30"},
   // --- Sun: Hangar 161 ---
   {name:"Soundsystem 79",stage:"Hangar 161",day:"Sun",start:"13:00",end:"13:40"},
   {name:"Xray Vez",stage:"Hangar 161",day:"Sun",start:"14:00",end:"14:40"},
@@ -2071,530 +2610,83 @@ const artists = [
   {name:"Wonk Unit",stage:"Hangar 161",day:"Sun",start:"20:00",end:"21:00"},
   {name:"Split Dogs",stage:"Hangar 161",day:"Sun",start:"21:30",end:"22:30"},
   {name:"Panic Shack",stage:"Hangar 161",day:"Sun",start:"23:00",end:"00:00"},
-  // --- Sun: The Fools Leap ---
-  {name:"Somerset Velvet",stage:"The Fools Leap",day:"Sun",start:"12:00",end:"13:00"},
-  {name:"Whiskey Moonface",stage:"The Fools Leap",day:"Sun",start:"13:30",end:"14:30"},
-  {name:"Black Kat Boppers",stage:"The Fools Leap",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Panda And The Moniums",stage:"The Fools Leap",day:"Sun",start:"16:30",end:"17:30"},
-  {name:"Wanton String Band",stage:"The Fools Leap",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Horses On The Beach",stage:"The Fools Leap",day:"Sun",start:"19:30",end:"20:30"},
-  {name:"Seas Of Mirth",stage:"The Fools Leap",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Bear Twist's Honky Donk Rock'n'Rollers",stage:"The Fools Leap",day:"Sun",start:"22:00",end:"22:45"},
-  {name:"Fiddler On The Doof",stage:"The Fools Leap",day:"Sun",start:"22:45",end:"23:45"},
-  // --- Sun: Full Moon Ballroom ---
-  {name:"Tripl3 B & The Troubl3 Makers",stage:"Full Moon Ballroom",day:"Sun",start:"13:30",end:"14:30"},
-  {name:"Lfay",stage:"Full Moon Ballroom",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"House Of Pantha",stage:"Full Moon Ballroom",day:"Sun",start:"16:30",end:"17:15"},
-  {name:"Cable Street Collective",stage:"Full Moon Ballroom",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"The Gulls",stage:"Full Moon Ballroom",day:"Sun",start:"19:30",end:"20:30"},
-  {name:"Wanton String Band",stage:"Full Moon Ballroom",day:"Sun",start:"21:00",end:"22:00"},
-  // --- Sun: Foggers Mill ---
-  {name:"Easydread",stage:"Foggers Mill",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Vegetable Collective",stage:"Foggers Mill",day:"Sun",start:"14:30",end:"15:30"},
-  {name:"Year Of The Dog",stage:"Foggers Mill",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Hot Squash",stage:"Foggers Mill",day:"Sun",start:"17:30",end:"18:30"},
-  {name:"Tree House Fire",stage:"Foggers Mill",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"The Guns Of Navarone",stage:"Foggers Mill",day:"Sun",start:"20:30",end:"21:30"},
-  // --- Sun: Soapranos Laundrette ---
-  {name:"Empressure",stage:"Soapranos Laundrette",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Soapranos: Hotwash!",stage:"Soapranos Laundrette",day:"Sun",start:"14:00",end:"15:00"},
-  {name:"Jungyals And Gays",stage:"Soapranos Laundrette",day:"Sun",start:"15:00",end:"17:00"},
-  {name:"Selectacee",stage:"Soapranos Laundrette",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Euphonique & MC Enamie",stage:"Soapranos Laundrette",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"T-Lex + Special Guests",stage:"Soapranos Laundrette",day:"Sun",start:"19:00",end:"20:00"},
-  // --- Sun: The Garden Centre ---
-  {name:"Bateman",stage:"The Garden Centre",day:"Sun",start:"14:00",end:"15:30"},
-  {name:"Tsp Ft. Factual MC",stage:"The Garden Centre",day:"Sun",start:"15:30",end:"16:30"},
-  {name:"Joseph Dooley",stage:"The Garden Centre",day:"Sun",start:"16:30",end:"17:30"},
-  {name:"Barcode-The-Dj",stage:"The Garden Centre",day:"Sun",start:"17:30",end:"19:00"},
-  // --- Sun: Botanica Zoo ---
-  {name:"Now That's Not What I Call Music",stage:"Botanica Zoo",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Clifford Junior B2B Ironic Thug",stage:"Botanica Zoo",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Dizzkid",stage:"Botanica Zoo",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Secret Sexy Lady Takeover",stage:"Botanica Zoo",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Ls Dare",stage:"Botanica Zoo",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Insectcrusha w/ Taz-B",stage:"Botanica Zoo",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Os:Man w/ MC Stezzy",stage:"Botanica Zoo",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Simms B2B Os:Man",stage:"Botanica Zoo",day:"Sun",start:"22:00",end:"23:00"},
-  {name:"Tashphrodisiac B2B Asset B2B Karmae T",stage:"Botanica Zoo",day:"Sun",start:"23:00",end:"23:55"},
-  // --- Sun: The Immortal Children of the Eternal Seed ---
-  {name:"Aerial Takeover",stage:"The Immortal Children of the Eternal Seed",day:"Sun",start:"20:00",end:"23:00"},
-  // --- Sun: Topsy Turvy Trims ---
-  {name:"Black Board Soundsystem",stage:"Topsy Turvy Trims",day:"Sun",start:"13:00",end:"15:00"},
-  {name:"Ed Spinna",stage:"Topsy Turvy Trims",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Hokey Cokey Cabaret",stage:"Topsy Turvy Trims",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Ignoring Izzy",stage:"Topsy Turvy Trims",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Tickety Boo",stage:"Topsy Turvy Trims",day:"Sun",start:"19:00",end:"21:00"},
-  // --- Sun: Sub Lab ---
-  {name:"Sublab Allstars",stage:"Sub Lab",day:"Sun",start:"16:00",end:"18:00"},
-  {name:"El-Ze",stage:"Sub Lab",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Tashphrodisiac",stage:"Sub Lab",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Dwelha",stage:"Sub Lab",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Felix Culpah",stage:"Sub Lab",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Supplya",stage:"Sub Lab",day:"Sun",start:"22:00",end:"23:00"},
-  {name:"Sublab Allstars",stage:"Sub Lab",day:"Sun",start:"23:00",end:"23:59"},
-  // --- Sun: Nachtlicker ---
-  {name:"Allen Tg",stage:"Nachtlicker",day:"Sun",start:"17:00",end:"18:15"},
-  {name:"Cultur/Riot Feat Ciara May",stage:"Nachtlicker",day:"Sun",start:"18:15",end:"19:15"},
-  {name:"Max Og",stage:"Nachtlicker",day:"Sun",start:"19:15",end:"20:15"},
-  {name:"Eight Spring Rolls",stage:"Nachtlicker",day:"Sun",start:"20:15",end:"21:15"},
-  {name:"Lakey",stage:"Nachtlicker",day:"Sun",start:"21:15",end:"22:30"},
-  {name:"Sloppy Spice",stage:"Nachtlicker",day:"Sun",start:"22:30",end:"23:30"},
-  // --- Sun: Deviant Lounge ---
-  {name:"Half Broken Kru",stage:"Deviant Lounge",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Juicy Goose B2B Froggy",stage:"Deviant Lounge",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Captain Chaos B2B Queerdo",stage:"Deviant Lounge",day:"Sun",start:"22:00",end:"23:00"},
-  {name:"DJ Bax",stage:"Deviant Lounge",day:"Sun",start:"23:00",end:"00:00"},
-  // --- Sun: Gabber Kebabber ---
-  {name:"Rhi Mysterio",stage:"Gabber Kebabber",day:"Sun",start:"14:00",end:"14:45"},
-  {name:"Super Han",stage:"Gabber Kebabber",day:"Sun",start:"14:45",end:"15:30"},
-  {name:"Adi",stage:"Gabber Kebabber",day:"Sun",start:"15:30",end:"16:30"},
-  {name:"Riguana",stage:"Gabber Kebabber",day:"Sun",start:"16:30",end:"17:15"},
-  {name:"Zen",stage:"Gabber Kebabber",day:"Sun",start:"17:15",end:"18:00"},
-  {name:"Boltcropper Takeover",stage:"Gabber Kebabber",day:"Sun",start:"18:00",end:"22:00"},
-  // --- Sun: E Numbers ---
-  {name:"Bungzo",stage:"E Numbers",day:"Sun",start:"18:00",end:"18:45"},
-  {name:"Hannza",stage:"E Numbers",day:"Sun",start:"18:45",end:"19:30"},
-  {name:"Climaxxx: Gwlucas",stage:"E Numbers",day:"Sun",start:"19:30",end:"20:15"},
-  {name:"Climaxxx: Bmol",stage:"E Numbers",day:"Sun",start:"20:15",end:"21:00"},
-  {name:"Climaxxx: Princess Elf Bar",stage:"E Numbers",day:"Sun",start:"21:00",end:"21:45"},
-  // --- Sun: The Pomegranate Parlour ---
-  {name:"Digital Roses",stage:"The Pomegranate Parlour",day:"Sun",start:"14:00",end:"15:00"},
-  {name:"Flibble",stage:"The Pomegranate Parlour",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Habibtati",stage:"The Pomegranate Parlour",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Dmtree",stage:"The Pomegranate Parlour",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Decebelle",stage:"The Pomegranate Parlour",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Illexxandra & DJ Shakey Mighty Morphin Power Combo",stage:"The Pomegranate Parlour",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Gypsyndicate",stage:"The Pomegranate Parlour",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Me Miles & I",stage:"The Pomegranate Parlour",day:"Sun",start:"21:00",end:"22:30"},
-  {name:"Ludec",stage:"The Pomegranate Parlour",day:"Sun",start:"22:30",end:"23:55"},
-  // --- Sun: Busker's Wharf ---
-  {name:"The Pussy Catbaret",stage:"Busker's Wharf",day:"Sun",start:"19:30",end:"21:00"},
-  // --- Sun: Twisted Time Machine (Bad Apple Bar) ---
-  {name:"Mvm - Finally We Are No One Album Playback",stage:"Twisted Time Machine",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Susomo Yakota - Acid Mt Fuji Album Playback",stage:"Twisted Time Machine",day:"Sun",start:"14:00",end:"15:00"},
-  {name:"Motown Amore",stage:"Twisted Time Machine",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"The Beatles Hour",stage:"Twisted Time Machine",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Emerging Beats: Dare To Disco",stage:"Twisted Time Machine",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"The Josh Baker Tribute Party",stage:"Twisted Time Machine",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Church Of Donkology",stage:"Twisted Time Machine",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Hang The Djs: Sunday Service",stage:"Twisted Time Machine",day:"Sun",start:"20:00",end:"22:00"},
-  {name:"Papa Disco's Goodnight Set",stage:"Twisted Time Machine",day:"Sun",start:"22:00",end:"00:00"},
-  // --- Sun: Síbín Beag ---
-  {name:"Didn't Make Mass (Irish Pub Quiz)",stage:"Síbín Beag",day:"Sun",start:"14:00",end:"16:00"},
-  {name:"Painted Sails",stage:"Síbín Beag",day:"Sun",start:"16:00",end:"16:45"},
-  {name:"Polly Gone Wrong",stage:"Síbín Beag",day:"Sun",start:"17:15",end:"18:00"},
-  {name:"Ruth Theodore",stage:"Síbín Beag",day:"Sun",start:"18:30",end:"19:15"},
-  {name:"Graham Sweeney",stage:"Síbín Beag",day:"Sun",start:"19:45",end:"20:30"},
-  {name:"Last Orders Karaoke",stage:"Síbín Beag",day:"Sun",start:"20:30",end:"22:00"},
-  {name:"Slán Abhaile",stage:"Síbín Beag",day:"Sun",start:"22:00",end:"22:30"},
+  // --- Sun: Hapitat ---
+  {name:"Hapitat",stage:"Hapitat",day:"Sun",start:"10:00",end:"18:00"},
   // --- Sun: Helix ---
   {name:"Full Fat Records",stage:"Helix",day:"Sun",start:"15:00",end:"16:00"},
   {name:"Submatic",stage:"Helix",day:"Sun",start:"16:00",end:"17:00"},
   {name:"Sin & Brook - Does It Double",stage:"Helix",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"This Is Inja",stage:"Helix",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"K-65 90's D&B Set",stage:"Helix",day:"Sun",start:"19:00",end:"20:30"},
+  {name:"This is Inja",stage:"Helix",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"K-65 (90's D&B Set)",stage:"Helix",day:"Sun",start:"19:00",end:"20:30"},
   {name:"Selecta J-Man",stage:"Helix",day:"Sun",start:"20:30",end:"22:00"},
-  {name:"Strategy DJ Set",stage:"Helix",day:"Sun",start:"22:00",end:"23:00"},
-  // --- Sun: Mining for (g)Old Town ---
-  {name:"DJ Sarah Tonin",stage:"Mining for (g)Old Town",day:"Sun",start:"13:30",end:"15:00"},
-  {name:"DJ Shoulda Learnt The Clarinet",stage:"Mining for (g)Old Town",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Light Gal",stage:"Mining for (g)Old Town",day:"Sun",start:"16:00",end:"17:30"},
-  {name:"Flails",stage:"Mining for (g)Old Town",day:"Sun",start:"17:30",end:"19:00"},
-  // --- Sun: End of the Line ---
-  {name:"Sufi",stage:"End of the Line",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Loopy",stage:"End of the Line",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Omadhaun",stage:"End of the Line",day:"Sun",start:"22:00",end:"23:00"},
-  {name:"Jenny Sparks",stage:"End of the Line",day:"Sun",start:"23:00",end:"00:00"},
+  {name:"Strategy - DJ Set",stage:"Helix",day:"Sun",start:"22:00",end:"23:00"},
+  // --- Sun: Hidden Woods ---
+  {name:"Grooverider [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Shades Of Rhythm [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"14:00",end:"15:00"},
+  {name:"K-Klass B2B Morgan Seatree [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"Sonique [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"Kings of the Rave: 2 Bad Mice B2B Ellis Dee B2B Mark XTC Ft. MC GQ [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"Pete Cannon B2B Time To Rush [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Ratty & Serum Ft. Mad P [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"Cheff The Boy B2B Hypershé B2B Origin8a & Propa [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"Altern 8 B2B Slipmatt Ft. Dread MC [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"Anz B2B Special Request [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"22:00",end:"23:00"},
+  {name:"Ratpack [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"23:00",end:"00:00"},
+  // --- Sun: Hydro XL ---
+  {name:"nimino - Live",stage:"Hydro XL",day:"Sun",start:"15:00",end:"16:20"},
+  {name:"KILIMANJARO B2B Oppidan",stage:"Hydro XL",day:"Sun",start:"16:30",end:"18:00"},
+  {name:"VTSS",stage:"Hydro XL",day:"Sun",start:"18:00",end:"19:30"},
+  {name:"Marlon Hoffstadt",stage:"Hydro XL",day:"Sun",start:"19:30",end:"21:00"},
+  {name:"SHERELLE - AV Show",stage:"Hydro XL",day:"Sun",start:"21:00",end:"22:30"},
+  {name:"Skrillex",stage:"Hydro XL",day:"Sun",start:"22:30",end:"23:50"},
+  {name:"Boomtown Closing Ceremony",stage:"Hydro XL",day:"Sun",start:"23:50",end:"00:00"},
   // --- Sun: Infinity ---
   {name:"Olive F",stage:"Infinity",day:"Sun",start:"17:00",end:"18:30"},
   {name:"Storm Mollison",stage:"Infinity",day:"Sun",start:"18:30",end:"20:00"},
-  {name:"Pbr Streetgang",stage:"Infinity",day:"Sun",start:"20:00",end:"21:30"},
+  {name:"PBR Streetgang",stage:"Infinity",day:"Sun",start:"20:00",end:"21:30"},
   {name:"Gina Breeze",stage:"Infinity",day:"Sun",start:"21:30",end:"23:00"},
-
-  // ================= ADDITIONAL VENUES: TALKS, WORKSHOPS, WELLNESS & WELFARE =================
-  // Pulled from Clashfinder's Boomtown 26 schedule (2026-07-29) — these hidden/support/
-  // talks venues had directory entries but no set-time data yet.
-  // --- Wed ---
-  // Reel News
-  {name:"Wondergupta",stage:"Reel News",day:"Wed",start:"13:15",end:"14:15"},
-  {name:"Warrior Tales & Demloxx",stage:"Reel News",day:"Wed",start:"14:15",end:"14:45"},
-  {name:"Brockwell Park Rangers",stage:"Reel News",day:"Wed",start:"14:45",end:"15:15"},
-  {name:"O'Connell & Co",stage:"Reel News",day:"Wed",start:"15:15",end:"16:15"},
-  {name:"Music in my underpants",stage:"Reel News",day:"Wed",start:"16:15",end:"17:00"},
-  {name:"Taygeta & Seb",stage:"Reel News",day:"Wed",start:"17:00",end:"18:00"},
-  {name:"Nowt",stage:"Reel News",day:"Wed",start:"18:00",end:"18:45"},
-  {name:"GDSMRCY",stage:"Reel News",day:"Wed",start:"18:45",end:"19:30"},
-  {name:"Break the Code",stage:"Reel News",day:"Wed",start:"19:30",end:"21:00"},
-  // Circus Tent
-  {name:"Contemporary Dance",stage:"Circus Tent",day:"Wed",start:"11:00",end:"12:00"},
-  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Wed",start:"12:00",end:"14:00"},
-  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Wed",start:"14:00",end:"16:00"},
-  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Wed",start:"16:00",end:"18:00"},
-  {name:"Bubblology",stage:"Circus Tent",day:"Wed",start:"18:00",end:"19:00"},
-  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Wed",start:"21:00",end:"22:00"},
-  // XR
-  {name:"Cassandra the Oracle",stage:"XR",day:"Wed",start:"14:00",end:"16:00"},
-  {name:"Strictly Burning Ballroom",stage:"XR",day:"Wed",start:"18:00",end:"18:30"},
-  // Climate Live
-  {name:"Climate Live Opening",stage:"Climate Live",day:"Wed",start:"12:00",end:"14:00"},
-  {name:"Radical Rosettes",stage:"Climate Live",day:"Wed",start:"15:00",end:"16:00"},
-  {name:"Doof Stick Making",stage:"Climate Live",day:"Wed",start:"16:15",end:"17:15"},
-  {name:"Finding Joy & Climate Connection Through Dance",stage:"Climate Live",day:"Wed",start:"17:30",end:"18:30"},
-  // Rebel Girls Club
-  {name:"Opening Ceremony with Everglowing & Find Your Flow",stage:"Rebel Girls Club",day:"Wed",start:"16:00",end:"16:40"},
-  {name:"Psycosomatic yoga with Yuliet",stage:"Rebel Girls Club",day:"Wed",start:"17:00",end:"18:00"},
-  {name:"Somatic dance to Twerk with Sofia & Ivy",stage:"Rebel Girls Club",day:"Wed",start:"18:30",end:"19:30"},
-  // Permaculture
-  {name:"Touch grass: An arrival circle for gorunding and connection",stage:"Permaculture",day:"Wed",start:"12:00",end:"13:00"},
-  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Wed",start:"13:30",end:"15:00"},
-  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Wed",start:"15:30",end:"16:30"},
-  {name:"Beyond bosses: Practical tools for more human workplaces",stage:"Permaculture",day:"Wed",start:"17:00",end:"18:00"},
-  // Ancient Futures
-  {name:"Ancient Futures Opening Ceremony",stage:"Ancient Futures",day:"Wed",start:"15:00",end:"16:00"},
-  {name:"Opening cermony",stage:"Ancient Futures",day:"Wed",start:"16:00",end:"17:00"},
-  {name:"Breathe Reconnect",stage:"Ancient Futures",day:"Wed",start:"17:00",end:"19:00"},
-  {name:"Flow dance",stage:"Ancient Futures",day:"Wed",start:"19:00",end:"21:00"},
-  // Airetiko
-  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Wed",start:"13:00",end:"15:00"},
-  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Wed",start:"15:00",end:"17:00"},
-  // Craft Tent
-  {name:"Craft workshops inc: Junk Jewelery, Hitty Hitty Bang Bang & Botanical Fascinators",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
-  // Narcotics Anonymous
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Wed",start:"08:00",end:"09:00"},
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Wed",start:"13:00",end:"14:00"},
-  // Energy Garden
-  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Wed",start:"12:00",end:"13:00"},
-  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Wed",start:"13:00",end:"15:00"},
-  // Cocaine Anonymous
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Wed",start:"11:00",end:"12:00"},
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Wed",start:"18:00",end:"19:00"},
-  // Spinney Hollow
-  {name:"Spinney Hollow - Traditional Green Wood Work Workshop & Banquet of Art table",stage:"Spinney Hollow",day:"Wed",start:"10:00",end:"18:00"},
-  // Tinker Station
-  {name:"Tinker Station",stage:"Tinker Station",day:"Wed",start:"10:00",end:"18:00"},
-  // The Magic Teapot
-  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Wed",start:"12:00",end:"00:00"},
-  // Hapitat
-  {name:"Hapitat",stage:"Hapitat",day:"Wed",start:"10:00",end:"18:00"},
-  // Garden
-  {name:"Wildflower Fortunes",stage:"Garden",day:"Wed",start:"10:00",end:"18:00"},
-  // Games Lounge
-  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Wed",start:"12:00",end:"00:00"},
-  // Crafty Rascals
-  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Wed",start:"10:00",end:"18:00"},
-  // Blink Mental Health
-  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Wed",start:"10:00",end:"19:30"},
-  // Reparium
-  {name:"Repairium",stage:"Reparium",day:"Wed",start:"14:00",end:"18:00"},
-  // Cas's Costumes
-  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Wed",start:"10:00",end:"18:00"},
-  // --- Thu ---
-  // Reel News
-  {name:"Drugs, Friends & Music: What does a safe festival need?",stage:"Reel News",day:"Thu",start:"10:30",end:"11:30"},
-  {name:"No Pasaran! How to stop the far right",stage:"Reel News",day:"Thu",start:"11:30",end:"12:30"},
-  {name:"Luddite Punk",stage:"Reel News",day:"Thu",start:"12:30",end:"13:30"},
-  {name:"AGONY & ECSTASY: HOW FOOTBALL HOOLIGANS STARTED RAVING",stage:"Reel News",day:"Thu",start:"13:30",end:"14:00"},
-  {name:"ACORN for a Bailiff Free Britain!",stage:"Reel News",day:"Thu",start:"14:00",end:"14:45"},
-  {name:"The Global Politics of Food",stage:"Reel News",day:"Thu",start:"14:45",end:"15:45"},
-  {name:"Power to the Workersâ€”with AI",stage:"Reel News",day:"Thu",start:"15:45",end:"16:30"},
-  {name:"Small Axe: When Underground Music Meets Grassroots Activism",stage:"Reel News",day:"Thu",start:"16:30",end:"17:15"},
-  {name:"Thick Richard",stage:"Reel News",day:"Thu",start:"17:15",end:"17:45"},
-  {name:"South Lebanon - Frontlines of Resistance",stage:"Reel News",day:"Thu",start:"17:45",end:"18:45"},
-  {name:"FILM: Sir No Sir",stage:"Reel News",day:"Thu",start:"18:45",end:"20:10"},
-  // Circus Tent
-  {name:"Energising Yoga",stage:"Circus Tent",day:"Thu",start:"09:00",end:"10:00"},
-  {name:"Belly Dance",stage:"Circus Tent",day:"Thu",start:"10:00",end:"11:00"},
-  {name:"Contemporary Dance",stage:"Circus Tent",day:"Thu",start:"10:00",end:"11:00"},
-  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Thu",start:"12:00",end:"14:00"},
-  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Thu",start:"14:00",end:"16:00"},
-  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Thu",start:"16:00",end:"18:00"},
-  {name:"Inspired Breath",stage:"Circus Tent",day:"Thu",start:"18:00",end:"19:00"},
-  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Thu",start:"21:00",end:"22:00"},
-  // XR
-  {name:"Cassandra the Oracle",stage:"XR",day:"Thu",start:"11:00",end:"12:00"},
-  {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Thu",start:"12:00",end:"13:00"},
-  {name:"Drumming Workshop",stage:"XR",day:"Thu",start:"13:00",end:"14:00"},
-  {name:"Big Oil Drumming Parade",stage:"XR",day:"Thu",start:"14:00",end:"15:00"},
-  {name:"Cassandra the Oracle",stage:"XR",day:"Thu",start:"15:10",end:"16:00"},
-  {name:"Tea Ladies",stage:"XR",day:"Thu",start:"16:00",end:"18:00"},
-  {name:"Strictly Burning Ballroom",stage:"XR",day:"Thu",start:"18:00",end:"18:30"},
-  // Climate Live
-  {name:"Bag Charm Making - Weaving Change",stage:"Climate Live",day:"Thu",start:"10:30",end:"11:30"},
-  {name:"Beads & Breathe",stage:"Climate Live",day:"Thu",start:"11:45",end:"12:45"},
-  {name:"Music X Climate Zine-Making",stage:"Climate Live",day:"Thu",start:"13:00",end:"14:00"},
-  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Thu",start:"14:15",end:"15:15"},
-  {name:"Collective Climate Collage Making - Quirky Academy CIC",stage:"Climate Live",day:"Thu",start:"15:30",end:"16:30"},
-  {name:"Jewellery & Trinket Making with Recycled Cans - EVA",stage:"Climate Live",day:"Thu",start:"16:45",end:"17:45"},
-  {name:"Cocaine Anonymous Meeting",stage:"Climate Live",day:"Thu",start:"18:00",end:"19:00"},
-  // Rebel Girls Club
-  {name:"Morning Yoga with Sofia (Find Your Flow)",stage:"Rebel Girls Club",day:"Thu",start:"10:00",end:"11:00"},
-  {name:"Movement: Heart - womb connection with Lauren",stage:"Rebel Girls Club",day:"Thu",start:"11:00",end:"12:15"},
-  {name:"Nipple Tassel Making with Maisie",stage:"Rebel Girls Club",day:"Thu",start:"13:00",end:"14:00"},
-  {name:"Twerk with Ivy Rose (Everglowing)",stage:"Rebel Girls Club",day:"Thu",start:"14:30",end:"15:30"},
-  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Thu",start:"16:00",end:"16:40"},
-  {name:"Herbal Balm Making with Spider",stage:"Rebel Girls Club",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Traditional Burlesque with Everglowing",stage:"Rebel Girls Club",day:"Thu",start:"18:30",end:"19:30"},
-  // Permaculture
-  {name:"Drawn from the ground: Natural inks, charcoal and figure drawing",stage:"Permaculture",day:"Thu",start:"10:00",end:"11:00"},
-  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Thu",start:"11:30",end:"12:30"},
-  {name:"The inner compass: Tarot, symbolism and self-trust",stage:"Permaculture",day:"Thu",start:"13:00",end:"14:00"},
-  {name:"Mushroom magic: Low-tech growing for curious humans",stage:"Permaculture",day:"Thu",start:"14:30",end:"15:30"},
-  {name:"Wild adornment: Willow crowns and headpieces by hand",stage:"Permaculture",day:"Thu",start:"15:30",end:"16:30"},
-  {name:"Wearable folklore: Crafting ear cuffs from scrap, wire and found objects",stage:"Permaculture",day:"Thu",start:"17:00",end:"18:00"},
-  // Ancient Futures
-  {name:"Yoga Sound Baths",stage:"Ancient Futures",day:"Thu",start:"09:00",end:"11:00"},
-  {name:"Scroll Loop Bingo",stage:"Ancient Futures",day:"Thu",start:"11:30",end:"12:30"},
-  {name:"Divine union in a divide world",stage:"Ancient Futures",day:"Thu",start:"13:00",end:"15:00"},
-  {name:"The Extraordinary Ordinary",stage:"Ancient Futures",day:"Thu",start:"15:30",end:"16:30"},
-  {name:"Social psychedelics: Spirit and science",stage:"Ancient Futures",day:"Thu",start:"17:00",end:"18:00"},
-  {name:"Medicine dance journey",stage:"Ancient Futures",day:"Thu",start:"18:30",end:"20:30"},
-  // Observatory
-  {name:"The Observatory Opening",stage:"Observatory",day:"Thu",start:"10:00",end:"11:00"},
-  {name:"Your Brain On Yoga",stage:"Observatory",day:"Thu",start:"11:30",end:"12:30"},
-  {name:"Abdominal Attunement",stage:"Observatory",day:"Thu",start:"13:00",end:"14:00"},
-  {name:"Feeling Seen & Seeing Feeling: Eeg & The Future Of Emotional Design",stage:"Observatory",day:"Thu",start:"14:30",end:"15:30"},
-  {name:"Fear & Loathing In Boomtown",stage:"Observatory",day:"Thu",start:"16:00",end:"17:00"},
-  {name:"Celebratory Reset Ritual",stage:"Observatory",day:"Thu",start:"17:30",end:"18:30"},
-  // Airetiko
-  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Thu",start:"11:00",end:"13:00"},
-  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Thu",start:"13:00",end:"15:00"},
-  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Thu",start:"15:00",end:"17:00"},
-  // Craft Tent
-  {name:"Craft workshops inc: Junk Jewelery, Hitty Hitty Bang Bang & Botanical Fascinators",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
-  // Narcotics Anonymous
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Thu",start:"08:00",end:"09:00"},
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Thu",start:"13:00",end:"14:00"},
-  // Energy Garden
-  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Thu",start:"12:00",end:"22:00"},
-  // Cocaine Anonymous
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Thu",start:"11:00",end:"12:00"},
-  // Spinney Hollow
-  {name:"Spinney Hollow - Traditional Green Wood Work Workshop & Banquet of Art table",stage:"Spinney Hollow",day:"Thu",start:"10:00",end:"18:00"},
-  // Tinker Station
-  {name:"Tinker Station",stage:"Tinker Station",day:"Thu",start:"10:00",end:"18:00"},
-  // The Magic Teapot
-  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Thu",start:"12:00",end:"00:00"},
-  // Hapitat
-  {name:"Hapitat",stage:"Hapitat",day:"Thu",start:"10:00",end:"18:00"},
-  // Garden
-  {name:"Wildflower Fortunes",stage:"Garden",day:"Thu",start:"10:00",end:"18:00"},
-  // Games Lounge
-  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Thu",start:"12:00",end:"00:00"},
-  // Crafty Rascals
-  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Thu",start:"10:00",end:"18:00"},
-  // Blink Mental Health
-  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Thu",start:"10:00",end:"19:30"},
-  // Reparium
-  {name:"Repairium",stage:"Reparium",day:"Thu",start:"10:00",end:"18:00"},
-  // Cas's Costumes
-  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Thu",start:"10:00",end:"18:00"},
-  // --- Fri ---
-  // Reel News
-  {name:"The Violence of Extraction Economies",stage:"Reel News",day:"Fri",start:"11:00",end:"12:00"},
-  {name:"Reports from Rojava  - Frontlines of Resistance",stage:"Reel News",day:"Fri",start:"12:00",end:"12:45"},
-  {name:"Operation Recomply: Democracy on Trial",stage:"Reel News",day:"Fri",start:"12:45",end:"14:45"},
-  {name:"The school to prison pipeline",stage:"Reel News",day:"Fri",start:"14:45",end:"15:30"},
-  {name:"Confronting institutional misogyny and oppression",stage:"Reel News",day:"Fri",start:"15:30",end:"16:30"},
-  {name:"Spycops",stage:"Reel News",day:"Fri",start:"16:30",end:"17:15"},
-  {name:"Demand the Impossible: using theatre in struggles for justice",stage:"Reel News",day:"Fri",start:"17:15",end:"18:15"},
-  {name:"Club Commons: Moving Bodies to Grow Movements in Queer Nightlife",stage:"Reel News",day:"Fri",start:"18:15",end:"19:00"},
-  // Circus Tent
-  {name:"Energising Yoga",stage:"Circus Tent",day:"Fri",start:"09:00",end:"10:00"},
-  {name:"Belly Dance",stage:"Circus Tent",day:"Fri",start:"11:00",end:"12:00"},
-  {name:"Contemporary Dance",stage:"Circus Tent",day:"Fri",start:"11:00",end:"12:00"},
-  {name:"HOOPGIRLS",stage:"Circus Tent",day:"Fri",start:"12:00",end:"14:00"},
-  {name:"Wye Circus Skills, Poi, Flower Stick, Hat Juggling",stage:"Circus Tent",day:"Fri",start:"14:00",end:"16:00"},
-  {name:"Wye Circus Skills, Juggling, Staff, Dapo Star",stage:"Circus Tent",day:"Fri",start:"16:00",end:"18:00"},
-  {name:"Inspired Breath",stage:"Circus Tent",day:"Fri",start:"18:00",end:"19:00"},
-  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Fri",start:"21:00",end:"22:00"},
-  // XR
-  {name:"Last Chance Salon",stage:"XR",day:"Fri",start:"11:00",end:"19:00"},
-  {name:"Cassandra the Oracle",stage:"XR",day:"Fri",start:"11:00",end:"12:00"},
-  {name:"Art Blocking",stage:"XR",day:"Fri",start:"11:00",end:"18:30"},
-  {name:"Drumming Workshop",stage:"XR",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Cassandra the Oracle",stage:"XR",day:"Fri",start:"14:00",end:"16:00"},
-  {name:"Tea Ladies",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
-  {name:"Costume Pimping",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
-  {name:"Strictly Burning Ballroom",stage:"XR",day:"Fri",start:"18:00",end:"18:30"},
-  // Climate Live
-  {name:"Beads & Breathe",stage:"Climate Live",day:"Fri",start:"10:30",end:"11:30"},
-  {name:"Jewellery & Trinket Making with Recycled Cans - EVA",stage:"Climate Live",day:"Fri",start:"11:45",end:"12:45"},
-  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"USB Decorating: No Dance Music Without Diversity",stage:"Climate Live",day:"Fri",start:"14:15",end:"15:15"},
-  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Fri",start:"15:30",end:"16:30"},
-  {name:"Doof Stick Making",stage:"Climate Live",day:"Fri",start:"16:45",end:"17:45"},
-  // Rebel Girls Club
-  {name:"Morning Yoga with Emma",stage:"Rebel Girls Club",day:"Fri",start:"10:00",end:"11:00"},
-  {name:"Meeting Warrior Self with Molly",stage:"Rebel Girls Club",day:"Fri",start:"11:00",end:"12:15"},
-  {name:"Cunting - Cunt Bunting Making with Maisie",stage:"Rebel Girls Club",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Lets be Fools: A Creative Wellbeing Workshop with Alena",stage:"Rebel Girls Club",day:"Fri",start:"14:30",end:"15:30"},
-  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Fri",start:"16:00",end:"16:40"},
-  {name:"Burlesque Life Drawing with Alissa",stage:"Rebel Girls Club",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Neo Burlesque Partner workshop with Everglowing",stage:"Rebel Girls Club",day:"Fri",start:"18:30",end:"19:30"},
-  // Permaculture
-  {name:"Green the cracks: Reclaiming neglected spaces for food and wildlife",stage:"Permaculture",day:"Fri",start:"10:00",end:"11:00"},
-  {name:"Not a single-use planet: Mushroom ecology, rot and radical redesign",stage:"Permaculture",day:"Fri",start:"11:30",end:"12:30"},
-  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"What actually helps when the world feels cooked? A panel on living well in strange times",stage:"Permaculture",day:"Fri",start:"14:30",end:"16:30"},
-  {name:"Wearable folklore: Crafting ear cuffs from scrap, wire and found objects",stage:"Permaculture",day:"Fri",start:"17:00",end:"18:00"},
-  // Ancient Futures
-  {name:"Flow Yoga",stage:"Ancient Futures",day:"Fri",start:"09:00",end:"11:00"},
-  {name:"DNBreathe Breathwork - Raise Your Frequency",stage:"Ancient Futures",day:"Fri",start:"11:30",end:"13:00"},
-  {name:"Coming Home To Yourself: The Art of Conscious Communication",stage:"Ancient Futures",day:"Fri",start:"13:30",end:"15:00"},
-  {name:"Breathwork & Somatic Workshop for Emotional Regulation & Processing",stage:"Ancient Futures",day:"Fri",start:"15:30",end:"17:00"},
-  {name:"Rave as ritual: how the festival space can heal us",stage:"Ancient Futures",day:"Fri",start:"17:30",end:"18:00"},
-  {name:"Ecstatic Dance",stage:"Ancient Futures",day:"Fri",start:"19:00",end:"21:00"},
-  // Observatory
-  {name:"Your Brain On Yoga",stage:"Observatory",day:"Fri",start:"10:00",end:"11:00"},
-  {name:"Drug Testing & Safety With The Loop'S Potty Professor & Crazy Chemist",stage:"Observatory",day:"Fri",start:"11:30",end:"12:30"},
-  {name:"How To Create Reality... In Your Dreams",stage:"Observatory",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Fear & Loathing In Boomtown",stage:"Observatory",day:"Fri",start:"14:30",end:"15:30"},
-  {name:"Gather: An Embodied Connection Workshop",stage:"Observatory",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"Women And Psychedelics - Science, Stories And Embodiment",stage:"Observatory",day:"Fri",start:"17:30",end:"18:30"},
-  // Airetiko
-  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Fri",start:"11:00",end:"13:00"},
-  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Fri",start:"13:00",end:"15:00"},
-  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Fri",start:"15:00",end:"17:00"},
-  // Craft Tent
-  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
-  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
-  {name:"Junk Jewelery",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
-  // Narcotics Anonymous
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Fri",start:"08:00",end:"09:00"},
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Fri",start:"13:00",end:"14:00"},
-  // Energy Garden
-  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Fri",start:"12:00",end:"22:00"},
-  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Fri",start:"13:00",end:"15:00"},
-  // Cocaine Anonymous
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Fri",start:"11:00",end:"12:00"},
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Fri",start:"18:00",end:"19:00"},
-  // Spinney Hollow
-  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Fri",start:"10:00",end:"18:00"},
-  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Fri",start:"10:00",end:"18:00"},
-  // Tinker Station
-  {name:"Tinker Station",stage:"Tinker Station",day:"Fri",start:"10:00",end:"18:00"},
-  // The Magic Teapot
-  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Fri",start:"12:00",end:"00:00"},
-  // Hapitat
-  {name:"Hapitat",stage:"Hapitat",day:"Fri",start:"10:00",end:"18:00"},
-  // Garden
-  {name:"Wildflower Fortunes",stage:"Garden",day:"Fri",start:"10:00",end:"18:00"},
-  // Games Lounge
-  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Fri",start:"12:00",end:"00:00"},
-  // Crafty Rascals
-  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Fri",start:"10:00",end:"18:00"},
-  // Blink Mental Health
-  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Fri",start:"10:00",end:"19:30"},
-  // Cas's Costumes
-  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Fri",start:"10:00",end:"18:00"},
-  // --- Sat ---
-  // Reel News
-  {name:"The Art of Protest",stage:"Reel News",day:"Sat",start:"10:30",end:"11:30"},
-  {name:"Past struggles for land, hidden geographies and imagining a different future",stage:"Reel News",day:"Sat",start:"11:30",end:"12:15"},
-  {name:"Speakeasy & Open Mic with Beadyman",stage:"Reel News",day:"Sat",start:"12:15",end:"13:15"},
-  {name:"\"Fire Walk With Me\" Red Flag workers' theatre",stage:"Reel News",day:"Sat",start:"13:15",end:"13:45"},
-  {name:"Banner Theatre LIVE: \"A Just Transition - Jobs, People, Planet\" Part 1",stage:"Reel News",day:"Sat",start:"13:45",end:"14:45"},
-  {name:"Banner Theatre LIVE: \"A Just Transition - Jobs, People, Planet\" Part 2",stage:"Reel News",day:"Sat",start:"14:45",end:"15:45"},
-  {name:"Birmingham Bin workers strike",stage:"Reel News",day:"Sat",start:"15:45",end:"16:45"},
-  {name:"UNITE Hospitality Glasgow - better pay, enjoyment & working conditions",stage:"Reel News",day:"Sat",start:"16:45",end:"17:30"},
-  {name:"Saturama: Tales of an Albion Rainforest",stage:"Reel News",day:"Sat",start:"17:30",end:"18:30"},
-  // Circus Tent
-  {name:"Energising Yoga",stage:"Circus Tent",day:"Sat",start:"09:00",end:"10:00"},
-  {name:"Belly Dance",stage:"Circus Tent",day:"Sat",start:"10:00",end:"11:00"},
-  {name:"Wye Circus Skills, Juggling, Dapo Star",stage:"Circus Tent",day:"Sat",start:"12:00",end:"14:00"},
-  {name:"Wye Circus Skills, Hoop",stage:"Circus Tent",day:"Sat",start:"14:00",end:"16:00"},
-  {name:"Wye Circus Skills, Poi, Staff, Flower Stick",stage:"Circus Tent",day:"Sat",start:"16:00",end:"18:00"},
-  {name:"Inspired Breath",stage:"Circus Tent",day:"Sat",start:"18:00",end:"19:00"},
-  {name:"Wye Circus Fire Show",stage:"Circus Tent",day:"Sat",start:"21:00",end:"22:00"},
-  // XR
-  {name:"Art Blocking",stage:"XR",day:"Sat",start:"11:00",end:"18:30"},
-  {name:"Last Chance Salon",stage:"XR",day:"Sat",start:"11:00",end:"19:00"},
-  {name:"Cassandra the Oracle",stage:"XR",day:"Sat",start:"11:00",end:"12:00"},
-  {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Sat",start:"12:00",end:"13:00"},
-  {name:"Drumming Workshop",stage:"XR",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Costume Pimping",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
-  {name:"Tea Ladies",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
-  {name:"Big Oil Drumming Parade",stage:"XR",day:"Sat",start:"14:00",end:"15:30"},
-  {name:"Cassandra the Oracle",stage:"XR",day:"Sat",start:"14:00",end:"16:00"},
-  {name:"Strictly Burning Ballroom",stage:"XR",day:"Sat",start:"18:00",end:"18:30"},
-  // Climate Live
-  {name:"Climate Live Opening",stage:"Climate Live",day:"Sat",start:"10:00",end:"20:00"},
-  {name:"Patch It For The Planet: Upcycled Patch Making - The Mend",stage:"Climate Live",day:"Sat",start:"10:30",end:"11:30"},
-  {name:"Beads & Breathe",stage:"Climate Live",day:"Sat",start:"11:45",end:"12:45"},
-  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Mediterranean Herb Repotting - Grounds for Growth",stage:"Climate Live",day:"Sat",start:"14:15",end:"15:15"},
-  {name:"Collective Climate Collage Making - Quirky Academy CIC",stage:"Climate Live",day:"Sat",start:"15:30",end:"16:30"},
-  {name:"Jungyals and Gays: Festival Flag Making and Community Conversations",stage:"Climate Live",day:"Sat",start:"16:45",end:"17:45"},
-  // Rebel Girls Club
-  {name:"Morning Yoga with Sofia (Find Your Flow)",stage:"Rebel Girls Club",day:"Sat",start:"10:00",end:"11:00"},
-  {name:"â€œThe Art of Refusing Neutrality: Why Creatives Must Take Sides.â€ with the Sumud Collective.",stage:"Rebel Girls Club",day:"Sat",start:"11:00",end:"12:15"},
-  {name:"THE DIVINE FEMININE Paint Your Power - Take Up Space with CreatedbyBillie",stage:"Rebel Girls Club",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Reclaim Your Voice with Amelie",stage:"Rebel Girls Club",day:"Sat",start:"14:30",end:"15:30"},
-  {name:"Daily Sound Bath with Find Your Flow",stage:"Rebel Girls Club",day:"Sat",start:"16:00",end:"16:40"},
-  {name:"Vulva Painting with Phoebe Grace",stage:"Rebel Girls Club",day:"Sat",start:"17:00",end:"18:00"},
-  {name:"Sensual Embodiment led by Scarlett",stage:"Rebel Girls Club",day:"Sat",start:"18:30",end:"19:30"},
-  // Permaculture
-  {name:"Flags for the feral: Wild plant printing on recycled cloth",stage:"Permaculture",day:"Sat",start:"10:00",end:"11:00"},
-  {name:"Lift eachother up: Acroyoga for connection and play",stage:"Permaculture",day:"Sat",start:"11:30",end:"12:30"},
-  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Hack the hardware: DIY electronics for land, plants and low cost automation",stage:"Permaculture",day:"Sat",start:"14:30",end:"15:30"},
-  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Sat",start:"15:30",end:"16:30"},
-  {name:"Wild adornment: Willow crowns and headpieces by hand",stage:"Permaculture",day:"Sat",start:"17:00",end:"18:00"},
-  // Ancient Futures
-  {name:"The Healing Breath",stage:"Ancient Futures",day:"Sat",start:"09:00",end:"11:00"},
-  {name:"Deep Chill Yoga",stage:"Ancient Futures",day:"Sat",start:"11:30",end:"13:30"},
-  {name:"The Future of Cannabis",stage:"Ancient Futures",day:"Sat",start:"14:00",end:"15:00"},
-  {name:"Multidimensional Workshop",stage:"Ancient Futures",day:"Sat",start:"15:30",end:"16:30"},
-  {name:"Science for wellness",stage:"Ancient Futures",day:"Sat",start:"17:00",end:"18:00"},
-  {name:"Rhythmic Release",stage:"Ancient Futures",day:"Sat",start:"18:30",end:"20:30"},
-  // Observatory
-  {name:"The Taste Test: Exploring Food Preferences",stage:"Observatory",day:"Sat",start:"10:00",end:"11:00"},
-  {name:"The Taste Test: Exploring Food Preferences",stage:"Observatory",day:"Sat",start:"11:30",end:"12:30"},
-  {name:"Conspiracy Kitchen: Come Cook With Us",stage:"Observatory",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Music Is Medicine",stage:"Observatory",day:"Sat",start:"14:30",end:"15:30"},
-  {name:"Move Together, Decide Together: Dancing Towards A New Democracy",stage:"Observatory",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Celebratory Reset Ritual",stage:"Observatory",day:"Sat",start:"17:30",end:"18:30"},
-  // Airetiko
-  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sat",start:"11:00",end:"13:00"},
-  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sat",start:"13:00",end:"15:00"},
-  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sat",start:"15:00",end:"17:00"},
-  // Craft Tent
-  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
-  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
-  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
-  // Narcotics Anonymous
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sat",start:"08:00",end:"09:00"},
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sat",start:"13:00",end:"14:00"},
-  // Energy Garden
-  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Sat",start:"12:00",end:"22:00"},
-  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Sat",start:"13:00",end:"15:00"},
-  // Cocaine Anonymous
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sat",start:"11:00",end:"12:00"},
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sat",start:"18:00",end:"19:00"},
-  // Spinney Hollow
-  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
-  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
-  // Tinker Station
-  {name:"Tinker Station",stage:"Tinker Station",day:"Sat",start:"10:00",end:"18:00"},
-  // The Magic Teapot
-  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sat",start:"12:00",end:"00:00"},
-  // Hapitat
-  {name:"Hapitat",stage:"Hapitat",day:"Sat",start:"10:00",end:"18:00"},
-  // Garden
-  {name:"Wildflower Fortunes",stage:"Garden",day:"Sat",start:"10:00",end:"18:00"},
-  // Games Lounge
-  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Sat",start:"12:00",end:"00:00"},
-  // Crafty Rascals
-  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Sat",start:"10:00",end:"18:00"},
-  // Blink Mental Health
-  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Sat",start:"10:00",end:"19:30"},
-  // Reparium
-  {name:"Repairium",stage:"Reparium",day:"Sat",start:"10:00",end:"18:00"},
-  // Cas's Costumes
-  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Sat",start:"10:00",end:"18:00"},
-  // --- Sun ---
-  // Reel News
+  // --- Sun: Mining for (g)Old Town ---
+  {name:"DJ Sarah Tonin",stage:"Mining for (g)Old Town",day:"Sun",start:"13:30",end:"15:00"},
+  {name:"DJ Shoulda Learnt The Clarinet",stage:"Mining for (g)Old Town",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"light gal",stage:"Mining for (g)Old Town",day:"Sun",start:"16:00",end:"17:30"},
+  {name:"Flails",stage:"Mining for (g)Old Town",day:"Sun",start:"17:30",end:"19:00"},
+  // --- Sun: Nachtlicker ---
+  {name:"ALLEN TG",stage:"Nachtlicker",day:"Sun",start:"17:00",end:"18:15"},
+  {name:"CULTUR/RIOT feat CIARA MAY",stage:"Nachtlicker",day:"Sun",start:"18:15",end:"19:15"},
+  {name:"MAX OG",stage:"Nachtlicker",day:"Sun",start:"19:15",end:"20:15"},
+  {name:"EIGHT SPRING ROLLS",stage:"Nachtlicker",day:"Sun",start:"20:15",end:"21:15"},
+  {name:"LAKEY",stage:"Nachtlicker",day:"Sun",start:"21:15",end:"22:30"},
+  {name:"SLOPPY SPICE",stage:"Nachtlicker",day:"Sun",start:"22:30",end:"23:30"},
+  // --- Sun: Narcotics Anonymous ---
+  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sun",start:"13:00",end:"14:00"},
+  // --- Sun: Nexus ---
+  {name:"Bongo's Bingo",stage:"Nexus",day:"Sun",start:"14:30",end:"15:30"},
+  {name:"The League of Rebelz",stage:"Nexus",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"Hollie Cook",stage:"Nexus",day:"Sun",start:"17:30",end:"18:30"},
+  {name:"Talib Kweli",stage:"Nexus",day:"Sun",start:"19:15",end:"20:15"},
+  {name:"Kibo",stage:"Nexus",day:"Sun",start:"20:40",end:"21:40"},
+  {name:"KiLLOWEN",stage:"Nexus",day:"Sun",start:"22:00",end:"23:00"},
+  // --- Sun: Observatory ---
+  {name:"Professor Dinger's Miracle Hangover Cure Experiment",stage:"Observatory",day:"Sun",start:"10:00",end:"11:00"},
+  {name:"Your Brain On Yoga",stage:"Observatory",day:"Sun",start:"11:30",end:"12:30"},
+  {name:"Music Is Medicine",stage:"Observatory",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Exploring The Neurodivergent Festival Goer Experience",stage:"Observatory",day:"Sun",start:"14:30",end:"15:30"},
+  {name:"Fear & Loathing In Boomtown… A Study Of Attitudes & Experiences",stage:"Observatory",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"The Observatory Closing",stage:"Observatory",day:"Sun",start:"17:30",end:"18:30"},
+  // --- Sun: Permaculture ---
+  {name:"Drawn in: Zentangle, slow lines and shared attention",stage:"Permaculture",day:"Sun",start:"10:00",end:"11:00"},
+  {name:"Drawn from the ground: Natural inks, charcoal and figure drawing",stage:"Permaculture",day:"Sun",start:"11:30",end:"12:30"},
+  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Soft rebellion: Seed balls for pollinators and wild edges",stage:"Permaculture",day:"Sun",start:"14:30",end:"15:30"},
+  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Sun",start:"15:30",end:"16:30"},
+  {name:"Flags for the feral: Wild plant printing on recycled cloth",stage:"Permaculture",day:"Sun",start:"17:00",end:"18:00"},
+  // --- Sun: Rebel Girls Club ---
+  {name:"Morning Yoga with Emma",stage:"Rebel Girls Club",day:"Sun",start:"10:00",end:"11:00"},
+  {name:"Self-love Sensuality with Beth (Find Your Flow)",stage:"Rebel Girls Club",day:"Sun",start:"11:00",end:"12:15"},
+  {name:"Body painting with Ivy",stage:"Rebel Girls Club",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Rebel Girls Rehab",stage:"Rebel Girls Club",day:"Sun",start:"14:30",end:"16:00"},
+  {name:"Closing Ceremony with Everglowing & Find Your Flow",stage:"Rebel Girls Club",day:"Sun",start:"16:00",end:"17:00"},
+  // --- Sun: Reel News ---
   {name:"Film: The people's revolution in Myanmar",stage:"Reel News",day:"Sun",start:"10:30",end:"11:30"},
   {name:"The Myth of Migration",stage:"Reel News",day:"Sun",start:"11:30",end:"12:15"},
   {name:"Palantir and the fight against military tech in the NHS",stage:"Reel News",day:"Sun",start:"12:15",end:"13:00"},
@@ -2605,92 +2697,145 @@ const artists = [
   {name:"Doctur Normul",stage:"Reel News",day:"Sun",start:"15:45",end:"16:15"},
   {name:"Nathan Tuft: working with youth",stage:"Reel News",day:"Sun",start:"16:15",end:"17:15"},
   {name:"Liv Wynter",stage:"Reel News",day:"Sun",start:"17:15",end:"18:15"},
-  // Circus Tent
-  {name:"Energising Yoga",stage:"Circus Tent",day:"Sun",start:"10:00",end:"11:00"},
-  {name:"Wye Circus Skills, Hoop",stage:"Circus Tent",day:"Sun",start:"11:00",end:"13:00"},
-  {name:"Wye Circus Skills, Poi, Staff",stage:"Circus Tent",day:"Sun",start:"13:00",end:"15:00"},
-  {name:"Wye Circus Skills, Juggling",stage:"Circus Tent",day:"Sun",start:"15:00",end:"17:00"},
-  {name:"Bubblology",stage:"Circus Tent",day:"Sun",start:"17:00",end:"18:00"},
-  // XR
+  // --- Sun: Reparium ---
+  {name:"Repairium",stage:"Reparium",day:"Sun",start:"10:00",end:"18:00"},
+  // --- Sun: Rose and Clown ---
+  {name:"Boomtown's Got Talent",stage:"Rose and Clown",day:"Sun",start:"13:00",end:"15:00"},
+  {name:"Sonia Sol",stage:"Rose and Clown",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"Nigel Garage",stage:"Rose and Clown",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"Robbieoke Williams",stage:"Rose and Clown",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"The 900 (Tony Hawk Tribute)",stage:"Rose and Clown",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Annie Craic",stage:"Rose and Clown",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"Phatworld (Off Me Nut)",stage:"Rose and Clown",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"DJ Lord of The Rings",stage:"Rose and Clown",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"Haych & Movin Whata’s: Linedance Experience",stage:"Rose and Clown",day:"Sun",start:"22:00",end:"23:00"},
+  {name:"Crack Street Boys",stage:"Rose and Clown",day:"Sun",start:"23:00",end:"00:00"},
+  // --- Sun: Sharing Circles ---
+  {name:"Sharing Circles - Workshop",stage:"Sharing Circles",day:"Sun",start:"11:00",end:"19:00"},
+  // --- Sun: Sibín Beag ---
+  {name:"Didn't Make Mass (The Irish Pub Quiz)",stage:"Sibín Beag",day:"Sun",start:"14:00",end:"16:00"},
+  {name:"Painted Sails [The Railway Inn Takeover]",stage:"Sibín Beag",day:"Sun",start:"16:00",end:"16:45"},
+  {name:"Polly Gone Wrong [The Railway Inn Takeover]",stage:"Sibín Beag",day:"Sun",start:"17:15",end:"18:00"},
+  {name:"Ruth Theodore [The Railway Inn Takeover]",stage:"Sibín Beag",day:"Sun",start:"18:30",end:"19:15"},
+  {name:"Graham Sweeney",stage:"Sibín Beag",day:"Sun",start:"19:45",end:"20:30"},
+  {name:"Last Orders Karaoke",stage:"Sibín Beag",day:"Sun",start:"20:30",end:"22:00"},
+  {name:"Slán Abhaile (Slawn a-WAL-eh) - Safe Home",stage:"Sibín Beag",day:"Sun",start:"22:00",end:"22:30"},
+  // --- Sun: Soapranos Laundrette ---
+  {name:"Empressure",stage:"Soapranos Laundrette",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Soapranos: Hotwash!",stage:"Soapranos Laundrette",day:"Sun",start:"14:00",end:"15:00"},
+  {name:"Jungyals and Gays (Kushtee b2b Manuka, Lingz b2b Bowen ft Tooti b)",stage:"Soapranos Laundrette",day:"Sun",start:"15:00",end:"17:00"},
+  {name:"Selectacee",stage:"Soapranos Laundrette",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"Euphonique & MC Enamie",stage:"Soapranos Laundrette",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"T-LEX + special guests",stage:"Soapranos Laundrette",day:"Sun",start:"19:00",end:"20:00"},
+  // --- Sun: Spectrum 360 ---
+  {name:"Peggy Viennetta Ft. MC Stone",stage:"Spectrum 360",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"Lobsta B",stage:"Spectrum 360",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"DJ Can’t Say No",stage:"Spectrum 360",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"Keptek",stage:"Spectrum 360",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Gullyteen",stage:"Spectrum 360",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"Darth Leng B2B Slinks [AMEN4TEKNO Takeover]",stage:"Spectrum 360",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"Roland K B2B Savage States B2B T-Menace [AMEN4TEKNO Takeover]",stage:"Spectrum 360",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"Spongebob Squarewave",stage:"Spectrum 360",day:"Sun",start:"22:00",end:"23:00"},
+  {name:"Perceval",stage:"Spectrum 360",day:"Sun",start:"23:00",end:"00:00"},
+  // --- Sun: Spinney Hollow ---
+  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
+  // --- Sun: Sub Lab ---
+  {name:"SUBLAB ALLSTARS",stage:"Sub Lab",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"SUBLAB ALLSTARS",stage:"Sub Lab",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"El-Ze",stage:"Sub Lab",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Tashphrodisiac",stage:"Sub Lab",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"Dwelha",stage:"Sub Lab",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"Felix Culpah",stage:"Sub Lab",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"Supplya",stage:"Sub Lab",day:"Sun",start:"22:00",end:"23:00"},
+  {name:"SUBLAB ALLSTARS",stage:"Sub Lab",day:"Sun",start:"23:00",end:"23:59"},
+  // --- Sun: Tangled Roots ---
+  {name:"Lionpulse x Sinai",stage:"Tangled Roots",day:"Sun",start:"12:00",end:"13:00"},
+  {name:"Aziza Jaye",stage:"Tangled Roots",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Cheshire Cat",stage:"Tangled Roots",day:"Sun",start:"14:00",end:"15:00"},
+  {name:"Ras Demo aka Demolition Man",stage:"Tangled Roots",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"Top Cat",stage:"Tangled Roots",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"Jolie P",stage:"Tangled Roots",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"SIMMS",stage:"Tangled Roots",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Aries (Jungle Set) Ft. Carasel",stage:"Tangled Roots",day:"Sun",start:"19:00",end:"20:15"},
+  {name:"IRAH",stage:"Tangled Roots",day:"Sun",start:"20:15",end:"21:00"},
+  // --- Sun: The Fools Leap ---
+  {name:"Somerset Velvet",stage:"The Fools Leap",day:"Sun",start:"12:00",end:"13:00"},
+  {name:"Whiskey Moonface",stage:"The Fools Leap",day:"Sun",start:"13:30",end:"14:30"},
+  {name:"Black Kat Boppers",stage:"The Fools Leap",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"Panda and The Moniums",stage:"The Fools Leap",day:"Sun",start:"16:30",end:"17:30"},
+  {name:"Wanton String Band",stage:"The Fools Leap",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Horses On The Beach",stage:"The Fools Leap",day:"Sun",start:"19:30",end:"20:30"},
+  {name:"Seas of Mirth",stage:"The Fools Leap",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"Bear Twist's Honky Donk Rock'n'Rollers",stage:"The Fools Leap",day:"Sun",start:"22:00",end:"22:45"},
+  {name:"Fiddler on The Doof",stage:"The Fools Leap",day:"Sun",start:"22:45",end:"23:45"},
+  // --- Sun: The Garden Centre ---
+  {name:"TBC",stage:"The Garden Centre",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"Bateman",stage:"The Garden Centre",day:"Sun",start:"14:00",end:"15:30"},
+  {name:"TSP Ft. Factual MC",stage:"The Garden Centre",day:"Sun",start:"15:30",end:"16:30"},
+  {name:"Joseph Dooley",stage:"The Garden Centre",day:"Sun",start:"16:30",end:"17:30"},
+  {name:"BARCODE-THE-DJ",stage:"The Garden Centre",day:"Sun",start:"17:30",end:"19:00"},
+  // --- Sun: The Immortal Children of the Eternal Seed ---
+  {name:"Aerial Takeover",stage:"The Immortal Children of the Eternal Seed",day:"Sun",start:"20:00",end:"23:00"},
+  // --- Sun: The Lion's Den ---
+  {name:"David Rodigan Presents: Ram Jam Ft D Double E, Hollie Cook & Irah",stage:"The Lion's Den",day:"Sun",start:"14:30",end:"15:45"},
+  {name:"Vengaboys",stage:"The Lion's Den",day:"Sun",start:"16:00",end:"16:50"},
+  {name:"EVE",stage:"The Lion's Den",day:"Sun",start:"17:10",end:"18:10"},
+  {name:"FCUKERS",stage:"The Lion's Den",day:"Sun",start:"18:40",end:"19:40"},
+  {name:"Scissor Sisters",stage:"The Lion's Den",day:"Sun",start:"20:10",end:"21:40"},
+  {name:"Faithless",stage:"The Lion's Den",day:"Sun",start:"22:15",end:"23:45"},
+  {name:"Boomtown Closing Ceremony",stage:"The Lion's Den",day:"Sun",start:"23:50",end:"00:00"},
+  // --- Sun: The Magic Teapot ---
+  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sun",start:"12:00",end:"00:00"},
+  // --- Sun: The Pomegranate Parlour ---
+  {name:"Digital Roses",stage:"The Pomegranate Parlour",day:"Sun",start:"14:00",end:"15:00"},
+  {name:"Flibble",stage:"The Pomegranate Parlour",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"Habibtati",stage:"The Pomegranate Parlour",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"DmTree",stage:"The Pomegranate Parlour",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"Decebelle",stage:"The Pomegranate Parlour",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Illexxandra & DJ Shakey Mighty Morphin Power Combo",stage:"The Pomegranate Parlour",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"Gypsyndicate",stage:"The Pomegranate Parlour",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"Me Miles & I",stage:"The Pomegranate Parlour",day:"Sun",start:"21:00",end:"22:30"},
+  {name:"LuDec",stage:"The Pomegranate Parlour",day:"Sun",start:"22:30",end:"23:55"},
+  // --- Sun: Tinker Station ---
+  {name:"Tinker Station",stage:"Tinker Station",day:"Sun",start:"10:00",end:"18:00"},
+  // --- Sun: Topsy Turvy Trims ---
+  {name:"Black Board Soundsystem",stage:"Topsy Turvy Trims",day:"Sun",start:"13:00",end:"15:00"},
+  {name:"Ed Spinna",stage:"Topsy Turvy Trims",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"TBA",stage:"Topsy Turvy Trims",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"Hokey Cokey Cabaret",stage:"Topsy Turvy Trims",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"Ignoring Izzy",stage:"Topsy Turvy Trims",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Tickety Boo",stage:"Topsy Turvy Trims",day:"Sun",start:"19:00",end:"21:00"},
+  // --- Sun: Tribe of Frog ---
+  {name:"Rob Ótico",stage:"Tribe of Frog",day:"Sun",start:"12:00",end:"13:30"},
+  {name:"Piou-Piou",stage:"Tribe of Frog",day:"Sun",start:"13:30",end:"15:00"},
+  {name:"Skeptic",stage:"Tribe of Frog",day:"Sun",start:"15:00",end:"16:30"},
+  {name:"Krosis",stage:"Tribe of Frog",day:"Sun",start:"16:30",end:"18:00"},
+  {name:"Roen",stage:"Tribe of Frog",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"Divination",stage:"Tribe of Frog",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"Psychosonic",stage:"Tribe of Frog",day:"Sun",start:"20:00",end:"21:00"},
+  {name:"Trubble",stage:"Tribe of Frog",day:"Sun",start:"21:00",end:"22:00"},
+  {name:"Celli",stage:"Tribe of Frog",day:"Sun",start:"22:00",end:"23:00"},
+  // --- Sun: Twisted Time Machine (Bad Apple Bar) ---
+  {name:"DAY TRIPPING : ALBUM PLAYBACKS with PAPA DISCO",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"12:00",end:"13:00"},
+  {name:"MÚM - FINALLY WE ARE NO ONE (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"13:00",end:"14:00"},
+  {name:"SUSOMO YAKOTA - ACID MT FUJI (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"14:00",end:"15:00"},
+  {name:"MOTOWN AMORE",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"15:00",end:"16:00"},
+  {name:"THE BEATLES HOUR",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"16:00",end:"17:00"},
+  {name:"EMERGING BEATS : DARE TO DISCO",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"17:00",end:"18:00"},
+  {name:"THE JOSH BAKER TRIBUTE PARTY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"18:00",end:"19:00"},
+  {name:"CHURCH OF DONKOLOGY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"19:00",end:"20:00"},
+  {name:"HANG THE DJS : SUNDAY SERVICE",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"20:00",end:"22:00"},
+  {name:"PAPA DISCO's GOODNIGHT SET",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"22:00",end:"00:00"},
+  // --- Sun: XR ---
   {name:"Last Chance Salon",stage:"XR",day:"Sun",start:"11:00",end:"16:00"},
   {name:"Art Blocking and Costume Pimping",stage:"XR",day:"Sun",start:"11:00",end:"16:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Sun",start:"11:00",end:"12:00"},
   {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Sun",start:"12:00",end:"13:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Sun",start:"14:00",end:"16:00"},
-  {name:"Tea Ladies",stage:"XR",day:"Sun",start:"14:00",end:"16:00"},
-  // Climate Live
-  {name:"Climate Live Opening",stage:"Climate Live",day:"Sun",start:"10:00",end:"20:00"},
-  {name:"Radical Rosettes",stage:"Climate Live",day:"Sun",start:"10:30",end:"11:30"},
-  {name:"Music X Climate Zine-Making",stage:"Climate Live",day:"Sun",start:"11:45",end:"12:45"},
-  {name:"Bag Charm Making - Weaving Change",stage:"Climate Live",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Patch It For The Planet: Upcycled Patch Making - The Mend",stage:"Climate Live",day:"Sun",start:"14:15",end:"15:15"},
-  {name:"Mediterranean Herb Repotting - Grounds for Growth",stage:"Climate Live",day:"Sun",start:"15:30",end:"16:30"},
-  {name:"Kemastry: Caged & Free, Creative Writing",stage:"Climate Live",day:"Sun",start:"16:45",end:"17:45"},
-  // Rebel Girls Club
-  {name:"Morning Yoga with Emma",stage:"Rebel Girls Club",day:"Sun",start:"10:00",end:"11:00"},
-  {name:"Self-love Sensuality with Beth (Find Your Flow)",stage:"Rebel Girls Club",day:"Sun",start:"11:00",end:"12:15"},
-  {name:"Body painting with Ivy",stage:"Rebel Girls Club",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Rebel Girls Rehab",stage:"Rebel Girls Club",day:"Sun",start:"14:30",end:"16:00"},
-  {name:"Closing Ceremony with Everglowing & Find Your Flow",stage:"Rebel Girls Club",day:"Sun",start:"16:00",end:"17:00"},
-  // Permaculture
-  {name:"Drawn in: Zentangle, slow lines and shared attention",stage:"Permaculture",day:"Sun",start:"10:00",end:"11:00"},
-  {name:"Drawn from the ground: Natural inks, charcoal and figure drawing",stage:"Permaculture",day:"Sun",start:"11:30",end:"12:30"},
-  {name:"Scrap cult: A lunchtime community art jam for tired weirdos",stage:"Permaculture",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Soft rebellion: Seed balls for pollinators and wild edges",stage:"Permaculture",day:"Sun",start:"14:30",end:"15:30"},
-  {name:"Tiny spoons for uncertain times: A miniature woodcarving workshop",stage:"Permaculture",day:"Sun",start:"15:30",end:"16:30"},
-  {name:"Flags for the feral: Wild plant printing on recycled cloth",stage:"Permaculture",day:"Sun",start:"17:00",end:"18:00"},
-  // Ancient Futures
-  {name:"4BEAT Yoga",stage:"Ancient Futures",day:"Sun",start:"09:00",end:"11:00"},
-  {name:"Breath & Bass",stage:"Ancient Futures",day:"Sun",start:"11:30",end:"13:30"},
-  {name:"Laughter Meditation",stage:"Ancient Futures",day:"Sun",start:"14:00",end:"15:00"},
-  {name:"Nervous System Reset",stage:"Ancient Futures",day:"Sun",start:"15:30",end:"17:30"},
-  {name:"Ancient Futures Closing Ceremony",stage:"Ancient Futures",day:"Sun",start:"18:00",end:"19:00"},
-  // Observatory
-  {name:"Professor Dinger's Miracle Hangover Cure Experiment",stage:"Observatory",day:"Sun",start:"10:00",end:"11:00"},
-  {name:"Your Brain On Yoga",stage:"Observatory",day:"Sun",start:"11:30",end:"12:30"},
-  {name:"Music Is Medicine",stage:"Observatory",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Exploring The Neurodivergent Festival Goer Experience",stage:"Observatory",day:"Sun",start:"14:30",end:"15:30"},
-  {name:"Fear & Loathing In Boomtownâ€¦ A Study Of Attitudes & Experiences",stage:"Observatory",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Grief, Belonging And Integration",stage:"Observatory",day:"Sun",start:"17:30",end:"18:30"},
-  // Airetiko
-  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sun",start:"11:00",end:"13:00"},
-  {name:"Airetiko Trapeze",stage:"Airetiko",day:"Sun",start:"13:00",end:"15:00"},
-  {name:"Airetiko Giant Marionettes",stage:"Airetiko",day:"Sun",start:"15:00",end:"17:00"},
-  // Craft Tent
-  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
-  {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
-  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
-  // Narcotics Anonymous
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sun",start:"08:00",end:"09:00"},
-  {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sun",start:"13:00",end:"14:00"},
-  // Energy Garden
-  {name:"Energy Garden Opening",stage:"Energy Garden",day:"Sun",start:"12:00",end:"20:00"},
-  {name:"Solar Panel Building Workshop",stage:"Energy Garden",day:"Sun",start:"13:00",end:"15:00"},
-  // Cocaine Anonymous
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sun",start:"11:00",end:"12:00"},
-  {name:"Cocaine Anonymous Meeting",stage:"Cocaine Anonymous",day:"Sun",start:"18:00",end:"19:00"},
-  // Spinney Hollow
-  {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
-  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
-  // Tinker Station
-  {name:"Tinker Station",stage:"Tinker Station",day:"Sun",start:"10:00",end:"18:00"},
-  // The Magic Teapot
-  {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sun",start:"12:00",end:"00:00"},
-  // Hapitat
-  {name:"Hapitat",stage:"Hapitat",day:"Sun",start:"10:00",end:"18:00"},
-  // Garden
-  {name:"Wildflower Fortunes",stage:"Garden",day:"Sun",start:"10:00",end:"18:00"},
-  // Games Lounge
-  {name:"Games Lounge (Running 24hrs)",stage:"Games Lounge",day:"Sun",start:"12:00",end:"00:00"},
-  // Crafty Rascals
-  {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Sun",start:"10:00",end:"18:00"},
-  // Blink Mental Health
-  {name:"Blink Mental Health Chill-Out Space",stage:"Blink Mental Health",day:"Sun",start:"10:00",end:"19:30"},
-  // Reparium
-  {name:"Repairium",stage:"Reparium",day:"Sun",start:"10:00",end:"18:00"},
-  // Cas's Costumes
-  {name:"Engineers of Desire",stage:"Cas's Costumes",day:"Sun",start:"10:00",end:"18:00"}
+  {name:"Tea Ladies",stage:"XR",day:"Sun",start:"14:00",end:"16:00"}
 ];
+// AUTO-GENERATED:LINEUP:END
 
 const DAY_ORDER = ["Wed","Thu","Fri","Sat","Sun"];
 
@@ -2733,6 +2878,40 @@ function toMinutes(day, time){
 
 function allArtists(){
   return artists.concat(Store.get("customArtists"));
+}
+
+// ===============================
+// OTHER SETS — some acts play more than once across the weekend (a B2B
+// slot one day, a solo set another, a "takeover" repeat). Wherever a
+// single slot's card/detail is shown, this surfaces the others by name
+// so you don't have to notice a repeat by scrolling the whole lineup.
+// ===============================
+function otherSetsFor(artist){
+  return allArtists()
+    .filter(a=> a.name === artist.name && !(a.day === artist.day && a.start === artist.start && a.stage === artist.stage))
+    .sort((a,b)=> (toMinutes(a.day, a.start) ?? 999999) - (toMinutes(b.day, b.start) ?? 999999));
+}
+
+function otherSetsHTML(artist){
+  const others = otherSetsFor(artist);
+  if(!others.length) return "";
+  const links = others.map((o,i)=> `<a class="inline-link other-set-link" href="javascript:void(0)" data-idx="${i}">${escapeHtml(o.day)} ${escapeHtml(o.start||"TBC")} · ${escapeHtml(o.stage)}</a>`).join(" &nbsp;·&nbsp; ");
+  return `<p class="empty-note other-sets-note">Also playing: ${links}</p>`;
+}
+
+// Wires the links otherSetsHTML() renders — call after inserting that
+// HTML into a container. Tapping one opens that other slot's own detail
+// card, same as tapping its timeline block would.
+function wireOtherSetLinks(container, artist, opts){
+  const others = otherSetsFor(artist);
+  container.querySelectorAll(".other-set-link").forEach(a=>{
+    const other = others[Number(a.dataset.idx)];
+    if(!other) return;
+    a.onclick = (e)=>{
+      e.stopPropagation();
+      showTimelineDetailModal(other, opts || {});
+    };
+  });
 }
 
 // A starred artist is saved as a snapshot ({...artist}) at the moment it's
@@ -2868,6 +3047,7 @@ function showArtists(list){
   list.forEach(artist=>{
     const saved = Store.get("schedule").some(x=>x.name === artist.name);
     const mustSee = isMustSee(artist.name);
+    const seen = isSeen(artist.name);
     const div = document.createElement("div");
     div.className = "item" + (mustSee ? " mustsee" : "");
     const genre = genreOf(artist);
@@ -2888,13 +3068,19 @@ function showArtists(list){
           ${bioBlock}
           ${previewBlock}
           ${consensusBadge}
+          ${otherSetsHTML(artist)}
         </div>
-        <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
+        <div class="star-seen-col">
+          <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
+          <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
+        </div>
       </div>
     `;
     wireStarButton(div.querySelector(".star-btn"), artist);
+    wireSeenButton(div.querySelector(".seen-btn"), artist);
     div.querySelector(".stage-link").onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
     wirePreviewButtons(div);
+    wireOtherSetLinks(div, artist);
     artistResults.appendChild(div);
   });
 }
@@ -3043,10 +3229,13 @@ function buildTimelineHTML(items, opts){
       const isMustSeeBlock = mustSeeNames ? mustSeeNames.has(p.name) : false;
       const cls = "timeline-block" + (isSaved ? " saved" : "") + (isMustSeeBlock ? " mustsee" : "") + (opts.readonly ? " readonly" : "");
       // Combined multi-person timelines (see renderPlanTimeline) tag each
-      // merged block with who picked it — initials only, kept compact
-      // since blocks can be as narrow as 60px.
+      // merged block with who picked it — one small coloured circle per
+      // person (colour + initial, not just a bare letter) so two people
+      // whose names start with the same letter (e.g. Dana and Dave) still
+      // read as clearly different at a glance, kept compact since blocks
+      // can be as narrow as 60px.
       const ownerBadge = (opts.showOwnerBadges && p._owners && p._owners.length)
-        ? `<span class="tb-owners" title="${escapeHtml(p._owners.join(", "))}">${p._owners.map(o=>escapeHtml((o[0]||"?").toUpperCase())).join("")}</span>`
+        ? `<span class="tb-owners" title="${escapeHtml(p._owners.join(", "))}">${p._owners.map(o=>`<span class="tb-owner-dot" style="background:${personColor(o)}">${escapeHtml((o[0]||"?").toUpperCase())}</span>`).join("")}</span>`
         : "";
       return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
@@ -3084,6 +3273,7 @@ function showTimelineDetailModal(artist, opts){
   closeTimelineDetailModal();
   const saved = Store.get("schedule").some(x=>x.name === artist.name);
   const mustSee = isMustSee(artist.name);
+  const seen = isSeen(artist.name);
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
   const previewBlock = artistPreviewBlockHtml(artist);
@@ -3102,8 +3292,12 @@ function showTimelineDetailModal(artist, opts){
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
           ${previewBlock}
+          ${otherSetsHTML(artist)}
         </div>
-        ${opts.readonly ? "" : `<button class="star-toggle-lg${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
+        <div class="star-seen-col">
+          ${opts.readonly ? "" : `<button class="star-toggle-lg${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
+          <button class="seen-toggle-lg${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}" id="timelineDetailSeenBtn">✓</button>
+        </div>
       </div>
     </div>
   `;
@@ -3111,6 +3305,7 @@ function showTimelineDetailModal(artist, opts){
   document.body.appendChild(backdrop);
   backdrop.querySelector("#timelineDetailCloseBtn").onclick = closeTimelineDetailModal;
   wirePreviewButtons(backdrop);
+  wireOtherSetLinks(backdrop, artist, opts);
   const stageLink = backdrop.querySelector(".stage-link");
   if(stageLink) stageLink.onclick = (e)=>{ e.stopPropagation(); closeTimelineDetailModal(); jumpToStageDirectory(artist.stage); };
   const starBtn = backdrop.querySelector("#timelineDetailStarBtn");
@@ -3121,6 +3316,12 @@ function showTimelineDetailModal(artist, opts){
     if(opts.onSaveToggle) opts.onSaveToggle();
     showTimelineDetailModal(artist, opts);
   });
+  const seenBtn = backdrop.querySelector("#timelineDetailSeenBtn");
+  if(seenBtn) seenBtn.onclick = (e)=>{
+    e.stopPropagation();
+    setSeen(artist, !isSeen(artist.name));
+    showTimelineDetailModal(artist, opts);
+  };
 }
 
 let artistsTimelineDay = "Wed";
@@ -3287,6 +3488,47 @@ function refreshAfterStarChange(){
   if(typeof renderClashTimeline === "function" && planView === "clash" && clashSubView === "timeline") renderClashTimeline();
 }
 
+// ===============================
+// SEEN LIVE — a separate tick confirming you actually caught this act
+// in person at the festival, distinct from starring/must-see (which is
+// about planning ahead of time, not what actually happened). Purely
+// personal — never part of the group sync payload, same as
+// personalClashChoices — so it never shows on a teammate's read-only tab.
+// ===============================
+function isSeen(name){
+  return (Store.get("seenArtists") || []).some(x=>x.name === name);
+}
+
+function setSeen(artist, value){
+  let seen = Store.get("seenArtists") || [];
+  if(value){
+    if(!seen.some(x=>x.name === artist.name)){
+      seen = [...seen, { name: artist.name, stage: artist.stage, day: artist.day, start: artist.start, end: artist.end, seenAt: Date.now() }];
+    }
+  } else {
+    seen = seen.filter(x=>x.name !== artist.name);
+  }
+  Store.set("seenArtists", seen);
+  refreshAfterSeenChange();
+}
+
+function refreshAfterSeenChange(){
+  showArtists(currentFilteredArtists());
+  renderSchedule();
+  if(typeof renderArtistsTimeline === "function" && artistsView === "timeline") renderArtistsTimeline();
+  if(typeof renderPlanTimeline === "function" && planView === "timeline") renderPlanTimeline();
+  if(typeof renderClashTimeline === "function" && planView === "clash" && clashSubView === "timeline") renderClashTimeline();
+  if(typeof renderSeenList === "function" && planView === "seen") renderSeenList();
+}
+
+function wireSeenButton(btn, artist){
+  if(!btn) return;
+  btn.onclick = (e)=>{
+    e.stopPropagation();
+    setSeen(artist, !isSeen(artist.name));
+  };
+}
+
 function showStarHint(btn){
   document.querySelectorAll(".star-hint-bubble").forEach(b=> b.remove());
   const bubble = document.createElement("div");
@@ -3446,9 +3688,10 @@ function showHalfOrderModal(day, a, b, onChoose){
   document.getElementById("halfOrderSkipBtn").onclick = ()=>{ onChoose(null); closeHalfOrderModal(); };
 }
 
-function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
+function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
+  const seen = isSeen(artist.name);
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
   const mustSeeSet = mustSeeNamesSet || new Set();
@@ -3478,19 +3721,21 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
       <div class="item-top">
         <div>
-          <strong>${artist.name}</strong>${mustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""}<br>
+          <strong>${artist.name}</strong>${mustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""}${seen ? ` <span class="mustsee-tag" style="background:rgba(75,227,172,.16); color:var(--accent-teal);">✓ seen live</span>` : ""}<br>
           <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
-          <span class="time-label">${timeLabel(artist)}</span>
+          <span class="time-label">${timeLabel(artist)}</span>${owners && owners.length > 1 ? ` <span class="tb-owners-inline">· ${escapeHtml(owners.join(", "))}</span>` : ""}
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
+          ${otherSetsHTML(artist)}
         </div>
-        ${readonly ? "" : `<div class="btnrow plan-btnrow">
+        <div class="btnrow plan-btnrow">
           <div class="btnrow-top">
-            <button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>
-            <button class="remove-btn">Remove</button>
+            ${readonly ? "" : `<button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>`}
+            <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
+            ${readonly ? "" : `<button class="remove-btn">Remove</button>`}
           </div>
-          <button class="set-time-btn">Set time</button>
-        </div>`}
+          ${readonly ? "" : `<button class="set-time-btn">Set time</button>`}
+        </div>
       </div>
       ${clashLines ? `<div class="clash-note">${clashLines}${choiceHTML}</div>` : ""}
       <div class="edit-slot"></div>
@@ -3525,12 +3770,25 @@ function openTimeEditor(container, artist, onSave){
 // ===============================
 // PLAN — WHOSE SCHEDULE AM I LOOKING AT
 // ===============================
+// One shared multi-select — List, Clashes, Timeline and Compare all read
+// from this same selection instead of each keeping its own person-picker.
 // "mine" is always this device's own Store.get("schedule") — the only
 // one that's ever editable, saved to, or counted in stats/next-event.
 // Anything else is a name key into peopleSchedules, a read-only snapshot
-// that arrived via a teammate's Sync code. Switching tabs never copies
-// or merges one into the other.
-let planActiveOwner = "mine";
+// that arrived via a teammate's Sync code. Selecting more than one merges
+// their picks into a single read-only combined view (same pick from two
+// people collapses into one entry tagged with both) rather than showing
+// one person's list at a time.
+let planSelectedOwners = new Set(["mine"]);
+
+// The set of owner keys actually in play right now — prunes any stale
+// selection (a teammate who's since stopped showing up in peopleSchedules)
+// and always falls back to ["mine"] rather than leaving the view empty.
+function activeOwnersList(){
+  const peopleByKey = new Map(comparePeopleList().map(p=>[p.key,p]));
+  const owners = [...planSelectedOwners].filter(k=> peopleByKey.has(k));
+  return owners.length ? owners : ["mine"];
+}
 
 // Shared by every per-person snapshot map (peopleSchedules/peopleBingo/
 // peopleCharacters/peopleLastSeen) — all keyed by stable personId now,
@@ -3549,86 +3807,125 @@ function personLastSeenTs(entry){
   return (entry && typeof entry === "object") ? entry.ts : entry;
 }
 
+// Merges every selected owner's picks into one array. A single owner of
+// "mine" returns the live Store.get("schedule") reference (unwrapped) so
+// existing index-based edit/remove/set-time code keeps working exactly as
+// before; any other selection (a single teammate, or several people at
+// once) is always read-only, and 2+ owners get deduped by identical pick
+// (same name+day+stage+start) into one entry tagged with everyone who
+// chose it via `_owners`.
 function activeScheduleData(){
-  if(planActiveOwner === "mine") return Store.get("schedule");
-  const people = Store.get("peopleSchedules") || {};
-  return personSnapshotList(people[planActiveOwner]).slice();
+  const owners = activeOwnersList();
+  if(owners.length === 1 && owners[0] === "mine") return Store.get("schedule");
+
+  const peopleByKey = new Map(comparePeopleList().map(p=>[p.key,p]));
+  const merged = new Map();
+  owners.forEach(ownerKey=>{
+    const person = peopleByKey.get(ownerKey);
+    if(!person) return;
+    person.list.forEach(a=>{
+      const key = `${a.name}|${a.day}|${a.stage}|${a.start}`;
+      if(!merged.has(key)) merged.set(key, { ...a, _owners: [] });
+      merged.get(key)._owners.push(person.label);
+    });
+  });
+  return [...merged.values()];
 }
 
-function renderPlanPersonTabs(){
+// Re-renders whichever Plan sub-view is currently showing — called
+// whenever the shared owner selector changes, since List/Clashes/
+// Timeline/Compare each read from the same selection now.
+function rerenderActivePlanView(){
+  if(planView === "timeline"){
+    renderPlanTimeline();
+  } else if(planView === "compare"){
+    renderCompareFilterChips();
+    renderPlanCompare();
+    if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("compareBigPicture");
+    if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+  } else if(planView === "clash"){
+    updateClashSubViewVisibility();
+  } else {
+    renderSchedule();
+  }
+}
+
+function renderPlanOwnerSelector(){
   const box = document.getElementById("planPersonTabs");
   const note = document.getElementById("planPersonNote");
   if(!box) return;
-  const people = Store.get("peopleSchedules") || {};
-  const personIds = Object.keys(people).filter(id=> personSnapshotList(people[id]).length > 0);
-  // If the previously-active friend has since disappeared from
-  // peopleSchedules (nothing saved, or never actually synced), fall
-  // back to your own tab rather than pointing at a button that's about
-  // to stop existing.
-  if(planActiveOwner !== "mine" && !personIds.includes(planActiveOwner)) planActiveOwner = "mine";
+  const people = comparePeopleList(); // [{key:"mine",label,list}, ...synced teammates]
 
-  // Your own tab is always shown, even with zero friends synced in yet —
+  // Drop any selected teammate who's since disappeared from
+  // peopleSchedules (nothing saved, or never actually synced) rather than
+  // leaving a selection pointed at someone who's about to stop existing.
+  [...planSelectedOwners].forEach(k=>{ if(!people.some(p=>p.key===k)) planSelectedOwners.delete(k); });
+  if(planSelectedOwners.size === 0) planSelectedOwners.add("mine");
+
+  // Your own chip is always shown, even with zero friends synced in yet —
   // labelled with your own picked name (matching what a friend would see
   // for you on their device) once you've set one, "Mine" until then.
   const myName = (Store.get("contributorName") || "").trim();
   const myLabel = myName ? `⭐ ${myName}` : "⭐ Mine";
 
-  // Timeline and Compare have their own person-selection UI (multi-select
-  // owner chips, and "everyone at once" respectively) — showing this
-  // single-select tab strip on top of those as well just duplicates the
-  // same names in two controls with different selection behaviour. Only
-  // List and Clashes actually use planActiveOwner to pick whose data to
-  // show, so this strip only needs to be visible there.
-  const relevantHere = planView === "list" || planView === "clash";
-  if(!relevantHere){
-    box.style.display = "none";
-    if(note) note.style.display = "none";
-    return;
-  }
   box.style.display = "";
-  box.className = "tabstrip";
-  box.innerHTML = `<button class="${planActiveOwner==="mine"?"active":""}" data-owner="mine">${escapeHtml(myLabel)}</button>` +
-    personIds.map(id=>`<button class="person ${planActiveOwner===id?"active":""}" data-owner="${escapeHtml(id)}">${escapeHtml(personDisplayName(people[id], id))}</button>`).join("");
-  box.querySelectorAll("button").forEach(btn=>{
-    btn.onclick = ()=>{
-      planActiveOwner = btn.dataset.owner;
-      renderPlanPersonTabs();
-      renderSchedule();
-      if(planView === "timeline") renderPlanTimeline();
+  box.className = "stagelist";
+  box.innerHTML = people.map(p=>{
+    const label = p.key === "mine" ? myLabel : escapeHtml(p.label);
+    return `<span class="chip${planSelectedOwners.has(p.key) ? " active" : ""}" data-owner="${escapeHtml(p.key)}">${label}</span>`;
+  }).join("");
+  box.querySelectorAll(".chip").forEach(c=>{
+    c.onclick = ()=>{
+      const key = c.dataset.owner;
+      if(planSelectedOwners.has(key)){
+        // Always leave at least one person selected — an empty view
+        // isn't a useful state to land in from a tap.
+        if(planSelectedOwners.size > 1) planSelectedOwners.delete(key);
+      } else {
+        planSelectedOwners.add(key);
+      }
+      renderPlanOwnerSelector();
+      rerenderActivePlanView();
     };
   });
-  if(note){
+
+  if(!note) return;
+  const owners = activeOwnersList();
+  if(people.length < 2){
     note.style.display = "";
-    if(personIds.length === 0){
-      note.textContent = "Nobody's synced in yet — a teammate's picks will show up as their own tab here (and in Compare below) once they have. Pick your name in Discover if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
-    } else if(planActiveOwner === "mine"){
-      note.textContent = "Viewing your own saved artists. Switch tabs above to look at a synced teammate's — it's read-only and never merges into yours. See everyone at once in the Compare view below.";
-    } else {
-      const activeEntry = people[planActiveOwner];
-      const activeLabel = personDisplayName(activeEntry, planActiveOwner);
-      const lastSeenEntry = (Store.get("peopleLastSeen") || {})[planActiveOwner];
-      const lastSeenTs = personLastSeenTs(lastSeenEntry);
-      const seenText = lastSeenTs ? ` (last synced ${formatLastSeen(lastSeenTs)})` : "";
-      // "Merge into mine" exists for exactly the situation this session
-      // has hit more than once: a device losing track of its own
-      // deviceId (reinstall, cleared storage, ...) ends up as a second,
-      // empty tab under the same name as a teammate's real synced data —
-      // this is the (safe, additive, undoable-by-just-not-syncing-yet)
-      // way to reclaim it as "you" without a destructive device-handoff
-      // wipe-and-replace.
-      note.innerHTML = `Viewing ${escapeHtml(activeLabel)}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list. <a class="inline-link" href="javascript:void(0)" id="mergePersonIntoMineLink">Is this actually you? Merge their picks into mine →</a>`;
-      const mergeLink = document.getElementById("mergePersonIntoMineLink");
-      if(mergeLink) mergeLink.onclick = ()=>{
-        const ok = confirm(`Merge ${activeLabel}'s saved artists, bingo squares and character into your own?\n\nThis only adds — it never removes or overwrites anything already on this device. ${activeLabel}'s separate tab disappears afterwards since it's now part of yours.`);
-        if(!ok) return;
-        const added = mergePersonIntoMine(planActiveOwner);
-        note.textContent = added ? `Merged in — ${added} thing${added===1?"":"s"} added to your own picks.` : "Nothing new to merge in.";
-      };
-    }
+    note.textContent = "Nobody's synced in yet — a teammate's picks will show up as another chip here once they have. Pick your name in Discover if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
+  } else if(owners.length === 1 && owners[0] !== "mine"){
+    // "Merge into mine" exists for exactly the situation this session
+    // has hit more than once: a device losing track of its own
+    // deviceId (reinstall, cleared storage, ...) ends up as a second,
+    // empty chip under the same name as a teammate's real synced data —
+    // this is the (safe, additive, undoable-by-just-not-syncing-yet)
+    // way to reclaim it as "you" without a destructive device-handoff
+    // wipe-and-replace.
+    const personId = owners[0];
+    const peopleSchedules = Store.get("peopleSchedules") || {};
+    const activeEntry = peopleSchedules[personId];
+    const activeLabel = personDisplayName(activeEntry, personId);
+    const lastSeenEntry = (Store.get("peopleLastSeen") || {})[personId];
+    const lastSeenTs = personLastSeenTs(lastSeenEntry);
+    const seenText = lastSeenTs ? ` (last synced ${formatLastSeen(lastSeenTs)})` : "";
+    note.style.display = "";
+    note.innerHTML = `Viewing ${escapeHtml(activeLabel)}'s saved artists from their last sync${seenText} — read-only, and it hasn't changed or added anything to your own list. <a class="inline-link" href="javascript:void(0)" id="mergePersonIntoMineLink">Is this actually you? Merge their picks into mine →</a>`;
+    const mergeLink = document.getElementById("mergePersonIntoMineLink");
+    if(mergeLink) mergeLink.onclick = ()=>{
+      const ok = confirm(`Merge ${activeLabel}'s saved artists, bingo squares and character into your own?\n\nThis only adds — it never removes or overwrites anything already on this device. ${activeLabel}'s separate chip disappears afterwards since it's now part of yours.`);
+      if(!ok) return;
+      const added = mergePersonIntoMine(personId);
+      note.textContent = added ? `Merged in — ${added} thing${added===1?"":"s"} added to your own picks.` : "Nothing new to merge in.";
+      renderPlanOwnerSelector();
+      rerenderActivePlanView();
+    };
+  } else {
+    note.style.display = "none";
   }
 }
 
-// See renderPlanPersonTabs' "Merge into mine" link above for why this
+// See renderPlanOwnerSelector's "Merge into mine" link above for why this
 // exists. Reuses mergeOwnCloudCopy's additive-only logic (new saved
 // artists unioned by name, bingo-marked squares unioned, character only
 // fills in if you don't have one) — same safety guarantees as merging
@@ -3656,9 +3953,9 @@ function mergePersonIntoMine(personId){
     if(map[personId]){ delete map[personId]; Store.set(key, map); }
   });
 
-  if(planActiveOwner === personId) planActiveOwner = "mine";
+  if(planSelectedOwners.has(personId)){ planSelectedOwners.delete(personId); planSelectedOwners.add("mine"); }
   refreshAfterMerge();
-  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+  if(typeof renderPlanOwnerSelector === "function") renderPlanOwnerSelector();
   if(typeof pushToCloud === "function") pushToCloud().catch(()=>{});
   // Without this, the duplicate keeps coming back: the merge above only
   // clears this device's own LOCAL copy of the duplicate's data, but the
@@ -3720,10 +4017,14 @@ if(mergeAllDuplicatesBtn) mergeAllDuplicatesBtn.onclick = ()=>{
 
 function renderSchedule(){
   const fullSchedule = activeScheduleData();
-  const readonly = planActiveOwner !== "mine";
+  const owners = activeOwnersList();
+  const combined = owners.length > 1;
+  const readonly = combined || owners[0] !== "mine";
 
   if(fullSchedule.length === 0){
-    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${readonly ? `${escapeHtml(planActiveOwner)} hasn't saved any artists yet.` : "No saved artists yet. Add some from the Lineup tab."}</p></div>`;
+    const peopleByKey = new Map(comparePeopleList().map(p=>[p.key,p]));
+    const ownerLabel = owners.map(k=> (peopleByKey.get(k) || {}).label || k).join(", ");
+    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${readonly ? `${escapeHtml(ownerLabel)} hasn't saved any artists yet.` : "No saved artists yet. Add some from the Lineup tab."}</p></div>`;
     return;
   }
 
@@ -3731,7 +4032,9 @@ function renderSchedule(){
   // Keep each entry's ORIGINAL index into the full (unfiltered) schedule
   // even when the must-sees-only filter is on — remove/set-time/star
   // wiring below reads .dataset.idx straight into Store.get("schedule"),
-  // so a filtered-array position would point at the wrong artist.
+  // so a filtered-array position would point at the wrong artist. Only
+  // meaningful when !readonly (i.e. owners is exactly ["mine"]), where
+  // fullSchedule *is* Store.get("schedule") itself.
   const shown = fullSchedule.map((a,i)=>({a,i})).filter(({a})=> !planMustSeeFilter || a.mustSee);
 
   if(shown.length === 0){
@@ -3740,7 +4043,7 @@ function renderSchedule(){
   }
 
   if(planView === "list"){
-    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet)).join("");
+    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet,a._owners)).join("");
   } else {
     const clashMap = findClashes(fullSchedule);
     const byDay = {};
@@ -3757,10 +4060,22 @@ function renderSchedule(){
       // "23:30", not before it as "0..." vs "2..." would alphabetically.
       const items = byDay[day].sort((x,y)=> (toMinutes(x.a.day, x.a.start) ?? 999999) - (toMinutes(y.a.day, y.a.start) ?? 999999));
       html += `<div class="daygroup">${day}</div>`;
-      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet));
+      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet,a._owners));
     });
     scheduleList.innerHTML = html;
   }
+
+  // "Seen live" is wired regardless of readonly — it's your own personal
+  // attendance log, not an edit to whichever schedule you're currently
+  // looking at, so it stays clickable even on a combined/teammate view.
+  scheduleList.querySelectorAll(".item").forEach(itemEl=>{
+    const idx = Number(itemEl.dataset.idx);
+    const artist = fullSchedule[idx];
+    if(!artist) return;
+    const seenBtn = itemEl.querySelector(".seen-btn");
+    if(seenBtn) seenBtn.onclick = ()=> setSeen(artist, !isSeen(artist.name));
+    wireOtherSetLinks(itemEl, artist);
+  });
 
   if(!readonly){
     scheduleList.querySelectorAll(".item").forEach(itemEl=>{
@@ -3849,25 +4164,29 @@ function updateClashSubViewVisibility(){
 
 function setPlanView(view){
   planView = view;
-  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
-  ["viewListBtn","viewClashBtn","viewTimelineBtn","viewCompareBtn"].forEach(id=>{
+  if(typeof renderPlanOwnerSelector === "function") renderPlanOwnerSelector();
+  ["viewListBtn","viewClashBtn","viewTimelineBtn","viewCompareBtn","viewSeenBtn"].forEach(id=>{
     const btn = document.getElementById(id);
     if(btn) btn.classList.remove("active");
   });
-  const activeBtnId = view==="list" ? "viewListBtn" : view==="clash" ? "viewClashBtn" : view==="timeline" ? "viewTimelineBtn" : "viewCompareBtn";
+  const activeBtnId = view==="list" ? "viewListBtn" : view==="clash" ? "viewClashBtn" : view==="timeline" ? "viewTimelineBtn" : view==="seen" ? "viewSeenBtn" : "viewCompareBtn";
   const activeBtn = document.getElementById(activeBtnId);
   if(activeBtn) activeBtn.classList.add("active");
 
   const listEls = [scheduleList, document.getElementById("nowNextBanner")];
   const timelineEl = document.getElementById("planTimelineView");
   const compareEl = document.getElementById("planCompareView");
+  const seenEl = document.getElementById("planSeenView");
   const clashTimelineEl = document.getElementById("clashTimelineView");
   const clashExtras = document.getElementById("clashExtras");
   const mustSeeFilterToggle = document.getElementById("mustSeeFilterToggle");
+  const starSeenLegend = document.getElementById("planStarSeenLegend");
   if(clashExtras) clashExtras.style.display = view==="clash" ? "" : "none";
-  if(mustSeeFilterToggle) mustSeeFilterToggle.style.display = view==="compare" ? "none" : "";
+  if(mustSeeFilterToggle) mustSeeFilterToggle.style.display = (view==="compare"||view==="seen") ? "none" : "";
+  if(starSeenLegend) starSeenLegend.style.display = (view==="compare"||view==="seen") ? "none" : "";
   if(timelineEl) timelineEl.style.display = view==="timeline" ? "" : "none";
   if(compareEl) compareEl.style.display = view==="compare" ? "" : "none";
+  if(seenEl) seenEl.style.display = view==="seen" ? "" : "none";
   if(clashTimelineEl && view!=="clash") clashTimelineEl.style.display = "none";
   listEls.forEach(el=> el && (el.style.display = (view==="list"||(view==="clash"&&clashSubView==="list")) ? "" : "none"));
 
@@ -3875,9 +4194,8 @@ function setPlanView(view){
     if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("timelineBigPicture");
     // Only jump off the currently selected day if it's genuinely empty —
     // never overrides a day someone's deliberately looking at.
-    const mine = Store.get("schedule");
-    if(!mine.some(a=> a.day === planTimelineDay && a.start)) planTimelineDay = pickDefaultTimelineDay(mine);
-    renderPlanTimelineOwnerChips();
+    const current = activeScheduleData();
+    if(!current.some(a=> a.day === planTimelineDay && a.start)) planTimelineDay = pickDefaultTimelineDay(current);
     renderPlanTimelineDayTabs();
     renderPlanTimeline();
   } else if(view === "compare"){
@@ -3888,6 +4206,8 @@ function setPlanView(view){
     if(typeof renderGroupDecisions === "function") renderGroupDecisions();
     renderCompareFilterChips();
     renderPlanCompare();
+  } else if(view === "seen"){
+    renderSeenList();
   } else if(view === "clash"){
     updateClashSubViewVisibility();
   } else {
@@ -3898,6 +4218,8 @@ function setPlanView(view){
 document.getElementById("viewListBtn").onclick = ()=> setPlanView("list");
 document.getElementById("viewClashBtn").onclick = ()=> setPlanView("clash");
 document.getElementById("viewTimelineBtn").onclick = ()=> setPlanView("timeline");
+const viewSeenBtn = document.getElementById("viewSeenBtn");
+if(viewSeenBtn) viewSeenBtn.onclick = ()=> setPlanView("seen");
 const viewCompareBtn = document.getElementById("viewCompareBtn");
 if(viewCompareBtn) viewCompareBtn.onclick = ()=> setPlanView("compare");
 
@@ -3926,13 +4248,26 @@ document.querySelectorAll("#clashSubViewToggle button").forEach(btn=>{
 // anywhere else.
 // ===============================
 function comparePeopleList(){
-  const people = [{ key:"mine", label:"You", list: Store.get("schedule") }];
+  // Own label uses your actual picked name (matching buildCombinedArtistInterestMap's
+  // convention) so Compare/Timeline badges show "Emma"/"E" instead of a
+  // generic "You"/"Y" once you've set one in Discover.
+  const people = [{ key:"mine", label: currentContributorName() || "You", list: Store.get("schedule") }];
   const peopleSchedules = Store.get("peopleSchedules") || {};
   Object.keys(peopleSchedules).forEach(id=>{
     const list = personSnapshotList(peopleSchedules[id]);
     if(list.length) people.push({ key:id, label:personDisplayName(peopleSchedules[id], id), list });
   });
   return people;
+}
+
+// Deterministic colour per person, by their stable position in
+// comparePeopleList() — index-based (not a name hash) so two people never
+// collide just because their names happen to start with the same letter
+// (e.g. "Dana" and "Dave" both showing initial "D").
+const PERSON_BADGE_COLORS = ["#4be3ac","#2f9bff","#f2a83c","#e2836a","#c792ea","#f06292","#ffd54f"];
+function personColor(label){
+  const idx = comparePeopleList().findIndex(p=>p.label === label);
+  return PERSON_BADGE_COLORS[(idx === -1 ? 0 : idx) % PERSON_BADGE_COLORS.length];
 }
 
 const COMPARE_FILTER_MODES = [
@@ -3963,10 +4298,20 @@ function renderCompareFilterChips(){
 function renderPlanCompare(){
   const box = document.getElementById("planCompareList");
   if(!box) return;
-  const people = comparePeopleList();
+  const allPeople = comparePeopleList();
+
+  if(allPeople.length < 2){
+    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — pick your name in Discover and it syncs automatically whenever you've both got signal (no signal, there's a manual backup code there too). Once they've synced, their picks show up here alongside yours.</p></div>`;
+    return;
+  }
+
+  // Compare respects the same shared owner selector as List/Clashes/
+  // Timeline — pick who's showing up top, and Compare narrows to just them.
+  const owners = new Set(activeOwnersList());
+  const people = allPeople.filter(p=> owners.has(p.key));
 
   if(people.length < 2){
-    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — pick your name in Discover and it syncs automatically whenever you've both got signal (no signal, there's a manual backup code there too). Once they've synced, their picks show up here alongside yours.</p></div>`;
+    box.innerHTML = `<div class="card"><p class="empty-note">Select more people up top to compare picks — add a teammate's chip alongside yours.</p></div>`;
     return;
   }
 
@@ -4022,7 +4367,8 @@ function renderPlanCompare(){
     const peopleChips = people.map(p=>{
       const has = p.key in e.interest;
       const mustSee = e.interest[p.key];
-      return `<span class="compare-person${has ? " in" : ""}">${escapeHtml(p.label)}${has ? (mustSee ? " ★" : " 👍") : ""}</span>`;
+      const dot = `<span class="tb-owner-dot" style="background:${personColor(p.label)}">${escapeHtml((p.label[0]||"?").toUpperCase())}</span>`;
+      return `<span class="compare-person${has ? " in" : ""}">${dot} ${escapeHtml(p.label)}${has ? (mustSee ? " ★" : " 👍") : ""}</span>`;
     }).join("");
     return `
       <div class="item">
@@ -4058,6 +4404,49 @@ function renderPlanCompare(){
   wireStageLinks(box);
 }
 
+// ===============================
+// SEEN LIVE VIEW — your own log of acts confirmed via the ✓ tick
+// wherever a star button appears (Lineup, Timeline detail, Plan list).
+// Purely personal (see isSeen/setSeen above) — always reflects this
+// device's own seenArtists, regardless of the shared owner selector.
+// ===============================
+function renderSeenList(){
+  const box = document.getElementById("planSeenList");
+  const countEl = document.getElementById("planSeenCount");
+  if(!box) return;
+  const seen = (Store.get("seenArtists") || []).slice().sort((a,b)=> (b.seenAt||0) - (a.seenAt||0));
+
+  if(countEl) countEl.textContent = seen.length
+    ? `You've confirmed seeing ${seen.length} act${seen.length===1?"":"s"} live so far.`
+    : "";
+
+  if(seen.length === 0){
+    box.innerHTML = `<div class="card"><p class="empty-note">Nothing ticked off yet — once you're actually watching an act at the festival, tap the ✓ next to its star (in Lineup, a Timeline block's detail, or here in Plan) to log that you caught it live.</p></div>`;
+    return;
+  }
+
+  box.innerHTML = seen.map(a=> `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <strong>${escapeHtml(a.name)}</strong> <span class="mustsee-tag" style="background:rgba(75,227,172,.16); color:var(--accent-teal);">✓ seen live</span><br>
+          <span class="stage-link" data-stage="${escapeHtml(a.stage)}">${escapeHtml(a.stage)}</span><br>
+          <span class="time-label">${timeLabel(a)}</span>
+        </div>
+        <button class="ghost seen-remove-btn" data-name="${escapeHtml(a.name)}">Undo</button>
+      </div>
+    </div>
+  `).join("");
+
+  box.querySelectorAll(".seen-remove-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      Store.set("seenArtists", (Store.get("seenArtists") || []).filter(x=> x.name !== btn.dataset.name));
+      renderSeenList();
+    };
+  });
+  wireStageLinks(box);
+}
+
 // "Big Picture" — a one-line roll-up shared by Compare and Timeline, so
 // either view opens with the headline numbers before scrolling through
 // individual artists. Built entirely from data those views (and Today)
@@ -4087,14 +4476,13 @@ function renderBigPictureSummary(containerId){
 
 // ===============================
 // SAVED-ARTIST TIMELINE (Plan) — same scrollable stage/time grid as the
-// Artists screen's Timeline view, but scoped to whichever person's tab
-// (mine, or one or more synced teammates picked below) is currently
-// selected. Picking more than one merges everyone's picks into a single
-// grid — a shared pick shows as one block tagged with everyone who
-// chose it, rather than one block per person.
+// Artists screen's Timeline view, scoped to whichever owner(s) are
+// selected in the shared top selector (renderPlanOwnerSelector). Selecting
+// more than one merges everyone's picks into a single grid — a shared
+// pick shows as one block tagged with everyone who chose it, rather than
+// one block per person.
 // ===============================
 let planTimelineDay = "Wed";
-let planTimelineSelectedOwners = new Set(["mine"]);
 
 // Timeline is filtered to one day at a time (a.day === planTimelineDay),
 // same as Clash Timeline below — correct and intentional, since it's a
@@ -4125,57 +4513,18 @@ function renderPlanTimelineDayTabs(){
   });
 }
 
-function renderPlanTimelineOwnerChips(){
-  const box = document.getElementById("planTimelineOwnerChips");
-  if(!box) return;
-  const people = comparePeopleList();
-  if(people.length < 2){ box.style.display = "none"; box.innerHTML = ""; return; }
-  box.style.display = "";
-  box.innerHTML = people.map(p=>
-    `<span class="chip${planTimelineSelectedOwners.has(p.key) ? " active" : ""}" data-owner="${escapeHtml(p.key)}">${escapeHtml(p.label)}</span>`
-  ).join("");
-  box.querySelectorAll(".chip").forEach(c=>{
-    c.onclick = ()=>{
-      const key = c.dataset.owner;
-      if(planTimelineSelectedOwners.has(key)){
-        // Always leave at least one person selected — an empty grid
-        // isn't a useful state to land in from a tap.
-        if(planTimelineSelectedOwners.size > 1) planTimelineSelectedOwners.delete(key);
-      } else {
-        planTimelineSelectedOwners.add(key);
-      }
-      renderPlanTimelineOwnerChips();
-      renderPlanTimeline();
-    };
-  });
-}
-
 function renderPlanTimeline(){
   const grid = document.getElementById("planTimelineGrid");
   if(!grid) return;
-  const people = comparePeopleList();
-  const peopleByKey = new Map(people.map(p=>[p.key, p]));
-  const owners = [...planTimelineSelectedOwners].filter(k=> peopleByKey.has(k));
-  const activeOwners = owners.length ? owners : ["mine"];
-  const combined = activeOwners.length > 1;
-  const readonly = combined || activeOwners[0] !== "mine";
+  const owners = activeOwnersList();
+  const combined = owners.length > 1;
+  const readonly = combined || owners[0] !== "mine";
 
-  // Merge each selected person's picks for this day, grouping identical
-  // picks (same name+stage+start) into one block tagged with everyone
-  // who chose it, so a shared pick shows once, not twice.
-  const merged = new Map();
-  activeOwners.forEach(ownerKey=>{
-    const person = peopleByKey.get(ownerKey);
-    if(!person) return;
-    person.list
-      .filter(a=> a.day === planTimelineDay && a.start && (!planMustSeeFilter || a.mustSee))
-      .forEach(a=>{
-        const key = `${a.name}|${a.day}|${a.stage}|${a.start}`;
-        if(!merged.has(key)) merged.set(key, { ...a, _owners: [] });
-        merged.get(key)._owners.push(person.label);
-      });
-  });
-  const dayItems = [...merged.values()];
+  // activeScheduleData() already merges every selected owner's picks
+  // (deduped by name+day+stage+start, tagged with _owners) — just filter
+  // down to this one day.
+  const full = activeScheduleData();
+  const dayItems = full.filter(a=> a.day === planTimelineDay && a.start && (!planMustSeeFilter || a.mustSee));
 
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
@@ -4183,9 +4532,12 @@ function renderPlanTimeline(){
   grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">${planMustSeeFilter ? `No must-sees with a set time saved for ${planTimelineDay} yet.` : `Nothing with a set time saved for ${planTimelineDay} yet.`}</p>`;
 
   const hint = document.getElementById("planTimelineHint");
-  if(hint) hint.textContent = combined
-    ? `Combined view of ${activeOwners.map(k=>peopleByKey.get(k)?.label || k).join(" + ")} — tap a block for details. Shared picks are marked with everyone's initials.`
-    : (readonly ? "Scroll sideways for time, down for stage. Tap a block to see details." : "Scroll sideways for time, down for stage. Tap a block to see details or unsave it.");
+  if(hint){
+    const peopleByKey = new Map(comparePeopleList().map(p=>[p.key,p]));
+    hint.textContent = combined
+      ? `Combined view of ${owners.map(k=>peopleByKey.get(k)?.label || k).join(" + ")} — tap a block for details. Shared picks are marked with everyone's initials.`
+      : (readonly ? "Scroll sideways for time, down for stage. Tap a block to see details." : "Scroll sideways for time, down for stage. Tap a block to see details or unsave it.");
+  }
 
   grid.querySelectorAll(".timeline-block").forEach(b=>{
     b.onclick = ()=>{
@@ -4219,7 +4571,8 @@ function renderClashTimelineDayTabs(){
 function renderClashTimeline(){
   const grid = document.getElementById("clashTimelineGrid");
   if(!grid) return;
-  const readonly = planActiveOwner !== "mine";
+  const owners = activeOwnersList();
+  const readonly = owners.length > 1 || owners[0] !== "mine";
   const fullSchedule = activeScheduleData();
   const clashMap = findClashes(fullSchedule);
   const clashingIdx = new Set(Object.keys(clashMap).map(Number));
@@ -4303,8 +4656,7 @@ renderNowNext();
 // map, per-person last-seen from sync, meeting point) — no new state.
 // ===============================
 function jumpToClashes(){
-  const planTab = document.querySelector('.tab[data-tab="plan"]');
-  if(planTab) planTab.click();
+  jumpToTab("plan");
   const btn = document.getElementById("viewClashBtn");
   if(btn) btn.click();
 }
@@ -4427,7 +4779,7 @@ if(sharePlanBtn){
 }
 
 function browseAllArtists(){
-  document.querySelector('.tab[data-tab="artists"]').click();
+  jumpToTab("artists");
   if(artistsView !== "list" && artistsViewListBtn) artistsViewListBtn.click();
   artistSearch.value = "";
   clearGenreChips();
@@ -4443,7 +4795,7 @@ document.getElementById("browseAllArtistsBtn").onclick = browseAllArtists;
 const artistsBrowseAllBtn = document.getElementById("artistsBrowseAllBtn");
 if(artistsBrowseAllBtn) artistsBrowseAllBtn.onclick = browseAllArtists;
 
-renderPlanPersonTabs();
+renderPlanOwnerSelector();
 renderSchedule();
 updateNextEvent();
 
@@ -5522,7 +5874,7 @@ renderVenueTable();
 // into view. Every screen is always in the DOM (hidden via CSS, not
 // removed), so no delay is needed between the two.
 function jumpToId(id, tab){
-  if(tab) document.querySelector(`.tab[data-tab="${tab}"]`).click();
+  if(tab) jumpToTab(tab);
   // Settings folds up by default (see setupSettingsToggle()) — jumping
   // to it from a link elsewhere should open it, not scroll to what'd
   // look like an empty card.
@@ -5551,7 +5903,7 @@ function jumpToId(id, tab){
 // Jump straight to a district's own marker/card on the map, from a
 // mention of its name anywhere else in the app (guide text, etc.).
 function jumpToDistrictOnMap(name){
-  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  jumpToTab("mapscreen");
   requestAnimationFrame(()=>{
     const marker = [...document.querySelectorAll("#mapInner .marker")].find(m=> m.dataset.name === name);
     if(marker) marker.click();
@@ -5561,7 +5913,7 @@ function jumpToDistrictOnMap(name){
 }
 
 function jumpToGlossaryTerm(term){
-  document.querySelector('.tab[data-tab="discover"]').click();
+  jumpToTab("discover");
   requestAnimationFrame(()=>{
     const box = document.getElementById("jumpGlossary");
     if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
@@ -5570,7 +5922,7 @@ function jumpToGlossaryTerm(term){
 }
 
 function jumpToCharacter(name){
-  document.querySelector('.tab[data-tab="discover"]').click();
+  jumpToTab("discover");
   requestAnimationFrame(()=>{
     const box = document.getElementById("jumpCharacters");
     if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
@@ -5640,7 +5992,7 @@ function linkifyKeyTerms(container){
         a.className = "inline-link";
         a.href = "javascript:void(0)";
         a.textContent = word;
-        if(isGeneric) a.onclick = ()=> document.querySelector('.tab[data-tab="mapscreen"]').click();
+        if(isGeneric) a.onclick = ()=> jumpToTab("mapscreen");
         else if(entry.type === "district") a.onclick = ()=> jumpToDistrictOnMap(entry.label);
         else if(entry.type === "character") a.onclick = ()=> jumpToCharacter(entry.label);
         else a.onclick = ()=> jumpToGlossaryTerm(entry.label);
@@ -5666,7 +6018,7 @@ function linkifyKeyTerms(container){
 // stalls) is better served by scrolling straight to the searchable list of
 // named/rumoured entries than by guessing at a marker to highlight.
 function jumpToDirectoryType(type){
-  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  jumpToTab("mapscreen");
   venueStatusFilter = "all";
   venueSearchTerm = "";
   if(venueSearchInput) venueSearchInput.value = "";
@@ -5682,7 +6034,7 @@ function jumpToDirectoryType(type){
 }
 
 function jumpToStageDirectory(stageName){
-  document.querySelector('.tab[data-tab="mapscreen"]').click();
+  jumpToTab("mapscreen");
   venueStatusFilter = "all";
   venueTypeFilter = "all";
   document.querySelectorAll("#venueStatusFilters button").forEach(b=> b.classList.toggle("active", b.dataset.status === "all"));
@@ -6582,10 +6934,10 @@ function refreshAfterMerge(){
   if(typeof loadCustomLandmarksList === "function") loadCustomLandmarksList();
   if(typeof loadMap === "function") loadMap();
   if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
-  if(typeof renderPlanPersonTabs === "function") renderPlanPersonTabs();
+  if(typeof renderPlanOwnerSelector === "function") renderPlanOwnerSelector();
   if(typeof renderCompareFilterChips === "function") renderCompareFilterChips();
   if(typeof renderPlanCompare === "function" && planView === "compare") renderPlanCompare();
-  if(typeof renderPlanTimelineOwnerChips === "function" && planView === "timeline"){ renderPlanTimelineOwnerChips(); renderPlanTimeline(); }
+  if(typeof renderPlanTimeline === "function" && planView === "timeline") renderPlanTimeline();
   if(typeof renderBingoPersonTabs === "function"){ renderBingoPersonTabs(); renderBingo(); }
   if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
@@ -7173,17 +7525,13 @@ renderTodayDashboard();
 setInterval(renderTodayDashboard, 60000);
 
 document.querySelectorAll('#todayQuickActions [data-today-jump]').forEach(btn=>{
-  btn.onclick = ()=>{
-    const target = document.querySelector(`.tab[data-tab="${btn.getAttribute("data-today-jump")}"]`);
-    if(target) target.click();
-  };
+  btn.onclick = ()=> jumpToTab(btn.getAttribute("data-today-jump"));
 });
 const todayQuickClashesBtn = document.getElementById("todayQuickClashes");
 if(todayQuickClashesBtn) todayQuickClashesBtn.onclick = ()=>{ if(typeof jumpToClashes === "function") jumpToClashes(); };
 const todayQuickSearchBtn = document.getElementById("todayQuickSearch");
 if(todayQuickSearchBtn) todayQuickSearchBtn.onclick = ()=>{
-  const target = document.querySelector('.tab[data-tab="artists"]');
-  if(target) target.click();
+  jumpToTab("artists");
   setTimeout(()=>{
     const listBtn = document.getElementById("artistsViewListBtn");
     if(listBtn) listBtn.click();
@@ -9254,7 +9602,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // "meeting" is deliberately absent — it's shared group data (stored on
 // the room doc, not personal), and must survive things like device
 // handoff instead of being wiped along with this device's own notes.
-const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","halfOrderChoices","lastOpenedAt"];
+const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","halfOrderChoices","lastOpenedAt","seenArtists"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an

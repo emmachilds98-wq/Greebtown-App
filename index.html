@@ -95,6 +95,7 @@
 <body style="padding-bottom: 156px;">
 
 <header class="appbar">
+  <button id="navBackBtn" class="appbar-back-btn" style="display:none;" aria-label="Back to where you were" title="Back to where you were">←</button>
   <div class="titles">
     <h1>Boomtown 26</h1>
     <div>Chapter Five: Radical Redesign · 12&ndash;16&nbsp;Aug</div>
@@ -266,6 +267,7 @@ Meet at the clock tower if separated"></textarea>
       <button id="artistsViewListBtn">List / search</button>
       <button class="active" id="artistsViewTimelineBtn">Timeline by stage</button>
     </div>
+    <p class="empty-note star-seen-legend">★ tap to save it to your Plan · <strong>hold</strong> to upgrade to a must-see &nbsp;·&nbsp; ✓ tap once you've actually caught it live at the festival</p>
 
     <div id="artistsListView" style="display:none;">
     <div id="artistResults"><p class="empty-note">Start typing a name, stage or genre — or tap a day/genre chip above — to search 1530+ acts across all 5 days.</p></div>
@@ -302,11 +304,13 @@ Meet at the clock tower if separated"></textarea>
       <button id="viewClashBtn">Clashes</button>
       <button id="viewTimelineBtn">Timeline</button>
       <button id="viewCompareBtn">Compare</button>
+      <button id="viewSeenBtn">✓ Seen</button>
     </div>
     <div class="stagelist" id="mustSeeFilterToggle" style="margin:10px 0;">
       <button class="active" data-filter="all">All saved</button>
       <button data-filter="mustsee">★ Must-sees only</button>
     </div>
+    <p class="empty-note star-seen-legend" id="planStarSeenLegend">★ tap to save · <strong>hold</strong> to upgrade to a must-see &nbsp;·&nbsp; ✓ tap once you've actually caught it live at the festival</p>
     <div id="clashExtras" style="display:none;">
       <p class="empty-note" id="clashLegend" style="margin-bottom:8px;">🔵 Starred · 🟠 Must-see — both count toward clashes below.</p>
       <div class="stagelist" id="clashSubViewToggle" style="margin-bottom:10px;">
@@ -325,7 +329,6 @@ Meet at the clock tower if separated"></textarea>
 
     <div id="planTimelineView" style="display:none;">
       <div id="timelineBigPicture"></div>
-      <div class="stagelist" id="planTimelineOwnerChips" style="margin:10px 0; display:none;"></div>
       <div class="stagelist" id="planTimelineDayTabs" style="margin:10px 0;"></div>
       <p class="empty-note" id="planTimelineHint" style="margin-bottom:8px;">Scroll sideways for time, down for stage. Tap a block to see details.</p>
       <div class="timeline-outer" id="planTimelineOuter"><div id="planTimelineGrid"></div></div>
@@ -337,6 +340,12 @@ Meet at the clock tower if separated"></textarea>
       <div id="groupDecisionsBox" class="card" style="margin:14px 0 10px; display:none;"></div>
       <div class="stagelist" id="compareFilterChips" style="margin-bottom:10px;"></div>
       <div id="planCompareList"></div>
+    </div>
+
+    <div id="planSeenView" style="display:none;">
+      <p class="empty-note" style="margin-bottom:8px;">Your own log of acts you've actually caught live — separate from starring/must-see, which is about what you're planning to see. Tick the ✓ next to any act's star, anywhere in the app, once you've genuinely seen it. This is just yours; it doesn't sync to teammates.</p>
+      <p class="empty-note" id="planSeenCount" style="margin-bottom:10px;"></p>
+      <div id="planSeenList"></div>
     </div>
 
     <button class="ghost" id="copyPlanBtn" style="margin-top:12px;">Copy plan as text</button>

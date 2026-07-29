@@ -1,0 +1,44 @@
+name: Sync Boomtown lineup
+
+# Scheduled runs are paused: the lineup is now sourced from a direct capture
+# of the official Boomtown app's own API (see scripts/import-boomtown-official.mjs)
+# rather than Clashfinder, and re-enabling a recurring Clashfinder overwrite
+# here would clobber that more accurate data on the next scheduled tick.
+# Re-add a `schedule:` block once we've settled on an accurate recurring
+# source. Manual runs (workflow_dispatch) still work if needed.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: emmachilds98-wq-patch-2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Fetch latest lineup and regenerate js/app.js
+        env:
+          CLASHFINDER_USERNAME: ${{ secrets.CLASHFINDER_USERNAME }}
+          CLASHFINDER_PRIVATE_KEY: ${{ secrets.CLASHFINDER_PRIVATE_KEY }}
+          CLASHFINDER_SLUG: ${{ vars.CLASHFINDER_SLUG }}
+        run: node scripts/sync-boomtown-lineup.mjs
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name "boomtown-lineup-sync[bot]"
+          git config user.email "actions@users.noreply.github.com"
+          git add js/app.js service-worker.js
+          git commit -m "Auto-sync Boomtown lineup from Clashfinder"
+          git push origin HEAD:emmachilds98-wq-patch-2
