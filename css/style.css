@@ -174,11 +174,18 @@
   .map-label.camp{background:none; border:none; padding:0; font-size:8px; text-transform:uppercase; letter-spacing:.08em; color:rgba(238,246,241,.6); text-shadow:0 1px 3px rgba(0,0,0,.7); transform:translate(-50%, -50%);}
   .stagelist{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
   .stagelist span{font-size:12px; background:var(--bg-panel-2); border:1px solid var(--line); padding:4px 10px; border-radius:20px; color:var(--text-muted);}
+  .stagelist button{font-size:12px; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-muted); padding:6px 12px; border-radius:20px; cursor:pointer; white-space:nowrap;}
+  .stagelist button.active{color:var(--accent-teal); border-color:var(--accent-teal); background:rgba(75,227,172,.14); font-weight:700;}
   .search-row{display:flex; gap:8px; align-items:center;}
   .search-row input{flex:1;}
   .search-row button{flex-shrink:0;}
   #genreChips .chip.active{color:var(--accent-amber); border-color:var(--accent-amber); background:rgba(242,168,60,.14); font-weight:700;}
   .stagelist .chip.active{color:var(--accent-teal); border-color:var(--accent-teal); background:rgba(75,227,172,.14); font-weight:700;}
+  /* Saved (blue) vs must-see (amber) keep the same colour coding used by
+     the timeline blocks and star toggle elsewhere in the app, so the
+     filter buttons read as an extension of that same system. */
+  #mustSeeFilterToggle button[data-filter="all"].active{color:var(--accent-lightblue); border-color:var(--accent-lightblue); background:rgba(47,155,255,.14);}
+  #mustSeeFilterToggle button[data-filter="mustsee"].active{color:var(--accent-amber); border-color:var(--accent-amber); background:rgba(242,168,60,.14);}
   .discovery{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px;}
   .story-brief{border-color:rgba(75,227,172,.42); background:linear-gradient(145deg, rgba(75,227,172,.10), var(--bg-panel));}
   .story-step{padding:10px 0; border-top:1px solid var(--line);}
@@ -243,15 +250,17 @@
   .preview-embed{max-width:320px;}
   .artist-descriptor{color:var(--text-muted); font-size:12px; line-height:1.4; margin-top:4px;}
   .stage-link{color:var(--accent-teal); text-decoration:underline; text-decoration-style:dotted; text-underline-offset:2px; cursor:pointer;}
-  .timeline-row-head.stage-link{color:inherit; text-decoration:none;}
+  .timeline-row-head.stage-link{color:inherit; text-decoration:none; justify-content:space-between; gap:4px;}
+  .timeline-row-head.stage-link::after{content:"ⓘ"; font-size:10px; color:var(--accent-teal); opacity:.75; flex-shrink:0;}
   .timeline-row-head.stage-link:hover{color:var(--accent-teal);}
+  .timeline-row-head.stage-link:hover::after{opacity:1;}
 
   /* ===== Timeline (Artists-by-stage and Plan) — stages down the side,
      time along the top, matching Boomtown's own app/printed timetable.
      Stage list scrolls vertically (unbounded: 12 main stages + 50+ hidden
      venues); time scrolls horizontally (bounded to a single day). ===== */
   .timeline-outer{position:relative; overflow:auto; max-height:68vh; border:1px solid var(--line); border-radius:14px; background:var(--bg-panel); -webkit-overflow-scrolling:touch;}
-  .timeline-grid{position:relative; display:flex; flex-direction:column; min-width:100%;}
+  .timeline-grid{position:relative; display:flex; flex-direction:column; min-width:100%; width:max-content;}
   .timeline-hours-row{display:flex; position:sticky; top:0; z-index:3;}
   /* Sticky (frozen) to the left in every timeline view — Artists,
      Plan, and Clash all share this markup via buildTimelineHTML(). Kept
