@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v134";
-const APP_BUILD_TIME = "2026-07-29T12:06:00Z";
+const APP_CACHE_VERSION = "v135";
+const APP_BUILD_TIME = "2026-07-29T12:18:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -5550,10 +5550,14 @@ function renderHomeSyncStatus(){
       <p class="empty-note" id="homeStatusFeedbackNote" style="margin-top:6px;"></p>
     </div>
     <div id="homeFriendStatusList" style="margin-top:12px;"></div>
-    <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--text-muted);">📱 <strong>Using someone else's phone?</strong> Restores their last-synced saved artists, bingo card and character here — wipes this device first, so hit Sync now above before switching if there's anything on here worth keeping.</p>
+    <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--text-muted);">📱 <strong>Using someone else's phone?</strong> Restores their last-synced saved artists, bingo card and character here. Whatever's currently on this phone gets backed up to the cloud automatically first — if that backup fails, nothing is touched and the switch is cancelled.</p>
     <div class="field" style="margin-top:8px;"><label>Their name</label><input type="text" id="homeHandoffNameInput" placeholder="e.g. Dave"></div>
     <button class="action danger" id="homeHandoffSwitchBtn">Wipe this phone &amp; switch to them</button>
     <p class="empty-note" id="homeHandoffStatusNote" style="margin-top:6px;"></p>
+    <div id="homeHandoffSwitchBackBox" style="display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">
+      <p class="empty-note">This phone was <span id="homeHandoffSwitchBackLabel"></span> before the last switch — its data was backed up first, so you can bring it right back.</p>
+      <button class="action" id="homeHandoffSwitchBackBtn">Switch back</button>
+    </div>
   `;
   const sel = document.getElementById("homeContributorName");
   const otherInput = document.getElementById("homeContributorOtherInput");
@@ -5563,6 +5567,7 @@ function renderHomeSyncStatus(){
   const syncNowBtn = document.getElementById("homeSyncNowBtn");
   if(syncNowBtn) syncNowBtn.onclick = ()=> runManualSync(syncNowBtn, document.getElementById("homeSyncNowNote"));
   if(typeof wireDeviceHandoffControl === "function") wireDeviceHandoffControl("homeHandoffNameInput", "homeHandoffSwitchBtn", "homeHandoffStatusNote");
+  if(typeof wireSwitchBackControl === "function") wireSwitchBackControl("homeHandoffSwitchBackBox", "homeHandoffSwitchBackLabel", "homeHandoffSwitchBackBtn", "homeHandoffStatusNote");
   if(typeof wireStatusControl === "function") wireStatusControl("homeStatusLocationSelect", "homeStatusOtherField", "homeStatusCustomInput", "homeStatusCustomBtn", "homeStatusFeedbackNote");
   if(typeof renderFriendStatusList === "function") renderFriendStatusList("homeFriendStatusList");
 }
@@ -6544,6 +6549,17 @@ async function findRoomMembersByName(name){
 }
 
 function switchDeviceIdentity(targetId, payload){
+  // Remember who this phone is switching AWAY from (if it already had
+  // its own identity), so "Switch back" can offer a one-tap return —
+  // by the time this runs, the caller has already confirmed a
+  // successful cloud backup of that outgoing identity's data, so this
+  // is always safe to restore from later.
+  const outgoingName = currentContributorName();
+  const outgoingDeviceId = Store.get("deviceId");
+  if(outgoingName && outgoingDeviceId && outgoingDeviceId !== targetId){
+    Store.set("previousIdentity", { name: outgoingName, deviceId: outgoingDeviceId });
+  }
+
   // Wipe this device's own personal data — everything that's specific
   // to whoever was using it before, including their own saved-artist
   // schedule (not part of PERSONAL_ONLY_KEYS, since that list is about
@@ -6614,19 +6630,11 @@ function wireDeviceHandoffControl(nameInputId, btnId, noteId){
         `Switch this phone to ${theirName}?\n\n` +
         `This WIPES everything currently saved on this device — its own saved artists, notes, meeting point, packing list, bingo card and character — and replaces it with ${theirName}'s last-synced saved artists, bingo card and character (as of ${seenText}).\n\n` +
         `${theirName}'s own private notes, meeting point and packing list can't be recovered this way — those only ever lived on their original phone.\n\n` +
-        `Make sure whoever's using this phone right now has hit Sync first, or their own current data is what gets wiped without ever reaching the cloud.\n\n` +
+        `Whatever's currently on this phone gets backed up to the cloud automatically first — if that backup fails, nothing is touched and this is cancelled. You'll also be able to switch straight back afterwards.\n\n` +
         `This can't be undone.`
       );
       if(!ok){ setNote("Cancelled — nothing changed."); return; }
-      // Best-effort safety net for the warning above — don't just rely on
-      // whoever's using this phone remembering to hit Sync themselves.
-      // Whatever's currently on this device (if it already has a name of
-      // its own) gets one last push to the cloud before it's wiped, so
-      // it's recoverable via this same restore-by-name flow later even
-      // if they forgot.
-      if(currentContributorName() && typeof pushToCloud === "function"){
-        try{ await pushToCloud(); }catch(err){}
-      }
+      if(!(await backUpCurrentDeviceBeforeSwitch(setNote))) return;
       switchDeviceIdentity(chosen.id, chosen.data);
       setNote(`Done — this phone is now ${theirName}.`);
       const freshInput = document.getElementById(nameInputId);
@@ -6639,6 +6647,80 @@ function wireDeviceHandoffControl(nameInputId, btnId, noteId){
   };
 }
 wireDeviceHandoffControl("handoffNameInput", "handoffSwitchBtn", "handoffStatusNote");
+
+// Shared by the "someone else's phone" switch above and "Switch back"
+// below — never proceed with a wipe unless whatever's currently on this
+// device (if it has an identity of its own) definitely reached the
+// cloud first. Returns true only if it's safe to go ahead and wipe.
+async function backUpCurrentDeviceBeforeSwitch(setNote){
+  if(!currentContributorName()) return true; // nothing of this device's own to lose
+  if(typeof pushToCloud !== "function") return true;
+  try{
+    await pushToCloud();
+    return true;
+  }catch(err){
+    if(setNote) setNote(`Couldn't back up this phone's current data before switching (${err && err.message ? err.message : "unknown error"}) — check your signal and try again. Nothing has been changed.`);
+    return false;
+  }
+}
+
+// "Switch back" — a one-tap undo for the handoff above, using whatever
+// this phone remembered as its own identity right before the last
+// switch (see switchDeviceIdentity's previousIdentity write). Reuses
+// the exact same lookup-by-name + confirm + backup-then-switch flow,
+// just pre-filled instead of typed, and prefers the exact remembered
+// deviceId over "whoever's newest under that name" if it's still there.
+async function switchBackToPreviousIdentity(setNote){
+  const prev = Store.get("previousIdentity");
+  if(!prev || !prev.name){ if(setNote) setNote("Nothing to switch back to."); return; }
+  if(!currentRoomCode()){ if(setNote) setNote("No room code set — check Sync above first."); return; }
+  if(!getFirestoreDb()){ if(setNote) setNote("Cloud sync isn't available right now."); return; }
+  if(setNote) setNote("Looking up…");
+  try{
+    const { matches, error } = await findRoomMembersByName(prev.name);
+    if(error){ if(setNote) setNote("Couldn't look that up right now — check your signal and try again."); return; }
+    const exact = matches.find(m=> m.id === prev.deviceId);
+    const chosen = exact || matches.slice().sort((a,b)=> (b.data.updatedAt||0) - (a.data.updatedAt||0))[0];
+    if(!chosen){ if(setNote) setNote(`Couldn't find ${prev.name}'s synced data anymore.`); return; }
+    const seenText = chosen.data.updatedAt ? formatLastSeen(chosen.data.updatedAt) : "a while ago";
+    const ok = confirm(
+      `Switch this phone back to ${prev.name}?\n\n` +
+      `This wipes whatever's currently on it and restores ${prev.name}'s last-synced saved artists, bingo card and character (as of ${seenText}).\n\n` +
+      `Whatever's currently here gets backed up to the cloud automatically first — if that backup fails, nothing is touched and this is cancelled.`
+    );
+    if(!ok){ if(setNote) setNote("Cancelled — nothing changed."); return; }
+    if(!(await backUpCurrentDeviceBeforeSwitch(setNote))) return;
+    switchDeviceIdentity(chosen.id, chosen.data);
+    Store.remove("previousIdentity"); // that undo has now been used — nothing further back to offer until the next switch away
+    if(setNote) setNote(`Done — this phone is ${prev.name} again.`);
+  }catch(err){
+    if(setNote) setNote(`Couldn't switch back (${err && err.message ? err.message : "unknown error"}) — check your signal and try again.`);
+  }
+}
+
+// Shows/hides and wires the "Switch back" box — shared by both the
+// Discover card and Home's own copy of it, same pattern as
+// wireDeviceHandoffControl above.
+function wireSwitchBackControl(boxId, labelId, btnId, noteId){
+  const box = document.getElementById(boxId);
+  const label = document.getElementById(labelId);
+  const btn = document.getElementById(btnId);
+  if(!box || !label || !btn) return;
+  const prev = Store.get("previousIdentity");
+  if(!prev || !prev.name || prev.name === currentContributorName()){
+    box.style.display = "none";
+    return;
+  }
+  box.style.display = "";
+  label.textContent = prev.name;
+  btn.onclick = async ()=>{
+    const setNote = (text)=>{ const el = document.getElementById(noteId); if(el) el.textContent = text; };
+    btn.disabled = true;
+    try{ await switchBackToPreviousIdentity(setNote); }
+    finally{ btn.disabled = false; }
+  };
+}
+wireSwitchBackControl("handoffSwitchBackBox", "handoffSwitchBackLabel", "handoffSwitchBackBtn", "handoffStatusNote");
 
 // Shared by the Discover "Sync now" button and Home's own copy of it
 // (Home added later so status is visible without a trip to Discover) —
