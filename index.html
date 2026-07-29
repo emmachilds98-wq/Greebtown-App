@@ -889,6 +889,13 @@ Talk to an actor in character
       <p class="empty-note" id="syncStatusNote" style="margin-top:8px;"></p>
     </div>
 
+    <div class="card" id="jumpSyncDiagnostics" style="border:1px solid rgba(242,168,60,.4);">
+      <h3>🔧 Sync not working? Run a check</h3>
+      <p class="empty-note">If Sync now doesn't seem to do anything, tap this — it checks each step on its own (separately from the normal button) and shows exactly which one is failing.</p>
+      <button class="action" id="syncDiagnosticsBtn" style="margin-top:6px;">Run sync diagnostics</button>
+      <div id="syncDiagnosticsResults" style="margin-top:10px; font-family:monospace; font-size:12px; white-space:pre-wrap; line-height:1.6;"></div>
+    </div>
+
     <div class="card" id="jumpDeviceHandoff">
       <h3>📱 Using someone else's phone?</h3>
       <p>If your own phone's dead or lost and you're borrowing a teammate's for a bit, this picks up where you left off — pulls in your last-synced saved artists, bingo card and character, and this phone continues as you from here.</p>
