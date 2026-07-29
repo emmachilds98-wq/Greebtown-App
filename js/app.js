@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v144";
-const APP_BUILD_TIME = "2026-07-29T14:02:00Z";
+const APP_CACHE_VERSION = "v145";
+const APP_BUILD_TIME = "2026-07-29T14:12:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3099,6 +3099,37 @@ async function deleteStaleRoomMember(personId){
   await memberRef.delete();
 }
 
+// "Merge all my duplicate tabs" — finds every person-tab across
+// peopleSchedules/peopleBingo/peopleCharacters whose displayName matches
+// this device's own current name, and runs mergePersonIntoMine on each
+// one. Same safety guarantees as doing it tab-by-tab (additive only,
+// each duplicate's stale cloud doc deleted so it can't come back) — this
+// is purely a "don't make someone click through them one at a time"
+// convenience, not a new merge mechanism.
+function mergeAllMyDuplicates(){
+  const myName = currentContributorName();
+  if(!myName) return { count: 0, changed: 0 };
+  const target = myName.trim().toLowerCase();
+  const maps = [Store.get("peopleSchedules")||{}, Store.get("peopleBingo")||{}, Store.get("peopleCharacters")||{}];
+  const ids = new Set();
+  maps.forEach(map=> Object.keys(map).forEach(id=>{
+    if(((map[id] && map[id].displayName) || "").trim().toLowerCase() === target) ids.add(id);
+  }));
+  let changed = 0;
+  ids.forEach(id=>{ changed += mergePersonIntoMine(id) || 0; });
+  return { count: ids.size, changed };
+}
+const mergeAllDuplicatesBtn = document.getElementById("mergeAllDuplicatesBtn");
+if(mergeAllDuplicatesBtn) mergeAllDuplicatesBtn.onclick = ()=>{
+  const note = document.getElementById("mergeAllDuplicatesNote");
+  const myName = currentContributorName();
+  if(!myName){ if(note) note.textContent = "Pick your name above first."; return; }
+  const { count, changed } = mergeAllMyDuplicates();
+  if(note) note.textContent = count
+    ? `Merged ${count} duplicate tab${count===1?"":"s"} into this device (${changed} thing${changed===1?"":"s"} added). They won't come back.`
+    : "No duplicate tabs found under your name.";
+};
+
 function renderSchedule(){
   const fullSchedule = activeScheduleData();
   const readonly = planActiveOwner !== "mine";
@@ -5506,21 +5537,26 @@ function setContributorName(name){
   Store.set("contributorName", trimmed);
   backfillOwnUnnamedEntries(trimmed);
 
-  // Heads-up only — deliberately NOT an automatic merge (that was tried
-  // and reverted; too easy to misfire from a device that wasn't even
-  // the one involved, and it made a teammate's own visible tab
-  // disappear from under them). Only fires the moment a name is first
-  // picked on a device with nothing of its own yet, so a duplicate
-  // identity gets noticed and fixed via the manual "Merge into mine"
-  // link (see renderPlanPersonTabs) right away, not days later.
+  // Automatic, but narrowly scoped enough that it can't repeat the
+  // mistake from #123 (reverted in #124 after it once made a teammate's
+  // own tab disappear): this only ever runs when THIS device has zero
+  // data of its own AND is having a name typed into it for the very
+  // first time — i.e. a genuinely fresh/empty device. The match is an
+  // exact string match against the name just typed for THIS device, so
+  // it can never reach out and merge/delete some other unrelated
+  // person's tab (Dave's, say) — only ones sharing the exact name this
+  // device itself just claimed. mergeAllMyDuplicates() (used by the
+  // manual "Merge all my duplicate tabs" button too) is additive-only,
+  // and now that mergePersonIntoMine also deletes the absorbed
+  // duplicate's stale cloud doc (see deleteStaleRoomMember), this is
+  // finally actually permanent instead of the duplicate quietly
+  // reappearing on the next sync.
   if(!previousName && trimmed){
     const hasOwnData = (Store.get("schedule")||[]).length || (Store.get("bingoCard")||[]).length || Store.get("myCharacter");
-    if(!hasOwnData){
-      const target = trimmed.toLowerCase();
-      const alreadySynced = [Store.get("peopleSchedules")||{}, Store.get("peopleBingo")||{}, Store.get("peopleCharacters")||{}]
-        .some(map=> Object.values(map).some(p=> ((p && p.displayName) || "").trim().toLowerCase() === target));
-      if(alreadySynced){
-        setTimeout(()=> window.alert(`Heads up: ${trimmed} already has saved picks synced from another device.\n\nIf those are yours, go to Plan → the "${trimmed}" tab → "Merge their picks into mine" to bring them into this device. Safe either way — it only adds, never overwrites.`), 300);
+    if(!hasOwnData && typeof mergeAllMyDuplicates === "function"){
+      const { count, changed } = mergeAllMyDuplicates();
+      if(count){
+        setTimeout(()=> window.alert(`Found ${count} existing synced tab${count===1?"":"s"} under "${trimmed}" from another device and brought ${count===1?"it":"them"} into this one automatically (${changed} thing${changed===1?"":"s"} added) — nothing here was overwritten.`), 300);
       }
     }
   }
