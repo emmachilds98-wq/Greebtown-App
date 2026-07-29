@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v159";
-const APP_BUILD_TIME = "2026-07-29T21:26:03Z";
+const APP_CACHE_VERSION = "v160";
+const APP_BUILD_TIME = "2026-07-29T21:35:24Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -4180,8 +4180,10 @@ function setPlanView(view){
   const clashTimelineEl = document.getElementById("clashTimelineView");
   const clashExtras = document.getElementById("clashExtras");
   const mustSeeFilterToggle = document.getElementById("mustSeeFilterToggle");
+  const starSeenLegend = document.getElementById("planStarSeenLegend");
   if(clashExtras) clashExtras.style.display = view==="clash" ? "" : "none";
   if(mustSeeFilterToggle) mustSeeFilterToggle.style.display = (view==="compare"||view==="seen") ? "none" : "";
+  if(starSeenLegend) starSeenLegend.style.display = (view==="compare"||view==="seen") ? "none" : "";
   if(timelineEl) timelineEl.style.display = view==="timeline" ? "" : "none";
   if(compareEl) compareEl.style.display = view==="compare" ? "" : "none";
   if(seenEl) seenEl.style.display = view==="seen" ? "" : "none";
