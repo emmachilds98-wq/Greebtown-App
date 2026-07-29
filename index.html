@@ -947,6 +947,14 @@ Talk to an actor in character
       <div id="syncDiagnosticsResults" style="margin-top:10px; font-family:monospace; font-size:12px; white-space:pre-wrap; line-height:1.6;"></div>
     </div>
 
+    <div class="card" id="jumpBackupHistory" style="border:1px solid rgba(75,227,172,.45);">
+      <h3>🗄️ Backup history</h3>
+      <p class="empty-note">A snapshot of your own synced data is taken automatically in the cloud in the background (at most every 20 minutes, only when something's changed) — the last 12 are kept. If a sync ever wipes or corrupts something, restore an earlier one here. This only ever affects your own data on this device, never a teammate's.</p>
+      <button class="ghost" id="refreshBackupHistoryBtn" style="margin:4px 0;">Refresh list</button>
+      <p class="empty-note" id="backupHistoryNote" style="margin-top:6px;"></p>
+      <div id="backupHistoryList" style="margin-top:6px;"></div>
+    </div>
+
     <div class="card" id="jumpDeviceHandoff">
       <h3>📱 Using someone else's phone?</h3>
       <p>If your own phone's dead or lost and you're borrowing a teammate's for a bit, this picks up where you left off — pulls in your last-synced saved artists, bingo card and character, and this phone continues as you from here.</p>

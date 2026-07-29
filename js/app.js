@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v139";
-const APP_BUILD_TIME = "2026-07-29T12:52:00Z";
+const APP_CACHE_VERSION = "v140";
+const APP_BUILD_TIME = "2026-07-29T13:26:22Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -110,6 +110,22 @@ function getFirestoreDb(){
     return null;
   }
 }
+
+// Snapshot-history backup config — declared here (not down by the rest of
+// the backup code) for the same TDZ reason as FIREBASE_CONFIG/_firestoreDb
+// above: pushToCloud() is reachable from autoSyncNow("on open") at the
+// bottom of this file's load-time call chain, and pushToCloud() reads
+// these two consts on every call.
+//
+// BACKUP_MIN_INTERVAL_MS throttles how often a new snapshot doc gets
+// written, independent of how often auto-sync itself runs (every 3 min) —
+// keeps this well inside Firestore's free (Spark) daily read/write quota
+// for a small group. BACKUP_MAX_SNAPSHOTS caps how many old snapshots are
+// kept per device (oldest pruned first), so storage stays bounded while
+// still giving enough history to step back past more than one bad sync in
+// a row.
+const BACKUP_MIN_INTERVAL_MS = 20 * 60 * 1000;
+const BACKUP_MAX_SNAPSHOTS = 12;
 
 // ===============================
 // PULL TO REFRESH — installed/standalone PWAs don't get the browser's
@@ -6504,7 +6520,8 @@ async function pushToCloud(){
   // just because someone retypes their name or two people happen to pick
   // the same one. Renaming updates the `from` field inside your one
   // stable document instead of creating (or colliding with) another.
-  await db.collection("rooms").doc(room).collection("members").doc(deviceId).set(JSON.parse(JSON.stringify(payload)));
+  const cleanPayload = JSON.parse(JSON.stringify(payload));
+  await db.collection("rooms").doc(room).collection("members").doc(deviceId).set(cleanPayload);
   Store.set("lastPushedRoomId", room);
   // Legacy cleanup: this room may still have a doc from before this
   // device had a stable id, filed under the old name-as-doc-id scheme.
@@ -6512,6 +6529,86 @@ async function pushToCloud(){
   // doc is a no-op, so this just self-heals any leftover ghost from the
   // transition without needing a one-time migration flag.
   if(name) db.collection("rooms").doc(room).collection("members").doc(name).delete().catch(()=>{});
+  // Best-effort snapshot history — see snapshotBackupIfDue() below. Never
+  // allowed to affect the outcome of a sync: a backup hiccup (offline
+  // mid-write, quota, whatever) must not turn a successful sync into a
+  // failed one.
+  snapshotBackupIfDue(db, room, deviceId, cleanPayload).catch(err=>{
+    console.warn("Backup snapshot failed (non-fatal):", err);
+  });
+}
+
+// Writes a timestamped copy of this device's own synced data to
+// rooms/{room}/members/{deviceId}/backups/{takenAt}, so a bad sync (data
+// cleared by mistake, a corrupted merge, two bad syncs in a row) can be
+// stepped back from — see the "🗄️ Backup history" card in Discover.
+// Deliberately cheap on Firestore's free quota:
+//  - throttled to at most once per BACKUP_MIN_INTERVAL_MS, checked first
+//    against a local timestamp (no read needed) before ever touching
+//    Firestore;
+//  - skipped entirely if the data hasn't actually changed since the last
+//    snapshot (one extra read, no write);
+//  - pruned to the newest BACKUP_MAX_SNAPSHOTS afterwards (oldest first).
+async function snapshotBackupIfDue(db, room, deviceId, payload){
+  const now = Date.now();
+  const lastAttempt = Store.get("lastBackupAttemptAt") || 0;
+  if(now - lastAttempt < BACKUP_MIN_INTERVAL_MS) return;
+  Store.set("lastBackupAttemptAt", now);
+  const backupsRef = db.collection("rooms").doc(room).collection("members").doc(deviceId).collection("backups");
+  const latest = await backupsRef.orderBy("takenAt", "desc").limit(1).get();
+  const payloadJson = JSON.stringify(payload);
+  if(!latest.empty && JSON.stringify(latest.docs[0].data().payload) === payloadJson) return; // nothing's changed — skip the write
+  await backupsRef.doc(String(now)).set({ takenAt: now, payload });
+  const all = await backupsRef.orderBy("takenAt", "desc").get();
+  const extra = all.docs.slice(BACKUP_MAX_SNAPSHOTS);
+  await Promise.all(extra.map(d=> d.ref.delete()));
+}
+
+// Lists this device's own backup snapshots, newest first, for the
+// "🗄️ Backup history" card.
+async function listMyBackups(){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room) return [];
+  const deviceId = ensureDeviceId();
+  const snap = await db.collection("rooms").doc(room).collection("members").doc(deviceId).collection("backups").orderBy("takenAt", "desc").get();
+  return snap.docs.map(d=> ({ id: d.id, takenAt: d.data().takenAt, payload: d.data().payload }));
+}
+
+// Restores one of this device's own backup snapshots: overwrites (not
+// merges — this is a deliberate step back to an earlier point in time,
+// not another teammate's additive sync) this device's local saved data
+// with what was in that snapshot, then pushes it back up so the cloud
+// copy and every teammate's next pull reflect the restored version too.
+// Personal-only fields (schedule/bingo/character/status/notes etc. live
+// in the payload the same way a normal sync does) are restored; nothing
+// about restoring reaches into or removes another teammate's own data.
+async function restoreBackupSnapshot(backupId){
+  const backups = await listMyBackups();
+  const found = backups.find(b=> b.id === backupId);
+  if(!found) throw new Error("That backup could no longer be found.");
+  const p = found.payload;
+  Store.set("clues", p.clues || {});
+  Store.set("characterNotes", p.characterNotes || {});
+  Store.set("theories", p.theories || []);
+  Store.set("hiddenVenues", p.hiddenVenues || []);
+  Store.set("involvedDone", p.involvedDone || []);
+  Store.set("discoveries", p.discoveries || []);
+  Store.set("customSocials", p.customSocials || []);
+  Store.set("quotes", p.quotes || []);
+  Store.set("sightings", p.sightings || []);
+  Store.set("customLandmarks", p.customLandmarks || []);
+  Store.set("schedule", p.schedule || []);
+  if(p.bingo){
+    Store.set("bingoCard", p.bingo.card || []);
+    Store.set("bingoMarked", p.bingo.marked || []);
+    Store.set("bingoLocked", !!p.bingo.locked);
+  }
+  Store.set("myCharacter", p.character || null);
+  Store.set("myStatus", p.status || null);
+  if(typeof refreshAfterMerge === "function") refreshAfterMerge();
+  await pushToCloud();
+  return found;
 }
 
 // Sets it locally (including clearing — an empty place still stamps a
@@ -6940,6 +7037,66 @@ if(syncDiagnosticsBtn) syncDiagnosticsBtn.onclick = ()=>{
 // renderHomeSyncStatus() fully rebuilds on every call (new name picked,
 // after a merge, etc.) — wiring it there, not here, so it's re-attached
 // to the fresh button each time instead of going stale.
+
+// ===============================
+// BACKUP HISTORY — lists this device's own snapshot history (see
+// snapshotBackupIfDue() near pushToCloud, further up this file) and lets
+// you step back to one if a sync went wrong. Only ever touches this
+// device's own data/own cloud doc — never another teammate's.
+// ===============================
+async function renderBackupHistoryList(){
+  const box = document.getElementById("backupHistoryList");
+  const note = document.getElementById("backupHistoryNote");
+  if(!box) return;
+  if(!getFirestoreDb()){ box.innerHTML = ""; if(note) note.textContent = "Cloud sync isn't available right now."; return; }
+  if(note) note.textContent = "Loading…";
+  try{
+    const backups = await listMyBackups();
+    if(!backups.length){
+      box.innerHTML = "";
+      if(note) note.textContent = "No backups yet — one's taken automatically in the background as you sync (at most once every 20 minutes, and only when something's actually changed).";
+      return;
+    }
+    if(note) note.textContent = `${backups.length} snapshot${backups.length===1?"":"s"} kept, newest first.`;
+    box.innerHTML = backups.map(b=>{
+      const d = new Date(b.takenAt);
+      const now = new Date();
+      const time = d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+      const when = d.toDateString() === now.toDateString() ? `Today, ${time}` : `${d.toLocaleDateString([], { day:"numeric", month:"short" })}, ${time}`;
+      return `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--line);">
+        <span>${escapeHtml(when)}</span>
+        <button class="ghost restoreBackupBtn" data-id="${escapeHtml(b.id)}" style="flex-shrink:0;">Restore this version</button>
+      </div>`;
+    }).join("");
+    box.querySelectorAll(".restoreBackupBtn").forEach(btn=>{
+      btn.onclick = async ()=>{
+        const id = btn.getAttribute("data-id");
+        const d = new Date(Number(id));
+        if(!confirm(`Restore your data to how it was at ${d.toLocaleString()}?\n\nThis replaces your notes, theories, finds, bingo card etc. on this device with that snapshot, then pushes it back to the cloud. This can't be undone (though the version you're on now will itself become a backup once you sync again with changed data).`)) return;
+        btn.disabled = true;
+        if(note) note.textContent = "Restoring…";
+        try{
+          await restoreBackupSnapshot(id);
+          if(note) note.textContent = `Restored to ${d.toLocaleString()} and synced.`;
+          renderBackupHistoryList();
+        }catch(err){
+          console.error("Restore failed:", err);
+          if(note) note.textContent = `Couldn't restore (${err && err.message ? err.message : "unknown error"}).`;
+        }finally{
+          btn.disabled = false;
+        }
+      };
+    });
+  }catch(err){
+    console.error("Loading backup history failed:", err);
+    if(note) note.textContent = `Couldn't load backup history (${err && err.message ? err.message : "unknown error"}).`;
+  }
+}
+const refreshBackupHistoryBtn = document.getElementById("refreshBackupHistoryBtn");
+if(refreshBackupHistoryBtn) refreshBackupHistoryBtn.onclick = ()=>{
+  refreshBackupHistoryBtn.disabled = true;
+  renderBackupHistoryList().finally(()=>{ refreshBackupHistoryBtn.disabled = false; });
+};
 
 // Auto-sync — on open, every few minutes while the app stays open, and
 // whenever it comes back to the foreground (phone locked/backgrounded

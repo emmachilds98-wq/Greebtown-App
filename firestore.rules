@@ -49,6 +49,26 @@ service cloud.firestore {
       // Needed for the app's old-room/device cleanup. Deleting a document
       // is safe here because only this fixed room is matched.
       allow delete: if true;
+
+      // Snapshot-history backups of this one member's own doc, written by
+      // snapshotBackupIfDue() in js/app.js. Each doc is immutable once
+      // created (create-only, no update) and is pruned by the app itself
+      // once older than the newest BACKUP_MAX_SNAPSHOTS, so delete is
+      // allowed the same way it is on the parent member doc above.
+      match /backups/{backupId} {
+        allow read: if true;
+        allow create: if
+          request.resource.data.keys().hasOnly(['takenAt', 'payload'])
+          && request.resource.data.takenAt is int
+          && request.resource.data.payload.keys().hasOnly([
+            'v','deviceId','from','clues','characterNotes','theories',
+            'hiddenVenues','involvedDone','discoveries','customSocials',
+            'quotes','sightings','customLandmarks','schedule','bingo',
+            'character','status','meeting','decisions','updatedAt'
+          ]);
+        allow update: if false;
+        allow delete: if true;
+      }
     }
 
     // Nothing else in the Firestore database is exposed to the public app.

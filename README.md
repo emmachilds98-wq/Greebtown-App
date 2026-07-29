@@ -129,6 +129,14 @@ This limits reads/writes to the exact `rooms/{roomCode}/members/{name}` shape th
 
 This deployment's room code is pre-set in `js/app.js` (`const GROUP_ROOM_CODE`), auto-filled and saved for everyone so nobody has to type or agree one — the Sync card's room code field just shows it. If you fork this for a different group, change that one constant to a new unguessable code.
 
+## 8. Backup history
+
+Alongside the live sync doc, each device's own data is also snapshotted automatically in the background (at most once every 20 minutes, and only when something's actually changed) to `rooms/medway-massive/members/{deviceId}/backups/{takenAt}`, with the newest 12 kept per device and older ones pruned. This is a free, code-only, no-billing-plan-change backup — it rides on the same client writes as normal sync, no Cloud Functions or Cloud Scheduler involved.
+
+If a sync ever wipes or corrupts a device's own data (accidental clear, a bad merge, more than one bad sync in a row), open **Discover → 🗄️ Backup history**, tap **Refresh list**, and restore an earlier snapshot. Restoring only ever replaces that one device's own data and re-pushes it to the cloud — it never reaches into or removes anything already synced from a teammate's device.
+
+**One-time setup step:** the rules above (section 7) only cover the `members` documents themselves. This feature adds a `backups` subcollection under each member doc, and `firestore.rules` in this repo has been updated to allow it — but like the rest of `firestore.rules`, that file isn't automatically applied by pushing to GitHub. Re-publish it once in the Firebase console (**Build → Firestore Database → Rules**, paste the current contents of `firestore.rules`, **Publish**) or backups will silently fail with a `permission-denied` error (harmless — sync itself still works either way, you just won't get backup history until the rules are published).
+
 ---
 
 ### Notes for the technically curious
