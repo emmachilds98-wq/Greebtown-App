@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v102";
-const APP_BUILD_TIME = "2026-07-29T02:22:00Z";
+const APP_CACHE_VERSION = "v103";
+const APP_BUILD_TIME = "2026-07-29T02:27:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2683,9 +2683,8 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet){
   const bioBlock = artistBioBlockHtml(artist);
   const mustSeeSet = mustSeeNamesSet || new Set();
   const clashLines = (clashes || []).map(c=>{
-    const walk = estimateWalk(artist.stage, c.stage);
     const otherMustSee = mustSeeSet.has(c.name);
-    return `<div>⚠ Clashes with <strong>${escapeHtml(c.name)}</strong>${otherMustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""} at <span class="stage-link" data-stage="${escapeHtml(c.stage)}">${escapeHtml(c.stage)}</span>${walk ? ` — ${escapeHtml(walk.text)}${escapeHtml(walk.suffix)}` : ""}</div>`;
+    return `<div>⚠ Clashes with <strong>${escapeHtml(c.name)}</strong>${otherMustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""} at <span class="stage-link" data-stage="${escapeHtml(c.stage)}">${escapeHtml(c.stage)}</span></div>`;
   }).join("");
   return `
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
@@ -3200,24 +3199,12 @@ function renderClashTimeline(){
 // ===============================
 // DASHBOARD NEXT EVENT
 // ===============================
+// The "next saved event" ticket this used to update lived on Home
+// standalone, duplicating the now/next line the context banner already
+// shows — removed, but the function name stays (it's called from every
+// save/unsave/set-time handler) since its real remaining job is
+// refreshing that banner whenever the saved schedule changes.
 function updateNextEvent(){
-  const target = document.getElementById("next-event");
-  const schedule = Store.get("schedule");
-  const timed = schedule
-    .map(a=>({...a, m: toMinutes(a.day, a.start)}))
-    .filter(a=> a.m !== null)
-    .sort((a,b)=> a.m - b.m);
-
-  const next = timed[0] || schedule[0];
-
-  if(next){
-    target.innerHTML = `
-      <div class="big">${next.name}</div>
-      <div class="sub">${next.stage} · ${timeLabel(next)}</div>
-    `;
-  } else {
-    target.innerHTML = "Nothing saved yet";
-  }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
 }
 
@@ -3287,7 +3274,7 @@ function renderHomeContextBanner(){
   } else {
     const timed = Store.get("schedule").map(a=>({...a, m: toMinutes(a.day, a.start)})).filter(a=>a.m!==null).sort((a,b)=>a.m-b.m);
     const next = timed[0];
-    if(next) nowNextLine = `Next saved: <strong>${escapeHtml(next.name)}</strong> · ${escapeHtml(next.day)} ${escapeHtml(next.start)}`;
+    if(next) nowNextLine = `Next saved: <strong>${escapeHtml(next.name)}</strong> · ${escapeHtml(next.day)} ${escapeHtml(next.start)} · ${escapeHtml(next.stage)}`;
   }
 
   const clashMap = findClashes(Store.get("schedule"));
@@ -3615,49 +3602,6 @@ const venueDirectory = [
   { name:"Burger Shack", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." },
   { name:"Greek Gyros", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." }
 ];
-
-// CLASH WALK ESTIMATOR — there's no verified precise map of Boomtown's
-// real site distances, so rather than fabricate exact minute figures,
-// this groups each venue's researched `near` text into one of the
-// festival's named areas and gives a rough band (same area / neighbouring
-// areas / different areas). Genuinely approximate — always allow extra
-// time and double-check the official app/map on-site.
-const VENUE_AREA_GROUPS = {
-  "downtown": "Downtown", "downtown village": "Downtown", "area 404": "Downtown", "botanica": "Downtown",
-  "hilltop": "Hilltop", "hilltop edge": "Hilltop", "oldtown": "Hilltop", "thrutopia": "Hilltop",
-  "woodland edge": "Hilltop", "pepperpot market": "Hilltop",
-  "temple valley": "Temple Valley",
-  "copperwood": "Copperwood",
-  "letsbe avenue": "Letsbe Avenue",
-  "metropolis": "Metropolis",
-};
-// Downtown and Hilltop sit next to each other in the site's central
-// cluster; Temple Valley is explicitly its own third area separate from
-// both (per Boomtown's own copy); Copperwood, Letsbe Avenue and
-// Metropolis are each their own named district further round the site.
-const NEIGHBOURING_AREAS = new Set(["Downtown|Hilltop", "Hilltop|Downtown"]);
-
-let _venueAreaByStage = null;
-function venueArea(stageName){
-  if(!_venueAreaByStage){
-    _venueAreaByStage = new Map();
-    venueDirectory.forEach(v=>{
-      const near = (v.near || "").toLowerCase().replace(/\s*\(.*?\)\s*/g, "").trim();
-      const area = VENUE_AREA_GROUPS[near];
-      if(area) _venueAreaByStage.set(v.name, area);
-    });
-  }
-  return _venueAreaByStage.get(stageName) || null;
-}
-
-function estimateWalk(stageA, stageB){
-  if(stageA === stageB) return null;
-  const areaA = venueArea(stageA), areaB = venueArea(stageB);
-  if(!areaA || !areaB) return { text:"Distance unclear — check the map on-site", suffix:"" };
-  if(areaA === areaB) return { text:"~5 min", suffix:" walk (same area)" };
-  if(NEIGHBOURING_AREAS.has(`${areaA}|${areaB}`)) return { text:"~10–15 min", suffix:" walk (neighbouring areas)" };
-  return { text:"~15–25 min", suffix:" walk (different areas — allow good time)" };
-}
 
 const map = document.getElementById("map");
 const mapInfo = document.getElementById("mapInfo");
