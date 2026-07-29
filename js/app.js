@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v128";
-const APP_BUILD_TIME = "2026-07-29T12:25:00Z";
+const APP_CACHE_VERSION = "v131";
+const APP_BUILD_TIME = "2026-07-29T11:42:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -340,6 +340,25 @@ fixBottomClearance();
 const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
+// Saved artists, bingo card and character are otherwise only backed up
+// to the cloud by periodic auto-sync or an explicit "Sync now" tap —
+// meaning a device that never taps Sync (or one whose local storage
+// gets wiped, e.g. by a device-handoff mistake) can lose real festival
+// picks with no copy anywhere else. Debounced so a run of rapid changes
+// (starring several artists in a row) triggers one push, not one per
+// change; pushToCloud() itself is a hoisted function declaration and a
+// safe no-op with no name/room/signal set, so this is safe to call from
+// here even though pushToCloud is defined much later in this file.
+let _autoBackupTimer = null;
+const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter"]);
+function scheduleAutoBackup(){
+  if(_autoBackupTimer) clearTimeout(_autoBackupTimer);
+  _autoBackupTimer = setTimeout(()=>{
+    _autoBackupTimer = null;
+    if(typeof pushToCloud === "function") pushToCloud().catch(()=>{});
+  }, 4000);
+}
+
 const Store = {
   get(key){
     const raw = localStorage.getItem(key);
@@ -355,7 +374,10 @@ const Store = {
       return fallback && typeof fallback === "object" ? JSON.parse(JSON.stringify(fallback)) : fallback;
     }
   },
-  set(key, value){ localStorage.setItem(key, JSON.stringify(value)); },
+  set(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+    if(AUTO_BACKUP_KEYS.has(key)) scheduleAutoBackup();
+  },
   remove(key){ localStorage.removeItem(key); }
 };
 
@@ -5266,6 +5288,50 @@ function currentContributorName(){
   return (Store.get("contributorName") || "").trim();
 }
 
+// Anything logged via the various "add" buttons before a name was ever
+// picked gets stamped with from:"" at creation time (see addHiddenVenueBtn
+// etc.) — there's no live lookup, it's baked in per-entry. That leaves
+// otherwise-real entries permanently unattributed and invisible to any
+// "filter by person" view, even after the person picks their name later.
+// Since these are always this device's own past entries (nobody else
+// could have written to this device's local storage), it's always safe
+// to claim any blank one for whoever just picked their name.
+function backfillOwnUnnamedEntries(name){
+  if(!name) return;
+  ["theories", "quotes", "sightings", "customLandmarks", "hiddenVenues"].forEach(key=>{
+    const list = Store.get(key);
+    if(!Array.isArray(list) || !list.length) return;
+    let changed = false;
+    list.forEach(entry=>{
+      if(entry && !(entry.from || "").trim()){ entry.from = name; changed = true; }
+    });
+    if(changed) Store.set(key, list);
+  });
+  const involved = Store.get("involvedDone");
+  if(Array.isArray(involved) && involved.length){
+    let changed = false;
+    const updated = involved.map(entry=>{
+      if(typeof entry === "object" && entry && !(entry.from || "").trim()){ changed = true; return { ...entry, from: name }; }
+      return entry;
+    });
+    if(changed) Store.set("involvedDone", updated);
+  }
+}
+
+// Single entry point for "this device's own user just (re)picked their
+// name" — every local picker (Home's inline one, Discover's) should call
+// this rather than writing contributorName to Store directly, so the
+// unnamed-entry backfill above always runs alongside it. Not used by
+// switchDeviceIdentity()'s device-handoff flow, which sets a name as
+// part of adopting someone else's already-attributed synced data, not
+// picking a fresh one for this device's own past entries.
+function setContributorName(name){
+  const trimmed = (name || "").trim();
+  Store.set("contributorName", trimmed);
+  backfillOwnUnnamedEntries(trimmed);
+  if(typeof refreshAfterMerge === "function") refreshAfterMerge();
+}
+
 // Keeps the Discover Sync card's picker and Home's inline picker (built
 // below) showing the same value, whichever one someone actually used —
 // both write to the same Store key, this just keeps the two displays
@@ -5300,10 +5366,10 @@ if(contributorNameInput){
   contributorNameInput.onchange = ()=>{
     if(contributorNameInput.value === "__other__"){
       contributorOtherField.style.display = "";
-      Store.set("contributorName", contributorOtherInput.value.trim());
+      setContributorName(contributorOtherInput.value.trim());
     } else {
       contributorOtherField.style.display = "none";
-      Store.set("contributorName", contributorNameInput.value);
+      setContributorName(contributorNameInput.value);
     }
     syncContributorNameDisplays();
     // Picking a name from the dropdown is the one moment a first-time
@@ -5315,7 +5381,7 @@ if(contributorNameInput){
     if(contributorNameInput.value !== "__other__" && typeof autoSyncNow === "function") autoSyncNow("name picked");
   };
   contributorOtherInput.oninput = ()=>{
-    if(contributorNameInput.value === "__other__") Store.set("contributorName", contributorOtherInput.value.trim());
+    if(contributorNameInput.value === "__other__") setContributorName(contributorOtherInput.value.trim());
     syncContributorNameDisplays();
   };
   contributorOtherInput.onblur = ()=>{
@@ -5367,18 +5433,18 @@ function wireHomeSyncStatusPicker(){
       // clobber the saved name with an empty string until there's
       // actually something to save.
       otherField.style.display = "";
-      if(otherInput.value.trim()) Store.set("contributorName", otherInput.value.trim());
+      if(otherInput.value.trim()) setContributorName(otherInput.value.trim());
       if(contributorNameInput){ contributorNameInput.value = "__other__"; }
       if(contributorOtherField){ contributorOtherField.style.display = ""; }
       updateHomeSyncStatusText();
     } else {
       otherField.style.display = "none";
-      Store.set("contributorName", sel.value);
+      setContributorName(sel.value);
       syncContributorNameDisplays();
     }
   };
   otherInput.oninput = ()=>{
-    Store.set("contributorName", otherInput.value.trim());
+    setContributorName(otherInput.value.trim());
     if(contributorOtherInput){ contributorOtherInput.value = otherInput.value; }
     if(contributorNameInput){ contributorNameInput.value = "__other__"; }
     if(contributorOtherField){ contributorOtherField.style.display = ""; }
@@ -6439,6 +6505,15 @@ function wireDeviceHandoffControl(nameInputId, btnId, noteId){
         `This can't be undone.`
       );
       if(!ok){ setNote("Cancelled — nothing changed."); return; }
+      // Best-effort safety net for the warning above — don't just rely on
+      // whoever's using this phone remembering to hit Sync themselves.
+      // Whatever's currently on this device (if it already has a name of
+      // its own) gets one last push to the cloud before it's wiped, so
+      // it's recoverable via this same restore-by-name flow later even
+      // if they forgot.
+      if(currentContributorName() && typeof pushToCloud === "function"){
+        try{ await pushToCloud(); }catch(err){}
+      }
       switchDeviceIdentity(chosen.id, chosen.data);
       setNote(`Done — this phone is now ${theirName}.`);
       const freshInput = document.getElementById(nameInputId);
