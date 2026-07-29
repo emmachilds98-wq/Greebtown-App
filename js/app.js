@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v158";
-const APP_BUILD_TIME = "2026-07-29T21:06:32Z";
+const APP_CACHE_VERSION = "v159";
+const APP_BUILD_TIME = "2026-07-29T21:26:03Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -421,7 +421,7 @@ fixBottomClearance();
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [] };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -434,7 +434,7 @@ const EMBEDDED_DATA = window.__boomtownSavedData || {};
 // safe no-op with no name/room/signal set, so this is safe to call from
 // here even though pushToCloud is defined much later in this file.
 let _autoBackupTimer = null;
-const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter"]);
+const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter", "seenArtists"]);
 function scheduleAutoBackup(){
   if(_autoBackupTimer) clearTimeout(_autoBackupTimer);
   _autoBackupTimer = setTimeout(()=>{
@@ -485,7 +485,7 @@ let suppressNavClear = false;
 function updateNavBackButton(){
   const btn = document.getElementById("navBackBtn");
   if(!btn) return;
-  btn.style.display = navReturnStack.length ? "" : "none";
+  btn.style.display = navReturnStack.length ? "flex" : "none";
 }
 
 function jumpToTab(tabId){
@@ -2880,6 +2880,40 @@ function allArtists(){
   return artists.concat(Store.get("customArtists"));
 }
 
+// ===============================
+// OTHER SETS — some acts play more than once across the weekend (a B2B
+// slot one day, a solo set another, a "takeover" repeat). Wherever a
+// single slot's card/detail is shown, this surfaces the others by name
+// so you don't have to notice a repeat by scrolling the whole lineup.
+// ===============================
+function otherSetsFor(artist){
+  return allArtists()
+    .filter(a=> a.name === artist.name && !(a.day === artist.day && a.start === artist.start && a.stage === artist.stage))
+    .sort((a,b)=> (toMinutes(a.day, a.start) ?? 999999) - (toMinutes(b.day, b.start) ?? 999999));
+}
+
+function otherSetsHTML(artist){
+  const others = otherSetsFor(artist);
+  if(!others.length) return "";
+  const links = others.map((o,i)=> `<a class="inline-link other-set-link" href="javascript:void(0)" data-idx="${i}">${escapeHtml(o.day)} ${escapeHtml(o.start||"TBC")} · ${escapeHtml(o.stage)}</a>`).join(" &nbsp;·&nbsp; ");
+  return `<p class="empty-note other-sets-note">Also playing: ${links}</p>`;
+}
+
+// Wires the links otherSetsHTML() renders — call after inserting that
+// HTML into a container. Tapping one opens that other slot's own detail
+// card, same as tapping its timeline block would.
+function wireOtherSetLinks(container, artist, opts){
+  const others = otherSetsFor(artist);
+  container.querySelectorAll(".other-set-link").forEach(a=>{
+    const other = others[Number(a.dataset.idx)];
+    if(!other) return;
+    a.onclick = (e)=>{
+      e.stopPropagation();
+      showTimelineDetailModal(other, opts || {});
+    };
+  });
+}
+
 // A starred artist is saved as a snapshot ({...artist}) at the moment it's
 // starred, so if the festival later moves that artist to a new stage/day/
 // time, the saved snapshot goes stale and the plan shows the old slot
@@ -3013,6 +3047,7 @@ function showArtists(list){
   list.forEach(artist=>{
     const saved = Store.get("schedule").some(x=>x.name === artist.name);
     const mustSee = isMustSee(artist.name);
+    const seen = isSeen(artist.name);
     const div = document.createElement("div");
     div.className = "item" + (mustSee ? " mustsee" : "");
     const genre = genreOf(artist);
@@ -3033,13 +3068,19 @@ function showArtists(list){
           ${bioBlock}
           ${previewBlock}
           ${consensusBadge}
+          ${otherSetsHTML(artist)}
         </div>
-        <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
+        <div class="star-seen-col">
+          <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
+          <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
+        </div>
       </div>
     `;
     wireStarButton(div.querySelector(".star-btn"), artist);
+    wireSeenButton(div.querySelector(".seen-btn"), artist);
     div.querySelector(".stage-link").onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
     wirePreviewButtons(div);
+    wireOtherSetLinks(div, artist);
     artistResults.appendChild(div);
   });
 }
@@ -3232,6 +3273,7 @@ function showTimelineDetailModal(artist, opts){
   closeTimelineDetailModal();
   const saved = Store.get("schedule").some(x=>x.name === artist.name);
   const mustSee = isMustSee(artist.name);
+  const seen = isSeen(artist.name);
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
   const previewBlock = artistPreviewBlockHtml(artist);
@@ -3250,8 +3292,12 @@ function showTimelineDetailModal(artist, opts){
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
           ${previewBlock}
+          ${otherSetsHTML(artist)}
         </div>
-        ${opts.readonly ? "" : `<button class="star-toggle-lg${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
+        <div class="star-seen-col">
+          ${opts.readonly ? "" : `<button class="star-toggle-lg${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
+          <button class="seen-toggle-lg${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}" id="timelineDetailSeenBtn">✓</button>
+        </div>
       </div>
     </div>
   `;
@@ -3259,6 +3305,7 @@ function showTimelineDetailModal(artist, opts){
   document.body.appendChild(backdrop);
   backdrop.querySelector("#timelineDetailCloseBtn").onclick = closeTimelineDetailModal;
   wirePreviewButtons(backdrop);
+  wireOtherSetLinks(backdrop, artist, opts);
   const stageLink = backdrop.querySelector(".stage-link");
   if(stageLink) stageLink.onclick = (e)=>{ e.stopPropagation(); closeTimelineDetailModal(); jumpToStageDirectory(artist.stage); };
   const starBtn = backdrop.querySelector("#timelineDetailStarBtn");
@@ -3269,6 +3316,12 @@ function showTimelineDetailModal(artist, opts){
     if(opts.onSaveToggle) opts.onSaveToggle();
     showTimelineDetailModal(artist, opts);
   });
+  const seenBtn = backdrop.querySelector("#timelineDetailSeenBtn");
+  if(seenBtn) seenBtn.onclick = (e)=>{
+    e.stopPropagation();
+    setSeen(artist, !isSeen(artist.name));
+    showTimelineDetailModal(artist, opts);
+  };
 }
 
 let artistsTimelineDay = "Wed";
@@ -3435,6 +3488,47 @@ function refreshAfterStarChange(){
   if(typeof renderClashTimeline === "function" && planView === "clash" && clashSubView === "timeline") renderClashTimeline();
 }
 
+// ===============================
+// SEEN LIVE — a separate tick confirming you actually caught this act
+// in person at the festival, distinct from starring/must-see (which is
+// about planning ahead of time, not what actually happened). Purely
+// personal — never part of the group sync payload, same as
+// personalClashChoices — so it never shows on a teammate's read-only tab.
+// ===============================
+function isSeen(name){
+  return (Store.get("seenArtists") || []).some(x=>x.name === name);
+}
+
+function setSeen(artist, value){
+  let seen = Store.get("seenArtists") || [];
+  if(value){
+    if(!seen.some(x=>x.name === artist.name)){
+      seen = [...seen, { name: artist.name, stage: artist.stage, day: artist.day, start: artist.start, end: artist.end, seenAt: Date.now() }];
+    }
+  } else {
+    seen = seen.filter(x=>x.name !== artist.name);
+  }
+  Store.set("seenArtists", seen);
+  refreshAfterSeenChange();
+}
+
+function refreshAfterSeenChange(){
+  showArtists(currentFilteredArtists());
+  renderSchedule();
+  if(typeof renderArtistsTimeline === "function" && artistsView === "timeline") renderArtistsTimeline();
+  if(typeof renderPlanTimeline === "function" && planView === "timeline") renderPlanTimeline();
+  if(typeof renderClashTimeline === "function" && planView === "clash" && clashSubView === "timeline") renderClashTimeline();
+  if(typeof renderSeenList === "function" && planView === "seen") renderSeenList();
+}
+
+function wireSeenButton(btn, artist){
+  if(!btn) return;
+  btn.onclick = (e)=>{
+    e.stopPropagation();
+    setSeen(artist, !isSeen(artist.name));
+  };
+}
+
 function showStarHint(btn){
   document.querySelectorAll(".star-hint-bubble").forEach(b=> b.remove());
   const bubble = document.createElement("div");
@@ -3597,6 +3691,7 @@ function showHalfOrderModal(day, a, b, onChoose){
 function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
+  const seen = isSeen(artist.name);
   const genre = genreOf(artist);
   const bioBlock = artistBioBlockHtml(artist);
   const mustSeeSet = mustSeeNamesSet || new Set();
@@ -3626,19 +3721,21 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
       <div class="item-top">
         <div>
-          <strong>${artist.name}</strong>${mustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""}<br>
+          <strong>${artist.name}</strong>${mustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""}${seen ? ` <span class="mustsee-tag" style="background:rgba(75,227,172,.16); color:var(--accent-teal);">✓ seen live</span>` : ""}<br>
           <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
           <span class="time-label">${timeLabel(artist)}</span>${owners && owners.length > 1 ? ` <span class="tb-owners-inline">· ${escapeHtml(owners.join(", "))}</span>` : ""}
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
+          ${otherSetsHTML(artist)}
         </div>
-        ${readonly ? "" : `<div class="btnrow plan-btnrow">
+        <div class="btnrow plan-btnrow">
           <div class="btnrow-top">
-            <button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>
-            <button class="remove-btn">Remove</button>
+            ${readonly ? "" : `<button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>`}
+            <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
+            ${readonly ? "" : `<button class="remove-btn">Remove</button>`}
           </div>
-          <button class="set-time-btn">Set time</button>
-        </div>`}
+          ${readonly ? "" : `<button class="set-time-btn">Set time</button>`}
+        </div>
       </div>
       ${clashLines ? `<div class="clash-note">${clashLines}${choiceHTML}</div>` : ""}
       <div class="edit-slot"></div>
@@ -3968,6 +4065,18 @@ function renderSchedule(){
     scheduleList.innerHTML = html;
   }
 
+  // "Seen live" is wired regardless of readonly — it's your own personal
+  // attendance log, not an edit to whichever schedule you're currently
+  // looking at, so it stays clickable even on a combined/teammate view.
+  scheduleList.querySelectorAll(".item").forEach(itemEl=>{
+    const idx = Number(itemEl.dataset.idx);
+    const artist = fullSchedule[idx];
+    if(!artist) return;
+    const seenBtn = itemEl.querySelector(".seen-btn");
+    if(seenBtn) seenBtn.onclick = ()=> setSeen(artist, !isSeen(artist.name));
+    wireOtherSetLinks(itemEl, artist);
+  });
+
   if(!readonly){
     scheduleList.querySelectorAll(".item").forEach(itemEl=>{
       const idx = Number(itemEl.dataset.idx);
@@ -4056,24 +4165,26 @@ function updateClashSubViewVisibility(){
 function setPlanView(view){
   planView = view;
   if(typeof renderPlanOwnerSelector === "function") renderPlanOwnerSelector();
-  ["viewListBtn","viewClashBtn","viewTimelineBtn","viewCompareBtn"].forEach(id=>{
+  ["viewListBtn","viewClashBtn","viewTimelineBtn","viewCompareBtn","viewSeenBtn"].forEach(id=>{
     const btn = document.getElementById(id);
     if(btn) btn.classList.remove("active");
   });
-  const activeBtnId = view==="list" ? "viewListBtn" : view==="clash" ? "viewClashBtn" : view==="timeline" ? "viewTimelineBtn" : "viewCompareBtn";
+  const activeBtnId = view==="list" ? "viewListBtn" : view==="clash" ? "viewClashBtn" : view==="timeline" ? "viewTimelineBtn" : view==="seen" ? "viewSeenBtn" : "viewCompareBtn";
   const activeBtn = document.getElementById(activeBtnId);
   if(activeBtn) activeBtn.classList.add("active");
 
   const listEls = [scheduleList, document.getElementById("nowNextBanner")];
   const timelineEl = document.getElementById("planTimelineView");
   const compareEl = document.getElementById("planCompareView");
+  const seenEl = document.getElementById("planSeenView");
   const clashTimelineEl = document.getElementById("clashTimelineView");
   const clashExtras = document.getElementById("clashExtras");
   const mustSeeFilterToggle = document.getElementById("mustSeeFilterToggle");
   if(clashExtras) clashExtras.style.display = view==="clash" ? "" : "none";
-  if(mustSeeFilterToggle) mustSeeFilterToggle.style.display = view==="compare" ? "none" : "";
+  if(mustSeeFilterToggle) mustSeeFilterToggle.style.display = (view==="compare"||view==="seen") ? "none" : "";
   if(timelineEl) timelineEl.style.display = view==="timeline" ? "" : "none";
   if(compareEl) compareEl.style.display = view==="compare" ? "" : "none";
+  if(seenEl) seenEl.style.display = view==="seen" ? "" : "none";
   if(clashTimelineEl && view!=="clash") clashTimelineEl.style.display = "none";
   listEls.forEach(el=> el && (el.style.display = (view==="list"||(view==="clash"&&clashSubView==="list")) ? "" : "none"));
 
@@ -4093,6 +4204,8 @@ function setPlanView(view){
     if(typeof renderGroupDecisions === "function") renderGroupDecisions();
     renderCompareFilterChips();
     renderPlanCompare();
+  } else if(view === "seen"){
+    renderSeenList();
   } else if(view === "clash"){
     updateClashSubViewVisibility();
   } else {
@@ -4103,6 +4216,8 @@ function setPlanView(view){
 document.getElementById("viewListBtn").onclick = ()=> setPlanView("list");
 document.getElementById("viewClashBtn").onclick = ()=> setPlanView("clash");
 document.getElementById("viewTimelineBtn").onclick = ()=> setPlanView("timeline");
+const viewSeenBtn = document.getElementById("viewSeenBtn");
+if(viewSeenBtn) viewSeenBtn.onclick = ()=> setPlanView("seen");
 const viewCompareBtn = document.getElementById("viewCompareBtn");
 if(viewCompareBtn) viewCompareBtn.onclick = ()=> setPlanView("compare");
 
@@ -4284,6 +4399,49 @@ function renderPlanCompare(){
     });
   }
   box.innerHTML = html;
+  wireStageLinks(box);
+}
+
+// ===============================
+// SEEN LIVE VIEW — your own log of acts confirmed via the ✓ tick
+// wherever a star button appears (Lineup, Timeline detail, Plan list).
+// Purely personal (see isSeen/setSeen above) — always reflects this
+// device's own seenArtists, regardless of the shared owner selector.
+// ===============================
+function renderSeenList(){
+  const box = document.getElementById("planSeenList");
+  const countEl = document.getElementById("planSeenCount");
+  if(!box) return;
+  const seen = (Store.get("seenArtists") || []).slice().sort((a,b)=> (b.seenAt||0) - (a.seenAt||0));
+
+  if(countEl) countEl.textContent = seen.length
+    ? `You've confirmed seeing ${seen.length} act${seen.length===1?"":"s"} live so far.`
+    : "";
+
+  if(seen.length === 0){
+    box.innerHTML = `<div class="card"><p class="empty-note">Nothing ticked off yet — once you're actually watching an act at the festival, tap the ✓ next to its star (in Lineup, a Timeline block's detail, or here in Plan) to log that you caught it live.</p></div>`;
+    return;
+  }
+
+  box.innerHTML = seen.map(a=> `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <strong>${escapeHtml(a.name)}</strong> <span class="mustsee-tag" style="background:rgba(75,227,172,.16); color:var(--accent-teal);">✓ seen live</span><br>
+          <span class="stage-link" data-stage="${escapeHtml(a.stage)}">${escapeHtml(a.stage)}</span><br>
+          <span class="time-label">${timeLabel(a)}</span>
+        </div>
+        <button class="ghost seen-remove-btn" data-name="${escapeHtml(a.name)}">Undo</button>
+      </div>
+    </div>
+  `).join("");
+
+  box.querySelectorAll(".seen-remove-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      Store.set("seenArtists", (Store.get("seenArtists") || []).filter(x=> x.name !== btn.dataset.name));
+      renderSeenList();
+    };
+  });
   wireStageLinks(box);
 }
 
@@ -9442,7 +9600,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // "meeting" is deliberately absent — it's shared group data (stored on
 // the room doc, not personal), and must survive things like device
 // handoff instead of being wiped along with this device's own notes.
-const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","halfOrderChoices","lastOpenedAt"];
+const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","halfOrderChoices","lastOpenedAt","seenArtists"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
