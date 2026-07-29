@@ -23,13 +23,6 @@
   h1,h2,h3{font-family:Futura, "Century Gothic", Avenir, Arial, sans-serif; letter-spacing:.03em;}
   .eyebrow{text-transform:uppercase; letter-spacing:.16em; font-size:11px; color:var(--accent-teal); font-weight:700; margin-bottom:4px;}
   header.appbar{position:sticky; top:0; z-index:40; background:rgba(11,21,18,.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); padding:calc(12px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) 12px calc(18px + env(safe-area-inset-left)); display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:6px 10px;}
-  /* Native-app-style back button, integrated into the header itself
-     rather than floating as a separate banner below it — same dark/blur
-     surface as the header, so it reads as part of the bar, not a bolted-
-     on extra. Sits before the titles; hidden entirely (not just faded)
-     when there's nowhere to go back to, so it never reserves dead space. */
-  .appbar-back-btn{display:none; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.06); border:1px solid var(--line); color:var(--text-primary); font-size:16px; line-height:1; cursor:pointer; flex-shrink:0; margin-right:2px; transition:background .15s ease, border-color .15s ease, color .15s ease;}
-  .appbar-back-btn:hover, .appbar-back-btn:active{background:rgba(75,227,172,.14); border-color:var(--accent-teal); color:var(--accent-teal);}
   header.appbar .titles{min-width:0;}
   header.appbar .titles h1{text-transform:uppercase; font-size:18px; letter-spacing:.06em; line-height:1.1;}
   header.appbar .titles div{font-size:11px; color:var(--text-muted); margin-top:2px;}
