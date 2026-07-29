@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v113";
-const APP_BUILD_TIME = "2026-07-29T04:01:00Z";
+const APP_CACHE_VERSION = "v114";
+const APP_BUILD_TIME = "2026-07-29T04:10:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -333,6 +333,7 @@ tabs.forEach(tab=>{
     if(tab.dataset.tab === "home" && typeof updateStats === "function") updateStats();
     if(tab.dataset.tab === "plan" && typeof renderNowNext === "function") renderNowNext();
     if(tab.dataset.tab === "discover" && typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
+    if(tab.dataset.tab === "discover" && typeof renderDiscoverForYou === "function") renderDiscoverForYou();
   };
 });
 
@@ -342,6 +343,8 @@ tabs.forEach(tab=>{
 // ===============================
 document.querySelectorAll("#discoverNav button").forEach(btn=>{
   btn.onclick = ()=>{
+    const tab = btn.dataset.jumpTab;
+    if(tab && typeof jumpToId === "function"){ jumpToId(btn.dataset.jump, tab); return; }
     const target = document.getElementById(btn.dataset.jump);
     if(target) target.scrollIntoView({ behavior:"smooth", block:"start" });
   };
@@ -5272,16 +5275,6 @@ function renderHomeSyncStatus(){
     <div class="field" style="margin-top:8px;"><label>Where are you?</label>
       <select id="homeStatusLocationSelect">
         <option value="">Select a location…</option>
-        <option value="Area 404">Area 404</option>
-        <option value="Botanica">Botanica</option>
-        <option value="Thrutopia">Thrutopia</option>
-        <option value="Copperwood">Copperwood</option>
-        <option value="Oldtown">Oldtown</option>
-        <option value="Letsbe Avenue">Letsbe Avenue</option>
-        <option value="Metropolis">Metropolis</option>
-        <option value="Grand Central">Grand Central</option>
-        <option value="Camp">Camp</option>
-        <option value="__other__">Other…</option>
       </select>
     </div>
     <div class="field" id="homeStatusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
@@ -5441,6 +5434,19 @@ function currentRoomCode(){
   return normalizeRoomCode(Store.get("roomCode"));
 }
 
+// The shared meeting point and group decisions are room-wide, not
+// per-device, but the deployed Firestore rules only grant read/write on
+// documents INSIDE rooms/{roomId}/members/ — not the rooms/{roomId}
+// parent document itself. Writing there was silently failing for
+// everyone with "Missing or insufficient permissions." Rather than
+// change security rules blind (no way to inspect or redeploy them from
+// here), these live as two reserved documents in that same members
+// collection instead — real deviceIds are always crypto.randomUUID()
+// strings, so these fixed IDs can never collide with an actual member.
+const SHARED_MEETING_DOC_ID = "__shared_meeting__";
+const SHARED_DECISIONS_DOC_ID = "__shared_decisions__";
+const RESERVED_MEMBER_DOC_IDS = [SHARED_MEETING_DOC_ID, SHARED_DECISIONS_DOC_ID];
+
 // A stable per-device identity, generated once and never re-derived from
 // anything the user can retype (name, room code) — the whole point is
 // that renaming yourself or switching rooms can't accidentally collide
@@ -5531,6 +5537,7 @@ function refreshAfterMerge(){
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
   if(typeof renderAllFriendStatusUI === "function") renderAllFriendStatusUI();
   if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+  if(typeof renderDiscoverForYou === "function") renderDiscoverForYou();
 }
 
 // ===============================
@@ -5613,12 +5620,35 @@ function renderAllFriendStatusUI(){
 // of the same place — "Other…" still opens a text field for anywhere
 // not in the list (e.g. a meetup spot), same picker pattern as the
 // contributor-name "Other…" select elsewhere in this file.
+// The full location directory (districts, main + minor stages, hidden
+// venues/things-to-find), grouped — same source data the Map's
+// directory already uses, not a second hand-typed list to keep in sync.
+function statusLocationOptionsHTML(){
+  const optgroup = (label, names)=> names.length
+    ? `<optgroup label="${escapeHtml(label)}">${names.map(n=> `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")}</optgroup>`
+    : "";
+  const districts = locations.filter(l=> l.kind === "district").map(l=> l.name);
+  const mainStages = locations.filter(l=> l.kind === "stage").map(l=> l.name);
+  const otherStageNames = otherStages.map(s=> s.name);
+  const hiddenNames = thingsToFind.map(t=> t.name);
+  return `
+    <option value="">Select a location…</option>
+    <option value="Camp">Camp</option>
+    ${optgroup("Districts", districts)}
+    ${optgroup("Main stages", mainStages)}
+    ${optgroup("Other stages", otherStageNames)}
+    ${optgroup("Hidden venues / finds", hiddenNames)}
+    <option value="__other__">Other…</option>
+  `;
+}
+
 function wireStatusControl(selectId, otherFieldId, otherInputId, btnId){
   const sel = document.getElementById(selectId);
   const otherField = document.getElementById(otherFieldId);
   const otherInput = document.getElementById(otherInputId);
   const btn = document.getElementById(btnId);
   if(!sel || !btn) return;
+  if(sel.options.length <= 1) sel.innerHTML = statusLocationOptionsHTML();
   sel.onchange = ()=>{
     if(otherField) otherField.style.display = sel.value === "__other__" ? "" : "none";
   };
@@ -5731,10 +5761,14 @@ async function setGroupDecision(decisionKey, status, choiceName){
     // on a DIFFERENT clash. The only remaining race is two people
     // deciding the exact same clash at once, which is an accepted
     // last-write-wins — same as every other shared single-value field.
-    const doc = await db.collection("rooms").doc(room).get();
+    // Lives in the members collection under a reserved doc ID (see
+    // SHARED_DECISIONS_DOC_ID above) — the rooms/{roomId} document
+    // itself isn't writable under the deployed security rules.
+    const ref = db.collection("rooms").doc(room).collection("members").doc(SHARED_DECISIONS_DOC_ID);
+    const doc = await ref.get();
     const cloudDecisions = (doc.exists && doc.data() && doc.data().decisions) || {};
     cloudDecisions[decisionKey] = entry;
-    await db.collection("rooms").doc(room).set({ decisions: cloudDecisions }, { merge: true });
+    await ref.set({ decisions: cloudDecisions });
     return true;
   }catch(err){
     return false;
@@ -5986,6 +6020,46 @@ if(todayQuickSearchBtn) todayQuickSearchBtn.onclick = ()=>{
   if(todayTabBtn) todayTabBtn.classList.add("tab-live");
 })();
 
+// ===============================
+// DISCOVER "FOR YOU" — a short, personalised strip above Discover's
+// category nav, built entirely from data the app already computes
+// (buildCombinedArtistInterestMap for group favourites/recommendations,
+// hiddenVenues for latest finds) — no separate tracking of "what's new".
+// ===============================
+function renderDiscoverForYou(){
+  const box = document.getElementById("discoverForYou");
+  if(!box) return;
+  const people = (typeof comparePeopleList === "function") ? comparePeopleList() : [{ key:"mine" }];
+  const lines = [];
+
+  if(people.length >= 2 && typeof buildCombinedArtistInterestMap === "function"){
+    const byArtist = Object.values(buildCombinedArtistInterestMap());
+    const favourites = byArtist
+      .filter(a=> Object.keys(a.interest).length >= 2)
+      .sort((a,b)=> Object.keys(b.interest).length - Object.keys(a.interest).length)
+      .slice(0, 3);
+    if(favourites.length){
+      lines.push(`<div class="discover-for-you-line">🔥 <strong>Group favourites:</strong> ${favourites.map(a=> escapeHtml(a.name)).join(", ")}</div>`);
+    }
+    const myName = currentContributorName() || "You";
+    const recs = byArtist
+      .filter(a=> Object.values(a.interest).filter(Boolean).length >= 2 && !a.interest[myName])
+      .slice(0, 3);
+    if(recs.length){
+      lines.push(`<div class="discover-for-you-line">⭐ <strong>Worth a look:</strong> ${recs.map(a=> escapeHtml(a.name)).join(", ")} — several of you have starred ${recs.length===1?"this":"these"}, you haven't saved ${recs.length===1?"it":"them"} yet.</div>`);
+    }
+  }
+
+  const venues = Store.get("hiddenVenues") || [];
+  if(venues.length){
+    const latest = venues.slice(-2).reverse();
+    lines.push(`<div class="discover-for-you-line">🕵 <strong>New finds:</strong> ${latest.map(v=> `${escapeHtml(v.name || "Untitled find")}${v.from ? " (via " + escapeHtml(v.from) + ")" : ""}`).join(", ")}</div>`);
+  }
+
+  box.innerHTML = lines.length ? `<div class="discover-for-you-card"><h3>For you</h3>${lines.join("")}</div>` : "";
+}
+renderDiscoverForYou();
+
 async function pushToCloud(){
   const db = getFirestoreDb();
   const room = currentRoomCode();
@@ -6047,7 +6121,10 @@ async function pushSharedMeeting(place){
   const room = currentRoomCode();
   if(!db || !room) return false;
   try{
-    await db.collection("rooms").doc(room).set({ meeting }, { merge: true });
+    // Same reserved-doc-in-members-collection approach as group
+    // decisions above — the rooms/{roomId} document itself isn't
+    // writable under the deployed security rules.
+    await db.collection("rooms").doc(room).collection("members").doc(SHARED_MEETING_DOC_ID).set({ meeting });
     return true;
   }catch(err){
     return false;
@@ -6059,23 +6136,23 @@ async function pullFromCloud(){
   const room = currentRoomCode();
   if(!db || !room) return { stats: null, count: 0 };
   const deviceId = ensureDeviceId();
-  const [snap, roomDoc] = await Promise.all([
-    db.collection("rooms").doc(room).collection("members").get(),
-    db.collection("rooms").doc(room).get().catch(()=> null)
-  ]);
-  if(roomDoc){
-    const roomData = roomDoc.exists ? roomDoc.data() : null;
-    applyMeetingFromRoomData(roomData);
-    applyDecisionsFromRoomData(roomData);
-  }
+  // Meeting point and group decisions ride along in this same members
+  // collection fetch now (see SHARED_MEETING_DOC_ID/SHARED_DECISIONS_DOC_ID
+  // above) — no separate rooms/{roomId} document read needed.
+  const snap = await db.collection("rooms").doc(room).collection("members").get();
+  let meetingData = null, decisionsData = null;
   const totals = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   let count = 0;
   snap.forEach(doc=>{
+    if(doc.id === SHARED_MEETING_DOC_ID){ meetingData = doc.data(); return; }
+    if(doc.id === SHARED_DECISIONS_DOC_ID){ decisionsData = doc.data(); return; }
     if(doc.id === deviceId) return; // never merge your own payload back into yourself
     const { stats } = mergeSyncPayload(doc.data());
     Object.keys(totals).forEach(k=> totals[k] += stats[k] || 0);
     count++;
   });
+  applyMeetingFromRoomData(meetingData);
+  applyDecisionsFromRoomData(decisionsData);
   return { stats: totals, count };
 }
 
@@ -6100,6 +6177,7 @@ async function findRoomMembersByName(name){
   const snap = await db.collection("rooms").doc(room).collection("members").get();
   const matches = [];
   snap.forEach(doc=>{
+    if(RESERVED_MEMBER_DOC_IDS.includes(doc.id)) return;
     const data = doc.data();
     if((data.from || "").trim().toLowerCase() === target) matches.push({ id: doc.id, data });
   });
