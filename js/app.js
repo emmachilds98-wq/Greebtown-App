@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v148";
-const APP_BUILD_TIME = "2026-07-29T14:44:00Z";
+const APP_CACHE_VERSION = "v149";
+const APP_BUILD_TIME = "2026-07-29T14:52:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6369,6 +6369,16 @@ function renderTodayNow(){
   `;
 }
 
+// Countdown label ("in 45m" / "in 2h 15m") for a NEXT UP row — same
+// nowMin/startMin units as the rest of Today's timing (minutes since
+// FESTIVAL_START), so no separate date math needed here.
+function nextUpCountdownLabel(startMin, nowMin){
+  const diff = startMin - nowMin;
+  if(diff < 60) return `in ${diff}m`;
+  const h = Math.floor(diff / 60), m = diff % 60;
+  return `in ${h}h${m ? ` ${m}m` : ""}`;
+}
+
 function renderTodayNextUp(){
   const box = document.getElementById("todayNextUp");
   if(!box) return;
@@ -6384,11 +6394,20 @@ function renderTodayNextUp(){
     })
     .slice(0, 4);
   box.innerHTML = `
-    <h3 style="margin-bottom:6px;">NEXT UP</h3>
-    ${upcoming.length ? upcoming.map(a=>{
-      const owners = Object.entries(a.interest).map(([o,m])=> `${escapeHtml(o)}${m ? " ★" : ""}`).join(" · ");
-      return `<div class="decision-artist-line"><strong>${escapeHtml(a.name)}</strong> — ${escapeHtml(a.stage)} · ${timeLabel(a)}<br><span style="font-size:12px;">${owners}</span></div>`;
-    }).join("") : `<p class="empty-note">Nothing upcoming saved yet.</p>`}
+    <h3 style="margin-bottom:8px;">NEXT UP</h3>
+    ${upcoming.length ? `<div class="nextup-list">${upcoming.map(a=>{
+      const owners = Object.entries(a.interest).map(([o,m])=>
+        `<span class="nextup-owner${m ? " mustsee" : ""}">${escapeHtml(o)}${m ? " ★" : ""}</span>`
+      ).join("");
+      return `<div class="nextup-row">
+        <div class="nextup-time">${escapeHtml(a.start || "")}<span class="nextup-countdown">${nextUpCountdownLabel(a.startMin, nowMin)}</span></div>
+        <div class="nextup-info">
+          <div class="nextup-name">${escapeHtml(a.name)}</div>
+          <div class="nextup-stage">${escapeHtml(a.stage)}</div>
+          ${owners ? `<div class="nextup-owners">${owners}</div>` : ""}
+        </div>
+      </div>`;
+    }).join("")}</div>` : `<p class="empty-note">Nothing upcoming saved yet.</p>`}
   `;
 }
 
@@ -7769,35 +7788,35 @@ loadGetInvolved();
 // ===============================
 const packingCategories = [
   { title:"⛺ Shelter & camp setup", items:[
-    "Tent","Pegs & mallet","Groundsheet if needed","Sleeping bag","Extra blanket","Pillow",
-    "Sleeping mat/air bed & pump","Picnic blanket","Folding chairs","Folding table (Emma has 1)"
+    "Tent","Pegs & mallet","Groundsheet, if needed","Sleeping bag","Extra blanket","Pillow",
+    "Sleeping mat / air bed & pump","Picnic blanket","Folding chairs","Folding table (Emma)"
   ]},
   { title:"🍳 Kitchen & food", items:[
-    "Camping stove","Gas canisters","Lighters / rolling supplies","Kettle/pots/pans for stove",
+    "Camping stove","Gas canisters","Lighters / rolling supplies","Kettle, pots & pans for the stove",
     "Plates, bowls, cutlery","Toastie maker (Emma)","Cups","Water container / shower bag",
-    "Small bottled water pack (6–12 small bottles)","Electrolyte sachets","Fresh food / snacks / drinks",
-    "Alcohol","Ice packs/cool box contents (Emma)"
+    "Bottled water pack (6–12 bottles)","Electrolyte sachets","Fresh food, snacks & drinks",
+    "Alcohol","Ice packs / cool box contents (Emma)"
   ]},
   { title:"🔌 Power, light & entertainment", items:[
-    "Speakers","Power banks","Projector with movies (Emma)","Charging cables","Lanterns/camp lamps",
-    "String lights","Head torch","Batteries (AA and AAA)","Cards/games","Notebook and pen",
-    "Dry bag for tech","Disposable camera or digital?"
+    "Speakers","Power banks","Projector with movies (Emma)","Charging cables","Lanterns / camp lamps",
+    "String lights","Head torch","Batteries (AA and AAA)","Cards / games","Notebook and pen",
+    "Dry bag for tech","Camera — disposable, or just your phone"
   ]},
   { title:"👕 Clothing", items:[
-    "Festival clothes","Lots of socks and pants","Warm hoodie/fleece","Waterproof jacket",
-    "Trainers / shoes (wellies / comfy night shoes)","Hats","Sunglasses"
+    "Festival clothes","Lots of socks and pants","Warm hoodie / fleece","Waterproof jacket",
+    "Trainers / shoes (wellies, or comfy night shoes)","Hats","Sunglasses"
   ]},
   { title:"🧴 Hygiene & health", items:[
-    "Toothbrush & toothpaste","Deodorant","Shower gel","Shampoo","Fans (electric for tent, hand fan for stages)",
+    "Toothbrush & toothpaste","Deodorant","Shower gel","Shampoo","Fans (electric for the tent, hand fan for stages)",
     "Wash cloth","Towel","Moisturiser","Hairbrush","Dry shampoo","Sun cream","Lip balm","Wet wipes",
     "Tweezers / nail clips","Emery board","Hand sanitiser","Toilet rolls","Tissue packs",
-    "Painkillers / anti-acid","Antihistamines","Plasters/basic first aid","Earplugs!!!!",
-    "Eye mask if you'll struggle to sleep"
+    "Painkillers / anti-acid","Antihistamines","Plasters / basic first aid","Earplugs — seriously, don't forget",
+    "Eye mask, if light will bother you when sleeping"
   ]},
   { title:"🔧 Practical & repairs", items:[
-    "Bin bags / plastic bags","Duct tape","Paracord/string spares for tent / patch kit",
-    "A crate or box to use as a bedside table in the tent","A few carabiners for hanging lights, bags and jackets around tent",
-    "Few zip ties","Clothesline (string) — the tent line works fine too","Small bag for daytime"
+    "Bin bags / plastic bags","Duct tape","Paracord or spare string for tent repairs, plus a patch kit",
+    "A crate or box for a bedside table in the tent","A few carabiners, for hanging lights, bags and jackets around the tent",
+    "A few zip ties","Clothesline — the tent's own guy-line usually works fine too","Small bag for daytime trips into the city"
   ]},
   { title:"🎫 Day-of essentials", items:[
     "Fully charge phone, speaker, lanterns, lights, torch and power banks","Festival ticket","Wallet, ID",
