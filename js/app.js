@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v155";
-const APP_BUILD_TIME = "2026-07-29T18:27:58Z";
+const APP_CACHE_VERSION = "v156";
+const APP_BUILD_TIME = "2026-07-29T19:17:37Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -926,9 +926,9 @@ const artists = [
   {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Wed",start:"12:00",end:"00:00"},
   {name:"Thrutopia Fire Opening Ceremony",stage:"Community Fire",day:"Wed",start:"13:00",end:"13:45"},
   // --- Wed: Craft Tent ---
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
   {name:"Botanical Fascinators",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
   {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
-  {name:"Junk Jewelery",stage:"Craft Tent",day:"Wed",start:"10:00",end:"18:00"},
   // --- Wed: Crafty Rascals ---
   {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Wed",start:"10:00",end:"18:00"},
   // --- Wed: Energy Garden ---
@@ -994,8 +994,8 @@ const artists = [
   {name:"KNIGHT CLUB : THE MEDIEVAL RAVE",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"21:00",end:"22:00"},
   {name:"CIDER DRINKERS ASSEMBLY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Wed",start:"22:00",end:"23:00"},
   // --- Wed: XR ---
-  {name:"Art Blocking and Costume Pimping",stage:"XR",day:"Wed",start:"13:00",end:"18:30"},
   {name:"Last Chance Salon",stage:"XR",day:"Wed",start:"13:00",end:"19:00"},
+  {name:"Art Blocking and Costume Pimping",stage:"XR",day:"Wed",start:"13:00",end:"18:30"},
   {name:"Tea Ladies",stage:"XR",day:"Wed",start:"14:00",end:"18:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Wed",start:"14:00",end:"16:00"},
   {name:"Strictly Burning Ballroom",stage:"XR",day:"Wed",start:"18:00",end:"18:30"},
@@ -1072,9 +1072,9 @@ const artists = [
   // --- Thu: Community Fire ---
   {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Thu",start:"12:00",end:"00:00"},
   // --- Thu: Craft Tent ---
-  {name:"Junk Jewelery",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
   {name:"Botanical Fascinators",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
   {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Thu",start:"10:00",end:"18:00"},
   // --- Thu: Crafty Rascals ---
   {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Thu",start:"10:00",end:"18:00"},
   // --- Thu: Deviant Lounge ---
@@ -1095,8 +1095,8 @@ const artists = [
   {name:"Top of the Donks featuring Kitty & Tiggy (DONKLINE TAKEOVER)",stage:"End of the Line",day:"Thu",start:"14:50",end:"15:40"},
   {name:"RedSKare b2b Misterrcha (DONKLINE TAKEOVER)",stage:"End of the Line",day:"Thu",start:"15:40",end:"16:30"},
   {name:"Gash b2b Bubble07",stage:"End of the Line",day:"Thu",start:"16:30",end:"17:20"},
-  {name:"Tdawgwillywacka b2b Deadbeat UK",stage:"End of the Line",day:"Thu",start:"17:20",end:"18:10"},
   {name:"Gash b2b Bubble07 (DONKLINE TAKEOVER)",stage:"End of the Line",day:"Thu",start:"17:20",end:"18:10"},
+  {name:"Tdawgwillywacka b2b Deadbeat UK",stage:"End of the Line",day:"Thu",start:"17:20",end:"18:10"},
   {name:"Finessa and DJ Wii Sports ft. Reptile B",stage:"End of the Line",day:"Thu",start:"18:10",end:"19:00"},
   {name:"Foreigna",stage:"End of the Line",day:"Thu",start:"19:00",end:"20:00"},
   {name:"DJ Shnoo",stage:"End of the Line",day:"Thu",start:"20:00",end:"20:45"},
@@ -1336,8 +1336,6 @@ const artists = [
   {name:"Nizan",stage:"The Garden Centre",day:"Thu",start:"23:00",end:"00:00"},
   // --- Thu: The Immortal Children of the Eternal Seed ---
   {name:"Loose forms Takeover ft NiPS/Spilla/Doctor Onion/Clackman Duke & Hi MC",stage:"The Immortal Children of the Eternal Seed",day:"Thu",start:"20:00",end:"00:00"},
-  // --- Thu: The Lion's Den ---
-  {name:"DJ Acid Carbon",stage:"The Lion's Den",day:"Thu",start:"14:00",end:"15:00"},
   // --- Thu: The Magic Teapot ---
   {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Thu",start:"12:00",end:"00:00"},
   // --- Thu: The Pomegranate Parlour ---
@@ -1387,9 +1385,9 @@ const artists = [
   {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Thu",start:"12:00",end:"13:00"},
   {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Thu",start:"12:00",end:"13:00"},
   {name:"Drumming Workshop",stage:"XR",day:"Thu",start:"13:00",end:"14:00"},
-  {name:"Costume Pimping",stage:"XR",day:"Thu",start:"14:00",end:"18:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Thu",start:"14:00",end:"16:00"},
   {name:"Big Oil Drumming Parade",stage:"XR",day:"Thu",start:"14:00",end:"15:30"},
+  {name:"Costume Pimping",stage:"XR",day:"Thu",start:"14:00",end:"18:00"},
   {name:"Tea Ladies",stage:"XR",day:"Thu",start:"16:00",end:"18:00"},
   {name:"Strictly Burning Ballroom",stage:"XR",day:"Thu",start:"18:00",end:"18:30"},
   // ================= FRI =================
@@ -1405,8 +1403,8 @@ const artists = [
   {name:"Sterling Moss",stage:"Acid Leak",day:"Fri",start:"01:00",end:"02:30"},
   {name:"DJ Smay",stage:"Acid Leak",day:"Fri",start:"02:30",end:"04:00"},
   // --- Fri: Agents of Change HQ ---
-  {name:"Agents of Change HQ",stage:"Agents of Change HQ",day:"Fri",start:"10:00",end:"20:00"},
   {name:"Weaving Change",stage:"Agents of Change HQ",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Agents of Change HQ",stage:"Agents of Change HQ",day:"Fri",start:"10:00",end:"20:00"},
   {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Fri",start:"11:00",end:"14:00"},
   {name:"Giant Triplets",stage:"Agents of Change HQ",day:"Fri",start:"16:00",end:"19:00"},
   // --- Fri: Airetiko ---
@@ -1475,9 +1473,9 @@ const artists = [
   // --- Fri: Community Fire ---
   {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Fri",start:"12:00",end:"00:00"},
   // --- Fri: Craft Tent ---
-  {name:"Junk Jewelery",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
-  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
   {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Botanical Fascinators",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Fri",start:"10:00",end:"18:00"},
   // --- Fri: Crafty Rascals ---
   {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Fri",start:"10:00",end:"18:00"},
   // --- Fri: Deviant Lounge ---
@@ -1897,13 +1895,13 @@ const artists = [
   {name:"BOOMTOWN PRIDE :  FULL THROTTLE HARD HOUSE with TEDDY LAMBORGHINI",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"02:30",end:"03:15"},
   {name:"BOOMTOWN PRIDE :  LG:Bx:T : Hard Pride :",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Fri",start:"03:15",end:"04:00"},
   // --- Fri: XR ---
-  {name:"Art Blocking",stage:"XR",day:"Fri",start:"11:00",end:"18:30"},
   {name:"Last Chance Salon",stage:"XR",day:"Fri",start:"11:00",end:"19:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Fri",start:"11:00",end:"12:00"},
+  {name:"Art Blocking",stage:"XR",day:"Fri",start:"11:00",end:"18:30"},
   {name:"Drumming Workshop",stage:"XR",day:"Fri",start:"13:00",end:"14:00"},
   {name:"Drumming Workshop",stage:"XR",day:"Fri",start:"13:00",end:"14:00"},
-  {name:"Tea Ladies",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Fri",start:"14:00",end:"16:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
   {name:"Costume Pimping",stage:"XR",day:"Fri",start:"14:00",end:"18:00"},
   {name:"Strictly Burning Ballroom",stage:"XR",day:"Fri",start:"18:00",end:"18:30"},
   // ================= SAT =================
@@ -1986,8 +1984,8 @@ const artists = [
   {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Sat",start:"12:00",end:"00:00"},
   // --- Sat: Craft Tent ---
   {name:"Botanical Fascinators",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
-  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
   {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sat",start:"10:00",end:"18:00"},
   // --- Sat: Crafty Rascals ---
   {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Sat",start:"10:00",end:"18:00"},
   // --- Sat: Deviant Lounge ---
@@ -2169,7 +2167,6 @@ const artists = [
   {name:"KELLS",stage:"Nachtlicker",day:"Sat",start:"02:30",end:"04:00"},
   // --- Sat: Narcotics Anonymous ---
   {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"River Chi",stage:"Narcotics Anonymous",day:"Sat",start:"15:00",end:"16:30"},
   {name:"Narcotic Anonymous Meeting",stage:"Narcotics Anonymous",day:"Sat",start:"08:00",end:"09:00"},
   // --- Sat: Nexus ---
   {name:"Bongo's Bingo",stage:"Nexus",day:"Sat",start:"14:00",end:"15:00"},
@@ -2278,8 +2275,8 @@ const artists = [
   {name:"Sterling Moss",stage:"Spectrum 360",day:"Sat",start:"02:00",end:"03:00"},
   {name:"Fish56Octagon",stage:"Spectrum 360",day:"Sat",start:"03:00",end:"04:00"},
   // --- Sat: Spinney Hollow ---
-  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
   {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sat",start:"10:00",end:"18:00"},
   // --- Sat: Sub Lab ---
   {name:"Anything But Becky",stage:"Sub Lab",day:"Sat",start:"18:00",end:"19:00"},
   {name:"Bubski",stage:"Sub Lab",day:"Sat",start:"19:00",end:"20:00"},
@@ -2414,14 +2411,14 @@ const artists = [
   {name:"BIG DADDY WOOF WOOF presents: THE DOG POUND PARTY",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"02:00",end:"03:00"},
   {name:"PINK FLOYD - THE DARK SIDE OF THE MOON (Album Playback)",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sat",start:"03:00",end:"04:00"},
   // --- Sat: XR ---
-  {name:"Last Chance Salon",stage:"XR",day:"Sat",start:"11:00",end:"19:00"},
   {name:"Art Blocking",stage:"XR",day:"Sat",start:"11:00",end:"18:30"},
+  {name:"Last Chance Salon",stage:"XR",day:"Sat",start:"11:00",end:"19:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Sat",start:"11:00",end:"12:00"},
   {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Sat",start:"12:00",end:"13:00"},
   {name:"Drumming Workshop",stage:"XR",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Big Oil Drumming Parade",stage:"XR",day:"Sat",start:"14:00",end:"15:30"},
-  {name:"Tea Ladies",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
   {name:"Costume Pimping",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
+  {name:"Tea Ladies",stage:"XR",day:"Sat",start:"14:00",end:"18:00"},
+  {name:"Big Oil Drumming Parade",stage:"XR",day:"Sat",start:"14:00",end:"15:30"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Sat",start:"14:00",end:"16:00"},
   {name:"Strictly Burning Ballroom",stage:"XR",day:"Sat",start:"18:00",end:"18:30"},
   // ================= SUN =================
@@ -2494,9 +2491,9 @@ const artists = [
   // --- Sun: Community Fire ---
   {name:"Community Fire (Running 24hrs)",stage:"Community Fire",day:"Sun",start:"12:00",end:"00:00"},
   // --- Sun: Craft Tent ---
-  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
   {name:"Botanical Fascinators",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
   {name:"Hitty Hitty Bang Bang",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Junk Jewelery",stage:"Craft Tent",day:"Sun",start:"10:00",end:"18:00"},
   // --- Sun: Crafty Rascals ---
   {name:"Crafty Rascals",stage:"Crafty Rascals",day:"Sun",start:"10:00",end:"18:00"},
   // --- Sun: Deviant Lounge ---
@@ -2690,8 +2687,8 @@ const artists = [
   {name:"Spongebob Squarewave",stage:"Spectrum 360",day:"Sun",start:"22:00",end:"23:00"},
   {name:"Perceval",stage:"Spectrum 360",day:"Sun",start:"23:00",end:"00:00"},
   // --- Sun: Spinney Hollow ---
-  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
   {name:"Spinney Hollow - Banquet of Art table",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
+  {name:"Spinney Hollow - Traditional Green Wood Work Workshop",stage:"Spinney Hollow",day:"Sun",start:"10:00",end:"18:00"},
   // --- Sun: Sub Lab ---
   {name:"SUBLAB ALLSTARS",stage:"Sub Lab",day:"Sun",start:"16:00",end:"17:00"},
   {name:"SUBLAB ALLSTARS",stage:"Sub Lab",day:"Sun",start:"17:00",end:"18:00"},
@@ -2780,8 +2777,8 @@ const artists = [
   {name:"HANG THE DJS : SUNDAY SERVICE",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"20:00",end:"22:00"},
   {name:"PAPA DISCO's GOODNIGHT SET",stage:"Twisted Time Machine (Bad Apple Bar)",day:"Sun",start:"22:00",end:"00:00"},
   // --- Sun: XR ---
-  {name:"Art Blocking and Costume Pimping",stage:"XR",day:"Sun",start:"11:00",end:"16:00"},
   {name:"Last Chance Salon",stage:"XR",day:"Sun",start:"11:00",end:"16:00"},
+  {name:"Art Blocking and Costume Pimping",stage:"XR",day:"Sun",start:"11:00",end:"16:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Sun",start:"11:00",end:"12:00"},
   {name:"Dirty Scrubbers Meditation",stage:"XR",day:"Sun",start:"12:00",end:"13:00"},
   {name:"Cassandra the Oracle",stage:"XR",day:"Sun",start:"14:00",end:"16:00"},
