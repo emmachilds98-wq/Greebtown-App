@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v140";
-const APP_BUILD_TIME = "2026-07-29T13:26:22Z";
+const APP_CACHE_VERSION = "v141";
+const APP_BUILD_TIME = "2026-07-29T13:35:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7168,6 +7168,17 @@ document.addEventListener("visibilitychange", ()=>{
   // just-happened attempt (e.g. rapid tab switching) — only worth a
   // fresh pull if it's actually been a while.
   if(document.visibilityState === "visible" && Date.now() - _lastAutoSyncAttempt > 60000){
+    // A home-screen "added to icon" app can stay suspended in the
+    // background for a long time without ever fully closing — unlike a
+    // browser tab, which tends to get reloaded from scratch far more
+    // often. That means it can keep running an OLD in-memory copy of
+    // this exact script, silently missing whatever bugs got fixed since
+    // it was last actually loaded, even though the page looks "open"
+    // and its data sync still runs. Re-checking for a newer version
+    // every time it's foregrounded (not just on first load or an
+    // explicit pull-to-refresh) catches that — same one-tap-to-refresh
+    // pill behaviour as the initial load check.
+    if(typeof checkForStaleCopy === "function") checkForStaleCopy();
     autoSyncNow("welcome back");
   }
 });
