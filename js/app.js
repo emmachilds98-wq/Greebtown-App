@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v112";
-const APP_BUILD_TIME = "2026-07-29T03:54:00Z";
+const APP_CACHE_VERSION = "v113";
+const APP_BUILD_TIME = "2026-07-29T04:01:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -2229,6 +2229,11 @@ function showArtists(list){
     artistResults.innerHTML = `<p class="empty-note">No artists match that search.</p>`;
     return;
   }
+  // Built once per render, not per artist — same combined-interest map
+  // Group Decisions/Today already compute, reused here rather than a
+  // separate per-card lookup.
+  const interestMap = (typeof buildCombinedArtistInterestMap === "function") ? buildCombinedArtistInterestMap() : {};
+  const totalPeople = (typeof comparePeopleList === "function") ? comparePeopleList().length : 1;
   list.forEach(artist=>{
     const saved = Store.get("schedule").some(x=>x.name === artist.name);
     const mustSee = isMustSee(artist.name);
@@ -2237,6 +2242,10 @@ function showArtists(list){
     const genre = genreOf(artist);
     const bioBlock = artistBioBlockHtml(artist);
     const previewBlock = artistPreviewBlockHtml(artist);
+    const interestEntry = totalPeople > 1 ? interestMap[`${artist.day || "TBC"}|${artist.name}`] : null;
+    const consensusBadge = (interestEntry && Object.keys(interestEntry.interest).length)
+      ? `<div class="consensus-badge">🔥 ${Object.keys(interestEntry.interest).length}/${totalPeople} interested<br><span class="consensus-owners">${Object.entries(interestEntry.interest).map(([o,m])=> `${escapeHtml(o)}${m?" ★":" 👍"}`).join(" · ")}</span></div>`
+      : "";
     div.innerHTML = `
       <div class="item-top">
         <div>
@@ -2247,6 +2256,7 @@ function showArtists(list){
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
           ${previewBlock}
+          ${consensusBadge}
         </div>
         <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
       </div>
@@ -3008,10 +3018,12 @@ function setPlanView(view){
   listEls.forEach(el=> el && (el.style.display = (view==="list"||(view==="clash"&&clashSubView==="list")) ? "" : "none"));
 
   if(view === "timeline"){
+    if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("timelineBigPicture");
     renderPlanTimelineOwnerChips();
     renderPlanTimelineDayTabs();
     renderPlanTimeline();
   } else if(view === "compare"){
+    if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("compareBigPicture");
     renderCompareFilterChips();
     renderPlanCompare();
   } else if(view === "clash"){
@@ -3051,8 +3063,6 @@ document.querySelectorAll("#clashSubViewToggle button").forEach(btn=>{
 // existing data — it doesn't change what "mine" or the person tabs do
 // anywhere else.
 // ===============================
-let compareOnlyShared = false;
-
 function comparePeopleList(){
   const people = [{ key:"mine", label:"You", list: Store.get("schedule") }];
   const peopleSchedules = Store.get("peopleSchedules") || {};
@@ -3063,15 +3073,25 @@ function comparePeopleList(){
   return people;
 }
 
+const COMPARE_FILTER_MODES = [
+  { key: "all", label: "Everyone's picks" },
+  { key: "everyone", label: "Everyone wants to see" },
+  { key: "mustsee", label: "Most Must Sees" },
+  { key: "likes", label: "Most Just Likes" },
+  { key: "onlyme", label: "Only me" },
+  { key: "shared", label: "Shared with someone" }
+];
+let compareFilterMode = "all";
+
 function renderCompareFilterChips(){
   const box = document.getElementById("compareFilterChips");
   if(!box) return;
   const people = comparePeopleList();
   if(people.length < 2){ box.innerHTML = ""; return; }
-  box.innerHTML = `<span class="chip ${!compareOnlyShared?"active":""}" data-mode="all">Everyone's picks</span><span class="chip ${compareOnlyShared?"active":""}" data-mode="shared">Only shared (2+)</span>`;
+  box.innerHTML = COMPARE_FILTER_MODES.map(m=> `<span class="chip ${compareFilterMode===m.key?"active":""}" data-mode="${m.key}">${m.label}</span>`).join("");
   box.querySelectorAll(".chip").forEach(c=>{
     c.onclick = ()=>{
-      compareOnlyShared = c.dataset.mode === "shared";
+      compareFilterMode = c.dataset.mode;
       renderCompareFilterChips();
       renderPlanCompare();
     };
@@ -3088,59 +3108,119 @@ function renderPlanCompare(){
     return;
   }
 
+  const totalPeople = people.length;
   const rows = new Map();
   people.forEach(p=>{
     p.list.forEach(a=>{
-      if(!rows.has(a.name)) rows.set(a.name, { artist:a, people:new Set() });
-      rows.get(a.name).people.add(p.key);
+      if(!rows.has(a.name)) rows.set(a.name, { artist:a, interest:{} });
+      const row = rows.get(a.name);
+      if(!(p.key in row.interest) || a.mustSee) row.interest[p.key] = !!a.mustSee;
     });
   });
 
   let entries = [...rows.values()];
-  if(compareOnlyShared) entries = entries.filter(e=> e.people.size >= 2);
+  const rankedMode = compareFilterMode === "mustsee" || compareFilterMode === "likes";
+  if(compareFilterMode === "shared") entries = entries.filter(e=> Object.keys(e.interest).length >= 2);
+  else if(compareFilterMode === "everyone") entries = entries.filter(e=> Object.keys(e.interest).length === totalPeople);
+  else if(compareFilterMode === "onlyme") entries = entries.filter(e=> Object.keys(e.interest).length === 1 && "mine" in e.interest);
+  else if(compareFilterMode === "mustsee") entries = entries.filter(e=> Object.values(e.interest).some(v=> v));
+  else if(compareFilterMode === "likes") entries = entries.filter(e=> Object.values(e.interest).some(v=> !v));
 
   if(entries.length === 0){
-    box.innerHTML = `<div class="card"><p class="empty-note">${compareOnlyShared ? "Nothing picked by two or more of you yet." : "Nobody's saved anything yet."}</p></div>`;
+    const emptyText = {
+      shared: "Nothing picked by two or more of you yet.",
+      everyone: "Nothing everyone's picked yet.",
+      onlyme: "Nothing that's only on your own list.",
+      mustsee: "No must-sees to compare yet.",
+      likes: "No just-likes to compare yet."
+    }[compareFilterMode] || "Nobody's saved anything yet.";
+    box.innerHTML = `<div class="card"><p class="empty-note">${emptyText}</p></div>`;
     return;
   }
 
-  entries.sort((x,y)=>{
-    const dx = DAY_ORDER.indexOf(x.artist.day), dy = DAY_ORDER.indexOf(y.artist.day);
-    const rd = (dx===-1?99:dx) - (dy===-1?99:dy);
-    if(rd) return rd;
-    return (toMinutes(x.artist.day, x.artist.start) ?? 999999) - (toMinutes(y.artist.day, y.artist.start) ?? 999999);
-  });
-
-  const byDay = {};
-  entries.forEach(e=>{
-    const key = e.artist.day && e.artist.day !== "TBC" ? e.artist.day : "No time set";
-    (byDay[key] = byDay[key] || []).push(e);
-  });
-
-  const order = [...DAY_ORDER, "No time set"];
-  let html = "";
-  order.forEach(day=>{
-    if(!byDay[day]) return;
-    html += `<div class="daygroup">${day}</div>`;
-    byDay[day].forEach(e=>{
-      const peopleChips = people.map(p=>
-        `<span class="compare-person${e.people.has(p.key) ? " in" : ""}">${escapeHtml(p.label)}</span>`
-      ).join("");
-      html += `
-        <div class="item">
-          <div class="item-top">
-            <div>
-              <strong>${escapeHtml(e.artist.name)}</strong><br>
-              <span class="stage-link" data-stage="${escapeHtml(e.artist.stage)}">${escapeHtml(e.artist.stage)}</span><br>
-              <span class="time-label">${timeLabel(e.artist)}</span>
-            </div>
-          </div>
-          <div class="compare-people">${peopleChips}</div>
-        </div>`;
+  if(rankedMode){
+    entries.sort((x,y)=>{
+      const wantMustSee = compareFilterMode === "mustsee";
+      const countX = Object.values(x.interest).filter(v=> wantMustSee ? v : !v).length;
+      const countY = Object.values(y.interest).filter(v=> wantMustSee ? v : !v).length;
+      if(countY !== countX) return countY - countX;
+      return (toMinutes(x.artist.day, x.artist.start) ?? 999999) - (toMinutes(y.artist.day, y.artist.start) ?? 999999);
     });
-  });
+  } else {
+    entries.sort((x,y)=>{
+      const dx = DAY_ORDER.indexOf(x.artist.day), dy = DAY_ORDER.indexOf(y.artist.day);
+      const rd = (dx===-1?99:dx) - (dy===-1?99:dy);
+      if(rd) return rd;
+      return (toMinutes(x.artist.day, x.artist.start) ?? 999999) - (toMinutes(y.artist.day, y.artist.start) ?? 999999);
+    });
+  }
+
+  const rowHTML = (e)=>{
+    const count = Object.keys(e.interest).length;
+    const peopleChips = people.map(p=>{
+      const has = p.key in e.interest;
+      const mustSee = e.interest[p.key];
+      return `<span class="compare-person${has ? " in" : ""}">${escapeHtml(p.label)}${has ? (mustSee ? " ★" : " 👍") : ""}</span>`;
+    }).join("");
+    return `
+      <div class="item">
+        <div class="item-top">
+          <div>
+            <strong>${escapeHtml(e.artist.name)}</strong><br>
+            <span class="stage-link" data-stage="${escapeHtml(e.artist.stage)}">${escapeHtml(e.artist.stage)}</span><br>
+            <span class="time-label">${timeLabel(e.artist)}</span>
+          </div>
+        </div>
+        <p class="empty-note" style="margin:4px 0;">🔥 ${count}/${totalPeople} interested</p>
+        <div class="compare-people">${peopleChips}</div>
+      </div>`;
+  };
+
+  let html = "";
+  if(rankedMode){
+    html = entries.map(rowHTML).join("");
+  } else {
+    const byDay = {};
+    entries.forEach(e=>{
+      const key = e.artist.day && e.artist.day !== "TBC" ? e.artist.day : "No time set";
+      (byDay[key] = byDay[key] || []).push(e);
+    });
+    const order = [...DAY_ORDER, "No time set"];
+    order.forEach(day=>{
+      if(!byDay[day]) return;
+      html += `<div class="daygroup">${day}</div>`;
+      byDay[day].forEach(e=> html += rowHTML(e));
+    });
+  }
   box.innerHTML = html;
   wireStageLinks(box);
+}
+
+// "Big Picture" — a one-line roll-up shared by Compare and Timeline, so
+// either view opens with the headline numbers before scrolling through
+// individual artists. Built entirely from data those views (and Today)
+// already compute — no separate counting logic.
+function renderBigPictureSummary(containerId){
+  const box = document.getElementById(containerId);
+  if(!box) return;
+  const people = comparePeopleList();
+  if(people.length < 2){ box.innerHTML = ""; return; }
+  const byArtist = buildCombinedArtistInterestMap();
+  const all = Object.values(byArtist);
+  const sharedMustSees = all.filter(a=> Object.values(a.interest).filter(Boolean).length >= 2).length;
+  const clashCount = groupClashPairs().length;
+  const decisionsRemaining = outstandingGroupDecisionsCount();
+  const nowMin = nowMinutesSinceFestivalStart();
+  const nextShared = all
+    .filter(a=> a.startMin !== null && a.startMin > nowMin && Object.keys(a.interest).length >= 2)
+    .sort((a,b)=> a.startMin - b.startMin)[0];
+  const parts = [
+    `${sharedMustSees} shared Must See${sharedMustSees===1?"":"s"}`,
+    `${clashCount} clash${clashCount===1?"":"es"}`,
+    `${decisionsRemaining} decision${decisionsRemaining===1?"":"s"} remaining`,
+  ];
+  if(nextShared) parts.push(`Next shared artist ${timeLabel(nextShared)}`);
+  box.innerHTML = `<p class="empty-note big-picture-line">${parts.join(" · ")}</p>`;
 }
 
 // ===============================
@@ -5895,16 +5975,15 @@ if(todayQuickSearchBtn) todayQuickSearchBtn.onclick = ()=>{
   }, 100);
 };
 
-// During the festival, Today answers "what should we be doing right
-// now" faster than Home does, so it becomes the tab you land on —
-// without removing Home or anyone's ability to switch back manually
-// mid-session. Before/after the festival, Home stays the default.
-(function setupFestivalModeDefault(){
-  const todayTabBtn = document.getElementById("todayTabBtn");
+// Home always stays the screen people land on — that's where "pick your
+// name and sync" lives, and auto-jumping past it during the festival
+// meant some people never saw it. During the festival, Today just gets
+// a "live" badge on its tab (positioned right after Home) so it's an
+// obvious, one-tap-away next stop instead of the landing screen itself.
+(function setupFestivalModeBadge(){
   if(!isFestivalLive()) return;
+  const todayTabBtn = document.getElementById("todayTabBtn");
   if(todayTabBtn) todayTabBtn.classList.add("tab-live");
-  const todayTab = document.querySelector('.tab[data-tab="today"]');
-  if(todayTab) todayTab.click();
 })();
 
 async function pushToCloud(){
