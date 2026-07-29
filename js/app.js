@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v152";
-const APP_BUILD_TIME = "2026-07-29T16:39:00Z";
+const APP_CACHE_VERSION = "v153";
+const APP_BUILD_TIME = "2026-07-29T16:46:00Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7948,7 +7948,13 @@ if(takeBackupNowBtn) takeBackupNowBtn.onclick = async ()=>{
 // it leaves a one-line note behind so background syncing is still
 // visible, not invisible writes to your saved data. The manual button
 // stays for an on-demand sync without waiting for the next automatic one.
-const AUTO_SYNC_INTERVAL_MS = 3 * 60 * 1000;
+// Tightened from 3 minutes so a merge (duplicate cleanup, data
+// recovery, anything) reliably shows up on everyone else's device
+// within 1-2 minutes rather than up to 3. Each pull reads every
+// member's doc (see pullFromCloud), so this isn't free — 2 minutes
+// (not tighter) keeps daily reads comfortably inside Firestore's free
+// tier for a small group even with everyone's app open all festival.
+const AUTO_SYNC_INTERVAL_MS = 2 * 60 * 1000;
 let _lastAutoSyncAttempt = 0;
 function autoSyncNow(trigger){
   if(!currentRoomCode()) return Promise.resolve();
