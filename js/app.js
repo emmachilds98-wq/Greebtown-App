@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v121";
-const APP_BUILD_TIME = "2026-07-29T04:52:00Z";
+const APP_CACHE_VERSION = "v122";
+const APP_BUILD_TIME = "2026-07-29T09:55:00Z";
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
   if(!pill) return;
@@ -6433,7 +6433,12 @@ async function runManualSync(btn, note){
     }
   }catch(err){
     console.error("Cloud sync failed:", err);
-    if(note) note.textContent = `Couldn't sync (${err && err.message ? err.message : "unknown error"}) — check you've got signal and try again.`;
+    // Include the Firestore error code (e.g. "permission-denied",
+    // "resource-exhausted") alongside the message — the message alone
+    // has been too vague to tell a rules problem apart from a quota or
+    // network one from the outside.
+    const codeSuffix = err && err.code ? ` [${err.code}]` : "";
+    if(note) note.textContent = `Couldn't sync (${err && err.message ? err.message : "unknown error"}${codeSuffix}) — check you've got signal and try again.`;
   }finally{
     if(btn) btn.disabled = false;
   }
@@ -6482,7 +6487,20 @@ function autoSyncNow(trigger){
         ? `${prefix}picked up ${total} new item${total===1?"":"s"} from ${count} other device${count===1?"":"s"}.`
         : `${prefix}up to date with ${count} other device${count===1?"":"s"}, nothing new from them.`;
     }
-  }).catch(err=>{ console.error("Auto-sync failed:", err); /* stays quiet in the UI — no signal, or room not set up yet — but still logged for diagnosis */ });
+  }).catch(err=>{
+    console.error("Auto-sync failed:", err);
+    // Auto-sync failures used to stay completely silent in the UI —
+    // reasonable for "no signal right now," but it meant a persistent
+    // problem (like a rules mismatch) could run silently in the
+    // background forever with nothing to go on except "sync just
+    // doesn't seem to work." Surface it the same way a manual Sync now
+    // failure shows, so it's visible without needing to tap the button.
+    const note = document.getElementById("cloudSyncStatusNote");
+    if(note){
+      const codeSuffix = err && err.code ? ` [${err.code}]` : "";
+      note.textContent = `Auto-sync failed (${err && err.message ? err.message : "unknown error"}${codeSuffix}).`;
+    }
+  });
 }
 // "New since you last opened" needs to run once the initial sync has
 // had a chance to land — otherwise it'd compare against data that's
