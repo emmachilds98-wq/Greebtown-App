@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v176";
-const APP_BUILD_TIME = "2026-07-30T22:43:30Z";
+const APP_CACHE_VERSION = "v177";
+const APP_BUILD_TIME = "2026-07-30T22:49:05Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5683,6 +5683,18 @@ function loadMap(){
 // marker underneath it.
 // ===============================
 let mapScale = 1, mapTx = 0, mapTy = 0;
+// Deliberately high, not literally unbounded — a true infinite scale
+// isn't a meaningful (or safe) floating-point value, and clampMapPan's
+// arithmetic below needs mapScale to stay finite. The map background is
+// an SVG (buildMapBackground()) and every marker/label is plain CSS/DOM,
+// not a raster image, so nothing pixelates as it scales up — everything
+// under #mapInner grows together via the same transform, which is
+// exactly the "behaves like a vector image" effect that was asked for.
+// 64x on a 100x100-unit schematic is already far beyond any distance
+// two adjacent hidden venues could need to zoom apart on a phone
+// screen, so this reads as "infinite" in practice without actually
+// being an unbounded number.
+const MAP_MAX_SCALE = 64;
 
 function applyMapTransform(){
   const inner = document.getElementById("mapInner");
@@ -5696,7 +5708,7 @@ function clampMapPan(){
   mapTy = Math.min(0, Math.max(-maxY, mapTy));
 }
 function setMapScale(newScale){
-  mapScale = Math.min(4, Math.max(1, newScale));
+  mapScale = Math.min(MAP_MAX_SCALE, Math.max(1, newScale));
   clampMapPan();
   applyMapTransform();
 }
@@ -5709,7 +5721,7 @@ function setMapScale(newScale){
 // solving "screen position stays put across a scale change" for the
 // new translate gives tx2 = px - (s2/s) * (px - tx).
 function setMapScaleAt(newScale, px, py){
-  const clamped = Math.min(4, Math.max(1, newScale));
+  const clamped = Math.min(MAP_MAX_SCALE, Math.max(1, newScale));
   const k = clamped / mapScale;
   mapTx = px - k * (px - mapTx);
   mapTy = py - k * (py - mapTy);
@@ -5727,8 +5739,13 @@ function setupMapZoomPan(){
   mapScale = 1; mapTx = 0; mapTy = 0;
   applyMapTransform();
 
-  document.getElementById("zoomInBtn").onclick = ()=>{ const c = mapCenterPoint(); setMapScaleAt(mapScale + 0.5, c.x, c.y); };
-  document.getElementById("zoomOutBtn").onclick = ()=>{ const c = mapCenterPoint(); setMapScaleAt(mapScale - 0.5, c.x, c.y); };
+  // Multiplicative steps, not a flat +/-0.5 — with MAP_MAX_SCALE raised
+  // well past the old cap of 4, a fixed step would go from a huge 50%
+  // jump near scale 1 to an imperceptible ~1% jump near scale 64.
+  // Multiplying/dividing keeps every tap feeling like the same amount of
+  // zoom regardless of how far in you already are.
+  document.getElementById("zoomInBtn").onclick = ()=>{ const c = mapCenterPoint(); setMapScaleAt(mapScale * 1.4, c.x, c.y); };
+  document.getElementById("zoomOutBtn").onclick = ()=>{ const c = mapCenterPoint(); setMapScaleAt(mapScale / 1.4, c.x, c.y); };
   document.getElementById("zoomResetBtn").onclick = ()=> { mapScale = 1; mapTx = 0; mapTy = 0; applyMapTransform(); };
 
   const pointers = new Map();
@@ -5823,7 +5840,9 @@ function setupMapZoomPan(){
   map.onwheel = (e)=>{
     e.preventDefault();
     const rect = map.getBoundingClientRect();
-    setMapScaleAt(mapScale + (e.deltaY < 0 ? 0.3 : -0.3), e.clientX - rect.left, e.clientY - rect.top);
+    // Multiplicative, same reason as the +/- buttons above — a flat
+    // per-scroll-tick step would barely register once zoomed in deep.
+    setMapScaleAt(mapScale * (e.deltaY < 0 ? 1.12 : 1/1.12), e.clientX - rect.left, e.clientY - rect.top);
   };
 
   if(!mapDragGuardInstalled){
@@ -9079,19 +9098,26 @@ function chatThreadSummary(thread){
   return last ? { text: last.text, ts: last.ts, mine: last.fromDeviceId === ensureDeviceId() } : null;
 }
 
-// Small, muted "location last set" line — same data friendStatusEntries()
-// already tracks for the "Where's everyone?" status feature, just
-// surfaced here too. Shared by the thread-list row and the open DM
-// header (chatOpenThreadLabel side) so the two stay consistent. Returns
-// "" (renders nothing) rather than a placeholder when no status has
-// ever been set, so a brand-new contact's row/header doesn't carry a
-// permanent "no location" line.
+// Small, muted "location last set" + "Last online" line — same data
+// friendStatusEntries() already tracks for the "Where's everyone?"
+// status feature (including "Last online", the exact same term/value
+// used there — entry.lastSyncedTs — so this doesn't introduce a second,
+// differently-worded concept for the same thing). Shared by the
+// thread-list row and the open DM header (chatOpenThreadLabel side) so
+// the two stay consistent. Returns "" (renders nothing) rather than a
+// placeholder when neither piece has ever been set, so a brand-new
+// contact's row/header doesn't carry a permanent empty line.
 function chatLocationLineHtml(name){
   if(!name) return "";
   const entry = friendStatusEntries().find(e=> (e.displayName || "").trim().toLowerCase() === name.trim().toLowerCase());
-  if(!entry || !entry.place) return "";
-  const when = entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago";
-  return `📍 ${escapeHtml(entry.place)} · set ${escapeHtml(when)}`;
+  if(!entry) return "";
+  const parts = [];
+  if(entry.place){
+    const when = entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago";
+    parts.push(`📍 ${escapeHtml(entry.place)} · set ${escapeHtml(when)}`);
+  }
+  if(entry.lastSyncedTs) parts.push(`Last online ${escapeHtml(formatLastSeen(entry.lastSyncedTs))}`);
+  return parts.join(" · ");
 }
 
 function chatThreadRowHtml(t){
