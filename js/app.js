@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v170";
-const APP_BUILD_TIME = "2026-07-30T21:53:27Z";
+const APP_CACHE_VERSION = "v171";
+const APP_BUILD_TIME = "2026-07-30T22:00:50Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3659,9 +3659,9 @@ let clashTimelineDay = "Wed";
 
 // Plan list day chips — same multi-select, AND-combined chip basis as the
 // Lineup search's day chips (selectedDays/loadDayChips above), applied to
-// the flat List view and the Clashes > List sub-view. Deliberately NOT
-// added to the Plan Timeline or Clash Timeline views — those already have
-// their own single-day tab selector (planTimelineDay/clashTimelineDay),
+// the flat List view, the Clashes > List sub-view, and Compare. Deliberately
+// NOT added to the Plan Timeline or Clash Timeline views — those already
+// have their own single-day tab selector (planTimelineDay/clashTimelineDay),
 // a one-day-at-a-time UI that a multi-select chip set would just conflict
 // with. renderSchedule() runs at load time (bottom of this file), so this
 // Set has to be declared up here, above that call, per the TDZ rule.
@@ -3684,7 +3684,8 @@ function loadPlanDayChips(){
     s.onclick = ()=>{
       togglePlanDayChip(s.dataset.d);
       updatePlanDayChipHighlights();
-      renderSchedule();
+      if(planView === "compare") renderPlanCompare();
+      else renderSchedule();
     };
   });
 }
@@ -4424,7 +4425,7 @@ function setPlanView(view){
   const activeBtn = document.getElementById(activeBtnId);
   if(activeBtn) activeBtn.classList.add("active");
 
-  const listEls = [scheduleList, document.getElementById("nowNextBanner"), document.getElementById("planDayChips")];
+  const listEls = [scheduleList, document.getElementById("nowNextBanner")];
   const timelineEl = document.getElementById("planTimelineView");
   const compareEl = document.getElementById("planCompareView");
   const seenEl = document.getElementById("planSeenView");
@@ -4432,6 +4433,7 @@ function setPlanView(view){
   const clashExtras = document.getElementById("clashExtras");
   const mustSeeFilterToggle = document.getElementById("mustSeeFilterToggle");
   const starSeenLegend = document.getElementById("planStarSeenLegend");
+  const planDayChipsBox = document.getElementById("planDayChips");
   if(clashExtras) clashExtras.style.display = view==="clash" ? "" : "none";
   if(mustSeeFilterToggle) mustSeeFilterToggle.style.display = (view==="compare"||view==="seen") ? "none" : "";
   if(starSeenLegend) starSeenLegend.style.display = (view==="compare"||view==="seen") ? "none" : "";
@@ -4440,6 +4442,10 @@ function setPlanView(view){
   if(seenEl) seenEl.style.display = view==="seen" ? "" : "none";
   if(clashTimelineEl && view!=="clash") clashTimelineEl.style.display = "none";
   listEls.forEach(el=> el && (el.style.display = (view==="list"||(view==="clash"&&clashSubView==="list")) ? "" : "none"));
+  // Day chips apply to List, Clashes > List and Compare — everywhere
+  // except Seen and the two single-day-tab timeline views (own view here,
+  // clash's nested timeline sub-view handled by updateClashSubViewVisibility).
+  if(planDayChipsBox) planDayChipsBox.style.display = (view==="seen"||view==="timeline"||(view==="clash"&&clashSubView==="timeline")) ? "none" : "";
 
   if(view === "timeline"){
     if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("timelineBigPicture");
@@ -4583,15 +4589,17 @@ function renderPlanCompare(){
   else if(compareFilterMode === "onlyme") entries = entries.filter(e=> Object.keys(e.interest).length === 1 && "mine" in e.interest);
   else if(compareFilterMode === "mustsee") entries = entries.filter(e=> Object.values(e.interest).some(v=> v));
   else if(compareFilterMode === "likes") entries = entries.filter(e=> Object.values(e.interest).some(v=> !v));
+  if(selectedPlanDays.size) entries = entries.filter(e=> selectedPlanDays.has(e.artist.day));
 
   if(entries.length === 0){
-    const emptyText = {
-      shared: "Nothing picked by two or more of you yet.",
-      everyone: "Nothing everyone's picked yet.",
-      onlyme: "Nothing that's only on your own list.",
-      mustsee: "No must-sees to compare yet.",
-      likes: "No just-likes to compare yet."
-    }[compareFilterMode] || "Nobody's saved anything yet.";
+    const dayNote = selectedPlanDays.size ? ` for ${DAY_ORDER.filter(d=>selectedPlanDays.has(d)).join(", ")}` : "";
+    const emptyText = ({
+      shared: "Nothing picked by two or more of you",
+      everyone: "Nothing everyone's picked",
+      onlyme: "Nothing that's only on your own list",
+      mustsee: "No must-sees to compare",
+      likes: "No just-likes to compare"
+    }[compareFilterMode] || "Nobody's saved anything") + `${dayNote} yet.`;
     box.innerHTML = `<div class="card"><p class="empty-note">${emptyText}</p></div>`;
     return;
   }
