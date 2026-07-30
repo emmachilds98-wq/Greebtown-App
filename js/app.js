@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v167";
-const APP_BUILD_TIME = "2026-07-29T22:13:00Z";
+const APP_CACHE_VERSION = "v168";
+const APP_BUILD_TIME = "2026-07-30T21:23:40Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -721,6 +721,14 @@ tabs.forEach(tab=>{
     const restoreY = tabScrollPositions[tab.dataset.tab] || 0;
     window.scrollTo(0, restoreY);
     if(document.scrollingElement) document.scrollingElement.scrollTop = restoreY;
+    // Switching tabs changes which timeline box (if any) is actually
+    // on-screen, but doesn't itself fire a scroll event when restoreY
+    // matches the outgoing tab's position — repositionAllTimelineScrollThumbs()
+    // is otherwise only wired to scroll/resize, so without this call the
+    // scroll-progress bar keeps showing wherever it last was computed
+    // (a different tab's timeline, or nothing) until the user happens to
+    // scroll on the new tab.
+    if(typeof repositionAllTimelineScrollThumbs === "function") requestAnimationFrame(repositionAllTimelineScrollThumbs);
     if(tab.dataset.tab === "home" && typeof updateStats === "function") updateStats();
     if(tab.dataset.tab === "plan" && typeof renderNowNext === "function") renderNowNext();
     if(tab.dataset.tab === "discover" && typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
