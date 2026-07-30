@@ -161,6 +161,16 @@ Saved personal/group schedules aren't disturbed by a wholesale lineup refresh �
 
 **One-time setup step:** the rules above (section 7) only cover the `members` documents themselves. This feature adds a `backups` subcollection under each member doc, and `firestore.rules` in this repo has been updated to allow it — but like the rest of `firestore.rules`, that file isn't automatically applied by pushing to GitHub. Re-publish it once in the Firebase console (**Build → Firestore Database → Rules**, paste the current contents of `firestore.rules`, **Publish**) or backups will silently fail with a `permission-denied` error (harmless — sync itself still works either way, you just won't get backup history until the rules are published).
 
+## 10. Local group chat
+
+A chat button (💬, top right of every screen) opens group and 1:1 messaging for up to ~10 people — same no-login, room-code-secured Firestore project as the rest of sync, in two new collections (`chatMessages`, `chatPresence`) alongside the existing `members` one. Unlike the rest of sync (which pulls on open, every 2 minutes, and on pull-to-refresh), chat is live — messages, the online dot, and read receipts update in real time via Firestore listeners while the app is open, and queue locally to send the moment signal returns if you're offline.
+
+- **Online status** is a heartbeat, not a login session — the app pings "I'm here" roughly every 90 seconds while a device has it open, and a friend shows as online for about 2.5 minutes after their last one.
+- **Location** shown next to each contact is the same manual "Where's everyone?" status from Discover (see section above) — there's now also an opt-in GPS toggle there, off by default, that auto-updates it every few minutes off your device's own location instead of you picking a spot each time.
+- **Read receipts** are per-thread, stored on your own presence doc, not per-message — cheap on quota, and consistent with everything else in this app: there's no real privacy boundary here. A "DM" isn't shown to anyone else in the *app's UI*, but it isn't encrypted or access-controlled beyond the same room code that already guards everything else — anyone who has that code could read the raw Firestore data if they went looking. Fine among a small trusted group; worth knowing.
+
+**One-time setup step, same as sections 7–9 above:** `firestore.rules` in this repo now includes rules for `chatMessages` and `chatPresence`, but that file only takes effect once it's re-published in the Firebase console (**Build → Firestore Database → Rules**, paste the current contents of `firestore.rules`, **Publish**). Until that's done, the chat panel will open fine but sending/receiving will fail with a `permission-denied` error — harmless, and everything else in the app (schedule, map, existing sync) is unaffected either way.
+
 ---
 
 ### Notes for the technically curious

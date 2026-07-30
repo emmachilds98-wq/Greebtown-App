@@ -73,6 +73,49 @@ service cloud.firestore {
       }
     }
 
+    // Local chat — group + 1:1 messages, plus a lightweight per-device
+    // presence/read-receipt doc. Sibling collections to rooms/medway-
+    // massive/members above, not nested under a specific member, since a
+    // message belongs to a thread (the whole group, or a pair of people),
+    // not to any one person's own sync doc. Same trust model as
+    // everything else in this file: no Firebase Auth, so this only
+    // validates document SHAPE, not who's allowed to write it — the room
+    // code is the access secret. See js/app.js's LOCAL CHAT section.
+    match /rooms/medway-massive/chatMessages/{messageId} {
+      allow read: if true;
+
+      // Messages are immutable once sent (no edit) — only ever created
+      // by sendChatMessage() or removed by this app's own history-
+      // pruning (pruneChatThreadIfNeeded, keeps a bounded number per
+      // thread), the same "delete is safe here, only this fixed room is
+      // matched" reasoning as the members doc above.
+      allow create: if
+        request.resource.data.keys().hasOnly(['thread','text','fromName','fromDeviceId','ts'])
+        && request.resource.data.thread is string && request.resource.data.thread.size() < 200
+        && request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() < 2000
+        && request.resource.data.fromName is string && request.resource.data.fromName.size() < 60
+        && request.resource.data.fromDeviceId is string
+        && request.resource.data.ts is int;
+      allow update: if false;
+      allow delete: if true;
+    }
+
+    // One doc per device: displayName/lastActiveAt for the online dot
+    // (sendChatHeartbeat), reads for per-thread read receipts
+    // (markThreadRead). Doc id is that device's own deviceId, matching
+    // the members doc convention, though — same caveat as everywhere
+    // else here — nothing enforces a device only ever writes its own id,
+    // since there's no auth to check it against.
+    match /rooms/medway-massive/chatPresence/{deviceId} {
+      allow read: if true;
+      allow create, update: if
+        request.resource.data.keys().hasOnly(['displayName','lastActiveAt','reads'])
+        && (!('displayName' in request.resource.data) || (request.resource.data.displayName is string && request.resource.data.displayName.size() < 60))
+        && (!('lastActiveAt' in request.resource.data) || request.resource.data.lastActiveAt is int)
+        && (!('reads' in request.resource.data) || request.resource.data.reads is map);
+      allow delete: if true;
+    }
+
     // Nothing else in the Firestore database is exposed to the public app.
     match /{document=**} {
       allow read, write: if false;
