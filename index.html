@@ -312,6 +312,7 @@ Meet at the clock tower if separated"></textarea>
       <button class="active" data-filter="all">All saved</button>
       <button data-filter="mustsee">★ Must-sees only</button>
     </div>
+    <div class="stagelist" id="planDayChips" style="margin:10px 0;"></div>
     <p class="empty-note star-seen-legend" id="planStarSeenLegend">★ tap to save · <strong>hold</strong> to upgrade to a must-see &nbsp;·&nbsp; ✓ tap once you've actually caught it live at the festival</p>
     <div id="clashExtras" style="display:none;">
       <p class="empty-note" id="clashLegend" style="margin-bottom:8px;">🔵 Starred · 🟠 Must-see — both count toward clashes below.</p>
@@ -592,7 +593,7 @@ Meet at the clock tower if separated"></textarea>
       </div>
     </div>
 
-    <div class="daygroup">📖 The story &amp; the day</div>
+    <div class="daygroup">🔥 What's happening</div>
 
     <div class="card story-brief" id="jumpStory">
   <span class="tag">Chapter Five: the clean version</span>
@@ -639,6 +640,30 @@ Meet at the clock tower if separated"></textarea>
 </div>
 <div class="stagelist" id="sightingsPersonChips" style="display:none; margin:6px 0;"></div>
 <div id="sightingsList"></div>
+
+    <div class="card" id="jumpNotes" style="border:1px solid rgba(75,227,172,.45); background:linear-gradient(145deg, rgba(75,227,172,.08), var(--bg-panel));">
+      <span class="tag">👥 One view, whose is whose</span>
+      <h3>🗂 All notes — everyone's, in one place</h3>
+      <p>Everyone's district notes, theories, hidden-venue finds, get-involved progress, memory journal, sightings, found socials and landmarks — synced automatically, all in one place. Defaults to <strong>By person</strong>; tab through names above to see one person's own page. Bingo cards and characters stay personal and never appear here.</p>
+      <button class="ghost" id="consolidatedToggleBtn" style="margin:8px 0;">Show all notes ▾</button>
+      <div id="consolidatedNotesBody" style="display:none;">
+        <div class="venue-filters" id="consolidatedViewToggle">
+          <button data-view="category">By category</button>
+          <button class="active" data-view="person">By person</button>
+        </div>
+        <div class="tabstrip" id="consolidatedPeopleTabs" style="display:none; margin-bottom:8px;"></div>
+        <button class="ghost" id="copyConsolidatedBtn" style="margin:4px 0 10px;">Copy full report</button>
+        <div id="consolidatedNotes"></div>
+      </div>
+    </div>
+
+    <div class="card" id="jumpActivity">
+      <h3>🕓 Recent group activity</h3>
+      <p class="empty-note" style="margin-bottom:8px;">A quick feed of what's changed — statuses, decisions, the meeting point, hidden-venue finds and theories. Not a chat, just a log.</p>
+      <div id="recentActivityList"></div>
+    </div>
+
+    <div class="daygroup">🏙 Explore Boomtown</div>
 
 <div class="card" id="jumpDistrictsIntro">
   <span class="tag">🏙 The districts</span>
@@ -696,105 +721,6 @@ Meet at the clock tower if separated"></textarea>
       <button class="action">Mark visited</button>
       <textarea class="clue-input" placeholder="Leads your group has picked up here..."></textarea>
     </div></div>
-
-    <div class="card" id="jumpInvolved">
-      <h3>🙋 Get involved</h3>
-      <p>Ways to actually take part in this chapter, beyond watching:</p>
-    </div>
-    <div id="getInvolvedList"><div class="item">
-      <div class="item-top">
-        <div>
-          <strong>Cloak of Hope</strong> <br>
-          <small>Stitch a 10–15cm fabric patch expressing a hope for the future — post it in ahead of time or stitch it on-site.</small>
-
-        </div>
-        <button>Mark done</button>
-      </div>
-    </div><div class="item">
-      <div class="item-top">
-        <div>
-          <strong>Thrutopia workshop</strong> <br>
-          <small>Propose your own talk, workshop or session for the new Thrutopia zone.</small>
-          <br><a class="linkbtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfh4w5SDGJQoUsgQ2hRD1yZCZvnVMHwPLIMOVAsavkEzCg6fw/viewform" target="_blank" rel="noopener">Submit a workshop</a>
-        </div>
-        <button>Mark done</button>
-      </div>
-    </div><div class="item">
-      <div class="item-top">
-        <div>
-          <strong>The Retreat</strong> <br>
-          <small>Book in for massage, saunas, hot tubs or sound baths if the pace catches up with you.</small>
-
-        </div>
-        <button>Mark done</button>
-      </div>
-    </div></div>
-
-    <div id="guideStoryContent"></div>
-
-    <div class="daygroup">🎮 Just for fun</div>
-
-    <div class="card" id="jumpCharacter">
-      <h3>🎭 Build your character</h3>
-      <p>Give yourself a name and an angle before you go — actors respond to you a lot better when you're playing along rather than just watching. Doesn't lock in like Bingo; edit it any time. Sync brings in everyone's characters too — see the tabs below to check who's playing who.</p>
-      <div class="tabstrip" id="charPersonTabs" style="display:none; margin-bottom:8px;"></div>
-      <div id="charFormFields">
-        <div class="field"><label>Character name</label><input type="text" id="charName" placeholder="e.g. Delia Voss"></div>
-        <div class="field"><label>District allegiance</label>
-          <select id="charDistrict">
-            <option value="">Undecided / floating</option>
-            <option value="Area 404">Area 404</option>
-            <option value="Botanica">Botanica</option>
-            <option value="Thrutopia">Thrutopia</option>
-            <option value="Copperwood">Copperwood</option>
-            <option value="Oldtown">Oldtown</option>
-            <option value="Letsbe Avenue">Letsbe Avenue</option>
-            <option value="Metropolis">Metropolis</option>
-          </select>
-        </div>
-        <div class="field"><label>A quirk or trait</label><input type="text" id="charQuirk" placeholder="e.g. Convinced everyone owes her a favour"></div>
-        <div class="field"><label>Opening line / catchphrase</label><input type="text" id="charCatchphrase" placeholder="e.g. &quot;I don't do introductions, I do arrivals.&quot;"></div>
-        <div class="field"><label>Backstory (a line or two)</label><textarea id="charBackstory" placeholder="Why is this person in the city right now?"></textarea></div>
-        <button class="action" id="saveCharBtn">Save character</button>
-      </div>
-      <div id="charCardDisplay" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="card" id="jumpBingo">
-      <h3>🎲 Boomtown bingo</h3>
-      <p>Write your own 24 squares below (one per line) — under 24 and the rest fill from a default list, over 24 and it picks 24 at random from what you wrote. Shuffle as much as you like, then lock it in: the squares are fixed for the weekend after that, but you can still tap any square to cross it off as you go.</p>
-      <p class="empty-note">Sync brings in everyone's cards too, once locked — see the tabs below to check who's locked in and with what. Yours is never touched by anyone else's.</p>
-      <div class="tabstrip" id="bingoPersonTabs" style="display:none; margin-bottom:8px;"></div>
-      <textarea id="bingoCustomInput" placeholder="One idea per line, e.g.
-Find a hidden venue
-Get given Boomtown bucks
-Talk to an actor in character
-..."></textarea>
-      <div id="bingoGrid"></div>
-      <button class="action" id="bingoGenerateBtn">Build/shuffle my card</button>
-      <button class="action danger" id="bingoLockBtn" style="display:none;">Lock in this card</button>
-      <p class="empty-note" id="bingoStatusNote" style="margin-top:8px;"></p>
-    </div>
-
-    <div class="card" id="jumpJournal">
-      <h3>😂 Quotebook</h3>
-      <p>The funny, ridiculous or unhinged things people actually said — the bits you'll want to read back in a year.</p>
-      <textarea id="quoteInput" placeholder="e.g. &quot;I've told the Guardian we're the water inspectors&quot;"></textarea>
-      <div class="field" style="margin-top:8px;"><label>Who said it? (optional)</label><input type="text" id="quoteSaidBy" placeholder="e.g. 'the Mr Biga actor', or a stranger in the queue"></div>
-      <button class="action" id="addQuoteBtn">Save it</button>
-      <button class="ghost" id="copyQuotesBtn" style="margin:8px 0 0;">Copy the quotebook</button>
-    </div>
-    <div class="stagelist" id="journalPersonChips" style="display:none; margin:6px 0;"></div>
-    <div id="quotesList"></div>
-
-    <div class="card" id="jumpTheories">
-      <h3>🔮 Theories</h3>
-      <p>Wild guesses count — log your group's best theories about where this chapter's heading.</p>
-      <textarea id="theoryInput" placeholder="e.g. I reckon the deepfake Collector is Mr Biga in a mask..."></textarea>
-      <button class="action" id="addTheoryBtn">Save theory</button>
-    </div>
-    <div class="stagelist" id="theoriesPersonChips" style="display:none; margin:6px 0;"></div>
-    <div id="theoriesList"></div>
 
     <div class="card" id="jumpCharacters">
       <h3>🎭 Characters &amp; factions</h3>
@@ -875,7 +801,106 @@ Talk to an actor in character
     </div>
     <div id="guideExtrasContent"></div>
 
-    <div class="daygroup">🗓 Logistics &amp; practical stuff</div>
+    <div id="guideStoryContent"></div>
+
+    <div class="card" id="jumpInvolved">
+      <h3>🙋 Get involved</h3>
+      <p>Ways to actually take part in this chapter, beyond watching:</p>
+    </div>
+    <div id="getInvolvedList"><div class="item">
+      <div class="item-top">
+        <div>
+          <strong>Cloak of Hope</strong> <br>
+          <small>Stitch a 10–15cm fabric patch expressing a hope for the future — post it in ahead of time or stitch it on-site.</small>
+
+        </div>
+        <button>Mark done</button>
+      </div>
+    </div><div class="item">
+      <div class="item-top">
+        <div>
+          <strong>Thrutopia workshop</strong> <br>
+          <small>Propose your own talk, workshop or session for the new Thrutopia zone.</small>
+          <br><a class="linkbtn" href="https://docs.google.com/forms/d/e/1FAIpQLSfh4w5SDGJQoUsgQ2hRD1yZCZvnVMHwPLIMOVAsavkEzCg6fw/viewform" target="_blank" rel="noopener">Submit a workshop</a>
+        </div>
+        <button>Mark done</button>
+      </div>
+    </div><div class="item">
+      <div class="item-top">
+        <div>
+          <strong>The Retreat</strong> <br>
+          <small>Book in for massage, saunas, hot tubs or sound baths if the pace catches up with you.</small>
+
+        </div>
+        <button>Mark done</button>
+      </div>
+    </div></div>
+
+    <div class="daygroup">🎮 Our stuff</div>
+
+    <div class="card" id="jumpBingo">
+      <h3>🎲 Boomtown bingo</h3>
+      <p>Write your own 24 squares below (one per line) — under 24 and the rest fill from a default list, over 24 and it picks 24 at random from what you wrote. Shuffle as much as you like, then lock it in: the squares are fixed for the weekend after that, but you can still tap any square to cross it off as you go.</p>
+      <p class="empty-note">Sync brings in everyone's cards too, once locked — see the tabs below to check who's locked in and with what. Yours is never touched by anyone else's.</p>
+      <div class="tabstrip" id="bingoPersonTabs" style="display:none; margin-bottom:8px;"></div>
+      <textarea id="bingoCustomInput" placeholder="One idea per line, e.g.
+Find a hidden venue
+Get given Boomtown bucks
+Talk to an actor in character
+..."></textarea>
+      <div id="bingoGrid"></div>
+      <button class="action" id="bingoGenerateBtn">Build/shuffle my card</button>
+      <button class="action danger" id="bingoLockBtn" style="display:none;">Lock in this card</button>
+      <p class="empty-note" id="bingoStatusNote" style="margin-top:8px;"></p>
+    </div>
+
+    <div class="card" id="jumpCharacter">
+      <h3>🎭 Build your character</h3>
+      <p>Give yourself a name and an angle before you go — actors respond to you a lot better when you're playing along rather than just watching. Doesn't lock in like Bingo; edit it any time. Sync brings in everyone's characters too — see the tabs below to check who's playing who.</p>
+      <div class="tabstrip" id="charPersonTabs" style="display:none; margin-bottom:8px;"></div>
+      <div id="charFormFields">
+        <div class="field"><label>Character name</label><input type="text" id="charName" placeholder="e.g. Delia Voss"></div>
+        <div class="field"><label>District allegiance</label>
+          <select id="charDistrict">
+            <option value="">Undecided / floating</option>
+            <option value="Area 404">Area 404</option>
+            <option value="Botanica">Botanica</option>
+            <option value="Thrutopia">Thrutopia</option>
+            <option value="Copperwood">Copperwood</option>
+            <option value="Oldtown">Oldtown</option>
+            <option value="Letsbe Avenue">Letsbe Avenue</option>
+            <option value="Metropolis">Metropolis</option>
+          </select>
+        </div>
+        <div class="field"><label>A quirk or trait</label><input type="text" id="charQuirk" placeholder="e.g. Convinced everyone owes her a favour"></div>
+        <div class="field"><label>Opening line / catchphrase</label><input type="text" id="charCatchphrase" placeholder="e.g. &quot;I don't do introductions, I do arrivals.&quot;"></div>
+        <div class="field"><label>Backstory (a line or two)</label><textarea id="charBackstory" placeholder="Why is this person in the city right now?"></textarea></div>
+        <button class="action" id="saveCharBtn">Save character</button>
+      </div>
+      <div id="charCardDisplay" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" id="jumpJournal">
+      <h3>😂 Quotebook</h3>
+      <p>The funny, ridiculous or unhinged things people actually said — the bits you'll want to read back in a year.</p>
+      <textarea id="quoteInput" placeholder="e.g. &quot;I've told the Guardian we're the water inspectors&quot;"></textarea>
+      <div class="field" style="margin-top:8px;"><label>Who said it? (optional)</label><input type="text" id="quoteSaidBy" placeholder="e.g. 'the Mr Biga actor', or a stranger in the queue"></div>
+      <button class="action" id="addQuoteBtn">Save it</button>
+      <button class="ghost" id="copyQuotesBtn" style="margin:8px 0 0;">Copy the quotebook</button>
+    </div>
+    <div class="stagelist" id="journalPersonChips" style="display:none; margin:6px 0;"></div>
+    <div id="quotesList"></div>
+
+    <div class="card" id="jumpTheories">
+      <h3>🔮 Theories</h3>
+      <p>Wild guesses count — log your group's best theories about where this chapter's heading.</p>
+      <textarea id="theoryInput" placeholder="e.g. I reckon the deepfake Collector is Mr Biga in a mask..."></textarea>
+      <button class="action" id="addTheoryBtn">Save theory</button>
+    </div>
+    <div class="stagelist" id="theoriesPersonChips" style="display:none; margin:6px 0;"></div>
+    <div id="theoriesList"></div>
+
+    <div class="daygroup">🧭 Useful</div>
 
     <div class="card" id="jumpPacking">
       <h3>🎒 Packing checklist</h3>
@@ -904,29 +929,22 @@ Talk to an actor in character
     </div>
     <div id="glossaryList"></div>
 
-    <div class="daygroup">🤝 Setup &amp; sharing</div>
-
-    <div class="card" id="jumpActivity">
-      <h3>🕓 Recent group activity</h3>
-      <p class="empty-note" style="margin-bottom:8px;">A quick feed of what's changed — statuses, decisions, the meeting point, hidden-venue finds and theories. Not a chat, just a log.</p>
-      <div id="recentActivityList"></div>
-    </div>
-
-    <div class="card" id="jumpNotes" style="border:1px solid rgba(75,227,172,.45); background:linear-gradient(145deg, rgba(75,227,172,.08), var(--bg-panel));">
-      <span class="tag">👥 One view, whose is whose</span>
-      <h3>🗂 All notes — everyone's, in one place</h3>
-      <p>Everyone's district notes, theories, hidden-venue finds, get-involved progress, memory journal, sightings, found socials and landmarks — synced automatically, all in one place. Defaults to <strong>By person</strong>; tab through names above to see one person's own page. Bingo cards and characters stay personal and never appear here.</p>
-      <button class="ghost" id="consolidatedToggleBtn" style="margin:8px 0;">Show all notes ▾</button>
-      <div id="consolidatedNotesBody" style="display:none;">
-        <div class="venue-filters" id="consolidatedViewToggle">
-          <button data-view="category">By category</button>
-          <button class="active" data-view="person">By person</button>
-        </div>
-        <div class="tabstrip" id="consolidatedPeopleTabs" style="display:none; margin-bottom:8px;"></div>
-        <button class="ghost" id="copyConsolidatedBtn" style="margin:4px 0 10px;">Copy full report</button>
-        <div id="consolidatedNotes"></div>
+    <div class="card" id="jumpFriendStatus">
+      <h3>📍 Where's everyone?</h3>
+      <p>A quick status, not live tracking — set where you are and it's visible to the group next sync. Manual by default; GPS is available below if you'd rather it update itself.</p>
+      <div class="field"><label>Where are you?</label>
+        <select id="statusLocationSelect">
+          <option value="">Select a location…</option>
+        </select>
       </div>
+      <div class="field" id="statusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="statusCustomInput" placeholder="Type where you are"></div>
+      <button class="action" id="statusCustomBtn" style="margin-top:6px;">Set my status</button>
+      <label class="gps-toggle-row"><input type="checkbox" id="gpsLocationToggle">Auto-update my location from GPS every few minutes (uses your device's location permission; overrides the manual field above while on)</label>
+      <p class="empty-note" id="statusFeedbackNote" style="margin-top:6px;"></p>
+      <div id="friendStatusList" style="margin-top:12px;"></div>
     </div>
+
+    <div class="daygroup">☁️ Sync &amp; data</div>
 
     <div class="card" id="jumpSync">
       <h3>🤝 Sync with your group</h3>
@@ -991,21 +1009,6 @@ Talk to an actor in character
         <p class="empty-note">This phone was <span id="handoffSwitchBackLabel"></span> before the last switch — its data was backed up first, so you can bring it right back.</p>
         <button class="action" id="handoffSwitchBackBtn">Switch back</button>
       </div>
-    </div>
-
-    <div class="card" id="jumpFriendStatus">
-      <h3>📍 Where's everyone?</h3>
-      <p>A quick status, not live tracking — set where you are and it's visible to the group next sync. Manual by default; GPS is available below if you'd rather it update itself.</p>
-      <div class="field"><label>Where are you?</label>
-        <select id="statusLocationSelect">
-          <option value="">Select a location…</option>
-        </select>
-      </div>
-      <div class="field" id="statusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="statusCustomInput" placeholder="Type where you are"></div>
-      <button class="action" id="statusCustomBtn" style="margin-top:6px;">Set my status</button>
-      <label class="gps-toggle-row"><input type="checkbox" id="gpsLocationToggle">Auto-update my location from GPS every few minutes (uses your device's location permission; overrides the manual field above while on)</label>
-      <p class="empty-note" id="statusFeedbackNote" style="margin-top:6px;"></p>
-      <div id="friendStatusList" style="margin-top:12px;"></div>
     </div>
 
     <div class="card">

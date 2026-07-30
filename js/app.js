@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v170";
-const APP_BUILD_TIME = "2026-07-30T21:53:31Z";
+const APP_CACHE_VERSION = "v173";
+const APP_BUILD_TIME = "2026-07-30T22:15:33Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3657,6 +3657,39 @@ let planMustSeeFilter = false;
 let clashSubView = "list";
 let clashTimelineDay = "Wed";
 
+// Plan list day chips — same multi-select, AND-combined chip basis as the
+// Lineup search's day chips (selectedDays/loadDayChips above), applied to
+// the flat List view, the Clashes > List sub-view, and Compare. Deliberately
+// NOT added to the Plan Timeline or Clash Timeline views — those already
+// have their own single-day tab selector (planTimelineDay/clashTimelineDay),
+// a one-day-at-a-time UI that a multi-select chip set would just conflict
+// with. renderSchedule() runs at load time (bottom of this file), so this
+// Set has to be declared up here, above that call, per the TDZ rule.
+let selectedPlanDays = new Set();
+
+function togglePlanDayChip(d){
+  if(selectedPlanDays.has(d)) selectedPlanDays.delete(d); else selectedPlanDays.add(d);
+}
+
+function updatePlanDayChipHighlights(){
+  document.querySelectorAll("#planDayChips .chip").forEach(c=> c.classList.toggle("active", selectedPlanDays.has(c.dataset.d)));
+}
+
+function loadPlanDayChips(){
+  const box = document.getElementById("planDayChips");
+  if(!box) return;
+  box.innerHTML = DAY_ORDER.map(d=>`<span class="chip" data-d="${d}">${d}</span>`).join("");
+  updatePlanDayChipHighlights();
+  box.querySelectorAll(".chip[data-d]").forEach(s=>{
+    s.onclick = ()=>{
+      togglePlanDayChip(s.dataset.d);
+      updatePlanDayChipHighlights();
+      if(planView === "compare") renderPlanCompare();
+      else renderSchedule();
+    };
+  });
+}
+
 function saveArtist(artist){
   let schedule = Store.get("schedule");
   const exists = schedule.find(x=>x.name === artist.name);
@@ -3867,6 +3900,25 @@ function closeHalfOrderModal(){
   if(existing) existing.remove();
 }
 
+// A personal clash pair (both artists in YOUR OWN schedule) can also be a
+// GROUP clash if 2+ different people across the group are into at least
+// one of the two — same day+sorted-names key either way (see
+// personalClashChoiceKey/groupClashPairs), so "also a group clash" is
+// just "this key is present in groupPairsByKey". Renders a small link-out
+// card so resolving your own pick doesn't leave you unaware the group
+// still needs to weigh in separately (or already has).
+function groupClashLinkHTML(pair, decision){
+  const status = decision ? decision.status : "needs";
+  const owners = new Set([...Object.keys(pair.a.interest), ...Object.keys(pair.b.interest)]);
+  owners.delete(currentContributorName() || "You");
+  const otherCount = owners.size;
+  return `<div class="decision-linked-note">
+    <span>⚡ ${otherCount} other${otherCount===1?"":"s"} in your group ${otherCount===1?"is":"are"} into this clash too — ${status==="needs" ? "no group call yet" : "group's already weighed in"}</span>
+    ${decisionStatusPillHTML(status)}
+    <button type="button" class="ghost decision-jump-btn" data-jump-key="${escapeHtml(pair.key)}">Open group decision</button>
+  </div>`;
+}
+
 // Asked whenever "half & half" is picked for a clashing pair — since a
 // clash means the two sets overlap, catching "half of each" only makes
 // sense with a real first/second order (leave one early, catch the
@@ -3903,7 +3955,7 @@ function showHalfOrderModal(day, a, b, onChoose){
   document.getElementById("halfOrderSkipBtn").onclick = ()=>{ onChoose(null); closeHalfOrderModal(); };
 }
 
-function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners){
+function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners, groupPairsByKey){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
   const seen = isSeen(artist.name);
@@ -3924,13 +3976,22 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
     const shortMine = escapeHtml(truncateName(artist.name, 14));
     const shortOther = escapeHtml(truncateName(other.name, 14));
     const halfOrder = choice === "half" ? getHalfOrderChoice(artist.day, artist.name, other.name) : null;
+    const clashKey = personalClashChoiceKey(artist.day, artist.name, other.name);
+    const groupPair = groupPairsByKey ? groupPairsByKey.get(clashKey) : null;
+    const groupDecision = groupPair ? (Store.get("groupDecisions") || {})[groupPair.key] : null;
+    // "I'll go" + 🙋 (solo) rather than reusing the group card's "Together"
+    // + 👥 wording — the two cards sit right next to each other when a
+    // clash is both personal and group, and near-identical labels are
+    // exactly what made it unclear which one only affects your own plan.
     choiceHTML = `
       <div class="decision-actions personal-clash-actions">
-        <button data-clash-choice="a" title="Go to ${escapeHtml(artist.name)}" class="${choice==="a" ? "active" : ""}">Go: ${shortMine}</button>
-        <button data-clash-choice="b" title="Go to ${escapeHtml(other.name)}" class="${choice==="b" ? "active" : ""}">Go: ${shortOther}</button>
-        <button data-clash-choice="half" class="${choice==="half" ? "active" : ""}">Half &amp; half</button>
+        <button data-clash-choice="a" title="Only updates your own plan — tap again to clear" class="${choice==="a" ? "active" : ""}">🙋 I'll go<br><strong>${shortMine}</strong></button>
+        <button data-clash-choice="b" title="Only updates your own plan — tap again to clear" class="${choice==="b" ? "active" : ""}">🙋 I'll go<br><strong>${shortOther}</strong></button>
+        <button data-clash-choice="half" title="Only updates your own plan — tap again to clear" class="${choice==="half" ? "active" : ""}">◐ Catch half<br><span>of each</span></button>
       </div>
-      ${halfOrder ? `<p class="empty-note" style="margin-top:4px;">Catching <strong>${escapeHtml(halfOrder)}</strong> first</p>` : ""}`;
+      <p class="empty-note personal-clash-scope-note">Just for your own plan — teammates won't see this pick.</p>
+      ${halfOrder ? `<p class="empty-note" style="margin-top:2px;">Catching <strong>${escapeHtml(halfOrder)}</strong> first</p>` : ""}
+      ${groupPair ? groupClashLinkHTML(groupPair, groupDecision) : ""}`;
   }
   return `
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
@@ -4243,6 +4304,11 @@ function renderSchedule(){
     return;
   }
 
+  // Computed once per render (not per item) — groupClashPairs() is an
+  // O(n²) scan over the whole group's combined interest map, and every
+  // clashing item on this screen needs the same lookup to know whether
+  // its personal clash is also a group one.
+  const groupPairsByKey = new Map(groupClashPairs().map(p=>[p.key, p]));
   const mustSeeNamesSet = new Set(fullSchedule.filter(a=>a.mustSee).map(a=>a.name));
   // Keep each entry's ORIGINAL index into the full (unfiltered) schedule
   // even when the must-sees-only filter is on — remove/set-time/star
@@ -4250,15 +4316,19 @@ function renderSchedule(){
   // so a filtered-array position would point at the wrong artist. Only
   // meaningful when !readonly (i.e. owners is exactly ["mine"]), where
   // fullSchedule *is* Store.get("schedule") itself.
-  const shown = fullSchedule.map((a,i)=>({a,i})).filter(({a})=> !planMustSeeFilter || a.mustSee);
+  const shown = fullSchedule.map((a,i)=>({a,i})).filter(({a})=>
+    (!planMustSeeFilter || a.mustSee) && (selectedPlanDays.size === 0 || selectedPlanDays.has(a.day))
+  );
 
   if(shown.length === 0){
-    scheduleList.innerHTML = `<div class="card"><p class="empty-note">No must-sees yet — hold a star to upgrade one.</p></div>`;
+    const dayNote = selectedPlanDays.size ? ` for ${DAY_ORDER.filter(d=>selectedPlanDays.has(d)).join(", ")}` : "";
+    const msg = planMustSeeFilter ? `No must-sees${dayNote} — hold a star to upgrade one.` : `Nothing saved${dayNote} yet.`;
+    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${msg}</p></div>`;
     return;
   }
 
   if(planView === "list"){
-    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet,a._owners)).join("");
+    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet,a._owners,groupPairsByKey)).join("");
   } else {
     const clashMap = findClashes(fullSchedule);
     const byDay = {};
@@ -4275,7 +4345,7 @@ function renderSchedule(){
       // "23:30", not before it as "0..." vs "2..." would alphabetically.
       const items = byDay[day].sort((x,y)=> (toMinutes(x.a.day, x.a.start) ?? 999999) - (toMinutes(y.a.day, y.a.start) ?? 999999));
       html += `<div class="daygroup">${day}</div>`;
-      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet,a._owners));
+      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet,a._owners,groupPairsByKey));
     });
     scheduleList.innerHTML = html;
   }
@@ -4346,6 +4416,10 @@ function renderSchedule(){
           renderSchedule();
         };
       });
+
+      itemEl.querySelectorAll(".decision-jump-btn").forEach(btn=>{
+        btn.onclick = ()=> jumpToGroupDecision(btn.getAttribute("data-jump-key"));
+      });
     });
   }
 
@@ -4360,7 +4434,7 @@ function renderSchedule(){
 // this just flips which of scheduleList vs clashTimelineView shows and
 // renders the right one, without touching the outer setPlanView state.
 function updateClashSubViewVisibility(){
-  const listEls = [scheduleList, document.getElementById("nowNextBanner")];
+  const listEls = [scheduleList, document.getElementById("nowNextBanner"), document.getElementById("planDayChips")];
   const clashTimelineEl = document.getElementById("clashTimelineView");
   document.querySelectorAll("#clashSubViewToggle button").forEach(b=>{
     b.classList.toggle("active", b.dataset.sub === clashSubView);
@@ -4396,6 +4470,7 @@ function setPlanView(view){
   const clashExtras = document.getElementById("clashExtras");
   const mustSeeFilterToggle = document.getElementById("mustSeeFilterToggle");
   const starSeenLegend = document.getElementById("planStarSeenLegend");
+  const planDayChipsBox = document.getElementById("planDayChips");
   if(clashExtras) clashExtras.style.display = view==="clash" ? "" : "none";
   if(mustSeeFilterToggle) mustSeeFilterToggle.style.display = (view==="compare"||view==="seen") ? "none" : "";
   if(starSeenLegend) starSeenLegend.style.display = (view==="compare"||view==="seen") ? "none" : "";
@@ -4404,6 +4479,10 @@ function setPlanView(view){
   if(seenEl) seenEl.style.display = view==="seen" ? "" : "none";
   if(clashTimelineEl && view!=="clash") clashTimelineEl.style.display = "none";
   listEls.forEach(el=> el && (el.style.display = (view==="list"||(view==="clash"&&clashSubView==="list")) ? "" : "none"));
+  // Day chips apply to List, Clashes > List and Compare — everywhere
+  // except Seen and the two single-day-tab timeline views (own view here,
+  // clash's nested timeline sub-view handled by updateClashSubViewVisibility).
+  if(planDayChipsBox) planDayChipsBox.style.display = (view==="seen"||view==="timeline"||(view==="clash"&&clashSubView==="timeline")) ? "none" : "";
 
   if(view === "timeline"){
     if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("timelineBigPicture");
@@ -4428,6 +4507,28 @@ function setPlanView(view){
   } else {
     renderSchedule();
   }
+}
+
+// Jumps from a personal clash card (Plan > List/Clashes) over to the
+// matching Group decision card in Compare. "Matching" just means the same
+// key — personalClashChoiceKey() and groupClashPairs() both build it from
+// day+sorted-artist-names, so a clash that's personal AND group-wide
+// always resolves to one identity across both stores. Expands the box
+// (and its "show more" list, if the card's past the fold) so the target
+// is actually in the DOM before scrolling to it.
+function jumpToGroupDecision(key){
+  setPlanView("compare");
+  groupDecisionsCollapsed = false;
+  const idx = groupClashPairs().findIndex(p=> p.key === key);
+  if(idx >= GROUP_DECISIONS_CAP) groupDecisionsExpanded = true;
+  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+  requestAnimationFrame(()=>{
+    const card = document.querySelector(`.decision-card[data-decision-key="${CSS.escape(key)}"]`);
+    if(!card) return;
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.add("decision-jump-highlight");
+    setTimeout(()=> card.classList.remove("decision-jump-highlight"), 1600);
+  });
 }
 
 document.getElementById("viewListBtn").onclick = ()=> setPlanView("list");
@@ -4547,15 +4648,17 @@ function renderPlanCompare(){
   else if(compareFilterMode === "onlyme") entries = entries.filter(e=> Object.keys(e.interest).length === 1 && "mine" in e.interest);
   else if(compareFilterMode === "mustsee") entries = entries.filter(e=> Object.values(e.interest).some(v=> v));
   else if(compareFilterMode === "likes") entries = entries.filter(e=> Object.values(e.interest).some(v=> !v));
+  if(selectedPlanDays.size) entries = entries.filter(e=> selectedPlanDays.has(e.artist.day));
 
   if(entries.length === 0){
-    const emptyText = {
-      shared: "Nothing picked by two or more of you yet.",
-      everyone: "Nothing everyone's picked yet.",
-      onlyme: "Nothing that's only on your own list.",
-      mustsee: "No must-sees to compare yet.",
-      likes: "No just-likes to compare yet."
-    }[compareFilterMode] || "Nobody's saved anything yet.";
+    const dayNote = selectedPlanDays.size ? ` for ${DAY_ORDER.filter(d=>selectedPlanDays.has(d)).join(", ")}` : "";
+    const emptyText = ({
+      shared: "Nothing picked by two or more of you",
+      everyone: "Nothing everyone's picked",
+      onlyme: "Nothing that's only on your own list",
+      mustsee: "No must-sees to compare",
+      likes: "No just-likes to compare"
+    }[compareFilterMode] || "Nobody's saved anything") + `${dayNote} yet.`;
     box.innerHTML = `<div class="card"><p class="empty-note">${emptyText}</p></div>`;
     return;
   }
@@ -5012,6 +5115,7 @@ document.getElementById("browseAllArtistsBtn").onclick = browseAllArtists;
 const artistsBrowseAllBtn = document.getElementById("artistsBrowseAllBtn");
 if(artistsBrowseAllBtn) artistsBrowseAllBtn.onclick = browseAllArtists;
 
+loadPlanDayChips();
 renderPlanOwnerSelector();
 renderSchedule();
 updateNextEvent();
@@ -7566,9 +7670,10 @@ function decisionCardHTML(pair, decision){
   const shortA = escapeHtml(truncateName(pair.a.name, 16));
   const shortB = escapeHtml(truncateName(pair.b.name, 16));
   const halfOrder = status === "half" ? getHalfOrderChoice(pair.day, pair.a.name, pair.b.name) : null;
-  const statusNote = status === "together" && decision ? `Together: <strong>${escapeHtml(decision.choice)}</strong>`
-    : status === "split" && decision ? `Splitting up`
-    : status === "half" && decision ? `Catching half of each${halfOrder ? ` — <strong>${escapeHtml(halfOrder)}</strong> first` : ""}`
+  const statusNote = status === "together" && decision ? `Group's call: everyone's going to <strong>${escapeHtml(decision.choice)}</strong>`
+    : status === "split" && decision ? `Group's call: splitting up — everyone catches their own pick`
+    : status === "half" && decision ? `Group's call: catching half of each${halfOrder ? ` — <strong>${escapeHtml(halfOrder)}</strong> first` : ""}`
+    : status === "later" && decision ? `Left open for now — still needs a decision`
     : "";
   return `
     <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(pair.key)}" data-day="${escapeHtml(pair.day)}">
@@ -7579,15 +7684,16 @@ function decisionCardHTML(pair, decision){
         <div class="decision-vs-side"><strong>${escapeHtml(pair.b.name)}</strong><span class="decision-vs-stage">${escapeHtml(pair.b.stage)}</span><span class="decision-vs-owners">${ownerLine(pair.b.interest)}</span></div>
       </div>
       ${statusNote || (decision && decision.detail) ? `<p class="empty-note decision-status-note">${statusNote}${statusNote && decision.detail ? " · " : ""}${decision && decision.detail ? `📝 ${escapeHtml(decision.detail)}` : ""}${decision ? ` <span class="decision-by">(${escapeHtml(decision.by)})</span>` : ""}</p>` : ""}
+      <p class="empty-note decision-actions-hint">Tapping one of these sets it for the whole group, not just you:</p>
       <div class="decision-actions">
         <div class="decision-actions-row decision-actions-together">
-          <button data-action="together-a" title="Everyone together — ${escapeHtml(pair.a.name)}" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">👥 ${shortA}</button>
-          <button data-action="together-b" title="Everyone together — ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">👥 ${shortB}</button>
+          <button data-action="together-a" title="Everyone in the group goes to ${escapeHtml(pair.a.name)} — nobody catches ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">👥 All together<br><strong>${shortA}</strong></button>
+          <button data-action="together-b" title="Everyone in the group goes to ${escapeHtml(pair.b.name)} — nobody catches ${escapeHtml(pair.a.name)}" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">👥 All together<br><strong>${shortB}</strong></button>
         </div>
         <div class="decision-actions-row">
-          <button data-action="split" class="${decision && decision.status==="split" ? "active" : ""}">↔️ Split up</button>
-          <button data-action="half" title="Catch half of ${escapeHtml(pair.a.name)}, half of ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="half" ? "active" : ""}">◐ Half &amp; half</button>
-          <button data-action="later" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Later</button>
+          <button data-action="split" title="No group pick — everyone catches whichever one they've chosen in their own plan" class="${decision && decision.status==="split" ? "active" : ""}">↔️ Split up<br><span>everyone picks their own</span></button>
+          <button data-action="half" title="Catch half of ${escapeHtml(pair.a.name)}, half of ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="half" ? "active" : ""}">◐ Half &amp; half<br><span>catch part of each</span></button>
+          <button data-action="later" title="Leave it open — this clash keeps showing as needing a decision" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Decide later<br><span>leave it open</span></button>
         </div>
       </div>
       ${decision ? `<div class="decision-detail-row">
@@ -10263,12 +10369,15 @@ const chapterFiveGuide = [
   { section:"logistics", title:"🤝 Getting one shared copy for the group", text:"Each phone saves its own data separately. To end up with one file that has everyone's notes, theories, hidden-venue finds and ticks in it: add your name and copy a Sync code in Discover, send it to a teammate, they paste and merge it in (nothing gets duplicated), and repeat round the group. Whoever's phone ends up with everyone merged in is the one to hit 'Download shareable group copy' on — that file is the group's master copy with personal things (bingo card, character, HQ notes) left out, so it's safe to actually hand round, and Discover's Consolidated Notes card shows you everything that's in it at a glance before you do." }
 ];
 
-// Only "story" gets its own divider/heading — it needs to visually
-// separate from the "Get involved" card above it. Extras and logistics
-// cards render directly into their container with no divider, since the
-// summary card immediately above each container already introduces the
-// topic; a second heading repeating the same title would be exactly the
-// kind of duplicate-looking clutter this split was meant to fix.
+// Only "story" gets its own divider/heading — its container
+// (guideStoryContent, in the Discover markup) sits between the "Beyond
+// the music" and "Get involved" cards, with no static heading of its own
+// otherwise, so it needs one to visually separate from what's above it.
+// Extras and logistics cards render directly into their container with no
+// divider, since the summary card immediately above each container
+// already introduces the topic; a second heading repeating the same
+// title would be exactly the kind of duplicate-looking clutter this
+// split was meant to fix.
 const GUIDE_SECTION_LABELS = {
   story: "📖 The story, in depth"
 };
