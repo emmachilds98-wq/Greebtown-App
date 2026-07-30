@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v175";
-const APP_BUILD_TIME = "2026-07-30T22:33:19Z";
+const APP_CACHE_VERSION = "v176";
+const APP_BUILD_TIME = "2026-07-30T22:43:30Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -9079,6 +9079,21 @@ function chatThreadSummary(thread){
   return last ? { text: last.text, ts: last.ts, mine: last.fromDeviceId === ensureDeviceId() } : null;
 }
 
+// Small, muted "location last set" line — same data friendStatusEntries()
+// already tracks for the "Where's everyone?" status feature, just
+// surfaced here too. Shared by the thread-list row and the open DM
+// header (chatOpenThreadLabel side) so the two stay consistent. Returns
+// "" (renders nothing) rather than a placeholder when no status has
+// ever been set, so a brand-new contact's row/header doesn't carry a
+// permanent "no location" line.
+function chatLocationLineHtml(name){
+  if(!name) return "";
+  const entry = friendStatusEntries().find(e=> (e.displayName || "").trim().toLowerCase() === name.trim().toLowerCase());
+  if(!entry || !entry.place) return "";
+  const when = entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago";
+  return `📍 ${escapeHtml(entry.place)} · set ${escapeHtml(when)}`;
+}
+
 function chatThreadRowHtml(t){
   const onlineDot = t.online === null ? "" : `<span class="chat-online-dot${t.online ? " online" : ""}"></span>`;
   const timeLabel = t.ts ? formatLastSeen(t.ts) : "";
@@ -9087,6 +9102,7 @@ function chatThreadRowHtml(t){
       <span class="chat-thread-icon">${t.icon}</span>
       <span class="chat-thread-main">
         <span class="chat-thread-name">${onlineDot}${escapeHtml(t.label)}</span>
+        ${t.loc ? `<span class="chat-thread-location">${t.loc}</span>` : ""}
         <span class="chat-thread-sub">${t.sub}</span>
       </span>
       <span class="chat-thread-meta">
@@ -9104,25 +9120,27 @@ function renderChatThreadList(){
   const rows = [chatThreadRowHtml({
     id: CHAT_THREAD_GROUP, label: "Everyone", icon: "👥",
     sub: groupSummary ? `${groupSummary.mine ? "You: " : ""}${escapeHtml(groupSummary.text)}` : "Say hi to the group",
-    ts: groupSummary ? groupSummary.ts : null, unread: unreadCountForThread(CHAT_THREAD_GROUP), online: null
+    ts: groupSummary ? groupSummary.ts : null, unread: unreadCountForThread(CHAT_THREAD_GROUP), online: null, loc: ""
   })];
   if(me){
-    const statusEntries = friendStatusEntries();
     chatContactNames().forEach(name=>{
       const thread = dmThreadId(me, name);
       const summary = chatThreadSummary(thread);
-      const entry = statusEntries.find(e=> (e.displayName || "").trim().toLowerCase() === name.trim().toLowerCase());
-      const locLine = entry && entry.place ? `${escapeHtml(entry.place)} · ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}` : "No location set yet";
       rows.push(chatThreadRowHtml({
         id: thread, label: name, icon: statusDotFor(name),
-        sub: summary ? `${summary.mine ? "You: " : ""}${escapeHtml(summary.text)}` : locLine,
-        ts: summary ? summary.ts : null, unread: unreadCountForThread(thread), online: isOnline(name)
+        // The last-message preview used to be the ONLY thing shown here
+        // once a thread had any messages, silently replacing the
+        // location line entirely — now they're two separate lines, so
+        // location stays visible however active the conversation is.
+        sub: summary ? `${summary.mine ? "You: " : ""}${escapeHtml(summary.text)}` : "No messages yet — say hi",
+        ts: summary ? summary.ts : null, unread: unreadCountForThread(thread), online: isOnline(name),
+        loc: chatLocationLineHtml(name)
       }));
     });
   }
   card.innerHTML = `
     <div class="chat-panel-head">
-      <strong>Chat</strong>
+      <span class="chat-panel-head-title"><strong>Chat</strong></span>
       <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
     </div>
     <div class="chat-thread-list">${rows.join("")}</div>
@@ -9163,10 +9181,14 @@ function renderChatThreadShell(){
   const card = document.querySelector("#chatPanel .chat-panel-card");
   if(!card || !chatOpenThread) return;
   const thread = chatOpenThread;
+  const isGroup = thread === CHAT_THREAD_GROUP;
   card.innerHTML = `
     <div class="chat-panel-head">
       <button type="button" class="chat-back-btn" id="chatBackBtn" aria-label="Back to chats">←</button>
-      <strong>${escapeHtml(chatOpenThreadLabel || "Chat")}</strong>
+      <span class="chat-panel-head-title">
+        <strong>${escapeHtml(chatOpenThreadLabel || "Chat")}</strong>
+        <span class="chat-panel-head-sub" id="chatHeadSub">${isGroup ? "" : chatLocationLineHtml(chatOpenThreadLabel)}</span>
+      </span>
       <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
     </div>
     <div class="chat-messages" id="chatMessagesBox"></div>
@@ -9228,6 +9250,13 @@ function renderChatMessagesOnly(){
   box.innerHTML = bubbles || `<p class="empty-note" style="padding:14px;">No messages yet — say hi.</p>`;
   box.insertAdjacentHTML("beforeend", chatReadReceiptLine(thread, msgs, isGroup));
   if(wasNearBottom) box.scrollTop = box.scrollHeight;
+  // Keeps the header's small location/last-seen line fresh too (e.g. the
+  // other person updates their status while this thread's open) — a
+  // plain innerHTML swap on one small span, never touching the close/
+  // back buttons or the compose form, so it can't reintroduce the
+  // draft-wiping bug this same render split fixed.
+  const headSub = document.getElementById("chatHeadSub");
+  if(headSub && !isGroup) headSub.innerHTML = chatLocationLineHtml(chatOpenThreadLabel);
 }
 
 function openChatPanel(){
