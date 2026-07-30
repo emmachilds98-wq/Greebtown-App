@@ -502,7 +502,19 @@
      backdrop, same dismissal pattern as the timeline detail modal. ===== */
   .chat-panel-card{background:var(--bg-panel); display:flex; flex-direction:column;}
   .chat-panel-head{display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); flex-shrink:0;}
-  .chat-panel-head strong{flex:1; min-width:0; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  /* Wraps the name (and, in a 1:1 thread, the small location/last-seen
+     line under it) — used in both the thread-list head ("Chat", no
+     subtitle) and the open-thread head, so the flex:1/min-width:0 that
+     lets the close button stay pinned to the right only needs defining
+     once. */
+  .chat-panel-head-title{flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; overflow:hidden;}
+  .chat-panel-head-title strong{font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  /* Deliberately smaller/muted, not styled like a second title — a
+     glance at the header shouldn't compete with the person's name for
+     attention, same "less obvious" treatment as .chat-thread-location
+     below. Empty (no status set yet) renders nothing, no empty gap. */
+  .chat-panel-head-sub{font-size:11px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chat-panel-head-sub:empty{display:none;}
   .chat-back-btn, .chat-close-btn{background:none; border:1px solid var(--line); color:var(--text-primary); border-radius:10px; width:32px; height:32px; font-size:15px; line-height:1; cursor:pointer; flex-shrink:0; padding:0;}
   .chat-thread-list{flex:1; overflow-y:auto;}
   .chat-thread-row{display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--line); cursor:pointer;}
@@ -510,6 +522,11 @@
   .chat-thread-icon{font-size:19px; flex-shrink:0; width:26px; text-align:center;}
   .chat-thread-main{min-width:0; flex:1;}
   .chat-thread-name{display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px;}
+  /* Sits between the name and the last-message preview, smaller and
+     more muted than either — visible again once a thread actually has
+     messages (previously the message preview replaced this line
+     entirely instead of sitting alongside it). */
+  .chat-thread-location{display:block; font-size:11px; color:var(--text-muted); opacity:.8; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .chat-thread-sub{display:block; font-size:12.5px; color:var(--text-muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .chat-thread-meta{display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;}
   .chat-thread-time{font-size:10.5px; color:var(--text-muted); white-space:nowrap;}
