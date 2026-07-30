@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v169";
-const APP_BUILD_TIME = "2026-07-30T21:37:50Z";
+const APP_CACHE_VERSION = "v170";
+const APP_BUILD_TIME = "2026-07-30T21:53:27Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3657,6 +3657,38 @@ let planMustSeeFilter = false;
 let clashSubView = "list";
 let clashTimelineDay = "Wed";
 
+// Plan list day chips — same multi-select, AND-combined chip basis as the
+// Lineup search's day chips (selectedDays/loadDayChips above), applied to
+// the flat List view and the Clashes > List sub-view. Deliberately NOT
+// added to the Plan Timeline or Clash Timeline views — those already have
+// their own single-day tab selector (planTimelineDay/clashTimelineDay),
+// a one-day-at-a-time UI that a multi-select chip set would just conflict
+// with. renderSchedule() runs at load time (bottom of this file), so this
+// Set has to be declared up here, above that call, per the TDZ rule.
+let selectedPlanDays = new Set();
+
+function togglePlanDayChip(d){
+  if(selectedPlanDays.has(d)) selectedPlanDays.delete(d); else selectedPlanDays.add(d);
+}
+
+function updatePlanDayChipHighlights(){
+  document.querySelectorAll("#planDayChips .chip").forEach(c=> c.classList.toggle("active", selectedPlanDays.has(c.dataset.d)));
+}
+
+function loadPlanDayChips(){
+  const box = document.getElementById("planDayChips");
+  if(!box) return;
+  box.innerHTML = DAY_ORDER.map(d=>`<span class="chip" data-d="${d}">${d}</span>`).join("");
+  updatePlanDayChipHighlights();
+  box.querySelectorAll(".chip[data-d]").forEach(s=>{
+    s.onclick = ()=>{
+      togglePlanDayChip(s.dataset.d);
+      updatePlanDayChipHighlights();
+      renderSchedule();
+    };
+  });
+}
+
 function saveArtist(artist){
   let schedule = Store.get("schedule");
   const exists = schedule.find(x=>x.name === artist.name);
@@ -4250,10 +4282,14 @@ function renderSchedule(){
   // so a filtered-array position would point at the wrong artist. Only
   // meaningful when !readonly (i.e. owners is exactly ["mine"]), where
   // fullSchedule *is* Store.get("schedule") itself.
-  const shown = fullSchedule.map((a,i)=>({a,i})).filter(({a})=> !planMustSeeFilter || a.mustSee);
+  const shown = fullSchedule.map((a,i)=>({a,i})).filter(({a})=>
+    (!planMustSeeFilter || a.mustSee) && (selectedPlanDays.size === 0 || selectedPlanDays.has(a.day))
+  );
 
   if(shown.length === 0){
-    scheduleList.innerHTML = `<div class="card"><p class="empty-note">No must-sees yet — hold a star to upgrade one.</p></div>`;
+    const dayNote = selectedPlanDays.size ? ` for ${DAY_ORDER.filter(d=>selectedPlanDays.has(d)).join(", ")}` : "";
+    const msg = planMustSeeFilter ? `No must-sees${dayNote} — hold a star to upgrade one.` : `Nothing saved${dayNote} yet.`;
+    scheduleList.innerHTML = `<div class="card"><p class="empty-note">${msg}</p></div>`;
     return;
   }
 
@@ -4360,7 +4396,7 @@ function renderSchedule(){
 // this just flips which of scheduleList vs clashTimelineView shows and
 // renders the right one, without touching the outer setPlanView state.
 function updateClashSubViewVisibility(){
-  const listEls = [scheduleList, document.getElementById("nowNextBanner")];
+  const listEls = [scheduleList, document.getElementById("nowNextBanner"), document.getElementById("planDayChips")];
   const clashTimelineEl = document.getElementById("clashTimelineView");
   document.querySelectorAll("#clashSubViewToggle button").forEach(b=>{
     b.classList.toggle("active", b.dataset.sub === clashSubView);
@@ -4388,7 +4424,7 @@ function setPlanView(view){
   const activeBtn = document.getElementById(activeBtnId);
   if(activeBtn) activeBtn.classList.add("active");
 
-  const listEls = [scheduleList, document.getElementById("nowNextBanner")];
+  const listEls = [scheduleList, document.getElementById("nowNextBanner"), document.getElementById("planDayChips")];
   const timelineEl = document.getElementById("planTimelineView");
   const compareEl = document.getElementById("planCompareView");
   const seenEl = document.getElementById("planSeenView");
@@ -5012,6 +5048,7 @@ document.getElementById("browseAllArtistsBtn").onclick = browseAllArtists;
 const artistsBrowseAllBtn = document.getElementById("artistsBrowseAllBtn");
 if(artistsBrowseAllBtn) artistsBrowseAllBtn.onclick = browseAllArtists;
 
+loadPlanDayChips();
 renderPlanOwnerSelector();
 renderSchedule();
 updateNextEvent();
@@ -9797,12 +9834,15 @@ const chapterFiveGuide = [
   { section:"logistics", title:"🤝 Getting one shared copy for the group", text:"Each phone saves its own data separately. To end up with one file that has everyone's notes, theories, hidden-venue finds and ticks in it: add your name and copy a Sync code in Discover, send it to a teammate, they paste and merge it in (nothing gets duplicated), and repeat round the group. Whoever's phone ends up with everyone merged in is the one to hit 'Download shareable group copy' on — that file is the group's master copy with personal things (bingo card, character, HQ notes) left out, so it's safe to actually hand round, and Discover's Consolidated Notes card shows you everything that's in it at a glance before you do." }
 ];
 
-// Only "story" gets its own divider/heading — it needs to visually
-// separate from the "Get involved" card above it. Extras and logistics
-// cards render directly into their container with no divider, since the
-// summary card immediately above each container already introduces the
-// topic; a second heading repeating the same title would be exactly the
-// kind of duplicate-looking clutter this split was meant to fix.
+// Only "story" gets its own divider/heading — its container
+// (guideStoryContent, in the Discover markup) sits between the "Beyond
+// the music" and "Get involved" cards, with no static heading of its own
+// otherwise, so it needs one to visually separate from what's above it.
+// Extras and logistics cards render directly into their container with no
+// divider, since the summary card immediately above each container
+// already introduces the topic; a second heading repeating the same
+// title would be exactly the kind of duplicate-looking clutter this
+// split was meant to fix.
 const GUIDE_SECTION_LABELS = {
   story: "📖 The story, in depth"
 };
