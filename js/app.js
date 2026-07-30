@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v174";
-const APP_BUILD_TIME = "2026-07-30T22:19:41Z";
+const APP_CACHE_VERSION = "v175";
+const APP_BUILD_TIME = "2026-07-30T22:33:19Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6828,7 +6828,7 @@ function formatLastSeen(ts){
 // free-text field. currentContributorName() is what every "add" handler
 // below calls to stamp new entries.
 // ===============================
-const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea"];
+const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea","Katelyn"];
 // Used by statusLineHTML/renderFriendStatusBar (defined further down) —
 // declared up here since renderHomeSyncStatus() runs at load time and
 // can trigger those before the FRIEND STATUS section below would run.
@@ -6958,14 +6958,30 @@ if(contributorNameInput){
     // which reads as broken. Skip it for "Other…" itself (no name yet,
     // just the text field appearing) — the oninput handler below covers
     // that once something's actually typed.
-    if(contributorNameInput.value !== "__other__" && typeof autoSyncNow === "function") autoSyncNow("name picked");
+    if(contributorNameInput.value !== "__other__" && typeof autoSyncNow === "function"){
+      autoSyncNow("name picked");
+      // chatContactNames()/presence never special-case KNOWN_CONTRIBUTORS —
+      // they only look at names actually seen syncing — so a fixed-roster
+      // pick needs this exactly like a typed "Other…" name does below.
+      // Fires the heartbeat right away instead of waiting for the next
+      // CHAT_HEARTBEAT_MS tick (up to 90s away), so whoever just picked
+      // their name shows up as an online chat contact immediately.
+      if(typeof sendChatHeartbeat === "function") sendChatHeartbeat();
+    }
   };
   contributorOtherInput.oninput = ()=>{
     if(contributorNameInput.value === "__other__") setContributorName(contributorOtherInput.value.trim());
     syncContributorNameDisplays();
   };
   contributorOtherInput.onblur = ()=>{
-    if(contributorNameInput.value === "__other__" && contributorOtherInput.value.trim() && typeof autoSyncNow === "function") autoSyncNow("name picked");
+    // Debounced to blur, not oninput above — same reason autoSyncNow is:
+    // firing a Firestore write on every keystroke while someone's still
+    // typing their name would be wasteful, this only fires once they're
+    // actually done.
+    if(contributorNameInput.value === "__other__" && contributorOtherInput.value.trim() && typeof autoSyncNow === "function"){
+      autoSyncNow("name picked");
+      if(typeof sendChatHeartbeat === "function") sendChatHeartbeat();
+    }
   };
 }
 
@@ -7054,6 +7070,7 @@ function renderHomeSyncStatus(){
         <option value="Lewis">Lewis</option>
         <option value="Dana">Dana</option>
         <option value="Rhea">Rhea</option>
+        <option value="Katelyn">Katelyn</option>
         <option value="__other__">Other…</option>
       </select>
     </div>
@@ -9027,7 +9044,7 @@ function startChatListeners(){
       chatMessagesCache = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
       renderChatUnreadBadge();
       if(chatOpenThread){
-        renderChatThreadView();
+        renderChatMessagesOnly();
         if(unreadCountForThread(chatOpenThread) > 0) markThreadRead(chatOpenThread);
       } else if(document.getElementById("chatPanel")){
         renderChatThreadList();
@@ -9040,7 +9057,14 @@ function startChatListeners(){
       chatPresenceCache = next;
       renderChatUnreadBadge();
       if(document.getElementById("chatPanel")){
-        if(chatOpenThread) renderChatThreadView(); else renderChatThreadList();
+        // Never renderChatThreadShell() here — a heartbeat from ANY of up
+        // to ~10 people lands roughly every CHAT_HEARTBEAT_MS/groupSize
+        // seconds, and used to fully rebuild the open thread's <form>
+        // (including the message <input>) on every single one of those,
+        // silently wiping out whatever someone was mid-typing and
+        // dropping keyboard focus. Only the messages/read-receipt area
+        // updates here; the compose box is untouched.
+        if(chatOpenThread) renderChatMessagesOnly(); else renderChatThreadList();
       }
     }, err=> console.warn("Chat presence listener failed:", err && err.code));
 }
@@ -9125,13 +9149,67 @@ function chatReadReceiptLine(thread, msgs, isGroup){
 function openChatThread(thread, label){
   chatOpenThread = thread;
   chatOpenThreadLabel = label;
-  renderChatThreadView();
+  renderChatThreadShell();
   markThreadRead(thread);
 }
 
-function renderChatThreadView(){
+// Full rebuild of the open thread's card — head, messages, AND the
+// compose form. Only ever called when actually opening or switching
+// threads (openChatThread), never from a live snapshot update, since
+// recreating the <input> mid-draft would wipe whatever's been typed and
+// drop keyboard focus. See renderChatMessagesOnly for the update path
+// that's safe to call on every message/presence change.
+function renderChatThreadShell(){
   const card = document.querySelector("#chatPanel .chat-panel-card");
   if(!card || !chatOpenThread) return;
+  const thread = chatOpenThread;
+  card.innerHTML = `
+    <div class="chat-panel-head">
+      <button type="button" class="chat-back-btn" id="chatBackBtn" aria-label="Back to chats">←</button>
+      <strong>${escapeHtml(chatOpenThreadLabel || "Chat")}</strong>
+      <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessagesBox"></div>
+    <form class="chat-input-row" id="chatSendForm">
+      <input type="text" id="chatMessageInput" placeholder="Message…" autocomplete="off" maxlength="2000">
+      <button type="submit" class="action" id="chatSendBtn">Send</button>
+    </form>
+  `;
+  document.getElementById("chatCloseBtn").onclick = closeChatPanel;
+  document.getElementById("chatBackBtn").onclick = ()=>{ chatOpenThread = null; chatOpenThreadLabel = null; renderChatThreadList(); };
+  const form = document.getElementById("chatSendForm");
+  const input = document.getElementById("chatMessageInput");
+  form.onsubmit = async (e)=>{
+    e.preventDefault();
+    if(!input.value.trim()) return;
+    const text = input.value;
+    input.value = "";
+    try{ await sendChatMessage(thread, text); }
+    catch(err){
+      input.value = text;
+      alert(err && err.message ? err.message : "Couldn't send — check you've got signal and try again.");
+    }
+  };
+  renderChatMessagesOnly();
+}
+
+// Updates just the bubbles + read-receipt line inside the already-open
+// thread — safe to call from a live onSnapshot callback, unlike
+// renderChatThreadShell above, because it never touches the compose
+// <form>/<input>. Without this split, a heartbeat from any one of up to
+// ~10 people (roughly every CHAT_HEARTBEAT_MS/group-size seconds), or
+// someone else simply opening the same DM thread (their own
+// markThreadRead write), landed on the chatPresence listener and forced
+// a full rebuild of the open thread — wiping out a draft mid-typing,
+// dropping keyboard focus, and (since the whole card was torn down and
+// rebuilt) visually looking like the chat had closed and reopened.
+// Only auto-scrolls to the bottom if the reader was already near it, so
+// this also doesn't yank someone back down while they're scrolled up
+// reading older messages.
+function renderChatMessagesOnly(){
+  if(!chatOpenThread) return;
+  const box = document.getElementById("chatMessagesBox");
+  if(!box) return;
   const thread = chatOpenThread;
   const msgs = threadMessages(thread);
   const me = ensureDeviceId();
@@ -9146,35 +9224,10 @@ function renderChatThreadView(){
       </div>
     </div>`;
   }).join("");
-  card.innerHTML = `
-    <div class="chat-panel-head">
-      <button type="button" class="chat-back-btn" id="chatBackBtn" aria-label="Back to chats">←</button>
-      <strong>${escapeHtml(chatOpenThreadLabel || "Chat")}</strong>
-      <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
-    </div>
-    <div class="chat-messages" id="chatMessagesBox">${bubbles || `<p class="empty-note" style="padding:14px;">No messages yet — say hi.</p>`}${chatReadReceiptLine(thread, msgs, isGroup)}</div>
-    <form class="chat-input-row" id="chatSendForm">
-      <input type="text" id="chatMessageInput" placeholder="Message…" autocomplete="off" maxlength="2000">
-      <button type="submit" class="action" id="chatSendBtn">Send</button>
-    </form>
-  `;
-  document.getElementById("chatCloseBtn").onclick = closeChatPanel;
-  document.getElementById("chatBackBtn").onclick = ()=>{ chatOpenThread = null; chatOpenThreadLabel = null; renderChatThreadList(); };
-  const box = document.getElementById("chatMessagesBox");
-  if(box) box.scrollTop = box.scrollHeight;
-  const form = document.getElementById("chatSendForm");
-  const input = document.getElementById("chatMessageInput");
-  form.onsubmit = async (e)=>{
-    e.preventDefault();
-    if(!input.value.trim()) return;
-    const text = input.value;
-    input.value = "";
-    try{ await sendChatMessage(thread, text); }
-    catch(err){
-      input.value = text;
-      alert(err && err.message ? err.message : "Couldn't send — check you've got signal and try again.");
-    }
-  };
+  const wasNearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 80;
+  box.innerHTML = bubbles || `<p class="empty-note" style="padding:14px;">No messages yet — say hi.</p>`;
+  box.insertAdjacentHTML("beforeend", chatReadReceiptLine(thread, msgs, isGroup));
+  if(wasNearBottom) box.scrollTop = box.scrollHeight;
 }
 
 function openChatPanel(){
