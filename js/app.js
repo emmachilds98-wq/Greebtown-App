@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v169";
-const APP_BUILD_TIME = "2026-07-30T21:37:50Z";
+const APP_CACHE_VERSION = "v170";
+const APP_BUILD_TIME = "2026-07-30T21:53:31Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7380,6 +7380,60 @@ renderAllFriendStatusUI();
 setInterval(renderAllFriendStatusUI, 60000);
 
 // ===============================
+// GPS AUTO-LOCATION — opt-in only (default off), sitting entirely on top
+// of the manual status feature above rather than as a separate system:
+// turning it on just calls setMyStatus() with a coordinate string instead
+// of a picked location, on a timer, then syncs it out the same way a
+// manual update does. No new Firestore fields, no new permissions model
+// beyond the one-time browser geolocation prompt.
+// ===============================
+const GPS_LOCATION_REFRESH_MS = 5 * 60 * 1000;
+let _gpsWatchTimer = null;
+
+function formatGpsPlace(coords){
+  return `GPS ${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
+}
+
+function refreshGpsLocationOnce(){
+  if(!("geolocation" in navigator) || !currentContributorName()) return;
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      setMyStatus(formatGpsPlace(pos.coords));
+      if(typeof pushToCloud === "function") pushToCloud().catch(()=>{});
+    },
+    (err)=>{
+      console.warn("GPS location failed:", err && err.message);
+      const note = document.getElementById("statusFeedbackNote");
+      if(note) note.textContent = `Couldn't get GPS location (${err && err.message ? err.message : "permission denied"}) — switched back to manual.`;
+      Store.set("gpsLocationEnabled", false);
+      const toggle = document.getElementById("gpsLocationToggle");
+      if(toggle) toggle.checked = false;
+      stopGpsWatch();
+    },
+    { enableHighAccuracy: false, maximumAge: 60000, timeout: 15000 }
+  );
+}
+
+function startGpsWatch(){
+  stopGpsWatch();
+  refreshGpsLocationOnce();
+  _gpsWatchTimer = setInterval(refreshGpsLocationOnce, GPS_LOCATION_REFRESH_MS);
+}
+function stopGpsWatch(){
+  if(_gpsWatchTimer){ clearInterval(_gpsWatchTimer); _gpsWatchTimer = null; }
+}
+(function wireGpsToggle(){
+  const toggle = document.getElementById("gpsLocationToggle");
+  if(!toggle) return;
+  toggle.checked = !!Store.get("gpsLocationEnabled");
+  toggle.onchange = ()=>{
+    Store.set("gpsLocationEnabled", toggle.checked);
+    if(toggle.checked) startGpsWatch(); else stopGpsWatch();
+  };
+  if(toggle.checked) startGpsWatch();
+})();
+
+// ===============================
 // GROUP DECISIONS — clash resolution across the WHOLE GROUP's saved
 // artists, not just this device's own (that's the existing
 // findClashes() above, used by the Plan "Clashes" view). A group clash
@@ -8648,6 +8702,418 @@ document.addEventListener("visibilitychange", ()=>{
     // pill behaviour as the initial load check.
     if(typeof checkForStaleCopy === "function") checkForStaleCopy();
     autoSyncNow("welcome back");
+  }
+});
+
+// ===============================
+// LOCAL CHAT — group + 1:1 messaging for the same small friend group as
+// the rest of sync, riding on the same no-auth Firestore room
+// (rooms/medway-massive) but in its own chatMessages/chatPresence
+// collections rather than the per-member sync doc, since a message is an
+// append-only event, not a single per-device snapshot that gets replaced
+// wholesale. Real-time (onSnapshot), not polled like the rest of
+// sync — a 2-minute delay is fine for a schedule, not for a chat you
+// just hit send on. Firestore's offline persistence (enabled once, up
+// top, in getFirestoreDb()) already queues writes made offline and sends
+// them the moment signal returns, so sending offline needs no extra
+// outbox code here — it just shows optimistically from the local cache.
+//
+// Same trust model as the rest of this app: there's no login, so a "DM"
+// here is private only by UI convention (not shown to anyone else in the
+// app), not cryptographically private — anyone who has the room code
+// could read the raw Firestore data. Fine for a small trusted friend
+// group, worth knowing if you ever say something you wouldn't want a
+// stranger with the code to see.
+//
+// Every const/let below is declared here, not further up the file, since
+// nothing earlier in this file's load-time (synchronous, top-level) call
+// chain reaches any of it — this whole feature is self-contained and
+// only ever called from its own init calls at the bottom of this block,
+// its own onSnapshot callbacks, or DOM event handlers wired within it.
+// See CLAUDE.md's TDZ rule for why that check matters here.
+// ===============================
+const CHAT_THREAD_GROUP = "group";
+const CHAT_HEARTBEAT_MS = 90 * 1000;
+const CHAT_ONLINE_MS = 150 * 1000; // a bit over one missed heartbeat before flipping to "offline"
+const CHAT_MESSAGE_FETCH_LIMIT = 500;
+const CHAT_PRUNE_KEEP = 300;
+const CHAT_PRUNE_MIN_INTERVAL_MS = 30 * 60 * 1000;
+
+let chatMessagesCache = [];
+let chatPresenceCache = {}; // deviceId -> {displayName, lastActiveAt, reads}
+let chatOpenThread = null; // null = showing the thread list; else the open thread's id
+let chatOpenThreadLabel = null;
+let chatMessagesUnsub = null;
+let chatPresenceUnsub = null;
+let chatHeartbeatTimer = null;
+
+// Deterministic regardless of who opens the DM first — sorted, lowercased
+// names, not deviceIds, so the same two people always land in the same
+// thread even across a reinstall (new deviceId) or a device-handoff,
+// same "identity is a name, not a device" model as friendStatusEntries.
+function dmThreadId(nameA, nameB){
+  const norm = n=> (n || "").trim().toLowerCase();
+  return "dm:" + [norm(nameA), norm(nameB)].sort().join("|");
+}
+
+// Everyone chat's aware of: the fixed roster plus anyone actually seen
+// syncing under a different (e.g. "Other…") name — same name-is-identity
+// source as friendStatusEntries, so the chat contact list and the
+// "Where's everyone?" list never disagree about who's in the group.
+function chatContactNames(){
+  const names = new Set(KNOWN_CONTRIBUTORS);
+  const peopleStatus = Store.get("peopleStatus") || {};
+  const peopleLastSeen = Store.get("peopleLastSeen") || {};
+  Object.values(peopleStatus).forEach(s=>{ if(s && s.displayName) names.add(s.displayName); });
+  Object.values(peopleLastSeen).forEach(s=>{ if(s && s.displayName) names.add(s.displayName); });
+  Object.values(chatPresenceCache).forEach(p=>{ if(p && p.displayName) names.add(p.displayName); });
+  const me = currentContributorName();
+  if(me) names.delete(me);
+  return [...names].sort((a,b)=> a.localeCompare(b));
+}
+
+function allMyThreadIds(){
+  const me = currentContributorName();
+  const ids = [CHAT_THREAD_GROUP];
+  if(me) chatContactNames().forEach(n=> ids.push(dmThreadId(me, n)));
+  return ids;
+}
+
+function presenceForName(name){
+  const norm = (name || "").trim().toLowerCase();
+  let latest = 0;
+  Object.values(chatPresenceCache).forEach(p=>{
+    if(p && (p.displayName || "").trim().toLowerCase() === norm) latest = Math.max(latest, p.lastActiveAt || 0);
+  });
+  return latest;
+}
+function isOnline(name){
+  const ts = presenceForName(name);
+  return !!ts && (Date.now() - ts) < CHAT_ONLINE_MS;
+}
+function myReadTs(thread){
+  const mine = chatPresenceCache[ensureDeviceId()];
+  return (mine && mine.reads && mine.reads[thread]) || 0;
+}
+// Newest read timestamp for `thread` among every device synced under
+// `name` other than this one — mirrors presenceForName's per-name
+// dedup, so a read receipt isn't fooled by someone's old/duplicate
+// deviceId lagging behind their current one.
+function otherReadTs(thread, name){
+  const norm = (name || "").trim().toLowerCase();
+  const me = ensureDeviceId();
+  let latest = 0;
+  Object.entries(chatPresenceCache).forEach(([id, p])=>{
+    if(id === me) return;
+    if(p && (p.displayName || "").trim().toLowerCase() === norm) latest = Math.max(latest, (p.reads && p.reads[thread]) || 0);
+  });
+  return latest;
+}
+
+function threadMessages(thread){
+  return chatMessagesCache.filter(m=> m.thread === thread).sort((a,b)=> a.ts - b.ts);
+}
+function unreadCountForThread(thread){
+  const readTs = myReadTs(thread);
+  const me = ensureDeviceId();
+  return chatMessagesCache.filter(m=> m.thread === thread && m.fromDeviceId !== me && m.ts > readTs).length;
+}
+function totalUnreadCount(){
+  return allMyThreadIds().reduce((sum, t)=> sum + unreadCountForThread(t), 0);
+}
+
+function renderChatUnreadBadge(){
+  const badge = document.getElementById("chatUnreadBadge");
+  if(!badge) return;
+  const n = totalUnreadCount();
+  if(n > 0){ badge.textContent = n > 99 ? "99+" : String(n); badge.style.display = ""; }
+  else badge.style.display = "none";
+}
+
+// Marks everything in `thread` read as of right now, both locally
+// (instant badge/UI feedback) and on this device's own presence doc, so
+// the read receipt reaches whoever's on the other end of a DM. Uses a
+// dotted-field merge (only the one thread's key inside `reads`), not a
+// full-document overwrite — never clobbers another thread's read
+// timestamp, or the displayName/lastActiveAt the heartbeat wrote.
+function markThreadRead(thread){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room) return;
+  const deviceId = ensureDeviceId();
+  const now = Date.now();
+  const mine = chatPresenceCache[deviceId] || {};
+  mine.reads = { ...(mine.reads || {}), [thread]: now };
+  chatPresenceCache[deviceId] = mine;
+  renderChatUnreadBadge();
+  const docRef = db.collection("rooms").doc(room).collection("chatPresence").doc(deviceId);
+  // FieldPath, not a "reads.<thread>" dotted string — a thread id can be
+  // a custom "Other…" name a friend typed in (dmThreadId), and if that
+  // name ever contained a literal "." a dotted string would misread it
+  // as a deeper nested path and corrupt sibling threads' read receipts.
+  // FieldPath takes each segment literally, with no such ambiguity.
+  const fieldPath = (typeof firebase !== "undefined" && firebase.firestore && firebase.firestore.FieldPath)
+    ? new firebase.firestore.FieldPath("reads", thread)
+    : null;
+  const fallback = ()=> docRef.set({ reads: { [thread]: now } }, { merge: true }).catch(()=>{});
+  // update() fails outright if the doc doesn't exist yet (no heartbeat
+  // sent yet this session) — falls back to a merge-set, which is safe
+  // there since a brand-new doc has no sibling read keys to protect.
+  (fieldPath ? docRef.update(fieldPath, now).catch(fallback) : fallback());
+  // best-effort throughout — a missed read receipt just shows as unread
+  // a little longer next time, never worth surfacing an error for.
+}
+
+async function sendChatMessage(thread, text){
+  const trimmed = (text || "").trim();
+  if(!trimmed) return;
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  const name = currentContributorName();
+  if(!db || !room || !name) throw new Error("Pick who you are (Discover → Sync) before chatting.");
+  const deviceId = ensureDeviceId();
+  await db.collection("rooms").doc(room).collection("chatMessages").add({
+    thread, text: trimmed.slice(0, 2000), fromName: name, fromDeviceId: deviceId, ts: Date.now()
+  });
+  markThreadRead(thread);
+  pruneChatThreadIfNeeded(thread).catch(err=> console.warn("Chat prune failed (non-fatal):", err));
+}
+
+// Keeps each thread's history bounded so a chatty festival weekend can't
+// quietly run past Firestore's free-tier reads — cheap on purpose:
+// throttled to at most once per CHAT_PRUNE_MIN_INTERVAL_MS (checked
+// against a local timestamp, no read needed) and only even considers
+// pruning off the messages this device already has cached locally from
+// the live listener, no extra query.
+async function pruneChatThreadIfNeeded(thread){
+  const now = Date.now();
+  const lastPrune = Store.get("lastChatPruneAt") || 0;
+  if(now - lastPrune < CHAT_PRUNE_MIN_INTERVAL_MS) return;
+  const msgs = threadMessages(thread);
+  if(msgs.length <= CHAT_PRUNE_KEEP) return;
+  Store.set("lastChatPruneAt", now);
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room) return;
+  const toDelete = msgs.slice(0, msgs.length - CHAT_PRUNE_KEEP);
+  const col = db.collection("rooms").doc(room).collection("chatMessages");
+  await Promise.all(toDelete.map(m=> col.doc(m.id).delete().catch(()=>{})));
+}
+
+function sendChatHeartbeat(){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  const name = currentContributorName();
+  if(!db || !room || !name) return;
+  const deviceId = ensureDeviceId();
+  db.collection("rooms").doc(room).collection("chatPresence").doc(deviceId)
+    .set({ displayName: name, lastActiveAt: Date.now() }, { merge: true })
+    .catch(()=>{});
+}
+
+function startChatListeners(){
+  const db = getFirestoreDb();
+  const room = currentRoomCode();
+  if(!db || !room || chatMessagesUnsub) return;
+  chatMessagesUnsub = db.collection("rooms").doc(room).collection("chatMessages")
+    .orderBy("ts", "desc").limit(CHAT_MESSAGE_FETCH_LIMIT)
+    .onSnapshot(snap=>{
+      chatMessagesCache = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+      renderChatUnreadBadge();
+      if(chatOpenThread){
+        renderChatThreadView();
+        if(unreadCountForThread(chatOpenThread) > 0) markThreadRead(chatOpenThread);
+      } else if(document.getElementById("chatPanel")){
+        renderChatThreadList();
+      }
+    }, err=> console.warn("Chat message listener failed:", err && err.code));
+  chatPresenceUnsub = db.collection("rooms").doc(room).collection("chatPresence")
+    .onSnapshot(snap=>{
+      const next = {};
+      snap.forEach(d=> next[d.id] = d.data());
+      chatPresenceCache = next;
+      renderChatUnreadBadge();
+      if(document.getElementById("chatPanel")){
+        if(chatOpenThread) renderChatThreadView(); else renderChatThreadList();
+      }
+    }, err=> console.warn("Chat presence listener failed:", err && err.code));
+}
+function stopChatListeners(){
+  if(chatMessagesUnsub){ chatMessagesUnsub(); chatMessagesUnsub = null; }
+  if(chatPresenceUnsub){ chatPresenceUnsub(); chatPresenceUnsub = null; }
+}
+
+function chatThreadSummary(thread){
+  const msgs = threadMessages(thread);
+  const last = msgs[msgs.length - 1];
+  return last ? { text: last.text, ts: last.ts, mine: last.fromDeviceId === ensureDeviceId() } : null;
+}
+
+function chatThreadRowHtml(t){
+  const onlineDot = t.online === null ? "" : `<span class="chat-online-dot${t.online ? " online" : ""}"></span>`;
+  const timeLabel = t.ts ? formatLastSeen(t.ts) : "";
+  return `
+    <div class="chat-thread-row" data-chat-thread="${escapeHtml(t.id)}" data-chat-label="${escapeHtml(t.label)}">
+      <span class="chat-thread-icon">${t.icon}</span>
+      <span class="chat-thread-main">
+        <span class="chat-thread-name">${onlineDot}${escapeHtml(t.label)}</span>
+        <span class="chat-thread-sub">${t.sub}</span>
+      </span>
+      <span class="chat-thread-meta">
+        ${timeLabel ? `<span class="chat-thread-time">${escapeHtml(timeLabel)}</span>` : ""}
+        ${t.unread ? `<span class="chat-unread-pill">${t.unread}</span>` : ""}
+      </span>
+    </div>`;
+}
+
+function renderChatThreadList(){
+  const card = document.querySelector("#chatPanel .chat-panel-card");
+  if(!card) return;
+  const me = currentContributorName();
+  const groupSummary = chatThreadSummary(CHAT_THREAD_GROUP);
+  const rows = [chatThreadRowHtml({
+    id: CHAT_THREAD_GROUP, label: "Everyone", icon: "👥",
+    sub: groupSummary ? `${groupSummary.mine ? "You: " : ""}${escapeHtml(groupSummary.text)}` : "Say hi to the group",
+    ts: groupSummary ? groupSummary.ts : null, unread: unreadCountForThread(CHAT_THREAD_GROUP), online: null
+  })];
+  if(me){
+    const statusEntries = friendStatusEntries();
+    chatContactNames().forEach(name=>{
+      const thread = dmThreadId(me, name);
+      const summary = chatThreadSummary(thread);
+      const entry = statusEntries.find(e=> (e.displayName || "").trim().toLowerCase() === name.trim().toLowerCase());
+      const locLine = entry && entry.place ? `${escapeHtml(entry.place)} · ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}` : "No location set yet";
+      rows.push(chatThreadRowHtml({
+        id: thread, label: name, icon: statusDotFor(name),
+        sub: summary ? `${summary.mine ? "You: " : ""}${escapeHtml(summary.text)}` : locLine,
+        ts: summary ? summary.ts : null, unread: unreadCountForThread(thread), online: isOnline(name)
+      }));
+    });
+  }
+  card.innerHTML = `
+    <div class="chat-panel-head">
+      <strong>Chat</strong>
+      <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
+    </div>
+    <div class="chat-thread-list">${rows.join("")}</div>
+    ${!me ? `<p class="empty-note" style="padding:0 16px 14px;">Pick who you are in Discover → Sync to start 1:1 chats — you can still read and send in Everyone without it.</p>` : ""}
+  `;
+  document.getElementById("chatCloseBtn").onclick = closeChatPanel;
+  card.querySelectorAll("[data-chat-thread]").forEach(row=>{
+    row.onclick = ()=> openChatThread(row.getAttribute("data-chat-thread"), row.getAttribute("data-chat-label"));
+  });
+}
+
+function chatReadReceiptLine(thread, msgs, isGroup){
+  const me = ensureDeviceId();
+  const lastMine = [...msgs].reverse().find(m=> m.fromDeviceId === me);
+  if(!lastMine) return "";
+  if(isGroup){
+    const seenBy = chatContactNames().filter(name=> otherReadTs(thread, name) >= lastMine.ts);
+    return seenBy.length ? `<div class="chat-read-receipt">Seen by ${escapeHtml(seenBy.join(", "))}</div>` : "";
+  }
+  const read = otherReadTs(thread, chatOpenThreadLabel) >= lastMine.ts;
+  return `<div class="chat-read-receipt">${read ? "Read" : "Sent"}</div>`;
+}
+
+function openChatThread(thread, label){
+  chatOpenThread = thread;
+  chatOpenThreadLabel = label;
+  renderChatThreadView();
+  markThreadRead(thread);
+}
+
+function renderChatThreadView(){
+  const card = document.querySelector("#chatPanel .chat-panel-card");
+  if(!card || !chatOpenThread) return;
+  const thread = chatOpenThread;
+  const msgs = threadMessages(thread);
+  const me = ensureDeviceId();
+  const isGroup = thread === CHAT_THREAD_GROUP;
+  const bubbles = msgs.map(m=>{
+    const mine = m.fromDeviceId === me;
+    return `<div class="chat-bubble-row${mine ? " mine" : ""}">
+      <div class="chat-bubble">
+        ${!mine && isGroup ? `<span class="chat-bubble-name">${escapeHtml(m.fromName)}</span>` : ""}
+        <span class="chat-bubble-text">${escapeHtml(m.text)}</span>
+        <span class="chat-bubble-time">${new Date(m.ts).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}</span>
+      </div>
+    </div>`;
+  }).join("");
+  card.innerHTML = `
+    <div class="chat-panel-head">
+      <button type="button" class="chat-back-btn" id="chatBackBtn" aria-label="Back to chats">←</button>
+      <strong>${escapeHtml(chatOpenThreadLabel || "Chat")}</strong>
+      <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessagesBox">${bubbles || `<p class="empty-note" style="padding:14px;">No messages yet — say hi.</p>`}${chatReadReceiptLine(thread, msgs, isGroup)}</div>
+    <form class="chat-input-row" id="chatSendForm">
+      <input type="text" id="chatMessageInput" placeholder="Message…" autocomplete="off" maxlength="2000">
+      <button type="submit" class="action" id="chatSendBtn">Send</button>
+    </form>
+  `;
+  document.getElementById("chatCloseBtn").onclick = closeChatPanel;
+  document.getElementById("chatBackBtn").onclick = ()=>{ chatOpenThread = null; chatOpenThreadLabel = null; renderChatThreadList(); };
+  const box = document.getElementById("chatMessagesBox");
+  if(box) box.scrollTop = box.scrollHeight;
+  const form = document.getElementById("chatSendForm");
+  const input = document.getElementById("chatMessageInput");
+  form.onsubmit = async (e)=>{
+    e.preventDefault();
+    if(!input.value.trim()) return;
+    const text = input.value;
+    input.value = "";
+    try{ await sendChatMessage(thread, text); }
+    catch(err){
+      input.value = text;
+      alert(err && err.message ? err.message : "Couldn't send — check you've got signal and try again.");
+    }
+  };
+}
+
+function openChatPanel(){
+  closeChatPanel();
+  const backdrop = document.createElement("div");
+  backdrop.id = "chatPanel";
+  backdrop.style.cssText = "position:fixed; inset:0; z-index:70; background:rgba(5,10,8,.78); display:flex; align-items:flex-end; justify-content:center;";
+  backdrop.innerHTML = `<div class="card chat-panel-card" style="width:100%; max-width:520px; height:88vh; max-height:88vh; margin:0; border-radius:20px 20px 0 0; padding:0;"></div>`;
+  backdrop.onclick = (e)=>{ if(e.target === backdrop) closeChatPanel(); };
+  document.body.appendChild(backdrop);
+  startChatListeners();
+  sendChatHeartbeat();
+  renderChatThreadList();
+}
+function closeChatPanel(){
+  const el = document.getElementById("chatPanel");
+  if(el) el.remove();
+  chatOpenThread = null;
+  chatOpenThreadLabel = null;
+}
+
+function initChat(){
+  const chatOpenBtn = document.getElementById("chatOpenBtn");
+  if(chatOpenBtn) chatOpenBtn.onclick = openChatPanel;
+  if(!getFirestoreDb()) return; // Firebase CDN didn't load (offline first visit, etc.) — chat just no-ops this session, same graceful fallback as the rest of cloud sync
+  startChatListeners();
+  sendChatHeartbeat();
+  chatHeartbeatTimer = setInterval(sendChatHeartbeat, CHAT_HEARTBEAT_MS);
+}
+initChat();
+
+// Pauses the live listeners and heartbeat while the tab/app is backgrounded
+// (battery/data — a chat sheet nobody's looking at doesn't need to stay
+// subscribed) and resumes them on return, mirroring autoSyncNow's own
+// visibilitychange handling above but kept separate since chat's restart
+// logic (listeners + heartbeat, not a one-shot pull) is different enough
+// not to share a handler cleanly.
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible"){
+    startChatListeners();
+    sendChatHeartbeat();
+    if(!chatHeartbeatTimer) chatHeartbeatTimer = setInterval(sendChatHeartbeat, CHAT_HEARTBEAT_MS);
+  }else{
+    stopChatListeners();
+    if(chatHeartbeatTimer){ clearInterval(chatHeartbeatTimer); chatHeartbeatTimer = null; }
   }
 });
 

@@ -100,7 +100,10 @@
     <div>Chapter Five: Radical Redesign · 12&ndash;16&nbsp;Aug</div>
     <div class="ptr-hint" id="ptrHint">↓ Pull down to refresh &amp; sync</div>
   </div>
-  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:39</span>
+  <div class="appbar-right">
+    <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:39</span>
+    <button type="button" class="chat-btn" id="chatOpenBtn" aria-label="Open group chat" title="Chat">💬<span class="chat-unread-badge" id="chatUnreadBadge" style="display:none;">0</span></button>
+  </div>
 </header>
 <div id="ptrIndicator" class="ptr-indicator" aria-hidden="true">
   <span class="ptr-indicator-arrow">↓</span>
@@ -992,7 +995,7 @@ Talk to an actor in character
 
     <div class="card" id="jumpFriendStatus">
       <h3>📍 Where's everyone?</h3>
-      <p>A quick status, not live tracking — set where you are and it's visible to the group next sync. No GPS, nothing automatic.</p>
+      <p>A quick status, not live tracking — set where you are and it's visible to the group next sync. Manual by default; GPS is available below if you'd rather it update itself.</p>
       <div class="field"><label>Where are you?</label>
         <select id="statusLocationSelect">
           <option value="">Select a location…</option>
@@ -1000,6 +1003,7 @@ Talk to an actor in character
       </div>
       <div class="field" id="statusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="statusCustomInput" placeholder="Type where you are"></div>
       <button class="action" id="statusCustomBtn" style="margin-top:6px;">Set my status</button>
+      <label class="gps-toggle-row"><input type="checkbox" id="gpsLocationToggle">Auto-update my location from GPS every few minutes (uses your device's location permission; overrides the manual field above while on)</label>
       <p class="empty-note" id="statusFeedbackNote" style="margin-top:6px;"></p>
       <div id="friendStatusList" style="margin-top:12px;"></div>
     </div>
