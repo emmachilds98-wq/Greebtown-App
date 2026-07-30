@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v177";
-const APP_BUILD_TIME = "2026-07-30T22:49:05Z";
+const APP_CACHE_VERSION = "v178";
+const APP_BUILD_TIME = "2026-07-30T23:02:06Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5700,6 +5700,23 @@ function applyMapTransform(){
   const inner = document.getElementById("mapInner");
   if(inner) inner.style.transform = `translate(${mapTx}px, ${mapTy}px) scale(${mapScale})`;
 }
+// A fast pinch or drag can generate pointermove events faster than the
+// screen actually repaints, so writing the transform straight from every
+// single one does redundant work and, combined with the browser
+// occasionally fighting for the same gesture (see the pointerdown/
+// pointermove handlers below), was part of what read as pinch-zoom
+// "cutting out" and snapping instead of tracking smoothly. State
+// (mapScale/mapTx/mapTy) still updates immediately/synchronously on
+// every event; only the actual style write is batched to once per
+// animation frame.
+let _mapTransformFrame = null;
+function scheduleMapTransform(){
+  if(_mapTransformFrame) return;
+  _mapTransformFrame = requestAnimationFrame(()=>{
+    _mapTransformFrame = null;
+    applyMapTransform();
+  });
+}
 function clampMapPan(){
   const rect = map.getBoundingClientRect();
   const maxX = rect.width * (mapScale - 1);
@@ -5710,7 +5727,7 @@ function clampMapPan(){
 function setMapScale(newScale){
   mapScale = Math.min(MAP_MAX_SCALE, Math.max(1, newScale));
   clampMapPan();
-  applyMapTransform();
+  scheduleMapTransform();
 }
 // Zooms toward a specific point (in #map's own coordinate space, i.e.
 // clientX/Y minus its bounding rect) rather than always scaling from
@@ -5727,7 +5744,7 @@ function setMapScaleAt(newScale, px, py){
   mapTy = py - k * (py - mapTy);
   mapScale = clamped;
   clampMapPan();
-  applyMapTransform();
+  scheduleMapTransform();
 }
 function mapCenterPoint(){
   const rect = map.getBoundingClientRect();
@@ -5775,12 +5792,26 @@ function setupMapZoomPan(){
       if(mapScale > 1){
         try{ map.setPointerCapture(e.pointerId); }catch(err){}
         map.style.touchAction = "none";
+        e.preventDefault();
         dragging = true; dragMoved = false;
         startX = e.clientX; startY = e.clientY; startTx = mapTx; startTy = mapTy;
       }
     } else if(pointers.size === 2){
-      try{ map.setPointerCapture(e.pointerId); }catch(err){}
+      // The first finger touched down while touch-action was still its
+      // resting "pan-y" (the branch above only captures/locks it down
+      // once mapScale > 1) — so by the time this second finger arrives,
+      // the browser may already be treating the gesture as a page
+      // scroll or its own native pinch-zoom. Re-capturing EVERY active
+      // pointer here (not just this new one) and calling
+      // preventDefault() forces the browser to hand the whole gesture
+      // over to this handler from this point on, instead of letting a
+      // scroll/native-zoom that already started keep fighting our pinch
+      // math for the rest of the gesture — that fight is what read as
+      // pinch-zoom "cutting out" and snapping between magnification
+      // points instead of tracking smoothly.
+      pointers.forEach((_, id)=>{ try{ map.setPointerCapture(id); }catch(err){} });
       map.style.touchAction = "none";
+      e.preventDefault();
       dragging = false;
       const pts = [...pointers.values()];
       pinchStartDist = dist(pts[0], pts[1]);
@@ -5791,6 +5822,7 @@ function setupMapZoomPan(){
     if(!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
     if(pointers.size === 2 && pinchStartDist){
+      e.preventDefault();
       const rect = map.getBoundingClientRect();
       const pts = [...pointers.values()];
       const m = mid(pts[0], pts[1]);
@@ -5800,9 +5832,10 @@ function setupMapZoomPan(){
       const dx = e.clientX - startX, dy = e.clientY - startY;
       if(Math.abs(dx) > 5 || Math.abs(dy) > 5) dragMoved = true;
       if(mapScale > 1){
+        e.preventDefault();
         mapTx = startTx + dx; mapTy = startTy + dy;
         clampMapPan();
-        applyMapTransform();
+        scheduleMapTransform();
       }
     }
   };
