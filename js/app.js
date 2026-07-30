@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v168";
-const APP_BUILD_TIME = "2026-07-30T21:23:40Z";
+const APP_CACHE_VERSION = "v169";
+const APP_BUILD_TIME = "2026-07-30T21:37:50Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -386,6 +386,9 @@ fixBottomClearance();
 // -webkit-overflow-scrolling:touch), which is exactly why "am I near
 // the bottom of this stage list yet" was hard to tell on a long one.
 //
+// The native scrollbar is hidden outright via CSS (.timeline-outer
+// scrollbar rules) now that this custom one exists — no point in both.
+//
 // position:fixed, positioned in JS from the box's own
 // getBoundingClientRect() — NOT position:absolute as a child of the
 // scrolling box itself, which was the first attempt and visibly broke:
@@ -431,18 +434,26 @@ function updateTimelineScrollThumb(outerId){
   track.style.display = "block";
   const inset = 8;
   const trackHeight = rect.height - inset * 2;
-  // Left side, not right — sits just past the sticky stage-name column
-  // (measured live since its width changes at the mobile breakpoint),
-  // so it's still visible under a right-hand thumb doing the actual
-  // scrolling instead of being covered by it, and doesn't sit on top
-  // of the stage names themselves.
-  const headEl = outer.querySelector(".timeline-row-head");
-  const headWidth = headEl ? headEl.offsetWidth : 88;
-  track.style.left = (rect.left + headWidth + 4) + "px";
+  // Left of the whole timeline box, outside it entirely — not just past
+  // the sticky stage-name column, which used to sit inside the box and
+  // read as part of the timeline itself. TRACK_WIDTH must match
+  // .timeline-scroll-track's CSS width. Clamped to a minimum of 2px so a
+  // box with little/no left margin (narrow viewport) never pushes the
+  // bar off-screen.
+  const TRACK_WIDTH = 5;
+  const gap = 6;
+  track.style.left = Math.max(2, rect.left - gap - TRACK_WIDTH) + "px";
   track.style.top = (rect.top + inset) + "px";
   track.style.height = trackHeight + "px";
   const thumbHeight = Math.max(24, (outer.clientHeight / outer.scrollHeight) * trackHeight);
-  const thumbTop = (outer.scrollTop / overflow) * (trackHeight - thumbHeight);
+  // Clamp scrollTop into [0, overflow] before computing the thumb
+  // position — on touch devices, elastic overscroll (rubber-banding) at
+  // the very top/bottom briefly pushes scrollTop negative or past
+  // overflow, and unclamped that swung thumbTop outside the track on
+  // every one of those scroll events, reading as a shake right at the
+  // top/bottom edges.
+  const clampedScrollTop = Math.max(0, Math.min(outer.scrollTop, overflow));
+  const thumbTop = (clampedScrollTop / overflow) * (trackHeight - thumbHeight);
   thumb.style.height = thumbHeight + "px";
   thumb.style.top = thumbTop + "px";
 }
@@ -3098,8 +3109,8 @@ function otherSetsFor(artist){
 function otherSetsHTML(artist){
   const others = otherSetsFor(artist);
   if(!others.length) return "";
-  const links = others.map((o,i)=> `<a class="inline-link other-set-link" href="javascript:void(0)" data-idx="${i}">${escapeHtml(o.day)} ${escapeHtml(o.start||"TBC")} · ${escapeHtml(o.stage)}</a>`).join(" &nbsp;·&nbsp; ");
-  return `<p class="empty-note other-sets-note">Also playing: ${links}</p>`;
+  const rows = others.map((o,i)=> `<a class="other-set-link" href="javascript:void(0)" data-idx="${i}"><span class="other-set-day">${escapeHtml(o.day)}</span><span class="other-set-time">${escapeHtml(o.start||"TBC")}</span><span class="other-set-stage">${escapeHtml(o.stage)}</span></a>`).join("");
+  return `<div class="other-sets-note"><span class="other-sets-label">Also playing</span>${rows}</div>`;
 }
 
 // Wires the links otherSetsHTML() renders — call after inserting that
@@ -5062,7 +5073,7 @@ const minorStages = otherStages.map((s, i)=>({
 // not a surveyed spot — the same caveat as the plain "?" markers below.
 const thingsToFind = [
   { name:"The Boomtown Bobbies", near:"Area 404", x:"12%", y:"36%", info:"A mock police station hidden venue playing on Area 404's Guardians — expect in-character 'officers', a booking-desk bar and a wink at the district's own policing storyline." },
-  { name:"The Luck Exchange", near:"Area 404", x:"14%", y:"70%", info:"A casino-themed hidden venue in Area 404's territory — cards, chips and a party underneath the gambling dressing." },
+  { name:"Luck Exchange Casino", near:"Area 404", x:"14%", y:"70%", info:"A casino-themed hidden venue in Area 404's territory — cards, chips and a party underneath the gambling dressing." },
   { name:"Botanica Zoo", near:"Botanica", x:"30%", y:"14%", info:"A character-led 'zoo' micro-venue inside Botanica — the theme is the clue, so follow the animal keepers and see where they lead." },
   { name:"The Garden Centre", near:"Botanica", x:"44%", y:"14%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
   { name:"Hotel Paradiso", near:"Copperwood", x:"84%", y:"20%", info:"A faded-glamour hotel-themed micro venue — sits well with Copperwood's 1925 film-world setting; check in at the 'front desk'." },
@@ -5074,7 +5085,7 @@ const thingsToFind = [
   { name:"Gabber Kebabber", near:"Letsbe Avenue", x:"46%", y:"84%", info:"Kebab-shop chaos paired with gabber and hardcore — a tiny, loud find rather than a destination with a published pin." },
   { name:"Sub Lab", near:"Metropolis", x:"16%", y:"84%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
   { name:"Deviant Lounge", near:"Metropolis", x:"22%", y:"90%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
-  { name:"Pomegranate Parlour", near:"Site-wide", x:"86%", y:"20%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor." },
+  { name:"The Pomegranate Parlour", near:"Site-wide", x:"86%", y:"20%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor." },
   { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." }
 ];
 
@@ -5853,7 +5864,13 @@ function mapQuickAction(kind){
     }
     const stageMatch = [...locations, ...minorStages].find(l=> l.name === next.stage);
     const marker = stageMatch ? [...document.querySelectorAll(".marker")].find(m=> m.dataset.name === stageMatch.name) : null;
-    if(marker){ marker.click(); jumpTo("map"); return; }
+    if(marker){
+      marker.click();
+      marker.classList.add("jump-highlight");
+      setTimeout(()=> marker.classList.remove("jump-highlight"), 2400);
+      jumpTo("map");
+      return;
+    }
     showMapInfo(`<div class="card"><h3>${escapeHtml(next.name)}</h3><p>${escapeHtml(next.stage)} · ${timeLabel(next)}</p></div>`);
     return;
   }
@@ -5979,6 +5996,21 @@ function fullVenueDirectory(){
   return venueDirectory.concat(loggedVenuesAsDirectory());
 }
 
+// Every name that actually gets a pin drawn in loadMap() — a directory
+// row only gets a "Show on map" link when its name is in this set, so
+// entries with no plotted location (most food stalls, welfare points and
+// shops, since Boomtown never publishes exact spots for these) don't
+// offer a link that goes nowhere.
+function mapMarkerNames(){
+  return new Set([
+    ...locations.filter(p=>p.kind !== "meeting").map(p=>p.name),
+    ...minorStages.map(p=>p.name),
+    ...thingsToFind.map(p=>p.name),
+    ...allLandmarks().map(p=>p.name),
+    ...gates.map(p=>p.name)
+  ]);
+}
+
 let venuePersonFilter = null;
 function renderVenueTable(){
   const body = document.getElementById("venueTableBody");
@@ -5998,8 +6030,10 @@ function renderVenueTable(){
       (v.info || "").toLowerCase().includes(term))
   );
   const musicLabel = m => m === true ? "🎵 Music" : m === false ? "🔇 No music" : "🎵 Music unclear";
+  const markerNames = mapMarkerNames();
   body.innerHTML = rows.map(v=>{
     const hours = v.status === "logged" ? null : stageHoursFromSchedule(v.name);
+    const onMap = markerNames.has(v.name);
     return `
     <div class="venue-row" data-venue-name="${escapeHtml(v.name)}">
       <div class="venue-row-head">
@@ -6012,7 +6046,10 @@ function renderVenueTable(){
       <div class="venue-row-meta">${escapeHtml(v.type)}${v.genre && v.genre !== "—" ? " · " + escapeHtml(v.genre) : ""}${v.near ? " · 📍 " + escapeHtml(v.near) : ""}</div>
       <p class="venue-row-info">${escapeHtml(v.info)}</p>
       ${hours ? `<p class="venue-row-info" style="color:var(--accent-teal); margin-top:4px;">🕐 Acts running roughly ${hours} (from saved set times — see Plan for exact slots)</p>` : ""}
-      ${v.status === "logged" ? `<button data-i="${v._hiddenVenueIndex}" class="ghost removeHiddenVenueBtn" style="margin-top:6px;">Remove this find</button>` : ""}
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+        ${onMap ? `<button class="ghost showOnMapBtn" data-name="${escapeHtml(v.name)}">📍 Show on map</button>` : ""}
+        ${v.status === "logged" ? `<button data-i="${v._hiddenVenueIndex}" class="ghost removeHiddenVenueBtn">Remove this find</button>` : ""}
+      </div>
     </div>
   `;
   }).join("") || `<p class="empty-note">No entries match these filters yet.</p>`;
@@ -6021,6 +6058,9 @@ function renderVenueTable(){
   // own name heading — a venue like "Botanica Zoo" would otherwise get its
   // own name partially turned into a link.
   body.querySelectorAll(".venue-row-meta, .venue-row-info").forEach(el=> linkifyKeyTerms(el));
+  body.querySelectorAll(".showOnMapBtn").forEach(btn=>{
+    btn.onclick = ()=> jumpToDistrictOnMap(btn.dataset.name);
+  });
   body.querySelectorAll(".removeHiddenVenueBtn").forEach(btn=>{
     btn.onclick = ()=>{
       const list = Store.get("hiddenVenues") || [];
@@ -6112,7 +6152,13 @@ function jumpToDistrictOnMap(name){
   jumpToTab("mapscreen");
   requestAnimationFrame(()=>{
     const marker = [...document.querySelectorAll("#mapInner .marker")].find(m=> m.dataset.name === name);
-    if(marker) marker.click();
+    if(marker){
+      marker.click();
+      // Flash it — a single dot among 40+ markers is easy to miss on
+      // arrival, so this briefly pops it oversized/white to draw the eye.
+      marker.classList.add("jump-highlight");
+      setTimeout(()=> marker.classList.remove("jump-highlight"), 2400);
+    }
     const info = document.getElementById("mapInfo");
     if(info) info.scrollIntoView({ behavior:"smooth", block:"start" });
   });
