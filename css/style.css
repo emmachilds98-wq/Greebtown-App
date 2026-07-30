@@ -526,5 +526,12 @@
   .chat-bubble-time{display:block; font-size:10px; color:var(--text-muted); margin-top:3px; text-align:right;}
   .chat-read-receipt{text-align:right; font-size:11px; color:var(--text-muted); padding:0 4px;}
   .chat-input-row{display:flex; gap:8px; padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); flex-shrink:0;}
-  .chat-input-row input{flex:1;}
+  /* 16px minimum, not the site-wide 15px input font-size — iOS Safari
+     auto-zooms the whole page in on focus for any text input under 16px,
+     which is exactly the "screen zooms in slightly and sits offset"
+     effect on opening chat and tapping the message box. 16px is below
+     that threshold everywhere else too in principle, but this is the
+     input most likely to be focused immediately on a small phone screen
+     inside a full-height sheet, where the zoom-and-shift is most visible. */
+  .chat-input-row input{flex:1; font-size:16px;}
   .chat-input-row button{flex-shrink:0;}
