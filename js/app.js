@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v171";
-const APP_BUILD_TIME = "2026-07-30T22:00:50Z";
+const APP_CACHE_VERSION = "v172";
+const APP_BUILD_TIME = "2026-07-30T22:11:21Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3900,6 +3900,25 @@ function closeHalfOrderModal(){
   if(existing) existing.remove();
 }
 
+// A personal clash pair (both artists in YOUR OWN schedule) can also be a
+// GROUP clash if 2+ different people across the group are into at least
+// one of the two — same day+sorted-names key either way (see
+// personalClashChoiceKey/groupClashPairs), so "also a group clash" is
+// just "this key is present in groupPairsByKey". Renders a small link-out
+// card so resolving your own pick doesn't leave you unaware the group
+// still needs to weigh in separately (or already has).
+function groupClashLinkHTML(pair, decision){
+  const status = decision ? decision.status : "needs";
+  const owners = new Set([...Object.keys(pair.a.interest), ...Object.keys(pair.b.interest)]);
+  owners.delete(currentContributorName() || "You");
+  const otherCount = owners.size;
+  return `<div class="decision-linked-note">
+    <span>⚡ ${otherCount} other${otherCount===1?"":"s"} in your group ${otherCount===1?"is":"are"} into this clash too — ${status==="needs" ? "no group call yet" : "group's already weighed in"}</span>
+    ${decisionStatusPillHTML(status)}
+    <button type="button" class="ghost decision-jump-btn" data-jump-key="${escapeHtml(pair.key)}">Open group decision</button>
+  </div>`;
+}
+
 // Asked whenever "half & half" is picked for a clashing pair — since a
 // clash means the two sets overlap, catching "half of each" only makes
 // sense with a real first/second order (leave one early, catch the
@@ -3936,7 +3955,7 @@ function showHalfOrderModal(day, a, b, onChoose){
   document.getElementById("halfOrderSkipBtn").onclick = ()=>{ onChoose(null); closeHalfOrderModal(); };
 }
 
-function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners){
+function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners, groupPairsByKey){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
   const seen = isSeen(artist.name);
@@ -3957,13 +3976,22 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
     const shortMine = escapeHtml(truncateName(artist.name, 14));
     const shortOther = escapeHtml(truncateName(other.name, 14));
     const halfOrder = choice === "half" ? getHalfOrderChoice(artist.day, artist.name, other.name) : null;
+    const clashKey = personalClashChoiceKey(artist.day, artist.name, other.name);
+    const groupPair = groupPairsByKey ? groupPairsByKey.get(clashKey) : null;
+    const groupDecision = groupPair ? (Store.get("groupDecisions") || {})[groupPair.key] : null;
+    // "I'll go" + 🙋 (solo) rather than reusing the group card's "Together"
+    // + 👥 wording — the two cards sit right next to each other when a
+    // clash is both personal and group, and near-identical labels are
+    // exactly what made it unclear which one only affects your own plan.
     choiceHTML = `
       <div class="decision-actions personal-clash-actions">
-        <button data-clash-choice="a" title="Go to ${escapeHtml(artist.name)}" class="${choice==="a" ? "active" : ""}">Go: ${shortMine}</button>
-        <button data-clash-choice="b" title="Go to ${escapeHtml(other.name)}" class="${choice==="b" ? "active" : ""}">Go: ${shortOther}</button>
-        <button data-clash-choice="half" class="${choice==="half" ? "active" : ""}">Half &amp; half</button>
+        <button data-clash-choice="a" title="Only updates your own plan — tap again to clear" class="${choice==="a" ? "active" : ""}">🙋 I'll go<br><strong>${shortMine}</strong></button>
+        <button data-clash-choice="b" title="Only updates your own plan — tap again to clear" class="${choice==="b" ? "active" : ""}">🙋 I'll go<br><strong>${shortOther}</strong></button>
+        <button data-clash-choice="half" title="Only updates your own plan — tap again to clear" class="${choice==="half" ? "active" : ""}">◐ Catch half<br><span>of each</span></button>
       </div>
-      ${halfOrder ? `<p class="empty-note" style="margin-top:4px;">Catching <strong>${escapeHtml(halfOrder)}</strong> first</p>` : ""}`;
+      <p class="empty-note personal-clash-scope-note">Just for your own plan — teammates won't see this pick.</p>
+      ${halfOrder ? `<p class="empty-note" style="margin-top:2px;">Catching <strong>${escapeHtml(halfOrder)}</strong> first</p>` : ""}
+      ${groupPair ? groupClashLinkHTML(groupPair, groupDecision) : ""}`;
   }
   return `
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
@@ -4276,6 +4304,11 @@ function renderSchedule(){
     return;
   }
 
+  // Computed once per render (not per item) — groupClashPairs() is an
+  // O(n²) scan over the whole group's combined interest map, and every
+  // clashing item on this screen needs the same lookup to know whether
+  // its personal clash is also a group one.
+  const groupPairsByKey = new Map(groupClashPairs().map(p=>[p.key, p]));
   const mustSeeNamesSet = new Set(fullSchedule.filter(a=>a.mustSee).map(a=>a.name));
   // Keep each entry's ORIGINAL index into the full (unfiltered) schedule
   // even when the must-sees-only filter is on — remove/set-time/star
@@ -4295,7 +4328,7 @@ function renderSchedule(){
   }
 
   if(planView === "list"){
-    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet,a._owners)).join("");
+    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet,a._owners,groupPairsByKey)).join("");
   } else {
     const clashMap = findClashes(fullSchedule);
     const byDay = {};
@@ -4312,7 +4345,7 @@ function renderSchedule(){
       // "23:30", not before it as "0..." vs "2..." would alphabetically.
       const items = byDay[day].sort((x,y)=> (toMinutes(x.a.day, x.a.start) ?? 999999) - (toMinutes(y.a.day, y.a.start) ?? 999999));
       html += `<div class="daygroup">${day}</div>`;
-      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet,a._owners));
+      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet,a._owners,groupPairsByKey));
     });
     scheduleList.innerHTML = html;
   }
@@ -4382,6 +4415,10 @@ function renderSchedule(){
           if(next !== "half") setHalfOrderChoice(artist.day, artist.name, otherName, null);
           renderSchedule();
         };
+      });
+
+      itemEl.querySelectorAll(".decision-jump-btn").forEach(btn=>{
+        btn.onclick = ()=> jumpToGroupDecision(btn.getAttribute("data-jump-key"));
       });
     });
   }
@@ -4470,6 +4507,28 @@ function setPlanView(view){
   } else {
     renderSchedule();
   }
+}
+
+// Jumps from a personal clash card (Plan > List/Clashes) over to the
+// matching Group decision card in Compare. "Matching" just means the same
+// key — personalClashChoiceKey() and groupClashPairs() both build it from
+// day+sorted-artist-names, so a clash that's personal AND group-wide
+// always resolves to one identity across both stores. Expands the box
+// (and its "show more" list, if the card's past the fold) so the target
+// is actually in the DOM before scrolling to it.
+function jumpToGroupDecision(key){
+  setPlanView("compare");
+  groupDecisionsCollapsed = false;
+  const idx = groupClashPairs().findIndex(p=> p.key === key);
+  if(idx >= GROUP_DECISIONS_CAP) groupDecisionsExpanded = true;
+  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+  requestAnimationFrame(()=>{
+    const card = document.querySelector(`.decision-card[data-decision-key="${CSS.escape(key)}"]`);
+    if(!card) return;
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.add("decision-jump-highlight");
+    setTimeout(()=> card.classList.remove("decision-jump-highlight"), 1600);
+  });
 }
 
 document.getElementById("viewListBtn").onclick = ()=> setPlanView("list");
@@ -7557,9 +7616,10 @@ function decisionCardHTML(pair, decision){
   const shortA = escapeHtml(truncateName(pair.a.name, 16));
   const shortB = escapeHtml(truncateName(pair.b.name, 16));
   const halfOrder = status === "half" ? getHalfOrderChoice(pair.day, pair.a.name, pair.b.name) : null;
-  const statusNote = status === "together" && decision ? `Together: <strong>${escapeHtml(decision.choice)}</strong>`
-    : status === "split" && decision ? `Splitting up`
-    : status === "half" && decision ? `Catching half of each${halfOrder ? ` — <strong>${escapeHtml(halfOrder)}</strong> first` : ""}`
+  const statusNote = status === "together" && decision ? `Group's call: everyone's going to <strong>${escapeHtml(decision.choice)}</strong>`
+    : status === "split" && decision ? `Group's call: splitting up — everyone catches their own pick`
+    : status === "half" && decision ? `Group's call: catching half of each${halfOrder ? ` — <strong>${escapeHtml(halfOrder)}</strong> first` : ""}`
+    : status === "later" && decision ? `Left open for now — still needs a decision`
     : "";
   return `
     <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(pair.key)}" data-day="${escapeHtml(pair.day)}">
@@ -7570,15 +7630,16 @@ function decisionCardHTML(pair, decision){
         <div class="decision-vs-side"><strong>${escapeHtml(pair.b.name)}</strong><span class="decision-vs-stage">${escapeHtml(pair.b.stage)}</span><span class="decision-vs-owners">${ownerLine(pair.b.interest)}</span></div>
       </div>
       ${statusNote || (decision && decision.detail) ? `<p class="empty-note decision-status-note">${statusNote}${statusNote && decision.detail ? " · " : ""}${decision && decision.detail ? `📝 ${escapeHtml(decision.detail)}` : ""}${decision ? ` <span class="decision-by">(${escapeHtml(decision.by)})</span>` : ""}</p>` : ""}
+      <p class="empty-note decision-actions-hint">Tapping one of these sets it for the whole group, not just you:</p>
       <div class="decision-actions">
         <div class="decision-actions-row decision-actions-together">
-          <button data-action="together-a" title="Everyone together — ${escapeHtml(pair.a.name)}" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">👥 ${shortA}</button>
-          <button data-action="together-b" title="Everyone together — ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">👥 ${shortB}</button>
+          <button data-action="together-a" title="Everyone in the group goes to ${escapeHtml(pair.a.name)} — nobody catches ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">👥 All together<br><strong>${shortA}</strong></button>
+          <button data-action="together-b" title="Everyone in the group goes to ${escapeHtml(pair.b.name)} — nobody catches ${escapeHtml(pair.a.name)}" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">👥 All together<br><strong>${shortB}</strong></button>
         </div>
         <div class="decision-actions-row">
-          <button data-action="split" class="${decision && decision.status==="split" ? "active" : ""}">↔️ Split up</button>
-          <button data-action="half" title="Catch half of ${escapeHtml(pair.a.name)}, half of ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="half" ? "active" : ""}">◐ Half &amp; half</button>
-          <button data-action="later" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Later</button>
+          <button data-action="split" title="No group pick — everyone catches whichever one they've chosen in their own plan" class="${decision && decision.status==="split" ? "active" : ""}">↔️ Split up<br><span>everyone picks their own</span></button>
+          <button data-action="half" title="Catch half of ${escapeHtml(pair.a.name)}, half of ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="half" ? "active" : ""}">◐ Half &amp; half<br><span>catch part of each</span></button>
+          <button data-action="later" title="Leave it open — this clash keeps showing as needing a decision" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Decide later<br><span>leave it open</span></button>
         </div>
       </div>
       ${decision ? `<div class="decision-detail-row">
