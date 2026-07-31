@@ -12,7 +12,7 @@
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
 const APP_CACHE_VERSION = "v196";
-const APP_BUILD_TIME = "2026-07-31T10:22:29Z";
+const APP_BUILD_TIME = "2026-07-31T10:24:29Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -859,14 +859,31 @@ const FESTIVAL_GATES_OPEN = new Date("2026-08-12T11:00:00Z"); // 12:00 BST, Wed 
 function updateCountdown(){
   const el = document.getElementById("countdownText");
   const card = document.getElementById("countdownCard");
+  // Home's top spot: the countdown while gates aren't open yet, then the
+  // "Next saved event" ticket takes over that exact position once they
+  // are — same slot, not stacked, so Home doesn't just grow a section
+  // once the festival's actually on. nextEventCard sits right where
+  // countdownCard is in the markup (index.html), so toggling one off and
+  // the other on swaps what occupies the top of Home with no layout jump.
+  // Only ever toggles *visibility* here, never repopulates content —
+  // updateNextEvent() (defined much further down, after the embedded
+  // `artists` array) already keeps #next-event current on load and on
+  // every schedule change, and this function runs at load time far
+  // above that declaration, so calling it from here would be exactly
+  // the TDZ trap CLAUDE.md warns about (caught by testing with the
+  // system clock moved into the festival window — it doesn't reproduce
+  // with today's real date, only once "now" is actually past gates-open).
+  const nextEventCard = document.getElementById("nextEventCard");
   const diff = FESTIVAL_GATES_OPEN - new Date();
   if(diff <= 0){
     // Stops and disappears at gates-open, rather than a "gates are
     // open" message taking up Home space for the rest of the festival.
     if(card) card.style.display = "none";
+    if(nextEventCard) nextEventCard.style.display = "";
     return;
   }
   if(card) card.style.display = "";
+  if(nextEventCard) nextEventCard.style.display = "none";
   const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
   const mins = Math.floor((diff % 3600000) / 60000);
