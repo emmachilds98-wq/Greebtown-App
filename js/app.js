@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v213";
-const APP_BUILD_TIME = "2026-07-31T19:12:16Z";
+const APP_CACHE_VERSION = "v214";
+const APP_BUILD_TIME = "2026-07-31T19:45:55Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -826,7 +826,7 @@ tabs.forEach(tab=>{
     // size), so the map needs telling its real size the first time it's
     // actually shown, and again on every later visit in case the
     // viewport changed while this tab was hidden (e.g. orientation).
-    if(tab.dataset.tab === "mapscreen" && typeof leafletMap !== "undefined" && leafletMap) requestAnimationFrame(()=> leafletMap.invalidateSize());
+    if(tab.dataset.tab === "mapscreen" && typeof mapGL !== "undefined" && mapGL) requestAnimationFrame(()=> mapGL.resize());
   };
 });
 
@@ -6078,28 +6078,35 @@ const map = document.getElementById("map");
 const mapInfo = document.getElementById("mapInfo");
 
 // ===============================
-// ILLUSTRATED BASEMAP — an original illustration (grass texture, organic
-// district clearings, tree icons, a ring of little tent icons for
-// camping, a worn dirt-trail route), not a copy of Boomtown's own custom
-// Mapbox style — different palette, different shapes, entirely our own
-// generated artwork, evoking "illustrated festival map" as a genre
-// rather than tracing their specific design. Geo-referenced onto the
-// real map as an SVG overlay (see loadMap()'s L.svgOverlay call) bound
-// to the same real-world SITE_BOUNDS every marker is placed within, so
-// it pans/zooms/scales as a real crisp vector layer — not a raster image
-// — sitting under the precisely (or honestly-approximately) positioned
-// real markers on top of it.
+// ILLUSTRATED BASEMAP — an original illustration (organic district
+// clearings, tree clusters, a ring of tent dots for camping, a worn
+// dirt-trail route connecting districts), not a copy of Boomtown's own
+// custom Mapbox style — different palette, different shapes, entirely
+// our own generated artwork, evoking "illustrated festival map" as a
+// genre rather than tracing their specific design.
+//
+// Built as GeoJSON directly in real lat/lon (via schematicToLatLon, the
+// same calibration every marker already uses) and added to the map as
+// MapLibre GL sources/layers (see loadMap()'s mapGL.on("load", ...)
+// below). MapLibre triangulates each fill/line/circle layer into a GPU
+// vertex buffer ONCE when the source is set, then the WebGL renderer
+// draws that mesh directly on every frame — unlike an SVG (or the
+// previous Leaflet DOM/SVG-overlay version), nothing here gets
+// re-parsed or re-drawn per frame. Generating points straight in real
+// lat/lon also sidesteps the earlier SVG-overlay approach's bounding-box
+// approximation entirely — every shape is placed exactly where its own
+// schematic coordinate maps to, not stretched to fit inside a rectangle.
 // ===============================
 function seededRand(seed){
   let s = seed;
   return ()=>{ s = (s * 9301 + 49297) % 233280; return s / 233280; };
 }
 
-// Soft organic blob outline (a "clearing") through a ring of jittered
-// points, smoothed with quadratic curves — reads far less mechanical
-// than a plain ellipse.
-function blobPath(cx, cy, baseR, seed, points){
-  points = points || 9;
+// A ring of jittered points around a center — reads as an organic
+// "clearing" outline once filled, far less mechanical than a plain
+// circle. Closed (first point repeated at the end) for GeoJSON Polygon use.
+function blobRing(cx, cy, baseR, seed, points){
+  points = points || 14;
   const rand = seededRand(seed);
   const pts = [];
   for(let i=0;i<points;i++){
@@ -6107,61 +6114,8 @@ function blobPath(cx, cy, baseR, seed, points){
     const r = baseR * (0.72 + rand() * 0.5);
     pts.push([cx + Math.cos(angle) * r, cy + Math.sin(angle) * r * 0.78]);
   }
-  let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)} `;
-  for(let i=0;i<points;i++){
-    const p0 = pts[i], p1 = pts[(i + 1) % points];
-    const mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2;
-    d += `Q ${p0[0].toFixed(1)} ${p0[1].toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)} `;
-  }
-  return d + "Z";
-}
-
-// A simple pictorial tree: trunk + three overlapping canopy blobs.
-function treeIcon(x, y, scale, seed){
-  const rand = seededRand(seed);
-  const s = scale * (0.8 + rand() * 0.5);
-  const hue = 100 + Math.floor(rand() * 20);
-  return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(2)})">
-    <rect x="-0.35" y="0.1" width="0.7" height="1.6" rx="0.2" fill="rgba(92,64,42,0.55)"/>
-    <circle cx="-1" cy="-0.2" r="1.25" fill="hsla(${hue},38%,38%,0.5)"/>
-    <circle cx="1" cy="-0.2" r="1.25" fill="hsla(${hue+8},40%,34%,0.5)"/>
-    <circle cx="0" cy="-1.1" r="1.55" fill="hsla(${hue+4},42%,42%,0.55)" stroke="hsla(${hue},40%,24%,0.4)" stroke-width="0.12"/>
-  </g>`;
-}
-function treeCluster(cx, cy, count, spread, seed){
-  const rand = seededRand(seed);
-  let out = "";
-  for(let i=0;i<count;i++){
-    const a = rand() * Math.PI * 2;
-    const r = rand() * spread;
-    const x = cx + Math.cos(a) * r;
-    const y = cy + Math.sin(a) * r * 0.7;
-    out += treeIcon(x, y, 0.9 + rand() * 0.7, seed + i * 7 + 3);
-  }
-  return out;
-}
-
-// A little pitched tent: two canvas panels + a ridge line + guy ropes.
-function tentIcon(x, y, rot, seed){
-  const rand = seededRand(seed);
-  const hue = rand() > 0.5 ? "45,168,242" : "242,168,60";
-  return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)})">
-    <path d="M -1.3 1 L 0 -1.3 L 1.3 1 Z" fill="rgba(${hue},0.22)" stroke="rgba(238,246,241,0.35)" stroke-width="0.14"/>
-    <path d="M 0 -1.3 L 0 1" stroke="rgba(238,246,241,0.3)" stroke-width="0.1"/>
-    <path d="M -1.3 1 L -1.9 1.4 M 1.3 1 L 1.9 1.4" stroke="rgba(238,246,241,0.2)" stroke-width="0.08"/>
-  </g>`;
-}
-function tentRing(){
-  let out = "";
-  for(let i=0;i<26;i++){
-    const a = (i / 26) * Math.PI * 2;
-    const wobble = seededRand(i * 13)();
-    const rad = 46 + wobble * 3;
-    const x = 50 + Math.cos(a) * rad;
-    const y = 50 + Math.sin(a) * rad * 0.98;
-    out += tentIcon(x, y, (a * 180 / Math.PI) + 90, i * 5 + 1);
-  }
-  return out;
+  pts.push(pts[0]);
+  return pts;
 }
 
 function nearestDistrict(x, y, districts){
@@ -6174,57 +6128,87 @@ function nearestDistrict(x, y, districts){
   return best;
 }
 
-// Builds the illustration as an SVG DOM element (not a string — L.svgOverlay
-// needs a real element) covering the same 0-100 schematic space every
-// other schematic-only coordinate in this file already uses.
-function buildMapBackgroundSvg(){
+// Converts a ring/list of [x,y] points in the existing 0-100 schematic
+// space into [lon,lat] pairs (GeoJSON coordinate order) via the same
+// SCHEMATIC_TO_LATLON_FIT every other approximate position in this file uses.
+function schematicRingToLngLat(ring){
+  return ring.map(([x,y])=>{ const c = schematicToLatLon(x, y); return [c.lon, c.lat]; });
+}
+
+// A jittered scatter of points around a center, each carrying a ready-
+// to-use fill color and size — feeds a GeoJSON "circle" layer standing
+// in for a tree cluster (small varied-green dots read as foliage at map
+// scale without needing individual tree glyphs or a font/sprite server).
+function treeClusterPoints(cx, cy, count, spread, seed){
+  const rand = seededRand(seed);
+  const pts = [];
+  for(let i=0;i<count;i++){
+    const a = rand() * Math.PI * 2;
+    const r = rand() * spread;
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r * 0.7;
+    const hue = 100 + Math.floor(rand() * 20);
+    pts.push({ x, y, size: 2.2 + rand() * 1.8, color: `hsla(${hue},40%,42%,0.55)` });
+  }
+  return pts;
+}
+
+// Builds every basemap shape as GeoJSON FeatureCollections, ready to
+// hand straight to mapGL.addSource(). Districts/trail/spokes/trees/tents
+// mirror the previous SVG illustration's shapes and layout 1:1, just
+// expressed as real-world geometry instead of drawing instructions.
+function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
-  const blobs = districts.map((d,i)=>{
-    const cx = parseFloat(d.x), cy = parseFloat(d.y);
-    return `<path d="${blobPath(cx, cy, 16, i * 31 + 7)}" fill="rgba(230,196,120,0.16)" stroke="rgba(242,168,60,0.45)" stroke-width="0.4" stroke-dasharray="1.4 1.6"/>`;
-  }).join("");
-  const loopPath = "M " + districts.map(d=>`${parseFloat(d.x)} ${parseFloat(d.y)}`).join(" L ") + " Z";
+
+  const districtFeatures = districts.map((d,i)=>({
+    type: "Feature",
+    properties: { name: d.name },
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(d.x), parseFloat(d.y), 16, i * 31 + 7)) ] }
+  }));
+
+  const centers = districts.map(d=>[parseFloat(d.x), parseFloat(d.y)]);
+  if(centers.length) centers.push(centers[0]);
+  const trailFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(centers) } };
 
   // Thin spokes from every stage (major + minor) to its nearest district,
   // so the path network reads like it actually connects the site rather
   // than one lonely ring.
   const spokeTargets = locations.filter(p=>p.kind === "stage").concat(minorStages);
-  const spokes = spokeTargets.map(s=>{
+  const spokeFeatures = spokeTargets.map(s=>{
     const sx = parseFloat(s.x), sy = parseFloat(s.y);
     const nd = nearestDistrict(sx, sy, districts);
-    return `<path d="M ${sx} ${sy} L ${parseFloat(nd.x)} ${parseFloat(nd.y)}" fill="none" stroke="rgba(196,158,110,0.3)" stroke-width="0.4" stroke-dasharray="0.3 1.2" stroke-linecap="round"/>`;
-  }).join("");
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[sx,sy],[parseFloat(nd.x), parseFloat(nd.y)]]) } };
+  });
 
   const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name));
-  const trees = forestSpots.map((f,i)=> treeCluster(parseFloat(f.x), parseFloat(f.y), 16, 12, 17 + i * 41)).join("")
-    + treeCluster(9, 14, 9, 8, 5) + treeCluster(91, 86, 9, 8, 61) + treeCluster(90, 10, 7, 7, 23) + treeCluster(10, 90, 7, 7, 37)
-    + treeCluster(50, 4, 5, 6, 71) + treeCluster(96, 50, 5, 6, 83);
+  let treePts = [];
+  forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 16, 12, 17 + i * 41)); });
+  [[9,14,9,8,5],[91,86,9,8,61],[90,10,7,7,23],[10,90,7,7,37],[50,4,5,6,71],[96,50,5,6,83]].forEach(([cx,cy,count,spread,seed])=>{
+    treePts = treePts.concat(treeClusterPoints(cx, cy, count, spread, seed));
+  });
+  const treeFeatures = treePts.map(t=>{
+    const c = schematicToLatLon(t.x, t.y);
+    return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
+  });
 
-  const svgHtml = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <defs>
-        <pattern id="grassTex" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(12)">
-          <rect width="5" height="5" fill="none"/>
-          <line x1="0.8" y1="5" x2="0.5" y2="2.6" stroke="rgba(255,255,255,0.05)" stroke-width="0.25"/>
-          <line x1="2.6" y1="5" x2="3" y2="2.3" stroke="rgba(0,0,0,0.10)" stroke-width="0.25"/>
-          <line x1="4.2" y1="5" x2="3.9" y2="2.8" stroke="rgba(255,255,255,0.04)" stroke-width="0.25"/>
-        </pattern>
-      </defs>
-      <rect x="0" y="0" width="100" height="100" fill="#1e3a28"/>
-      <rect x="0" y="0" width="100" height="100" fill="url(#grassTex)"/>
-      <path d="M -5 38 Q 50 18 105 42" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.6"/>
-      <path d="M -5 68 Q 50 52 105 72" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="0.6"/>
-      <path d="M 5 45 C 5 25 15 10 30 8 C 45 4 55 2 65 8 C 80 10 90 18 95 30 C 98 40 97 55 90 65 C 85 80 75 90 60 93 C 45 95 30 92 18 82 C 8 70 5 58 5 45 Z" fill="none" stroke="rgba(143,168,156,0.3)" stroke-width="0.5" stroke-dasharray="2 2"/>
-      ${tentRing()}
-      ${blobs}
-      ${spokes}
-      <path d="${loopPath}" fill="none" stroke="rgba(196,158,110,0.6)" stroke-width="0.9" stroke-linejoin="round" stroke-dasharray="0.3 1.6" stroke-linecap="round"/>
-      ${trees}
-    </svg>
-  `;
-  const wrap = document.createElement("div");
-  wrap.innerHTML = svgHtml.trim();
-  return wrap.firstElementChild;
+  const tentFeatures = [];
+  for(let i=0;i<26;i++){
+    const a = (i / 26) * Math.PI * 2;
+    const wobble = seededRand(i * 13)();
+    const rad = 46 + wobble * 3;
+    const x = 50 + Math.cos(a) * rad;
+    const y = 50 + Math.sin(a) * rad * 0.98;
+    const c = schematicToLatLon(x, y);
+    tentFeatures.push({ type:"Feature", properties:{ color: (i % 2 === 0) ? "rgba(45,168,242,0.55)" : "rgba(242,168,60,0.55)" }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
+  }
+
+  return {
+    districts: { type:"FeatureCollection", features: districtFeatures },
+    trail: { type:"FeatureCollection", features: [trailFeature] },
+    spokes: { type:"FeatureCollection", features: spokeFeatures },
+    trees: { type:"FeatureCollection", features: treeFeatures },
+    tents: { type:"FeatureCollection", features: tentFeatures }
+  };
 }
 
 // Layer visibility persists across loadMap() re-renders (tab switches, syncs,
@@ -6279,31 +6263,44 @@ function realCoordFor(place){
 }
 
 // ===============================
-// MAP — a real Leaflet map on satellite imagery tiles (real GPS positions
-// where we have them, honestly-approximate ones elsewhere — see the
-// calibration section above), replacing the old hand-drawn illustrative
-// SVG schematic. Boomtown's own map artwork/tileset is proprietary and
-// deliberately not used here — only the factual location data extracted
-// alongside it (js/boomtown-locations-2026.js) feeds this.
+// MAP — a real MapLibre GL (WebGL) map (real GPS positions where we have
+// them, honestly-approximate ones elsewhere — see the calibration section
+// above), replacing both the old hand-drawn SVG schematic and the
+// Leaflet+satellite-tile version that followed it. Boomtown's own map
+// artwork/tileset is proprietary and deliberately not used here — only
+// the factual location data extracted alongside it
+// (js/boomtown-locations-2026.js) feeds this.
 //
-// The Leaflet map itself is created ONCE (see the `if(!leafletMap)`
-// branch below) and never torn down — loadMap() is called often
-// (every background sync, every place add/remove, every tab visit; see
-// refreshAfterMerge()), and rebuilding the whole map/tile layer on each
-// of those would reset the user's pan/zoom mid-exploration and re-fetch
-// every tile. Only the marker layers are cleared and redrawn each call.
-// Leaflet can be constructed while its container is hidden (Home is the
-// default active tab, so the very first load-time call happens off-
-// screen) — it just won't size itself correctly until
-// leafletMap.invalidateSize() runs once the container is actually
-// visible, which the tab-click handler triggers on every visit to Map.
+// The basemap illustration (districts/trail/spokes/trees/tents — see
+// buildMapGeoJSON above) is GeoJSON added as MapLibre sources/layers,
+// which MapLibre triangulates into a GPU mesh once and renders directly
+// every frame — this is the piece that actually benefits from "GPU mesh
+// instead of redrawing paths." The individual interactive markers
+// (stages, gates, POIs, etc. — a few dozen, each needing its own click
+// handler/label) stay as plain positioned DOM elements via
+// maplibregl.Marker, the same divIcon-style approach Leaflet used —
+// there's no real benefit to tessellating ~80 individually-clickable
+// HTML elements into a mesh, so only the decorative basemap art moved.
+//
+// The map itself is created ONCE (see the `if(!mapGL)` branch below) and
+// never torn down — loadMap() is called often (every background sync,
+// every place add/remove, every tab visit; see refreshAfterMerge()), and
+// rebuilding the whole map on each of those would reset the user's
+// pan/zoom mid-exploration. Only the marker layers are cleared and
+// redrawn each call; the GeoJSON basemap art is added once inside
+// mapGL.on("load", ...) and never rebuilt. MapLibre can be constructed
+// while its container is hidden (Home is the default active tab, so the
+// very first load-time call happens off-screen) — it just won't size
+// itself correctly until mapGL.resize() runs once the container is
+// actually visible, which the tab-click handler triggers on every visit
+// to Map.
 // ===============================
-let leafletMap = null;
-let mapLayerGroups = {};
+let mapGL = null;
+let mapMarkerGroups = {};
 let mapMarkersByName = {};
 
-// Every marker on this map is one combined divIcon (a positioning dot
-// plus its label) rather than two separate Leaflet layers per place —
+// Every marker on this map is one combined DOM element (a positioning
+// dot plus its label) rather than two separate layers per place —
 // simpler to keep in sync, and the existing .marker/.map-label CSS
 // (position:absolute; left:0; top:0 plus each variant's own centering
 // margin/transform) already assumes exactly this "both positioned from
@@ -6315,13 +6312,25 @@ function mapMarkerHtml(dotClass, labelClass, name, icon){
     ${name ? `<div class="map-label ${labelClass || ""}">${escapeHtml(name)}</div>` : ""}
   `;
 }
-function addMapMarker(layerGroup, lat, lon, html, opts){
+// groupName is a plain string key into mapMarkerGroups/mapLayerVisible
+// (e.g. "main", "minor", "poi") — MapLibre has no Leaflet-style
+// LayerGroup object, so group membership/visibility is tracked here
+// instead, by hiding/showing each marker's own DOM element.
+function addMapMarker(groupName, lat, lon, html, opts){
   opts = opts || {};
-  const icon = L.divIcon({ className: "", html, iconSize: [0, 0], iconAnchor: [0, 0] });
-  const marker = L.marker([lat, lon], { icon, title: opts.title || "", keyboard: false });
-  if(opts.onClick) marker.on("click", ()=> opts.onClick(marker));
-  marker.addTo(layerGroup);
-  if(opts.name) mapMarkersByName[opts.name] = marker;
+  const el = document.createElement("div");
+  el.innerHTML = html;
+  if(opts.title) el.title = opts.title;
+  if(opts.onClick) el.addEventListener("click", (e)=>{ e.stopPropagation(); opts.onClick(); });
+  // anchor:"top-left" (not MapLibre's default "center") so the element's
+  // own top-left lands exactly on the coordinate, matching the
+  // .marker/.map-label CSS's own centering math — the same contract
+  // Leaflet's iconAnchor:[0,0] gave us before.
+  const marker = new maplibregl.Marker({ element: el, anchor: "top-left" }).setLngLat([lon, lat]).addTo(mapGL);
+  if(mapLayerVisible[groupName] === false) el.style.display = "none";
+  if(!mapMarkerGroups[groupName]) mapMarkerGroups[groupName] = [];
+  mapMarkerGroups[groupName].push(marker);
+  if(opts.name) mapMarkersByName[opts.name] = { marker, onClick: opts.onClick || null };
   return marker;
 }
 function showMapInfoCard(html){
@@ -6342,46 +6351,65 @@ const POI_ICONS = {
 };
 
 function loadMap(){
-  if(!leafletMap){
+  if(!mapGL){
     // Centered on the real site (schematic (0,0) run through the same
     // calibration fit used everywhere else, not a hand-picked guess),
     // zoom chosen to fit the ~1.2km span the extracted map data
     // actually covers (see js/boomtown-locations-2026.js's coverage
-    // caveat), bounded so panning can't wander off onto a blank OSM
-    // tile with nothing plotted on it.
-    const SITE_BOUNDS = L.latLngBounds([51.0495, -1.2445], [51.0575, -1.2340]);
-    leafletMap = L.map(map, {
-      center: [51.0534, -1.2394],
+    // caveat), padded and bounded so panning can't wander off into
+    // blank space with nothing plotted on it.
+    const SITE_SW = { lat: 51.0495, lon: -1.2445 };
+    const SITE_NE = { lat: 51.0575, lon: -1.2340 };
+    const pad = 0.25;
+    const latPad = (SITE_NE.lat - SITE_SW.lat) * pad;
+    const lonPad = (SITE_NE.lon - SITE_SW.lon) * pad;
+    const MAX_BOUNDS = [
+      [SITE_SW.lon - lonPad, SITE_SW.lat - latPad],
+      [SITE_NE.lon + lonPad, SITE_NE.lat + latPad]
+    ];
+    mapGL = new maplibregl.Map({
+      container: map,
+      // A fully local style — solid background colour, no tile/sprite/
+      // glyph URLs — so the map needs zero network requests once
+      // MapLibre itself has loaded, same "works with zero signal" goal
+      // as the rest of this PWA's service worker.
+      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#1e3a28" } }] },
+      center: [-1.2394, 51.0534],
       zoom: 16, minZoom: 14, maxZoom: 19,
-      maxBounds: SITE_BOUNDS.pad(0.25),
-      zoomControl: false
+      maxBounds: MAX_BOUNDS,
+      attributionControl: false
     });
-    L.control.zoom({ position: "topleft" }).addTo(leafletMap);
-    // Our own illustrated basemap (buildMapBackgroundSvg, defined above)
-    // as a real georeferenced SVG overlay — not a raster image, so it
-    // stays crisp at any zoom level like the rest of Leaflet's vector
-    // layers, and not Boomtown's own map artwork/style. Bound to the same
-    // padded SITE_BOUNDS used for maxBounds/centering (not the tighter
-    // box the SCHEMATIC_TO_LATLON_FIT's 4 corners map to) so the
-    // illustration fills the whole pannable area — real markers are
-    // spread across the wider real-data bounds, and a background sized
-    // to the schematic fit's own footprint left a blank void around them.
-    // svgOverlay only supports an axis-aligned rectangle (no shear), so
-    // this is already an approximation on top of an approximate transform;
-    // stretching it to fill the view is in keeping with the rest of the
-    // app's "illustrative, not surveyed" framing rather than a
-    // meaningfully new inaccuracy.
-    const BG_BOUNDS = SITE_BOUNDS.pad(0.25);
-    L.svgOverlay(buildMapBackgroundSvg(), BG_BOUNDS, { interactive: false }).addTo(leafletMap);
-    mapLayerGroups = {
-      main: L.layerGroup().addTo(leafletMap),
-      gate: L.layerGroup().addTo(leafletMap),
-      place: L.layerGroup().addTo(leafletMap),
-      minor: L.layerGroup(), secret: L.layerGroup(),
-      camp: L.layerGroup(), landmark: L.layerGroup(), poi: L.layerGroup()
-    };
-    Object.keys(mapLayerVisible).forEach(key=>{
-      if(mapLayerVisible[key] && mapLayerGroups[key]) mapLayerGroups[key].addTo(leafletMap);
+    mapGL.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
+    // The illustrated basemap (buildMapGeoJSON, defined above) — added
+    // once the style has finished loading (required before addSource/
+    // addLayer are valid calls) and never rebuilt afterwards, same as
+    // the rest of this one-time init block. Fill/line/circle layers are
+    // triangulated into a GPU mesh by MapLibre right here, then just
+    // drawn every frame from then on.
+    mapGL.on("load", ()=>{
+      const geo = buildMapGeoJSON();
+      mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
+      mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": "rgba(230,196,120,0.16)" } });
+      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": "rgba(242,168,60,0.55)", "line-width": 1.4, "line-dasharray": [2, 2] } });
+
+      mapGL.addSource("mapTrail", { type: "geojson", data: geo.trail });
+      mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(196,158,110,0.6)", "line-width": 1.8, "line-dasharray": [1, 2] } });
+
+      mapGL.addSource("mapSpokes", { type: "geojson", data: geo.spokes });
+      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(196,158,110,0.3)", "line-width": 1, "line-dasharray": [1, 3] } });
+
+      mapGL.addSource("mapTrees", { type: "geojson", data: geo.trees });
+      mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.6], 19, ["*", ["get", "size"], 2.4]],
+        "circle-color": ["get", "color"]
+      } });
+
+      mapGL.addSource("mapTents", { type: "geojson", data: geo.tents });
+      mapGL.addLayer({ id: "tents-circle", type: "circle", source: "mapTents", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.5, 19, 5],
+        "circle-color": ["get", "color"],
+        "circle-stroke-width": 1, "circle-stroke-color": "rgba(238,246,241,0.3)"
+      } });
     });
     document.querySelectorAll("#mapLayerToggles .chip").forEach(chip=>{
       const layer = chip.dataset.layer;
@@ -6389,27 +6417,27 @@ function loadMap(){
       chip.onclick = ()=>{
         mapLayerVisible[layer] = !mapLayerVisible[layer];
         chip.classList.toggle("active", mapLayerVisible[layer]);
-        if(!mapLayerGroups[layer]) return;
-        if(mapLayerVisible[layer]) mapLayerGroups[layer].addTo(leafletMap);
-        else leafletMap.removeLayer(mapLayerGroups[layer]);
+        (mapMarkerGroups[layer] || []).forEach(m=>{
+          const el = m.getElement();
+          if(el) el.style.display = mapLayerVisible[layer] ? "" : "none";
+        });
       };
     });
   }
 
-  Object.values(mapLayerGroups).forEach(g=> g.clearLayers());
+  Object.values(mapMarkerGroups).forEach(arr=> arr.forEach(m=> m.remove()));
+  mapMarkerGroups = {};
   mapMarkersByName = {};
 
-  // Districts — broad narrative areas, not single points, so these render
-  // as a soft translucent circle plus label rather than a precise pin;
-  // always approximate (Boomtown's districts don't correspond to any one
+  // Districts — broad narrative areas, not single points, so these get
+  // a label only here (the actual "area" is the illustrated basemap's
+  // own translucent clearing shape under it — see buildMapGeoJSON —
+  // rather than a second overlapping circle drawn on top of it); always
+  // approximate (Boomtown's districts don't correspond to any one
   // surveyed spot even in the official app).
   locations.filter(place=> place.kind === "district").forEach(place=>{
     const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
-    L.circle([coord.lat, coord.lon], {
-      radius: 90, className: "district-area", color: "rgba(242,168,60,.55)",
-      weight: 1.5, fillColor: "rgba(242,168,60,.55)", fillOpacity: .12, dashArray: "4 4"
-    }).addTo(mapLayerGroups.main);
-    addMapMarker(mapLayerGroups.main, coord.lat, coord.lon,
+    addMapMarker("main", coord.lat, coord.lon,
       `<div class="map-label district">${escapeHtml(place.name)}</div>`,
       { name: place.name, title: place.name, onClick: ()=> showMapInfoCard(`
         <div class="card">
@@ -6424,7 +6452,7 @@ function loadMap(){
   // Main stages
   locations.filter(place=> place.kind === "stage").forEach(place=>{
     const coord = realCoordFor(place);
-    addMapMarker(mapLayerGroups.main, coord.lat, coord.lon,
+    addMapMarker("main", coord.lat, coord.lon,
       mapMarkerHtml("stage", "", place.name),
       { name: place.name, title: place.name, onClick: ()=>{
         showMapInfoCard(`
@@ -6443,7 +6471,7 @@ function loadMap(){
   minorStages.forEach(place=>{
     const isRumoured = place.status === "rumoured";
     const coord = realCoordFor(place);
-    addMapMarker(mapLayerGroups.minor, coord.lat, coord.lon,
+    addMapMarker("minor", coord.lat, coord.lon,
       mapMarkerHtml("stage minor" + (isRumoured ? " rumoured" : ""), isRumoured ? "rumoured" : "", place.name),
       { name: place.name, title: place.name + (isRumoured ? " (rumoured — no 2026 confirmation)" : ""), onClick: ()=> showMapInfoCard(`
         <div class="card">
@@ -6457,7 +6485,7 @@ function loadMap(){
 
   thingsToFind.forEach(spot=>{
     const coord = realCoordFor(spot);
-    addMapMarker(mapLayerGroups.secret, coord.lat, coord.lon,
+    addMapMarker("secret", coord.lat, coord.lon,
       mapMarkerHtml("secret", "secret", spot.name, "?"),
       { name: spot.name, title: spot.name, onClick: ()=> showMapInfoCard(`
         <div class="card">
@@ -6472,7 +6500,7 @@ function loadMap(){
 
   secretSpots.forEach(spot=>{
     const coord = schematicToLatLon(parseFloat(spot.x), parseFloat(spot.y));
-    addMapMarker(mapLayerGroups.secret, coord.lat, coord.lon,
+    addMapMarker("secret", coord.lat, coord.lon,
       mapMarkerHtml("secret", "", null, "?"),
       { title: "Rumoured hidden venue territory", onClick: ()=> showMapInfoCard(`
         <div class="card">
@@ -6486,7 +6514,7 @@ function loadMap(){
 
   allLandmarks().forEach(place=>{
     const coord = realCoordFor(place);
-    addMapMarker(mapLayerGroups.landmark, coord.lat, coord.lon,
+    addMapMarker("landmark", coord.lat, coord.lon,
       mapMarkerHtml("landmark", "landmark", place.name),
       { name: place.name, title: place.name, onClick: ()=> showMapInfoCard(`
         <div class="card">
@@ -6502,12 +6530,12 @@ function loadMap(){
 
   campLabels.forEach(c=>{
     const coord = schematicToLatLon(parseFloat(c.x), parseFloat(c.y));
-    addMapMarker(mapLayerGroups.camp, coord.lat, coord.lon, `<div class="map-label camp">⛺ ${escapeHtml(c.text)}</div>`, {});
+    addMapMarker("camp", coord.lat, coord.lon, `<div class="map-label camp">⛺ ${escapeHtml(c.text)}</div>`, {});
   });
 
   gates.forEach(place=>{
     const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
-    addMapMarker(mapLayerGroups.gate, coord.lat, coord.lon,
+    addMapMarker("gate", coord.lat, coord.lon,
       mapMarkerHtml("gate", "gate", place.name),
       { name: place.name, title: place.name, onClick: ()=> showMapInfoCard(`
         <div class="card">
@@ -6521,7 +6549,7 @@ function loadMap(){
   });
 
   ((window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois) || []).forEach(poi=>{
-    addMapMarker(mapLayerGroups.poi, poi.lat, poi.lon,
+    addMapMarker("poi", poi.lat, poi.lon,
       `<div class="marker poi">${POI_ICONS[poi.category] || "📍"}</div>`,
       { title: poi.category, onClick: ()=> showMapInfoCard(`
         <div class="card">
@@ -6534,7 +6562,7 @@ function loadMap(){
   });
 
   // Places added via the ＋ button — new ones carry real lat/lon straight
-  // from Leaflet's own click event (see ADD A PLACE further down); ones
+  // from the map's own click event (see ADD A PLACE further down); ones
   // saved before this map switched over still carry the old normalized
   // 0-100 x/y, converted through the same approximate calibration as
   // everything else schematic-only.
@@ -6542,7 +6570,7 @@ function loadMap(){
     const coord = (place.lat != null && place.lon != null)
       ? { lat: place.lat, lon: place.lon }
       : schematicToLatLon(place.x, place.y);
-    addMapMarker(mapLayerGroups.place, coord.lat, coord.lon,
+    addMapMarker("place", coord.lat, coord.lon,
       mapMarkerHtml("place" + (place.official ? " official" : ""), "place", place.name),
       { name: place.name, title: place.name, onClick: ()=> { if(typeof showPlaceInfo === "function") showPlaceInfo(place); } }
     );
@@ -6669,10 +6697,11 @@ function closeAddPlaceModal(){
 }
 
 function renderPlacePickPin(){
-  if(_placePickMarker && leafletMap){ leafletMap.removeLayer(_placePickMarker); _placePickMarker = null; }
-  if(!_placeDraft || _placeDraft.lat == null || !leafletMap) return;
-  const icon = L.divIcon({ className: "", html: `<div class="place-pick-pin">📍</div>`, iconSize: [0, 0], iconAnchor: [13, 30] });
-  _placePickMarker = L.marker([_placeDraft.lat, _placeDraft.lon], { icon, keyboard: false }).addTo(leafletMap);
+  if(_placePickMarker){ _placePickMarker.remove(); _placePickMarker = null; }
+  if(!_placeDraft || _placeDraft.lat == null || !mapGL) return;
+  const el = document.createElement("div");
+  el.innerHTML = `<div class="place-pick-pin">📍</div>`;
+  _placePickMarker = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([_placeDraft.lon, _placeDraft.lat]).addTo(mapGL);
 }
 
 function showPlacePickBar(){
@@ -6698,12 +6727,12 @@ function stopPlacePicking(){
   _placePicking = false;
   const bar = document.getElementById("placePickBar");
   if(bar) bar.style.display = "none";
-  if(_placePickMarker && leafletMap){ leafletMap.removeLayer(_placePickMarker); _placePickMarker = null; }
-  if(leafletMap && _placePickClickHandler){ leafletMap.off("click", _placePickClickHandler); _placePickClickHandler = null; }
+  if(_placePickMarker){ _placePickMarker.remove(); _placePickMarker = null; }
+  if(mapGL && _placePickClickHandler){ mapGL.off("click", _placePickClickHandler); _placePickClickHandler = null; }
 }
 
 function startPlacePicking(){
-  if(!_placeDraft || !leafletMap) return;
+  if(!_placeDraft || !mapGL) return;
   closeAddPlaceModal();
   _placePicking = true;
   showPlacePickBar();
@@ -6713,13 +6742,13 @@ function startPlacePicking(){
   // fixed overlay means the map's actual scroll position never had to
   // matter until now — bring it into view so there's something to tap.
   if(map && typeof map.scrollIntoView === "function") map.scrollIntoView({ behavior:"smooth", block:"center" });
-  requestAnimationFrame(()=> leafletMap.invalidateSize());
+  requestAnimationFrame(()=> mapGL.resize());
   _placePickClickHandler = (e)=>{
-    _placeDraft.lat = e.latlng.lat; _placeDraft.lon = e.latlng.lng;
+    _placeDraft.lat = e.lngLat.lat; _placeDraft.lon = e.lngLat.lng;
     renderPlacePickPin();
     showPlacePickBar();
   };
-  leafletMap.on("click", _placePickClickHandler);
+  mapGL.on("click", _placePickClickHandler);
 }
 
 function openAddPlaceModal(draft){
@@ -6871,11 +6900,12 @@ function mapQuickAction(kind){
       return;
     }
     const stageMatch = [...locations, ...minorStages].find(l=> l.name === next.stage);
-    const marker = stageMatch ? mapMarkersByName[stageMatch.name] : null;
-    if(marker && leafletMap){
-      leafletMap.setView(marker.getLatLng(), Math.max(leafletMap.getZoom(), 17));
-      marker.fire("click");
-      const dot = marker.getElement() && marker.getElement().querySelector(".marker");
+    const entry = stageMatch ? mapMarkersByName[stageMatch.name] : null;
+    if(entry && mapGL){
+      mapGL.jumpTo({ center: entry.marker.getLngLat(), zoom: Math.max(mapGL.getZoom(), 17) });
+      if(entry.onClick) entry.onClick();
+      const el = entry.marker.getElement();
+      const dot = el && el.querySelector(".marker");
       if(dot){
         dot.classList.add("jump-highlight");
         setTimeout(()=> dot.classList.remove("jump-highlight"), 2400);
@@ -7178,14 +7208,15 @@ function jumpToId(id, tab){
 function jumpToDistrictOnMap(name){
   jumpToTab("mapscreen");
   requestAnimationFrame(()=>{
-    if(leafletMap) leafletMap.invalidateSize();
-    const marker = mapMarkersByName[name];
-    if(marker && leafletMap){
-      leafletMap.setView(marker.getLatLng(), Math.max(leafletMap.getZoom(), 16));
-      marker.fire("click");
+    if(mapGL) mapGL.resize();
+    const entry = mapMarkersByName[name];
+    if(entry && mapGL){
+      mapGL.jumpTo({ center: entry.marker.getLngLat(), zoom: Math.max(mapGL.getZoom(), 16) });
+      if(entry.onClick) entry.onClick();
       // Flash it — a single dot among 40+ markers is easy to miss on
       // arrival, so this briefly pops it oversized/white to draw the eye.
-      const dot = marker.getElement() && marker.getElement().querySelector(".marker");
+      const el = entry.marker.getElement();
+      const dot = el && el.querySelector(".marker");
       if(dot){
         dot.classList.add("jump-highlight");
         setTimeout(()=> dot.classList.remove("jump-highlight"), 2400);

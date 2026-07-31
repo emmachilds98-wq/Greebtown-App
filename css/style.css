@@ -275,17 +275,16 @@
   .packing-cat-toggle{display:flex; justify-content:space-between; align-items:center; width:100%; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin:10px 0 4px; color:var(--text-primary); font-size:13px; font-weight:700; cursor:pointer; text-align:left;}
   .packing-cat-count{font-size:11.5px; font-weight:600; color:var(--text-muted);}
   .daygroup:first-child{margin-top:0;}
-  /* Real Leaflet map now (see js/app.js's MAP section) — touch-action is
-     deliberately NOT overridden here, unlike the old schematic version;
-     Leaflet sets its own on .leaflet-container internally and needs full
+  /* Real MapLibre GL (WebGL) map now (see js/app.js's MAP section) —
+     touch-action is deliberately NOT overridden here, unlike the old
+     schematic version; MapLibre sets its own internally and needs full
      control of the gesture for pinch/pan/double-tap-zoom to work right. */
   #map{height:460px; position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#1a2f29;}
-  .leaflet-container{background:#1a2f29; font:inherit;}
-  .leaflet-control-zoom a{background:rgba(11,21,18,.82) !important; color:var(--text-primary) !important; border-color:rgba(255,255,255,.2) !important;}
-  .leaflet-control-zoom a:hover{border-color:var(--accent-amber) !important;}
-  .leaflet-control-attribution{background:rgba(11,21,18,.7) !important; color:var(--text-muted) !important; font-size:9px !important;}
-  .leaflet-control-attribution a{color:var(--text-muted) !important;}
-  .leaflet-popup{display:none;} /* info is shown in #mapInfo below the map instead of a Leaflet popup */
+  .maplibregl-map{background:#1a2f29; font:inherit;}
+  .maplibregl-ctrl-group{background:rgba(11,21,18,.82) !important; border:1px solid rgba(255,255,255,.2) !important;}
+  .maplibregl-ctrl-group button{background-color:transparent !important;}
+  .maplibregl-ctrl-group button + button{border-top:1px solid rgba(255,255,255,.15) !important;}
+  .maplibregl-ctrl-icon{filter:invert(1) brightness(1.6);}
   .marker{position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; border-radius:50%; background:transparent; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center;}
   .marker::before{content:""; width:13px; height:13px; border-radius:50%; background:var(--accent-amber); box-shadow:0 0 0 4px rgba(242,168,60,.25); border:1.5px solid rgba(11,21,18,.6);}
   .marker.stage::before{width:16px; height:13px; border-radius:2px 2px 0 0; clip-path:polygon(50% 0%, 100% 100%, 0% 100%); background:var(--accent-teal); box-shadow:0 0 0 4px rgba(75,227,172,.22); border:none;}
