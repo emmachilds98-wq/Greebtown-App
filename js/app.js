@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v218";
-const APP_BUILD_TIME = "2026-07-31T21:23:18Z";
+const APP_CACHE_VERSION = "v219";
+const APP_BUILD_TIME = "2026-07-31T21:30:44Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6181,6 +6181,26 @@ function treeClusterPoints(cx, cy, count, spread, seed){
   return pts;
 }
 
+// Same jittered-scatter idea as treeClusterPoints, but in the mixed
+// bright colours the reference video's ordinary camping fields actually
+// show (a "confetti" of small orange/blue/pink/teal tent shapes dotted
+// across the grass) — every named camping field on this map had just a
+// text label floating on bare green before this, unlike the premium
+// camps which at least got their own area fill.
+const CONFETTI_COLORS = ["rgba(242,140,60,0.75)", "rgba(75,150,227,0.75)", "rgba(227,110,160,0.75)", "rgba(75,200,180,0.75)"];
+function confettiClusterPoints(cx, cy, count, spread, seed){
+  const rand = seededRand(seed);
+  const pts = [];
+  for(let i=0;i<count;i++){
+    const a = rand() * Math.PI * 2;
+    const r = rand() * spread;
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r * 0.7;
+    pts.push({ x, y, size: 1.6 + rand() * 1.2, color: CONFETTI_COLORS[Math.floor(rand() * CONFETTI_COLORS.length)] });
+  }
+  return pts;
+}
+
 // Builds every basemap shape as GeoJSON FeatureCollections, ready to
 // hand straight to mapGL.addSource(). Districts/trail/spokes/trees/tents
 // mirror the previous SVG illustration's shapes and layout 1:1, just
@@ -6205,6 +6225,15 @@ function buildMapGeoJSON(){
   const centers = districts.map(d=>[parseFloat(d.x), parseFloat(d.y)]);
   if(centers.length) centers.push(centers[0]);
   const trailFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(centers) } };
+
+  // A small "plaza" dot at each district's exact centre — every stage/
+  // venue path converges there, and without something to converge ON it
+  // just looked like every path faded out into empty grass at the
+  // middle of each blob. Gives the hub-and-spoke network an actual hub.
+  const plazaFeatures = districts.map(d=>{
+    const c = schematicToLatLon(parseFloat(d.x), parseFloat(d.y));
+    return { type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
+  });
 
   // Spokes from every stage (major + minor) to its nearest district — the
   // main walkable "roads" of the path network.
@@ -6244,6 +6273,18 @@ function buildMapGeoJSON(){
       properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(c.x), parseFloat(c.y), 10, 700 + i * 61, 14)) ] }
     };
+  });
+
+  // Ordinary camping fields get a scatter of small confetti-coloured tent
+  // dots instead — matches the reference video (every plain camping
+  // field shows as bright orange/blue/pink/teal tent shapes dotted over
+  // green, not a solid fill like the premium camps get).
+  const ordinaryCamps = campLabels.filter(c=> !/premium/i.test(c.text));
+  let confettiPts = [];
+  ordinaryCamps.forEach((c,i)=>{ confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 14, 7, 800 + i * 47)); });
+  const confettiFeatures = confettiPts.map(t=>{
+    const c = schematicToLatLon(t.x, t.y);
+    return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
   });
 
   // Forest AREAS — a solid mottled-green clearing shape under each named
@@ -6291,6 +6332,7 @@ function buildMapGeoJSON(){
 
   return {
     districts: { type:"FeatureCollection", features: districtFeatures },
+    plazas: { type:"FeatureCollection", features: plazaFeatures },
     campAreas: { type:"FeatureCollection", features: campFeatures },
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
@@ -6298,6 +6340,7 @@ function buildMapGeoJSON(){
     capillaries: { type:"FeatureCollection", features: capillaryFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
+    confetti: { type:"FeatureCollection", features: confettiFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
     boundary: { type:"FeatureCollection", features: [boundaryFeature] }
   };
@@ -6523,6 +6566,22 @@ function loadMap(){
 
       mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
       mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
+
+      // A small packed-earth "plaza" where every path actually converges
+      // at each district's centre, instead of every spoke fading out
+      // into empty grass at the middle of the blob.
+      mapGL.addSource("mapPlazas", { type: "geojson", data: geo.plazas });
+      mapGL.addLayer({ id: "plazas-circle", type: "circle", source: "mapPlazas", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 19, 11],
+        "circle-color": "rgba(196,158,110,0.5)",
+        "circle-stroke-width": 1, "circle-stroke-color": "rgba(70,54,38,0.6)"
+      } });
+
+      mapGL.addSource("mapConfetti", { type: "geojson", data: geo.confetti });
+      mapGL.addLayer({ id: "confetti-circle", type: "circle", source: "mapConfetti", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.5], 19, ["*", ["get", "size"], 2.2]],
+        "circle-color": ["get", "color"]
+      } });
 
       mapGL.addSource("mapTrees", { type: "geojson", data: geo.trees });
       mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", paint: {
