@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v201";
-const APP_BUILD_TIME = "2026-07-31T10:59:55Z";
+const APP_CACHE_VERSION = "v202";
+const APP_BUILD_TIME = "2026-07-31T11:03:50Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3379,18 +3379,15 @@ function updateClearArtistSearchBtn(){
 }
 
 // ===============================
-// WANT TO SEE TOGETHER — a lightweight, explicit "I specifically want
-// the group to coordinate around this one" flag on a Lineup artist
-// card, separate from just starring it to your own Plan (which only
-// ever means "I personally intend to go"). Synced the exact same
-// read-only-snapshot way as joinedActivities (see buildSyncPayload/
-// mergeSyncPayload) — a plain array of "day|name" keys, no separate
-// collection/system. Once 2+ people have flagged the same act, it
-// surfaces a card in the existing group Decisions area (see
-// wantTogetherEntries()/wantTogetherCardHTML() near decisionCardHTML
-// further down) using the SAME setGroupDecision()/groupDecisions
-// machinery a clash pair already uses — a "want together" decision is
-// just a decision keyed by one artist instead of a clashing pair.
+// WANT TO SEE TOGETHER — retired from the UI (no button creates these
+// any more, see showArtists() above and wantTogetherEntries() further
+// down, which now always returns empty). Left in place, not deleted:
+// removing it fully would mean touching buildSyncPayload/
+// mergeSyncPayload/firestore.rules too, and rejecting a field a
+// not-yet-updated device might still send isn't a risk worth taking
+// just to hide a feature. Was: a lightweight, explicit "I specifically
+// want the group to coordinate around this one" flag on a Lineup
+// artist card, separate from just starring it to your own Plan.
 // ===============================
 function wantTogetherKey(day, name){
   return `${day || "TBC"}|${name}`;
@@ -3447,15 +3444,6 @@ function showArtists(list){
     const consensusBadge = (interestEntry && Object.keys(interestEntry.interest).length)
       ? `<div class="consensus-badge">🔥 ${Object.keys(interestEntry.interest).length}/${totalPeople} interested<br><span class="consensus-owners">${Object.entries(interestEntry.interest).map(([o,m])=> `${escapeHtml(o)}${m?" ★":" 👍"}`).join(" · ")}</span></div>`
       : "";
-    // "Want to see together" is a day+time act, not a browsing-only one —
-    // TBC acts have nothing to coordinate around yet, same reasoning as
-    // other time-dependent features elsewhere in the app.
-    const hasDay = artist.day && artist.day !== "TBC";
-    const wantTogetherOn = hasDay && isWantTogether(artist.day, artist.name);
-    const wantTogetherNames = hasDay ? wantTogetherInterestedNames(artist.day, artist.name) : [];
-    const wantTogetherBadge = wantTogetherNames.length
-      ? `<div class="consensus-badge" style="color:var(--accent-red);">❤️ ${wantTogetherNames.length} want${wantTogetherNames.length===1?"s":""} to see this together<br><span class="consensus-owners">${escapeHtml(wantTogetherNames.join(" · "))}</span></div>`
-      : "";
     div.innerHTML = `
       <div class="item-top">
         <div>
@@ -3467,14 +3455,12 @@ function showArtists(list){
           ${bioBlock}
           ${previewBlock}
           ${consensusBadge}
-          ${wantTogetherBadge}
           ${otherSetsHTML(artist)}
         </div>
         <div class="star-seen-col">
           <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
           <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
           ${artist.start ? `<button class="ghost timeline-jump-btn" aria-label="View on the timeline" title="View on the timeline" style="padding:5px 8px; font-size:13px;">🗓</button>` : ""}
-          ${hasDay ? `<button class="ghost want-together-btn${wantTogetherOn ? " active" : ""}" aria-label="${wantTogetherOn ? "Stop flagging — want the group to see this together" : "I want the group to see this together"}" title="I want the group to see this together" style="padding:5px 8px; font-size:13px; ${wantTogetherOn ? "color:var(--accent-red); border-color:var(--accent-red); background:rgba(226,131,106,.14);" : ""}">${wantTogetherOn ? "❤️" : "🤍"}</button>` : ""}
         </div>
       </div>
     `;
@@ -3488,12 +3474,6 @@ function showArtists(list){
     // rather than needing the small dedicated timeline-only search.
     const timelineJumpBtn = div.querySelector(".timeline-jump-btn");
     if(timelineJumpBtn) timelineJumpBtn.onclick = (e)=>{ e.stopPropagation(); jumpToArtistInTimeline(artist); };
-    const wantTogetherBtn = div.querySelector(".want-together-btn");
-    if(wantTogetherBtn) wantTogetherBtn.onclick = (e)=>{
-      e.stopPropagation();
-      toggleWantTogether(artist.day, artist.name);
-      showArtists(list);
-    };
     artistResults.appendChild(div);
   });
 }
@@ -8775,30 +8755,17 @@ function groupClashPairs(){
   return pairs.sort((p1,p2)=> p1.a.startMin - p2.a.startMin);
 }
 
-// Single-artist "want to see together" candidates for the group
-// Decisions area (see WANT TO SEE TOGETHER above) — same "2+ different
-// people, needs a group call" bar as groupClashPairs(), just for one
-// act instead of a clashing pair. Keyed "want|day|name" so it can never
-// collide with a real clash-pair key, and reuses the exact same
-// setGroupDecision()/groupDecisions status machinery.
+// "Want to see together" is retired from the UI — no button creates new
+// entries any more (see showArtists() above), and this always returns
+// empty so nothing it used to feed (Decisions cards, the outstanding-
+// count badge) can surface it either. Left as a function rather than
+// deleted everywhere it's called, and the underlying wantTogether/
+// peopleWantTogether sync fields are left alone rather than ripped out
+// of buildSyncPayload/mergeSyncPayload/firestore.rules — doing that
+// would reject syncs from any device that hasn't updated yet, which is
+// a real risk this app doesn't need to take just to hide a feature.
 function wantTogetherEntries(){
-  const artists = allArtists();
-  const allKeys = new Set(Store.get("wantTogether") || []);
-  Object.values(Store.get("peopleWantTogether") || {}).forEach(entry=>{
-    personSnapshotList(entry).forEach(k=> allKeys.add(k));
-  });
-  const entries = [];
-  allKeys.forEach(key=>{
-    const sep = key.indexOf("|");
-    if(sep === -1) return;
-    const day = key.slice(0, sep), name = key.slice(sep + 1);
-    const artist = artists.find(a=> a.name === name && a.day === day);
-    if(!artist || !artist.start) return;
-    const names = wantTogetherInterestedNames(day, name);
-    if(names.length < 2) return; // needs 2+ people to be worth a group decision
-    entries.push({ key: "want|" + key, day, artist, names });
-  });
-  return entries.sort((a,b)=> (toMinutes(a.day, a.artist.start) ?? 999999) - (toMinutes(b.day, b.artist.start) ?? 999999));
+  return [];
 }
 
 function outstandingGroupDecisionsCount(){
