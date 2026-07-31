@@ -206,13 +206,14 @@
      and don't have this problem. */
   .item .btnrow{display:flex; gap:6px; flex-shrink:0; align-self:center;}
   /* Plan screen: a single narrow column of compact icon buttons (star,
-     seen, remove, set-time) instead of a wider two-tier block with
-     full "Remove"/"Set time" text labels — same compact-icon treatment
-     Lineup's own star-seen-col already uses for its 4 buttons, so the
+     seen, set-time — no remove/delete here on purpose, unsaving is done
+     by pressing the star again from Lineup) instead of a wider block
+     with a full "Set time" text label — same compact-icon treatment
+     Lineup's own star-seen-col already uses for its buttons, so the
      two match, and it leaves the artist name/stage/bio text on the left
      noticeably more room, especially on narrow phones. */
   .plan-btnrow{flex-direction:column; align-items:center; gap:4px;}
-  .item button.star-btn, .item button.seen-btn, .item button.remove-btn, .item button.set-time-btn{padding:5px 8px; font-size:15px;}
+  .item button.star-btn, .item button.seen-btn, .item button.set-time-btn{padding:5px 8px; font-size:15px;}
   .clash-note{color:var(--accent-red); font-size:12px; margin-top:6px;}
   .mustsee-tag{display:inline-block; font-size:10px; font-weight:700; color:var(--accent-amber); background:rgba(242,168,60,.14); border:1px solid rgba(242,168,60,.4); border-radius:20px; padding:1px 7px; margin-left:2px; vertical-align:middle;}
   .compare-people{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
