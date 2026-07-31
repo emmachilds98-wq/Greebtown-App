@@ -95,7 +95,18 @@
   .item.clash{border-color:var(--accent-red); background:rgba(226,131,106,.08);}
   .item.mustsee{border-color:var(--accent-amber); background:rgba(242,168,60,.06);}
   .item.packed{border-color:var(--accent-teal); background:rgba(75,227,172,.06);}
-  .item-top{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .item-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  /* Flex items default to min-width:auto, which refuses to shrink below
+     the width of their own unbroken content (a long artist name, or a
+     row of "Also playing"/other-set-stage text with white-space:nowrap)
+     — with the button column beside it fixed at flex-shrink:0, that
+     forced the info column to overflow the card rather than wrap,
+     visually overlapping/colliding with the buttons on narrow screens.
+     min-width:0 lets it shrink to the space actually available so its
+     own text wraps/ellipses properly instead. Applies to every card
+     built on .item-top (Lineup, Plan, Compare, Seen, landmarks/socials/
+     packing lists, ...) since they all share this same layout bug. */
+  .item-top > *:first-child{min-width:0; overflow-wrap:break-word;}
   .item small{color:var(--text-muted);}
   .item button{background:none; border:1px solid var(--line); color:var(--accent-amber); border-radius:10px; padding:6px 12px; font-size:14px; cursor:pointer; white-space:nowrap;}
   .item button:hover{border-color:var(--accent-amber);}
@@ -151,7 +162,12 @@
      vertically centered against the full card content, name through
      bio, not just the first line. */
   .timeline-modal-card{padding-right:0;}
-  .timeline-modal-body{display:grid; grid-template-columns:1fr 64px; align-items:center;}
+  /* minmax(0,1fr), not a bare 1fr — a grid track sized with a bare fr
+     unit still won't shrink below its content's natural width by
+     default (the grid equivalent of flexbox's min-width:auto gotcha —
+     see .item-top above), which let a long bio/other-sets block push
+     into or past the fixed star/seen column on narrow screens. */
+  .timeline-modal-body{display:grid; grid-template-columns:minmax(0,1fr) 64px; align-items:start;}
   .timeline-modal-body .star-toggle-lg{justify-self:center;}
   .timeline-modal-body .star-seen-col{justify-self:center;}
   .item .btnrow{display:flex; gap:6px; flex-shrink:0;}
@@ -436,7 +452,10 @@
   .timeline-now-line{position:absolute; top:0; bottom:0; width:2px; background:var(--accent-red, #e5484d); z-index:4; pointer-events:none;}
   .timeline-now-label{position:absolute; top:1px; left:3px; font-size:9px; font-weight:700; letter-spacing:.03em; color:#fff; background:var(--accent-red, #e5484d); padding:1px 3px; border-radius:3px; white-space:nowrap;}
   .timeline-vline{position:absolute; top:0; bottom:0; border-left:1px solid var(--line); opacity:.5;}
-  .timeline-block{position:absolute; top:3px; bottom:3px; border-radius:8px; padding:4px 6px; font-size:10.5px; line-height:1.25; overflow:hidden; cursor:pointer; border:1px solid var(--accent-teal); background:rgba(75,227,172,.14); color:var(--text-primary);}
+  /* top/height are set inline per-block by buildTimelineHTML (js/app.js)
+     now that same-stage overlapping items get their own lane — a fixed
+     top:3px/bottom:3px here would only ever describe a single lane. */
+  .timeline-block{position:absolute; border-radius:8px; padding:4px 6px; font-size:10.5px; line-height:1.25; overflow:hidden; cursor:pointer; border:1px solid var(--accent-teal); background:rgba(75,227,172,.14); color:var(--text-primary);}
   .timeline-block.saved{background:rgba(47,155,255,.22); border-color:var(--accent-lightblue);}
   .timeline-block.mustsee{background:rgba(242,168,60,.22); border-color:var(--accent-amber);}
   .timeline-block.clashing{box-shadow:0 0 0 2px var(--accent-red) inset;}
@@ -479,7 +498,7 @@
   .other-set-link:hover{border-color:var(--accent-teal);}
   .other-set-day{font-weight:700; color:var(--accent-teal); flex-shrink:0;}
   .other-set-time{font-weight:600; color:var(--text-primary); flex-shrink:0;}
-  .other-set-stage{color:var(--text-muted); margin-left:auto; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .other-set-stage{color:var(--text-muted); margin-left:auto; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;}
   .update-entry{border-left:2px solid var(--accent-teal); padding-left:10px; margin-bottom:10px;}
   .update-entry .when{font-size:11px; color:var(--text-muted);}
   .stat{background:var(--bg-panel-2); border:1px solid var(--line); border-radius:12px; padding:10px 14px; font-size:12px; color:var(--text-muted); text-align:center; flex:1; min-width:90px;}

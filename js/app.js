@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v189";
-const APP_BUILD_TIME = "2026-07-31T03:47:39Z";
+const APP_CACHE_VERSION = "v190";
+const APP_BUILD_TIME = "2026-07-31T09:26:50Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -449,9 +449,25 @@ function updateTimelineScrollThumb(outerId){
   // meaningful to scroll — a short/filtered day shouldn't get a
   // progress bar with nowhere to go.
   if(rect.height < 1 || overflow < 24){ track.style.display = "none"; return; }
-  track.style.display = "block";
   const inset = 8;
-  const trackHeight = rect.height - inset * 2;
+  // Never draw over the fixed bottom nav bar — position:fixed means this
+  // track's own top/height are computed purely from the timeline box's
+  // on-screen rect, with no awareness of what else is fixed to the
+  // viewport. Wherever the page happens to be scrolled to, the box's
+  // bottom edge can land behind the tab bar's fixed area, and since the
+  // track sits at a higher z-index (so it's visible over the timeline
+  // itself), that let it glow on top of the nav instead of being hidden
+  // behind it. Clamp the track's own bottom edge to sit above the real,
+  // currently-measured top of the nav bar (its height varies with
+  // env(safe-area-inset-bottom) across devices, so this is measured
+  // fresh each time rather than hand-guessed).
+  const navBar = document.querySelector("nav.tabbar");
+  const navTop = navBar ? navBar.getBoundingClientRect().top : window.innerHeight;
+  const bottomLimit = Math.min(window.innerHeight, navTop) - 6;
+  const top = rect.top + inset;
+  const trackHeight = Math.min(rect.top + rect.height - inset, bottomLimit) - top;
+  if(trackHeight < 24){ track.style.display = "none"; return; }
+  track.style.display = "block";
   // Left of the whole timeline box, outside it entirely — not just past
   // the sticky stage-name column, which used to sit inside the box and
   // read as part of the timeline itself. TRACK_WIDTH must match
@@ -461,7 +477,7 @@ function updateTimelineScrollThumb(outerId){
   const TRACK_WIDTH = 5;
   const gap = 6;
   track.style.left = Math.max(2, rect.left - gap - TRACK_WIDTH) + "px";
-  track.style.top = (rect.top + inset) + "px";
+  track.style.top = top + "px";
   track.style.height = trackHeight + "px";
   const thumbHeight = Math.max(24, (outer.clientHeight / outer.scrollHeight) * trackHeight);
   // Clamp scrollTop into [0, overflow] before computing the thumb
@@ -544,7 +560,7 @@ window.addEventListener("orientationchange", repositionAllTimelineScrollThumbs);
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, personalClashTimes: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, personalClashTimes: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false, wantTogether: [], peopleWantTogether: {} };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -557,7 +573,7 @@ const EMBEDDED_DATA = window.__boomtownSavedData || {};
 // safe no-op with no name/room/signal set, so this is safe to call from
 // here even though pushToCloud is defined much later in this file.
 let _autoBackupTimer = null;
-const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter", "seenArtists", "activities", "joinedActivities"]);
+const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter", "seenArtists", "activities", "joinedActivities", "wantTogether"]);
 function scheduleAutoBackup(){
   if(_autoBackupTimer) clearTimeout(_autoBackupTimer);
   _autoBackupTimer = setTimeout(()=>{
@@ -3317,6 +3333,51 @@ function updateClearArtistSearchBtn(){
   clearArtistSearchBtn.style.display = hasActiveArtistFilters() ? "" : "none";
 }
 
+// ===============================
+// WANT TO SEE TOGETHER — a lightweight, explicit "I specifically want
+// the group to coordinate around this one" flag on a Lineup artist
+// card, separate from just starring it to your own Plan (which only
+// ever means "I personally intend to go"). Synced the exact same
+// read-only-snapshot way as joinedActivities (see buildSyncPayload/
+// mergeSyncPayload) — a plain array of "day|name" keys, no separate
+// collection/system. Once 2+ people have flagged the same act, it
+// surfaces a card in the existing group Decisions area (see
+// wantTogetherEntries()/wantTogetherCardHTML() near decisionCardHTML
+// further down) using the SAME setGroupDecision()/groupDecisions
+// machinery a clash pair already uses — a "want together" decision is
+// just a decision keyed by one artist instead of a clashing pair.
+// ===============================
+function wantTogetherKey(day, name){
+  return `${day || "TBC"}|${name}`;
+}
+function myWantTogetherSet(){
+  return new Set(Store.get("wantTogether") || []);
+}
+function isWantTogether(day, name){
+  return myWantTogetherSet().has(wantTogetherKey(day, name));
+}
+function toggleWantTogether(day, name){
+  const key = wantTogetherKey(day, name);
+  const list = Store.get("wantTogether") || [];
+  const idx = list.indexOf(key);
+  if(idx === -1) list.push(key); else list.splice(idx, 1);
+  Store.set("wantTogether", list);
+}
+// Every name (including your own, if flagged) that's flagged "want
+// together" for this exact day+artist — combines this device's own
+// list with every synced teammate's peopleWantTogether snapshot.
+function wantTogetherInterestedNames(day, name){
+  const key = wantTogetherKey(day, name);
+  const names = new Set();
+  const myName = currentContributorName() || "You";
+  if(myWantTogetherSet().has(key)) names.add(myName);
+  const peopleWantTogether = Store.get("peopleWantTogether") || {};
+  Object.entries(peopleWantTogether).forEach(([id, entry])=>{
+    if(personSnapshotList(entry).includes(key)) names.add(personDisplayName(entry, id));
+  });
+  return [...names];
+}
+
 function showArtists(list){
   artistResults.innerHTML = "";
   if(list.length === 0){
@@ -3341,6 +3402,15 @@ function showArtists(list){
     const consensusBadge = (interestEntry && Object.keys(interestEntry.interest).length)
       ? `<div class="consensus-badge">🔥 ${Object.keys(interestEntry.interest).length}/${totalPeople} interested<br><span class="consensus-owners">${Object.entries(interestEntry.interest).map(([o,m])=> `${escapeHtml(o)}${m?" ★":" 👍"}`).join(" · ")}</span></div>`
       : "";
+    // "Want to see together" is a day+time act, not a browsing-only one —
+    // TBC acts have nothing to coordinate around yet, same reasoning as
+    // other time-dependent features elsewhere in the app.
+    const hasDay = artist.day && artist.day !== "TBC";
+    const wantTogetherOn = hasDay && isWantTogether(artist.day, artist.name);
+    const wantTogetherNames = hasDay ? wantTogetherInterestedNames(artist.day, artist.name) : [];
+    const wantTogetherBadge = wantTogetherNames.length
+      ? `<div class="consensus-badge" style="color:var(--accent-red);">❤️ ${wantTogetherNames.length} want${wantTogetherNames.length===1?"s":""} to see this together<br><span class="consensus-owners">${escapeHtml(wantTogetherNames.join(" · "))}</span></div>`
+      : "";
     div.innerHTML = `
       <div class="item-top">
         <div>
@@ -3352,11 +3422,14 @@ function showArtists(list){
           ${bioBlock}
           ${previewBlock}
           ${consensusBadge}
+          ${wantTogetherBadge}
           ${otherSetsHTML(artist)}
         </div>
         <div class="star-seen-col">
           <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
           <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
+          ${artist.start ? `<button class="ghost timeline-jump-btn" aria-label="View on the timeline" title="View on the timeline" style="padding:5px 8px; font-size:13px;">🗓</button>` : ""}
+          ${hasDay ? `<button class="ghost want-together-btn${wantTogetherOn ? " active" : ""}" aria-label="${wantTogetherOn ? "Stop flagging — want the group to see this together" : "I want the group to see this together"}" title="I want the group to see this together" style="padding:5px 8px; font-size:13px; ${wantTogetherOn ? "color:var(--accent-red); border-color:var(--accent-red); background:rgba(226,131,106,.14);" : ""}">${wantTogetherOn ? "❤️" : "🤍"}</button>` : ""}
         </div>
       </div>
     `;
@@ -3365,6 +3438,17 @@ function showArtists(list){
     div.querySelector(".stage-link").onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
     wirePreviewButtons(div);
     wireOtherSetLinks(div, artist);
+    // Main List/search results are the primary search experience — this
+    // is how a search result actually gets you to the Timeline view now,
+    // rather than needing the small dedicated timeline-only search.
+    const timelineJumpBtn = div.querySelector(".timeline-jump-btn");
+    if(timelineJumpBtn) timelineJumpBtn.onclick = (e)=>{ e.stopPropagation(); jumpToArtistInTimeline(artist); };
+    const wantTogetherBtn = div.querySelector(".want-together-btn");
+    if(wantTogetherBtn) wantTogetherBtn.onclick = (e)=>{
+      e.stopPropagation();
+      toggleWantTogether(artist.day, artist.name);
+      showArtists(list);
+    };
     artistResults.appendChild(div);
   });
 }
@@ -3494,21 +3578,42 @@ function buildTimelineHTML(items, opts){
   }
 
   const rows = stages.map(stage=>{
-    // Sorted by start time so each block can be clamped against the next
-    // one on the same row — without this, a short set (padded up to the
-    // 60px minimum below so its text has room) could extend past where
-    // the next act on that stage actually starts, visually overlapping
-    // its text even though their real time slots don't overlap at all.
+    // Sorted by start time, then packed into lanes (extra vertical bands
+    // within the row) via a greedy interval-scheduling pass — two items
+    // on the same stage were previously only nudged apart by WIDTH
+    // (clamped against the next item's start), which assumed same-stage
+    // items never truly overlap in time. They can: two of one person's
+    // own overlapping activities share a lane ("<name>'s activities" —
+    // see activityToTimelineItem), or a genuine same-stage double-booking
+    // in the source data. Without a real lane, two such items land at
+    // the exact same left position and render fully on top of each
+    // other rather than just close together. Most rows have zero
+    // overlaps and end up with a single lane — same look as before.
     const stageItems = parsed.filter(p=>p.stage===stage).sort((a,b)=> a._start - b._start);
-    const blocks = stageItems.map((p, i)=>{
+    const laneEndTimes = [];
+    const lanes = [];
+    stageItems.forEach(p=>{
+      let laneIdx = laneEndTimes.findIndex(end=> end <= p._start);
+      if(laneIdx === -1){ laneIdx = laneEndTimes.length; lanes.push([]); }
+      laneEndTimes[laneIdx] = p._end;
+      lanes[laneIdx].push(p);
+      p._lane = laneIdx;
+    });
+    const stageRowHeight = rowHeight * lanes.length;
+    const blocks = stageItems.map(p=>{
+      const lane = lanes[p._lane];
+      const i = lane.indexOf(p);
       const left = (p._start-minMin)*pxPerMin;
       const desiredWidth = Math.max((p._end-p._start)*pxPerMin, 60);
-      const next = stageItems[i+1];
-      // 2px breathing room before the next block's left edge; floors at
-      // 20px rather than letting two back-to-back/overlapping-in-data
-      // acts collapse to zero or negative width.
+      const next = lane[i+1];
+      // 2px breathing room before the next block's left edge (within the
+      // SAME lane only now); floors at 20px rather than letting two
+      // back-to-back/overlapping-in-data acts collapse to zero or
+      // negative width.
       const gapLimit = next ? Math.max((next._start-minMin)*pxPerMin - left - 2, 20) : Infinity;
       const width = Math.min(desiredWidth, gapLimit);
+      const top = p._lane * rowHeight + 3;
+      const blockHeight = rowHeight - 6;
       const isSaved = savedNames ? savedNames.has(p.name) : false;
       const isMustSeeBlock = mustSeeNames ? mustSeeNames.has(p.name) : false;
       const cls = "timeline-block" + (isSaved ? " saved" : "") + (isMustSeeBlock ? " mustsee" : "") + (opts.readonly ? " readonly" : "");
@@ -3521,9 +3626,9 @@ function buildTimelineHTML(items, opts){
       const ownerBadge = (opts.showOwnerBadges && p._owners && p._owners.length)
         ? `<span class="tb-owners" title="${escapeHtml(p._owners.join(", "))}">${p._owners.map(o=>`<span class="tb-owner-dot" style="background:${personColorFor(o)}">${escapeHtml((o[0]||"?").toUpperCase())}</span>`).join("")}</span>`
         : "";
-      return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
+      return `<div class="${cls}" style="left:${left}px; width:${width}px; top:${top}px; height:${blockHeight}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
-    return `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${rowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
+    return `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${stageRowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
   }).join("");
 
   // Same line repeated into every row-body above (each positioned in
@@ -4390,18 +4495,20 @@ function mergePersonIntoMine(personId){
   const peopleCharacters = Store.get("peopleCharacters") || {};
   const peopleActivities = Store.get("peopleActivities") || {};
   const peopleJoins = Store.get("peopleJoins") || {};
+  const peopleWantTogether = Store.get("peopleWantTogether") || {};
   const payload = {
     schedule: personSnapshotList(peopleSchedules[personId]),
     bingo: peopleBingo[personId] || null,
     character: peopleCharacters[personId] || null,
     activities: personSnapshotList(peopleActivities[personId]),
-    joinedActivities: personSnapshotList(peopleJoins[personId])
+    joinedActivities: personSnapshotList(peopleJoins[personId]),
+    wantTogether: personSnapshotList(peopleWantTogether[personId])
   };
   const changed = mergeOwnCloudCopy(payload);
 
   // Retire the now-absorbed duplicate so it stops showing as a separate
   // "read-only teammate" version of yourself.
-  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins"].forEach(key=>{
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins","peopleWantTogether"].forEach(key=>{
     const map = Store.get(key) || {};
     if(map[personId]){ delete map[personId]; Store.set(key, map); }
   });
@@ -5106,7 +5213,10 @@ function renderPlanTimeline(){
       if(list) list.scrollIntoView({ behavior:"smooth", block:"start" });
     };
   });
-  if(typeof renderPlanActivitiesList === "function") renderPlanActivitiesList(activityItems, planTimelineDay);
+  // Joined-copy items (isJoinedCopy) only exist to plot a second block on
+  // the timeline grid itself — the list below stays deduped, one row per
+  // real activity, with its own Join/Leave toggle already covering that.
+  if(typeof renderPlanActivitiesList === "function") renderPlanActivitiesList(activityItems.filter(a=>!a.isJoinedCopy), planTimelineDay);
   refreshTimelineScrollProgress("planTimelineOuter");
 }
 
@@ -5248,7 +5358,10 @@ function activityAttendeeNames(ownerId, ownerName, activityId){
 
 // Turns one activity into a buildTimelineHTML-compatible item — see the
 // section banner above for why the synthetic `stage` value is what
-// creates a per-person lane for free.
+// creates a per-person lane for free. Always plots under the CREATOR's
+// own lane, whether it's your own activity or a friend's group one —
+// see activityToJoinedTimelineItem below for the second, separate copy
+// a joiner gets under their own lane.
 function activityToTimelineItem(a, ownerId, ownerName){
   return {
     id: a.id, ownerId, ownerName, visibility: a.visibility,
@@ -5258,9 +5371,31 @@ function activityToTimelineItem(a, ownerId, ownerName){
   };
 }
 
+// A friend's group activity you've tapped "I'm in" on is a real personal
+// time commitment, not just an interest count — it needs to show up
+// under YOUR OWN lane too, same day/time, so your own timetable line
+// actually reflects where you intend to be, not just what you created.
+// Kept as a clearly-marked separate copy (name suffix + distinct genre
+// label) rather than merged into the original item, so the timeline
+// still reads "created by" vs "joined by" at a glance, and so it's easy
+// to exclude from the Join/Delete list (renderPlanActivitiesList) below,
+// which only ever wants one row per real activity.
+function activityToJoinedTimelineItem(a, ownerId, ownerName, joinerName){
+  return {
+    id: a.id, ownerId, ownerName, visibility: a.visibility,
+    name: `${a.name} (joining ${ownerName})`,
+    day: a.day, start: a.start, end: a.end,
+    stage: `${joinerName}’s activities`,
+    genre: "Joined activity",
+    isJoinedCopy: true
+  };
+}
+
 // Merges this device's own activities (personal + group) with every
 // synced teammate's GROUP-only activities for one day — same shape as
-// activeScheduleData() above, just for activities instead of picks.
+// activeScheduleData() above, just for activities instead of picks. Also
+// adds a joined-copy item (see activityToJoinedTimelineItem) under your
+// own lane for every friend's activity you've joined.
 function activitiesForDay(day){
   const myId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : "";
   const myName = currentContributorName() || "You";
@@ -5269,10 +5404,13 @@ function activitiesForDay(day){
     .map(a=> activityToTimelineItem(a, myId, myName));
 
   const peopleActivities = Store.get("peopleActivities") || {};
+  const myJoined = myActivityJoinedIds();
   Object.entries(peopleActivities).forEach(([id, entry])=>{
     if(id === myId) return; // this device's own group activities are already in Store.get("activities") above
     personSnapshotList(entry).filter(a=> a.day === day && a.start).forEach(a=>{
-      items.push(activityToTimelineItem(a, id, personDisplayName(entry, id)));
+      const ownerName = personDisplayName(entry, id);
+      items.push(activityToTimelineItem(a, id, ownerName));
+      if(myJoined.has(activityGlobalId(id, a.id))) items.push(activityToJoinedTimelineItem(a, id, ownerName, myName));
     });
   });
   return items;
@@ -7126,7 +7264,13 @@ function buildSyncPayload(){
     // in" — lands in peopleJoins[personId], read alongside peopleActivities
     // so any device can compute a full attendee list for any activity
     // without a separate write path per activity.
-    joinedActivities: Store.get("joinedActivities") || []
+    joinedActivities: Store.get("joinedActivities") || [],
+    // "day|name" keys this device has flagged "want to see this
+    // together" on a Lineup act — lands in peopleWantTogether[personId],
+    // read alongside this device's own list to compute a combined
+    // interest count/name list for any artist (see
+    // wantTogetherInterestedNames).
+    wantTogether: Store.get("wantTogether") || []
   };
 }
 
@@ -7353,6 +7497,15 @@ function mergeSyncPayload(payload){
     const peopleJoins = Store.get("peopleJoins") || {};
     peopleJoins[personId] = { displayName: from, list: payload.joinedActivities.slice() };
     Store.set("peopleJoins", peopleJoins);
+  }
+
+  // Same read-only-snapshot treatment for "want to see together" flags —
+  // replaces that person's own entry each resync, never touches this
+  // device's own "wantTogether".
+  if(Array.isArray(payload.wantTogether)){
+    const peopleWantTogether = Store.get("peopleWantTogether") || {};
+    peopleWantTogether[personId] = { displayName: from, list: payload.wantTogether.slice() };
+    Store.set("peopleWantTogether", peopleWantTogether);
   }
 
   // The shared meeting point and group decisions ride along on every
@@ -8308,12 +8461,43 @@ function groupClashPairs(){
   return pairs.sort((p1,p2)=> p1.a.startMin - p2.a.startMin);
 }
 
+// Single-artist "want to see together" candidates for the group
+// Decisions area (see WANT TO SEE TOGETHER above) — same "2+ different
+// people, needs a group call" bar as groupClashPairs(), just for one
+// act instead of a clashing pair. Keyed "want|day|name" so it can never
+// collide with a real clash-pair key, and reuses the exact same
+// setGroupDecision()/groupDecisions status machinery.
+function wantTogetherEntries(){
+  const artists = allArtists();
+  const allKeys = new Set(Store.get("wantTogether") || []);
+  Object.values(Store.get("peopleWantTogether") || {}).forEach(entry=>{
+    personSnapshotList(entry).forEach(k=> allKeys.add(k));
+  });
+  const entries = [];
+  allKeys.forEach(key=>{
+    const sep = key.indexOf("|");
+    if(sep === -1) return;
+    const day = key.slice(0, sep), name = key.slice(sep + 1);
+    const artist = artists.find(a=> a.name === name && a.day === day);
+    if(!artist || !artist.start) return;
+    const names = wantTogetherInterestedNames(day, name);
+    if(names.length < 2) return; // needs 2+ people to be worth a group decision
+    entries.push({ key: "want|" + key, day, artist, names });
+  });
+  return entries.sort((a,b)=> (toMinutes(a.day, a.artist.start) ?? 999999) - (toMinutes(b.day, b.artist.start) ?? 999999));
+}
+
 function outstandingGroupDecisionsCount(){
   const decisions = Store.get("groupDecisions") || {};
-  return groupClashPairs().filter(p=>{
+  const outstandingPairs = groupClashPairs().filter(p=>{
     const d = decisions[p.key];
     return !d || d.status === "later";
   }).length;
+  const outstandingWant = wantTogetherEntries().filter(e=>{
+    const d = decisions[e.key];
+    return !d || d.status === "later";
+  }).length;
+  return outstandingPairs + outstandingWant;
 }
 
 // Sets it locally, then pushes this device's own regular sync doc right
@@ -8446,25 +8630,59 @@ function wireDecisionCard(el, pair){
   }
 }
 
+// Same card shell as decisionCardHTML above, simplified to one artist
+// instead of a vs-pair — no "split"/"half" actions make sense without a
+// clash forcing a choice, just "we're going together" or "not yet".
+function wantTogetherCardHTML(entry, decision){
+  const status = decision ? decision.status : "needs";
+  const needsDecision = status === "needs" || status === "later";
+  const statusNote = status === "together" && decision ? `Group's call: going together` : "";
+  return `
+    <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(entry.key)}" data-day="${escapeHtml(entry.day)}">
+      <div class="decision-head"><span>❤️ ${escapeHtml(timeLabel(entry.artist))}</span>${decisionStatusPillHTML(status)}</div>
+      <div class="decision-vs">
+        <div class="decision-vs-side"><strong>${escapeHtml(entry.artist.name)}</strong><span class="decision-vs-stage">${escapeHtml(entry.artist.stage)}</span><span class="decision-vs-owners">${escapeHtml(entry.names.join(" · "))} want to see this together</span></div>
+      </div>
+      ${statusNote ? `<p class="empty-note decision-status-note">${statusNote}${decision ? ` <span class="decision-by">(${escapeHtml(decision.by)})</span>` : ""}</p>` : ""}
+      <div class="decision-actions">
+        <div class="decision-actions-row decision-actions-together">
+          <button data-action="together" title="Everyone in the group plans to catch this one together" class="${decision && decision.status==="together" ? "active" : ""}">👥 We're going<br><span>together</span></button>
+          <button data-action="later" title="Leave it open for now" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Not yet<br><span>leave it open</span></button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function wireWantTogetherCard(el, entry){
+  el.querySelectorAll(".decision-actions button").forEach(btn=>{
+    const action = btn.getAttribute("data-action");
+    btn.onclick = ()=> setGroupDecision(entry.key, action, action === "together" ? entry.artist.name : null);
+  });
+}
+
 // Reusable so the same render backs both the Plan tab's box and Today's
 // DECISIONS section — no separate data path, same groupClashPairs()/
-// groupDecisions Store key either way. Capped with a "show more" toggle
-// so a busy lineup with several real group clashes can't crowd out the
-// actual Plan list underneath it.
+// wantTogetherEntries()/groupDecisions Store key either way. Capped with
+// a "show more" toggle so a busy lineup with several real group clashes
+// (or want-together prompts) can't crowd out the actual Plan list
+// underneath it.
 function renderGroupDecisions(containerId){
   const box = document.getElementById(containerId || "groupDecisionsBox");
   if(!box) return;
   const pairs = groupClashPairs();
+  const wantEntries = (typeof wantTogetherEntries === "function") ? wantTogetherEntries() : [];
   const decisions = Store.get("groupDecisions") || {};
-  if(!pairs.length){ box.innerHTML = ""; box.style.display = "none"; return; }
+  const totalCount = pairs.length + wantEntries.length;
+  if(!totalCount){ box.innerHTML = ""; box.style.display = "none"; return; }
   box.style.display = "";
-  const outstanding = pairs.filter(p=>{ const d = decisions[p.key]; return !d || d.status === "later"; }).length;
+  const outstanding = pairs.filter(p=>{ const d = decisions[p.key]; return !d || d.status === "later"; }).length
+    + wantEntries.filter(e=>{ const d = decisions[e.key]; return !d || d.status === "later"; }).length;
   // Collapsed to one summary line by default — this used to sit full-
   // height above Compare's own list every time, effectively hiding the
   // thing Compare is actually for. The header/toggle is a "card" of its
   // own so it reads as collapsible rather than as a heading.
   const collapseHeader = `<div class="decisions-box-header${groupDecisionsCollapsed ? "" : " expanded"}" id="groupDecisionsCollapseToggle">
-    <h3 style="margin:0; font-size:14px;">⚡ Group decisions <span class="empty-note" style="font-weight:400;">${pairs.length} clash${pairs.length===1?"":"es"}${outstanding ? ` · ${outstanding} still needed` : " · all set"}</span></h3>
+    <h3 style="margin:0; font-size:14px;">⚡ Group decisions <span class="empty-note" style="font-weight:400;">${totalCount} item${totalCount===1?"":"s"}${outstanding ? ` · ${outstanding} still needed` : " · all set"}</span></h3>
     <span class="decisions-box-chevron">${groupDecisionsCollapsed ? "▾" : "▴"}</span>
   </div>`;
   if(groupDecisionsCollapsed){
@@ -8472,13 +8690,21 @@ function renderGroupDecisions(containerId){
     document.getElementById("groupDecisionsCollapseToggle").onclick = ()=>{ groupDecisionsCollapsed = false; renderGroupDecisions(containerId); };
     return;
   }
-  const visible = groupDecisionsExpanded ? pairs : pairs.slice(0, GROUP_DECISIONS_CAP);
+  // Clash pairs first (usually more time-critical since something has
+  // to give), then want-together prompts — one combined list under one
+  // cap/expand toggle rather than two separate sections.
+  const allItems = [...pairs.map(p=>({ kind:"pair", data:p })), ...wantEntries.map(e=>({ kind:"want", data:e }))];
+  const visible = groupDecisionsExpanded ? allItems : allItems.slice(0, GROUP_DECISIONS_CAP);
   box.innerHTML = collapseHeader
-    + visible.map(p=> decisionCardHTML(p, decisions[p.key])).join("")
-    + (pairs.length > GROUP_DECISIONS_CAP ? `<button class="ghost" id="groupDecisionsToggle" style="margin-top:2px;">${groupDecisionsExpanded ? "Show fewer" : `Show ${pairs.length - GROUP_DECISIONS_CAP} more`}</button>` : "");
+    + visible.map(item=> item.kind === "pair" ? decisionCardHTML(item.data, decisions[item.data.key]) : wantTogetherCardHTML(item.data, decisions[item.data.key])).join("")
+    + (allItems.length > GROUP_DECISIONS_CAP ? `<button class="ghost" id="groupDecisionsToggle" style="margin-top:2px;">${groupDecisionsExpanded ? "Show fewer" : `Show ${allItems.length - GROUP_DECISIONS_CAP} more`}</button>` : "");
   document.getElementById("groupDecisionsCollapseToggle").onclick = ()=>{ groupDecisionsCollapsed = true; renderGroupDecisions(containerId); };
   const cards = box.querySelectorAll(".decision-card");
-  visible.forEach((p,i)=>{ if(cards[i]) wireDecisionCard(cards[i], p); });
+  visible.forEach((item,i)=>{
+    if(!cards[i]) return;
+    if(item.kind === "pair") wireDecisionCard(cards[i], item.data);
+    else wireWantTogetherCard(cards[i], item.data);
+  });
   const toggleBtn = document.getElementById("groupDecisionsToggle");
   if(toggleBtn) toggleBtn.onclick = ()=>{ groupDecisionsExpanded = !groupDecisionsExpanded; renderGroupDecisions(containerId); };
 }
@@ -8978,6 +9204,12 @@ function mergeOwnCloudCopy(payload){
     payload.joinedActivities.forEach(k=> mineJoins.add(k));
     if(mineJoins.size !== before){ Store.set("joinedActivities", [...mineJoins]); changed += (mineJoins.size - before); }
   }
+  if(Array.isArray(payload.wantTogether) && payload.wantTogether.length){
+    const mineWant = new Set(Store.get("wantTogether") || []);
+    const before = mineWant.size;
+    payload.wantTogether.forEach(k=> mineWant.add(k));
+    if(mineWant.size !== before){ Store.set("wantTogether", [...mineWant]); changed += (mineWant.size - before); }
+  }
   return changed;
 }
 
@@ -9019,7 +9251,7 @@ async function pullFromCloud(){
   // duplicate's tab forever, since nothing ever told it the doc was
   // gone. Only prunes read-only teammate copies, never "mine".
   let pruned = false;
-  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins"].forEach(key=>{
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins","peopleWantTogether"].forEach(key=>{
     const map = Store.get(key) || {};
     let changed = false;
     Object.keys(map).forEach(id=>{
@@ -9081,7 +9313,7 @@ function switchDeviceIdentity(targetId, payload){
   // schedule (not part of PERSONAL_ONLY_KEYS, since that list is about
   // what's excluded from the *shareable group snapshot*, a different
   // concern from "what counts as this device's own identity").
-  [...PERSONAL_ONLY_KEYS, "schedule", "activities", "joinedActivities"].forEach(key=> Store.remove(key));
+  [...PERSONAL_ONLY_KEYS, "schedule", "activities", "joinedActivities", "wantTogether"].forEach(key=> Store.remove(key));
 
   Store.set("contributorName", payload.from || "Someone");
   Store.set("deviceId", targetId);
@@ -9101,11 +9333,12 @@ function switchDeviceIdentity(targetId, payload){
   // recovered from here.
   if(Array.isArray(payload.activities)) Store.set("activities", payload.activities.map(a=>({ ...a })));
   if(Array.isArray(payload.joinedActivities)) Store.set("joinedActivities", payload.joinedActivities.slice());
+  if(Array.isArray(payload.wantTogether)) Store.set("wantTogether", payload.wantTogether.slice());
 
   // They're "mine" now, not a read-only teammate — drop any cached
   // snapshot under their old personId so they don't also linger as
   // their own separate person-tab right after taking over.
-  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins"].forEach(key=>{
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins","peopleWantTogether"].forEach(key=>{
     const map = Store.get(key) || {};
     if(map[targetId]){ delete map[targetId]; Store.set(key, map); }
   });
