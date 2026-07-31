@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v190";
-const APP_BUILD_TIME = "2026-07-31T09:26:50Z";
+const APP_CACHE_VERSION = "v191";
+const APP_BUILD_TIME = "2026-07-31T09:46:37Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -831,18 +831,28 @@ notesBox.oninput = ()=> Store.set("notes", notesBox.value);
 // ===============================
 // COUNTDOWN & STATS
 // ===============================
+// UTC-anchored (not a bare local-time string) — see FESTIVAL_START's own
+// comment further down for why: the festival is on UK time (BST,
+// UTC+1) regardless of the viewer's own device timezone. 11:00 UTC =
+// 12:00 BST. Declared up here (not down with FESTIVAL_START near
+// TODAY/FESTIVAL MODE) since updateCountdown() runs at load time, at
+// the bottom of this same block — see the TDZ rule in CLAUDE.md.
+const FESTIVAL_GATES_OPEN = new Date("2026-08-12T11:00:00Z"); // 12:00 BST, Wed 12 Aug 2026
 function updateCountdown(){
   const el = document.getElementById("countdownText");
-  const gates = new Date("2026-08-12T12:00:00");
-  const diff = gates - new Date();
+  const card = document.getElementById("countdownCard");
+  const diff = FESTIVAL_GATES_OPEN - new Date();
   if(diff <= 0){
-    el.textContent = "Gates are open — have the best one.";
+    // Stops and disappears at gates-open, rather than a "gates are
+    // open" message taking up Home space for the rest of the festival.
+    if(card) card.style.display = "none";
     return;
   }
+  if(card) card.style.display = "";
   const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
   const mins = Math.floor((diff % 3600000) / 60000);
-  el.innerHTML = `<span style="font-size:22px; font-weight:700; color:var(--accent-amber);">${days}d ${hours}h ${mins}m</span><br>until gates open (Wed 12 Aug, approx. lunchtime)`;
+  el.innerHTML = `<span style="font-size:22px; font-weight:700; color:var(--accent-amber);">${days}d ${hours}h ${mins}m</span><br>until gates open (Wed 12 Aug, 12:00 UK time)`;
 }
 updateCountdown();
 setInterval(updateCountdown, 60000);
@@ -5607,13 +5617,10 @@ function renderHomeContextBanner(){
 
   // Now/next set info lives in the dedicated "Next saved event" ticket
   // above this banner instead — kept out of here so the two don't say
-  // the same thing twice in different words.
-  // Only your own personal clashes alert here — group "decisions needed"
-  // used to also show on this banner, but that's a nag for something
-  // you'll pick a time for yourselves, not an urgent home-screen alert;
-  // it still lives on the Today tab and in Plan → Compare.
-  const clashMap = findClashes(Store.get("schedule"));
-  const clashCount = Object.keys(clashMap).length;
+  // the same thing twice in different words. Clash warnings used to show
+  // here too, but Home's top area is meant to answer "what have my
+  // friends been doing?" not double as a general app-update feed — clash
+  // alerts still live on the Today tab and in Plan → Compare.
 
   // Only shows for someone who's actually set a location (peopleStatus)
   // — not just "synced recently," which used to fire for anyone who'd
@@ -5652,15 +5659,10 @@ function renderHomeContextBanner(){
   banner.innerHTML = `
     <div class="card home-context-banner">
       <div class="hcb-top">${escapeHtml(dayLabel)} · ${escapeHtml(clockLabel)}${name ? " · " + escapeHtml(name) : ""}</div>
-      ${clashCount ? `<div class="hcb-line hcb-warn">⚡ ${clashCount} saved artist${clashCount===1?"":"s"} clashing</div>` : ""}
       ${showLocationReminder ? `<div class="hcb-line">📍 Update your location? It's been a while — <a class="inline-link" id="hcbLocationUpdateLink">update</a> · <a class="inline-link" id="hcbLocationDismissLink">not now</a></div>` : ""}
       ${bottomLine ? `<div class="hcb-line hcb-muted">${bottomLine}</div>` : ""}
     </div>
   `;
-  if(clashCount){
-    const warnLine = banner.querySelector(".hcb-warn");
-    if(warnLine){ warnLine.style.cursor = "pointer"; warnLine.onclick = jumpToClashes; }
-  }
   if(showLocationReminder){
     const updateLink = banner.querySelector("#hcbLocationUpdateLink");
     if(updateLink) updateLink.onclick = ()=> jumpToId("jumpFriendStatus", "discover");
@@ -6941,6 +6943,17 @@ function jumpToId(id, tab){
   };
 })();
 
+(function setupAddToHomeToggle(){
+  const btn = document.getElementById("addToHomeToggleBtn");
+  const body = document.getElementById("addToHomeBody");
+  if(!btn || !body) return;
+  btn.onclick = ()=>{
+    const nowOpen = body.style.display === "none";
+    body.style.display = nowOpen ? "" : "none";
+    btn.textContent = nowOpen ? "Hide ▴" : "Show me how ▾";
+  };
+})();
+
 // Jump straight to a district's own marker/card on the map, from a
 // mention of its name anywhere else in the app (guide text, etc.).
 function jumpToDistrictOnMap(name){
@@ -7566,14 +7579,15 @@ function formatLastSeen(ts){
 // all the way up near the top of the file — see the comment there for why.
 // ===============================
 // Used by statusLineHTML/renderFriendStatusBar (defined further down) —
-// declared up here since renderHomeSyncStatus() runs at load time and
-// can trigger those before the FRIEND STATUS section below would run.
+// declared up here since renderAllFriendStatusUI() runs at load time
+// (top-level call further down the file) and can trigger those before
+// the FRIEND STATUS section below would otherwise run.
 const STATUS_STALE_MS = 30 * 60 * 1000; // 30 min — past this, visibly flagged as stale
 // Used by wireGpsToggle/startGpsWatch (defined much further down, in the
 // GPS AUTO-LOCATION section) — declared up here for the same TDZ-safety
-// reason as STATUS_STALE_MS above: renderHomeSyncStatus() runs at load
-// time and now calls wireGpsToggle("homeGpsLocationToggle"), which can
-// reach these two before their own section would otherwise run.
+// reason as STATUS_STALE_MS above: wireGpsToggle("gpsLocationToggle") is
+// called at load time (top-level, in the GPS AUTO-LOCATION section) and
+// can reach these two before their own section would otherwise run.
 const GPS_LOCATION_REFRESH_MS = 5 * 60 * 1000;
 let _gpsWatchTimer = null;
 const contributorNameInput = document.getElementById("contributorName");
@@ -7674,6 +7688,7 @@ function syncContributorNameDisplays(){
     }
   }
   if(typeof renderHomeSyncStatus === "function") renderHomeSyncStatus();
+  if(typeof updateHeaderLastSynced === "function") updateHeaderLastSynced();
 }
 
 if(contributorNameInput){
@@ -7790,57 +7805,44 @@ function wireHomeSyncStatusPicker(){
   };
 }
 
+// Slim, top-of-Home version — the full location/friend-status/device-
+// handoff controls this used to also render now live only in Discover's
+// jumpFriendStatus/jumpSync/jumpDeviceHandoff cards (linked below), so
+// this box doesn't duplicate them; it keeps only the one thing that
+// needs to be immediate: picking your name so sync actually starts.
 function renderHomeSyncStatus(){
   const box = document.getElementById("homeSyncStatus");
   if(!box) return;
   const name = currentContributorName();
   const isOther = name && !KNOWN_CONTRIBUTORS.includes(name);
   box.innerHTML = `
-    <span class="tag" style="${name ? "" : "background:rgba(242,168,60,.16); color:var(--accent-amber); border-color:rgba(242,168,60,.4);"}">${name ? "Syncing" : "Set this up once"}</span>
-    <h3>${name ? `✅ Syncing as ${escapeHtml(name)}` : "⚠️ Pick your name to start syncing"}</h3>
-    <p>${name
-      ? `Syncs automatically on open, every few minutes, and whenever you pull down from the top ↓ to refresh. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> also has a manual button, any time.`
-      : `Pick who you are to start syncing — one-time, done for good on this device. If this exact name already has synced data from another phone or browser, it's found and pulled in automatically the moment you pick it. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover.`}</p>
-    ${name ? `<p style="margin-top:6px; font-size:12px; color:var(--text-muted);">🔄 Data last synced with the group: <strong>${formatLastSynced()}</strong> — not the same as the app-version pill up top, that's about new code shipping, this is about your notes actually reaching everyone.</p>` : ""}
-    <div class="field" style="margin-top:10px;"><label>Who are you?</label>
-      <select id="homeContributorName">
-        <option value="">Select a name…</option>
-        <option value="Emma">Emma</option>
-        <option value="Dave">Dave</option>
-        <option value="Rob">Rob</option>
-        <option value="Jack">Jack</option>
-        <option value="Lewis">Lewis</option>
-        <option value="Dana">Dana</option>
-        <option value="Rhea">Rhea</option>
-        <option value="Katelyn">Katelyn</option>
-        <option value="__other__">Other…</option>
-      </select>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <span class="tag" style="${name ? "" : "background:rgba(242,168,60,.16); color:var(--accent-amber); border-color:rgba(242,168,60,.4);"}">${name ? "Syncing" : "Set this up once"}</span>
+      <h3 style="margin:0; font-size:14px;">${name ? `✅ Syncing as ${escapeHtml(name)}` : "⚠️ Pick your name to sync"}</h3>
     </div>
-    <div class="field" id="homeContributorOtherField" style="display:${isOther ? "" : "none"};"><label>Your name</label><input type="text" id="homeContributorOtherInput" placeholder="Type your name"></div>
-    <button class="action" id="homeSyncNowBtn" style="margin-top:10px;">☁️ Sync now</button>
-    <p class="empty-note" id="homeSyncNowNote" style="margin-top:6px;"></p>
-    <div style="margin-top:14px; padding:12px; border:1px solid rgba(242,168,60,.4); border-radius:10px; background:rgba(242,168,60,.08);">
-      <strong style="color:var(--accent-amber);">📍 Where are you right now?</strong>
-      <p style="margin-top:4px; font-size:13px; color:var(--text-muted);">Friends can see where you are, it helps with meeting up, and it flags the nearest stage — worth turning on.</p>
-      <div class="field" style="margin-top:8px;"><label>Where are you?</label>
-        <select id="homeStatusLocationSelect">
-          <option value="">Select a location…</option>
+    <p style="margin-top:4px; font-size:12.5px;">${name
+      ? `Last synced: <strong>${formatLastSynced()}</strong> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">manual sync &amp; more</a>`
+      : `One-time pick, found &amp; restored automatically if it's synced before. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">More in Discover</a>`}</p>
+    <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-top:8px;">
+      <div class="field" style="margin:0; flex:1; min-width:140px;">
+        <select id="homeContributorName">
+          <option value="">Select a name…</option>
+          <option value="Emma">Emma</option>
+          <option value="Dave">Dave</option>
+          <option value="Rob">Rob</option>
+          <option value="Jack">Jack</option>
+          <option value="Lewis">Lewis</option>
+          <option value="Dana">Dana</option>
+          <option value="Rhea">Rhea</option>
+          <option value="Katelyn">Katelyn</option>
+          <option value="__other__">Other…</option>
         </select>
       </div>
-      <div class="field" id="homeStatusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
-      <button class="action" id="homeStatusCustomBtn" style="margin-top:6px;">Set my status</button>
-      <label class="gps-toggle-row"><input type="checkbox" id="homeGpsLocationToggle">Auto-update my location from GPS every few minutes</label>
-      <p class="empty-note" id="homeStatusFeedbackNote" style="margin-top:6px;"></p>
+      <button class="action" id="homeSyncNowBtn" style="flex-shrink:0;">☁️ Sync now</button>
     </div>
-    <div id="homeFriendStatusList" style="margin-top:12px;"></div>
-    <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--text-muted);">📱 <strong>Using someone else's phone?</strong> Restores their last-synced saved artists, bingo card and character here. Whatever's currently on this phone gets backed up to the cloud automatically first — if that backup fails, nothing is touched and the switch is cancelled.</p>
-    <div class="field" style="margin-top:8px;"><label>Their name</label><input type="text" id="homeHandoffNameInput" placeholder="e.g. Dave"></div>
-    <button class="action danger" id="homeHandoffSwitchBtn">Wipe this phone &amp; switch to them</button>
-    <p class="empty-note" id="homeHandoffStatusNote" style="margin-top:6px;"></p>
-    <div id="homeHandoffSwitchBackBox" style="display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">
-      <p class="empty-note">This phone was <span id="homeHandoffSwitchBackLabel"></span> before the last switch — its data was backed up first, so you can bring it right back.</p>
-      <button class="action" id="homeHandoffSwitchBackBtn">Switch back</button>
-    </div>
+    <div class="field" id="homeContributorOtherField" style="display:${isOther ? "" : "none"}; margin-top:8px;"><label>Your name</label><input type="text" id="homeContributorOtherInput" placeholder="Type your name"></div>
+    <p class="empty-note" id="homeSyncNowNote" style="margin-top:6px;"></p>
+    <p style="margin-top:8px; font-size:12px; color:var(--text-muted);">📍 Location, friends' status &amp; using someone else's phone — all in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','discover')">Discover</a>.</p>
   `;
   const sel = document.getElementById("homeContributorName");
   const otherInput = document.getElementById("homeContributorOtherInput");
@@ -7849,13 +7851,9 @@ function renderHomeSyncStatus(){
   wireHomeSyncStatusPicker();
   const syncNowBtn = document.getElementById("homeSyncNowBtn");
   if(syncNowBtn) syncNowBtn.onclick = ()=> runManualSync(syncNowBtn, document.getElementById("homeSyncNowNote"));
-  if(typeof wireDeviceHandoffControl === "function") wireDeviceHandoffControl("homeHandoffNameInput", "homeHandoffSwitchBtn", "homeHandoffStatusNote");
-  if(typeof wireSwitchBackControl === "function") wireSwitchBackControl("homeHandoffSwitchBackBox", "homeHandoffSwitchBackLabel", "homeHandoffSwitchBackBtn", "homeHandoffStatusNote");
-  if(typeof wireStatusControl === "function") wireStatusControl("homeStatusLocationSelect", "homeStatusOtherField", "homeStatusCustomInput", "homeStatusCustomBtn", "homeStatusFeedbackNote");
-  if(typeof renderFriendStatusList === "function") renderFriendStatusList("homeFriendStatusList");
-  if(typeof wireGpsToggle === "function") wireGpsToggle("homeGpsLocationToggle");
 }
 renderHomeSyncStatus();
+if(typeof updateHeaderLastSynced === "function") updateHeaderLastSynced();
 
 // The "how data/sync/updates work" explainer only needs a full read
 // once — collapses to a one-liner after the first Home visit rather
@@ -7873,7 +7871,7 @@ function renderHomeInfoCard(){
       <p>Shared things — theories, hidden-venue finds, quotebook entries, live sightings, district notes, get-involved ticks, found socials, landmarks — combine into one pool everyone sees (Discover's "All notes"). Your Plan, bingo card and character stay yours — sync never merges anyone else's into them — but everyone else's land in their own named tab right next to yours, on the Plan, Bingo and My Character screens, so you can see what your friends have without it touching your own.</p>
       <p><strong>Using more than one phone/browser as the same person?</strong> Each one gets tracked separately behind the scenes, so a fresh device (reinstalled, cleared, or just a different browser) can look "empty" at first. Picking your name on it now checks for your existing synced data automatically and pulls it straight in — and if a duplicate ever shows up anyway, <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> has a "Merge all my duplicate tabs" button that fixes it permanently, any time. Nothing gets removed or overwritten by any of this — it only ever adds.</p>
       <p>If a sync ever looks wrong — something missing, or a device you didn't expect — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','discover')">Backup history</a> in Discover keeps snapshots of your own data (automatic every 20 min, or tap "Back up now" for a permanent one before doing anything risky) that you can step back to.</p>
-      <p>Want just your own stuff backed up locally too? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
+      <p>Want just your own stuff backed up locally too? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings','discover')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
       <p>The app itself updates quietly in the background whenever you're online, and keeps working fully offline once it's loaded once — updates never touch anything you've saved.</p>
       <button class="ghost" id="collapseHomeInfoBtn" style="margin-top:10px;">Got it, don't show this in full again</button>
     `;
@@ -7882,7 +7880,7 @@ function renderHomeInfoCard(){
   } else {
     box.innerHTML = `
       <h3 style="margin-bottom:0;">💾 Your data, sync &amp; updates</h3>
-      <p style="margin-top:6px;">Saves itself automatically, backs up to the cloud within seconds, syncs itself once you've picked a name — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','discover')">Backup history</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings')">Settings</a> · <a class="inline-link" href="javascript:void(0)" id="expandHomeInfoLink">full explanation</a></p>
+      <p style="margin-top:6px;">Saves itself automatically, backs up to the cloud within seconds, syncs itself once you've picked a name — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','discover')">Backup history</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings','discover')">Settings</a> · <a class="inline-link" href="javascript:void(0)" id="expandHomeInfoLink">full explanation</a></p>
     `;
     const expandLink = document.getElementById("expandHomeInfoLink");
     if(expandLink) expandLink.onclick = ()=>{ Store.set("seenHomeInfoCard", false); renderHomeInfoCard(); };
@@ -8032,9 +8030,20 @@ function formatLastSynced(){
   return d.toDateString() === now.toDateString() ? `Today, ${time}` : `${d.toLocaleDateString([], { day:"numeric", month:"short" })}, ${time}`;
 }
 
+function updateHeaderLastSynced(){
+  const el = document.getElementById("headerLastSynced");
+  if(!el) return;
+  const name = currentContributorName();
+  if(!name){ el.textContent = ""; el.title = ""; return; }
+  const ts = Store.get("lastSyncedAt");
+  el.textContent = ts ? new Date(ts).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }) : "—";
+  el.title = `Last synced: ${formatLastSynced()}`;
+}
+
 function recordLastSynced(){
   Store.set("lastSyncedAt", Date.now());
   if(typeof renderHomeSyncStatus === "function") renderHomeSyncStatus();
+  updateHeaderLastSynced();
 }
 
 // Same refresh list a manual "Merge it in" and a cloud sync both need,
@@ -8716,8 +8725,14 @@ renderGroupDecisions();
 // (own Plan, group sync, group decisions, shared meeting point) — no
 // new state of its own beyond which tab is active.
 // ===============================
-const FESTIVAL_START = new Date("2026-08-12T00:00:00");
-const FESTIVAL_END = new Date("2026-08-17T00:00:00"); // exclusive — through end of Sun 16 Aug
+// UTC-anchored, not a bare local-time string — the festival is in the
+// UK, on BST (UTC+1) throughout August, so "midnight on 12 Aug UK time"
+// is 23:00 UTC on 11 Aug. A bare "2026-08-12T00:00:00" string is parsed
+// in whichever timezone the VIEWER'S OWN DEVICE happens to be set to,
+// which is wrong for anyone whose device isn't on UK time (travelling,
+// misconfigured, etc.) even though the festival itself never moves.
+const FESTIVAL_START = new Date("2026-08-11T23:00:00Z"); // 00:00 BST, Wed 12 Aug 2026
+const FESTIVAL_END = new Date("2026-08-16T23:00:00Z"); // exclusive — 00:00 BST Sun 16 Aug, through end of Sun 16 Aug
 function isFestivalLive(){
   const now = new Date();
   return now >= FESTIVAL_START && now < FESTIVAL_END;
@@ -8992,6 +9007,68 @@ function renderRecentActivity(containerId, limit){
     ? events.map(e=> `<div class="status-line">${e.icon} ${e.text} <span style="color:var(--text-muted); font-size:11px;">· ${formatLastSeen(e.ts)}</span></div>`).join("")
     : `<p class="empty-note">Nothing yet — activity shows up here as your group syncs, sets statuses, logs finds and makes decisions.</p>`;
 }
+
+// Home's own, narrower feed — "what have my friends been doing?" only.
+// Deliberately excludes groupDecisions/clash events (those read as app
+// nags, not social updates) and hidden-venue/theory finds beyond a
+// couple, unlike Discover's fuller buildRecentActivity() above which
+// keeps everything. Adds joined-activity and unread-chat events that
+// buildRecentActivity() doesn't have, since those are exactly the kind
+// of "friend activity" Home's top area should surface first.
+function buildHomeFriendActivity(){
+  const events = [];
+  const myDeviceId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : null;
+
+  const peopleStatus = Store.get("peopleStatus") || {};
+  Object.entries(peopleStatus).forEach(([id, s])=>{
+    if(id === myDeviceId) return;
+    if(s && s.updatedAt && s.place) events.push({ ts: s.updatedAt, text: `${escapeHtml(personDisplayName(s, id))} updated their location to ${escapeHtml(s.place)}`, icon: personDotHtml(personDisplayName(s, id)) });
+  });
+
+  const unread = (typeof totalUnreadCount === "function") ? totalUnreadCount() : 0;
+  if(unread > 0){
+    events.push({ ts: Date.now(), text: `${unread} unread chat message${unread===1?"":"s"} — tap to open`, icon: "💬", isChatLink: true });
+  }
+
+  const peopleActivities = Store.get("peopleActivities") || {};
+  Object.entries(peopleActivities).forEach(([id, entry])=>{
+    if(id === myDeviceId) return;
+    personSnapshotList(entry).forEach(a=>{
+      if(!a.createdAt) return;
+      const attendees = (typeof activityAttendeeNames === "function") ? activityAttendeeNames(id, personDisplayName(entry, id), a.id) : [];
+      events.push({ ts: a.createdAt, text: `${escapeHtml(personDisplayName(entry, id))} added a group activity: ${escapeHtml(a.name)}${attendees.length > 1 ? ` (${attendees.length} in)` : ""}`, icon: "🎉" });
+    });
+  });
+
+  // "Friends joining activities" (joinedActivities/peopleJoins) is only
+  // ever stored as a plain set of "owner::activityId" keys with no join
+  // timestamp — there's nothing to sort a feed entry by, so it's left
+  // out here rather than faking a time. Attendee counts on the activity-
+  // creation events above already surface it indirectly ("3 in").
+
+  const meetingUpdatedAt = Store.get("meetingUpdatedAt");
+  if(meetingUpdatedAt){
+    events.push({ ts: meetingUpdatedAt, text: `${escapeHtml(Store.get("meetingBy") || "Someone")} set the meeting point to ${escapeHtml(Store.get("meeting") || "")}`, icon: "📍" });
+  }
+
+  (Store.get("hiddenVenues") || []).slice(-3).forEach(v=>{
+    if(v.ts) events.push({ ts: v.ts, text: `${escapeHtml(v.from || "Someone")} found: ${escapeHtml(v.name || "Untitled find")}`, icon: "🕵" });
+  });
+
+  return events.sort((a,b)=> b.ts - a.ts);
+}
+
+function renderHomeFriendActivity(){
+  const box = document.getElementById("homeFriendActivity");
+  if(!box) return;
+  const events = buildHomeFriendActivity().slice(0, 6);
+  box.innerHTML = events.length
+    ? events.map(e=> `<div class="status-line${e.isChatLink ? " home-activity-chat-link" : ""}">${e.icon} ${e.text}${e.isChatLink ? "" : ` <span style="color:var(--text-muted); font-size:11px;">· ${formatLastSeen(e.ts)}</span>`}</div>`).join("")
+    : `<p class="empty-note">Nothing new from friends yet — updates show up here as people set locations, chat or add activities.</p>`;
+  const chatLine = box.querySelector(".home-activity-chat-link");
+  if(chatLine){ chatLine.style.cursor = "pointer"; chatLine.onclick = ()=>{ if(typeof openChatPanel === "function") openChatPanel(); }; }
+}
+renderHomeFriendActivity();
 
 async function pushToCloud(){
   const db = getFirestoreDb();
