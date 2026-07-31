@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v216";
-const APP_BUILD_TIME = "2026-07-31T20:55:51Z";
+const APP_CACHE_VERSION = "v217";
+const APP_BUILD_TIME = "2026-07-31T21:09:50Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5876,10 +5876,10 @@ const locations = [
   { name:"Letsbe Avenue", kind:"district", x:"40%", y:"14%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
   { name:"Metropolis", kind:"district", x:"15%", y:"34%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
   { name:"Grand Central", kind:"stage", x:"66%", y:"30%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
-  { name:"The Lion's Den", kind:"stage", x:"46%", y:"44%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
+  { name:"The Lion's Den", kind:"stage", x:"93%", y:"38%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
   { name:"Hydro XL", kind:"stage", x:"28%", y:"34%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
   { name:"Anara Forest", kind:"stage", x:"72%", y:"44%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
-  { name:"Hidden Woods", kind:"stage", x:"24%", y:"78%", info:"One of two woodland stages tucked among the trees, with its own beach bar and treetop walks. Leans eclectic bass and reggae/dub, often billing bigger DnB names alongside newer acts — explore carefully after dark." },
+  { name:"Hidden Woods", kind:"stage", x:"18%", y:"8%", info:"One of two woodland stages tucked among the trees, with its own beach bar and treetop walks. Leans eclectic bass and reggae/dub, often billing bigger DnB names alongside newer acts — explore carefully after dark." },
   { name:"NEXUS", kind:"stage", x:"32%", y:"22%", info:"Right in Botanica — its main stage, 'where nature connects', celebrating live music and the freshest names on the scene. The hip-hop, grime and garage side has previously pulled in names like Bashy, MJ Cole and Lady Leshurr." },
   { name:"Helix", kind:"stage", x:"20%", y:"38%", info:"Alongside Metropolis. Breaks, big beat and bass-heavy line-up." },
   { name:"Meeting Point", kind:"meeting", x:"48%", y:"58%", info:"Your chosen meetup spot — set this with your group before you split up." }
@@ -5909,12 +5909,15 @@ const otherStages = [
 // repositioned near Area 404/Botanica/Letsbe Avenue per the video-
 // confirmed "Downtown" cluster (see the district fix above); Acid Leak
 // moved to sit by Area 404 per its own info text ("Area 404's acid
-// techno... stage"). Foggers Mill/The Fools Leap's entries here are
-// unused — realCoordFor() finds a precise real-coordinate match for
-// both, so their actual map position never reads from this array.
-// Tangled Roots/Síbín Beag/Infinity left unchanged — no clear match found
-// in the reference video, so untouched rather than guessed.
-const minorStagePositions = [[46,34],[14,50],[34,16],[56,38],[30,58],[62,52],[44,42],[72,66],[40,76],[54,26],[56,80]];
+// techno... stage"); Tangled Roots moved to sit just west of Copperwood,
+// where its own label appears on camera twice in the reference video.
+// Foggers Mill/The Fools Leap's entries here are unused — realCoordFor()
+// finds a precise real-coordinate match for both, so their actual map
+// position never reads from this array. Infinity moved next to
+// Metropolis — its own label appears right beside "METROPOLIS" on
+// camera. Síbín Beag left unchanged — no clear match found in the
+// reference video, so untouched rather than guessed.
+const minorStagePositions = [[46,34],[60,18],[34,16],[56,38],[30,58],[62,52],[44,42],[72,66],[40,76],[54,26],[24,40]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -5938,8 +5941,8 @@ const thingsToFind = [
   { name:"Mining for (g)Old Town", near:"Oldtown", x:"84%", y:"48%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
   { name:"Cas's Costumes", near:"Oldtown", x:"92%", y:"56%", info:"A costume-shop-fronted micro venue fitting Oldtown's circus and rogues theme — worth a look if you want to dress into the story." },
   { name:"Soapranos Laundrette", near:"Letsbe Avenue", x:"36%", y:"10%", info:"A laundrette-fronted hidden venue — in 2025 it hosted dance-music DJ sets behind the washing machines. Look for the set dressing, not a normal stage entrance." },
-  { name:"E Numbers", near:"Letsbe Avenue", x:"44%", y:"10%", info:"A sweet-shop/E-numbers-themed party spot fitting Letsbe Avenue's consumer-product BLIP storyline — small, high-energy, easy to walk past." },
-  { name:"Gabber Kebabber", near:"Letsbe Avenue", x:"40%", y:"18%", info:"Kebab-shop chaos paired with gabber and hardcore — a tiny, loud find rather than a destination with a published pin." },
+  { name:"E Numbers", near:"Letsbe Avenue", x:"10%", y:"26%", info:"A sweet-shop/E-numbers-themed party spot fitting Letsbe Avenue's consumer-product BLIP storyline — small, high-energy, easy to walk past." },
+  { name:"Gabber Kebabber", near:"Letsbe Avenue", x:"22%", y:"30%", info:"Kebab-shop chaos paired with gabber and hardcore — a tiny, loud find rather than a destination with a published pin." },
   { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
   { name:"Deviant Lounge", near:"Metropolis", x:"19%", y:"38%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
   { name:"The Pomegranate Parlour", near:"Site-wide", x:"86%", y:"20%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor." },
@@ -5961,10 +5964,10 @@ const landmarks = [
   { name:"Pepperpot Market", x:"46%", y:"50%", info:"A reliable food-and-drink hub roughly central to the site, also home to one of the two 24-hour medical centres and the Safer Spaces welfare team.", hours:"Medical centre & welfare: 24 hours." },
   { name:"The Retreat", x:"60%", y:"12%", info:"Boomtown's paid spa space in the Thrutopia woodlands — spa/hot-tub sessions, sauna and cold splash, sound baths and massages. Book ahead; it's separate from your festival ticket." },
   { name:"The Observatory", x:"52%", y:"14%", info:"New for 2026 — a genuine academic research hub embedded in the festival, led by psychologist Dr Martha Newson with researchers from 10+ UK universities studying identity, belonging and collective behaviour at live events. Take part in a study or the before/after survey if you're curious." },
-  { name:"Lion's Gate Portal", x:"26%", y:"44%", info:"The story's central portal art piece near the Lion's Den — last chapter's closing ceremony used it to foretell the Lion's Den's return to Temple Valley this year." },
+  { name:"Lion's Gate Portal", x:"90%", y:"34%", info:"The story's central portal art piece near the Lion's Den — last chapter's closing ceremony used it to foretell the Lion's Den's return to Temple Valley this year." },
   { name:"Medical Centre — Hilltop", x:"72%", y:"50%", info:"One of two confirmed 24-hour medical centres for Chapter Five (the other is at Pepperpot Market).", hours:"24 hours." },
   { name:"Public Transport Hub", x:"6%", y:"42%", info:"Near West Gate — coach, shuttle and accessible-transport drop-off/pick-up point." },
-  { name:"Lockers — Hidden Woods", x:"28%", y:"80%", info:"One of the confirmed 2026 locker locations, alongside Thrutopia, the Lion's Den/Orchid area and Downtown Village." },
+  { name:"Lockers — Hidden Woods", x:"14%", y:"12%", info:"One of the confirmed 2026 locker locations, alongside Thrutopia, the Lion's Den/Orchid area and Downtown Village." },
   { name:"Lockers — Thrutopia", x:"58%", y:"10%", info:"Locker point in the Thrutopia woodlands." },
   { name:"Amnesty Points — West Gate", x:"5%", y:"50%", info:"Dispose of anything prohibited before you're searched, no questions asked — every gate has one." },
   { name:"Charge Candy — Pepperpot Market", x:"50%", y:"52%", info:"One of six confirmed phone-charging points dotted across the site." }
@@ -6187,14 +6190,29 @@ function buildMapGeoJSON(){
   if(centers.length) centers.push(centers[0]);
   const trailFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(centers) } };
 
-  // Thin spokes from every stage (major + minor) to its nearest district,
-  // so the path network reads like it actually connects the site rather
-  // than one lonely ring.
+  // Spokes from every stage (major + minor) to its nearest district — the
+  // main walkable "roads" of the path network.
   const spokeTargets = locations.filter(p=>p.kind === "stage").concat(minorStages);
   const spokeFeatures = spokeTargets.map(s=>{
     const sx = parseFloat(s.x), sy = parseFloat(s.y);
     const nd = nearestDistrict(sx, sy, districts);
     return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[sx,sy],[parseFloat(nd.x), parseFloat(nd.y)]]) } };
+  });
+
+  // Thinner "capillary" paths from every smaller point (hidden venues,
+  // landmarks, gates) to its nearest district — without these, only the
+  // dozen main/minor stages had any path at all, so every hidden venue,
+  // landmark and gate looked like a marker dropped on plain grass with no
+  // way to reach it. Drawing a path to each one, thinner and fainter than
+  // the main stage spokes, makes the whole map read as one connected
+  // network instead of isolated pins — same layering idea real
+  // illustrated maps use (thick main routes, thin capillary paths to
+  // individual stalls/venues).
+  const capillaryTargets = thingsToFind.concat(landmarks).concat(gates);
+  const capillaryFeatures = capillaryTargets.map(p=>{
+    const px = parseFloat(p.x), py = parseFloat(p.y);
+    const nd = nearestDistrict(px, py, districts);
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[px,py],[parseFloat(nd.x), parseFloat(nd.y)]]) } };
   });
 
   // Forest AREAS — a solid mottled-green clearing shape under each named
@@ -6245,6 +6263,7 @@ function buildMapGeoJSON(){
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
+    capillaries: { type:"FeatureCollection", features: capillaryFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
@@ -6448,11 +6467,23 @@ function loadMap(){
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 1.6, "line-dasharray": [2, 2] } });
 
+      // Path network — three tiers so the map reads as a connected route
+      // system rather than isolated markers on plain grass: a solid main
+      // trail linking every district (drawn with a dark "casing" line
+      // underneath a lighter tan fill line, the same two-layer technique
+      // real road cartography uses so it stands out from the grass),
+      // medium spokes carrying that trail out to every stage, and thin
+      // dotted capillaries reaching every hidden venue, landmark and gate.
       mapGL.addSource("mapTrail", { type: "geojson", data: geo.trail });
-      mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(196,158,110,0.6)", "line-width": 1.8, "line-dasharray": [1, 2] } });
+      mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(70,54,38,0.55)", "line-width": 5.5 } });
+      mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(214,186,146,0.9)", "line-width": 2.6 } });
 
       mapGL.addSource("mapSpokes", { type: "geojson", data: geo.spokes });
-      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(196,158,110,0.3)", "line-width": 1, "line-dasharray": [1, 3] } });
+      mapGL.addLayer({ id: "spokes-casing", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(70,54,38,0.4)", "line-width": 3.2 } });
+      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(214,186,146,0.7)", "line-width": 1.5 } });
+
+      mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
+      mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
 
       mapGL.addSource("mapTrees", { type: "geojson", data: geo.trees });
       mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", paint: {
