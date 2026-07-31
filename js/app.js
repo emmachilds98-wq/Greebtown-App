@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v180";
-const APP_BUILD_TIME = "2026-07-31T02:27:50Z";
+const APP_CACHE_VERSION = "v181";
+const APP_BUILD_TIME = "2026-07-31T02:36:54Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6886,6 +6886,13 @@ const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea","Ka
 // can trigger those before the FRIEND STATUS section below would run.
 const STATUS_STALE_MS = 30 * 60 * 1000; // 30 min — past this, visibly flagged as stale
 const STATUS_DOT_PALETTE = ["🟣","🔵","🟢","🟠","🟡","🔴"];
+// Used by wireGpsToggle/startGpsWatch (defined much further down, in the
+// GPS AUTO-LOCATION section) — declared up here for the same TDZ-safety
+// reason as STATUS_STALE_MS above: renderHomeSyncStatus() runs at load
+// time and now calls wireGpsToggle("homeGpsLocationToggle"), which can
+// reach these two before their own section would otherwise run.
+const GPS_LOCATION_REFRESH_MS = 5 * 60 * 1000;
+let _gpsWatchTimer = null;
 const contributorNameInput = document.getElementById("contributorName");
 const contributorOtherField = document.getElementById("contributorOtherField");
 const contributorOtherInput = document.getElementById("contributorOtherInput");
@@ -7131,7 +7138,7 @@ function renderHomeSyncStatus(){
     <p class="empty-note" id="homeSyncNowNote" style="margin-top:6px;"></p>
     <div style="margin-top:14px; padding:12px; border:1px solid rgba(242,168,60,.4); border-radius:10px; background:rgba(242,168,60,.08);">
       <strong style="color:var(--accent-amber);">📍 Where are you right now?</strong>
-      <p style="margin-top:4px; font-size:13px; color:var(--text-muted);">Moved since you last opened the app? Update it here every time — it's how the group actually knows where everyone is.</p>
+      <p style="margin-top:4px; font-size:13px; color:var(--text-muted);">Friends can see where you are, it helps with meeting up, and it flags the nearest stage — worth turning on.</p>
       <div class="field" style="margin-top:8px;"><label>Where are you?</label>
         <select id="homeStatusLocationSelect">
           <option value="">Select a location…</option>
@@ -7139,6 +7146,7 @@ function renderHomeSyncStatus(){
       </div>
       <div class="field" id="homeStatusOtherField" style="display:none;"><label>Where, exactly?</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
       <button class="action" id="homeStatusCustomBtn" style="margin-top:6px;">Set my status</button>
+      <label class="gps-toggle-row"><input type="checkbox" id="homeGpsLocationToggle">Auto-update my location from GPS every few minutes</label>
       <p class="empty-note" id="homeStatusFeedbackNote" style="margin-top:6px;"></p>
     </div>
     <div id="homeFriendStatusList" style="margin-top:12px;"></div>
@@ -7162,6 +7170,7 @@ function renderHomeSyncStatus(){
   if(typeof wireSwitchBackControl === "function") wireSwitchBackControl("homeHandoffSwitchBackBox", "homeHandoffSwitchBackLabel", "homeHandoffSwitchBackBtn", "homeHandoffStatusNote");
   if(typeof wireStatusControl === "function") wireStatusControl("homeStatusLocationSelect", "homeStatusOtherField", "homeStatusCustomInput", "homeStatusCustomBtn", "homeStatusFeedbackNote");
   if(typeof renderFriendStatusList === "function") renderFriendStatusList("homeFriendStatusList");
+  if(typeof wireGpsToggle === "function") wireGpsToggle("homeGpsLocationToggle");
 }
 renderHomeSyncStatus();
 
@@ -7386,10 +7395,16 @@ function statusDotFor(id){
   return STATUS_DOT_PALETTE[hash % STATUS_DOT_PALETTE.length];
 }
 
-function setMyStatus(place){
+// gps is optional {lat, lon} — only ever set by the GPS auto-location
+// path (refreshGpsLocationOnce). Always builds a fresh object rather
+// than merging onto the previous one, so switching back to a manual
+// location naturally drops any stale GPS coordinates from the old
+// position instead of leaving a misleading "Open in Maps" link pointing
+// at where GPS last saw you.
+function setMyStatus(place, gps){
   const trimmed = (place || "").trim();
   if(!trimmed) return;
-  Store.set("myStatus", { place: trimmed, updatedAt: Date.now() });
+  Store.set("myStatus", { place: trimmed, updatedAt: Date.now(), ...(gps ? { gps } : {}) });
   renderAllFriendStatusUI();
 }
 
@@ -7410,10 +7425,10 @@ function friendStatusEntries(){
     // lastSyncedTs is separate from updatedAt (when they last SET their
     // location) — a device can sync more recently than it last changed
     // its status, so these two times can genuinely differ.
-    .map(([id, s])=> ({ id, displayName: personDisplayName(s, id), place: s.place, updatedAt: s.updatedAt, lastSyncedTs: personLastSeenTs(peopleLastSeen[id]) }));
+    .map(([id, s])=> ({ id, displayName: personDisplayName(s, id), place: s.place, updatedAt: s.updatedAt, lastSyncedTs: personLastSeenTs(peopleLastSeen[id]), gps: s.gps || null }));
   const myStatus = Store.get("myStatus");
   if(myStatus && myStatus.place && myDeviceId){
-    entries.push({ id: myDeviceId, displayName: currentContributorName() || "You", place: myStatus.place, updatedAt: myStatus.updatedAt, lastSyncedTs: Store.get("lastSyncedAt"), isMe: true });
+    entries.push({ id: myDeviceId, displayName: currentContributorName() || "You", place: myStatus.place, updatedAt: myStatus.updatedAt, lastSyncedTs: Store.get("lastSyncedAt"), gps: myStatus.gps || null, isMe: true });
   }
   const byName = new Map();
   entries.forEach(e=>{
@@ -7432,7 +7447,8 @@ function statusLineHTML(entry){
   // is done by just setting a new one. Mainly here for ghost/stale
   // entries left over from before sync worked properly.
   const removeBtn = entry.isMe ? "" : ` <button type="button" class="status-remove-btn" onclick="removeFriendStatus('${entry.id}')" title="Remove this status" aria-label="Remove ${escapeHtml(entry.displayName)}'s status" style="border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:13px; padding:0 4px;">✕</button>`;
-  return `<div class="status-line${stale ? " status-stale" : ""}">${statusDotFor(entry.id)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Location set ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}${removeBtn}${syncedLine}</div>`;
+  const mapsLink = entry.gps ? mapsLinkHtml(entry.gps.lat, entry.gps.lon) : "";
+  return `<div class="status-line${stale ? " status-stale" : ""}">${statusDotFor(entry.id)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Location set ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}${removeBtn}${syncedLine}${mapsLink}</div>`;
 }
 
 // Clears a stale/ghost friend status — local cache first (so the UI
@@ -7558,30 +7574,101 @@ setInterval(renderAllFriendStatusUI, 60000);
 // turning it on just calls setMyStatus() with a coordinate string instead
 // of a picked location, on a timer, then syncs it out the same way a
 // manual update does. No new Firestore fields, no new permissions model
-// beyond the one-time browser geolocation prompt.
+// beyond the one-time browser geolocation prompt. GPS_LOCATION_REFRESH_MS
+// and _gpsWatchTimer are declared up near STATUS_STALE_MS instead of here
+// — see that comment for why.
 // ===============================
-const GPS_LOCATION_REFRESH_MS = 5 * 60 * 1000;
-let _gpsWatchTimer = null;
+
+// Boomtown's confirmed real-world 2026 site — Matterley Estate, near
+// Winchester, Hampshire (SO21 1HW) — researched directly rather than
+// assumed. This is a SINGLE reference point, not a per-stage one: no
+// public GPS-accurate district/stage map exists for Boomtown (checked)
+// — only an official qualitative layout (Downtown in the valley bowl,
+// Hilltop above it, Lions Den/Temple Valley beyond that) with no
+// compass bearing given anywhere. Claiming a specific "nearest stage"
+// from that would be fabricating precision the source data doesn't
+// have, so GPS location only ever surfaces a distance-from-site
+// estimate, clearly labelled as one.
+const FESTIVAL_SITE_COORDS = { lat: 51.0514, lon: -1.2456 };
+
+function haversineDistanceKm(lat1, lon1, lat2, lon2){
+  const R = 6371;
+  const toRad = d=> d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// The site itself (valley + hilltop + Temple Valley) spans roughly this
+// radius end to end per the official accessibility page's walking
+// distances (Meadow campsite to Temple Valley ~3-3.6km one-way) — so
+// "within ~2km of the reference point" reads as "somewhere on site"
+// rather than claiming a specific district, which the data can't back.
+function siteProximityLabel(lat, lon){
+  const km = haversineDistanceKm(lat, lon, FESTIVAL_SITE_COORDS.lat, FESTIVAL_SITE_COORDS.lon);
+  if(km < 2) return "on site (estimate)";
+  if(km < 20) return `~${km.toFixed(1)}km from the festival site (estimate)`;
+  return `~${Math.round(km)}km from the festival site (estimate)`;
+}
 
 function formatGpsPlace(coords){
-  return `GPS ${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
+  return `GPS ${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)} · ${siteProximityLabel(coords.latitude, coords.longitude)}`;
+}
+
+// Cross-platform "open in the device's default maps app" link — Apple
+// Maps' own web link (maps.apple.com) is what iOS treats as its native
+// maps handoff; everything else (Android, desktop) gets Google Maps'
+// universal search link, which opens the Google Maps app if installed
+// or falls back to the browser. No dependency, just picking the right
+// URL scheme per platform.
+function mapsLinkUrl(lat, lon){
+  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent || "");
+  return isIOS
+    ? `https://maps.apple.com/?ll=${lat},${lon}`
+    : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+}
+function mapsLinkHtml(lat, lon){
+  if(typeof lat !== "number" || typeof lon !== "number") return "";
+  return `<a class="linkbtn" href="${mapsLinkUrl(lat, lon)}" target="_blank" rel="noopener" style="margin-left:6px;">📍 Open in Maps</a>`;
+}
+
+// Keeps both GPS toggle checkboxes (Discover's static one, Home's
+// re-rendered-every-time one) showing the same on/off state, whichever
+// one someone actually used or however a background failure changed it.
+function syncGpsToggleCheckboxes(checked){
+  ["gpsLocationToggle", "homeGpsLocationToggle"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.checked = checked;
+  });
 }
 
 function refreshGpsLocationOnce(){
   if(!("geolocation" in navigator) || !currentContributorName()) return;
   navigator.geolocation.getCurrentPosition(
     (pos)=>{
-      setMyStatus(formatGpsPlace(pos.coords));
+      setMyStatus(formatGpsPlace(pos.coords), { lat: pos.coords.latitude, lon: pos.coords.longitude });
       if(typeof pushToCloud === "function") pushToCloud().catch(()=>{});
     },
     (err)=>{
-      console.warn("GPS location failed:", err && err.message);
-      const note = document.getElementById("statusFeedbackNote");
-      if(note) note.textContent = `Couldn't get GPS location (${err && err.message ? err.message : "permission denied"}) — switched back to manual.`;
-      Store.set("gpsLocationEnabled", false);
-      const toggle = document.getElementById("gpsLocationToggle");
-      if(toggle) toggle.checked = false;
-      stopGpsWatch();
+      console.warn("GPS location failed:", err && err.code, err && err.message);
+      const note = document.getElementById("statusFeedbackNote") || document.getElementById("homeStatusFeedbackNote");
+      // code 1 = PERMISSION_DENIED — the browser remembers a "no" and
+      // won't show its own prompt again on this site until the person
+      // changes it themselves in browser/device settings, so retrying
+      // silently in the background is pointless: turn the feature off
+      // and say plainly what to do next. Anything else (2 =
+      // POSITION_UNAVAILABLE, 3 = TIMEOUT) is transient — a GPS blip,
+      // no signal indoors, whatever — so leave the toggle on and just
+      // let the next scheduled refresh try again rather than forcing
+      // them to notice and re-enable it by hand.
+      if(err && err.code === 1){
+        if(note) note.textContent = "Location access is blocked for this site. To use GPS, re-enable location for this site in your browser/device settings, then turn this back on.";
+        Store.set("gpsLocationEnabled", false);
+        syncGpsToggleCheckboxes(false);
+        stopGpsWatch();
+      } else if(note){
+        note.textContent = `Couldn't get GPS location right now (${err && err.message ? err.message : "no signal"}) — will try again shortly.`;
+      }
     },
     { enableHighAccuracy: false, maximumAge: 60000, timeout: 15000 }
   );
@@ -7595,16 +7682,22 @@ function startGpsWatch(){
 function stopGpsWatch(){
   if(_gpsWatchTimer){ clearInterval(_gpsWatchTimer); _gpsWatchTimer = null; }
 }
-(function wireGpsToggle(){
-  const toggle = document.getElementById("gpsLocationToggle");
+// Called once at load for Discover's static toggle, and fresh on every
+// renderHomeSyncStatus() rebuild for Home's copy — same re-wire-on-
+// every-render pattern as wireStatusControl/wireDeviceHandoffControl
+// elsewhere in this file, since Home's box is fully replaced each time.
+function wireGpsToggle(toggleId){
+  const toggle = document.getElementById(toggleId);
   if(!toggle) return;
   toggle.checked = !!Store.get("gpsLocationEnabled");
   toggle.onchange = ()=>{
     Store.set("gpsLocationEnabled", toggle.checked);
+    syncGpsToggleCheckboxes(toggle.checked);
     if(toggle.checked) startGpsWatch(); else stopGpsWatch();
   };
   if(toggle.checked) startGpsWatch();
-})();
+}
+wireGpsToggle("gpsLocationToggle");
 
 // ===============================
 // GROUP DECISIONS — clash resolution across the WHOLE GROUP's saved
