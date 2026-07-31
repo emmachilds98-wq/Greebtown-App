@@ -175,8 +175,14 @@
      unit still won't shrink below its content's natural width by
      default (the grid equivalent of flexbox's min-width:auto gotcha —
      see .item-top above), which let a long bio/other-sets block push
-     into or past the fixed star/seen column on narrow screens. */
-  .timeline-modal-body{display:grid; grid-template-columns:minmax(0,1fr) 64px; align-items:start;}
+     into or past the fixed star/seen column on narrow screens.
+     align-items:center (not start) — the ✕ close button sits absolute
+     top:10px/right:10px over this same corner, and with start alignment
+     the star landed right at the top of the row, directly under it.
+     Centering the star/seen column against the full row height (name
+     through bio — see the padding-right comment above) reliably clears
+     that corner regardless of how much text the card has. */
+  .timeline-modal-body{display:grid; grid-template-columns:minmax(0,1fr) 64px; align-items:center;}
   .timeline-modal-body .star-toggle-lg{justify-self:center;}
   /* margin-top:0 overrides .star-seen-col's own list-card offset above —
      this modal only ever holds the big star-toggle-lg/seen-toggle-lg
