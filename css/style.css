@@ -145,14 +145,17 @@
      else) or a clashing new hue. */
   /* Grew from 2 buttons (star, seen) to 4 (star, seen, timeline-jump,
      want-together) without a matching layout change — .item-top's
-     align-items:flex-start pins this column to the card's very top edge
-     regardless of its own height, so the extra two buttons just made the
-     column taller upward-and-down from that same top-pinned start point,
-     landing the star flush against the card's top edge/title line instead
-     of sitting comfortably inside the card. A small top offset gives it
-     breathing room from the edge and the title without fully centering
-     the column against whatever height the text side happens to be. */
-  .star-seen-col{display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; margin-top:10px;}
+     align-items:flex-start pinned this column to the card's very top
+     edge regardless of its own height, so the extra two buttons just
+     made the column taller upward-and-down from that same top-pinned
+     start point, landing the star flush against the card's top edge/
+     title line instead of sitting comfortably inside the card. Fixed
+     properly with align-self:center (overriding the parent's
+     align-items just for this one column) rather than a fixed top
+     margin — that only ever approximated centering for a "typical"
+     amount of bio/other-sets text, where true flex centering works
+     regardless of how long a given card's text actually is. */
+  .star-seen-col{display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; align-self:center;}
   .seen-btn{border-radius:10px; padding:4px 10px; font-size:13px;}
   .item button.seen-btn{color:var(--text-muted); border-color:var(--line);}
   .item button.seen-btn.seen{color:var(--accent-teal); border-color:var(--accent-teal); background:rgba(75,227,172,.14); font-weight:700;}
@@ -184,22 +187,24 @@
      that corner regardless of how much text the card has. */
   .timeline-modal-body{display:grid; grid-template-columns:minmax(0,1fr) 64px; align-items:center;}
   .timeline-modal-body .star-toggle-lg{justify-self:center;}
-  /* margin-top:0 overrides .star-seen-col's own list-card offset above —
-     this modal only ever holds the big star-toggle-lg/seen-toggle-lg
-     pair (2 buttons, not the list card's 4), and its position here is
-     already independently tuned by the centering math in the comment
-     just above, so it shouldn't shift when that other column's spacing
-     changes. */
-  .timeline-modal-body .star-seen-col{justify-self:center; margin-top:0;}
-  .item .btnrow{display:flex; gap:6px; flex-shrink:0;}
-  /* Plan screen only: "Set time" drops onto its own row below star +
-     remove, so the button column is only ever two buttons wide — leaving
-     the artist name/stage/bio text on the left noticeably more room,
-     especially on narrow phones where a 3-wide button column was eating
-     into it. */
-  .plan-btnrow{flex-direction:column; align-items:stretch; gap:6px;}
-  .plan-btnrow .btnrow-top{display:flex; gap:6px;}
-  .plan-btnrow .set-time-btn{width:100%;}
+  .timeline-modal-body .star-seen-col{justify-self:center;}
+  /* align-self:center (not the parent .item-top's own align-items:
+     flex-start) centers this whole button column against the full card
+     height — name through bio — instead of pinning it to the top edge,
+     the same fix already applied to the timeline detail modal's own
+     star/seen pair. Scoped to just these two column classes rather than
+     changing .item-top itself, since plenty of other .item-top cards
+     (landmarks, socials, theories, ...) only ever hold a single button
+     and don't have this problem. */
+  .item .btnrow{display:flex; gap:6px; flex-shrink:0; align-self:center;}
+  /* Plan screen: a single narrow column of compact icon buttons (star,
+     seen, remove, set-time) instead of a wider two-tier block with
+     full "Remove"/"Set time" text labels — same compact-icon treatment
+     Lineup's own star-seen-col already uses for its 4 buttons, so the
+     two match, and it leaves the artist name/stage/bio text on the left
+     noticeably more room, especially on narrow phones. */
+  .plan-btnrow{flex-direction:column; align-items:center; gap:4px;}
+  .item button.star-btn, .item button.seen-btn, .item button.remove-btn, .item button.set-time-btn{padding:5px 8px; font-size:15px;}
   .clash-note{color:var(--accent-red); font-size:12px; margin-top:6px;}
   .mustsee-tag{display:inline-block; font-size:10px; font-weight:700; color:var(--accent-amber); background:rgba(242,168,60,.14); border:1px solid rgba(242,168,60,.4); border-radius:20px; padding:1px 7px; margin-left:2px; vertical-align:middle;}
   .compare-people{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}

@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v197";
-const APP_BUILD_TIME = "2026-07-31T10:32:48Z";
+const APP_CACHE_VERSION = "v198";
+const APP_BUILD_TIME = "2026-07-31T10:41:13Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -4328,12 +4328,10 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
           ${otherSetsHTML(artist)}
         </div>
         <div class="btnrow plan-btnrow">
-          <div class="btnrow-top">
-            ${readonly ? "" : `<button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>`}
-            <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
-            ${readonly ? "" : `<button class="remove-btn">Remove</button>`}
-          </div>
-          ${readonly ? "" : `<button class="set-time-btn">Set time</button>`}
+          ${readonly ? "" : `<button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>`}
+          <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
+          ${readonly ? "" : `<button class="remove-btn" aria-label="Remove from your plan" title="Remove from your plan">🗑</button>`}
+          ${readonly ? "" : `<button class="set-time-btn" aria-label="Set a custom time for this artist" title="Set a custom time">🕐</button>`}
         </div>
       </div>
       ${clashLines ? `<div class="clash-note">${clashLines}${choiceHTML}</div>` : ""}
