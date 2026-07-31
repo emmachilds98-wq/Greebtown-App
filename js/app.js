@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v203";
-const APP_BUILD_TIME = "2026-07-31T14:46:57Z";
+const APP_CACHE_VERSION = "v204";
+const APP_BUILD_TIME = "2026-07-31T14:51:04Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6471,6 +6471,22 @@ function setupMapZoomPan(){
   mapScale = 1; mapTx = 0; mapTy = 0;
   applyMapTransform();
 
+  // Markers/labels sit visually on top of #map but functionally get in
+  // the way of a pinch or drag that happens to start or pass over one —
+  // a marker's own :active/tap-highlight state and its eventual click
+  // (suppressed after the fact by the drag-guard below, but only once
+  // the gesture's already over) both read as the gesture "catching" or
+  // "stopping" mid-zoom on a busy map with 40+ markers scattered across
+  // it. pointer-events:none on every marker/label for the DURATION of an
+  // active gesture (added the instant a real pinch or drag starts,
+  // removed the instant it ends) routes every touch event straight to
+  // #map itself with nothing to interfere, rather than relying on
+  // after-the-gesture cleanup alone.
+  const inner = document.getElementById("mapInner");
+  function setGestureActive(active){
+    if(inner) inner.classList.toggle("gesture-active", active);
+  }
+
   // Multiplicative steps, not a flat +/-0.5 — with MAP_MAX_SCALE raised
   // well past the old cap of 4, a fixed step would go from a huge 50%
   // jump near scale 1 to an imperceptible ~1% jump near scale 64.
@@ -6528,6 +6544,7 @@ function setupMapZoomPan(){
       map.style.touchAction = "none";
       e.preventDefault();
       dragging = false;
+      setGestureActive(true);
       const pts = [...pointers.values()];
       pinchStartDist = dist(pts[0], pts[1]);
       pinchStartScale = mapScale;
@@ -6545,7 +6562,10 @@ function setupMapZoomPan(){
       dragMoved = true;
     } else if(dragging && pointers.size === 1){
       const dx = e.clientX - startX, dy = e.clientY - startY;
-      if(Math.abs(dx) > 5 || Math.abs(dy) > 5) dragMoved = true;
+      if(Math.abs(dx) > 5 || Math.abs(dy) > 5){
+        if(!dragMoved) setGestureActive(true);
+        dragMoved = true;
+      }
       if(mapScale > 1){
         e.preventDefault();
         mapTx = startTx + dx; mapTy = startTy + dy;
@@ -6559,6 +6579,7 @@ function setupMapZoomPan(){
     if(pointers.size < 2) pinchStartDist = null;
     if(pointers.size === 0){
       dragging = false;
+      setGestureActive(false);
       // Gesture's over — always give touch-action back to the page, even
       // if still zoomed in, so the very next swipe can scroll normally.
       map.style.touchAction = "pan-y";

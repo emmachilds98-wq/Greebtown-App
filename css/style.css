@@ -276,6 +276,12 @@
   }
   #map:active{cursor:grabbing;}
   #mapInner{position:absolute; inset:0; transform-origin:0 0; width:100%; height:100%;}
+  /* Toggled by setupMapZoomPan() for the exact duration of an active
+     pinch/drag — see its own comment there for why: routes every touch
+     event straight through to #map's own gesture handling with nothing
+     for a marker's tap-highlight/eventual click to catch on mid-gesture,
+     on a map with 40+ of them scattered across it. */
+  #mapInner.gesture-active .marker, #mapInner.gesture-active .map-label{pointer-events:none;}
   .mapZoomControls{position:absolute; top:8px; left:8px; z-index:4; display:flex; flex-direction:column; gap:4px;}
   .mapZoomControls button{width:30px; height:30px; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:rgba(11,21,18,.72); color:var(--text-primary); font-size:16px; cursor:pointer; line-height:1; padding:0; touch-action:auto;}
   .mapZoomControls button:hover{border-color:var(--accent-amber);}
