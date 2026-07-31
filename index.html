@@ -408,7 +408,7 @@ Meet at the clock tower if separated"></textarea>
       <h2 style="margin-bottom:14px;">Map</h2>
       <button type="button" class="fab-add-btn" id="mapAddPlaceBtn" aria-label="Add a place" title="Add a place">+</button>
     </div>
-    <p class="empty-note" style="margin-bottom:10px;">Real satellite imagery of the actual site, not Boomtown's own official artwork — stages and amenities plotted at real GPS positions where we have them, other markers (districts, hidden venues, gates) stay approximate rather than surveyed. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
+    <p class="empty-note" style="margin-bottom:10px;">An original illustrated map of the site (our own artwork, not Boomtown's official map) — stages and amenities plotted at real GPS positions where we have them, other markers (districts, hidden venues, gates) stay approximate rather than surveyed. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
 
     <div id="jumpMapView">
     <p style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:4px;">On-the-spot lookups</p>
@@ -1113,9 +1113,9 @@ Talk to an actor in character
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
-<!-- Real map — satellite imagery via Leaflet, not Boomtown's own
-     proprietary map artwork/tileset. See js/app.js's MAP section and
-     js/boomtown-locations-2026.js. -->
+<!-- Real map — an original illustrated basemap via Leaflet, not Boomtown's
+     own proprietary map artwork/tileset. See js/app.js's MAP section
+     (buildMapBackgroundSvg) and js/boomtown-locations-2026.js. -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="js/artist-bios.js"></script>
 <script src="js/artist-previews.js"></script>
