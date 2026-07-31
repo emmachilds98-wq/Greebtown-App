@@ -39,6 +39,8 @@ service cloud.firestore {
           'status',
           'meeting',
           'decisions',
+          'activities',
+          'joinedActivities',
           'updatedAt'
         ])
         && request.resource.data.v == 1
@@ -66,7 +68,8 @@ service cloud.firestore {
             'v','deviceId','from','clues','characterNotes','theories',
             'hiddenVenues','involvedDone','discoveries','customSocials',
             'quotes','sightings','customLandmarks','schedule','bingo',
-            'character','status','meeting','decisions','updatedAt'
+            'character','status','meeting','decisions','activities',
+            'joinedActivities','updatedAt'
           ]);
         allow update: if false;
         allow delete: if true;

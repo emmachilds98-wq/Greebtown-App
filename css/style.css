@@ -502,6 +502,12 @@
   .chat-btn:hover{border-color:var(--accent-teal);}
   .chat-unread-badge{position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 4px; border-radius:999px; background:var(--accent-red); color:#fff; font-size:10.5px; font-weight:700; display:flex; align-items:center; justify-content:center; line-height:1; border:2px solid var(--bg-deep);}
 
+  /* Circular "+" — Plan page's own add-activity entry point, positioned
+     top-right of that page's own title block (not the fixed app header),
+     same teal/dark fill as button.action so it reads as the same kind of
+     "primary create" action. */
+  .fab-add-btn{position:absolute; top:0; right:0; width:40px; height:40px; border-radius:50%; background:var(--accent-teal); color:#08211a; border:none; font-size:22px; font-weight:700; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,.35); flex-shrink:0; padding:0;}
+
   /* ===== Chat panel — a bottom sheet over everything, closed by the ✕,
      the back arrow (from a thread back to the list), or tapping the
      backdrop, same dismissal pattern as the timeline detail modal. ===== */
