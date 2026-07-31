@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v214";
-const APP_BUILD_TIME = "2026-07-31T19:45:55Z";
+const APP_CACHE_VERSION = "v215";
+const APP_BUILD_TIME = "2026-07-31T20:27:54Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6157,14 +6157,22 @@ function treeClusterPoints(cx, cy, count, spread, seed){
 // hand straight to mapGL.addSource(). Districts/trail/spokes/trees/tents
 // mirror the previous SVG illustration's shapes and layout 1:1, just
 // expressed as real-world geometry instead of drawing instructions.
+// A small fixed palette so neighbouring district clearings read as
+// visually distinct areas instead of identical translucent blobs —
+// cycled by index, not tied to any real Boomtown branding/colour.
+const DISTRICT_PALETTE = ["242,168,60", "75,190,227", "196,150,255", "180,214,120", "230,130,150"];
+
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
 
-  const districtFeatures = districts.map((d,i)=>({
-    type: "Feature",
-    properties: { name: d.name },
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(d.x), parseFloat(d.y), 16, i * 31 + 7)) ] }
-  }));
+  const districtFeatures = districts.map((d,i)=>{
+    const rgb = DISTRICT_PALETTE[i % DISTRICT_PALETTE.length];
+    return {
+      type: "Feature",
+      properties: { name: d.name, fill: `rgba(${rgb},0.22)`, line: `rgba(${rgb},0.65)` },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(d.x), parseFloat(d.y), 16, i * 31 + 7, 18)) ] }
+    };
+  });
 
   const centers = districts.map(d=>[parseFloat(d.x), parseFloat(d.y)]);
   if(centers.length) centers.push(centers[0]);
@@ -6180,9 +6188,19 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[sx,sy],[parseFloat(nd.x), parseFloat(nd.y)]]) } };
   });
 
+  // Forest AREAS — a solid mottled-green clearing shape under each named
+  // forest/woods spot, not just a scatter of tree dots floating on bare
+  // background, so a wooded zone actually reads as one continuous area
+  // (the individual tree dots below add texture on top of this, the way
+  // a real illustrated map layers a base tone under icon detail).
   const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name));
+  const forestFeatures = forestSpots.map((f,i)=>({
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), 15, 400 + i * 53, 16)) ] }
+  }));
+
   let treePts = [];
-  forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 16, 12, 17 + i * 41)); });
+  forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 22, 13, 17 + i * 41)); });
   [[9,14,9,8,5],[91,86,9,8,61],[90,10,7,7,23],[10,90,7,7,37],[50,4,5,6,71],[96,50,5,6,83]].forEach(([cx,cy,count,spread,seed])=>{
     treePts = treePts.concat(treeClusterPoints(cx, cy, count, spread, seed));
   });
@@ -6199,15 +6217,29 @@ function buildMapGeoJSON(){
     const x = 50 + Math.cos(a) * rad;
     const y = 50 + Math.sin(a) * rad * 0.98;
     const c = schematicToLatLon(x, y);
-    tentFeatures.push({ type:"Feature", properties:{ color: (i % 2 === 0) ? "rgba(45,168,242,0.55)" : "rgba(242,168,60,0.55)" }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
+    tentFeatures.push({ type:"Feature", properties:{ color: (i % 2 === 0) ? "rgba(45,168,242,0.6)" : "rgba(242,168,60,0.6)" }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
   }
+
+  // Faint terrain-contour lines and an overall hand-sketched site
+  // boundary — purely decorative ground texture (not information-
+  // bearing, so it adds visual richness without adding anything to
+  // parse), reusing blobRing's "jittered ring" look for a consistent
+  // hand-drawn feel across every shape on this basemap.
+  const contourFeatures = [
+    { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[-5,38],[20,26],[50,20],[80,28],[105,42]]) } },
+    { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[-5,68],[20,58],[50,54],[80,62],[105,72]]) } }
+  ];
+  const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(blobRing(50, 50, 48, 999, 22)) } };
 
   return {
     districts: { type:"FeatureCollection", features: districtFeatures },
+    forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
-    tents: { type:"FeatureCollection", features: tentFeatures }
+    tents: { type:"FeatureCollection", features: tentFeatures },
+    contours: { type:"FeatureCollection", features: contourFeatures },
+    boundary: { type:"FeatureCollection", features: [boundaryFeature] }
   };
 }
 
@@ -6388,9 +6420,24 @@ function loadMap(){
     // drawn every frame from then on.
     mapGL.on("load", ()=>{
       const geo = buildMapGeoJSON();
+
+      // Bottom-to-top: faint ground texture first, then area fills, then
+      // paths, then icon-like points on top — the same layering a real
+      // illustrated map uses so everything reads at a glance instead of
+      // competing on one flat plane.
+      mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
+      mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.05)", "line-width": 1 } });
+
+      mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
+      mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
+
+      mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
+      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(30,70,45,0.5)" } });
+      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(90,140,100,0.4)", "line-width": 1 } });
+
       mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
-      mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": "rgba(230,196,120,0.16)" } });
-      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": "rgba(242,168,60,0.55)", "line-width": 1.4, "line-dasharray": [2, 2] } });
+      mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 1.6, "line-dasharray": [2, 2] } });
 
       mapGL.addSource("mapTrail", { type: "geojson", data: geo.trail });
       mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(196,158,110,0.6)", "line-width": 1.8, "line-dasharray": [1, 2] } });
@@ -6400,15 +6447,16 @@ function loadMap(){
 
       mapGL.addSource("mapTrees", { type: "geojson", data: geo.trees });
       mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.6], 19, ["*", ["get", "size"], 2.4]],
-        "circle-color": ["get", "color"]
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.6], 19, ["*", ["get", "size"], 2.6]],
+        "circle-color": ["get", "color"],
+        "circle-stroke-width": 0.6, "circle-stroke-color": "rgba(20,40,28,0.5)"
       } });
 
       mapGL.addSource("mapTents", { type: "geojson", data: geo.tents });
       mapGL.addLayer({ id: "tents-circle", type: "circle", source: "mapTents", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.5, 19, 5],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.8, 19, 5.5],
         "circle-color": ["get", "color"],
-        "circle-stroke-width": 1, "circle-stroke-color": "rgba(238,246,241,0.3)"
+        "circle-stroke-width": 1, "circle-stroke-color": "rgba(238,246,241,0.4)"
       } });
     });
     document.querySelectorAll("#mapLayerToggles .chip").forEach(chip=>{
