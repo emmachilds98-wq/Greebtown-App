@@ -4,13 +4,18 @@
     --text-primary:#eef6f1; --text-muted:#8fa89c; --line:#24403a;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  /* touch-action:manipulation site-wide disables the double-tap-to-zoom
-     gesture (mobile Safari/Chrome both zoom on a fast double-tap by
-     default, which is easy to trigger by mistake tapping buttons/cards
-     quickly) while still permitting normal panning and pinch-zoom —
-     more specific touch-action rules elsewhere (e.g. #map) still win. */
-  html{min-height:100%; overflow-x:hidden; scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:manipulation;}
-  body{min-height:100%; overflow-x:hidden; -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:manipulation;}
+  /* touch-action:pan-x pan-y disables the double-tap-to-zoom gesture
+     (mobile Safari/Chrome both zoom on a fast double-tap by default,
+     which is easy to trigger by mistake tapping buttons/cards quickly)
+     and pinch-zoom, while still permitting normal panning/scrolling —
+     more specific touch-action rules elsewhere (e.g. #map) still win.
+     Pinch-zoom is also disabled at the viewport level (see index.html's
+     meta viewport tag) as the primary fix; this is a second, redundant
+     line of defense at the CSS layer specifically so a pinch gesture
+     that starts outside #map's own boundary has nothing native to fall
+     through to either way. */
+  html{min-height:100%; overflow-x:hidden; scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:pan-x pan-y;}
+  body{min-height:100%; overflow-x:hidden; -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:pan-x pan-y;}
   body{
     background:
       radial-gradient(circle at 15% 20%, rgba(242,168,60,0.10), transparent 40%),
