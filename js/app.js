@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v215";
-const APP_BUILD_TIME = "2026-07-31T20:27:54Z";
+const APP_CACHE_VERSION = "v216";
+const APP_BUILD_TIME = "2026-07-31T20:55:51Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5868,20 +5868,20 @@ updateNextEvent();
 // SCHEMATIC MAP — real districts & key stages, approximate layout
 // ===============================
 const locations = [
-  { name:"Area 404", kind:"district", x:"20%", y:"28%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
-  { name:"Botanica", kind:"district", x:"38%", y:"20%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
+  { name:"Area 404", kind:"district", x:"50%", y:"30%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
+  { name:"Botanica", kind:"district", x:"28%", y:"20%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
   { name:"Thrutopia", kind:"district", x:"56%", y:"16%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
-  { name:"Copperwood", kind:"district", x:"74%", y:"26%", info:"A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
-  { name:"Oldtown", kind:"district", x:"80%", y:"52%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
-  { name:"Letsbe Avenue", kind:"district", x:"60%", y:"66%", info:"The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
-  { name:"Metropolis", kind:"district", x:"34%", y:"68%", info:"A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
+  { name:"Copperwood", kind:"district", x:"68%", y:"26%", info:"A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
+  { name:"Oldtown", kind:"district", x:"88%", y:"52%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
+  { name:"Letsbe Avenue", kind:"district", x:"40%", y:"14%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
+  { name:"Metropolis", kind:"district", x:"15%", y:"34%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
   { name:"Grand Central", kind:"stage", x:"66%", y:"30%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
   { name:"The Lion's Den", kind:"stage", x:"46%", y:"44%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
   { name:"Hydro XL", kind:"stage", x:"28%", y:"34%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
   { name:"Anara Forest", kind:"stage", x:"72%", y:"44%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
   { name:"Hidden Woods", kind:"stage", x:"24%", y:"78%", info:"One of two woodland stages tucked among the trees, with its own beach bar and treetop walks. Leans eclectic bass and reggae/dub, often billing bigger DnB names alongside newer acts — explore carefully after dark." },
-  { name:"NEXUS", kind:"stage", x:"42%", y:"26%", info:"Right in Botanica — its main stage, 'where nature connects', celebrating live music and the freshest names on the scene. The hip-hop, grime and garage side has previously pulled in names like Bashy, MJ Cole and Lady Leshurr." },
-  { name:"Helix", kind:"stage", x:"40%", y:"64%", info:"Alongside Metropolis. Breaks, big beat and bass-heavy line-up." },
+  { name:"NEXUS", kind:"stage", x:"32%", y:"22%", info:"Right in Botanica — its main stage, 'where nature connects', celebrating live music and the freshest names on the scene. The hip-hop, grime and garage side has previously pulled in names like Bashy, MJ Cole and Lady Leshurr." },
+  { name:"Helix", kind:"stage", x:"20%", y:"38%", info:"Alongside Metropolis. Breaks, big beat and bass-heavy line-up." },
   { name:"Meeting Point", kind:"meeting", x:"48%", y:"58%", info:"Your chosen meetup spot — set this with your group before you split up." }
 ];
 
@@ -5905,7 +5905,16 @@ const otherStages = [
   { name:"Infinity", status:"confirmed", info:"A house, UK garage and queer-club stage — confirmed for 2026 with a ~25-artist bill on Boomtown's own lineup page (Desiato DJs, Rose Gray, I. JORDAN, Queer House Party, Dykes on Decks) plus a Paradisco-branded Queer House Party takeover." }
 ];
 
-const minorStagePositions = [[40,42],[14,50],[58,30],[44,52],[30,58],[62,52],[12,36],[72,66],[40,76],[78,40],[56,80]];
+// Spectrum 360, Rose and Clown, Hangar 161 and Full Moon Ballroom
+// repositioned near Area 404/Botanica/Letsbe Avenue per the video-
+// confirmed "Downtown" cluster (see the district fix above); Acid Leak
+// moved to sit by Area 404 per its own info text ("Area 404's acid
+// techno... stage"). Foggers Mill/The Fools Leap's entries here are
+// unused — realCoordFor() finds a precise real-coordinate match for
+// both, so their actual map position never reads from this array.
+// Tangled Roots/Síbín Beag/Infinity left unchanged — no clear match found
+// in the reference video, so untouched rather than guessed.
+const minorStagePositions = [[46,34],[14,50],[34,16],[56,38],[30,58],[62,52],[44,42],[72,66],[40,76],[54,26],[56,80]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -5920,19 +5929,19 @@ const minorStages = otherStages.map((s, i)=>({
 // locations for these, so treat every pin here as "go looking round here",
 // not a surveyed spot — the same caveat as the plain "?" markers below.
 const thingsToFind = [
-  { name:"The Boomtown Bobbies", near:"Area 404", x:"12%", y:"36%", info:"A mock police station hidden venue playing on Area 404's Guardians — expect in-character 'officers', a booking-desk bar and a wink at the district's own policing storyline." },
-  { name:"Luck Exchange Casino", near:"Area 404", x:"14%", y:"70%", info:"A casino-themed hidden venue in Area 404's territory — cards, chips and a party underneath the gambling dressing." },
-  { name:"Botanica Zoo", near:"Botanica", x:"30%", y:"14%", info:"A character-led 'zoo' micro-venue inside Botanica — the theme is the clue, so follow the animal keepers and see where they lead." },
-  { name:"The Garden Centre", near:"Botanica", x:"44%", y:"14%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
-  { name:"Hotel Paradiso", near:"Copperwood", x:"84%", y:"20%", info:"A faded-glamour hotel-themed micro venue — sits well with Copperwood's 1925 film-world setting; check in at the 'front desk'." },
-  { name:"Reel News", near:"Copperwood", x:"86%", y:"36%", info:"A newsreel/cinema-themed hidden spot tying into Von Vanderhaus's film empire — expect projected clips and in-character 'reporters'." },
-  { name:"Mining for (g)Old Town", near:"Oldtown", x:"84%", y:"66%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
-  { name:"Cas's Costumes", near:"Oldtown", x:"70%", y:"84%", info:"A costume-shop-fronted micro venue fitting Oldtown's circus and rogues theme — worth a look if you want to dress into the story." },
-  { name:"Soapranos Laundrette", near:"Letsbe Avenue", x:"54%", y:"90%", info:"A laundrette-fronted hidden venue — in 2025 it hosted dance-music DJ sets behind the washing machines. Look for the set dressing, not a normal stage entrance." },
-  { name:"E Numbers", near:"Letsbe Avenue", x:"62%", y:"78%", info:"A sweet-shop/E-numbers-themed party spot fitting Letsbe Avenue's consumer-product BLIP storyline — small, high-energy, easy to walk past." },
-  { name:"Gabber Kebabber", near:"Letsbe Avenue", x:"46%", y:"84%", info:"Kebab-shop chaos paired with gabber and hardcore — a tiny, loud find rather than a destination with a published pin." },
-  { name:"Sub Lab", near:"Metropolis", x:"16%", y:"84%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
-  { name:"Deviant Lounge", near:"Metropolis", x:"22%", y:"90%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
+  { name:"The Boomtown Bobbies", near:"Area 404", x:"46%", y:"26%", info:"A mock police station hidden venue playing on Area 404's Guardians — expect in-character 'officers', a booking-desk bar and a wink at the district's own policing storyline." },
+  { name:"Luck Exchange Casino", near:"Area 404", x:"54%", y:"34%", info:"A casino-themed hidden venue in Area 404's territory — cards, chips and a party underneath the gambling dressing." },
+  { name:"Botanica Zoo", near:"Botanica", x:"24%", y:"16%", info:"A character-led 'zoo' micro-venue inside Botanica — the theme is the clue, so follow the animal keepers and see where they lead." },
+  { name:"The Garden Centre", near:"Botanica", x:"32%", y:"24%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
+  { name:"Hotel Paradiso", near:"Copperwood", x:"64%", y:"22%", info:"A faded-glamour hotel-themed micro venue — sits well with Copperwood's 1925 film-world setting; check in at the 'front desk'." },
+  { name:"Reel News", near:"Copperwood", x:"72%", y:"30%", info:"A newsreel/cinema-themed hidden spot tying into Von Vanderhaus's film empire — expect projected clips and in-character 'reporters'." },
+  { name:"Mining for (g)Old Town", near:"Oldtown", x:"84%", y:"48%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
+  { name:"Cas's Costumes", near:"Oldtown", x:"92%", y:"56%", info:"A costume-shop-fronted micro venue fitting Oldtown's circus and rogues theme — worth a look if you want to dress into the story." },
+  { name:"Soapranos Laundrette", near:"Letsbe Avenue", x:"36%", y:"10%", info:"A laundrette-fronted hidden venue — in 2025 it hosted dance-music DJ sets behind the washing machines. Look for the set dressing, not a normal stage entrance." },
+  { name:"E Numbers", near:"Letsbe Avenue", x:"44%", y:"10%", info:"A sweet-shop/E-numbers-themed party spot fitting Letsbe Avenue's consumer-product BLIP storyline — small, high-energy, easy to walk past." },
+  { name:"Gabber Kebabber", near:"Letsbe Avenue", x:"40%", y:"18%", info:"Kebab-shop chaos paired with gabber and hardcore — a tiny, loud find rather than a destination with a published pin." },
+  { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
+  { name:"Deviant Lounge", near:"Metropolis", x:"19%", y:"38%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
   { name:"The Pomegranate Parlour", near:"Site-wide", x:"86%", y:"20%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor." },
   { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." }
 ];
