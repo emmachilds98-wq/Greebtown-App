@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v186";
-const APP_BUILD_TIME = "2026-07-31T03:21:21Z";
+const APP_CACHE_VERSION = "v187";
+const APP_BUILD_TIME = "2026-07-31T03:28:38Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -544,7 +544,7 @@ window.addEventListener("orientationchange", repositionAllTimelineScrollThumbs);
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, personalClashTimes: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -3987,25 +3987,44 @@ function setPersonalClashChoice(day, nameA, nameB, choice){
   Store.set("personalClashChoices", choices);
 }
 
-// Which of a "half & half" pair you're catching FIRST — purely local,
-// same day+sorted-names key as the choice itself above, so it lines up
-// with both a personal clash's own half&half AND a shared group
-// decision's half&half. Never synced (see PERSONAL_ONLY_KEYS), and
-// never shown on anyone else's device or read-only tab — only used to
-// order/label things in your own Plan.
-function getHalfOrderChoice(day, nameA, nameB){
-  const orders = Store.get("halfOrderChoices") || {};
-  return orders[personalClashChoiceKey(day, nameA, nameB)] || null;
+// Your own actual intended timings for a "custom"-resolved clash pair —
+// replaces the old forced half-and-half split (always exactly 50/50,
+// with no way to say "actually I want 20 minutes of one and the rest of
+// the other"). Purely local, same day+sorted-names key as the choice
+// itself above, never synced (see PERSONAL_ONLY_KEYS), never shown on
+// anyone else's device or read-only tab — only ever reflected in your
+// own Plan (List, Timeline, Clashes).
+function getPersonalClashTimes(day, nameA, nameB){
+  const times = Store.get("personalClashTimes") || {};
+  return times[personalClashChoiceKey(day, nameA, nameB)] || null;
 }
-function setHalfOrderChoice(day, nameA, nameB, firstName){
+function setPersonalClashTimes(day, nameA, nameB, timesByName){
   const key = personalClashChoiceKey(day, nameA, nameB);
-  const orders = Store.get("halfOrderChoices") || {};
-  if(firstName) orders[key] = firstName; else delete orders[key];
-  Store.set("halfOrderChoices", orders);
+  const times = Store.get("personalClashTimes") || {};
+  if(timesByName) times[key] = timesByName; else delete times[key];
+  Store.set("personalClashTimes", times);
 }
 
-function closeHalfOrderModal(){
-  const existing = document.getElementById("halfOrderModal");
+// Given one saved artist and the ONE other act it clashes with, returns
+// the time that should actually be SHOWN for it in your Plan — your own
+// custom-time override if this pair is "custom"-resolved and a time was
+// actually saved for this act, otherwise its real, unmodified time.
+// Used everywhere a saved pick's time is displayed (List, Timeline,
+// Clash views) — never on the Lineup tab's own browsing, which always
+// shows the real official time, since that's shared festival data, not
+// a personal adjustment.
+function effectiveArtistTime(artist, otherName){
+  if(!otherName) return { start: artist.start, end: artist.end, overridden: false };
+  const choice = getPersonalClashChoice(artist.day, artist.name, otherName);
+  if(choice !== "custom") return { start: artist.start, end: artist.end, overridden: false };
+  const times = getPersonalClashTimes(artist.day, artist.name, otherName);
+  const mine = times && times[artist.name];
+  if(!mine || !mine.start) return { start: artist.start, end: artist.end, overridden: false };
+  return { start: mine.start, end: mine.end || mine.start, overridden: true };
+}
+
+function closeCustomClashTimeModal(){
+  const existing = document.getElementById("customClashTimeModal");
   if(existing) existing.remove();
 }
 
@@ -4028,40 +4047,44 @@ function groupClashLinkHTML(pair, decision){
   </div>`;
 }
 
-// Asked whenever "half & half" is picked for a clashing pair — since a
-// clash means the two sets overlap, catching "half of each" only makes
-// sense with a real first/second order (leave one early, catch the
-// back half of the other), and guessing wrong there is exactly the kind
-// of thing that ruins the plan on the day. onChoose(firstName|null) —
-// null if skipped, which just means the half&half status is set with no
-// order recorded (fine, just less specific).
-function showHalfOrderModal(day, a, b, onChoose){
-  closeHalfOrderModal();
+// Asked whenever "pick my own times" is chosen for a clashing pair —
+// two independent start/end pickers, one per act, prefilled with each
+// act's own real time as a sensible starting point (most people just
+// trim one end and leave the other), not forced into a 50/50 split or
+// any particular order. onSave(timesByName|null) — null if cancelled.
+function showCustomClashTimeModal(day, a, b, onSave){
+  closeCustomClashTimeModal();
   const backdrop = document.createElement("div");
-  backdrop.id = "halfOrderModal";
+  backdrop.id = "customClashTimeModal";
   backdrop.style.cssText = "position:fixed; inset:0; z-index:65; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
+  const fieldsFor = (artist, prefix)=> `
+    <strong>${escapeHtml(artist.name)}</strong><br>
+    <span style="font-size:12px; color:var(--text-muted);">${escapeHtml(artist.stage)} · real time ${escapeHtml(timeLabel(artist))}</span>
+    <div class="row2" style="margin-top:6px;">
+      <div class="field"><label>Start</label><input type="time" id="${prefix}Start" value="${escapeHtml(artist.start||"")}"></div>
+      <div class="field"><label>End</label><input type="time" id="${prefix}End" value="${escapeHtml(artist.end||"")}"></div>
+    </div>`;
   backdrop.innerHTML = `
-    <div class="card" style="position:relative; width:100%; max-width:380px; margin:0;">
-      <h3 style="margin-bottom:6px;">Catching half of each — which one first?</h3>
-      <p class="empty-note" style="margin-bottom:10px;">Just for your own Plan — this doesn't change what anyone else sees, and you can change it any time.</p>
-      <button class="action half-order-btn" data-pick="a" style="margin-bottom:8px; text-align:left; display:block;">
-        <strong>${escapeHtml(a.name)}</strong><br><span style="font-weight:400; font-size:12px;">${escapeHtml(a.stage)} · ${escapeHtml(timeLabel(a))}</span>
-      </button>
-      <button class="action half-order-btn" data-pick="b" style="text-align:left; display:block;">
-        <strong>${escapeHtml(b.name)}</strong><br><span style="font-weight:400; font-size:12px;">${escapeHtml(b.stage)} · ${escapeHtml(timeLabel(b))}</span>
-      </button>
-      <button class="ghost" id="halfOrderSkipBtn" style="margin-top:10px;">Skip — decide later</button>
+    <div class="card" style="position:relative; width:100%; max-width:400px; max-height:85vh; overflow-y:auto; margin:0;">
+      <h3 style="margin-bottom:6px;">Your actual plan for this clash</h3>
+      <p class="empty-note" style="margin-bottom:10px;">Set exactly when you'll catch each one — just for your own Plan, doesn't change what anyone else sees, and you can change it any time.</p>
+      <div style="margin-bottom:14px;">${fieldsFor(a, "clashTimeA")}</div>
+      <div style="margin-bottom:14px;">${fieldsFor(b, "clashTimeB")}</div>
+      <button class="action" id="customClashTimeSaveBtn">Save my times</button>
+      <button class="ghost" id="customClashTimeCancelBtn" style="margin-top:8px;">Cancel</button>
     </div>
   `;
-  backdrop.onclick = (e)=>{ if(e.target === backdrop) closeHalfOrderModal(); };
+  backdrop.onclick = (e)=>{ if(e.target === backdrop) closeCustomClashTimeModal(); };
   document.body.appendChild(backdrop);
-  backdrop.querySelectorAll(".half-order-btn").forEach(btn=>{
-    btn.onclick = ()=>{
-      onChoose(btn.getAttribute("data-pick") === "a" ? a.name : b.name);
-      closeHalfOrderModal();
-    };
-  });
-  document.getElementById("halfOrderSkipBtn").onclick = ()=>{ onChoose(null); closeHalfOrderModal(); };
+  backdrop.querySelector("#customClashTimeCancelBtn").onclick = ()=>{ onSave(null); closeCustomClashTimeModal(); };
+  backdrop.querySelector("#customClashTimeSaveBtn").onclick = ()=>{
+    const aStart = backdrop.querySelector("#clashTimeAStart").value || a.start;
+    const aEnd = backdrop.querySelector("#clashTimeAEnd").value || a.end;
+    const bStart = backdrop.querySelector("#clashTimeBStart").value || b.start;
+    const bEnd = backdrop.querySelector("#clashTimeBEnd").value || b.end;
+    onSave({ [a.name]: { start: aStart, end: aEnd }, [b.name]: { start: bStart, end: bEnd } });
+    closeCustomClashTimeModal();
+  };
 }
 
 function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners, groupPairsByKey){
@@ -4079,12 +4102,15 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
   // clash still shows the warning text above, just without action
   // buttons, rather than trying to squeeze an n-way picker in here.
   let choiceHTML = "";
+  let effectiveTime = { start: artist.start, end: artist.end, overridden: false };
+  if(clashes && clashes.length === 1){
+    effectiveTime = effectiveArtistTime(artist, clashes[0].name);
+  }
   if(!readonly && clashes && clashes.length === 1){
     const other = clashes[0];
     const choice = getPersonalClashChoice(artist.day, artist.name, other.name);
     const shortMine = escapeHtml(truncateName(artist.name, 14));
     const shortOther = escapeHtml(truncateName(other.name, 14));
-    const halfOrder = choice === "half" ? getHalfOrderChoice(artist.day, artist.name, other.name) : null;
     const clashKey = personalClashChoiceKey(artist.day, artist.name, other.name);
     const groupPair = groupPairsByKey ? groupPairsByKey.get(clashKey) : null;
     const groupDecision = groupPair ? (Store.get("groupDecisions") || {})[groupPair.key] : null;
@@ -4096,10 +4122,10 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
       <div class="decision-actions personal-clash-actions">
         <button data-clash-choice="a" title="Only updates your own plan — tap again to clear" class="${choice==="a" ? "active" : ""}">🙋 I'll go<br><strong>${shortMine}</strong></button>
         <button data-clash-choice="b" title="Only updates your own plan — tap again to clear" class="${choice==="b" ? "active" : ""}">🙋 I'll go<br><strong>${shortOther}</strong></button>
-        <button data-clash-choice="half" title="Only updates your own plan — tap again to clear" class="${choice==="half" ? "active" : ""}">◐ Catch half<br><span>of each</span></button>
+        <button data-clash-choice="custom" title="Only updates your own plan — tap again to clear" class="${choice==="custom" ? "active" : ""}">⏱ Pick my<br><span>own times</span></button>
       </div>
       <p class="empty-note personal-clash-scope-note">Just for your own plan — teammates won't see this pick.</p>
-      ${halfOrder ? `<p class="empty-note" style="margin-top:2px;">Catching <strong>${escapeHtml(halfOrder)}</strong> first</p>` : ""}
+      ${effectiveTime.overridden ? `<p class="empty-note" style="margin-top:2px;">Your plan: <strong>${escapeHtml(timeLabel({ ...artist, ...effectiveTime }))}</strong> (real time ${escapeHtml(timeLabel(artist))})</p>` : ""}
       ${groupPair ? groupClashLinkHTML(groupPair, groupDecision) : ""}`;
   }
   return `
@@ -4108,7 +4134,7 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
         <div>
           <strong>${artist.name}</strong>${mustSee ? ` <span class="mustsee-tag">★ must-see</span>` : ""}${seen ? ` <span class="mustsee-tag" style="background:rgba(75,227,172,.16); color:var(--accent-teal);">✓ seen live</span>` : ""}<br>
           <span class="stage-link" data-stage="${escapeHtml(artist.stage)}">${artist.stage}</span><br>
-          <span class="time-label">${timeLabel(artist)}</span>${owners && owners.length > 1 ? ` <span class="tb-owners-inline">· ${escapeHtml(owners.join(", "))}</span>` : ""}
+          <span class="time-label">${timeLabel(effectiveTime.overridden ? { ...artist, ...effectiveTime } : artist)}${effectiveTime.overridden ? ` <span class="mustsee-tag" style="background:rgba(47,155,255,.16); color:var(--accent-lightblue);">your plan</span>` : ""}</span>${owners && owners.length > 1 ? ` <span class="tb-owners-inline">· ${escapeHtml(owners.join(", "))}</span>` : ""}
           <div class="artist-descriptor">${escapeHtml(artistDescriptor(artist))}</div>
           ${bioBlock}
           ${otherSetsHTML(artist)}
@@ -4509,14 +4535,15 @@ function renderSchedule(){
           if(!otherName) return;
           const clicked = btn.getAttribute("data-clash-choice");
           const already = getPersonalClashChoice(artist.day, artist.name, otherName);
-          if(clicked === "half" && already !== "half"){
+          if(clicked === "custom" && already !== "custom"){
             // Both sides of a personal clash are things you saved
             // yourself, so the other one's full time/stage is right
             // there in your own schedule — no separate lookup needed.
             const other = Store.get("schedule").find(x=> x.name === otherName && x.day === artist.day) || { name: otherName, stage: "", day: artist.day, start: "", end: "" };
-            showHalfOrderModal(artist.day, artist, other, (firstName)=>{
-              setHalfOrderChoice(artist.day, artist.name, otherName, firstName);
-              setPersonalClashChoice(artist.day, artist.name, otherName, "half");
+            showCustomClashTimeModal(artist.day, artist, other, (timesByName)=>{
+              if(!timesByName) return; // cancelled — leave the previous choice as-is
+              setPersonalClashTimes(artist.day, artist.name, otherName, timesByName);
+              setPersonalClashChoice(artist.day, artist.name, otherName, "custom");
               renderSchedule();
             });
             return;
@@ -4525,7 +4552,7 @@ function renderSchedule(){
           // without a separate "clear" control.
           const next = already === clicked ? null : clicked;
           setPersonalClashChoice(artist.day, artist.name, otherName, next);
-          if(next !== "half") setHalfOrderChoice(artist.day, artist.name, otherName, null);
+          if(next !== "custom") setPersonalClashTimes(artist.day, artist.name, otherName, null);
           renderSchedule();
         };
       });
@@ -4990,12 +5017,24 @@ function renderPlanTimeline(){
 
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
+  // Your own exact-time overrides for "custom"-resolved clashes (see
+  // effectiveArtistTime/getPersonalClashChoice) — solo view only. A
+  // combined multi-person view keeps everyone's real times so picks
+  // stay comparable across people; only your own single-person Timeline
+  // plots your actual intended times.
+  const clashMapForDay = (!combined && owners[0] === "mine") ? findClashes(dayItems) : null;
+  const timelineItems = clashMapForDay ? dayItems.map((a, i)=>{
+    const clashesForA = clashMapForDay[i];
+    if(!clashesForA || clashesForA.length !== 1) return a;
+    const eff = effectiveArtistTime(a, clashesForA[0].name);
+    return eff.overridden ? { ...a, start: eff.start, end: eff.end } : a;
+  }) : dayItems;
   // Personal & group activities get their own per-person lane, tacked on
   // after the real lineup rows — computed from savedNames/mustSeeNames
   // BEFORE this concat so an activity never picks up a stray ★ from a
   // same-named saved act.
   const activityItems = (typeof activitiesForDay === "function") ? activitiesForDay(planTimelineDay) : [];
-  const renderItems = dayItems.concat(activityItems);
+  const renderItems = timelineItems.concat(activityItems);
   const { html } = buildTimelineHTML(renderItems, { day: planTimelineDay, readonly, savedNames, mustSeeNames, showOwnerBadges: combined });
   grid.innerHTML = renderItems.length ? html : `<p class="empty-note" style="padding:16px;">${planMustSeeFilter ? `No must-sees with a set time saved for ${planTimelineDay} yet.` : `Nothing with a set time saved for ${planTimelineDay} yet.`}</p>`;
 
@@ -5060,14 +5099,23 @@ function renderClashTimeline(){
   const fullSchedule = activeScheduleData();
   const clashMap = findClashes(fullSchedule);
   const clashingIdx = new Set(Object.keys(clashMap).map(Number));
-  const dayItems = fullSchedule
+  const dayEntries = fullSchedule
     .map((a,i)=>({a,i}))
-    .filter(({a,i})=> clashingIdx.has(i) && a.day === clashTimelineDay && a.start && (!planMustSeeFilter || a.mustSee))
-    .map(({a})=>a);
+    .filter(({a,i})=> clashingIdx.has(i) && a.day === clashTimelineDay && a.start && (!planMustSeeFilter || a.mustSee));
+  const dayItems = dayEntries.map(({a})=>a);
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
-  const { html } = buildTimelineHTML(dayItems, { day: clashTimelineDay, readonly, savedNames, mustSeeNames });
-  grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">No clashes on ${clashTimelineDay}${planMustSeeFilter ? " among your must-sees" : ""}.</p>`;
+  // Same solo-view-only exact-time overrides as the Plan Timeline (see
+  // renderPlanTimeline) — a combined/readonly view keeps everyone's real
+  // times, since that's the whole point of comparing across people.
+  const timelineItems = !readonly ? dayEntries.map(({a,i})=>{
+    const clashesForA = clashMap[i];
+    if(!clashesForA || clashesForA.length !== 1) return a;
+    const eff = effectiveArtistTime(a, clashesForA[0].name);
+    return eff.overridden ? { ...a, start: eff.start, end: eff.end } : a;
+  }) : dayItems;
+  const { html } = buildTimelineHTML(timelineItems, { day: clashTimelineDay, readonly, savedNames, mustSeeNames });
+  grid.innerHTML = timelineItems.length ? html : `<p class="empty-note" style="padding:16px;">No clashes on ${clashTimelineDay}${planMustSeeFilter ? " among your must-sees" : ""}.</p>`;
 
   grid.querySelectorAll(".timeline-block").forEach(b=>{
     b.classList.add("clashing");
@@ -8284,10 +8332,16 @@ function decisionCardHTML(pair, decision){
   const ownerLine = (interest)=> Object.entries(interest).map(([owner, mustSee])=> `${escapeHtml(owner)} ${mustSee ? "★" : "👍"}`).join(" · ") || "no one yet";
   const shortA = escapeHtml(truncateName(pair.a.name, 16));
   const shortB = escapeHtml(truncateName(pair.b.name, 16));
-  const halfOrder = status === "half" ? getHalfOrderChoice(pair.day, pair.a.name, pair.b.name) : null;
+  // Group's call is just "everyone splits and catches part of each" — the
+  // exact minutes are inherently personal (you and a teammate could each
+  // trim the overlap differently), so this reads YOUR OWN saved times for
+  // this pair via the same personalClashTimes mechanism the personal
+  // clash picker uses, never a single shared "order" for the whole group.
+  const myHalfTimes = status === "half" ? getPersonalClashTimes(pair.day, pair.a.name, pair.b.name) : null;
+  const myHalfNote = myHalfTimes ? `${escapeHtml(timeLabel({ ...pair.a, ...myHalfTimes[pair.a.name] }))} · ${escapeHtml(timeLabel({ ...pair.b, ...myHalfTimes[pair.b.name] }))}` : null;
   const statusNote = status === "together" && decision ? `Group's call: everyone's going to <strong>${escapeHtml(decision.choice)}</strong>`
     : status === "split" && decision ? `Group's call: splitting up — everyone catches their own pick`
-    : status === "half" && decision ? `Group's call: catching half of each${halfOrder ? ` — <strong>${escapeHtml(halfOrder)}</strong> first` : ""}`
+    : status === "half" && decision ? `Group's call: catching part of each${myHalfNote ? ` — your plan: <strong>${myHalfNote}</strong>` : " — set your own times below"}`
     : status === "later" && decision ? `Left open for now — still needs a decision`
     : "";
   return `
@@ -8307,7 +8361,7 @@ function decisionCardHTML(pair, decision){
         </div>
         <div class="decision-actions-row">
           <button data-action="split" title="No group pick — everyone catches whichever one they've chosen in their own plan" class="${decision && decision.status==="split" ? "active" : ""}">↔️ Split up<br><span>everyone picks their own</span></button>
-          <button data-action="half" title="Catch half of ${escapeHtml(pair.a.name)}, half of ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="half" ? "active" : ""}">◐ Half &amp; half<br><span>catch part of each</span></button>
+          <button data-action="half" title="Catch part of ${escapeHtml(pair.a.name)}, part of ${escapeHtml(pair.b.name)} — you'll set your own exact times" class="${decision && decision.status==="half" ? "active" : ""}">◐ Split the set<br><span>pick your own times</span></button>
           <button data-action="later" title="Leave it open — this clash keeps showing as needing a decision" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Decide later<br><span>leave it open</span></button>
         </div>
       </div>
@@ -8324,11 +8378,13 @@ function wireDecisionCard(el, pair){
     if(action === "together-a") return setGroupDecision(pair.key, "together", pair.a.name);
     if(action === "together-b") return setGroupDecision(pair.key, "together", pair.b.name);
     if(action === "half"){
-      // Always asks (even re-confirming an existing half&half) — that's
-      // also how you'd come back and change your mind about which one's
-      // first.
-      showHalfOrderModal(pair.day, pair.a, pair.b, (firstName)=>{
-        setHalfOrderChoice(pair.day, pair.a.name, pair.b.name, firstName);
+      // Always asks (even re-confirming an existing split) — that's also
+      // how you'd come back and change your mind about your own timings.
+      // Sets the GROUP's status (shared, synced) but the exact times
+      // themselves stay purely personal — see getPersonalClashTimes above.
+      showCustomClashTimeModal(pair.day, pair.a, pair.b, (timesByName)=>{
+        if(!timesByName) return; // cancelled — leave the group status as-is
+        setPersonalClashTimes(pair.day, pair.a.name, pair.b.name, timesByName);
         setGroupDecision(pair.key, "half", null);
       });
       return;
@@ -11210,7 +11266,7 @@ document.getElementById("resetApp").onclick = ()=>{
 // "meeting" is deliberately absent — it's shared group data (stored on
 // the room doc, not personal), and must survive things like device
 // handoff instead of being wiped along with this device's own notes.
-const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","halfOrderChoices","lastOpenedAt","seenArtists"];
+const PERSONAL_ONLY_KEYS = ["notes","customArtists","bingoCard","bingoMarked","bingoLocked","myCharacter","bingoCustomText","bingoLinesSeen","contributorName","roomCode","lastSyncedAt","seenHomeInfoCard","dismissedAddToHome","packingChecked","deviceId","lastPushedRoomId","personalClashChoices","personalClashTimes","lastOpenedAt","seenArtists"];
 
 // Building the snapshot HTML is shared by both download flows below —
 // each needs three fallbacks because a sandboxed viewer (like an
