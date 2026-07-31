@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v193";
-const APP_BUILD_TIME = "2026-07-31T10:01:09Z";
+const APP_CACHE_VERSION = "v194";
+const APP_BUILD_TIME = "2026-07-31T10:04:35Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -11394,7 +11394,9 @@ const officialLiveIntel = [
   { text:"Boomtown secured planning permission for a 20% capacity boost this chapter — from roughly 66,000 up to just under 77,000 attendees — the scale behind the 'Radical Redesign' push for more space, more woodland and more hidden places across the whole site.", source:"South Downs National Park Authority planning approval, via festival trade press", when:"2026", confirmed:true },
   { text:"Grand Central has moved to roomier woodland terrain as part of the redesign — if you remember it from a previous chapter, don't expect it in the same spot this year.", source:"Official Chapter Five redesign coverage", when:"2026", confirmed:true },
   { text:"Hydro XL has taken over the former Origins stage footprint in Downtown and doubled in capacity to 20,000, running entirely on green hydrogen fuel cells — one of the UK's first large-scale stages to do so.", source:"Boomtown official announcement / festival press", when:"2026", confirmed:true },
-  { text:"Metropolis's Job Centre — long reported closed and folded into the Betterverse™ storyline — is confirmed reopening for Chapter Five as 'Jobcentre 2.0', now with aptitude tests, biometric data collection and new jobs to appraise your skillset.", source:"Boomtown Jobcentre official social posts", when:"2026", confirmed:true }
+  { text:"Metropolis's Job Centre — long reported closed and folded into the Betterverse™ storyline — is confirmed reopening for Chapter Five as 'Jobcentre 2.0', now with aptitude tests, biometric data collection and new jobs to appraise your skillset.", source:"Boomtown Jobcentre official social posts", when:"2026", confirmed:true },
+  { text:"Confirmed headliners span Kneecap, Faithless, Four Tet, Scissor Sisters, Madness and Skrillex — the widest genre spread the main stages have had in years, with more live bands on the bill than any previous chapter (deliberately broadening past the bass-heavy lineups of recent chapters).", source:"Official 2026 lineup announcement", when:"2026", confirmed:true },
+  { text:"Hilltop has been reborn as a dedicated live-music hub for Chapter Five — worth knowing if you want guitars and bands in the mix alongside the electronic headliners this year.", source:"Boomtown 'Radical Redesign' site announcements", when:"2026", confirmed:true }
 ];
 
 function loadOfficialLiveIntel(){
@@ -11410,6 +11412,37 @@ function loadOfficialLiveIntel(){
   `).join("");
 }
 loadOfficialLiveIntel();
+
+// "Search for clues now" — investigated before building anything: this
+// is a static GitHub Pages app with no server component beyond Firestore
+// (used only for the sync room), running on Firebase's free Spark plan.
+// That rules out every "proper" live-search option in order:
+//   1. Existing connectors (Firestore) can't do web/social search at all.
+//   2. There is no free, keyless, CORS-open public API for Instagram/X/
+//      Reddit search that's safe to call directly from a static site —
+//      any real key would be exposed client-side to every visitor, and
+//      Reddit's own API blocks unauthenticated cross-origin fetches at
+//      any real scale (and its ToS doesn't allow this attribution-free).
+//   3. A Firebase Cloud Function could proxy a real search, but outbound
+//      networking from Functions needs the paid Blaze plan — not free.
+//   4. So: the lightweight, reliable fallback the spec itself calls for.
+// This button doesn't fetch or scrape anything in-app (no fragile
+// parsing, no rate limits to hit, nothing to silently break) — it just
+// opens X's own live search in a new tab with a combined query covering
+// social chatter, festival news and story clues in one go, the same way
+// the "quick-check searches" links below it already work. Genuinely
+// fresh, user-triggered results, zero backend, zero secrets, free
+// forever — the daily-checked officialLiveIntel list above stays the
+// source of truth for anything worth folding permanently into the app.
+const searchForCluesBtn = document.getElementById("searchForCluesBtn");
+if(searchForCluesBtn) searchForCluesBtn.onclick = ()=>{
+  const note = document.getElementById("searchForCluesNote");
+  const query = "boomtown (radical redesign OR secret set OR update OR clue)";
+  const win = window.open(`https://twitter.com/search?q=${encodeURIComponent(query)}&f=live`, "_blank", "noopener");
+  if(note) note.textContent = win
+    ? "Opened a live search in a new tab — anything genuinely sourced from here or elsewhere gets folded into the list above by the daily update."
+    : "Your browser blocked the pop-up — allow pop-ups for this site, or use one of the search links further down instead.";
+};
 
 // ===============================
 // GLOSSARY
