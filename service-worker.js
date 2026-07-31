@@ -1,6 +1,6 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v184";
+const CACHE_VERSION = "v185";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
 
 // Everything the app needs to run with zero network connection.
@@ -92,6 +92,22 @@ self.addEventListener("fetch", (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
         return networkResponse;
       }).catch(() => cached);
+    })
+  );
+});
+
+// Tapping a chat notification (js/app.js's notifyNewChatMessage, via
+// registration.showNotification — see the LOCAL CHAT section there for
+// why this is foreground/backgrounded-tab only, never a true closed-app
+// push) should focus the app if it's already open somewhere, or open it
+// fresh otherwise, same as tapping any other app's own notifications.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
+      const existing = clientsArr.find((c) => "focus" in c);
+      if (existing) return existing.focus();
+      return self.clients.openWindow("./");
     })
   );
 });

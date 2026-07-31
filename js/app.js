@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v184";
-const APP_BUILD_TIME = "2026-07-31T03:09:08Z";
+const APP_CACHE_VERSION = "v185";
+const APP_BUILD_TIME = "2026-07-31T03:17:21Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -33,6 +33,15 @@ const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea","Ka
 // collapsed to a one-line summary so Compare is visible without an
 // extra tap, same TDZ-safety reason as groupDecisionsExpanded above.
 let groupDecisionsCollapsed = true;
+
+// Used by renderHomeContextBanner (defined much further down) — declared
+// up here since that function runs at load time (its own top-level call,
+// far below), same TDZ-safety reason as everything else in this cluster.
+// No real background timer fires this reminder (see the LOCATION
+// REMINDER section further down for why) — it's a plain elapsed-time
+// check against myStatus.updatedAt, re-evaluated every time this banner
+// re-renders (load, every 60s tick, and on visibilitychange).
+const LOCATION_REMINDER_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
@@ -535,7 +544,7 @@ window.addEventListener("orientationchange", repositionAllTimelineScrollThumbs);
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {} };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -5333,16 +5342,39 @@ function renderHomeContextBanner(){
 
   const bottomLine = [friendLine, meetingLine].filter(Boolean).join(" · ");
 
+  // LOCATION REMINDER — no real background timer fires this (a static
+  // GitHub Pages app with no server can't wake a closed tab — see the
+  // LOCAL CHAT notifications section for the same constraint applied to
+  // chat). Just an elapsed-time check against myStatus.updatedAt,
+  // re-evaluated every time this banner renders, so it's only ever
+  // honest about "as of the last time you had this open." Dismissing
+  // snoozes for one more full interval rather than forever, same as the
+  // interval itself — see LOCATION_REMINDER_INTERVAL_MS above.
+  const myStatus = Store.get("myStatus");
+  const reminderOn = !!Store.get("locationReminderEnabled");
+  const lastLocationUpdate = (myStatus && myStatus.updatedAt) || 0;
+  const reminderDismissedAt = Store.get("locationReminderDismissedAt") || 0;
+  const showLocationReminder = reminderOn
+    && (Date.now() - lastLocationUpdate) > LOCATION_REMINDER_INTERVAL_MS
+    && (Date.now() - reminderDismissedAt) > LOCATION_REMINDER_INTERVAL_MS;
+
   banner.innerHTML = `
     <div class="card home-context-banner">
       <div class="hcb-top">${escapeHtml(dayLabel)} · ${escapeHtml(clockLabel)}${name ? " · " + escapeHtml(name) : ""}</div>
       ${clashCount ? `<div class="hcb-line hcb-warn">⚡ ${clashCount} saved artist${clashCount===1?"":"s"} clashing</div>` : ""}
+      ${showLocationReminder ? `<div class="hcb-line">📍 Update your location? It's been a while — <a class="inline-link" id="hcbLocationUpdateLink">update</a> · <a class="inline-link" id="hcbLocationDismissLink">not now</a></div>` : ""}
       ${bottomLine ? `<div class="hcb-line hcb-muted">${bottomLine}</div>` : ""}
     </div>
   `;
   if(clashCount){
     const warnLine = banner.querySelector(".hcb-warn");
     if(warnLine){ warnLine.style.cursor = "pointer"; warnLine.onclick = jumpToClashes; }
+  }
+  if(showLocationReminder){
+    const updateLink = banner.querySelector("#hcbLocationUpdateLink");
+    if(updateLink) updateLink.onclick = ()=> jumpToId("jumpFriendStatus", "discover");
+    const dismissLink = banner.querySelector("#hcbLocationDismissLink");
+    if(dismissLink) dismissLink.onclick = ()=>{ Store.set("locationReminderDismissedAt", Date.now()); renderHomeContextBanner(); };
   }
 }
 renderHomeContextBanner();
@@ -8037,6 +8069,22 @@ function wireGpsToggle(toggleId){
 }
 wireGpsToggle("gpsLocationToggle");
 
+// See LOCATION_REMINDER_INTERVAL_MS near the top of the file and
+// renderHomeContextBanner's showLocationReminder logic — this toggle
+// just flips the Store flag that check reads; the reminder itself never
+// runs on a real timer.
+function wireLocationReminderToggle(){
+  const toggle = document.getElementById("locationReminderToggle");
+  if(!toggle) return;
+  toggle.checked = !!Store.get("locationReminderEnabled");
+  toggle.onchange = ()=>{
+    Store.set("locationReminderEnabled", toggle.checked);
+    if(!toggle.checked) Store.remove("locationReminderDismissedAt");
+    if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+  };
+}
+wireLocationReminderToggle();
+
 // ===============================
 // GROUP DECISIONS — clash resolution across the WHOLE GROUP's saved
 // artists, not just this device's own (that's the existing
@@ -9365,6 +9413,13 @@ const CHAT_ONLINE_MS = 150 * 1000; // a bit over one missed heartbeat before fli
 const CHAT_MESSAGE_FETCH_LIMIT = 500;
 const CHAT_PRUNE_KEEP = 300;
 const CHAT_PRUNE_MIN_INTERVAL_MS = 30 * 60 * 1000;
+// See notifyNewChatMessage()/toggleChatNotifications() further down —
+// foreground/backgrounded-tab only, same constraint as everywhere else
+// in this app: a static GitHub Pages site with no server holding VAPID/
+// FCM keys can't wake a genuinely closed tab, so this only fires while
+// this tab or installed PWA's own JS is still alive to receive the live
+// onSnapshot update that triggers it.
+const CHAT_NOTIFY_KEY = "chatNotificationsEnabled";
 
 let chatMessagesCache = [];
 let chatPresenceCache = {}; // deviceId -> {displayName, lastActiveAt, reads}
@@ -9538,13 +9593,67 @@ function sendChatHeartbeat(){
     .catch(()=>{});
 }
 
+// CHAT NOTIFICATIONS — see CHAT_NOTIFY_KEY above for the platform
+// constraint this works within: foreground/backgrounded-tab only, no
+// genuine closed-app push (that needs a server holding VAPID/FCM keys,
+// which this Spark-plan, no-backend app deliberately doesn't have — see
+// getFirestoreDb()'s own Spark-plan note). Reliable on Android Chrome
+// while the tab/PWA is merely backgrounded; best-effort on iOS Safari,
+// which suspends background web content aggressively and only fires
+// while this tab is the one actually in front.
+function chatNotificationsSupported(){
+  return typeof Notification !== "undefined";
+}
+function chatNotificationsEnabled(){
+  return chatNotificationsSupported() && Notification.permission === "granted" && !!Store.get(CHAT_NOTIFY_KEY);
+}
+// Must be called from a user gesture (a click), since requestPermission()
+// silently no-ops outside one on most browsers — the bell toggle in
+// renderChatThreadList's head is that gesture.
+async function toggleChatNotifications(){
+  if(!chatNotificationsSupported()) return false;
+  if(Store.get(CHAT_NOTIFY_KEY)){ Store.set(CHAT_NOTIFY_KEY, false); return false; }
+  const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+  Store.set(CHAT_NOTIFY_KEY, perm === "granted");
+  return perm === "granted";
+}
+function notifyNewChatMessage(msg){
+  if(!chatNotificationsEnabled()) return;
+  if(msg.thread === chatOpenThread && document.getElementById("chatPanel")) return; // already looking at this exact thread
+  const title = msg.thread === CHAT_THREAD_GROUP ? `${msg.fromName} (Everyone)` : msg.fromName;
+  const body = (msg.text || "").slice(0, 200);
+  const show = ()=>{
+    try{ new Notification(title, { body }); }catch(err){ /* best-effort — never worth surfacing an error for a missed notification */ }
+  };
+  if(navigator.serviceWorker && navigator.serviceWorker.ready){
+    navigator.serviceWorker.ready
+      .then(reg=> reg.showNotification(title, { body, tag: "chat-" + msg.thread, icon: "./icons/icon-192.png" }))
+      .catch(show);
+  } else {
+    show();
+  }
+}
+
 function startChatListeners(){
   const db = getFirestoreDb();
   const room = currentRoomCode();
   if(!db || !room || chatMessagesUnsub) return;
+  // True only for this listener's very first snapshot (the initial full
+  // fetch) — every doc in it reports as docChanges() type "added" just
+  // like a genuinely new message would, so without this a fresh
+  // openChatPanel()/app-load would fire a notification for every
+  // existing message in the room all at once.
+  let firstMessagesSnapshot = true;
   chatMessagesUnsub = db.collection("rooms").doc(room).collection("chatMessages")
     .orderBy("ts", "desc").limit(CHAT_MESSAGE_FETCH_LIMIT)
     .onSnapshot(snap=>{
+      if(!firstMessagesSnapshot){
+        const myId = ensureDeviceId();
+        snap.docChanges().forEach(change=>{
+          if(change.type === "added" && change.doc.data().fromDeviceId !== myId) notifyNewChatMessage(change.doc.data());
+        });
+      }
+      firstMessagesSnapshot = false;
       chatMessagesCache = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
       renderChatUnreadBadge();
       if(chatOpenThread){
@@ -9649,15 +9758,27 @@ function renderChatThreadList(){
       }));
     });
   }
+  const notifySupported = chatNotificationsSupported();
+  const notifyOn = chatNotificationsEnabled();
   card.innerHTML = `
     <div class="chat-panel-head">
       <span class="chat-panel-head-title"><strong>Chat</strong></span>
+      ${notifySupported ? `<button type="button" class="chat-close-btn" id="chatNotifyBtn" aria-label="${notifyOn ? "Turn off message notifications" : "Turn on message notifications"}" title="${notifyOn ? "Notifications on — while this tab's open" : "Notifications off"}">${notifyOn ? "🔔" : "🔕"}</button>` : ""}
       <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
     </div>
     <div class="chat-thread-list">${rows.join("")}</div>
     ${!me ? `<p class="empty-note" style="padding:0 16px 14px;">Pick who you are in Discover → Sync to start 1:1 chats — you can still read and send in Everyone without it.</p>` : ""}
   `;
   document.getElementById("chatCloseBtn").onclick = closeChatPanel;
+  const notifyBtn = document.getElementById("chatNotifyBtn");
+  // Notifications only ever fire while this tab/PWA is open (see
+  // CHAT_NOTIFY_KEY above) — worth saying up front so turning this on
+  // doesn't read as a promise of a true closed-app push it can't keep.
+  if(notifyBtn) notifyBtn.onclick = ()=> toggleChatNotifications().then(()=>{
+    if(!Notification || Notification.permission !== "denied") { renderChatThreadList(); return; }
+    alert("Notifications are blocked for this site in your browser settings — allow them there, then try again.");
+    renderChatThreadList();
+  });
   card.querySelectorAll("[data-chat-thread]").forEach(row=>{
     row.onclick = ()=> openChatThread(row.getAttribute("data-chat-thread"), row.getAttribute("data-chat-label"));
   });
