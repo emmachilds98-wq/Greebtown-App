@@ -1,6 +1,6 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v209";
+const CACHE_VERSION = "v210";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
 
 // ===============================
@@ -47,6 +47,7 @@ const PRECACHE_URLS = [
   "./js/app.js",
   "./js/artist-bios.js",
   "./js/artist-previews.js",
+  "./js/boomtown-locations-2026.js",
   "./js/pwa-register.js",
   "./icons/icon-72.png",
   "./icons/icon-96.png",
