@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v202";
-const APP_BUILD_TIME = "2026-07-31T11:03:50Z";
+const APP_CACHE_VERSION = "v203";
+const APP_BUILD_TIME = "2026-07-31T14:46:57Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -574,7 +574,7 @@ window.addEventListener("orientationchange", repositionAllTimelineScrollThumbs);
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, personalClashTimes: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], customPlaces: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false, wantTogether: [], peopleWantTogether: {} };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, personalClashTimes: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], customPlaces: [], officialTimeCorrections: {}, bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false, wantTogether: [], peopleWantTogether: {} };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -587,7 +587,7 @@ const EMBEDDED_DATA = window.__boomtownSavedData || {};
 // safe no-op with no name/room/signal set, so this is safe to call from
 // here even though pushToCloud is defined much later in this file.
 let _autoBackupTimer = null;
-const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter", "seenArtists", "activities", "joinedActivities", "wantTogether"]);
+const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter", "seenArtists", "activities", "joinedActivities", "wantTogether", "officialTimeCorrections"]);
 function scheduleAutoBackup(){
   if(_autoBackupTimer) clearTimeout(_autoBackupTimer);
   _autoBackupTimer = setTimeout(()=>{
@@ -3221,8 +3221,25 @@ function toMinutes(day, time){
   });
 })();
 
+// `artists` is a big static const array baked into this file at deploy
+// time — nothing at runtime can actually rewrite it, so an "official"
+// time correction submitted from the app (see applyOfficialTimeCorrection
+// near openTimeEditor) can't literally edit the real lineup data. What
+// it CAN do is layer a synced correction on top of it here, applied to
+// every matching artist on every call — same "overlay on static/synced
+// base data" pattern as customLandmarks/customPlaces elsewhere in this
+// file. Keyed "day|name" only, not day+name+start+stage — an act with
+// two different sets on the same day would have both corrected
+// identically, which is a real but rare edge case given how few acts
+// double up same-day, not worth a more complex key for.
 function allArtists(){
-  return artists.concat(Store.get("customArtists"));
+  const base = artists.concat(Store.get("customArtists"));
+  const corrections = Store.get("officialTimeCorrections") || {};
+  if(!Object.keys(corrections).length) return base;
+  return base.map(a=>{
+    const c = corrections[`${a.day || "TBC"}|${a.name}`];
+    return c ? { ...a, start: c.start, end: c.end } : a;
+  });
 }
 
 // ===============================
@@ -4233,7 +4250,7 @@ function showCustomClashTimeModal(day, a, b, onSave){
       <div class="field"><label>End</label><input type="time" id="${prefix}End" value="${escapeHtml(artist.end||"")}"></div>
     </div>`;
   backdrop.innerHTML = `
-    <div class="card" style="position:relative; width:100%; max-width:400px; max-height:85vh; overflow-y:auto; margin:0;">
+    <div class="card" style="position:relative; width:100%; max-width:400px; max-height:85vh; overflow-y:auto; overflow-x:hidden; margin:0;">
       <h3 style="margin-bottom:6px;">Your actual plan for this clash</h3>
       <p class="empty-note" style="margin-bottom:10px;">Set exactly when you'll catch each one — just for your own Plan, doesn't change what anyone else sees, and you can change it any time.</p>
       <div style="margin-bottom:14px;">${fieldsFor(a, "clashTimeA")}</div>
@@ -4332,15 +4349,34 @@ function openTimeEditor(container, artist, onSave){
       <div class="field"><label>Start</label><input type="time" class="edit-start" value="${artist.start||""}"></div>
       <div class="field"><label>End</label><input type="time" class="edit-end" value="${artist.end||""}"></div>
     </div>
+    <label class="official-time-check">
+      <input type="checkbox" class="edit-official">
+      <span>This is an official change (Boomtown announced a new/shorter time) — share the correction with everyone, not just your own plan</span>
+    </label>
     <button class="action save-time-btn">Save time</button>
   `;
   container.querySelector(".save-time-btn").onclick = ()=>{
     const day = container.querySelector(".edit-day").value;
     const start = container.querySelector(".edit-start").value || null;
     const end = container.querySelector(".edit-end").value || null;
-    onSave(day, start, end);
+    const official = container.querySelector(".edit-official").checked;
+    onSave(day, start, end, official);
     container.innerHTML = "";
   };
+}
+
+// An official correction is a shared overlay applied on top of the
+// static `artists` lineup data by allArtists() (see there for why it
+// can't literally rewrite that const array) — synced the same additive,
+// key+updatedAt-wins way as customPlaces, so a genuine correction
+// reaches everyone, but a stale copy of one can never clobber a fresher
+// one. Keyed "day|name" — see allArtists()'s own comment for the
+// same-name-twice-in-one-day edge case this doesn't handle.
+function applyOfficialTimeCorrection(day, name, start, end){
+  if(!day || day === "TBC" || !name) return;
+  const corrections = Store.get("officialTimeCorrections") || {};
+  corrections[`${day}|${name}`] = { start, end, by: currentContributorName() || "Someone", updatedAt: Date.now() };
+  Store.set("officialTimeCorrections", corrections);
 }
 
 // ===============================
@@ -4677,10 +4713,18 @@ function renderSchedule(){
       if(mustSeeBtn) mustSeeBtn.onclick = ()=> setMustSee(artist, !isMustSee(artist.name));
 
       itemEl.querySelector(".set-time-btn").onclick = ()=>{
-        openTimeEditor(itemEl.querySelector(".edit-slot"), artist, (day,start,end)=>{
+        // Re-tapping the clock icon while the editor's already open for
+        // this artist closes it again, instead of just re-rendering the
+        // same form on top of itself.
+        const slot = itemEl.querySelector(".edit-slot");
+        if(slot.innerHTML.trim()){ slot.innerHTML = ""; return; }
+        openTimeEditor(slot, artist, (day,start,end,official)=>{
           let sched = Store.get("schedule");
           sched[idx] = { ...sched[idx], day, start, end };
           Store.set("schedule", sched);
+          // "Official" means Boomtown itself changed the time, not just
+          // a personal clash workaround — see applyOfficialTimeCorrection.
+          if(official) applyOfficialTimeCorrection(day, artist.name, start, end);
           renderSchedule();
           updateNextEvent();
         });
@@ -5496,7 +5540,7 @@ function openActivityComposer(){
   backdrop.id = "activityComposerModal";
   backdrop.style.cssText = "position:fixed; inset:0; z-index:60; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
   backdrop.innerHTML = `
-    <div class="card" style="position:relative; width:100%; max-width:420px; max-height:85vh; overflow-y:auto; margin:0;">
+    <div class="card" style="position:relative; width:100%; max-width:420px; max-height:85vh; overflow-y:auto; overflow-x:hidden; margin:0;">
       <button aria-label="Close" id="activityComposerCloseBtn" style="position:absolute; top:10px; right:10px; background:none; border:1px solid var(--line); color:var(--text-primary); border-radius:10px; width:32px; height:32px; font-size:16px; line-height:1; cursor:pointer;">✕</button>
       <h3>Add an activity</h3>
       <p class="empty-note" style="margin-bottom:10px;">Anything from "meet at the campsite" to a friend's own set — not part of the official lineup. Everyone synced sees it on your timeline either way — Group also lets them join in, Personal is just visible to look at.</p>
@@ -7493,6 +7537,10 @@ function buildSyncPayload(){
     sightings: Store.get("sightings") || [],
     customLandmarks: Store.get("customLandmarks") || [],
     customPlaces: Store.get("customPlaces") || [],
+    // Official time corrections — see allArtists()/applyOfficialTimeCorrection.
+    // A plain object keyed "day|name", merged the same key+updatedAt-wins
+    // way as customPlaces (see mergeSyncPayload below).
+    officialTimeCorrections: Store.get("officialTimeCorrections") || {},
     // Read-only snapshot of this device's own saved artists — the
     // receiving phone stores this under peopleSchedules[from], never
     // merged into its own "schedule". See the DATA ISOLATION MODEL note
@@ -7559,7 +7607,7 @@ function decodeSyncCode(code){
 }
 
 function mergeSyncPayload(payload){
-  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, places:0, schedule:0, bingo:0, character:0, characterNotes:0 };
+  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, places:0, corrections:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   const from = payload.from || "Someone";
   // The stable identity to key per-person snapshots by, wherever one's
   // available — falls back to the display name only for payloads from
@@ -7728,6 +7776,23 @@ function mergeSyncPayload(payload){
     }
   });
   Store.set("customPlaces", placesList);
+
+  // Official time corrections merge the same key+updatedAt-wins way as
+  // customPlaces just above — see allArtists()/applyOfficialTimeCorrection.
+  // Re-reconciling saved artists right after means an incoming correction
+  // updates this device's own already-saved schedule entries immediately,
+  // not just future allArtists() lookups.
+  const corrections = Store.get("officialTimeCorrections") || {};
+  Object.entries(payload.officialTimeCorrections || {}).forEach(([key, c])=>{
+    if(!c) return;
+    const existing = corrections[key];
+    if(!existing || (c.updatedAt || 0) > (existing.updatedAt || 0)){
+      corrections[key] = c;
+      stats.corrections++;
+    }
+  });
+  Store.set("officialTimeCorrections", corrections);
+  if(typeof reconcileSavedArtists === "function") reconcileSavedArtists();
 
   // Read-only per-person schedule snapshot — replaces that person's own
   // entry each time they resync (it's a full current snapshot of their
@@ -8210,7 +8275,7 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     const payload = decodeSyncCode(raw);
     const { stats, from } = mergeSyncPayload(payload);
     input.value = "";
-    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks, +${stats.places} map places. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}${stats.character ? `${from}'s character is now viewable in its own tab on the My Character card. ` : ""}Nothing already saved was duplicated.`;
+    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks, +${stats.places} map places, +${stats.corrections} official time corrections. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}${stats.character ? `${from}'s character is now viewable in its own tab on the My Character card. ` : ""}Nothing already saved was duplicated.`;
     recordLastSynced();
     refreshAfterMerge();
   }catch(err){
