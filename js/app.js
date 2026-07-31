@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v179";
-const APP_BUILD_TIME = "2026-07-31T02:20:17Z";
+const APP_CACHE_VERSION = "v180";
+const APP_BUILD_TIME = "2026-07-31T02:27:50Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -1945,8 +1945,8 @@ const artists = [
   {name:"What actually helps when the world feels cooked? A panel on living well in strange times",stage:"Permaculture",day:"Fri",start:"14:30",end:"16:30"},
   {name:"Wearable folklore: Crafting ear cuffs from scrap, wire and found objects",stage:"Permaculture",day:"Fri",start:"17:00",end:"18:00"},
   // --- Fri: PFP Robot ---
-  {name:"Comp Winner",stage:"PFP Robot",day:"Fri",start:"15:00",end:"15:45"},
-  {name:"Darth Leng",stage:"PFP Robot",day:"Fri",start:"15:30",end:"16:30"},
+  {name:"Wasteham",stage:"PFP Robot",day:"Fri",start:"15:00",end:"15:45"},
+  {name:"Darth Leng",stage:"PFP Robot",day:"Fri",start:"15:45",end:"16:30"},
   {name:"Indecline",stage:"PFP Robot",day:"Fri",start:"16:30",end:"17:30"},
   {name:"Roland K",stage:"PFP Robot",day:"Fri",start:"17:30",end:"18:30"},
   // --- Fri: Rebel Girls Club ---
