@@ -630,11 +630,15 @@
      underneath. The button itself is position:static now — centering
      lives on the wrap so the label can stack under it without needing
      hand-tuned pixel offsets. */
-  /* translateY is nudged a few px past dead-center (not a flat -50%) —
-     true center reads as slightly high here since the wrap now stacks
-     three items (chat, cog, last-synced text) against the title block's
-     own top-heavy weight (h1 + subtitle + pull-hint). */
-  .chat-btn-wrap{position:absolute; top:50%; right:calc(18px + env(safe-area-inset-right)); transform:translateY(calc(-50% + 6px)); display:flex; flex-direction:column; align-items:center; gap:3px;}
+  /* top is 50% + half the notch inset, not a flat 50% — header's own
+     padding is calc(12px + env(safe-area-inset-top)) on top but a flat
+     12px on bottom (see header.appbar above), so the box's geometric
+     center sits env(safe-area-inset-top)/2 ABOVE the title/pill row's
+     actual visual center on any notched phone. A flat px nudge (the
+     previous attempt here) only ever matches one specific notch size;
+     this scales correctly on every device, and reduces to a dead 50%
+     on anything with no inset at all. */
+  .chat-btn-wrap{position:absolute; top:calc(50% + env(safe-area-inset-top) / 2); right:calc(18px + env(safe-area-inset-right)); transform:translateY(-50%); display:flex; flex-direction:column; align-items:center; gap:3px;}
   .chat-btn{position:relative; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-primary); width:38px; height:38px; border-radius:12px; font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:0;}
   .chat-btn:hover{border-color:var(--accent-teal);}
   .chat-unread-badge{position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 4px; border-radius:999px; background:var(--accent-red); color:#fff; font-size:10.5px; font-weight:700; display:flex; align-items:center; justify-content:center; line-height:1; border:2px solid var(--bg-deep);}
