@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v187";
-const APP_BUILD_TIME = "2026-07-31T03:28:38Z";
+const APP_CACHE_VERSION = "v188";
+const APP_BUILD_TIME = "2026-07-31T03:37:25Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -891,21 +891,52 @@ loadCustomSocials();
 // add them yourself via "Add an artist" once the app confirms.
 // End times are auto-estimated as "until the next act on that stage" since
 // Boomtown doesn't publish set lengths — treat them as approximate.
+//
+// No per-artist genre field exists anywhere in the 1621 scraped acts
+// below — genreOf() (just after this table) always falls back to a
+// per-STAGE genre. This table used to only cover 28 of the 63 real stage
+// names actually in use, leaving the rest to fall through to a blanket
+// "Unconfirmed" — every value below is now sourced from venueDirectory's
+// own already-researched genre/type fields (see VENUE DIRECTORY further
+// down) rather than guessed, and every stage has an entry. Kept to a
+// short, shared "Category / Category" vocabulary (see GENRE_INFO just
+// below) rather than each stage's own longer description, since these
+// values also double as the Lineup tab's genre filter chips — one chip
+// per unique value here, not per stage.
 // ===============================
 const STAGE_GENRE = {
-  "Anara Forest":"Bass / Drum & Bass", "Grand Central":"Live / Alternative",
-  "Hidden Woods":"Bass / Dub / Jungle", "Hydro XL":"House / Dance",
-  "The Lion's Den":"D&B / Reggae / Headline", "Nexus":"Party / Variety",
-  "Rose and Clown":"Cabaret / Variety", "Spectrum 360":"Bass / Hardstyle",
-  "Foggers Mill":"Eclectic / DJ", "The Fools Leap":"Folk / Balkan / Party",
-  "Full Moon Ballroom":"Swing / Variety", "Hangar 161":"Alt / Punk / Metal",
-  "Tangled Roots":"Dub / Bass", "Helix":"Breaks / Big Beat", "Infinity":"House / UK Garage",
-  "Tribe of Frog":"Psytrance / Trance", "Acid Leak":"Acid / Techno",
-  "The Boomtown Bobbies":"Bass / Party", "Sub Lab":"Dubstep / Bass",
-  "Nachtlicker":"Techno / Electro", "Deviant Lounge":"Bass / Alt",
-  "Gabber Kebabber":"Hardcore / Gabber", "E Numbers":"Bass / Rave",
-  "The Pomegranate Parlour":"World / Eclectic", "Síbín Beag":"Irish Folk / Trad",
-  "Twisted Time Machine":"Party / Playback Sets", "Botanica Zoo":"Bass / D&B",
+  "Acid Leak":"Acid / Techno", "Agents of Change HQ":"Talks / Community",
+  "Airetiko":"Circus / Performance", "Anara Forest":"Bass / Drum & Bass",
+  "Ancient Futures":"Talks / Community", "Blink Mental Health":"Welfare / Support",
+  "Botanica Zoo":"Bass / D&B", "Busker's Wharf":"Folk / Acoustic",
+  "Cas's Costumes":"Party / Variety", "Circus Tent":"Circus / Performance",
+  "Climate Live":"Talks / Community", "Cocaine Anonymous":"Welfare / Support",
+  "Community Fire":"Talks / Community", "Craft Tent":"Workshop / Craft",
+  "Crafty Rascals":"Workshop / Craft", "Deviant Lounge":"Bass / Alt",
+  "E Numbers":"Bass / Rave", "End of the Line":"Eclectic / DJ",
+  "Energy Garden":"Talks / Community", "Foggers Mill":"Eclectic / DJ",
+  "Full Moon Ballroom":"Swing / Variety", "Gabber Kebabber":"Hardcore / Gabber",
+  "Games Lounge":"Chill / Downtime", "Garden":"Chill / Downtime",
+  "Grand Central":"Live / Alternative", "Hangar 161":"Alt / Punk / Metal",
+  "Hapitat":"Chill / Downtime", "Helix":"Breaks / Big Beat",
+  "Hidden Woods":"Bass / Dub / Jungle", "Hotel Paradiso":"Eclectic / DJ",
+  "Hydro XL":"House / Dance", "Infinity":"House / UK Garage",
+  "Luck Exchange Casino":"Comedy / Game-show", "Mining for (g)Old Town":"Party / Variety",
+  "Nachtlicker":"Techno / Electro", "Narcotics Anonymous":"Welfare / Support",
+  "Nexus":"Party / Variety", "Observatory":"Talks / Community",
+  "Permaculture":"Talks / Community", "PFP Robot":"Techno / Electro",
+  "Rebel Girls Club":"Welfare / Support", "Reel News":"Eclectic / DJ",
+  "Reparium":"Workshop / Craft", "Rose and Clown":"Cabaret / Variety",
+  "Sharing Circles":"Talks / Community", "Sibín Beag":"Irish Folk / Trad",
+  "Soapranos Laundrette":"House / Dance", "Spectrum 360":"Bass / Hardstyle",
+  "Spinney Hollow":"Eclectic / DJ", "Sub Lab":"Dubstep / Bass",
+  "Tangled Roots":"Dub / Bass", "The Boomtown Bobbies":"Bass / Party",
+  "The Fools Leap":"Folk / Balkan / Party", "The Garden Centre":"Eclectic / DJ",
+  "The Immortal Children of the Eternal Seed":"World / Eclectic", "The Lion's Den":"D&B / Reggae / Headline",
+  "The Magic Teapot":"Chill / Downtime", "The Pomegranate Parlour":"World / Eclectic",
+  "Tinker Station":"Workshop / Craft", "Topsy Turvy Trims":"Party / Variety",
+  "Tribe of Frog":"Psytrance / Trance", "Twisted Time Machine (Bad Apple Bar)":"Party / Playback Sets",
+  "XR":"Talks / Community",
   "Check app":"Unconfirmed"
 };
 function genreOf(a){ return a.genre || STAGE_GENRE[a.stage] || "Unconfirmed"; }
@@ -926,21 +957,28 @@ const GENRE_INFO = {
   "Bass / Rave": "Old-school rave stabs and breakbeats with modern bass weight.",
   "Breaks / Big Beat": "Chunky breakbeats and big, riffy drops — festival breaks.",
   "Cabaret / Variety": "Live hosted variety — burlesque, comedy, circus and song.",
+  "Chill / Downtime": "A low-key space to sit down and recharge, not a dancefloor.",
+  "Circus / Performance": "Live circus and physical performance — aerial, acrobatics, theatre.",
+  "Comedy / Game-show": "Hosted comedy and game-show-style segments rather than DJs.",
   "D&B / Reggae / Headline": "Big-stage drum & bass headliners alongside reggae/sound-system sets.",
   "Dub / Bass": "Deep, echo-laden dub reggae with sub-bass at its core.",
   "Dubstep / Bass": "Half-time wobble and weight — classic and modern dubstep.",
   "Eclectic / DJ": "Genre-hopping DJ sets that don't sit still in one lane.",
+  "Folk / Acoustic": "Live, mostly-unplugged folk and acoustic sets.",
   "Folk / Balkan / Party": "Brass-heavy Balkan folk turned into a full-on party set.",
   "Hardcore / Gabber": "Very fast, distorted kicks — the hardcore/gabber end of the spectrum.",
   "House / Dance": "Classic four-to-the-floor house built for dancing.",
-  "House / Techno": "The house/techno crossover — groovy but driving.",
+  "House / UK Garage": "Four-to-the-floor house crossed with UK garage's bounce and skip.",
   "Irish Folk / Trad": "Traditional Irish folk, played live and built for a sing-along.",
   "Live / Alternative": "Live bands outside the DJ/electronic lineup — alternative/indie leaning.",
   "Party / Playback Sets": "Themed nostalgia/playback sets built around a single album or era.",
   "Party / Variety": "Feel-good party sets — a bit of everything, low on pretension.",
   "Psytrance / Trance": "Fast, hypnotic, high-energy trance and psytrance.",
   "Swing / Variety": "Swing-era music and variety entertainment, live and danceable.",
+  "Talks / Community": "Panels, workshops and community-led conversation rather than a DJ set.",
   "Techno / Electro": "Driving, machine-built techno and electro.",
+  "Welfare / Support": "On-site welfare support and peer-led meetings, not a performance space.",
+  "Workshop / Craft": "Hands-on making and repair workshops rather than a stage.",
   "World / Eclectic": "Global sounds and genre-blending selections.",
   "Unconfirmed": "Genre not confirmed yet — check the app or ask on-site."
 };
