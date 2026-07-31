@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v200";
-const APP_BUILD_TIME = "2026-07-31T10:56:14Z";
+const APP_CACHE_VERSION = "v201";
+const APP_BUILD_TIME = "2026-07-31T10:59:55Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -4248,7 +4248,7 @@ function showCustomClashTimeModal(day, a, b, onSave){
   const fieldsFor = (artist, prefix)=> `
     <strong>${escapeHtml(artist.name)}</strong><br>
     <span style="font-size:12px; color:var(--text-muted);">${escapeHtml(artist.stage)} · real time ${escapeHtml(timeLabel(artist))}</span>
-    <div class="row2" style="margin-top:6px;">
+    <div class="time-row" style="margin-top:6px;">
       <div class="field"><label>Start</label><input type="time" id="${prefix}Start" value="${escapeHtml(artist.start||"")}"></div>
       <div class="field"><label>End</label><input type="time" id="${prefix}End" value="${escapeHtml(artist.end||"")}"></div>
     </div>`;
@@ -4348,7 +4348,7 @@ function openTimeEditor(container, artist, onSave){
         ${DAY_ORDER.map(d=>`<option value="${d}" ${artist.day===d?"selected":""}>${d}</option>`).join("")}
       </select>
     </div>
-    <div class="row2">
+    <div class="time-row">
       <div class="field"><label>Start</label><input type="time" class="edit-start" value="${artist.start||""}"></div>
       <div class="field"><label>End</label><input type="time" class="edit-end" value="${artist.end||""}"></div>
     </div>
@@ -5535,7 +5535,7 @@ function openActivityComposer(){
           ${DAY_ORDER.map(d=>`<option value="${d}">${d}</option>`).join("")}
         </select>
       </div>
-      <div class="row2">
+      <div class="time-row">
         <div class="field"><label>Start</label><input type="time" id="activityStartInput"></div>
         <div class="field"><label>End</label><input type="time" id="activityEndInput"></div>
       </div>
