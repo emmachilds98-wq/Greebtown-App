@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v198";
-const APP_BUILD_TIME = "2026-07-31T10:41:13Z";
+const APP_CACHE_VERSION = "v199";
+const APP_BUILD_TIME = "2026-07-31T10:49:33Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -4330,7 +4330,7 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
         <div class="btnrow plan-btnrow">
           ${readonly ? "" : `<button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>`}
           <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
-          ${readonly ? "" : `<button class="remove-btn" aria-label="Remove from your plan" title="Remove from your plan">🗑</button>`}
+          ${readonly ? "" : `<button class="remove-btn" aria-label="Remove from your plan" title="Remove from your plan">✕</button>`}
           ${readonly ? "" : `<button class="set-time-btn" aria-label="Set a custom time for this artist" title="Set a custom time">🕐</button>`}
         </div>
       </div>
@@ -5327,12 +5327,16 @@ function renderClashTimeline(){
 // schedule/bingo/character/status above (see the DATA ISOLATION MODEL
 // note near Store/DEFAULTS): Store.get("activities") is this device's
 // own personal+group activities; peopleActivities[personId] is a
-// read-only snapshot of a teammate's synced GROUP-visibility-only
-// activities, replaced whole on every resync (see buildSyncPayload/
-// mergeSyncPayload). Personal-visibility activities never leave this
-// device. "Joined" group activities work the same way via
-// joinedActivities/peopleJoins, so any device can compute a full
-// attendee list for any activity just from data it already pulls.
+// read-only snapshot of a teammate's synced activities — BOTH
+// visibilities, replaced whole on every resync (see buildSyncPayload/
+// mergeSyncPayload). "visibility" no longer controls who can SEE an
+// activity — every activity always syncs and is always viewable on
+// everyone's Plan/Timeline — it only controls who can JOIN one: only
+// "group" activities offer a Join button (see renderPlanActivitiesList
+// below); "personal" ones are still visible everywhere, just view-only
+// for anyone who isn't the owner. "Joined" group activities work the
+// same way via joinedActivities/peopleJoins, so any device can compute
+// a full attendee list for any activity just from data it already pulls.
 //
 // Each person's activities get fed into the Plan Timeline (see
 // renderPlanTimeline) tagged with a synthetic `stage` of "<name>'s
@@ -5525,13 +5529,13 @@ function openActivityComposer(){
     <div class="card" style="position:relative; width:100%; max-width:420px; max-height:85vh; overflow-y:auto; margin:0;">
       <button aria-label="Close" id="activityComposerCloseBtn" style="position:absolute; top:10px; right:10px; background:none; border:1px solid var(--line); color:var(--text-primary); border-radius:10px; width:32px; height:32px; font-size:16px; line-height:1; cursor:pointer;">✕</button>
       <h3>Add an activity</h3>
-      <p class="empty-note" style="margin-bottom:10px;">Anything from "meet at the campsite" to a friend's own set — not part of the official lineup. Personal stays on just your own timeline; Group shows up for everyone synced and they can join in.</p>
+      <p class="empty-note" style="margin-bottom:10px;">Anything from "meet at the campsite" to a friend's own set — not part of the official lineup. Everyone synced sees it on your timeline either way — Group also lets them join in, Personal is just visible to look at.</p>
       <div class="field"><label>Name</label><input type="text" id="activityNameInput" placeholder="e.g. Sunrise coffee at camp"></div>
       <div class="field">
-        <label>Visibility</label>
+        <label>Joinable?</label>
         <div class="stagelist" id="activityVisibilityToggle">
-          <button type="button" class="active" data-vis="personal">Just me</button>
-          <button type="button" data-vis="group">Group — visible &amp; joinable</button>
+          <button type="button" class="active" data-vis="personal">Personal — view only</button>
+          <button type="button" data-vis="group">Group — can join in</button>
         </div>
       </div>
       <div class="field">
@@ -6777,6 +6781,11 @@ function startPlacePicking(){
   _placePicking = true;
   showPlacePickBar();
   renderPlacePickPin();
+  // The card that opened this (e.g. the "Found something?" hidden-venue
+  // jump card) can sit well below the map itself, and the modal being a
+  // fixed overlay means the map's actual scroll position never had to
+  // matter until now — bring it into view so there's something to tap.
+  if(map && typeof map.scrollIntoView === "function") map.scrollIntoView({ behavior:"smooth", block:"center" });
 }
 
 // Hooked into the map's own existing clean-tap detection (see
@@ -6814,6 +6823,7 @@ function openAddPlaceModal(draft){
         <select id="placeCategoryInput">
           <option value="Landmark">Landmark</option>
           <option value="Venue">Venue</option>
+          <option value="Hidden venue">Hidden venue</option>
           <option value="Meeting point">Meeting point</option>
           <option value="Food & drink">Food &amp; drink</option>
           <option value="Other">Other</option>
@@ -7545,9 +7555,12 @@ function buildSyncPayload(){
     decisions: Store.get("groupDecisions") || {},
     // Same read-only-snapshot treatment as schedule/bingo/character/status
     // above — lands in peopleActivities[personId] on the receiving end.
-    // Personal-visibility activities never leave this device: only ones
-    // explicitly marked "group" are included here (see createActivity).
-    activities: (Store.get("activities") || []).filter(a=> a && a.visibility === "group"),
+    // Every activity syncs regardless of visibility — "personal" vs
+    // "group" only controls whether others can JOIN it (see
+    // renderPlanActivitiesList's join-button gating), not whether they
+    // can see it. It's always visible on the owner's own timeline lane
+    // for anyone synced in, same as a group one.
+    activities: Store.get("activities") || [],
     // Which OTHER people's group activities this device has marked "I'm
     // in" — lands in peopleJoins[personId], read alongside peopleActivities
     // so any device can compute a full attendee list for any activity
@@ -7901,8 +7914,8 @@ function currentContributorName(){
 }
 
 // Anything logged via the various "add" buttons before a name was ever
-// picked gets stamped with from:"" at creation time (see addHiddenVenueBtn
-// etc.) — there's no live lookup, it's baked in per-entry. That leaves
+// picked gets stamped with from:"" at creation time — there's no live
+// lookup, it's baked in per-entry. That leaves
 // otherwise-real entries permanently unattributed and invisible to any
 // "filter by person" view, even after the person picks their name later.
 // Since these are always this device's own past entries (nobody else
@@ -11210,37 +11223,19 @@ if(packingSearchInput) packingSearchInput.oninput = ()=>{
 };
 
 // ===============================
-// HIDDEN VENUE LOG — feeds straight into the venue directory above,
-// tagged "Your find".
-// ===============================
-const hiddenVenueNameInput = document.getElementById("hiddenVenueName");
-const hiddenVenueTypeInput = document.getElementById("hiddenVenueType");
-const hiddenVenueGenreInput = document.getElementById("hiddenVenueGenre");
-const hiddenVenueNearInput = document.getElementById("hiddenVenueNear");
-const hiddenVenueInput = document.getElementById("hiddenVenueInput");
-
-document.getElementById("addHiddenVenueBtn").onclick = ()=>{
-  const name = hiddenVenueNameInput.value.trim();
-  const info = hiddenVenueInput.value.trim();
-  if(!name && !info) return;
-  const entries = Store.get("hiddenVenues");
-  entries.push({
-    name: name || "Untitled find",
-    type: hiddenVenueTypeInput.value,
-    genre: hiddenVenueGenreInput.value.trim(),
-    near: hiddenVenueNearInput.value.trim(),
-    info,
-    from: currentContributorName() || "",
-    when: new Date().toLocaleString(),
-    ts: Date.now()
-  });
-  Store.set("hiddenVenues", entries);
-  hiddenVenueNameInput.value = "";
-  hiddenVenueGenreInput.value = "";
-  hiddenVenueNearInput.value = "";
-  hiddenVenueInput.value = "";
-  renderVenueTable();
-  if(typeof renderConsolidatedNotes === "function") renderConsolidatedNotes();
+// HIDDEN VENUE LOG — the old standalone name/type/genre/location/notes
+// form here is retired in favour of the unified "Add a place" flow (the
+// ＋ button on the map above, see the ADD A PLACE section) — this jump
+// button just opens that same modal, pre-set to the "Hidden venue"
+// category, instead of duplicating a second add flow. Note this means
+// new finds logged this way land in customPlaces, not the older
+// hiddenVenues array the venue directory's "Your finds" filter and
+// "Copy your finds" button below still read from — existing logged
+// finds aren't touched or lost, there's just nowhere new for that
+// specific list to grow from any more.
+const jumpToAddPlaceFromHiddenBtn = document.getElementById("jumpToAddPlaceFromHidden");
+if(jumpToAddPlaceFromHiddenBtn) jumpToAddPlaceFromHiddenBtn.onclick = ()=>{
+  if(typeof openAddPlaceModal === "function") openAddPlaceModal({ name:"", category:"Hidden venue", note:"", x:null, y:null });
 };
 
 // ===============================
@@ -11907,13 +11902,9 @@ async function buildSnapshotHtml(opts){
   opts = opts || {};
   const keys = opts.excludePersonal ? Object.keys(DEFAULTS).filter(k=> !PERSONAL_ONLY_KEYS.includes(k)) : Object.keys(DEFAULTS);
   const saved = Object.fromEntries(keys.map(key=>[key, Store.get(key)]));
-  // "activities" isn't in PERSONAL_ONLY_KEYS (group ones are meant to be
-  // shared, same as "schedule") — but it's a mixed personal+group array,
-  // so the personal ones need stripping out by hand here, same filter
-  // buildSyncPayload() applies before anything ever reaches Firestore.
-  if(opts.excludePersonal && Array.isArray(saved.activities)){
-    saved.activities = saved.activities.filter(a=> a && a.visibility === "group");
-  }
+  // "activities" isn't in PERSONAL_ONLY_KEYS — both visibilities are
+  // meant to be shared (see buildSyncPayload's own comment on this),
+  // same as "schedule", so no stripping needed here any more either.
   const data = JSON.stringify(saved).replace(/</g, "\\u003c");
   const seedScript = `<script>window.__boomtownSavedData=${data};<\/script>`;
   let template;

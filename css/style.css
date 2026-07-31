@@ -88,7 +88,15 @@
   button:focus-visible, a:focus-visible{outline:2px solid var(--accent-teal); outline-offset:2px;}
   textarea{resize:vertical; min-height:70px; margin-top:10px;}
   .row2{display:flex; gap:8px;}
-  .row2 > *{flex:1;}
+  /* min-width:0 — the same flexbox min-width:auto gotcha fixed elsewhere
+     in this file (.item-top, .other-set-stage, .timeline-modal-body):
+     a flex child otherwise refuses to shrink below its own content's
+     natural width, and input[type=time]'s native picker control has a
+     real minimum rendered width on mobile that's wider than half a
+     narrow modal (e.g. the Add Activity card's Start/End row) can
+     actually give it — without this, the two time fields either
+     overflowed the card or visually overlapped each other. */
+  .row2 > *{flex:1; min-width:0;}
   .field{margin-bottom:10px;}
   .field label{display:block; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;}
   .item{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
