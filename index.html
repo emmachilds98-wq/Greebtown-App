@@ -2,7 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- maximum-scale=1, user-scalable=no: the map (#map, js/app.js's
+     setupMapZoomPan) has its own dedicated, purpose-built pinch/pan/zoom
+     implementation, and without this the BROWSER'S OWN native page
+     pinch-zoom is also enabled everywhere. The two fight — any pinch
+     gesture whose fingers aren't both perfectly within #map's exact
+     boundary (very easy to clip while genuinely trying to zoom the map)
+     falls through to native page-zoom instead, which is what produced
+     the "whole app zoomed out inside a black box" bug. Disabling native
+     page zoom is the standard fix for an app that embeds its own
+     zoomable widget — the trade-off is losing pinch-to-zoom on ordinary
+     text elsewhere in the app, accepted here since the map already
+     covers the one place zoom is actually needed. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
 <title>Greebtown</title>
 
