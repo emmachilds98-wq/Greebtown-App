@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v185";
-const APP_BUILD_TIME = "2026-07-31T03:17:21Z";
+const APP_CACHE_VERSION = "v186";
+const APP_BUILD_TIME = "2026-07-31T03:21:21Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3626,6 +3626,73 @@ if(artistsViewListBtn && artistsViewTimelineBtn){
     renderArtistsTimeline();
   };
 }
+
+// LINEUP SEARCH → TIMELINE — the small 🔍 above the Timeline view's day
+// tabs. Reuses the exact same search state/logic as the List/search view
+// (artistSearch.value + currentFilteredArtists()/hasActiveArtistFilters())
+// rather than a second, parallel filter implementation — typing here
+// drives that same shared input, so switching to List/search later shows
+// the same query.
+function jumpToArtistInTimeline(artist){
+  if(artist.day && DAY_ORDER.includes(artist.day)) artistsTimelineDay = artist.day;
+  if(artistsView !== "timeline" && artistsViewTimelineBtn) artistsViewTimelineBtn.click();
+  else { renderArtistTimelineDayTabs(); renderArtistsTimeline(); }
+  // Double rAF: the view-switch/render above already ran synchronously,
+  // but scrollIntoView needs the block's final layout in place — same
+  // pattern as doBackNav's own double rAF further up this file.
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{
+    const block = document.querySelector(`#artistTimelineGrid .timeline-block[data-name="${CSS.escape(artist.name)}"][data-day="${CSS.escape(artist.day||"")}"]`);
+    if(!block) return;
+    block.scrollIntoView({ behavior:"smooth", block:"center", inline:"center" });
+    block.classList.add("search-highlight");
+    setTimeout(()=> block.classList.remove("search-highlight"), 2300);
+  }));
+}
+
+function closeArtistTimelineSearch(){
+  const existing = document.getElementById("artistTimelineSearchModal");
+  if(existing) existing.remove();
+}
+function openArtistTimelineSearch(){
+  closeArtistTimelineSearch();
+  const backdrop = document.createElement("div");
+  backdrop.id = "artistTimelineSearchModal";
+  backdrop.style.cssText = "position:fixed; inset:0; z-index:60; background:rgba(5,10,8,.72); display:flex; align-items:flex-start; justify-content:center; padding:20px;";
+  backdrop.innerHTML = `
+    <div class="card" style="position:relative; width:100%; max-width:420px; max-height:80vh; overflow-y:auto; margin:0;">
+      <button aria-label="Close" id="artistTimelineSearchCloseBtn" style="position:absolute; top:10px; right:10px; background:none; border:1px solid var(--line); color:var(--text-primary); border-radius:10px; width:32px; height:32px; font-size:16px; line-height:1; cursor:pointer;">✕</button>
+      <h3>Find on the timeline</h3>
+      <div class="field"><input type="text" id="artistTimelineSearchInput" placeholder="Name, stage or genre" value="${escapeHtml(artistSearch.value)}"></div>
+      <div id="artistTimelineSearchResults" style="margin-top:10px;"></div>
+    </div>
+  `;
+  backdrop.onclick = (e)=>{ if(e.target === backdrop) closeArtistTimelineSearch(); };
+  document.body.appendChild(backdrop);
+  backdrop.querySelector("#artistTimelineSearchCloseBtn").onclick = closeArtistTimelineSearch;
+  const input = backdrop.querySelector("#artistTimelineSearchInput");
+  const resultsBox = backdrop.querySelector("#artistTimelineSearchResults");
+  let currentMatches = [];
+  const renderResults = ()=>{
+    artistSearch.value = input.value;
+    updateClearArtistSearchBtn();
+    currentMatches = hasActiveArtistFilters() ? currentFilteredArtists().slice(0, 40) : [];
+    resultsBox.innerHTML = currentMatches.length
+      ? currentMatches.map((a, i)=> `<div class="chat-thread-row" data-i="${i}" style="cursor:pointer;"><div style="flex:1; min-width:0;"><div><strong>${escapeHtml(a.name)}</strong></div><div class="chat-thread-sub">${escapeHtml(a.stage)} · ${escapeHtml(a.day || "TBC")}${a.start ? " · " + escapeHtml(a.start) : ""}</div></div></div>`).join("")
+      : `<p class="empty-note">${input.value.trim() ? "No matches." : "Start typing a name, stage or genre."}</p>`;
+    resultsBox.querySelectorAll("[data-i]").forEach(row=>{
+      row.onclick = ()=>{
+        const artist = currentMatches[Number(row.dataset.i)];
+        closeArtistTimelineSearch();
+        if(artist) jumpToArtistInTimeline(artist);
+      };
+    });
+  };
+  input.oninput = renderResults;
+  renderResults();
+  input.focus();
+}
+const artistTimelineSearchBtn = document.getElementById("artistTimelineSearchBtn");
+if(artistTimelineSearchBtn) artistTimelineSearchBtn.onclick = openArtistTimelineSearch;
 
 // Collapsed to a handful of rows by default — the full genre list runs
 // to dozens of chips, which used to push the actual artist list well

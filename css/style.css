@@ -440,6 +440,15 @@
   .timeline-block.saved{background:rgba(47,155,255,.22); border-color:var(--accent-lightblue);}
   .timeline-block.mustsee{background:rgba(242,168,60,.22); border-color:var(--accent-amber);}
   .timeline-block.clashing{box-shadow:0 0 0 2px var(--accent-red) inset;}
+  /* Briefly flashed by jumpToArtistInTimeline() (Lineup search →
+     timeline) so the scrolled-to block is obvious at a glance among a
+     whole row of similar-looking ones, then removed a couple seconds
+     later — not a permanent state like .saved/.mustsee above. */
+  .timeline-block.search-highlight{animation:timeline-search-pulse 1.1s ease-in-out 2;}
+  @keyframes timeline-search-pulse{
+    0%, 100%{box-shadow:0 0 0 2px var(--accent-teal) inset;}
+    50%{box-shadow:0 0 0 2px var(--accent-teal) inset, 0 0 12px 2px rgba(75,227,172,.7);}
+  }
   .timeline-block b{display:block; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .timeline-block .tb-time{display:block; color:var(--text-muted); font-size:9.5px; margin-top:1px; white-space:nowrap;}
   .timeline-block.readonly{cursor:default;}
