@@ -392,8 +392,11 @@ Meet at the clock tower if separated"></textarea>
 
   <!-- MAP -->
   <section id="mapscreen" class="screen">
-    <div class="eyebrow">Find your way</div>
-    <h2 style="margin-bottom:14px;">Map</h2>
+    <div style="position:relative;">
+      <div class="eyebrow">Find your way</div>
+      <h2 style="margin-bottom:14px;">Map</h2>
+      <button type="button" class="fab-add-btn" id="mapAddPlaceBtn" aria-label="Add a place" title="Add a place">+</button>
+    </div>
     <p class="empty-note" style="margin-bottom:10px;">An illustrated schematic, not the official surveyed map — venue positions inside the city are illustrative, especially with this chapter's redesign. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
 
     <div id="jumpMapView">
@@ -412,7 +415,7 @@ Meet at the clock tower if separated"></textarea>
     <p style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:4px;">Jump to</p>
     <div class="venue-filters" id="mapNav" style="margin-bottom:14px;">
       <button data-jump="jumpDirectory">📋 Directory</button>
-      <button data-jump="jumpLogLandmark">🏕 Log a landmark</button>
+      <button data-jump="jumpLogLandmark">🏕 Your places</button>
       <button data-jump="jumpLogHidden">🕵 Log a hidden venue</button>
       <button data-jump="jumpSiteInfo">🕐 Gate &amp; hours</button>
       <button data-jump="jumpFoodBars">🍺 Food &amp; bars</button>
@@ -432,6 +435,7 @@ Meet at the clock tower if separated"></textarea>
       <span><span class="dot outline"></span>Named hidden venue / thing to find</span>
       <span><span class="dot" style="border-radius:3px; background:rgba(196,158,110,.85);"></span>Gate</span>
       <span><span class="dot" style="border-radius:3px; background:rgba(45,168,242,.75);"></span>Landmark</span>
+      <span><span class="dot" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:rgba(196,150,255,.85);"></span>Your places</span>
       <span><span class="line-swatch"></span>Approx. route, not a literal path</span>
     </div>
     <div id="mapInfo"></div>
@@ -478,24 +482,10 @@ Meet at the clock tower if separated"></textarea>
     </div>
 
     <div class="card" id="jumpLogLandmark">
-      <h3>Log a landmark</h3>
-      <p>Spotted something worth marking that's not in the list — a good water point, a landmark tree, a meetup spot? Add it here; it shows up on the map above and can be removed any time.</p>
-      <div class="field"><label>Name</label><input type="text" id="landmarkName" placeholder="What is it?"></div>
-      <div class="field"><label>Nearest district</label>
-        <select id="landmarkDistrict">
-          <option value="Area 404">Area 404</option>
-          <option value="Botanica">Botanica</option>
-          <option value="Thrutopia">Thrutopia</option>
-          <option value="Copperwood">Copperwood</option>
-          <option value="Oldtown">Oldtown</option>
-          <option value="Letsbe Avenue">Letsbe Avenue</option>
-          <option value="Metropolis">Metropolis</option>
-        </select>
-      </div>
-      <div class="field"><label>Notes (optional)</label><textarea id="landmarkInfo" placeholder="What's here, or why it matters"></textarea></div>
-      <button class="action" id="addLandmarkBtn">Add to map</button>
+      <h3>Your places</h3>
+      <p>Add a meeting spot, landmark, food stall or anything else worth marking with the <strong>＋</strong> button above — tap it, fill it in, then mark the exact spot on the map. Older landmarks logged the previous way still live below and can be removed any time.</p>
+      <div id="customLandmarksList"></div>
     </div>
-    <div id="customLandmarksList"></div>
 
     <div class="card" id="jumpLogHidden">
       <h3>Log a hidden venue</h3>
