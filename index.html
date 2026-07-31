@@ -287,8 +287,10 @@ Meet at the clock tower if separated"></textarea>
       <span><span style="color:var(--accent-lightblue); font-size:15px;">☆</span> Like</span>
       <span><span style="color:var(--accent-amber); font-size:15px;">★</span> Must-see</span>
       <span><span style="color:var(--accent-teal); font-size:15px;">✓</span> Seen</span>
+      <span><span style="font-size:14px;">🗓</span> Timeline</span>
+      <span><span style="font-size:14px;">🤍</span> Want together</span>
     </div>
-    <p class="empty-note star-seen-legend">Tap ☆ to save it to your Plan · <strong>hold</strong> to upgrade to a must-see &nbsp;·&nbsp; tap ✓ once you've actually caught it live</p>
+    <p class="empty-note star-seen-legend">Tap ☆ to save it to your Plan · <strong>hold</strong> to upgrade to a must-see &nbsp;·&nbsp; tap ✓ once you've actually caught it live &nbsp;·&nbsp; 🗓 jumps to it on the timeline &nbsp;·&nbsp; 🤍 flags you want to see it with the group</p>
 
     <div id="artistsListView" style="display:none;">
     <div id="artistResults"><p class="empty-note">Start typing a name, stage or genre — or tap a day/genre chip above — to search 1621+ acts across all 5 days.</p></div>
@@ -345,6 +347,13 @@ Meet at the clock tower if separated"></textarea>
       <button data-filter="mustsee">★ Must-sees only</button>
     </div>
     <div class="stagelist" id="planDayChips" style="margin:10px 0;"></div>
+    <div class="lineup-key" style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin:8px 0 2px; font-size:12px; color:var(--text-muted);">
+      <span><span style="color:var(--accent-lightblue); font-size:15px;">☆</span> Like</span>
+      <span><span style="color:var(--accent-amber); font-size:15px;">★</span> Must-see</span>
+      <span><span style="color:var(--accent-teal); font-size:15px;">✓</span> Seen</span>
+      <span><span style="font-size:14px;">✕</span> Remove</span>
+      <span><span style="font-size:14px;">🕐</span> Set time</span>
+    </div>
     <p class="empty-note star-seen-legend" id="planStarSeenLegend">★ tap to save · <strong>hold</strong> to upgrade to a must-see &nbsp;·&nbsp; ✓ tap once you've actually caught it live at the festival</p>
     <div id="clashExtras" style="display:none;">
       <p class="empty-note" id="clashLegend" style="margin-bottom:8px;">🔵 Starred · 🟠 Must-see — both count toward clashes below.</p>
@@ -488,25 +497,10 @@ Meet at the clock tower if separated"></textarea>
     </div>
 
     <div class="card" id="jumpLogHidden">
-      <h3>Log a hidden venue</h3>
-      <p>Found one of the 50+ secret spots? Save it here — it'll show up in the directory above tagged "Your find", and everyone in your group can copy the list out.</p>
-      <div class="field"><label>Name</label><input type="text" id="hiddenVenueName" placeholder="What was it called?"></div>
-      <div class="field"><label>Type</label>
-        <select id="hiddenVenueType">
-          <option value="Hidden venue">Hidden venue</option>
-          <option value="Main stage">Main stage</option>
-          <option value="Shop / hidden venue">Shop</option>
-          <option value="Workshop / shop">Workshop</option>
-          <option value="Welfare / support">Welfare / support</option>
-          <option value="Talks / installation">Talks / installation</option>
-          <option value="Leisure / ride">Leisure / ride</option>
-        </select>
-      </div>
-      <div class="field"><label>Genre / vibe (optional)</label><input type="text" id="hiddenVenueGenre" placeholder="e.g. hard techno, folk, chill bar"></div>
-      <div class="field"><label>Rough location (optional)</label><input type="text" id="hiddenVenueNear" placeholder="e.g. near Botanica, edge of Hidden Woods"></div>
-      <div class="field"><label>Notes</label><textarea id="hiddenVenueInput" placeholder="What it was like, when you found it..."></textarea></div>
-      <button class="action" id="addHiddenVenueBtn">Save find</button>
-      <button class="ghost" id="copyVenuesBtn" style="margin:8px 6px 0 0;">Copy your finds</button>
+      <h3>🕵 Found something?</h3>
+      <p class="empty-note">Log it with the same <strong>＋</strong> button the map above uses — pick "Hidden venue" as the category and mark the exact spot.</p>
+      <button class="action" id="jumpToAddPlaceFromHidden">📍 Log it here</button>
+      <button class="ghost" id="copyVenuesBtn" style="margin:8px 0 0;">Copy your finds</button>
     </div>
 
     <div class="card">
