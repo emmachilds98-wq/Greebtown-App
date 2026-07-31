@@ -33,6 +33,7 @@ service cloud.firestore {
           'quotes',
           'sightings',
           'customLandmarks',
+          'customPlaces',
           'schedule',
           'bingo',
           'character',
@@ -68,7 +69,7 @@ service cloud.firestore {
           && request.resource.data.payload.keys().hasOnly([
             'v','deviceId','from','clues','characterNotes','theories',
             'hiddenVenues','involvedDone','discoveries','customSocials',
-            'quotes','sightings','customLandmarks','schedule','bingo',
+            'quotes','sightings','customLandmarks','customPlaces','schedule','bingo',
             'character','status','meeting','decisions','activities',
             'joinedActivities','wantTogether','updatedAt'
           ]);

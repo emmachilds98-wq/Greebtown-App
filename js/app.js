@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v195";
-const APP_BUILD_TIME = "2026-07-31T10:10:08Z";
+const APP_CACHE_VERSION = "v196";
+const APP_BUILD_TIME = "2026-07-31T10:22:29Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -574,7 +574,7 @@ window.addEventListener("orientationchange", repositionAllTimelineScrollThumbs);
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, personalClashTimes: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false, wantTogether: [], peopleWantTogether: {} };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, personalClashTimes: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], customPlaces: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {}, locationReminderEnabled: false, locationReminderDismissedAt: null, chatNotificationsEnabled: false, wantTogether: [], peopleWantTogether: {} };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -782,6 +782,10 @@ tabs.forEach(tab=>{
     // bottom nav, not just the back button) lands where you left off.
     const outgoingTab = document.querySelector(".tab.active");
     if(outgoingTab) tabScrollPositions[outgoingTab.dataset.tab] = window.scrollY;
+    // Leaving Map mid "Add a place" flow shouldn't leave its fixed
+    // picking bar/modal stuck floating over whatever tab you switch to.
+    if(typeof stopPlacePicking === "function") stopPlacePicking();
+    if(typeof closeAddPlaceModal === "function") closeAddPlaceModal();
     screens.forEach(s=>s.classList.remove("active"));
     tabs.forEach(t=>t.classList.remove("active"));
     document.getElementById(tab.dataset.tab).classList.add("active");
@@ -6329,6 +6333,29 @@ function loadMap(){
     inner.appendChild(label);
   });
 
+  // Places added via the ＋ button — normalized x/y (0-100, see the
+  // ADD A PLACE section further down for why) rendered exactly like
+  // every other marker on this map, just with a distinct icon/colour
+  // so a friend-created pin reads as clearly different from the
+  // official landmark/gate/stage markers without cluttering the map.
+  (Store.get("customPlaces") || []).forEach(place=>{
+    const marker = document.createElement("div");
+    marker.className = "marker place" + (place.official ? " official" : "");
+    marker.style.left = place.x + "%";
+    marker.style.top = place.y + "%";
+    marker.title = place.name;
+    marker.dataset.name = place.name;
+    marker.onclick = ()=>{ if(typeof showPlaceInfo === "function") showPlaceInfo(place); };
+    inner.appendChild(marker);
+
+    const label = document.createElement("div");
+    label.className = "map-label place";
+    label.style.left = place.x + "%";
+    label.style.top = place.y + "%";
+    label.textContent = place.name;
+    inner.appendChild(label);
+  });
+
   setupMapZoomPan();
 }
 
@@ -6507,6 +6534,15 @@ function setupMapZoomPan(){
       // that didn't land on a marker/label/control — those already have
       // their own tap behaviour and shouldn't also trigger a zoom.
       if(!dragMoved && !e.target.closest(".marker, .map-label, .mapZoomControls")){
+        // "Add a place" picking mode hijacks a clean tap to drop/move the
+        // pin instead of the usual double-tap-zoom — see ADD A PLACE
+        // further down. Suspending double-tap-zoom here is deliberate:
+        // repeated taps to fine-tune the pin's position shouldn't also
+        // zoom the map out from under it.
+        if(typeof _placePicking !== "undefined" && _placePicking){
+          if(typeof handlePlacePickTap === "function") handlePlacePickTap(e.clientX, e.clientY);
+          return;
+        }
         const now = Date.now();
         const pos = { x:e.clientX, y:e.clientY };
         const isDouble = lastTapPos && (now - lastTapTime) < DOUBLE_TAP_MS && dist(pos, lastTapPos) < DOUBLE_TAP_PX;
@@ -6625,24 +6661,233 @@ function loadCustomLandmarksList(){
   });
 }
 
-document.getElementById("addLandmarkBtn").onclick = ()=>{
-  const name = document.getElementById("landmarkName").value.trim();
-  if(!name) return;
-  const list = Store.get("customLandmarks") || [];
-  list.push({
-    name,
-    district: document.getElementById("landmarkDistrict").value,
-    info: document.getElementById("landmarkInfo").value.trim(),
-    from: currentContributorName() || ""
-  });
-  Store.set("customLandmarks", list);
-  document.getElementById("landmarkName").value = "";
-  document.getElementById("landmarkInfo").value = "";
-  loadCustomLandmarksList();
-  loadMap();
-};
-
+// Old "Log a landmark" add-form is retired in favour of the unified
+// "Add a place" flow below (the ＋ button) — this list view stays,
+// since previously-logged/synced landmarks are real group data that
+// must keep showing and stay removable, just no longer addable here.
 loadCustomLandmarksList();
+
+// ===============================
+// ADD A PLACE — the single, unified way to drop a pin on the map,
+// replacing the old district-picker "Log a landmark" form above. Investigated
+// before building: the existing map (buildMapBackground/loadMap) is a
+// procedurally-generated illustrative SVG, not a georeferenced image —
+// nothing in this file ties any position on it to real-world WGS84
+// latitude/longitude, so writing fabricated-looking "51.xxxx, -1.xxxx"
+// numbers here would be false precision, not real geodata. Every place
+// instead stores x/y as the exact same normalized 0-100 map-space
+// coordinate every other marker on this map already uses (matching the
+// viewBox="0 0 100 100" SVG background) — resolution-independent, not
+// screen/pixel/CSS-tied, and exactly what a future calibration layer
+// mapping this illustrative space onto a real surveyed map would need
+// as its input regardless of whether the numbers are also literal
+// lat/lon. customPlaces is one flat, shared Store key (see
+// buildSyncPayload/mergeSyncPayload above) — not a second location
+// system alongside customLandmarks; that older array is kept read-only
+// (list above) rather than migrated, so no group data is lost.
+// ===============================
+function ensurePlaceId(){
+  return "place_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// Converts a raw pointer position into the map's own normalized 0-100
+// space, undoing the current pan/zoom transform (#mapInner is
+// translate(mapTx,mapTy) scale(mapScale) relative to #map's box, and at
+// scale 1 fills that box exactly — same reasoning as mapCenterPoint()
+// above) so a dropped pin lands under the finger regardless of how far
+// panned/zoomed in the map currently is.
+function mapPointFromClient(clientX, clientY){
+  const rect = map.getBoundingClientRect();
+  const innerX = (clientX - rect.left - mapTx) / mapScale;
+  const innerY = (clientY - rect.top - mapTy) / mapScale;
+  return {
+    x: Math.max(1, Math.min(99, (innerX / rect.width) * 100)),
+    y: Math.max(1, Math.min(99, (innerY / rect.height) * 100))
+  };
+}
+
+let _placeDraft = null; // {id?, name, category, note, x, y} while the add/edit flow is open
+let _placePicking = false;
+
+function closeAddPlaceModal(){
+  const el = document.getElementById("addPlaceModal");
+  if(el) el.remove();
+}
+
+function renderPlacePickPin(){
+  const old = document.getElementById("placePickPin");
+  if(old) old.remove();
+  if(!_placeDraft || _placeDraft.x == null) return;
+  const inner = document.getElementById("mapInner");
+  if(!inner) return;
+  const pin = document.createElement("div");
+  pin.id = "placePickPin";
+  pin.className = "place-pick-pin";
+  pin.style.left = _placeDraft.x + "%";
+  pin.style.top = _placeDraft.y + "%";
+  pin.textContent = "📍";
+  inner.appendChild(pin);
+}
+
+function showPlacePickBar(){
+  let bar = document.getElementById("placePickBar");
+  if(!bar){
+    bar = document.createElement("div");
+    bar.id = "placePickBar";
+    bar.className = "place-pick-bar";
+    document.body.appendChild(bar);
+  }
+  const hasSpot = _placeDraft && _placeDraft.x != null;
+  bar.innerHTML = `
+    <span style="flex:1; font-size:12.5px;">📍 Tap the map to drop the pin${hasSpot ? " — tap again to move it" : ""}</span>
+    <button class="ghost" id="placePickCancelBtn" style="flex-shrink:0;">Cancel</button>
+    <button class="action" id="placePickConfirmBtn" style="flex-shrink:0;" ${hasSpot ? "" : "disabled"}>Confirm</button>
+  `;
+  bar.style.display = "flex";
+  document.getElementById("placePickCancelBtn").onclick = ()=>{ stopPlacePicking(); openAddPlaceModal(_placeDraft); };
+  document.getElementById("placePickConfirmBtn").onclick = ()=>{ stopPlacePicking(); openAddPlaceModal(_placeDraft); };
+}
+
+function stopPlacePicking(){
+  _placePicking = false;
+  const bar = document.getElementById("placePickBar");
+  if(bar) bar.style.display = "none";
+  const pin = document.getElementById("placePickPin");
+  if(pin) pin.remove();
+}
+
+function startPlacePicking(){
+  if(!_placeDraft) return;
+  closeAddPlaceModal();
+  _placePicking = true;
+  showPlacePickBar();
+  renderPlacePickPin();
+}
+
+// Hooked into the map's own existing clean-tap detection (see
+// map.onpointerup=endPointer in MAP ZOOM & PAN below) rather than a
+// second pointer-handling system layered on top of it — that section's
+// pinch/drag/double-tap-zoom state machine already had real gesture
+// bugs fixed once (see CLAUDE.md task history); a competing drag-the-
+// pin listener on the same element risks reopening exactly that class
+// of bug. So "draggable" here means "tap again to move it" — genuinely
+// repositionable before confirming, just not a continuous drag.
+function handlePlacePickTap(clientX, clientY){
+  if(!_placeDraft) return;
+  const p = mapPointFromClient(clientX, clientY);
+  _placeDraft.x = p.x; _placeDraft.y = p.y;
+  renderPlacePickPin();
+  showPlacePickBar();
+}
+
+function openAddPlaceModal(draft){
+  closeAddPlaceModal();
+  stopPlacePicking();
+  const editingId = draft && draft.id;
+  _placeDraft = draft ? { ...draft } : { name:"", category:"Landmark", note:"", x:null, y:null };
+  const hasSpot = _placeDraft.x != null;
+  const backdrop = document.createElement("div");
+  backdrop.id = "addPlaceModal";
+  backdrop.style.cssText = "position:fixed; inset:0; z-index:60; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
+  backdrop.innerHTML = `
+    <div class="card" style="position:relative; width:100%; max-width:400px; max-height:85vh; overflow-y:auto; margin:0;">
+      <button aria-label="Close" id="addPlaceCloseBtn" style="position:absolute; top:10px; right:10px; background:none; border:1px solid var(--line); color:var(--text-primary); border-radius:10px; width:32px; height:32px; font-size:16px; line-height:1; cursor:pointer;">✕</button>
+      <h3>${editingId ? "Edit place" : "Add a place"}</h3>
+      <p class="empty-note" style="margin-bottom:10px;">${editingId ? "Update the details, or move its pin." : "Mark anything worth remembering — a meeting spot, a landmark, a food stall — right where it actually is."}</p>
+      <div class="field"><label>Name</label><input type="text" id="placeNameInput" placeholder="What is it?" value="${escapeHtml(_placeDraft.name || "")}"></div>
+      <div class="field"><label>Category</label>
+        <select id="placeCategoryInput">
+          <option value="Landmark">Landmark</option>
+          <option value="Venue">Venue</option>
+          <option value="Meeting point">Meeting point</option>
+          <option value="Food & drink">Food &amp; drink</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Note (optional)</label><textarea id="placeNoteInput" placeholder="Anything worth remembering">${escapeHtml(_placeDraft.note || "")}</textarea></div>
+      <button class="action" id="placeMarkOnMapBtn" style="margin-top:2px;">📍 ${hasSpot ? "Move pin on map" : "Mark on map"}</button>
+      <p class="empty-note" id="placePickStatus" style="margin-top:6px;">${hasSpot ? "Spot set — save below, or move it again." : "Tap the button above, then tap the map to drop a pin."}</p>
+      <button class="action" id="placeSaveBtn" style="margin-top:10px;" ${hasSpot ? "" : "disabled"}>${editingId ? "Save changes" : "Add place"}</button>
+    </div>
+  `;
+  backdrop.onclick = (e)=>{ if(e.target === backdrop){ _placeDraft = null; closeAddPlaceModal(); } };
+  document.body.appendChild(backdrop);
+  document.getElementById("addPlaceCloseBtn").onclick = ()=>{ _placeDraft = null; closeAddPlaceModal(); };
+  document.getElementById("placeCategoryInput").value = _placeDraft.category || "Landmark";
+  document.getElementById("placeMarkOnMapBtn").onclick = ()=>{
+    _placeDraft.name = document.getElementById("placeNameInput").value.trim();
+    _placeDraft.category = document.getElementById("placeCategoryInput").value;
+    _placeDraft.note = document.getElementById("placeNoteInput").value.trim();
+    startPlacePicking();
+  };
+  document.getElementById("placeSaveBtn").onclick = ()=>{
+    const name = document.getElementById("placeNameInput").value.trim();
+    if(!name || _placeDraft.x == null) return;
+    const list = Store.get("customPlaces") || [];
+    const now = Date.now();
+    if(editingId){
+      const existing = list.find(p=> p.id === editingId);
+      if(existing){
+        existing.name = name;
+        existing.category = document.getElementById("placeCategoryInput").value;
+        existing.note = document.getElementById("placeNoteInput").value.trim();
+        existing.x = _placeDraft.x; existing.y = _placeDraft.y;
+        existing.updatedAt = now;
+      }
+    } else {
+      list.push({
+        id: ensurePlaceId(),
+        name,
+        category: document.getElementById("placeCategoryInput").value,
+        note: document.getElementById("placeNoteInput").value.trim(),
+        x: _placeDraft.x, y: _placeDraft.y,
+        from: currentContributorName() || "",
+        deviceId: (typeof ensureDeviceId === "function") ? ensureDeviceId() : "",
+        room: (typeof currentRoomCode === "function") ? currentRoomCode() : "",
+        official: false,
+        createdAt: now, updatedAt: now
+      });
+    }
+    Store.set("customPlaces", list);
+    _placeDraft = null;
+    closeAddPlaceModal();
+    loadMap();
+  };
+}
+
+// Tapping a place marker shows its details — edit/delete only offered
+// when it's this device's own creation (deviceId match), so one
+// friend's device can never edit or remove another's pin; it can only
+// ever touch its own array locally either way.
+function showPlaceInfo(place){
+  const isMine = place.deviceId && (typeof ensureDeviceId === "function") && place.deviceId === ensureDeviceId();
+  mapInfo.innerHTML = `
+    <div class="card">
+      <span class="tag">${escapeHtml(place.category || "Place")}</span>
+      <h3>${escapeHtml(place.name)}</h3>
+      ${place.note ? `<p>${escapeHtml(place.note)}</p>` : ""}
+      <p class="empty-note" style="margin-top:6px;">Added by ${escapeHtml(place.from || "Someone")}${place.updatedAt ? " · " + formatLastSeen(place.updatedAt) : ""}</p>
+      ${isMine ? `
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="ghost" id="editPlaceBtn">✏️ Edit</button>
+          <button class="ghost danger" id="deletePlaceBtn">🗑 Delete</button>
+        </div>
+      ` : ""}
+    </div>
+  `;
+  if(isMine){
+    document.getElementById("editPlaceBtn").onclick = ()=> openAddPlaceModal(place);
+    document.getElementById("deletePlaceBtn").onclick = ()=>{
+      if(!confirm(`Remove "${place.name}" from the map? This only removes it from your own device — if a friend already synced it in, it stays on theirs unless they remove it too.`)) return;
+      Store.set("customPlaces", (Store.get("customPlaces") || []).filter(p=> p.id !== place.id));
+      mapInfo.innerHTML = "";
+      loadMap();
+    };
+  }
+}
+
+const mapAddPlaceBtn = document.getElementById("mapAddPlaceBtn");
+if(mapAddPlaceBtn) mapAddPlaceBtn.onclick = ()=> openAddPlaceModal();
 
 loadMap();
 
@@ -7252,6 +7497,7 @@ function buildSyncPayload(){
     quotes: Store.get("quotes") || [],
     sightings: Store.get("sightings") || [],
     customLandmarks: Store.get("customLandmarks") || [],
+    customPlaces: Store.get("customPlaces") || [],
     // Read-only snapshot of this device's own saved artists — the
     // receiving phone stores this under peopleSchedules[from], never
     // merged into its own "schedule". See the DATA ISOLATION MODEL note
@@ -7315,7 +7561,7 @@ function decodeSyncCode(code){
 }
 
 function mergeSyncPayload(payload){
-  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, schedule:0, bingo:0, character:0, characterNotes:0 };
+  const stats = { clues:0, theories:0, venues:0, districts:0, involved:0, socials:0, quotes:0, sightings:0, landmarks:0, places:0, schedule:0, bingo:0, character:0, characterNotes:0 };
   const from = payload.from || "Someone";
   // The stable identity to key per-person snapshots by, wherever one's
   // available — falls back to the display name only for payloads from
@@ -7457,6 +7703,33 @@ function mergeSyncPayload(payload){
     stats.landmarks++;
   });
   Store.set("customLandmarks", customLandmarksList);
+
+  // customPlaces (Map's "Add a place" pins) carry a real stable `id`
+  // and `updatedAt`, unlike the content-hash-keyed lists above, so this
+  // merges by id with newer-updatedAt-wins instead — new ids are added,
+  // and an id already present only gets replaced if the incoming copy
+  // is strictly newer. That's what lets a creator's own edit actually
+  // reach everyone else on their next sync (last-write-wins), while a
+  // friend re-syncing a stale copy of someone else's place can never
+  // clobber a fresher version anyone else already has. Deletes are NOT
+  // propagated this way (no tombstone record) — same limitation
+  // customLandmarks above already has today, just worth calling out
+  // since customPlaces has an explicit delete button.
+  const placesList = Store.get("customPlaces") || [];
+  const placesById = new Map(placesList.map(p=> [p.id, p]));
+  (payload.customPlaces || []).forEach(p=>{
+    if(!p || !p.id || !(p.name || "").trim()) return;
+    const existing = placesById.get(p.id);
+    if(!existing){
+      const fresh = { ...p, from: p.from || from };
+      placesList.push(fresh);
+      placesById.set(p.id, fresh);
+      stats.places++;
+    } else if((p.updatedAt || 0) > (existing.updatedAt || 0)){
+      Object.assign(existing, p, { from: p.from || existing.from });
+    }
+  });
+  Store.set("customPlaces", placesList);
 
   // Read-only per-person schedule snapshot — replaces that person's own
   // entry each time they resync (it's a full current snapshot of their
@@ -7622,7 +7895,7 @@ function currentContributorName(){
 // to claim any blank one for whoever just picked their name.
 function backfillOwnUnnamedEntries(name){
   if(!name) return;
-  ["theories", "quotes", "sightings", "customLandmarks", "hiddenVenues"].forEach(key=>{
+  ["theories", "quotes", "sightings", "customLandmarks", "hiddenVenues", "customPlaces"].forEach(key=>{
     const list = Store.get(key);
     if(!Array.isArray(list) || !list.length) return;
     let changed = false;
@@ -7939,7 +8212,7 @@ if(mergeSyncCodeBtn) mergeSyncCodeBtn.onclick = ()=>{
     const payload = decodeSyncCode(raw);
     const { stats, from } = mergeSyncPayload(payload);
     input.value = "";
-    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}${stats.character ? `${from}'s character is now viewable in its own tab on the My Character card. ` : ""}Nothing already saved was duplicated.`;
+    note.textContent = `Merged ${from}'s update: +${stats.clues} district notes, +${stats.characterNotes} character notes, +${stats.theories} theories, +${stats.venues} hidden venues, +${stats.districts} districts visited, +${stats.involved} get-involved ticks, +${stats.socials} socials, +${stats.quotes} journal quotes, +${stats.sightings} live sightings, +${stats.landmarks} landmarks, +${stats.places} map places. ${stats.schedule ? `${from}'s ${stats.schedule} saved artists are now viewable in their own tab on the Plan screen (not merged into your list). ` : ""}${stats.bingo ? `${from}'s bingo card is now viewable in its own tab on the Bingo screen. ` : ""}${stats.character ? `${from}'s character is now viewable in its own tab on the My Character card. ` : ""}Nothing already saved was duplicated.`;
     recordLastSynced();
     refreshAfterMerge();
   }catch(err){
@@ -9146,6 +9419,7 @@ async function restoreBackupSnapshot(backupId){
   Store.set("quotes", p.quotes || []);
   Store.set("sightings", p.sightings || []);
   Store.set("customLandmarks", p.customLandmarks || []);
+  Store.set("customPlaces", p.customPlaces || []);
   Store.set("schedule", p.schedule || []);
   if(p.bingo){
     Store.set("bingoCard", p.bingo.card || []);

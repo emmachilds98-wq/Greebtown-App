@@ -514,6 +514,24 @@
   .marker.landmark::after{content:none;}
   .map-label.landmark{color:rgba(150,200,242,.95); font-weight:700; font-size:9px; background:rgba(11,21,18,.6); border:1px solid rgba(45,168,242,.3);}
 
+  /* ===== "Add a place" markers — friend-created pins from the ＋ button,
+     kept visually distinct but subtle rather than another loud colour on
+     an already-busy legend. .official is unused today (no official
+     place dataset exists yet) but the visual hook is ready for one. ===== */
+  .marker.place::before{width:13px; height:13px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:rgba(196,150,255,.85); box-shadow:none; border:1.5px solid rgba(11,21,18,.6);}
+  .marker.place::after{content:none;}
+  .marker.place.official::before{border-radius:50%; transform:none; background:rgba(242,168,60,.9);}
+  .map-label.place{color:rgba(210,180,255,.95); font-weight:700; font-size:9px; background:rgba(11,21,18,.6); border:1px solid rgba(196,150,255,.3);}
+
+  /* Temporary pin shown while picking a place's spot — pointer-events
+     none so it never steals the tap that's meant to move the map's own
+     pan/zoom-aware pointer handling below it. */
+  .place-pick-pin{position:absolute; left:0; top:0; transform:translate(-50%, -90%); font-size:26px; line-height:1; pointer-events:none; z-index:6; filter:drop-shadow(0 3px 4px rgba(0,0,0,.5));}
+
+  /* Fixed bar shown during picking mode, above the bottom nav (same
+     safe-area-aware offset pattern as nav.tabbar itself). */
+  .place-pick-bar{position:fixed; left:12px; right:12px; bottom:calc(72px + env(safe-area-inset-bottom)); z-index:65; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:14px; padding:10px 12px; display:flex; align-items:center; gap:8px; box-shadow:0 6px 20px rgba(0,0,0,.4);}
+
   /* ===== GPS location toggle — sits under the manual status button in
      the "Where's everyone?" card ===== */
   .gps-toggle-row{display:flex; align-items:center; gap:8px; margin-top:12px; font-size:12.5px; line-height:1.4; color:var(--text-muted); cursor:pointer;}
