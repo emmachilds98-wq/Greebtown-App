@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v217";
-const APP_BUILD_TIME = "2026-07-31T21:09:50Z";
+const APP_CACHE_VERSION = "v218";
+const APP_BUILD_TIME = "2026-07-31T21:23:18Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6140,6 +6140,22 @@ function nearestDistrict(x, y, districts){
   return best;
 }
 
+// A gently bowed 3-point path between two schematic points instead of a
+// dead-straight line — a whole hub's worth of spokes drawn perfectly
+// straight reads as an artificial "spider web" converging on one dot;
+// nudging each path's midpoint sideways by a small, deterministic
+// (seeded on the endpoints, so stable across reloads) amount makes the
+// same network read as hand-drawn paths instead.
+function curvedLine(p0, p1, seed){
+  const rand = seededRand(seed);
+  const mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2;
+  const dx = p1[0] - p0[0], dy = p1[1] - p0[1];
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  const nx = -dy / len, ny = dx / len;
+  const offset = (rand() - 0.5) * Math.min(len * 0.4, 6);
+  return [p0, [mx + nx * offset, my + ny * offset], p1];
+}
+
 // Converts a ring/list of [x,y] points in the existing 0-100 schematic
 // space into [lon,lat] pairs (GeoJSON coordinate order) via the same
 // SCHEMATIC_TO_LATLON_FIT every other approximate position in this file uses.
@@ -6193,10 +6209,10 @@ function buildMapGeoJSON(){
   // Spokes from every stage (major + minor) to its nearest district — the
   // main walkable "roads" of the path network.
   const spokeTargets = locations.filter(p=>p.kind === "stage").concat(minorStages);
-  const spokeFeatures = spokeTargets.map(s=>{
+  const spokeFeatures = spokeTargets.map((s,i)=>{
     const sx = parseFloat(s.x), sy = parseFloat(s.y);
     const nd = nearestDistrict(sx, sy, districts);
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[sx,sy],[parseFloat(nd.x), parseFloat(nd.y)]]) } };
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([sx,sy], [parseFloat(nd.x), parseFloat(nd.y)], i * 17 + 3)) } };
   });
 
   // Thinner "capillary" paths from every smaller point (hidden venues,
@@ -6209,10 +6225,25 @@ function buildMapGeoJSON(){
   // illustrated maps use (thick main routes, thin capillary paths to
   // individual stalls/venues).
   const capillaryTargets = thingsToFind.concat(landmarks).concat(gates);
-  const capillaryFeatures = capillaryTargets.map(p=>{
+  const capillaryFeatures = capillaryTargets.map((p,i)=>{
     const px = parseFloat(p.x), py = parseFloat(p.y);
     const nd = nearestDistrict(px, py, districts);
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[px,py],[parseFloat(nd.x), parseFloat(nd.y)]]) } };
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nd.x), parseFloat(nd.y)], i * 23 + 11)) } };
+  });
+
+  // Premium camp AREAS — the reference video shows Camp Orchid Downtown
+  // and the two Camp Skylark sites as solid colour-filled fields (pink
+  // for Orchid, warm yellow for Skylark), distinct from the plain green
+  // used for ordinary camping — matched here for the same reason the
+  // forest/district areas got fills instead of a floating text label.
+  const campAreaDefs = campLabels.filter(c=> /premium/i.test(c.text));
+  const campFeatures = campAreaDefs.map((c,i)=>{
+    const isDowntown = /downtown/i.test(c.text);
+    return {
+      type: "Feature",
+      properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(c.x), parseFloat(c.y), 10, 700 + i * 61, 14)) ] }
+    };
   });
 
   // Forest AREAS — a solid mottled-green clearing shape under each named
@@ -6260,6 +6291,7 @@ function buildMapGeoJSON(){
 
   return {
     districts: { type:"FeatureCollection", features: districtFeatures },
+    campAreas: { type:"FeatureCollection", features: campFeatures },
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
@@ -6466,6 +6498,13 @@ function loadMap(){
       mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 1.6, "line-dasharray": [2, 2] } });
+
+      // Camp areas drawn AFTER districts/forests so they sit on top —
+      // Camp Orchid Downtown in particular overlaps Metropolis's own
+      // district clearing, and a fill drawn underneath it just vanished.
+      mapGL.addSource("mapCampAreas", { type: "geojson", data: geo.campAreas });
+      mapGL.addLayer({ id: "camp-areas-fill", type: "fill", source: "mapCampAreas", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "camp-areas-line", type: "line", source: "mapCampAreas", paint: { "line-color": "rgba(255,255,255,0.25)", "line-width": 1, "line-dasharray": [1, 1.5] } });
 
       // Path network — three tiers so the map reads as a connected route
       // system rather than isolated markers on plain grass: a solid main
