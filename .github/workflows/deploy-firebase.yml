@@ -1,0 +1,41 @@
+name: Deploy Firebase (Cloud Functions + Firestore rules)
+
+# Only runs when something that actually needs deploying changes — a
+# regular app.js/index.html edit never triggers this, only the backend
+# pieces (Cloud Function source, firestore.rules, or the Firebase config
+# files themselves). Also runnable by hand from the Actions tab.
+on:
+  push:
+    branches: [emmachilds98-wq-patch-2]
+    paths:
+      - "functions/**"
+      - "firestore.rules"
+      - "firebase.json"
+      - ".firebaserc"
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install function dependencies
+        run: npm install --prefix functions
+
+      # Authenticates as the service account behind the
+      # FIREBASE_SERVICE_ACCOUNT secret (its JSON key, generated in
+      # Firebase Console → Project settings → Service accounts →
+      # Generate new private key) — the Firebase CLI picks this up
+      # automatically via GOOGLE_APPLICATION_CREDENTIALS, no separate
+      # `firebase login` step needed.
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy functions + Firestore rules
+        run: npx firebase-tools@13 deploy --only functions,firestore:rules --project greebtown --non-interactive

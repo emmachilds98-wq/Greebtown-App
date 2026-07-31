@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v208";
-const APP_BUILD_TIME = "2026-07-31T15:42:47Z";
+const APP_CACHE_VERSION = "v209";
+const APP_BUILD_TIME = "2026-07-31T16:24:53Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -124,6 +124,15 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "944940862671",
   appId: "1:944940862671:web:f84ece4e66b052b4f97bba"
 };
+
+// Public VAPID key for Web Push (FCM) — generated in Firebase Console →
+// Project settings → Cloud Messaging → Web configuration. This is the
+// PUBLIC half of the key pair (safe to ship client-side, same as
+// apiKey above); the private half never leaves Firebase/the Cloud
+// Function. Grouped with FIREBASE_CONFIG up here for the same reason —
+// registerPushToken() (further down) can in principle be reached early
+// via the notifications toggle.
+const FCM_VAPID_KEY = "BGUEw1DydjFpvFLR7XsG27rfs2SVhfPl194eXqjM4Rg84MfppgagOA-FsUbxPyuE6e-t-5H5tbKlrZAcjfviEH8";
 
 let _firestoreDb = null;
 function getFirestoreDb(){
@@ -8193,6 +8202,17 @@ function setContributorName(name){
     }
   }
 
+  // Notifications default OFF in every browser until someone actually
+  // asks — picking a name is the first real user gesture available (a
+  // select's onchange still counts as one), and it's the natural
+  // onboarding moment, so ask here rather than leaving it buried behind
+  // the 🔔 bell for people to find on their own. Only ever fires once:
+  // Notification.permission is "default" only before the very first
+  // grant/deny, so this silently no-ops on every later name edit.
+  if(trimmed && typeof chatNotificationsSupported === "function" && chatNotificationsSupported() && Notification.permission === "default" && typeof toggleChatNotifications === "function"){
+    toggleChatNotifications();
+  }
+
   if(typeof refreshAfterMerge === "function") refreshAfterMerge();
 }
 
@@ -10559,28 +10579,72 @@ function sendChatHeartbeat(){
     .catch(()=>{});
 }
 
-// CHAT NOTIFICATIONS — see CHAT_NOTIFY_KEY above for the platform
-// constraint this works within: foreground/backgrounded-tab only, no
-// genuine closed-app push (that needs a server holding VAPID/FCM keys,
-// which this Spark-plan, no-backend app deliberately doesn't have — see
-// getFirestoreDb()'s own Spark-plan note). Reliable on Android Chrome
-// while the tab/PWA is merely backgrounded; best-effort on iOS Safari,
-// which suspends background web content aggressively and only fires
-// while this tab is the one actually in front.
+// CHAT NOTIFICATIONS — two layers behind the one CHAT_NOTIFY_KEY toggle.
+// This local Notification API path only ever fires while the tab/PWA is
+// actually running (foreground or merely backgrounded) — reliable on
+// Android Chrome, best-effort on iOS Safari, which suspends background
+// web content aggressively. registerPushToken()/unregisterPushToken()
+// (further down) layer real Web Push (FCM) on top of the same toggle,
+// which — via the sendChatPush Cloud Function (functions/index.js) —
+// reaches the lock screen even with the app fully closed. That half
+// needs the Blaze (pay-as-you-go) plan for Cloud Functions; this local
+// path works regardless and is the fallback if push isn't available.
 function chatNotificationsSupported(){
   return typeof Notification !== "undefined";
 }
 function chatNotificationsEnabled(){
   return chatNotificationsSupported() && Notification.permission === "granted" && !!Store.get(CHAT_NOTIFY_KEY);
 }
+// Web Push (FCM) registration — the actual lock-screen/closed-app
+// delivery path, layered on top of the same CHAT_NOTIFY_KEY toggle that
+// already controls the foreground-only Notification API path below.
+// Registering just gets a per-device push token from FCM and saves it
+// to Firestore so the sendChatPush Cloud Function (functions/index.js)
+// can address this device — nothing here decides who gets notified;
+// sending is entirely server-side via the Admin SDK, never a client
+// write reaching anyone else's device directly. Best-effort throughout:
+// a browser without Messaging support, no service worker, or Firestore
+// unreachable just means this device falls back to foreground-only
+// notifications, same as before this existed.
+async function registerPushToken(){
+  if(typeof firebase === "undefined" || !firebase.messaging || !("serviceWorker" in navigator)) return;
+  const db = getFirestoreDb();
+  if(!db) return;
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    const token = await firebase.messaging().getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: reg });
+    if(!token) return;
+    const deviceId = ensureDeviceId();
+    await db.collection("rooms").doc(currentRoomCode()).collection("pushTokens").doc(deviceId).set({
+      deviceId, token, displayName: currentContributorName() || "", updatedAt: Date.now()
+    });
+  }catch(err){
+    console.warn("Push token registration failed (non-fatal — falls back to foreground-only notifications):", err && err.message);
+  }
+}
+async function unregisterPushToken(){
+  const db = getFirestoreDb();
+  if(!db) return;
+  try{
+    await db.collection("rooms").doc(currentRoomCode()).collection("pushTokens").doc(ensureDeviceId()).delete();
+  }catch(err){
+    console.warn("Push token cleanup failed (non-fatal):", err && err.message);
+  }
+}
+
 // Must be called from a user gesture (a click), since requestPermission()
 // silently no-ops outside one on most browsers — the bell toggle in
 // renderChatThreadList's head is that gesture.
 async function toggleChatNotifications(){
   if(!chatNotificationsSupported()) return false;
-  if(Store.get(CHAT_NOTIFY_KEY)){ Store.set(CHAT_NOTIFY_KEY, false); return false; }
+  if(Store.get(CHAT_NOTIFY_KEY)){
+    Store.set(CHAT_NOTIFY_KEY, false);
+    unregisterPushToken();
+    return false;
+  }
   const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
   Store.set(CHAT_NOTIFY_KEY, perm === "granted");
+  if(perm === "granted") registerPushToken();
   return perm === "granted";
 }
 
@@ -10599,7 +10663,7 @@ function renderSettingsNotifyBtn(){
   const on = chatNotificationsEnabled();
   btn.disabled = false;
   btn.textContent = on ? "🔔 Notifications on — tap to turn off" : "🔕 Notifications off — tap to turn on";
-  if(note) note.textContent = "Only fires while this tab/PWA is open — not a true closed-app push.";
+  if(note) note.textContent = "Reaches your lock screen even with the app fully closed, on devices/browsers that support it.";
 }
 (function wireSettingsNotifyBtn(){
   const btn = document.getElementById("settingsNotifyBtn");
@@ -10757,7 +10821,7 @@ function renderChatThreadList(){
   card.innerHTML = `
     <div class="chat-panel-head">
       <span class="chat-panel-head-title"><strong>Chat</strong></span>
-      ${notifySupported ? `<button type="button" class="chat-close-btn" id="chatNotifyBtn" aria-label="${notifyOn ? "Turn off message notifications" : "Turn on message notifications"}" title="${notifyOn ? "Notifications on — while this tab's open" : "Notifications off"}">${notifyOn ? "🔔" : "🔕"}</button>` : ""}
+      ${notifySupported ? `<button type="button" class="chat-close-btn" id="chatNotifyBtn" aria-label="${notifyOn ? "Turn off message notifications" : "Turn on message notifications"}" title="${notifyOn ? "Notifications on — reaches your lock screen" : "Notifications off"}">${notifyOn ? "🔔" : "🔕"}</button>` : ""}
       <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
     </div>
     <div class="chat-thread-list">${rows.join("")}</div>
@@ -10765,9 +10829,6 @@ function renderChatThreadList(){
   `;
   document.getElementById("chatCloseBtn").onclick = closeChatPanel;
   const notifyBtn = document.getElementById("chatNotifyBtn");
-  // Notifications only ever fire while this tab/PWA is open (see
-  // CHAT_NOTIFY_KEY above) — worth saying up front so turning this on
-  // doesn't read as a promise of a true closed-app push it can't keep.
   if(notifyBtn) notifyBtn.onclick = ()=> toggleChatNotifications().then(()=>{
     if(!Notification || Notification.permission !== "denied") { renderChatThreadList(); return; }
     alert("Notifications are blocked for this site in your browser settings — allow them there, then try again.");
@@ -10911,6 +10972,10 @@ function initChat(){
   startChatListeners();
   sendChatHeartbeat();
   chatHeartbeatTimer = setInterval(sendChatHeartbeat, CHAT_HEARTBEAT_MS);
+  // Re-registers (rather than re-prompts) on every load for anyone who's
+  // already granted permission — FCM tokens can rotate/expire, and this
+  // keeps Firestore's copy current without needing another click.
+  if(chatNotificationsEnabled()) registerPushToken();
 }
 initChat();
 

@@ -1,7 +1,41 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v208";
+const CACHE_VERSION = "v209";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
+
+// ===============================
+// BACKGROUND PUSH (FCM) — lets a chat message reach the lock screen
+// with the app fully closed, not just backgrounded. A service worker
+// can't import js/app.js (no ES modules here, and FIREBASE_CONFIG lives
+// in a page-context script), so the same config is duplicated below —
+// keep both in sync if the Firebase project ever changes. Registering a
+// device for push (js/app.js's registerPushToken) and actually sending
+// one (functions/index.js's sendChatPush Cloud Function) are the other
+// two pieces of this feature. Wrapped in try/catch: if the CDN scripts
+// fail to load (offline first install, etc.), the rest of this worker
+// — caching, offline support — still needs to carry on regardless.
+try{
+  importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js");
+  importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js");
+  firebase.initializeApp({
+    apiKey: "AIzaSyAgiBfNu3IpTCpumJQrYkFOh03VNFTWOVQ",
+    authDomain: "greebtown.firebaseapp.com",
+    projectId: "greebtown",
+    storageBucket: "greebtown.firebasestorage.app",
+    messagingSenderId: "944940862671",
+    appId: "1:944940862671:web:f84ece4e66b052b4f97bba"
+  });
+  // Just calling this wires up the compat SDK's own default background-
+  // message handler (shows the notification/webpush payload the Cloud
+  // Function sends) — no onBackgroundMessage override needed since the
+  // Cloud Function already sends a full `notification` payload, not a
+  // data-only message. Its own notificationclick handling coexists fine
+  // with this file's own notificationclick listener further down (both
+  // just focus-or-open the app; harmless if both fire).
+  firebase.messaging();
+}catch(err){
+  console.warn("Firebase Messaging unavailable in service worker (push notifications won't reach the lock screen, everything else still works):", err && err.message);
+}
 
 // Everything the app needs to run with zero network connection.
 // Paths are relative so this works from a GitHub Pages project subpath too.
