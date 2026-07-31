@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v192";
-const APP_BUILD_TIME = "2026-07-31T09:52:25Z";
+const APP_CACHE_VERSION = "v193";
+const APP_BUILD_TIME = "2026-07-31T09:58:37Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
