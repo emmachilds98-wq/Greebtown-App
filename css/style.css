@@ -275,28 +275,17 @@
   .packing-cat-toggle{display:flex; justify-content:space-between; align-items:center; width:100%; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin:10px 0 4px; color:var(--text-primary); font-size:13px; font-weight:700; cursor:pointer; text-align:left;}
   .packing-cat-count{font-size:11.5px; font-weight:600; color:var(--text-muted);}
   .daygroup:first-child{margin-top:0;}
-  #map{height:460px; position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--line); touch-action:pan-y; cursor:grab;
-    background:
-      radial-gradient(ellipse at 18% 22%, rgba(52,110,68,0.55), transparent 55%),
-      radial-gradient(ellipse at 78% 28%, rgba(44,98,60,0.5), transparent 50%),
-      radial-gradient(ellipse at 62% 78%, rgba(56,116,72,0.5), transparent 55%),
-      radial-gradient(ellipse at 22% 82%, rgba(40,90,56,0.5), transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(60,120,76,0.35), transparent 60%),
-      linear-gradient(135deg,#163b24,#284d32);
-  }
-  #map:active{cursor:grabbing;}
-  #mapInner{position:absolute; inset:0; transform-origin:0 0; width:100%; height:100%;}
-  /* Toggled by setupMapZoomPan() for the exact duration of an active
-     pinch/drag — see its own comment there for why: routes every touch
-     event straight through to #map's own gesture handling with nothing
-     for a marker's tap-highlight/eventual click to catch on mid-gesture,
-     on a map with 40+ of them scattered across it. */
-  #mapInner.gesture-active .marker, #mapInner.gesture-active .map-label{pointer-events:none;}
-  .mapZoomControls{position:absolute; top:8px; left:8px; z-index:4; display:flex; flex-direction:column; gap:4px;}
-  .mapZoomControls button{width:30px; height:30px; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:rgba(11,21,18,.72); color:var(--text-primary); font-size:16px; cursor:pointer; line-height:1; padding:0; touch-action:auto;}
-  .mapZoomControls button:hover{border-color:var(--accent-amber);}
-  .compass{position:absolute; bottom:8px; left:8px; z-index:4; opacity:.9;}
-  #map::after{content:"SCHEMATIC — NOT TO SCALE"; position:absolute; top:10px; right:12px; background:rgba(0,0,0,.5); padding:5px 10px; border-radius:20px; font-size:9px; letter-spacing:.06em; opacity:.85; z-index:4;}
+  /* Real Leaflet map now (see js/app.js's MAP section) — touch-action is
+     deliberately NOT overridden here, unlike the old schematic version;
+     Leaflet sets its own on .leaflet-container internally and needs full
+     control of the gesture for pinch/pan/double-tap-zoom to work right. */
+  #map{height:460px; position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#1a2f29;}
+  .leaflet-container{background:#1a2f29; font:inherit;}
+  .leaflet-control-zoom a{background:rgba(11,21,18,.82) !important; color:var(--text-primary) !important; border-color:rgba(255,255,255,.2) !important;}
+  .leaflet-control-zoom a:hover{border-color:var(--accent-amber) !important;}
+  .leaflet-control-attribution{background:rgba(11,21,18,.7) !important; color:var(--text-muted) !important; font-size:9px !important;}
+  .leaflet-control-attribution a{color:var(--text-muted) !important;}
+  .leaflet-popup{display:none;} /* info is shown in #mapInfo below the map instead of a Leaflet popup */
   .marker{position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; border-radius:50%; background:transparent; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center;}
   .marker::before{content:""; width:13px; height:13px; border-radius:50%; background:var(--accent-amber); box-shadow:0 0 0 4px rgba(242,168,60,.25); border:1.5px solid rgba(11,21,18,.6);}
   .marker.stage::before{width:16px; height:13px; border-radius:2px 2px 0 0; clip-path:polygon(50% 0%, 100% 100%, 0% 100%); background:var(--accent-teal); box-shadow:0 0 0 4px rgba(75,227,172,.22); border:none;}
@@ -589,13 +578,13 @@
   .chip{display:inline-block; cursor:pointer;}
   #mapLayerToggles .chip{opacity:.45;}
   #mapLayerToggles .chip.active{opacity:1; border-color:var(--accent-amber); color:var(--accent-amber);}
-  #mapInner.hide-minor .marker.minor, #mapInner.hide-minor .map-label.minor{display:none;}
-  #mapInner.hide-secret .marker.secret, #mapInner.hide-secret .map-label.secret{display:none;}
-  #mapInner.hide-camp .map-label.camp{display:none;}
-  #mapInner.hide-landmark .marker.landmark, #mapInner.hide-landmark .map-label.landmark{display:none;}
   .marker.landmark::before{width:14px; height:10px; border-radius:3px 3px 0 0; background:rgba(45,168,242,.75); box-shadow:none; border:1.5px solid rgba(11,21,18,.6);}
   .marker.landmark::after{content:none;}
   .map-label.landmark{color:rgba(150,200,242,.95); font-weight:700; font-size:9px; background:rgba(11,21,18,.6); border:1px solid rgba(45,168,242,.3);}
+  /* Real amenity POIs (toilets, food, bars, water, etc.) — small emoji
+     badge, no pulse/label clutter since there can be 50+ of these. */
+  .marker.poi{width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:rgba(11,21,18,.75); border:1px solid rgba(255,255,255,.18); font-size:11px;}
+  .marker.poi::before, .marker.poi::after{content:none;}
 
   /* ===== "Add a place" markers — friend-created pins from the ＋ button,
      kept visually distinct but subtle rather than another loud colour on
