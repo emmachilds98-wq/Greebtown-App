@@ -115,6 +115,7 @@
   <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated 28 Jul, 19:39</span>
   <div class="chat-btn-wrap">
     <button type="button" class="chat-btn" id="chatOpenBtn" aria-label="Open group chat" title="Chat">💬<span class="chat-unread-badge" id="chatUnreadBadge" style="display:none;">0</span></button>
+    <button type="button" class="chat-btn" id="settingsOpenBtn" aria-label="Open settings" title="Settings">⚙️</button>
     <div class="header-last-synced" id="headerLastSynced"></div>
   </div>
 </header>
@@ -143,6 +144,8 @@
 
     <div class="card" id="homeSyncStatus"></div>
 
+    <div class="card" id="homeLocationStatus" style="padding:10px 14px;"></div>
+
     <div id="homeContextBanner"></div>
 
     <div class="card">
@@ -153,8 +156,9 @@
         <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('artists')">🎵 Lineup</a> — search or browse the full 5-day timetable, filter by day or genre, see a stage-by-stage timeline, and save acts straight to your Plan.</li>
         <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('plan')">⭐ Plan</a> — your own saved timetable: a day-by-day list, a Clashes view, a visual Timeline, and Compare to see everyone's picks side by side.</li>
         <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('mapscreen')">🗺 Map</a> — the schematic site map, the full hidden-venue directory, GPS, gate &amp; food info, and your group's shared meeting point.</li>
-        <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('discover')">✨ Discover</a> — the story so far, districts &amp; characters, sync &amp; backups, bingo, your character, the quotebook, theories, packing checklist and glossary.</li>
+        <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('discover')">✨ Discover</a> — the story so far, districts &amp; characters, bingo, your character, the quotebook, theories, packing checklist and glossary.</li>
         <li><a class="inline-link" href="javascript:void(0)" onclick="if(typeof openChatPanel==='function') openChatPanel();">💬 Chat</a> — group and 1:1 messages with whoever's synced in, from the icon top-right on any screen.</li>
+        <li><a class="inline-link" href="javascript:void(0)" onclick="if(typeof openSettingsScreen==='function') openSettingsScreen();">⚙️ Settings</a> — sync, merge duplicates, backups, location &amp; GPS and notifications, from the cog icon top-right under Chat.</li>
       </ul>
     </div>
 
@@ -244,7 +248,7 @@ Meet at the clock tower if separated"></textarea>
 
     <div class="card">
       <h3>⚙️ Settings</h3>
-      <p class="empty-note">Backups, resetting this device — full options in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings','discover')">Discover</a>.</p>
+      <p class="empty-note">Sync, merge, backups, location &amp; GPS, notifications and resetting this device — all under the <strong>⚙️ Settings</strong> button, top right under the chat icon. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings','settingsscreen')">Open Settings</a>.</p>
     </div>
   </section>
 
@@ -262,7 +266,7 @@ Meet at the clock tower if separated"></textarea>
       <button data-today-jump="mapscreen">🗺 Map</button>
       <button data-today-jump="plan">🎵 Plan</button>
       <button id="todayQuickClashes">⚡ Clashes</button>
-      <button data-today-jump="discover" id="todayQuickFriends">📍 Friends</button>
+      <button id="todayQuickFriends" onclick="jumpToId('jumpFriendStatus','settingsscreen')">📍 Friends</button>
       <button id="todayQuickSearch">🔎 Search</button>
     </div>
   </section>
@@ -331,7 +335,7 @@ Meet at the clock tower if separated"></textarea>
 
     <div class="stagelist" id="planPersonTabs" style="display:none; margin-bottom:12px;"></div>
     <p class="empty-note" id="planPersonNote" style="display:none; margin-bottom:10px;"></p>
-    <p class="empty-note" style="margin-bottom:10px; font-size:12px;">Duplicate name? <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('mergeAllDuplicatesBtn','discover')">Merge your records here →</a></p>
+    <p class="empty-note" style="margin-bottom:10px; font-size:12px;">Duplicate name? <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('mergeAllDuplicatesBtn','settingsscreen')">Merge your records here →</a></p>
 
     <div class="viewtoggle">
       <button class="active" id="viewListBtn">List</button>
@@ -555,6 +559,12 @@ Meet at the clock tower if separated"></textarea>
     <h2 style="margin-bottom:14px;">Discover</h2>
     <p class="empty-note" style="margin-bottom:10px;">A dashboard into everything that isn't the lineup or map — pick a category below, or check what's new for you first.</p>
 
+    <div class="search-row">
+      <input type="text" id="discoverGlobalSearch" placeholder="Search everything — artists, venues, districts, characters, glossary…">
+      <button class="ghost" id="clearDiscoverSearchBtn" style="display:none;">Clear</button>
+    </div>
+    <div id="discoverSearchResults"></div>
+
     <div id="discoverForYou"></div>
 
     <div id="discoverNav" style="margin-bottom:4px;">
@@ -592,17 +602,18 @@ Meet at the clock tower if separated"></textarea>
           <button data-jump="jumpPacking">🎒 Packing checklist</button>
           <button data-jump="jumpLogistics">🗓 Logistics</button>
           <button data-jump="jumpGlossary">📔 Glossary</button>
-          <button data-jump="jumpFriendStatus">📍 Where's everyone</button>
+          <button data-jump="jumpFriendStatus" data-jump-tab="settingsscreen">📍 Location &amp; GPS</button>
         </div>
       </div>
       <div class="discover-cat">
-        <div class="discover-cat-title">☁️ Sync &amp; data</div>
+        <div class="discover-cat-title">⚙️ Settings</div>
         <div class="venue-filters">
-          <button data-jump="jumpSync">🤝 Sync</button>
-          <button data-jump="jumpSyncDiagnostics">🔧 Sync diagnostics</button>
-          <button data-jump="jumpBackupHistory">🗄️ Backup history</button>
-          <button data-jump="jumpDeviceHandoff">📱 Using someone else's phone</button>
-          <button data-jump="jumpSettings">⚙️ Settings &amp; backups</button>
+          <button data-jump="jumpSync" data-jump-tab="settingsscreen">🤝 Sync</button>
+          <button data-jump="jumpSyncDiagnostics" data-jump-tab="settingsscreen">🔧 Sync diagnostics</button>
+          <button data-jump="jumpBackupHistory" data-jump-tab="settingsscreen">🗄️ Backup history</button>
+          <button data-jump="jumpDeviceHandoff" data-jump-tab="settingsscreen">📱 Using someone else's phone</button>
+          <button data-jump="jumpNotifications" data-jump-tab="settingsscreen">🔔 Notifications</button>
+          <button data-jump="jumpSettings" data-jump-tab="settingsscreen">⚙️ Settings &amp; backups</button>
         </div>
       </div>
     </div>
@@ -944,8 +955,25 @@ Talk to an actor in character
     </div>
     <div id="glossaryList"></div>
 
+    <div class="card">
+      <h3>⚙️ Sync, backups &amp; location</h3>
+      <p class="empty-note">These have moved — find Sync, merge duplicate tabs, backup history, device handoff, location &amp; GPS and notifications all together under the <strong>⚙️ Settings</strong> button, top right under the chat icon.</p>
+      <button class="action" onclick="if(typeof openSettingsScreen==='function') openSettingsScreen();">⚙️ Open Settings</button>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="settingsscreen" class="screen">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <button type="button" class="ghost" id="settingsBackBtn" aria-label="Back">← Back</button>
+      <div>
+        <div class="eyebrow">Preferences &amp; data</div>
+        <h2 style="margin:0;">⚙️ Settings</h2>
+      </div>
+    </div>
+
     <div class="card" id="jumpFriendStatus">
-      <h3>📍 Where's everyone?</h3>
+      <h3>📍 Location &amp; GPS</h3>
       <p>A quick status, not live tracking — set where you are and it's visible to the group next sync. Manual by default; GPS is available below if you'd rather it update itself.</p>
       <div class="field"><label>Where are you?</label>
         <select id="statusLocationSelect">
@@ -958,6 +986,13 @@ Talk to an actor in character
       <label class="gps-toggle-row"><input type="checkbox" id="locationReminderToggle">Remind me on Home if I haven't updated my location in 2+ hours (a nudge in the app, not a push notification — only works while you have it open)</label>
       <p class="empty-note" id="statusFeedbackNote" style="margin-top:6px;"></p>
       <div id="friendStatusList" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card" id="jumpNotifications">
+      <h3>🔔 Notifications</h3>
+      <p class="empty-note">Chat message notifications — on while this tab/PWA is open, same toggle as the 🔔 icon inside Chat itself.</p>
+      <button class="action" id="settingsNotifyBtn">🔔 Notifications</button>
+      <p class="empty-note" id="settingsNotifyNote" style="margin-top:6px;"></p>
     </div>
 
     <div class="daygroup">☁️ Sync &amp; data</div>

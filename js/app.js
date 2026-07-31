@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v204";
-const APP_BUILD_TIME = "2026-07-31T14:51:04Z";
+const APP_CACHE_VERSION = "v205";
+const APP_BUILD_TIME = "2026-07-31T15:16:04Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -815,6 +815,42 @@ tabs.forEach(tab=>{
 });
 
 // ===============================
+// SETTINGS SPACE — a dedicated space for Sync, merge, backups, device
+// handoff, Location & GPS and Notifications, reached from the ⚙️ cog
+// button in the header (under Chat) rather than living scattered inside
+// Discover. Deliberately NOT one of the bottom tabbar's .tab buttons —
+// it's a slide-to space you leave via the existing floating back button
+// (same navReturnStack/doBackNav plumbing every other jumpToId/jumpToTab
+// call already uses), not a 7th permanent tab.
+// ===============================
+function openSettingsScreen(focusId){
+  const activeTab = document.querySelector(".tab.active");
+  if(activeTab){
+    navReturnStack.push({ tab: activeTab.dataset.tab, scrollY: window.scrollY });
+    updateNavBackButton();
+  }
+  screens.forEach(s=>s.classList.remove("active"));
+  tabs.forEach(t=>t.classList.remove("active"));
+  const el = document.getElementById("settingsscreen");
+  if(el) el.classList.add("active");
+  if(typeof renderSettingsNotifyBtn === "function") renderSettingsNotifyBtn();
+  window.scrollTo(0, 0);
+  if(document.scrollingElement) document.scrollingElement.scrollTop = 0;
+  if(focusId){
+    requestAnimationFrame(()=>{
+      const target = document.getElementById(focusId);
+      if(target) target.scrollIntoView({ behavior:"smooth", block:"center" });
+    });
+  }
+}
+(function wireSettingsScreen(){
+  const openBtn = document.getElementById("settingsOpenBtn");
+  if(openBtn) openBtn.onclick = ()=> openSettingsScreen();
+  const backBtn = document.getElementById("settingsBackBtn");
+  if(backBtn) backBtn.onclick = doBackNav;
+})();
+
+// ===============================
 // DISCOVER TOP NAVIGATOR — jump straight to any section instead of a
 // long blind scroll, since it's grown to a lot of cards.
 // ===============================
@@ -823,7 +859,7 @@ document.querySelectorAll("#discoverNav button").forEach(btn=>{
     const tab = btn.dataset.jumpTab;
     if(tab && typeof jumpToId === "function"){ jumpToId(btn.dataset.jump, tab); return; }
     const target = document.getElementById(btn.dataset.jump);
-    if(target) target.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(target) target.scrollIntoView({ behavior:"smooth", block:"center" });
   };
 });
 
@@ -835,7 +871,7 @@ document.querySelectorAll("#discoverNav button").forEach(btn=>{
 document.querySelectorAll("#mapNav button").forEach(btn=>{
   btn.onclick = ()=>{
     const target = document.getElementById(btn.dataset.jump);
-    if(target) target.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(target) target.scrollIntoView({ behavior:"smooth", block:"center" });
   };
 });
 
@@ -4505,7 +4541,7 @@ function renderPlanOwnerSelector(){
   const owners = activeOwnersList();
   if(people.length < 2){
     note.style.display = "";
-    note.textContent = "Nobody's synced in yet — a teammate's picks will show up as another chip here once they have. Pick your name in Discover if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
+    note.textContent = "Nobody's synced in yet — a teammate's picks will show up as another chip here once they have. Pick your name in Settings if you haven't already, and it syncs automatically whenever you've both got signal; no signal, there's a manual backup code there too.";
   } else if(owners.length === 1 && owners[0] !== "mine"){
     // "Merge into mine" exists for exactly the situation this session
     // has hit more than once: a device losing track of its own
@@ -4990,7 +5026,7 @@ function renderPlanCompare(){
   const allPeople = comparePeopleList();
 
   if(allPeople.length < 2){
-    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — pick your name in Discover and it syncs automatically whenever you've both got signal (no signal, there's a manual backup code there too). Once they've synced, their picks show up here alongside yours.</p></div>`;
+    box.innerHTML = `<div class="card"><p class="empty-note">Sync with a friend first to compare plans — pick your name in Settings and it syncs automatically whenever you've both got signal (no signal, there's a manual backup code there too). Once they've synced, their picks show up here alongside yours.</p></div>`;
     return;
   }
 
@@ -5267,7 +5303,7 @@ function renderPlanTimeline(){
     head.onclick = (e)=>{
       e.stopPropagation();
       const list = document.getElementById("planActivitiesList");
-      if(list) list.scrollIntoView({ behavior:"smooth", block:"start" });
+      if(list) list.scrollIntoView({ behavior:"smooth", block:"center" });
     };
   });
   // Joined-copy items (isJoinedCopy) only exist to plot a second block on
@@ -5716,7 +5752,7 @@ function renderHomeContextBanner(){
   `;
   if(showLocationReminder){
     const updateLink = banner.querySelector("#hcbLocationUpdateLink");
-    if(updateLink) updateLink.onclick = ()=> jumpToId("jumpFriendStatus", "discover");
+    if(updateLink) updateLink.onclick = ()=> jumpToId("jumpFriendStatus", "settingsscreen");
     const dismissLink = banner.querySelector("#hcbLocationDismissLink");
     if(dismissLink) dismissLink.onclick = ()=>{ Store.set("locationReminderDismissedAt", Date.now()); renderHomeContextBanner(); };
   }
@@ -6963,7 +6999,7 @@ loadMap();
 function mapQuickAction(kind){
   const jumpTo = (id)=>{
     const el = document.getElementById(id);
-    if(el) requestAnimationFrame(()=> el.scrollIntoView({ behavior:"smooth", block:"start" }));
+    if(el) requestAnimationFrame(()=> el.scrollIntoView({ behavior:"smooth", block:"center" }));
   };
   const showMapInfo = (html)=>{
     if(mapInfo) mapInfo.innerHTML = html;
@@ -6995,7 +7031,7 @@ function mapQuickAction(kind){
 
   if(kind === "friends"){
     const entries = (typeof friendStatusEntries === "function") ? friendStatusEntries() : [];
-    const list = entries.length && typeof statusLineHTML === "function" ? entries.map(statusLineHTML).join("") : `<p class="empty-note">No one's set a status yet — see Discover's "Where's everyone?" card.</p>`;
+    const list = entries.length && typeof statusLineHTML === "function" ? entries.map(statusLineHTML).join("") : `<p class="empty-note">No one's set a status yet — see Settings' "Location & GPS" card.</p>`;
     showMapInfo(`<div class="card"><h3>📍 Friends</h3>${list}</div>`);
     return;
   }
@@ -7236,7 +7272,11 @@ renderVenueTable();
 // into view. Every screen is always in the DOM (hidden via CSS, not
 // removed), so no delay is needed between the two.
 function jumpToId(id, tab){
-  if(tab) jumpToTab(tab);
+  // The Settings space isn't a bottom-tabbar tab (see openSettingsScreen
+  // above) — jumpToTab(tab) would fail to find a matching .tab button for
+  // it, so route there separately instead.
+  if(tab === "settingsscreen"){ if(typeof openSettingsScreen === "function") openSettingsScreen(); }
+  else if(tab) jumpToTab(tab);
   // Settings folds up by default (see setupSettingsToggle()) — jumping
   // to it from a link elsewhere should open it, not scroll to what'd
   // look like an empty card.
@@ -7247,7 +7287,7 @@ function jumpToId(id, tab){
   }
   requestAnimationFrame(()=>{
     const el = document.getElementById(id);
-    if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(el) el.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 }
 
@@ -7287,7 +7327,7 @@ function jumpToDistrictOnMap(name){
       setTimeout(()=> marker.classList.remove("jump-highlight"), 2400);
     }
     const info = document.getElementById("mapInfo");
-    if(info) info.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(info) info.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 }
 
@@ -7295,7 +7335,7 @@ function jumpToGlossaryTerm(term){
   jumpToTab("discover");
   requestAnimationFrame(()=>{
     const box = document.getElementById("jumpGlossary");
-    if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(box) box.scrollIntoView({ behavior:"smooth", block:"center" });
     if(glossarySearch){ glossarySearch.value = term; glossarySearch.dispatchEvent(new Event("input")); }
   });
 }
@@ -7304,7 +7344,7 @@ function jumpToCharacter(name){
   jumpToTab("discover");
   requestAnimationFrame(()=>{
     const box = document.getElementById("jumpCharacters");
-    if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(box) box.scrollIntoView({ behavior:"smooth", block:"center" });
     if(characterSearch){ characterSearch.value = name; characterSearch.dispatchEvent(new Event("input")); }
   });
 }
@@ -7408,7 +7448,7 @@ function jumpToDirectoryType(type){
   renderVenueTable();
   requestAnimationFrame(()=>{
     const dir = document.getElementById("jumpDirectory");
-    if(dir) dir.scrollIntoView({ behavior:"smooth", block:"start" });
+    if(dir) dir.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 }
 
@@ -7427,6 +7467,123 @@ function jumpToStageDirectory(stageName){
     if(row) row.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 }
+
+// ===============================
+// DISCOVER GLOBAL SEARCH — one search box reaching across Lineup artists,
+// the full venue directory and Discover's own sections/characters/
+// glossary/districts, instead of three separate searches you have to
+// already know which screen to open first. Only wired via oninput (never
+// called at load time), so it's safe to reference things declared much
+// further down this file (characters/glossary/GUIDE_DISTRICT_NAMES) —
+// by the time anyone can type into it, the whole script has already run.
+// Artist/venue hits get a capped preview (DISCOVER_SEARCH_MAX_PER_GROUP)
+// with a "See all N" link into that screen's own full search for the
+// rest, rather than dumping hundreds of rows into Discover itself.
+// ===============================
+const DISCOVER_SEARCH_MAX_PER_GROUP = 6;
+function jumpToArtistSearch(term){
+  jumpToTab("artists");
+  if(artistsView !== "list" && artistsViewListBtn) artistsViewListBtn.click();
+  artistSearch.value = term;
+  updateClearArtistSearchBtn();
+  renderArtistSearchResults();
+  window.scrollTo(0, 0);
+}
+function discoverSearchSections(){
+  return [...document.querySelectorAll("#discoverNav button[data-jump]")].map(btn=> ({
+    label: btn.textContent.trim(), jumpId: btn.dataset.jump, jumpTab: btn.dataset.jumpTab || null
+  }));
+}
+function renderDiscoverGlobalSearch(){
+  const input = document.getElementById("discoverGlobalSearch");
+  const box = document.getElementById("discoverSearchResults");
+  const clearBtn = document.getElementById("clearDiscoverSearchBtn");
+  const nav = document.getElementById("discoverNav");
+  const forYou = document.getElementById("discoverForYou");
+  if(!input || !box) return;
+  const raw = input.value.trim();
+  const term = raw.toLowerCase();
+  if(clearBtn) clearBtn.style.display = term ? "" : "none";
+  if(!term){
+    box.innerHTML = "";
+    if(nav) nav.style.display = "";
+    if(forYou) forYou.style.display = "";
+    return;
+  }
+  if(nav) nav.style.display = "none";
+  if(forYou) forYou.style.display = "none";
+
+  const artistMatches = allArtists().filter(a=>
+    a.name.toLowerCase().includes(term) || a.stage.toLowerCase().includes(term) || genreOf(a).toLowerCase().includes(term)
+  );
+  const venueMatches = fullVenueDirectory().filter(v=>
+    v.name.toLowerCase().includes(term) || (v.genre||"").toLowerCase().includes(term) ||
+    (v.near||"").toLowerCase().includes(term) || (v.info||"").toLowerCase().includes(term)
+  );
+  const sectionMatches = discoverSearchSections().filter(s=> s.label.toLowerCase().includes(term));
+  const districtMatches = (typeof GUIDE_DISTRICT_NAMES !== "undefined" ? GUIDE_DISTRICT_NAMES : []).filter(d=> d.toLowerCase().includes(term));
+  const characterMatches = (typeof characters !== "undefined" ? characters : []).filter(c=> c.name.toLowerCase().includes(term));
+  const glossaryMatches = (typeof glossary !== "undefined" ? glossary : []).filter(g=> g.term.toLowerCase().includes(term) || (g.def||"").toLowerCase().includes(term));
+
+  const artistRowsHtml = artistMatches.slice(0, DISCOVER_SEARCH_MAX_PER_GROUP).map(a=> `
+    <div class="item" style="cursor:pointer;" data-artist-jump="${escapeHtml(a.name)}">
+      <strong>${escapeHtml(a.name)}</strong> — ${escapeHtml(a.stage)}<br>
+      <small>${escapeHtml(timeLabel(a))} · ${escapeHtml(genreOf(a))}</small>
+    </div>`).join("");
+  const venueRowsHtml = venueMatches.slice(0, DISCOVER_SEARCH_MAX_PER_GROUP).map(v=> `
+    <div class="item" style="cursor:pointer;" data-venue-jump="${escapeHtml(v.name)}">
+      <strong>${escapeHtml(v.name)}</strong> — ${escapeHtml(v.type)}${v.near ? " · 📍 " + escapeHtml(v.near) : ""}<br>
+      <small>${escapeHtml((v.info||"").slice(0,90))}${(v.info||"").length > 90 ? "…" : ""}</small>
+    </div>`).join("");
+  const discoverEntries = [
+    ...sectionMatches.map(s=> ({ label: s.label, jumpId: s.jumpId, jumpTab: s.jumpTab })),
+    ...districtMatches.map(d=> ({ label: `🏙 ${d}`, district: d })),
+    ...characterMatches.slice(0, DISCOVER_SEARCH_MAX_PER_GROUP).map(c=> ({ label: `🗣 ${c.name}`, character: c.name })),
+    ...glossaryMatches.slice(0, DISCOVER_SEARCH_MAX_PER_GROUP).map(g=> ({ label: `📔 ${g.term}`, glossaryTerm: g.term }))
+  ];
+  const discoverRowsHtml = discoverEntries.map((e,i)=> `<div class="item" style="cursor:pointer;" data-discover-entry="${i}"><strong>${escapeHtml(e.label)}</strong></div>`).join("");
+
+  const groups = [];
+  if(artistRowsHtml) groups.push(`<div class="daygroup">🎵 Lineup (${artistMatches.length})</div>${artistRowsHtml}${artistMatches.length > DISCOVER_SEARCH_MAX_PER_GROUP ? `<p class="empty-note" id="discoverSearchSeeAllArtists" style="cursor:pointer;">See all ${artistMatches.length} in Lineup →</p>` : ""}`);
+  if(venueRowsHtml) groups.push(`<div class="daygroup">🕵 Directory (${venueMatches.length})</div>${venueRowsHtml}${venueMatches.length > DISCOVER_SEARCH_MAX_PER_GROUP ? `<p class="empty-note" id="discoverSearchSeeAllVenues" style="cursor:pointer;">See all ${venueMatches.length} in Directory →</p>` : ""}`);
+  if(discoverRowsHtml) groups.push(`<div class="daygroup">✨ Discover</div>${discoverRowsHtml}`);
+  box.innerHTML = groups.length ? groups.join("") : `<p class="empty-note">No matches for "${escapeHtml(raw)}".</p>`;
+
+  box.querySelectorAll("[data-artist-jump]").forEach(el=>{
+    el.onclick = ()=> jumpToArtistSearch(el.getAttribute("data-artist-jump"));
+  });
+  box.querySelectorAll("[data-venue-jump]").forEach(el=>{
+    el.onclick = ()=> jumpToStageDirectory(el.getAttribute("data-venue-jump"));
+  });
+  box.querySelectorAll("[data-discover-entry]").forEach(el=>{
+    const entry = discoverEntries[Number(el.getAttribute("data-discover-entry"))];
+    el.onclick = ()=>{
+      if(entry.district) jumpToDistrictOnMap(entry.district);
+      else if(entry.character) jumpToCharacter(entry.character);
+      else if(entry.glossaryTerm) jumpToGlossaryTerm(entry.glossaryTerm);
+      else jumpToId(entry.jumpId, entry.jumpTab);
+    };
+  });
+  const seeAllArtists = document.getElementById("discoverSearchSeeAllArtists");
+  if(seeAllArtists) seeAllArtists.onclick = ()=> jumpToArtistSearch(raw);
+  const seeAllVenues = document.getElementById("discoverSearchSeeAllVenues");
+  if(seeAllVenues) seeAllVenues.onclick = ()=> jumpToStageDirectory(raw);
+}
+(function wireDiscoverGlobalSearch(){
+  const input = document.getElementById("discoverGlobalSearch");
+  const clearBtn = document.getElementById("clearDiscoverSearchBtn");
+  if(!input) return;
+  let debounceTimer = null;
+  input.oninput = ()=>{
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(renderDiscoverGlobalSearch, 180);
+  };
+  if(clearBtn) clearBtn.onclick = ()=>{
+    input.value = "";
+    renderDiscoverGlobalSearch();
+    input.focus();
+  };
+})();
 
 function wireStageLinks(container){
   if(!container) return;
@@ -8141,8 +8298,8 @@ function updateHomeSyncStatusText(){
   }
   if(heading) heading.textContent = name ? `✅ Syncing as ${name}` : "⚠️ Pick your name to start syncing";
   if(para) para.innerHTML = name
-    ? `Syncs automatically on open, every few minutes, and whenever you pull down from the top ↓ to refresh. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> also has a manual button, any time.`
-    : `Pick who you are to start syncing — one-time, done for good on this device. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> in Discover.`;
+    ? `Syncs automatically on open, every few minutes, and whenever you pull down from the top ↓ to refresh. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','settingsscreen')">Sync</a> also has a manual button, any time.`
+    : `Pick who you are to start syncing — one-time, done for good on this device. Same picker as <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','settingsscreen')">Sync</a> in Settings.`;
 }
 
 function wireHomeSyncStatusPicker(){
@@ -8188,12 +8345,11 @@ function renderHomeSyncStatus(){
   const isOther = name && !KNOWN_CONTRIBUTORS.includes(name);
   box.innerHTML = `
     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-      <span class="tag" style="${name ? "" : "background:rgba(242,168,60,.16); color:var(--accent-amber); border-color:rgba(242,168,60,.4);"}">${name ? "Syncing" : "Set this up once"}</span>
       <h3 style="margin:0; font-size:14px;">${name ? `✅ Syncing as ${escapeHtml(name)}` : "⚠️ Pick your name to sync"}</h3>
     </div>
     <p style="margin-top:4px; font-size:12.5px;">${name
-      ? `Last synced: <strong>${formatLastSynced()}</strong> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">manual sync &amp; more</a>`
-      : `One-time pick, found &amp; restored automatically if it's synced before. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">More in Discover</a>`}</p>
+      ? `Last synced: <strong>${formatLastSynced()}</strong> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','settingsscreen')">manual sync &amp; more</a>`
+      : `One-time pick, found &amp; restored automatically if it's synced before. <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','settingsscreen')">More in Settings</a>`}</p>
     <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-top:8px;">
       <div class="field" style="margin:0; flex:1; min-width:140px;">
         <select id="homeContributorName">
@@ -8213,7 +8369,7 @@ function renderHomeSyncStatus(){
     </div>
     <div class="field" id="homeContributorOtherField" style="display:${isOther ? "" : "none"}; margin-top:8px;"><label>Your name</label><input type="text" id="homeContributorOtherInput" placeholder="Type your name"></div>
     <p class="empty-note" id="homeSyncNowNote" style="margin-top:6px;"></p>
-    <p style="margin-top:8px; font-size:12px; color:var(--text-muted);">📍 Location, friends' status &amp; using someone else's phone — all in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','discover')">Discover</a>.</p>
+    <p style="margin-top:8px; font-size:12px; color:var(--text-muted);">📍 Friends' status &amp; using someone else's phone — all in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','settingsscreen')">Settings</a>.</p>
   `;
   const sel = document.getElementById("homeContributorName");
   const otherInput = document.getElementById("homeContributorOtherInput");
@@ -8225,6 +8381,30 @@ function renderHomeSyncStatus(){
 }
 renderHomeSyncStatus();
 if(typeof updateHeaderLastSynced === "function") updateHeaderLastSynced();
+
+// Slim location prompt directly under the name/sync card — "Location &
+// GPS" itself (the full picker, GPS toggle, friend list) now lives in
+// Settings; this is just enough to show status at a glance and point
+// there, kept re-render-safe (called from renderAllFriendStatusUI, same
+// refresh point as the friend status list/bar) so it never goes stale.
+function renderHomeLocationStatus(){
+  const box = document.getElementById("homeLocationStatus");
+  if(!box) return;
+  const name = currentContributorName();
+  const myStatus = Store.get("myStatus");
+  const gpsOn = !!Store.get("gpsLocationEnabled");
+  let line;
+  if(!name){
+    line = `📍 Pick your name above, then set your location in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','settingsscreen')">Settings</a>.`;
+  } else if(myStatus && myStatus.place){
+    const stale = myStatus.updatedAt && (Date.now() - myStatus.updatedAt) > STATUS_STALE_MS;
+    line = `📍 ${gpsOn ? "GPS on — " : ""}You're at <strong>${escapeHtml(myStatus.place)}</strong>${stale ? " <span class=\"status-stale-tag\">stale</span>" : ""} · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','settingsscreen')">update</a>`;
+  } else {
+    line = `📍 Location not set — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','settingsscreen')">add it or turn on GPS</a> in Settings.`;
+  }
+  box.innerHTML = `<p class="empty-note" style="margin:0; font-size:12.5px;">${line}</p>`;
+}
+renderHomeLocationStatus();
 
 // The "how data/sync/updates work" explainer only needs a full read
 // once — collapses to a one-liner after the first Home visit rather
@@ -8238,11 +8418,11 @@ function renderHomeInfoCard(){
       <span class="tag">Read this once</span>
       <h3>💾 Your data, sync &amp; updates</h3>
       <p>Everything you add saves itself to this device the instant you type or tap — no save button. It also backs up to the cloud within seconds of any change to your saved artists, bingo card or character, not just on a periodic sync — so even if this device's local copy is ever lost, the cloud almost always has the latest version.</p>
-      <p>Once you've picked your name in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a>, this phone syncs itself automatically every time you open the app with signal, every few minutes while it's open, and whenever it comes back to the foreground — no button needed. A "Sync now" button is there too for an instant one mid-session.</p>
+      <p>Once you've picked your name in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','settingsscreen')">Sync</a>, this phone syncs itself automatically every time you open the app with signal, every few minutes while it's open, and whenever it comes back to the foreground — no button needed. A "Sync now" button is there too for an instant one mid-session.</p>
       <p>Shared things — theories, hidden-venue finds, quotebook entries, live sightings, district notes, get-involved ticks, found socials, landmarks — combine into one pool everyone sees (Discover's "All notes"). Your Plan, bingo card and character stay yours — sync never merges anyone else's into them — but everyone else's land in their own named tab right next to yours, on the Plan, Bingo and My Character screens, so you can see what your friends have without it touching your own.</p>
-      <p><strong>Using more than one phone/browser as the same person?</strong> Each one gets tracked separately behind the scenes, so a fresh device (reinstalled, cleared, or just a different browser) can look "empty" at first. Picking your name on it now checks for your existing synced data automatically and pulls it straight in — and if a duplicate ever shows up anyway, <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> has a "Merge all my duplicate tabs" button that fixes it permanently, any time. Nothing gets removed or overwritten by any of this — it only ever adds.</p>
-      <p>If a sync ever looks wrong — something missing, or a device you didn't expect — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','discover')">Backup history</a> in Discover keeps snapshots of your own data (automatic every 20 min, or tap "Back up now" for a permanent one before doing anything risky) that you can step back to.</p>
-      <p>Want just your own stuff backed up locally too? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings','discover')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
+      <p><strong>Using more than one phone/browser as the same person?</strong> Each one gets tracked separately behind the scenes, so a fresh device (reinstalled, cleared, or just a different browser) can look "empty" at first. Picking your name on it now checks for your existing synced data automatically and pulls it straight in — and if a duplicate ever shows up anyway, <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','settingsscreen')">Sync</a> has a "Merge all my duplicate tabs" button that fixes it permanently, any time. Nothing gets removed or overwritten by any of this — it only ever adds.</p>
+      <p>If a sync ever looks wrong — something missing, or a device you didn't expect — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','settingsscreen')">Backup history</a> in Settings keeps snapshots of your own data (automatic every 20 min, or tap "Back up now" for a permanent one before doing anything risky) that you can step back to.</p>
+      <p>Want just your own stuff backed up locally too? Grab your personal copy from <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings','settingsscreen')">Settings</a>. Want a combined file to hand round once everyone's synced in? Same place — the shareable group copy leaves out everyone's personal bingo card, character and notes, so it's safe to actually share.</p>
       <p>The app itself updates quietly in the background whenever you're online, and keeps working fully offline once it's loaded once — updates never touch anything you've saved.</p>
       <button class="ghost" id="collapseHomeInfoBtn" style="margin-top:10px;">Got it, don't show this in full again</button>
     `;
@@ -8251,7 +8431,7 @@ function renderHomeInfoCard(){
   } else {
     box.innerHTML = `
       <h3 style="margin-bottom:0;">💾 Your data, sync &amp; updates</h3>
-      <p style="margin-top:6px;">Saves itself automatically, backs up to the cloud within seconds, syncs itself once you've picked a name — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','discover')">Sync</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','discover')">Backup history</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings','discover')">Settings</a> · <a class="inline-link" href="javascript:void(0)" id="expandHomeInfoLink">full explanation</a></p>
+      <p style="margin-top:6px;">Saves itself automatically, backs up to the cloud within seconds, syncs itself once you've picked a name — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSync','settingsscreen')">Sync</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpBackupHistory','settingsscreen')">Backup history</a> · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpSettings','settingsscreen')">Settings</a> · <a class="inline-link" href="javascript:void(0)" id="expandHomeInfoLink">full explanation</a></p>
     `;
     const expandLink = document.getElementById("expandHomeInfoLink");
     if(expandLink) expandLink.onclick = ()=>{ Store.set("seenHomeInfoCard", false); renderHomeInfoCard(); };
@@ -8561,6 +8741,7 @@ function renderAllFriendStatusUI(){
   renderFriendStatusList("friendStatusList");
   renderFriendStatusList("homeFriendStatusList");
   renderFriendStatusBar();
+  if(typeof renderHomeLocationStatus === "function") renderHomeLocationStatus();
 }
 
 // Shared by Discover's status card and Home's own copy of it — Home
@@ -9858,7 +10039,7 @@ wireSwitchBackControl("handoffSwitchBackBox", "handoffSwitchBackLabel", "handoff
 async function runManualSync(btn, note){
   const haveName = !!currentContributorName();
   if(!currentRoomCode()){ if(note) note.textContent = "Type your group's room code above first."; return; }
-  if(!getFirestoreDb()){ if(note) note.textContent = "Cloud sync isn't available right now — use the manual code box in Discover instead."; return; }
+  if(!getFirestoreDb()){ if(note) note.textContent = "Cloud sync isn't available right now — use the manual code box in Settings instead."; return; }
   if(btn) btn.disabled = true;
   if(note) note.textContent = "Syncing…";
   try{
@@ -10321,7 +10502,7 @@ async function sendChatMessage(thread, text){
   const db = getFirestoreDb();
   const room = currentRoomCode();
   const name = currentContributorName();
-  if(!db || !room || !name) throw new Error("Pick who you are (Discover → Sync) before chatting.");
+  if(!db || !room || !name) throw new Error("Pick who you are (Settings → Sync) before chatting.");
   const deviceId = ensureDeviceId();
   await db.collection("rooms").doc(room).collection("chatMessages").add({
     thread, text: trimmed.slice(0, 2000), fromName: name, fromDeviceId: deviceId, ts: Date.now()
@@ -10386,6 +10567,34 @@ async function toggleChatNotifications(){
   Store.set(CHAT_NOTIFY_KEY, perm === "granted");
   return perm === "granted";
 }
+
+// Settings' own notifications card — a second way to reach the exact
+// same toggle as the 🔔 icon inside Chat (renderChatThreadList's
+// chatNotifyBtn), not a separate setting, so the two can never disagree.
+function renderSettingsNotifyBtn(){
+  const btn = document.getElementById("settingsNotifyBtn");
+  const note = document.getElementById("settingsNotifyNote");
+  if(!btn) return;
+  if(!chatNotificationsSupported()){
+    btn.disabled = true;
+    btn.textContent = "🔕 Not supported on this browser";
+    return;
+  }
+  const on = chatNotificationsEnabled();
+  btn.disabled = false;
+  btn.textContent = on ? "🔔 Notifications on — tap to turn off" : "🔕 Notifications off — tap to turn on";
+  if(note) note.textContent = "Only fires while this tab/PWA is open — not a true closed-app push.";
+}
+(function wireSettingsNotifyBtn(){
+  const btn = document.getElementById("settingsNotifyBtn");
+  if(!btn) return;
+  btn.onclick = ()=> toggleChatNotifications().then(()=>{
+    if(!Notification || Notification.permission !== "denied"){ renderSettingsNotifyBtn(); return; }
+    alert("Notifications are blocked for this site in your browser settings — allow them there, then try again.");
+    renderSettingsNotifyBtn();
+  });
+  renderSettingsNotifyBtn();
+})();
 function notifyNewChatMessage(msg){
   if(!chatNotificationsEnabled()) return;
   if(msg.thread === chatOpenThread && document.getElementById("chatPanel")) return; // already looking at this exact thread
@@ -10536,7 +10745,7 @@ function renderChatThreadList(){
       <button type="button" class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">✕</button>
     </div>
     <div class="chat-thread-list">${rows.join("")}</div>
-    ${!me ? `<p class="empty-note" style="padding:0 16px 14px;">Pick who you are in Discover → Sync to start 1:1 chats — you can still read and send in Everyone without it.</p>` : ""}
+    ${!me ? `<p class="empty-note" style="padding:0 16px 14px;">Pick who you are in Settings → Sync to start 1:1 chats — you can still read and send in Everyone without it.</p>` : ""}
   `;
   document.getElementById("chatCloseBtn").onclick = closeChatPanel;
   const notifyBtn = document.getElementById("chatNotifyBtn");

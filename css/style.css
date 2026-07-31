@@ -120,7 +120,17 @@
      stacked full-width fields instead, which can never run out of room
      regardless of how wide any given browser insists on rendering the
      control. */
-  .time-row{display:flex; flex-direction:column; gap:2px;}
+  .time-row{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  /* The min-width:auto gotcha strikes a third time, on the CROSS axis
+     this time: .time-row's children are flex items too (just stacked
+     in a column instead of a row), and without min-width:0 here as
+     well, a child whose own content wants to be wider than the
+     container (input[type=time]'s native control again) can still
+     force THIS box wider than .time-row itself rather than being
+     clamped to it — which is exactly how the stacked fields were still
+     overhanging the card's right edge even after max-width/overflow
+     were added to the input itself. */
+  .time-row > .field{min-width:0;}
   /* Checkbox for flagging a time edit as an official Boomtown change
      rather than a personal workaround — see applyOfficialTimeCorrection.
      align-items:flex-start (not center) since the label text usually
