@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v191";
-const APP_BUILD_TIME = "2026-07-31T09:46:37Z";
+const APP_CACHE_VERSION = "v192";
+const APP_BUILD_TIME = "2026-07-31T09:52:25Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -42,6 +42,19 @@ let groupDecisionsCollapsed = true;
 // check against myStatus.updatedAt, re-evaluated every time this banner
 // re-renders (load, every 60s tick, and on visibilitychange).
 const LOCATION_REMINDER_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+// Used by the LOCAL CHAT feature (defined much further down, see its own
+// section comment there for why everything else in that block is safe to
+// keep local) — these three specifically have to live up here instead.
+// renderHomeFriendActivity()'s own load-time call far below reaches
+// totalUnreadCount() -> allMyThreadIds()/unreadCountForThread(), which
+// touch CHAT_THREAD_GROUP, chatMessagesCache and chatPresenceCache before
+// the chat section's own declarations would otherwise have run — same
+// TDZ-safety reason as everything else in this cluster (this one bit
+// Greebtown for real: ReferenceError on CHAT_THREAD_GROUP at load).
+const CHAT_THREAD_GROUP = "group";
+let chatMessagesCache = [];
+let chatPresenceCache = {}; // deviceId -> {displayName, lastActiveAt, reads}
 
 (function renderBuildStatusPill(){
   const pill = document.getElementById("buildStatusPill");
@@ -9871,14 +9884,17 @@ document.addEventListener("visibilitychange", ()=>{
 // group, worth knowing if you ever say something you wouldn't want a
 // stranger with the code to see.
 //
-// Every const/let below is declared here, not further up the file, since
-// nothing earlier in this file's load-time (synchronous, top-level) call
-// chain reaches any of it — this whole feature is self-contained and
+// Most of the const/let below is declared here, not further up the file,
+// since nothing earlier in this file's load-time (synchronous, top-level)
+// call chain reaches it — this feature is otherwise self-contained and
 // only ever called from its own init calls at the bottom of this block,
 // its own onSnapshot callbacks, or DOM event handlers wired within it.
+// Three exceptions — CHAT_THREAD_GROUP, chatMessagesCache and
+// chatPresenceCache — are declared up near the top of the file instead,
+// because renderHomeFriendActivity()'s load-time call does reach them via
+// totalUnreadCount(); see the comment up there for the chain.
 // See CLAUDE.md's TDZ rule for why that check matters here.
 // ===============================
-const CHAT_THREAD_GROUP = "group";
 const CHAT_HEARTBEAT_MS = 90 * 1000;
 const CHAT_ONLINE_MS = 150 * 1000; // a bit over one missed heartbeat before flipping to "offline"
 const CHAT_MESSAGE_FETCH_LIMIT = 500;
@@ -9892,8 +9908,6 @@ const CHAT_PRUNE_MIN_INTERVAL_MS = 30 * 60 * 1000;
 // onSnapshot update that triggers it.
 const CHAT_NOTIFY_KEY = "chatNotificationsEnabled";
 
-let chatMessagesCache = [];
-let chatPresenceCache = {}; // deviceId -> {displayName, lastActiveAt, reads}
 let chatOpenThread = null; // null = showing the thread list; else the open thread's id
 let chatOpenThreadLabel = null;
 let chatMessagesUnsub = null;
