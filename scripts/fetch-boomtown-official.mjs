@@ -132,7 +132,23 @@ async function main() {
     // Mask immediately, before it can land in any log line.
     console.log(`::add-mask::${refreshTokenOut}`);
     console.log("Refresh token rotated by Google — persisting the new value.");
-    await rotateGithubSecret("BOOMTOWN_REFRESH_TOKEN", refreshTokenOut);
+    // Best-effort, same as rotateGithubSecret()'s own stated design (it
+    // already no-ops gracefully when GH_SECRETS_PAT/GITHUB_REPOSITORY
+    // aren't set) — but a PAT that's *present* and simply lacks the
+    // repo's "Secrets: write" permission throws instead of skipping, and
+    // that throw was going uncaught here, aborting the whole script
+    // before it ever reached fetchTimetable() below. This run's actual
+    // job — pulling the current lineup — must not depend on secret
+    // rotation succeeding: this device already has the fresh idToken in
+    // memory and can fetch with it regardless of whether the rotated
+    // refresh token made it back to the repo secret for NEXT time.
+    try {
+      await rotateGithubSecret("BOOMTOWN_REFRESH_TOKEN", refreshTokenOut);
+    } catch (err) {
+      console.warn(
+        `Couldn't persist rotated refresh token (non-fatal, continuing with this run's fetch): ${err.message}`
+      );
+    }
   } else {
     console.log("Refresh token unchanged this exchange.");
   }
