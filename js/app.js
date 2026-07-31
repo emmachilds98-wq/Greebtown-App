@@ -11,14 +11,23 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v182";
-const APP_BUILD_TIME = "2026-07-31T02:41:28Z";
+const APP_CACHE_VERSION = "v183";
+const APP_BUILD_TIME = "2026-07-31T02:52:39Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
 // call chain, same TDZ-safety reason as STATUS_STALE_MS/_firestoreDb.
 let groupDecisionsExpanded = false;
 const GROUP_DECISIONS_CAP = 4;
+
+// The fixed roster of expected names (see "WHO'S USING THIS DEVICE"
+// further down for the actual picker UI) — moved all the way up here,
+// not just near that section, because personColorFor() (see the PERSON
+// IDENTITY COLOUR section further down) needs a stable index into this
+// array for every known person's colour, and buildTimelineHTML() —
+// reachable from renderSchedule()'s load-time call far below — can
+// reach personColorFor() before that section would otherwise run.
+const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea","Katelyn"];
 // Collapsed by default — Group decisions used to sit permanently full-
 // height above Compare's own list, effectively hiding it. Starts
 // collapsed to a one-line summary so Compare is visible without an
@@ -595,6 +604,12 @@ let suppressNavClear = false;
 // behave, and avoids restoring a scroll offset that no longer makes
 // sense after the page's own content has changed shape.
 let tabScrollPositions = {};
+// Double-tapping a bottom-nav tab (two taps on the same tab within this
+// window, whether or not it was already the active tab) scrolls to top —
+// on top of, not instead of, the floating "back to top" button above and
+// the tab-switch scroll-memory restore below.
+let lastTabTapTime = {};
+const DOUBLE_TAP_TOP_MS = 400;
 
 // Floating, drag-to-move button — same pattern as "Back to top" below
 // (own remembered position, own localStorage key), not a fixed header
@@ -718,6 +733,9 @@ function doBackNav(){
 
 tabs.forEach(tab=>{
   tab.onclick = ()=>{
+    const now = Date.now();
+    const isDoubleTap = lastTabTapTime[tab.dataset.tab] && (now - lastTabTapTime[tab.dataset.tab] < DOUBLE_TAP_TOP_MS);
+    lastTabTapTime[tab.dataset.tab] = now;
     if(!suppressNavClear){ navReturnStack = []; updateNavBackButton(); }
     suppressNavClear = false;
     // Remember where you were on the tab you're leaving, before
@@ -729,9 +747,14 @@ tabs.forEach(tab=>{
     tabs.forEach(t=>t.classList.remove("active"));
     document.getElementById(tab.dataset.tab).classList.add("active");
     tab.classList.add("active");
-    const restoreY = tabScrollPositions[tab.dataset.tab] || 0;
-    window.scrollTo(0, restoreY);
-    if(document.scrollingElement) document.scrollingElement.scrollTop = restoreY;
+    if(isDoubleTap){
+      tabScrollPositions[tab.dataset.tab] = 0;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      const restoreY = tabScrollPositions[tab.dataset.tab] || 0;
+      window.scrollTo(0, restoreY);
+      if(document.scrollingElement) document.scrollingElement.scrollTop = restoreY;
+    }
     // Switching tabs changes which timeline box (if any) is actually
     // on-screen, but doesn't itself fire a scroll event when restoreY
     // matches the outgoing tab's position — repositionAllTimelineScrollThumbs()
@@ -3449,7 +3472,7 @@ function buildTimelineHTML(items, opts){
       // read as clearly different at a glance, kept compact since blocks
       // can be as narrow as 60px.
       const ownerBadge = (opts.showOwnerBadges && p._owners && p._owners.length)
-        ? `<span class="tb-owners" title="${escapeHtml(p._owners.join(", "))}">${p._owners.map(o=>`<span class="tb-owner-dot" style="background:${personColor(o)}">${escapeHtml((o[0]||"?").toUpperCase())}</span>`).join("")}</span>`
+        ? `<span class="tb-owners" title="${escapeHtml(p._owners.join(", "))}">${p._owners.map(o=>`<span class="tb-owner-dot" style="background:${personColorFor(o)}">${escapeHtml((o[0]||"?").toUpperCase())}</span>`).join("")}</span>`
         : "";
       return `<div class="${cls}" style="left:${left}px; width:${width}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
@@ -4576,14 +4599,45 @@ function comparePeopleList(){
   return people;
 }
 
-// Deterministic colour per person, by their stable position in
-// comparePeopleList() — index-based (not a name hash) so two people never
-// collide just because their names happen to start with the same letter
-// (e.g. "Dana" and "Dave" both showing initial "D").
-const PERSON_BADGE_COLORS = ["#4be3ac","#2f9bff","#f2a83c","#e2836a","#c792ea","#f06292","#ffd54f"];
-function personColor(label){
-  const idx = comparePeopleList().findIndex(p=>p.label === label);
-  return PERSON_BADGE_COLORS[(idx === -1 ? 0 : idx) % PERSON_BADGE_COLORS.length];
+// ===============================
+// PERSON IDENTITY COLOUR — one stable colour per person, used everywhere
+// a person needs identifying: chat, friend locations, and timeline/plan
+// owner badges (this replaces the three separate, inconsistent things
+// that used to exist here: an index-into-comparePeopleList() colour for
+// timeline badges, a hash-of-deviceId emoji for friend status, and a
+// hash-of-name emoji for chat — all now just personColorFor()).
+//
+// Keyed by NAME, not deviceId — same "identity is a name, not a device"
+// model the rest of the app already uses (friendStatusEntries/
+// chatContactNames dedupe by name too), so a person's colour survives a
+// reinstall, a second device, or a browser switch, unlike the old
+// index-into-comparePeopleList() approach: that order came from
+// Object.keys() over locally-synced data, which genuinely could — and
+// did — put the same person at a different index (and therefore a
+// different colour) on two different phones.
+//
+// Known roster members (KNOWN_CONTRIBUTORS) get a fixed slot by
+// position — guaranteed no two people on the known roster ever share a
+// colour. Anyone else (a custom "Other…" name) falls back to a stable
+// hash into the same palette, which is sized past the known roster
+// specifically so that fallback has room to be distinct too for a group
+// that can grow to ~10.
+const PERSON_COLOR_PALETTE = ["#4be3ac","#2f9bff","#f2a83c","#e2836a","#c792ea","#f06292","#ffd54f","#5ac8c8","#ff8a65","#90caf9"];
+function personColorFor(name){
+  const norm = (name || "").trim().toLowerCase();
+  const knownIdx = KNOWN_CONTRIBUTORS.findIndex(n=> n.toLowerCase() === norm);
+  if(knownIdx !== -1) return PERSON_COLOR_PALETTE[knownIdx % PERSON_COLOR_PALETTE.length];
+  let hash = 0;
+  for(let i=0;i<norm.length;i++) hash = (hash * 31 + norm.charCodeAt(i)) >>> 0;
+  return PERSON_COLOR_PALETTE[hash % PERSON_COLOR_PALETTE.length];
+}
+// Small filled circle in a person's colour — the shared visual unit for
+// "this belongs to/came from that person" wherever a compact identity
+// marker is needed (friend status lines, chat contact rows) as opposed
+// to the lettered tb-owner-dot badges used on timeline blocks.
+function personDotHtml(name, sizePx){
+  const size = sizePx || 10;
+  return `<span style="display:inline-block; width:${size}px; height:${size}px; border-radius:50%; background:${personColorFor(name)}; flex-shrink:0; vertical-align:middle;"></span>`;
 }
 
 const COMPARE_FILTER_MODES = [
@@ -4685,7 +4739,7 @@ function renderPlanCompare(){
     const peopleChips = people.map(p=>{
       const has = p.key in e.interest;
       const mustSee = e.interest[p.key];
-      const dot = `<span class="tb-owner-dot" style="background:${personColor(p.label)}">${escapeHtml((p.label[0]||"?").toUpperCase())}</span>`;
+      const dot = `<span class="tb-owner-dot" style="background:${personColorFor(p.label)}">${escapeHtml((p.label[0]||"?").toUpperCase())}</span>`;
       return `<span class="compare-person${has ? " in" : ""}">${dot} ${escapeHtml(p.label)}${has ? (mustSee ? " ★" : " 👍") : ""}</span>`;
     }).join("");
     return `
@@ -6878,14 +6932,13 @@ function formatLastSeen(ts){
 // WHO'S USING THIS DEVICE — a fixed name picker (with an "Other" escape
 // hatch) so every entry gets tagged with a real person, not a typo-prone
 // free-text field. currentContributorName() is what every "add" handler
-// below calls to stamp new entries.
+// below calls to stamp new entries. KNOWN_CONTRIBUTORS itself now lives
+// all the way up near the top of the file — see the comment there for why.
 // ===============================
-const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea","Katelyn"];
 // Used by statusLineHTML/renderFriendStatusBar (defined further down) —
 // declared up here since renderHomeSyncStatus() runs at load time and
 // can trigger those before the FRIEND STATUS section below would run.
 const STATUS_STALE_MS = 30 * 60 * 1000; // 30 min — past this, visibly flagged as stale
-const STATUS_DOT_PALETTE = ["🟣","🔵","🟢","🟠","🟡","🔴"];
 // Used by wireGpsToggle/startGpsWatch (defined much further down, in the
 // GPS AUTO-LOCATION section) — declared up here for the same TDZ-safety
 // reason as STATUS_STALE_MS above: renderHomeSyncStatus() runs at load
@@ -7388,13 +7441,6 @@ function refreshAfterMerge(){
 // mergeSyncPayload's payload.status / peopleStatus above) — no separate
 // write path or extra Firestore reads needed.
 // ===============================
-function statusDotFor(id){
-  let hash = 0;
-  const s = String(id || "");
-  for(let i=0;i<s.length;i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
-  return STATUS_DOT_PALETTE[hash % STATUS_DOT_PALETTE.length];
-}
-
 // gps is optional {lat, lon} — only ever set by the GPS auto-location
 // path (refreshGpsLocationOnce). Always builds a fresh object rather
 // than merging onto the previous one, so switching back to a manual
@@ -7448,7 +7494,7 @@ function statusLineHTML(entry){
   // entries left over from before sync worked properly.
   const removeBtn = entry.isMe ? "" : ` <button type="button" class="status-remove-btn" onclick="removeFriendStatus('${entry.id}')" title="Remove this status" aria-label="Remove ${escapeHtml(entry.displayName)}'s status" style="border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:13px; padding:0 4px;">✕</button>`;
   const mapsLink = entry.gps ? mapsLinkHtml(entry.gps.lat, entry.gps.lon) : "";
-  return `<div class="status-line${stale ? " status-stale" : ""}">${statusDotFor(entry.id)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Location set ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}${removeBtn}${syncedLine}${mapsLink}</div>`;
+  return `<div class="status-line${stale ? " status-stale" : ""}">${personDotHtml(entry.displayName)} <strong>${label}</strong> — ${escapeHtml(entry.place)} · Location set ${entry.updatedAt ? formatLastSeen(entry.updatedAt) : "a while ago"}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}${removeBtn}${syncedLine}${mapsLink}</div>`;
 }
 
 // Clears a stale/ghost friend status — local cache first (so the UI
@@ -7497,7 +7543,7 @@ function renderFriendStatusBar(){
   bar.style.display = "";
   bar.innerHTML = entries.map(e=>{
     const stale = e.updatedAt && (Date.now() - e.updatedAt) > STATUS_STALE_MS;
-    return `<span class="status-chip${stale ? " status-stale" : ""}">${statusDotFor(e.id)} ${escapeHtml(e.displayName)} · ${escapeHtml(e.place)}</span>`;
+    return `<span class="status-chip${stale ? " status-stale" : ""}">${personDotHtml(e.displayName)} ${escapeHtml(e.displayName)} · ${escapeHtml(e.place)}</span>`;
   }).join("");
 }
 
@@ -8178,11 +8224,11 @@ function buildRecentActivity(){
 
   const peopleStatus = Store.get("peopleStatus") || {};
   Object.entries(peopleStatus).forEach(([id, s])=>{
-    if(s && s.updatedAt && s.place) events.push({ ts: s.updatedAt, text: `${escapeHtml(personDisplayName(s, id))} updated their location to ${escapeHtml(s.place)}`, icon: statusDotFor(id) });
+    if(s && s.updatedAt && s.place) events.push({ ts: s.updatedAt, text: `${escapeHtml(personDisplayName(s, id))} updated their location to ${escapeHtml(s.place)}`, icon: personDotHtml(personDisplayName(s, id)) });
   });
   const myStatus = Store.get("myStatus");
   if(myStatus && myStatus.updatedAt && myStatus.place && myDeviceId){
-    events.push({ ts: myStatus.updatedAt, text: `You updated your location to ${escapeHtml(myStatus.place)}`, icon: statusDotFor(myDeviceId) });
+    events.push({ ts: myStatus.updatedAt, text: `You updated your location to ${escapeHtml(myStatus.place)}`, icon: personDotHtml(currentContributorName() || "You") });
   }
 
   const decisions = Store.get("groupDecisions") || {};
@@ -9279,7 +9325,7 @@ function renderChatThreadList(){
       const thread = dmThreadId(me, name);
       const summary = chatThreadSummary(thread);
       rows.push(chatThreadRowHtml({
-        id: thread, label: name, icon: statusDotFor(name),
+        id: thread, label: name, icon: personDotHtml(name),
         // The last-message preview used to be the ONLY thing shown here
         // once a thread had any messages, silently replacing the
         // location line entirely — now they're two separate lines, so
