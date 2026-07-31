@@ -41,6 +41,7 @@ service cloud.firestore {
           'decisions',
           'activities',
           'joinedActivities',
+          'wantTogether',
           'updatedAt'
         ])
         && request.resource.data.v == 1
@@ -69,7 +70,7 @@ service cloud.firestore {
             'hiddenVenues','involvedDone','discoveries','customSocials',
             'quotes','sightings','customLandmarks','schedule','bingo',
             'character','status','meeting','decisions','activities',
-            'joinedActivities','updatedAt'
+            'joinedActivities','wantTogether','updatedAt'
           ]);
         allow update: if false;
         allow delete: if true;
