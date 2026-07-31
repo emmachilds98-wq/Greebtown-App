@@ -86,7 +86,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 
 <!-- Styles -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" integrity="sha256-V2sIX92Uh6ZaGSFTKMHghsB85b9toJtmazgG09AI2uk=" crossorigin="">
 <link rel="stylesheet" href="css/style.css">
 
 <!--
@@ -408,7 +408,7 @@ Meet at the clock tower if separated"></textarea>
       <h2 style="margin-bottom:14px;">Map</h2>
       <button type="button" class="fab-add-btn" id="mapAddPlaceBtn" aria-label="Add a place" title="Add a place">+</button>
     </div>
-    <p class="empty-note" style="margin-bottom:10px;">An original illustrated map of the site (our own artwork, not Boomtown's official map) — stages and amenities plotted at real GPS positions where we have them, other markers (districts, hidden venues, gates) stay approximate rather than surveyed. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
+    <p class="empty-note" style="margin-bottom:10px;">An original illustrated map of the site (our own artwork, not Boomtown's official map, rendered on the GPU for smooth zooming) — stages and amenities plotted at real GPS positions where we have them, other markers (districts, hidden venues, gates) stay approximate rather than surveyed. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
 
     <div id="jumpMapView">
     <p style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:4px;">On-the-spot lookups</p>
@@ -1113,10 +1113,16 @@ Talk to an actor in character
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
-<!-- Real map — an original illustrated basemap via Leaflet, not Boomtown's
-     own proprietary map artwork/tileset. See js/app.js's MAP section
-     (buildMapBackgroundSvg) and js/boomtown-locations-2026.js. -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Real map — an original illustrated basemap via MapLibre GL JS (WebGL),
+     not Boomtown's own proprietary map artwork/tileset. The basemap
+     shapes (district clearings, tree clusters, tent ring, trail loop)
+     are GeoJSON, triangulated into a GPU mesh once and rendered by the
+     GPU every frame, instead of an SVG re-drawing its paths each frame.
+     No tile/glyph/sprite URLs are configured, so this needs zero network
+     requests once loaded — genuinely offline-capable, same as the rest
+     of this PWA. See js/app.js's MAP section (buildMapGeoJSON) and
+     js/boomtown-locations-2026.js. -->
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha256-vpYzxNhw4m+zfxz+XFp3GBZnEUAD6hYgeseFDY2ordE=" crossorigin=""></script>
 <script src="js/artist-bios.js"></script>
 <script src="js/artist-previews.js"></script>
 <script src="js/boomtown-locations-2026.js"></script>
