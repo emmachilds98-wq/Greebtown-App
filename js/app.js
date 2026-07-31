@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v212";
-const APP_BUILD_TIME = "2026-07-31T18:09:59Z";
+const APP_CACHE_VERSION = "v213";
+const APP_BUILD_TIME = "2026-07-31T19:12:16Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6077,6 +6077,156 @@ const venueDirectory = [
 const map = document.getElementById("map");
 const mapInfo = document.getElementById("mapInfo");
 
+// ===============================
+// ILLUSTRATED BASEMAP — an original illustration (grass texture, organic
+// district clearings, tree icons, a ring of little tent icons for
+// camping, a worn dirt-trail route), not a copy of Boomtown's own custom
+// Mapbox style — different palette, different shapes, entirely our own
+// generated artwork, evoking "illustrated festival map" as a genre
+// rather than tracing their specific design. Geo-referenced onto the
+// real map as an SVG overlay (see loadMap()'s L.svgOverlay call) bound
+// to the same real-world SITE_BOUNDS every marker is placed within, so
+// it pans/zooms/scales as a real crisp vector layer — not a raster image
+// — sitting under the precisely (or honestly-approximately) positioned
+// real markers on top of it.
+// ===============================
+function seededRand(seed){
+  let s = seed;
+  return ()=>{ s = (s * 9301 + 49297) % 233280; return s / 233280; };
+}
+
+// Soft organic blob outline (a "clearing") through a ring of jittered
+// points, smoothed with quadratic curves — reads far less mechanical
+// than a plain ellipse.
+function blobPath(cx, cy, baseR, seed, points){
+  points = points || 9;
+  const rand = seededRand(seed);
+  const pts = [];
+  for(let i=0;i<points;i++){
+    const angle = (i / points) * Math.PI * 2;
+    const r = baseR * (0.72 + rand() * 0.5);
+    pts.push([cx + Math.cos(angle) * r, cy + Math.sin(angle) * r * 0.78]);
+  }
+  let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)} `;
+  for(let i=0;i<points;i++){
+    const p0 = pts[i], p1 = pts[(i + 1) % points];
+    const mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2;
+    d += `Q ${p0[0].toFixed(1)} ${p0[1].toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)} `;
+  }
+  return d + "Z";
+}
+
+// A simple pictorial tree: trunk + three overlapping canopy blobs.
+function treeIcon(x, y, scale, seed){
+  const rand = seededRand(seed);
+  const s = scale * (0.8 + rand() * 0.5);
+  const hue = 100 + Math.floor(rand() * 20);
+  return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(2)})">
+    <rect x="-0.35" y="0.1" width="0.7" height="1.6" rx="0.2" fill="rgba(92,64,42,0.55)"/>
+    <circle cx="-1" cy="-0.2" r="1.25" fill="hsla(${hue},38%,38%,0.5)"/>
+    <circle cx="1" cy="-0.2" r="1.25" fill="hsla(${hue+8},40%,34%,0.5)"/>
+    <circle cx="0" cy="-1.1" r="1.55" fill="hsla(${hue+4},42%,42%,0.55)" stroke="hsla(${hue},40%,24%,0.4)" stroke-width="0.12"/>
+  </g>`;
+}
+function treeCluster(cx, cy, count, spread, seed){
+  const rand = seededRand(seed);
+  let out = "";
+  for(let i=0;i<count;i++){
+    const a = rand() * Math.PI * 2;
+    const r = rand() * spread;
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r * 0.7;
+    out += treeIcon(x, y, 0.9 + rand() * 0.7, seed + i * 7 + 3);
+  }
+  return out;
+}
+
+// A little pitched tent: two canvas panels + a ridge line + guy ropes.
+function tentIcon(x, y, rot, seed){
+  const rand = seededRand(seed);
+  const hue = rand() > 0.5 ? "45,168,242" : "242,168,60";
+  return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)})">
+    <path d="M -1.3 1 L 0 -1.3 L 1.3 1 Z" fill="rgba(${hue},0.22)" stroke="rgba(238,246,241,0.35)" stroke-width="0.14"/>
+    <path d="M 0 -1.3 L 0 1" stroke="rgba(238,246,241,0.3)" stroke-width="0.1"/>
+    <path d="M -1.3 1 L -1.9 1.4 M 1.3 1 L 1.9 1.4" stroke="rgba(238,246,241,0.2)" stroke-width="0.08"/>
+  </g>`;
+}
+function tentRing(){
+  let out = "";
+  for(let i=0;i<26;i++){
+    const a = (i / 26) * Math.PI * 2;
+    const wobble = seededRand(i * 13)();
+    const rad = 46 + wobble * 3;
+    const x = 50 + Math.cos(a) * rad;
+    const y = 50 + Math.sin(a) * rad * 0.98;
+    out += tentIcon(x, y, (a * 180 / Math.PI) + 90, i * 5 + 1);
+  }
+  return out;
+}
+
+function nearestDistrict(x, y, districts){
+  let best = null, bestD = Infinity;
+  districts.forEach(d=>{
+    const dx = parseFloat(d.x) - x, dy = parseFloat(d.y) - y;
+    const dist = dx * dx + dy * dy;
+    if(dist < bestD){ bestD = dist; best = d; }
+  });
+  return best;
+}
+
+// Builds the illustration as an SVG DOM element (not a string — L.svgOverlay
+// needs a real element) covering the same 0-100 schematic space every
+// other schematic-only coordinate in this file already uses.
+function buildMapBackgroundSvg(){
+  const districts = locations.filter(p=>p.kind === "district");
+  const blobs = districts.map((d,i)=>{
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    return `<path d="${blobPath(cx, cy, 16, i * 31 + 7)}" fill="rgba(230,196,120,0.16)" stroke="rgba(242,168,60,0.45)" stroke-width="0.4" stroke-dasharray="1.4 1.6"/>`;
+  }).join("");
+  const loopPath = "M " + districts.map(d=>`${parseFloat(d.x)} ${parseFloat(d.y)}`).join(" L ") + " Z";
+
+  // Thin spokes from every stage (major + minor) to its nearest district,
+  // so the path network reads like it actually connects the site rather
+  // than one lonely ring.
+  const spokeTargets = locations.filter(p=>p.kind === "stage").concat(minorStages);
+  const spokes = spokeTargets.map(s=>{
+    const sx = parseFloat(s.x), sy = parseFloat(s.y);
+    const nd = nearestDistrict(sx, sy, districts);
+    return `<path d="M ${sx} ${sy} L ${parseFloat(nd.x)} ${parseFloat(nd.y)}" fill="none" stroke="rgba(196,158,110,0.3)" stroke-width="0.4" stroke-dasharray="0.3 1.2" stroke-linecap="round"/>`;
+  }).join("");
+
+  const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name));
+  const trees = forestSpots.map((f,i)=> treeCluster(parseFloat(f.x), parseFloat(f.y), 16, 12, 17 + i * 41)).join("")
+    + treeCluster(9, 14, 9, 8, 5) + treeCluster(91, 86, 9, 8, 61) + treeCluster(90, 10, 7, 7, 23) + treeCluster(10, 90, 7, 7, 37)
+    + treeCluster(50, 4, 5, 6, 71) + treeCluster(96, 50, 5, 6, 83);
+
+  const svgHtml = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs>
+        <pattern id="grassTex" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(12)">
+          <rect width="5" height="5" fill="none"/>
+          <line x1="0.8" y1="5" x2="0.5" y2="2.6" stroke="rgba(255,255,255,0.05)" stroke-width="0.25"/>
+          <line x1="2.6" y1="5" x2="3" y2="2.3" stroke="rgba(0,0,0,0.10)" stroke-width="0.25"/>
+          <line x1="4.2" y1="5" x2="3.9" y2="2.8" stroke="rgba(255,255,255,0.04)" stroke-width="0.25"/>
+        </pattern>
+      </defs>
+      <rect x="0" y="0" width="100" height="100" fill="#1e3a28"/>
+      <rect x="0" y="0" width="100" height="100" fill="url(#grassTex)"/>
+      <path d="M -5 38 Q 50 18 105 42" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.6"/>
+      <path d="M -5 68 Q 50 52 105 72" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="0.6"/>
+      <path d="M 5 45 C 5 25 15 10 30 8 C 45 4 55 2 65 8 C 80 10 90 18 95 30 C 98 40 97 55 90 65 C 85 80 75 90 60 93 C 45 95 30 92 18 82 C 8 70 5 58 5 45 Z" fill="none" stroke="rgba(143,168,156,0.3)" stroke-width="0.5" stroke-dasharray="2 2"/>
+      ${tentRing()}
+      ${blobs}
+      ${spokes}
+      <path d="${loopPath}" fill="none" stroke="rgba(196,158,110,0.6)" stroke-width="0.9" stroke-linejoin="round" stroke-dasharray="0.3 1.6" stroke-linecap="round"/>
+      ${trees}
+    </svg>
+  `;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = svgHtml.trim();
+  return wrap.firstElementChild;
+}
+
 // Layer visibility persists across loadMap() re-renders (tab switches, syncs,
 // adding a hidden venue, etc. all refresh the map's markers). Off by
 // default for the busier layers so the map isn't crowded on first arrival —
@@ -6207,17 +6357,22 @@ function loadMap(){
       zoomControl: false
     });
     L.control.zoom({ position: "topleft" }).addTo(leafletMap);
-    // Satellite/aerial imagery (Esri World Imagery), not a street-map
-    // style — the festival site is farmland, so an OSM/CARTO-style
-    // vector basemap would render almost blank there (no road grid,
-    // no buildings to draw). Aerial photography actually shows the
-    // real fields and treelines, which is both more useful here and
-    // closer to what a real navigational site map needs to feel like.
-    // Free, no API key required for this usage level.
-    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-      maxZoom: 19,
-      attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community"
-    }).addTo(leafletMap);
+    // Our own illustrated basemap (buildMapBackgroundSvg, defined above)
+    // as a real georeferenced SVG overlay — not a raster image, so it
+    // stays crisp at any zoom level like the rest of Leaflet's vector
+    // layers, and not Boomtown's own map artwork/style. Bound to the same
+    // padded SITE_BOUNDS used for maxBounds/centering (not the tighter
+    // box the SCHEMATIC_TO_LATLON_FIT's 4 corners map to) so the
+    // illustration fills the whole pannable area — real markers are
+    // spread across the wider real-data bounds, and a background sized
+    // to the schematic fit's own footprint left a blank void around them.
+    // svgOverlay only supports an axis-aligned rectangle (no shear), so
+    // this is already an approximation on top of an approximate transform;
+    // stretching it to fill the view is in keeping with the rest of the
+    // app's "illustrative, not surveyed" framing rather than a
+    // meaningfully new inaccuracy.
+    const BG_BOUNDS = SITE_BOUNDS.pad(0.25);
+    L.svgOverlay(buildMapBackgroundSvg(), BG_BOUNDS, { interactive: false }).addTo(leafletMap);
     mapLayerGroups = {
       main: L.layerGroup().addTo(leafletMap),
       gate: L.layerGroup().addTo(leafletMap),
