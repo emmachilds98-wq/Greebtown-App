@@ -12,7 +12,7 @@
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
 const APP_CACHE_VERSION = "v193";
-const APP_BUILD_TIME = "2026-07-31T09:58:37Z";
+const APP_BUILD_TIME = "2026-07-31T10:01:09Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -46,12 +46,13 @@ const LOCATION_REMINDER_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours
 // Used by the LOCAL CHAT feature (defined much further down, see its own
 // section comment there for why everything else in that block is safe to
 // keep local) — these three specifically have to live up here instead.
-// renderHomeFriendActivity()'s own load-time call far below reaches
-// totalUnreadCount() -> allMyThreadIds()/unreadCountForThread(), which
-// touch CHAT_THREAD_GROUP, chatMessagesCache and chatPresenceCache before
-// the chat section's own declarations would otherwise have run — same
-// TDZ-safety reason as everything else in this cluster (this one bit
-// Greebtown for real: ReferenceError on CHAT_THREAD_GROUP at load).
+// Home's since-removed friend-activity feed used to call totalUnreadCount()
+// -> allMyThreadIds()/unreadCountForThread() at load time, which touch
+// CHAT_THREAD_GROUP, chatMessagesCache and chatPresenceCache — this bit
+// Greebtown for real (ReferenceError on CHAT_THREAD_GROUP at load) before
+// these were hoisted up here. Left here rather than moved back down: safe
+// either way, and keeps the same trap from reopening if anything at load
+// time starts reading unread-chat state again.
 const CHAT_THREAD_GROUP = "group";
 let chatMessagesCache = [];
 let chatPresenceCache = {}; // deviceId -> {displayName, lastActiveAt, reads}
@@ -9021,68 +9022,6 @@ function renderRecentActivity(containerId, limit){
     : `<p class="empty-note">Nothing yet — activity shows up here as your group syncs, sets statuses, logs finds and makes decisions.</p>`;
 }
 
-// Home's own, narrower feed — "what have my friends been doing?" only.
-// Deliberately excludes groupDecisions/clash events (those read as app
-// nags, not social updates) and hidden-venue/theory finds beyond a
-// couple, unlike Discover's fuller buildRecentActivity() above which
-// keeps everything. Adds joined-activity and unread-chat events that
-// buildRecentActivity() doesn't have, since those are exactly the kind
-// of "friend activity" Home's top area should surface first.
-function buildHomeFriendActivity(){
-  const events = [];
-  const myDeviceId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : null;
-
-  const peopleStatus = Store.get("peopleStatus") || {};
-  Object.entries(peopleStatus).forEach(([id, s])=>{
-    if(id === myDeviceId) return;
-    if(s && s.updatedAt && s.place) events.push({ ts: s.updatedAt, text: `${escapeHtml(personDisplayName(s, id))} updated their location to ${escapeHtml(s.place)}`, icon: personDotHtml(personDisplayName(s, id)) });
-  });
-
-  const unread = (typeof totalUnreadCount === "function") ? totalUnreadCount() : 0;
-  if(unread > 0){
-    events.push({ ts: Date.now(), text: `${unread} unread chat message${unread===1?"":"s"} — tap to open`, icon: "💬", isChatLink: true });
-  }
-
-  const peopleActivities = Store.get("peopleActivities") || {};
-  Object.entries(peopleActivities).forEach(([id, entry])=>{
-    if(id === myDeviceId) return;
-    personSnapshotList(entry).forEach(a=>{
-      if(!a.createdAt) return;
-      const attendees = (typeof activityAttendeeNames === "function") ? activityAttendeeNames(id, personDisplayName(entry, id), a.id) : [];
-      events.push({ ts: a.createdAt, text: `${escapeHtml(personDisplayName(entry, id))} added a group activity: ${escapeHtml(a.name)}${attendees.length > 1 ? ` (${attendees.length} in)` : ""}`, icon: "🎉" });
-    });
-  });
-
-  // "Friends joining activities" (joinedActivities/peopleJoins) is only
-  // ever stored as a plain set of "owner::activityId" keys with no join
-  // timestamp — there's nothing to sort a feed entry by, so it's left
-  // out here rather than faking a time. Attendee counts on the activity-
-  // creation events above already surface it indirectly ("3 in").
-
-  const meetingUpdatedAt = Store.get("meetingUpdatedAt");
-  if(meetingUpdatedAt){
-    events.push({ ts: meetingUpdatedAt, text: `${escapeHtml(Store.get("meetingBy") || "Someone")} set the meeting point to ${escapeHtml(Store.get("meeting") || "")}`, icon: "📍" });
-  }
-
-  (Store.get("hiddenVenues") || []).slice(-3).forEach(v=>{
-    if(v.ts) events.push({ ts: v.ts, text: `${escapeHtml(v.from || "Someone")} found: ${escapeHtml(v.name || "Untitled find")}`, icon: "🕵" });
-  });
-
-  return events.sort((a,b)=> b.ts - a.ts);
-}
-
-function renderHomeFriendActivity(){
-  const box = document.getElementById("homeFriendActivity");
-  if(!box) return;
-  const events = buildHomeFriendActivity().slice(0, 6);
-  box.innerHTML = events.length
-    ? events.map(e=> `<div class="status-line${e.isChatLink ? " home-activity-chat-link" : ""}">${e.icon} ${e.text}${e.isChatLink ? "" : ` <span style="color:var(--text-muted); font-size:11px;">· ${formatLastSeen(e.ts)}</span>`}</div>`).join("")
-    : `<p class="empty-note">Nothing new from friends yet — updates show up here as people set locations, chat or add activities.</p>`;
-  const chatLine = box.querySelector(".home-activity-chat-link");
-  if(chatLine){ chatLine.style.cursor = "pointer"; chatLine.onclick = ()=>{ if(typeof openChatPanel === "function") openChatPanel(); }; }
-}
-renderHomeFriendActivity();
-
 async function pushToCloud(){
   const db = getFirestoreDb();
   const room = currentRoomCode();
@@ -9890,9 +9829,9 @@ document.addEventListener("visibilitychange", ()=>{
 // only ever called from its own init calls at the bottom of this block,
 // its own onSnapshot callbacks, or DOM event handlers wired within it.
 // Three exceptions — CHAT_THREAD_GROUP, chatMessagesCache and
-// chatPresenceCache — are declared up near the top of the file instead,
-// because renderHomeFriendActivity()'s load-time call does reach them via
-// totalUnreadCount(); see the comment up there for the chain.
+// chatPresenceCache — are declared up near the top of the file instead;
+// see the comment up there for why (a since-removed Home feature used to
+// reach them via totalUnreadCount() at load time).
 // See CLAUDE.md's TDZ rule for why that check matters here.
 // ===============================
 const CHAT_HEARTBEAT_MS = 90 * 1000;
