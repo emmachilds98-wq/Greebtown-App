@@ -84,6 +84,18 @@
     width:100%; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-primary);
     padding:12px 14px; border-radius:12px; font-size:15px; font-family:inherit;
   }
+  /* iOS Safari's native input[type=time] control renders its own
+     internal wheel/segment UI at whatever width it wants, ignoring
+     width:100%/box-sizing:border-box on the element itself — the CSS
+     box is sized correctly, but the native control painted inside it
+     can still visually spill out past that box's own right edge with
+     nothing clipping it. max-width belt-and-braces confirms the box
+     itself never claims more than its container; overflow:hidden is
+     the part that actually stops the native control's own rendering
+     from bleeding out past it — this is what full-width .time-row
+     fields were still overlapping the card's edge even after being
+     stacked one per row instead of two side by side. */
+  input[type=time]{max-width:100%; overflow:hidden;}
   input:focus, textarea:focus, select:focus{outline:2px solid var(--accent-teal); outline-offset:1px;}
   button:focus-visible, a:focus-visible{outline:2px solid var(--accent-teal); outline-offset:2px;}
   textarea{resize:vertical; min-height:70px; margin-top:10px;}
@@ -109,6 +121,14 @@
      regardless of how wide any given browser insists on rendering the
      control. */
   .time-row{display:flex; flex-direction:column; gap:2px;}
+  /* Checkbox for flagging a time edit as an official Boomtown change
+     rather than a personal workaround — see applyOfficialTimeCorrection.
+     align-items:flex-start (not center) since the label text usually
+     wraps to 2+ lines and center-aligning would float the checkbox
+     awkwardly in the middle of that block instead of level with its
+     first line. */
+  .official-time-check{display:flex; align-items:flex-start; gap:8px; margin:10px 0; font-size:12.5px; color:var(--text-muted); line-height:1.4; cursor:pointer;}
+  .official-time-check input[type=checkbox]{width:auto; flex-shrink:0; margin-top:2px;}
   .field{margin-bottom:10px;}
   .field label{display:block; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;}
   .item{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
