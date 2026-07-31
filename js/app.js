@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v206";
-const APP_BUILD_TIME = "2026-07-31T15:26:17Z";
+const APP_CACHE_VERSION = "v207";
+const APP_BUILD_TIME = "2026-07-31T15:30:22Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -8382,27 +8382,43 @@ function renderHomeSyncStatus(){
 renderHomeSyncStatus();
 if(typeof updateHeaderLastSynced === "function") updateHeaderLastSynced();
 
-// Slim location prompt directly under the name/sync card — "Location &
-// GPS" itself (the full picker, GPS toggle, friend list) now lives in
-// Settings; this is just enough to show status at a glance and point
-// there, kept re-render-safe (called from renderAllFriendStatusUI, same
-// refresh point as the friend status list/bar) so it never goes stale.
+// Location prompt directly under the name/sync card — a real inline
+// picker (same select/GPS toggle as Settings' full "Location & GPS"
+// card, via the same wireStatusControl/wireGpsToggle helpers below, just
+// re-wired fresh on every render since the box is fully rebuilt each
+// time) so setting or checking your status doesn't need a trip to
+// Settings at all. Kept re-render-safe (called from
+// renderAllFriendStatusUI, same refresh point as the friend status
+// list/bar) so it never goes stale.
 function renderHomeLocationStatus(){
   const box = document.getElementById("homeLocationStatus");
   if(!box) return;
   const name = currentContributorName();
   const myStatus = Store.get("myStatus");
   const gpsOn = !!Store.get("gpsLocationEnabled");
-  let line;
-  if(!name){
-    line = `📍 Pick your name above, then set your location in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','settingsscreen')">Settings</a>.`;
-  } else if(myStatus && myStatus.place){
-    const stale = myStatus.updatedAt && (Date.now() - myStatus.updatedAt) > STATUS_STALE_MS;
-    line = `📍 ${gpsOn ? "GPS on — " : ""}You're at <strong>${escapeHtml(myStatus.place)}</strong>${stale ? " <span class=\"status-stale-tag\">stale</span>" : ""} · <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','settingsscreen')">update</a>`;
-  } else {
-    line = `📍 Location not set — <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','settingsscreen')">add it or turn on GPS</a> in Settings.`;
-  }
-  box.innerHTML = `<p class="empty-note" style="margin:0; font-size:12.5px;">${line}</p>`;
+  const stale = !!(myStatus && myStatus.updatedAt && (Date.now() - myStatus.updatedAt) > STATUS_STALE_MS);
+  const headline = !name
+    ? `📍 Location &amp; GPS`
+    : myStatus && myStatus.place
+      ? `📍 You're at <span style="color:var(--accent-teal);">${escapeHtml(myStatus.place)}</span>${gpsOn ? ` <span style="font-size:11px; color:var(--text-muted);">(GPS)</span>` : ""}${stale ? ` <span class="status-stale-tag">stale</span>` : ""}`
+      : `📍 Location not set`;
+  box.innerHTML = `
+    <h3 style="margin:0; font-size:14px;">${headline}</h3>
+    ${!name ? `<p class="empty-note" style="margin-top:4px;">Pick your name above first, then set where you are.</p>` : ""}
+    <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-top:8px;">
+      <div class="field" style="margin:0; flex:1; min-width:140px;">
+        <label>Where are you?</label>
+        <select id="homeStatusLocationSelect"></select>
+      </div>
+      <button class="action" id="homeStatusCustomBtn" style="flex-shrink:0;">Set</button>
+    </div>
+    <div class="field" id="homeStatusOtherField" style="display:none; margin-top:8px;"><label>Where, exactly?</label><input type="text" id="homeStatusCustomInput" placeholder="Type where you are"></div>
+    <label class="gps-toggle-row" style="margin-top:8px; display:block;"><input type="checkbox" id="homeGpsLocationToggle"> Auto-update from GPS every few minutes</label>
+    <p class="empty-note" id="homeStatusFeedbackNote" style="margin-top:6px;"></p>
+    <p class="empty-note" style="margin-top:8px; font-size:11.5px;">Friends' status &amp; more location settings in <a class="inline-link" href="javascript:void(0)" onclick="jumpToId('jumpFriendStatus','settingsscreen')">Settings</a>.</p>
+  `;
+  wireStatusControl("homeStatusLocationSelect", "homeStatusOtherField", "homeStatusCustomInput", "homeStatusCustomBtn", "homeStatusFeedbackNote");
+  wireGpsToggle("homeGpsLocationToggle");
 }
 renderHomeLocationStatus();
 
