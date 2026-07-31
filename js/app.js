@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v219";
-const APP_BUILD_TIME = "2026-07-31T21:30:44Z";
+const APP_CACHE_VERSION = "v220";
+const APP_BUILD_TIME = "2026-07-31T21:51:54Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6213,6 +6213,19 @@ const DISTRICT_PALETTE = ["242,168,60", "75,190,227", "196,150,255", "180,214,12
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
 
+  // Real farmland field-boundary texture — Matterley Estate is a working
+  // dairy farm, and the reference video's own open ground shows real
+  // field-boundary lines throughout, not flat empty green. A scatter of
+  // large, barely-there alternating-tint blobs across the open ground
+  // (drawn first/bottom, so forests/districts/camps layer over it where
+  // they overlap) breaks up what would otherwise be a big flat colour.
+  const FIELD_SPOTS = [[8,60],[30,45],[50,55],[68,55],[85,70],[92,40],[55,80],[20,65],[40,85],[75,85],[10,15],[60,40]];
+  const fieldFeatures = FIELD_SPOTS.map(([cx,cy],i)=>({
+    type: "Feature",
+    properties: { fill: i % 2 === 0 ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.03)" },
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, 13, 1000 + i * 71, 12)) ] }
+  }));
+
   const districtFeatures = districts.map((d,i)=>{
     const rgb = DISTRICT_PALETTE[i % DISTRICT_PALETTE.length];
     return {
@@ -6319,18 +6332,31 @@ function buildMapGeoJSON(){
     tentFeatures.push({ type:"Feature", properties:{ color: (i % 2 === 0) ? "rgba(45,168,242,0.6)" : "rgba(242,168,60,0.6)" }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
   }
 
-  // Faint terrain-contour lines and an overall hand-sketched site
-  // boundary — purely decorative ground texture (not information-
-  // bearing, so it adds visual richness without adding anything to
-  // parse), reusing blobRing's "jittered ring" look for a consistent
-  // hand-drawn feel across every shape on this basemap.
+  // Faint terrain-contour lines — purely decorative ground texture (not
+  // information-bearing, so it adds visual richness without adding
+  // anything to parse).
   const contourFeatures = [
     { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[-5,38],[20,26],[50,20],[80,28],[105,42]]) } },
     { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[-5,68],[20,58],[50,54],[80,62],[105,72]]) } }
   ];
-  const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(blobRing(50, 50, 48, 999, 22)) } };
+
+  // The site boundary — traced from the reference video's own wide
+  // overview shots (an irregular rounded pentagon with a camping bulge
+  // to the south-west, not a plain circle), anchored on the gates and
+  // outermost camping fields whose positions are already set from that
+  // same video, then lightly jittered per-point for a hand-sketched feel
+  // rather than a mechanically straight-edged polygon.
+  const boundaryAnchors = [
+    [3,46], [9,20], [14,7], [48,4], [70,6], [86,14], [96,32],
+    [91,48], [95,64], [78,93], [74,87], [48,90], [25,75], [7,58], [5,35]
+  ];
+  const boundaryRand = seededRand(555);
+  const boundaryRing = boundaryAnchors.map(([x,y])=> [x + (boundaryRand() - 0.5) * 3, y + (boundaryRand() - 0.5) * 3]);
+  boundaryRing.push(boundaryRing[0]);
+  const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(boundaryRing) } };
 
   return {
+    fields: { type:"FeatureCollection", features: fieldFeatures },
     districts: { type:"FeatureCollection", features: districtFeatures },
     plazas: { type:"FeatureCollection", features: plazaFeatures },
     campAreas: { type:"FeatureCollection", features: campFeatures },
@@ -6528,6 +6554,9 @@ function loadMap(){
       // paths, then icon-like points on top — the same layering a real
       // illustrated map uses so everything reads at a glance instead of
       // competing on one flat plane.
+      mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
+      mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", paint: { "fill-color": ["get", "fill"] } });
+
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
       mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.05)", "line-width": 1 } });
 
@@ -6684,19 +6713,14 @@ function loadMap(){
     );
   });
 
-  secretSpots.forEach(spot=>{
-    const coord = schematicToLatLon(parseFloat(spot.x), parseFloat(spot.y));
-    addMapMarker("secret", coord.lat, coord.lon,
-      mapMarkerHtml("secret", "", null, "?"),
-      { title: "Rumoured hidden venue territory", onClick: ()=> showMapInfoCard(`
-        <div class="card">
-          <span class="tag">unlisted</span>
-          <h3>Rumoured hidden venue territory</h3>
-          <p>Boomtown's 50+ hidden venues are never published, so this is just a "go exploring here" nudge, not a real surveyed spot. Wander, follow the sound, and log what you actually find below.</p>
-        </div>
-      `) }
-    );
-  });
+  // secretSpots (3 generic unnamed "?" markers) intentionally not
+  // rendered — unlike everything else on this map, they don't correspond
+  // to any specific confirmed venue, just a vague "somewhere here" guess.
+  // Everything else shown here (stages, hidden venues, landmarks) is
+  // backed by real confirmed 2026 lineup/schedule evidence — see
+  // venueDirectory — so these anonymous placeholders were the one
+  // exception. Left in the data (not deleted outright) in case a real
+  // position for one of them turns up later.
 
   allLandmarks().forEach(place=>{
     const coord = realCoordFor(place);
