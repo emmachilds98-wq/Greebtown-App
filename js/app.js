@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v183";
-const APP_BUILD_TIME = "2026-07-31T02:52:39Z";
+const APP_CACHE_VERSION = "v184";
+const APP_BUILD_TIME = "2026-07-31T03:09:08Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -535,7 +535,7 @@ window.addEventListener("orientationchange", repositionAllTimelineScrollThumbs);
 //    per-member doc) since there's only ever one value for the whole
 //    group, not one per person. "myStatus"/"peopleStatus" follow the
 //    same per-person-snapshot pattern as schedule/bingo/character above.
-const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [] };
+const DEFAULTS = { schedule: [], peopleSchedules: {}, peopleBingo: {}, peopleCharacters: {}, peopleLastSeen: {}, peopleStatus: {}, myStatus: null, discoveries: [], meeting: null, meetingBy: "", meetingUpdatedAt: null, groupDecisions: {}, personalClashChoices: {}, halfOrderChoices: {}, notes: "", customArtists: [], hiddenVenues: [], clues: {}, characterNotes: {}, involvedDone: [], theories: [], customSocials: [], contributorName: "", roomCode: "", quotes: [], bingoCard: [], bingoMarked: [], bingoLocked: false, myCharacter: null, sightings: [], customLandmarks: [], bingoCustomText: "", bingoLinesSeen: 0, lastSyncedAt: null, seenHomeInfoCard: false, dismissedAddToHome: false, packingChecked: [], deviceId: "", lastPushedRoomId: "", lastOpenedAt: null, seenArtists: [], activities: [], joinedActivities: [], peopleActivities: {}, peopleJoins: {} };
 const EMBEDDED_DATA = window.__boomtownSavedData || {};
 
 // Saved artists, bingo card and character are otherwise only backed up
@@ -548,7 +548,7 @@ const EMBEDDED_DATA = window.__boomtownSavedData || {};
 // safe no-op with no name/room/signal set, so this is safe to call from
 // here even though pushToCloud is defined much later in this file.
 let _autoBackupTimer = null;
-const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter", "seenArtists"]);
+const AUTO_BACKUP_KEYS = new Set(["schedule", "bingoCard", "bingoMarked", "bingoLocked", "myCharacter", "seenArtists", "activities", "joinedActivities"]);
 function scheduleAutoBackup(){
   if(_autoBackupTimer) clearTimeout(_autoBackupTimer);
   _autoBackupTimer = setTimeout(()=>{
@@ -3671,6 +3671,16 @@ document.getElementById("addArtistBtn").onclick = ()=>{
   loadGenreChips();
 };
 
+// Same composer, same experience, whichever tab it's opened from — see
+// openActivityComposer() in the PERSONAL & GROUP ACTIVITIES section
+// further down (a hoisted function declaration, so referencing it here
+// ahead of its own declaration is safe; it's never actually called until
+// one of these buttons is tapped, long after the whole script has run).
+const lineupAddActivityBtn = document.getElementById("lineupAddActivityBtn");
+if(lineupAddActivityBtn) lineupAddActivityBtn.onclick = ()=> openActivityComposer();
+const planAddActivityBtn = document.getElementById("planAddActivityBtn");
+if(planAddActivityBtn) planAddActivityBtn.onclick = ()=> openActivityComposer();
+
 // ===============================
 // PERSONAL SCHEDULE
 // ===============================
@@ -4238,16 +4248,20 @@ function mergePersonIntoMine(personId){
   const peopleSchedules = Store.get("peopleSchedules") || {};
   const peopleBingo = Store.get("peopleBingo") || {};
   const peopleCharacters = Store.get("peopleCharacters") || {};
+  const peopleActivities = Store.get("peopleActivities") || {};
+  const peopleJoins = Store.get("peopleJoins") || {};
   const payload = {
     schedule: personSnapshotList(peopleSchedules[personId]),
     bingo: peopleBingo[personId] || null,
-    character: peopleCharacters[personId] || null
+    character: peopleCharacters[personId] || null,
+    activities: personSnapshotList(peopleActivities[personId]),
+    joinedActivities: personSnapshotList(peopleJoins[personId])
   };
   const changed = mergeOwnCloudCopy(payload);
 
   // Retire the now-absorbed duplicate so it stops showing as a separate
   // "read-only teammate" version of yourself.
-  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus"].forEach(key=>{
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins"].forEach(key=>{
     const map = Store.get(key) || {};
     if(map[personId]){ delete map[personId]; Store.set(key, map); }
   });
@@ -4900,8 +4914,14 @@ function renderPlanTimeline(){
 
   const savedNames = new Set(dayItems.map(a=>a.name));
   const mustSeeNames = new Set(dayItems.filter(a=>a.mustSee).map(a=>a.name));
-  const { html } = buildTimelineHTML(dayItems, { day: planTimelineDay, readonly, savedNames, mustSeeNames, showOwnerBadges: combined });
-  grid.innerHTML = dayItems.length ? html : `<p class="empty-note" style="padding:16px;">${planMustSeeFilter ? `No must-sees with a set time saved for ${planTimelineDay} yet.` : `Nothing with a set time saved for ${planTimelineDay} yet.`}</p>`;
+  // Personal & group activities get their own per-person lane, tacked on
+  // after the real lineup rows — computed from savedNames/mustSeeNames
+  // BEFORE this concat so an activity never picks up a stray ★ from a
+  // same-named saved act.
+  const activityItems = (typeof activitiesForDay === "function") ? activitiesForDay(planTimelineDay) : [];
+  const renderItems = dayItems.concat(activityItems);
+  const { html } = buildTimelineHTML(renderItems, { day: planTimelineDay, readonly, savedNames, mustSeeNames, showOwnerBadges: combined });
+  grid.innerHTML = renderItems.length ? html : `<p class="empty-note" style="padding:16px;">${planMustSeeFilter ? `No must-sees with a set time saved for ${planTimelineDay} yet.` : `Nothing with a set time saved for ${planTimelineDay} yet.`}</p>`;
 
   const hint = document.getElementById("planTimelineHint");
   if(hint){
@@ -4919,6 +4939,21 @@ function renderPlanTimeline(){
     };
   });
   wireStageLinks(grid);
+  // Activity lanes use a synthetic "<name>'s activities" stage that isn't
+  // a real venue — jumping to the map/venue directory for one (what
+  // wireStageLinks just wired every row head to do) would be a dead end,
+  // so point those specific row heads at the actual Join/Delete list
+  // below instead.
+  const activityStages = new Set(activityItems.map(a=>a.stage));
+  grid.querySelectorAll(".timeline-row-head.stage-link").forEach(head=>{
+    if(!activityStages.has(head.dataset.stage)) return;
+    head.onclick = (e)=>{
+      e.stopPropagation();
+      const list = document.getElementById("planActivitiesList");
+      if(list) list.scrollIntoView({ behavior:"smooth", block:"start" });
+    };
+  });
+  if(typeof renderPlanActivitiesList === "function") renderPlanActivitiesList(activityItems, planTimelineDay);
   refreshTimelineScrollProgress("planTimelineOuter");
 }
 
@@ -4968,6 +5003,233 @@ function renderClashTimeline(){
   });
   wireStageLinks(grid);
   refreshTimelineScrollProgress("clashTimelineOuter");
+}
+
+// ===============================
+// PERSONAL & GROUP ACTIVITIES — "add your own thing to the timetable"
+// (a meetup, a friend's own set, anything not part of the official
+// lineup), layered on the exact same read-only-snapshot sync pattern as
+// schedule/bingo/character/status above (see the DATA ISOLATION MODEL
+// note near Store/DEFAULTS): Store.get("activities") is this device's
+// own personal+group activities; peopleActivities[personId] is a
+// read-only snapshot of a teammate's synced GROUP-visibility-only
+// activities, replaced whole on every resync (see buildSyncPayload/
+// mergeSyncPayload). Personal-visibility activities never leave this
+// device. "Joined" group activities work the same way via
+// joinedActivities/peopleJoins, so any device can compute a full
+// attendee list for any activity just from data it already pulls.
+//
+// Each person's activities get fed into the Plan Timeline (see
+// renderPlanTimeline) tagged with a synthetic `stage` of "<name>'s
+// activities" — buildTimelineHTML groups blocks into one row per
+// distinct `stage` value with zero changes needed to that shared
+// function, which is what gives every person their own lane.
+// ===============================
+function ensureActivityId(){
+  return "act_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function createActivity({ name, visibility, day, start, end }){
+  const list = Store.get("activities") || [];
+  const activity = {
+    id: ensureActivityId(),
+    name: (name || "").trim(),
+    visibility: visibility === "group" ? "group" : "personal",
+    day: day || "TBC",
+    start: start || null,
+    end: end || null,
+    createdAt: Date.now()
+  };
+  list.push(activity);
+  Store.set("activities", list);
+  return activity;
+}
+
+function deleteActivity(id){
+  const list = (Store.get("activities") || []).filter(a=> a.id !== id);
+  Store.set("activities", list);
+}
+
+// "Owner::activity" — a globally-unique id across every device's own
+// activity id sequence, since ensureActivityId() is only unique per
+// device on its own.
+function activityGlobalId(ownerId, activityId){
+  return `${ownerId}::${activityId}`;
+}
+function myActivityJoinedIds(){
+  return new Set(Store.get("joinedActivities") || []);
+}
+function toggleJoinActivity(ownerId, activityId){
+  const key = activityGlobalId(ownerId, activityId);
+  const joined = Store.get("joinedActivities") || [];
+  const idx = joined.indexOf(key);
+  if(idx === -1) joined.push(key); else joined.splice(idx, 1);
+  Store.set("joinedActivities", joined);
+}
+
+// The owner is always implicitly "in" their own activity — everyone
+// else has to have actually tapped "I'm in" (found via this device's own
+// joinedActivities if it isn't the owner, or a teammate's synced
+// peopleJoins snapshot otherwise).
+function activityAttendeeNames(ownerId, ownerName, activityId){
+  const key = activityGlobalId(ownerId, activityId);
+  const names = new Set([ownerName]);
+  const myId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : "";
+  if(myId !== ownerId && myActivityJoinedIds().has(key)) names.add(currentContributorName() || "You");
+  const peopleJoins = Store.get("peopleJoins") || {};
+  Object.entries(peopleJoins).forEach(([id, entry])=>{
+    if(id === ownerId) return;
+    if(personSnapshotList(entry).includes(key)) names.add(personDisplayName(entry, id));
+  });
+  return [...names];
+}
+
+// Turns one activity into a buildTimelineHTML-compatible item — see the
+// section banner above for why the synthetic `stage` value is what
+// creates a per-person lane for free.
+function activityToTimelineItem(a, ownerId, ownerName){
+  return {
+    id: a.id, ownerId, ownerName, visibility: a.visibility,
+    name: a.name, day: a.day, start: a.start, end: a.end,
+    stage: `${ownerName}’s activities`,
+    genre: a.visibility === "personal" ? "Personal activity" : "Group activity"
+  };
+}
+
+// Merges this device's own activities (personal + group) with every
+// synced teammate's GROUP-only activities for one day — same shape as
+// activeScheduleData() above, just for activities instead of picks.
+function activitiesForDay(day){
+  const myId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : "";
+  const myName = currentContributorName() || "You";
+  const items = (Store.get("activities") || [])
+    .filter(a=> a.day === day && a.start)
+    .map(a=> activityToTimelineItem(a, myId, myName));
+
+  const peopleActivities = Store.get("peopleActivities") || {};
+  Object.entries(peopleActivities).forEach(([id, entry])=>{
+    if(id === myId) return; // this device's own group activities are already in Store.get("activities") above
+    personSnapshotList(entry).filter(a=> a.day === day && a.start).forEach(a=>{
+      items.push(activityToTimelineItem(a, id, personDisplayName(entry, id)));
+    });
+  });
+  return items;
+}
+
+// A compact, actually-tappable list underneath the dense timeline grid —
+// the timeline blocks are informational (see renderPlanTimeline's
+// stage-link override), this is where Join/Leave/Delete actually live.
+function renderPlanActivitiesList(activityItems, day){
+  const box = document.getElementById("planActivitiesList");
+  if(!box) return;
+  if(!activityItems.length){ box.innerHTML = ""; return; }
+  const myId = (typeof ensureDeviceId === "function") ? ensureDeviceId() : "";
+  box.innerHTML = `
+    <div class="card" style="margin-top:10px;">
+      <h3>Activities — ${escapeHtml(day)}</h3>
+      ${activityItems.map(a=>{
+        const mine = a.ownerId === myId;
+        const attendees = a.visibility === "group" ? activityAttendeeNames(a.ownerId, a.ownerName, a.id) : null;
+        const joined = !mine && myActivityJoinedIds().has(activityGlobalId(a.ownerId, a.id));
+        const timeText = a.start ? `${a.start}${a.end ? "–" + a.end : ""}` : "No time set";
+        const joinBtn = (!mine && a.visibility === "group")
+          ? `<button type="button" class="ghost activity-join-btn" data-owner="${escapeHtml(a.ownerId)}" data-id="${escapeHtml(a.id)}" style="padding:4px 10px; font-size:12px; white-space:nowrap;">${joined ? "Leave" : "I'm in"}</button>`
+          : "";
+        const deleteBtn = mine
+          ? `<button type="button" class="ghost activity-delete-btn" data-id="${escapeHtml(a.id)}" style="padding:4px 10px; font-size:12px; white-space:nowrap;">Delete</button>`
+          : "";
+        return `
+          <div class="chat-thread-row" style="cursor:default;">
+            ${personDotHtml(a.ownerName)}
+            <div style="flex:1; min-width:0;">
+              <div><strong>${escapeHtml(a.name)}</strong> <span class="tag" style="margin-left:4px;">${a.visibility === "personal" ? "Personal" : "Group"}</span></div>
+              <div class="chat-thread-sub">${escapeHtml(a.ownerName)}${mine ? " (you)" : ""} · ${escapeHtml(timeText)}${attendees ? ` · ${attendees.length} in` : ""}</div>
+            </div>
+            ${joinBtn}${deleteBtn}
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+  box.querySelectorAll(".activity-join-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      toggleJoinActivity(btn.dataset.owner, btn.dataset.id);
+      if(typeof renderPlanTimeline === "function") renderPlanTimeline();
+    };
+  });
+  box.querySelectorAll(".activity-delete-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      deleteActivity(btn.dataset.id);
+      if(typeof renderPlanTimeline === "function") renderPlanTimeline();
+    };
+  });
+}
+
+let _activityComposerVisibility = "personal";
+function closeActivityComposer(){
+  const existing = document.getElementById("activityComposerModal");
+  if(existing) existing.remove();
+}
+// Same trigger, same experience whether opened from Plan's "+" or
+// Lineup's "Add an activity" card — see the two call sites below.
+function openActivityComposer(){
+  closeActivityComposer();
+  _activityComposerVisibility = "personal";
+  const backdrop = document.createElement("div");
+  backdrop.id = "activityComposerModal";
+  backdrop.style.cssText = "position:fixed; inset:0; z-index:60; background:rgba(5,10,8,.72); display:flex; align-items:center; justify-content:center; padding:20px;";
+  backdrop.innerHTML = `
+    <div class="card" style="position:relative; width:100%; max-width:420px; max-height:85vh; overflow-y:auto; margin:0;">
+      <button aria-label="Close" id="activityComposerCloseBtn" style="position:absolute; top:10px; right:10px; background:none; border:1px solid var(--line); color:var(--text-primary); border-radius:10px; width:32px; height:32px; font-size:16px; line-height:1; cursor:pointer;">✕</button>
+      <h3>Add an activity</h3>
+      <p class="empty-note" style="margin-bottom:10px;">Anything from "meet at the campsite" to a friend's own set — not part of the official lineup. Personal stays on just your own timeline; Group shows up for everyone synced and they can join in.</p>
+      <div class="field"><label>Name</label><input type="text" id="activityNameInput" placeholder="e.g. Sunrise coffee at camp"></div>
+      <div class="field">
+        <label>Visibility</label>
+        <div class="stagelist" id="activityVisibilityToggle">
+          <button type="button" class="active" data-vis="personal">Just me</button>
+          <button type="button" data-vis="group">Group — visible &amp; joinable</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Day</label>
+        <select id="activityDayInput">
+          <option value="TBC">TBC</option>
+          ${DAY_ORDER.map(d=>`<option value="${d}">${d}</option>`).join("")}
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Start</label><input type="time" id="activityStartInput"></div>
+        <div class="field"><label>End</label><input type="time" id="activityEndInput"></div>
+      </div>
+      <button class="action" id="activitySaveBtn">Save activity</button>
+    </div>
+  `;
+  backdrop.onclick = (e)=>{ if(e.target === backdrop) closeActivityComposer(); };
+  document.body.appendChild(backdrop);
+  backdrop.querySelector("#activityComposerCloseBtn").onclick = closeActivityComposer;
+  backdrop.querySelectorAll("#activityVisibilityToggle button").forEach(btn=>{
+    btn.onclick = ()=>{
+      _activityComposerVisibility = btn.dataset.vis;
+      backdrop.querySelectorAll("#activityVisibilityToggle button").forEach(b=> b.classList.toggle("active", b === btn));
+    };
+  });
+  backdrop.querySelector("#activitySaveBtn").onclick = ()=>{
+    const nameInput = backdrop.querySelector("#activityNameInput");
+    const name = nameInput.value.trim();
+    if(!name){ nameInput.focus(); return; }
+    const day = backdrop.querySelector("#activityDayInput").value;
+    const start = backdrop.querySelector("#activityStartInput").value || null;
+    const end = backdrop.querySelector("#activityEndInput").value || null;
+    createActivity({ name, visibility: _activityComposerVisibility, day, start, end });
+    closeActivityComposer();
+    // Jump straight to Plan's Timeline view, on the activity's own day if
+    // it has one, so the new per-person lane is immediately visible —
+    // the whole point of asking for a day/time up front.
+    if(day !== "TBC" && typeof planTimelineDay !== "undefined") planTimelineDay = day;
+    if(typeof jumpToTab === "function") jumpToTab("plan");
+    if(typeof setPlanView === "function") setPlanView("timeline");
+  };
 }
 
 // ===============================
@@ -6669,7 +6931,17 @@ function buildSyncPayload(){
     // mergeSyncPayload below) — a simple last-write-wins spread across
     // however many devices happen to sync, no separate document needed.
     meeting: Store.get("meetingUpdatedAt") ? { place: Store.get("meeting") || "", by: Store.get("meetingBy") || "", updatedAt: Store.get("meetingUpdatedAt") } : null,
-    decisions: Store.get("groupDecisions") || {}
+    decisions: Store.get("groupDecisions") || {},
+    // Same read-only-snapshot treatment as schedule/bingo/character/status
+    // above — lands in peopleActivities[personId] on the receiving end.
+    // Personal-visibility activities never leave this device: only ones
+    // explicitly marked "group" are included here (see createActivity).
+    activities: (Store.get("activities") || []).filter(a=> a && a.visibility === "group"),
+    // Which OTHER people's group activities this device has marked "I'm
+    // in" — lands in peopleJoins[personId], read alongside peopleActivities
+    // so any device can compute a full attendee list for any activity
+    // without a separate write path per activity.
+    joinedActivities: Store.get("joinedActivities") || []
   };
 }
 
@@ -6876,6 +7148,26 @@ function mergeSyncPayload(payload){
     const peopleStatus = Store.get("peopleStatus") || {};
     peopleStatus[personId] = { displayName: from, place: payload.status.place, updatedAt: payload.status.updatedAt || payload.updatedAt || Date.now() };
     Store.set("peopleStatus", peopleStatus);
+  }
+
+  // Same replace-snapshot treatment for group-visible activities — only
+  // ever the "group" ones (buildSyncPayload already filters out personal
+  // ones before they're sent), replaces that person's own entry each
+  // resync, never touches this device's own "activities".
+  if(Array.isArray(payload.activities)){
+    const peopleActivities = Store.get("peopleActivities") || {};
+    peopleActivities[personId] = { displayName: from, list: payload.activities.map(a=>({ ...a })) };
+    Store.set("peopleActivities", peopleActivities);
+  }
+
+  // Read-only snapshot of who THAT device has joined (not who's joined
+  // THEIR activities) — every device's own "I'm in" taps ride along on
+  // its own payload the same way, so any device can compute a full
+  // attendee list for any activity by scanning every peopleJoins entry.
+  if(Array.isArray(payload.joinedActivities)){
+    const peopleJoins = Store.get("peopleJoins") || {};
+    peopleJoins[personId] = { displayName: from, list: payload.joinedActivities.slice() };
+    Store.set("peopleJoins", peopleJoins);
   }
 
   // The shared meeting point and group decisions ride along on every
@@ -8462,6 +8754,21 @@ function mergeOwnCloudCopy(payload){
     Store.set("myCharacter", { ...payload.character });
     changed++;
   }
+  if(Array.isArray(payload.activities) && payload.activities.length){
+    const mine = Store.get("activities") || [];
+    const mineIds = new Set(mine.map(a=> a && a.id));
+    let added = 0;
+    payload.activities.forEach(a=>{
+      if(a && a.id && !mineIds.has(a.id)){ mine.push({ ...a }); mineIds.add(a.id); added++; }
+    });
+    if(added){ Store.set("activities", mine); changed += added; }
+  }
+  if(Array.isArray(payload.joinedActivities) && payload.joinedActivities.length){
+    const mineJoins = new Set(Store.get("joinedActivities") || []);
+    const before = mineJoins.size;
+    payload.joinedActivities.forEach(k=> mineJoins.add(k));
+    if(mineJoins.size !== before){ Store.set("joinedActivities", [...mineJoins]); changed += (mineJoins.size - before); }
+  }
   return changed;
 }
 
@@ -8503,7 +8810,7 @@ async function pullFromCloud(){
   // duplicate's tab forever, since nothing ever told it the doc was
   // gone. Only prunes read-only teammate copies, never "mine".
   let pruned = false;
-  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus"].forEach(key=>{
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins"].forEach(key=>{
     const map = Store.get(key) || {};
     let changed = false;
     Object.keys(map).forEach(id=>{
@@ -8565,7 +8872,7 @@ function switchDeviceIdentity(targetId, payload){
   // schedule (not part of PERSONAL_ONLY_KEYS, since that list is about
   // what's excluded from the *shareable group snapshot*, a different
   // concern from "what counts as this device's own identity").
-  [...PERSONAL_ONLY_KEYS, "schedule"].forEach(key=> Store.remove(key));
+  [...PERSONAL_ONLY_KEYS, "schedule", "activities", "joinedActivities"].forEach(key=> Store.remove(key));
 
   Store.set("contributorName", payload.from || "Someone");
   Store.set("deviceId", targetId);
@@ -8579,11 +8886,17 @@ function switchDeviceIdentity(targetId, payload){
   }
   if(payload.character) Store.set("myCharacter", { ...payload.character });
   if(payload.status) Store.set("myStatus", { ...payload.status });
+  // Only the GROUP activities this identity had already synced come back
+  // this way — same limitation as everything else in this function:
+  // personal-only data that never left their original device can't be
+  // recovered from here.
+  if(Array.isArray(payload.activities)) Store.set("activities", payload.activities.map(a=>({ ...a })));
+  if(Array.isArray(payload.joinedActivities)) Store.set("joinedActivities", payload.joinedActivities.slice());
 
   // They're "mine" now, not a read-only teammate — drop any cached
   // snapshot under their old personId so they don't also linger as
   // their own separate person-tab right after taking over.
-  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus"].forEach(key=>{
+  ["peopleSchedules","peopleBingo","peopleCharacters","peopleLastSeen","peopleStatus","peopleActivities","peopleJoins"].forEach(key=>{
     const map = Store.get(key) || {};
     if(map[targetId]){ delete map[targetId]; Store.set(key, map); }
   });
@@ -10730,6 +11043,13 @@ async function buildSnapshotHtml(opts){
   opts = opts || {};
   const keys = opts.excludePersonal ? Object.keys(DEFAULTS).filter(k=> !PERSONAL_ONLY_KEYS.includes(k)) : Object.keys(DEFAULTS);
   const saved = Object.fromEntries(keys.map(key=>[key, Store.get(key)]));
+  // "activities" isn't in PERSONAL_ONLY_KEYS (group ones are meant to be
+  // shared, same as "schedule") — but it's a mixed personal+group array,
+  // so the personal ones need stripping out by hand here, same filter
+  // buildSyncPayload() applies before anything ever reaches Firestore.
+  if(opts.excludePersonal && Array.isArray(saved.activities)){
+    saved.activities = saved.activities.filter(a=> a && a.visibility === "group");
+  }
   const data = JSON.stringify(saved).replace(/</g, "\\u003c");
   const seedScript = `<script>window.__boomtownSavedData=${data};<\/script>`;
   let template;

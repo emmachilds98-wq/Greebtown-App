@@ -301,12 +301,21 @@ Meet at the clock tower if separated"></textarea>
       </div>
       <button class="action" id="addArtistBtn">Add to lineup</button>
     </div>
+
+    <div class="card">
+      <h3>Add an activity</h3>
+      <p>Not an official act — a meetup, a friend's own set, anything else worth putting on the timetable. Keep it personal or share it with the group so they can see it and join in.</p>
+      <button class="action" id="lineupAddActivityBtn">Add an activity</button>
+    </div>
   </section>
 
   <!-- PLAN -->
   <section id="plan" class="screen">
-    <div class="eyebrow">Your timetable</div>
-    <h2 style="margin-bottom:14px;">My Boomtown</h2>
+    <div style="position:relative;">
+      <div class="eyebrow">Your timetable</div>
+      <h2 style="margin-bottom:14px;">My Boomtown</h2>
+      <button type="button" class="fab-add-btn" id="planAddActivityBtn" aria-label="Add an activity" title="Add an activity">+</button>
+    </div>
 
     <div class="stagelist" id="planPersonTabs" style="display:none; margin-bottom:12px;"></div>
     <p class="empty-note" id="planPersonNote" style="display:none; margin-bottom:10px;"></p>
@@ -345,6 +354,7 @@ Meet at the clock tower if separated"></textarea>
       <div class="stagelist" id="planTimelineDayTabs" style="margin:10px 0;"></div>
       <p class="empty-note" id="planTimelineHint" style="margin-bottom:8px;">Scroll sideways for time, down for stage. Tap a block to see details.</p>
       <div class="timeline-outer" id="planTimelineOuter"><div id="planTimelineGrid"></div></div>
+      <div id="planActivitiesList"></div>
     </div>
 
     <div id="planCompareView" style="display:none;">
