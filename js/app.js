@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v252";
-const APP_BUILD_TIME = "2026-08-01T10:04:41Z";
+const APP_CACHE_VERSION = "v253";
+const APP_BUILD_TIME = "2026-08-01T10:11:36Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6022,6 +6022,64 @@ const campLabels = [
   { x:"74%", y:"87%", text:"Camp Skylark Sunset (premium)" }
 ];
 
+// Amenity markers (toilets, food, bars, water, welfare, etc.) — replaced
+// a straight dump of js/boomtown-locations-2026.js's 53 real-GPS POI
+// points (see that file's own header: extracted from the official app's
+// live map data) after repeated reports that the icons "don't seem to be
+// in the right positions". Those positions were never actually wrong —
+// they're real surveyed coordinates — but this map's districts/camps/
+// paths are ALL hand-placed schematic guesses from the reference video,
+// on a completely different calibration, so real GPS markers kept
+// landing in the gaps between the illustrated zones instead of on them.
+// Hand-placing these on the same schematic system everything else uses
+// fixes the mismatch for good, at the cost of only covering the clusters
+// actually visible in specific reference-video frames rather than all 53
+// real points — each entry below notes which frame/area it's from.
+// Kept js/boomtown-locations-2026.js itself untouched as reference data
+// (also still used for precise stage-position matching via
+// realStageMatch) — just stopped rendering its POI list directly.
+const amenities = [
+  // West Gate — two toilet blocks right beside the gate itself.
+  { category:"Toilets", x:"4%", y:"44%", note:"West Gate" },
+  { category:"Toilets", x:"5%", y:"48%", note:"West Gate" },
+  // Path south of Sub Lab/Loconnection/Nachtlicker (Metropolis) — a row
+  // of toilets plus a water point along the footpath.
+  { category:"Toilets", x:"9%", y:"35%", note:"Metropolis path" },
+  { category:"Toilets", x:"11%", y:"38%", note:"Metropolis path" },
+  { category:"Toilets", x:"13%", y:"41%", note:"Metropolis path" },
+  { category:"Water Point", x:"12%", y:"39%", note:"Metropolis path" },
+  // Metropolis district centre — a welfare/food/bar cluster right by the
+  // district's own label.
+  { category:"Welfare", x:"16%", y:"31%", note:"Metropolis" },
+  { category:"Food", x:"18%", y:"33%", note:"Metropolis" },
+  { category:"Bar", x:"19%", y:"30%", note:"Metropolis" },
+  // Ancient Futures (near Thrutopia) — wooded venue cluster with a
+  // top-up point, photobooth, two food stalls, welfare and first aid.
+  { category:"Top-Up Point", x:"51%", y:"18%", note:"Ancient Futures" },
+  { category:"Photobooth", x:"50%", y:"20%", note:"Ancient Futures" },
+  { category:"Food", x:"53%", y:"21%", note:"Ancient Futures" },
+  { category:"Food", x:"54%", y:"23%", note:"Ancient Futures" },
+  { category:"Welfare", x:"52%", y:"25%", note:"Ancient Futures" },
+  { category:"First Aid", x:"53%", y:"27%", note:"Ancient Futures" },
+  // Oldtown, by The Fools Leap — toilets, an accessible-facilities
+  // marker and a water point on the accessible dashed path.
+  { category:"Toilets", x:"79%", y:"45%", note:"Oldtown / The Fools Leap" },
+  { category:"Accessible Facilities", x:"80%", y:"46%", note:"Oldtown / The Fools Leap" },
+  { category:"Water Point", x:"81%", y:"47%", note:"Oldtown / The Fools Leap" },
+  // Pepperpot Market — the site's main food/drink/medical/welfare hub
+  // (see its own landmark entry); a representative spread rather than
+  // exact individual spots, same "clustered, not surveyed one-by-one"
+  // honesty as everywhere else Boomtown doesn't publish exact positions.
+  { category:"Market", x:"45%", y:"49%", note:"Pepperpot Market" },
+  { category:"Food", x:"47%", y:"51%", note:"Pepperpot Market" },
+  { category:"Food", x:"44%", y:"52%", note:"Pepperpot Market" },
+  { category:"Bar", x:"48%", y:"48%", note:"Pepperpot Market" },
+  { category:"Reception", x:"46%", y:"52%", note:"Pepperpot Market" },
+  { category:"First Aid", x:"49%", y:"50%", note:"Pepperpot Market" },
+  { category:"Welfare", x:"43%", y:"50%", note:"Pepperpot Market" },
+  { category:"Cash Point", x:"46%", y:"47%", note:"Pepperpot Market" }
+];
+
 const gates = [
   { name:"West Gate", x:"3%", y:"46%", info:"Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, plus the Public Transport Hub and the premium Camp Orchid Downtown pitches (built for coach/shuttle arrivals — closest gate access is here, not South Gate).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
   { name:"East Gate", x:"96%", y:"32%", info:"Nearest the White Carparks, motorcycle and cycle parking, and Campervan Field.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
@@ -6420,6 +6478,30 @@ function buildMapGeoJSON(){
     return Math.min(Math.max(2, Math.min(desired, minDist * 0.42)), safeMax);
   }
 
+  // Camping fields off the official app read as by far the biggest
+  // ground use on site — real Boomtown camping dwarfs the "town"
+  // districts, not the other way round — but clearanceRadius above was
+  // sizing them the same conservative way as a district, capped at 9-11
+  // and shrunk against EVERY other zone including neighbouring camp
+  // fields. That last part doesn't match reality: two camping fields
+  // blending together at their edges (Camp Orchid Downtown sitting
+  // inside/beside the wider Downtown Camping, say) is normal — it's only
+  // running into a themed district, parking or the market hub that needs
+  // a hard boundary. So camp fields get their own clearance check against
+  // just those non-camp zones, a higher desired cap, and a ratio closer
+  // to the theoretical safe half-distance (0.48 vs 0.42) since that
+  // safety margin was designed for the tighter district-vs-district case.
+  const nonCampZoneCenters = zoneCenters.filter(z=> !campLabels.includes(z.ref));
+  function campClearanceRadius(cx, cy, selfRef, desired){
+    let minDist = Infinity;
+    nonCampZoneCenters.forEach(z=>{
+      if(z.ref === selfRef) return;
+      minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy));
+    });
+    const safeMax = Math.max(1.5, minDist / 2 - 0.4);
+    return Math.min(Math.max(3, Math.min(desired, minDist * 0.48)), safeMax);
+  }
+
   function districtSpreadR(d){
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     let maxDist = 0;
@@ -6717,7 +6799,7 @@ function buildMapGeoJSON(){
   const campFeatures = campAreaDefs.map((c,i)=>{
     const isDowntown = /downtown/i.test(c.text);
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
-    const r = clearanceRadius(cx, cy, c, 11);
+    const r = campClearanceRadius(cx, cy, c, 18);
     campAreaRadii.set(c, r);
     return {
       type: "Feature",
@@ -6783,7 +6865,7 @@ function buildMapGeoJSON(){
   const campFieldRadii = new Map();
   const campFieldFeatures = ordinaryCamps.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
-    const r = clearanceRadius(cx, cy, c, 9);
+    const r = campClearanceRadius(cx, cy, c, 18);
     campFieldRadii.set(c, r);
     return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 600 + i * 43, 12)) ] } };
   });
@@ -7596,29 +7678,20 @@ function loadMap(){
     );
   });
 
-  // Real official-app amenity data is NOT run through nearZone() —
-  // tried that (converting each poi's real lat/lon back into schematic
-  // space and checking it against the drawn zone shapes) and it was
-  // actively harmful: with a 12-unit buffer it still dropped 36 of 53
-  // real POIs, including the ONLY marked First Aid, Reception and Cash
-  // Point pins. That test was ALSO run against the old
-  // SCHEMATIC_TO_LATLON_FIT affine transform, since replaced by
-  // schematicToLatLon()'s straight SITE_SW/SITE_NE scaling above (that
-  // old fit had a real, confirmed ~5x real-world scale bug — see its
-  // replacement's own comment) — but the actual reasoning for not
-  // filtering real POI markers by "does it look inside our drawn zone"
-  // stands regardless of transform accuracy: these are genuine positions
-  // straight from the official app's own map data, and hiding safety
-  // info (first aid, welfare) because a zone shape doesn't happen to
-  // reach it isn't a trade worth making.
-  ((window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois) || []).forEach(poi=>{
-    addMapMarker("poi", poi.lat, poi.lon,
+  // See the `amenities` const's own comment (above, near `gates`) for
+  // why this renders hand-placed, video-referenced positions instead of
+  // a straight dump of js/boomtown-locations-2026.js's real-GPS POI list
+  // — the real coordinates weren't wrong, they just sat on a different
+  // calibration than every hand-drawn district/camp/path on this map.
+  amenities.forEach(poi=>{
+    const coord = schematicToLatLon(parseFloat(poi.x), parseFloat(poi.y));
+    addMapMarker("poi", coord.lat, coord.lon,
       `<div class="marker poi">${POI_ICONS[poi.category] || "📍"}</div>`,
       { title: poi.category, onClick: ()=> showMapInfoCard(`
         <div class="card">
           <span class="tag">amenity</span>
           <h3>${POI_ICONS[poi.category] || "📍"} ${escapeHtml(poi.category)}</h3>
-          <p class="empty-note">Real position, from the official app's own map data.</p>
+          <p class="empty-note">Seen on the official app's own map near ${escapeHtml(poi.note)} — approximate, not surveyed.</p>
         </div>
       `) }
     );
