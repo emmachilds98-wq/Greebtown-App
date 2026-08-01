@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v227";
-const APP_BUILD_TIME = "2026-08-01T03:01:03Z";
+const APP_CACHE_VERSION = "v228";
+const APP_BUILD_TIME = "2026-08-01T03:13:16Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6270,6 +6270,47 @@ function buildMapGeoJSON(){
   // paths agree on what belongs to it) and sizes the clearing to just
   // past the furthest one — small district, small clearing.
   const districtMemberPoints = locations.filter(p=>p.kind === "stage").concat(minorStages).concat(thingsToFind);
+
+  // Master registry of every ground-zone centre (districts, camping
+  // fields, parking) this pass considers purely to keep neighbouring
+  // zones from geometrically overlapping — shrinking district radius
+  // alone (the previous pass) wasn't enough on its own: a camping
+  // field's own blob (radius ~8-10) can reach past a district centre
+  // that's only a few schematic units away regardless of how small the
+  // district's own radius is (Oldtown sits just ~5 units from East
+  // Camping, for example). clearanceRadius caps whichever radius is
+  // being asked for so it can reach at most 40% of the way to the
+  // NEAREST other zone's centre — two neighbouring zones each capped at
+  // 40% still leaves a real gap between their edges, even accounting for
+  // blobRing's own up-to-22%-oversize irregularity.
+  const zoneCenters = districts.map(d=>({ x: parseFloat(d.x), y: parseFloat(d.y), ref: d }))
+    .concat(campLabels.map(c=>({ x: parseFloat(c.x), y: parseFloat(c.y), ref: c })))
+    .concat(parkingAreas.map(p=>({ x: parseFloat(p.x), y: parseFloat(p.y), ref: p })));
+  function clearanceRadius(cx, cy, selfRef, desired){
+    let minDist = Infinity;
+    zoneCenters.forEach(z=>{
+      if(z.ref === selfRef) return;
+      minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy));
+    });
+    // The floor below (2) exists so a zone tucked close to a neighbour
+    // doesn't shrink away to nothing — but a floor alone can't be
+    // allowed to win: if BOTH of a close pair hit the same floor, their
+    // radii can sum to MORE than the distance between them (this
+    // actually happened for Oldtown/East Camping, ~5 units apart — a
+    // floor of 3 each summed to 6). minDist/2 is a hard ceiling no floor
+    // is allowed to cross, since two neighbours each capped at half the
+    // distance between them can never sum past that distance.
+    const safeMax = Math.max(1.5, minDist / 2 - 0.4);
+    return Math.min(Math.max(2, Math.min(desired, minDist * 0.36)), safeMax);
+  }
+
+  // Every zone shape actually drawn (district/camp/parking), collected
+  // as {x,y,r} while each is built below — exposed as geo.zoneShapes so
+  // loadMap()'s marker-adding code can skip any pin that doesn't land
+  // near a real drawn zone, instead of scattering icons across open
+  // ground/woods that the real site doesn't have anything on.
+  const zoneShapes = [];
+
   function districtSpreadR(d){
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     let maxDist = 0;
@@ -6279,14 +6320,18 @@ function buildMapGeoJSON(){
       const dx = parseFloat(p.x) - cx, dy = parseFloat(p.y) - cy;
       maxDist = Math.max(maxDist, Math.sqrt(dx * dx + dy * dy));
     });
-    return Math.min(13, Math.max(7, maxDist + 3));
+    const desired = Math.min(13, Math.max(5, maxDist + 3));
+    return clearanceRadius(cx, cy, d, desired);
   }
   const districtFeatures = districts.map((d,i)=>{
     const rgb = DISTRICT_PALETTE[i % DISTRICT_PALETTE.length];
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    const r = districtSpreadR(d);
+    zoneShapes.push({ x: cx, y: cy, r });
     return {
       type: "Feature",
       properties: { name: d.name, fill: `rgba(${rgb},0.32)`, line: `rgba(${rgb},0.95)`, casing: `rgba(${rgb},0.28)` },
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(d.x), parseFloat(d.y), districtSpreadR(d), i * 31 + 7, 18)) ] }
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 31 + 7, 18)) ] }
     };
   });
 
@@ -6369,15 +6414,18 @@ function buildMapGeoJSON(){
   // green/yellow camping fields and the busy district clearings), with a
   // few straight internal "row" lines so it reads as a car park rather
   // than just another grey blob.
-  const parkingFeatures = parkingAreas.map((p,i)=>({
-    type: "Feature", properties: {},
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(p.x), parseFloat(p.y), p.r, 1200 + i * 37, 10)) ] }
-  }));
+  const parkingFeatures = parkingAreas.map((p,i)=>{
+    const cx = parseFloat(p.x), cy = parseFloat(p.y);
+    const r = clearanceRadius(cx, cy, p, p.r);
+    zoneShapes.push({ x: cx, y: cy, r });
+    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 1200 + i * 37, 10)) ] } };
+  });
   let parkingRowFeatures = [];
   parkingAreas.forEach((p,i)=>{
     const cx = parseFloat(p.x), cy = parseFloat(p.y);
-    for(let r=-2;r<=2;r++){
-      parkingRowFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - p.r * 0.8, cy + r * (p.r / 3)], [cx + p.r * 0.8, cy + r * (p.r / 3)]]) } });
+    const r = clearanceRadius(cx, cy, p, p.r);
+    for(let row=-2;row<=2;row++){
+      parkingRowFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - r * 0.8, cy + row * (r / 3)], [cx + r * 0.8, cy + row * (r / 3)]]) } });
     }
   });
 
@@ -6390,23 +6438,31 @@ function buildMapGeoJSON(){
   // than a circle (seen clearly, twice, across both videos), so it gets
   // fewer ring points for a more angular shape than the Skylark camps.
   const campAreaDefs = campLabels.filter(c=> /premium/i.test(c.text));
+  const campAreaRadii = new Map();
   const campFeatures = campAreaDefs.map((c,i)=>{
     const isDowntown = /downtown/i.test(c.text);
+    const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const r = clearanceRadius(cx, cy, c, 10);
+    campAreaRadii.set(c, r);
+    zoneShapes.push({ x: cx, y: cy, r });
     return {
       type: "Feature",
       properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(c.x), parseFloat(c.y), 10, 700 + i * 61, isDowntown ? 6 : 14)) ] }
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 700 + i * 61, isDowntown ? 6 : 14)) ] }
     };
   });
 
   // A small triangular tree-ring/hedge path inside Camp Orchid Downtown —
   // a distinctive real feature visible clearly (and repeatedly) in both
-  // reference videos, not present anywhere else on the map.
+  // reference videos, not present anywhere else on the map. Sized to
+  // half the camp's own (possibly clearance-shrunk) radius so it always
+  // stays inside the camp area fill instead of poking out past its edge.
   const downtownCamp = campAreaDefs.find(c=> /downtown/i.test(c.text));
   const triangleFeature = downtownCamp ? {
     type: "Feature", properties: {},
     geometry: { type: "LineString", coordinates: schematicRingToLngLat((()=>{
-      const ring = blobRing(parseFloat(downtownCamp.x), parseFloat(downtownCamp.y), 4, 850, 3);
+      const triR = Math.min(4, campAreaRadii.get(downtownCamp) * 0.5);
+      const ring = blobRing(parseFloat(downtownCamp.x), parseFloat(downtownCamp.y), triR, 850, 3);
       ring.push(ring[0]);
       return ring;
     })()) }
@@ -6436,22 +6492,27 @@ function buildMapGeoJSON(){
   // happened to be underneath, which made them hard to tell apart from
   // plain open ground at a glance.
   const ordinaryCamps = campLabels.filter(c=> !/premium/i.test(c.text));
-  const campFieldFeatures = ordinaryCamps.map((c,i)=>({
-    type: "Feature", properties: {},
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(c.x), parseFloat(c.y), 8, 600 + i * 43, 12)) ] }
-  }));
+  const campFieldRadii = new Map();
+  const campFieldFeatures = ordinaryCamps.map((c,i)=>{
+    const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const r = clearanceRadius(cx, cy, c, 8);
+    campFieldRadii.set(c, r);
+    zoneShapes.push({ x: cx, y: cy, r });
+    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 600 + i * 43, 12)) ] } };
+  });
   let campFieldLineFeatures = [];
   ordinaryCamps.forEach((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const r = campFieldRadii.get(c) * 0.85;
     const rand = seededRand(650 + i * 19);
     for(let l=0;l<2;l++){
       const a = rand() * Math.PI;
-      const dx = Math.cos(a) * 7, dy = Math.sin(a) * 7 * 0.8;
+      const dx = Math.cos(a) * r, dy = Math.sin(a) * r * 0.8;
       campFieldLineFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - dx, cy - dy], [cx + dx, cy + dy]]) } });
     }
   });
   let confettiPts = [];
-  ordinaryCamps.forEach((c,i)=>{ confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 14, 7, 800 + i * 47)); });
+  ordinaryCamps.forEach((c,i)=>{ confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 14, campFieldRadii.get(c) * 0.85, 800 + i * 47)); });
   const confettiFeatures = confettiPts.map(t=>{
     const c = schematicToLatLon(t.x, t.y);
     return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
@@ -6544,7 +6605,8 @@ function buildMapGeoJSON(){
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
-    boundary: { type:"FeatureCollection", features: [boundaryFeature] }
+    boundary: { type:"FeatureCollection", features: [boundaryFeature] },
+    zoneShapes
   };
 }
 
@@ -6594,6 +6656,37 @@ function schematicToLatLon(xPercent, yPercent){
     lat: fit.a * xPercent + fit.b * yPercent + fit.c,
     lon: fit.d * xPercent + fit.e * yPercent + fit.f
   };
+}
+// The inverse of schematicToLatLon — solves the same 2x2 linear system
+// (lat = a*x + b*y + c, lon = d*x + e*y + f) for x/y given lat/lon, so a
+// REAL lat/lon point (the official-app POI data) can be tested against
+// the schematic-space zone shapes (mapZoneShapes) everything else on
+// this map already uses, with one shared nearZone() check instead of
+// two different distance systems.
+function latLonToSchematic(lat, lon){
+  const fit = SCHEMATIC_TO_LATLON_FIT;
+  const det = fit.a * fit.e - fit.b * fit.d;
+  const dLat = lat - fit.c, dLon = lon - fit.f;
+  return {
+    x: (fit.e * dLat - fit.b * dLon) / det,
+    y: (fit.a * dLon - fit.d * dLat) / det
+  };
+}
+// True if (x,y) — schematic 0-100 space — lands inside (or within
+// `buffer` schematic units of) any real drawn zone (district clearing,
+// camping field, parking area). Used to skip marker pins that would
+// otherwise float on open field/woods the real site doesn't have
+// anything on. Buffer defaults generous (this map's schematic/real
+// calibration has real error, see SCHEMATIC_TO_LATLON_FIT's own
+// comment) so it only cuts pins that are genuinely far from every zone,
+// not ones just past a blob's literal edge.
+function nearZone(x, y, buffer){
+  // Before the map's first "load" event fires, mapZoneShapes is still
+  // empty — treat that as "unknown" and show everything rather than
+  // hiding every marker for that one frame.
+  if(!mapZoneShapes.length) return true;
+  buffer = buffer == null ? 6 : buffer;
+  return mapZoneShapes.some(z=> Math.hypot(z.x - x, z.y - y) <= z.r + buffer);
 }
 function realStageMatch(name){
   const data = window.BOOMTOWN_LOCATIONS_2026;
@@ -6645,6 +6738,14 @@ function realCoordFor(place){
 let mapGL = null;
 let mapMarkerGroups = {};
 let mapMarkersByName = {};
+// Every drawn ground zone (district clearing, camping field, parking
+// area) as {x, y, r} in the same schematic 0-100 space everything else
+// uses — built once inside buildMapGeoJSON (see mapGL.on("load", ...)
+// below) and read by the marker-adding code further down loadMap() to
+// skip pins that land outside every real zone (open field/woods with
+// nothing actually there on the real site) instead of scattering icons
+// across plain ground with no zone under them.
+let mapZoneShapes = [];
 
 // Every marker on this map is one combined DOM element (a positioning
 // dot plus its label) rather than two separate layers per place —
@@ -6747,6 +6848,7 @@ function loadMap(){
     // drawn every frame from then on.
     mapGL.on("load", ()=>{
       const geo = buildMapGeoJSON();
+      mapZoneShapes = geo.zoneShapes;
 
       // Bottom-to-top: faint ground texture first, then area fills, then
       // paths, then icon-like points on top — the same layering a real
@@ -6948,7 +7050,11 @@ function loadMap(){
     );
   });
 
-  minorStages.forEach(place=>{
+  // Filtered to points that actually land near a drawn zone (district/
+  // camp/parking) — the schematic positions here predate the tighter,
+  // clearance-checked zone shapes above, so some used to end up floating
+  // on open field/woods the real site doesn't have anything on.
+  minorStages.filter(place=> nearZone(parseFloat(place.x), parseFloat(place.y))).forEach(place=>{
     const isRumoured = place.status === "rumoured";
     const coord = realCoordFor(place);
     addMapMarker("minor", coord.lat, coord.lon,
@@ -6963,7 +7069,7 @@ function loadMap(){
     );
   });
 
-  thingsToFind.forEach(spot=>{
+  thingsToFind.filter(spot=> nearZone(parseFloat(spot.x), parseFloat(spot.y))).forEach(spot=>{
     const coord = realCoordFor(spot);
     addMapMarker("secret", coord.lat, coord.lon,
       mapMarkerHtml("secret", "secret", spot.name, "?"),
@@ -7023,7 +7129,20 @@ function loadMap(){
     );
   });
 
-  ((window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois) || []).forEach(poi=>{
+  // Real official-app amenity data — genuine positions, but genuine
+  // doesn't mean "inside one of this map's drawn zones": the schematic
+  // basemap is only an approximation, so some real POIs land in open
+  // field/woods on this map's own geometry even though they're
+  // legitimate on the real site. latLonToSchematic converts each one
+  // back into the same schematic space the zone shapes use so they can
+  // be checked against the same nearZone() rule as everything else,
+  // with a wider buffer (12 vs the default 6) since these positions
+  // never went through the same approximate placement the rest of the
+  // schematic data did, and shouldn't be held to as tight a leash.
+  ((window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois) || []).filter(poi=>{
+    const sc = latLonToSchematic(poi.lat, poi.lon);
+    return nearZone(sc.x, sc.y, 12);
+  }).forEach(poi=>{
     addMapMarker("poi", poi.lat, poi.lon,
       `<div class="marker poi">${POI_ICONS[poi.category] || "📍"}</div>`,
       { title: poi.category, onClick: ()=> showMapInfoCard(`
