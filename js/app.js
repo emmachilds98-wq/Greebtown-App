@@ -11,14 +11,14 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v253";
-const APP_BUILD_TIME = "2026-08-01T10:11:36Z";
+const APP_CACHE_VERSION = "v254";
+const APP_BUILD_TIME = "2026-08-01T10:24:58Z";
 
-// Used by renderGroupDecisions (defined much further down) — declared up
+// Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
 // call chain, same TDZ-safety reason as STATUS_STALE_MS/_firestoreDb.
-let groupDecisionsExpanded = false;
-const GROUP_DECISIONS_CAP = 4;
+let groupInvitesExpanded = false;
+const GROUP_INVITES_CAP = 4;
 
 // The fixed roster of expected names (see "WHO'S USING THIS DEVICE"
 // further down for the actual picker UI) — moved all the way up here,
@@ -28,11 +28,11 @@ const GROUP_DECISIONS_CAP = 4;
 // reachable from renderSchedule()'s load-time call far below — can
 // reach personColorFor() before that section would otherwise run.
 const KNOWN_CONTRIBUTORS = ["Emma","Dave","Rob","Jack","Lewis","Dana","Rhea","Katelyn"];
-// Collapsed by default — Group decisions used to sit permanently full-
+// Collapsed by default — Group invites used to sit permanently full-
 // height above Compare's own list, effectively hiding it. Starts
 // collapsed to a one-line summary so Compare is visible without an
-// extra tap, same TDZ-safety reason as groupDecisionsExpanded above.
-let groupDecisionsCollapsed = true;
+// extra tap, same TDZ-safety reason as groupInvitesExpanded above.
+let groupInvitesCollapsed = true;
 
 // Used by renderHomeContextBanner (defined much further down) — declared
 // up here since that function runs at load time (its own top-level call,
@@ -3496,7 +3496,7 @@ function showArtists(list){
     return;
   }
   // Built once per render, not per artist — same combined-interest map
-  // Group Decisions/Today already compute, reused here rather than a
+  // Today's dashboard already computes, reused here rather than a
   // separate per-card lookup.
   const interestMap = (typeof buildCombinedArtistInterestMap === "function") ? buildCombinedArtistInterestMap() : {};
   const totalPeople = (typeof comparePeopleList === "function") ? comparePeopleList().length : 1;
@@ -3529,12 +3529,14 @@ function showArtists(list){
         <div class="star-seen-col">
           <button class="star-btn${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see">${saved ? "★" : "☆"}</button>
           <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
+          ${inviteHeartBtnHTML(artist)}
           ${artist.start ? `<button class="ghost timeline-jump-btn" aria-label="View on the timeline" title="View on the timeline" style="padding:5px 8px; font-size:13px;">🗓</button>` : ""}
         </div>
       </div>
     `;
     wireStarButton(div.querySelector(".star-btn"), artist);
     wireSeenButton(div.querySelector(".seen-btn"), artist);
+    wireInviteHeartBtn(div.querySelector(".invite-heart-btn"), artist);
     div.querySelector(".stage-link").onclick = (e)=>{ e.stopPropagation(); jumpToStageDirectory(artist.stage); };
     wirePreviewButtons(div);
     wireOtherSetLinks(div, artist);
@@ -3780,6 +3782,7 @@ function showTimelineDetailModal(artist, opts){
         <div class="star-seen-col">
           ${opts.readonly ? "" : `<button class="star-toggle-lg${mustSee ? " mustsee" : ""}" aria-label="Toggle saved, hold for must-see" id="timelineDetailStarBtn">${saved ? "★" : "☆"}</button>`}
           <button class="seen-toggle-lg${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}" id="timelineDetailSeenBtn">✓</button>
+          ${opts.readonly ? "" : inviteHeartBtnHTML(artist).replace('class="ghost invite-heart-btn', 'id="timelineDetailInviteBtn" class="ghost invite-heart-btn')}
         </div>
       </div>
     </div>
@@ -3804,6 +3807,11 @@ function showTimelineDetailModal(artist, opts){
     e.stopPropagation();
     setSeen(artist, !isSeen(artist.name));
     showTimelineDetailModal(artist, opts);
+  };
+  const inviteBtn = backdrop.querySelector("#timelineDetailInviteBtn");
+  if(inviteBtn) inviteBtn.onclick = (e)=>{
+    e.stopPropagation();
+    toggleGroupInvite(artist).then(()=> showTimelineDetailModal(artist, opts));
   };
 }
 
@@ -4206,10 +4214,9 @@ function findClashes(schedule){
 
 // A personal clash's own resolution (which one to actually go to, or
 // catch half of each) is purely local — it's this one person's call
-// about their own schedule, not something the group needs to weigh in
-// on (that's groupClashPairs()/setGroupDecision() above, for clashes
-// involving 2+ different people). Keyed on day+artist-pair, same
-// stable-identity approach as group decisions, so it survives reorders.
+// about their own schedule, not something the group weighs in on.
+// Keyed on day+artist-pair, same stable-identity approach as a group
+// invite key, so it survives reorders.
 function personalClashChoiceKey(day, nameA, nameB){
   return `${day}|${[nameA, nameB].sort().join("__")}`;
 }
@@ -4265,25 +4272,6 @@ function closeCustomClashTimeModal(){
   if(existing) existing.remove();
 }
 
-// A personal clash pair (both artists in YOUR OWN schedule) can also be a
-// GROUP clash if 2+ different people across the group are into at least
-// one of the two — same day+sorted-names key either way (see
-// personalClashChoiceKey/groupClashPairs), so "also a group clash" is
-// just "this key is present in groupPairsByKey". Renders a small link-out
-// card so resolving your own pick doesn't leave you unaware the group
-// still needs to weigh in separately (or already has).
-function groupClashLinkHTML(pair, decision){
-  const status = decision ? decision.status : "needs";
-  const owners = new Set([...Object.keys(pair.a.interest), ...Object.keys(pair.b.interest)]);
-  owners.delete(currentContributorName() || "You");
-  const otherCount = owners.size;
-  return `<div class="decision-linked-note">
-    <span>⚡ ${otherCount} other${otherCount===1?"":"s"} in your group ${otherCount===1?"is":"are"} into this clash too — ${status==="needs" ? "no group call yet" : "group's already weighed in"}</span>
-    ${decisionStatusPillHTML(status)}
-    <button type="button" class="ghost decision-jump-btn" data-jump-key="${escapeHtml(pair.key)}">Open group decision</button>
-  </div>`;
-}
-
 // Asked whenever "pick my own times" is chosen for a clashing pair —
 // two independent start/end pickers, one per act, prefilled with each
 // act's own real time as a sensible starting point (most people just
@@ -4324,7 +4312,7 @@ function showCustomClashTimeModal(day, a, b, onSave){
   };
 }
 
-function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners, groupPairsByKey){
+function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owners){
   const clashClass = clashes && clashes.length ? " clash" : "";
   const mustSee = !!artist.mustSee;
   const seen = isSeen(artist.name);
@@ -4348,9 +4336,6 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
     const choice = getPersonalClashChoice(artist.day, artist.name, other.name);
     const shortMine = escapeHtml(truncateName(artist.name, 14));
     const shortOther = escapeHtml(truncateName(other.name, 14));
-    const clashKey = personalClashChoiceKey(artist.day, artist.name, other.name);
-    const groupPair = groupPairsByKey ? groupPairsByKey.get(clashKey) : null;
-    const groupDecision = groupPair ? (Store.get("groupDecisions") || {})[groupPair.key] : null;
     // "I'll go" + 🙋 (solo) rather than reusing the group card's "Together"
     // + 👥 wording — the two cards sit right next to each other when a
     // clash is both personal and group, and near-identical labels are
@@ -4362,8 +4347,7 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
         <button data-clash-choice="custom" title="Only updates your own plan — tap again to clear" class="${choice==="custom" ? "active" : ""}">⏱ Pick my<br><span>own times</span></button>
       </div>
       <p class="empty-note personal-clash-scope-note">Just for your own plan — teammates won't see this pick.</p>
-      ${effectiveTime.overridden ? `<p class="empty-note" style="margin-top:2px;">Your plan: <strong>${escapeHtml(timeLabel({ ...artist, ...effectiveTime }))}</strong> (real time ${escapeHtml(timeLabel(artist))})</p>` : ""}
-      ${groupPair ? groupClashLinkHTML(groupPair, groupDecision) : ""}`;
+      ${effectiveTime.overridden ? `<p class="empty-note" style="margin-top:2px;">Your plan: <strong>${escapeHtml(timeLabel({ ...artist, ...effectiveTime }))}</strong> (real time ${escapeHtml(timeLabel(artist))})</p>` : ""}`;
   }
   return `
     <div class="item${clashClass}${mustSee ? " mustsee" : ""}" data-idx="${idx}">
@@ -4379,6 +4363,7 @@ function scheduleItemHTML(artist, idx, clashes, readonly, mustSeeNamesSet, owner
         <div class="btnrow plan-btnrow">
           ${readonly ? "" : `<button class="star-btn${mustSee ? " mustsee" : ""} mustsee-toggle-btn" aria-label="Toggle must-see" title="Must-see">${mustSee ? "★" : "☆"}</button>`}
           <button class="seen-btn${seen ? " seen" : ""}" aria-label="${seen ? "You saw this live — tap to undo" : "Tick once you've actually seen this live at the festival"}" title="${seen ? "You saw this live — tap to undo" : "Confirm: I saw this live at the festival"}">✓</button>
+          ${readonly ? "" : inviteHeartBtnHTML(artist)}
           ${readonly ? "" : `<button class="set-time-btn" aria-label="Set a custom time for this artist" title="Set a custom time">🕐</button>`}
         </div>
       </div>
@@ -4506,7 +4491,7 @@ function rerenderActivePlanView(){
     renderCompareFilterChips();
     renderPlanCompare();
     if(typeof renderBigPictureSummary === "function") renderBigPictureSummary("compareBigPicture");
-    if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+    if(typeof renderGroupInvites === "function") renderGroupInvites();
   } else if(planView === "clash"){
     updateClashSubViewVisibility();
   } else {
@@ -4698,11 +4683,6 @@ function renderSchedule(){
     return;
   }
 
-  // Computed once per render (not per item) — groupClashPairs() is an
-  // O(n²) scan over the whole group's combined interest map, and every
-  // clashing item on this screen needs the same lookup to know whether
-  // its personal clash is also a group one.
-  const groupPairsByKey = new Map(groupClashPairs().map(p=>[p.key, p]));
   const mustSeeNamesSet = new Set(fullSchedule.filter(a=>a.mustSee).map(a=>a.name));
   // Keep each entry's ORIGINAL index into the full (unfiltered) schedule
   // even when the must-sees-only filter is on — remove/set-time/star
@@ -4722,7 +4702,7 @@ function renderSchedule(){
   }
 
   if(planView === "list"){
-    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet,a._owners,groupPairsByKey)).join("");
+    scheduleList.innerHTML = shown.map(({a,i})=> scheduleItemHTML(a,i,null,readonly,mustSeeNamesSet,a._owners)).join("");
   } else {
     const clashMap = findClashes(fullSchedule);
     const byDay = {};
@@ -4739,7 +4719,7 @@ function renderSchedule(){
       // "23:30", not before it as "0..." vs "2..." would alphabetically.
       const items = byDay[day].sort((x,y)=> (toMinutes(x.a.day, x.a.start) ?? 999999) - (toMinutes(y.a.day, y.a.start) ?? 999999));
       html += `<div class="daygroup">${day}</div>`;
-      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet,a._owners,groupPairsByKey));
+      items.forEach(({a,i})=> html += scheduleItemHTML(a,i,clashMap[i],readonly,mustSeeNamesSet,a._owners));
     });
     scheduleList.innerHTML = html;
   }
@@ -4763,6 +4743,8 @@ function renderSchedule(){
 
       const mustSeeBtn = itemEl.querySelector(".mustsee-toggle-btn");
       if(mustSeeBtn) mustSeeBtn.onclick = ()=> setMustSee(artist, !isMustSee(artist.name));
+
+      wireInviteHeartBtn(itemEl.querySelector(".invite-heart-btn"), artist);
 
       itemEl.querySelector(".set-time-btn").onclick = ()=>{
         // Re-tapping the clock icon while the editor's already open for
@@ -4809,10 +4791,6 @@ function renderSchedule(){
           if(next !== "custom") setPersonalClashTimes(artist.day, artist.name, otherName, null);
           renderSchedule();
         };
-      });
-
-      itemEl.querySelectorAll(".decision-jump-btn").forEach(btn=>{
-        btn.onclick = ()=> jumpToGroupDecision(btn.getAttribute("data-jump-key"));
       });
     });
   }
@@ -4891,7 +4869,7 @@ function setPlanView(view){
     // Moved here (out of always-visible at the top of every Plan view) so
     // the default List view isn't cluttered by a section that's only
     // actually relevant once you're comparing everyone's picks.
-    if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+    if(typeof renderGroupInvites === "function") renderGroupInvites();
     renderCompareFilterChips();
     renderPlanCompare();
   } else if(view === "seen"){
@@ -4901,28 +4879,6 @@ function setPlanView(view){
   } else {
     renderSchedule();
   }
-}
-
-// Jumps from a personal clash card (Plan > List/Clashes) over to the
-// matching Group decision card in Compare. "Matching" just means the same
-// key — personalClashChoiceKey() and groupClashPairs() both build it from
-// day+sorted-artist-names, so a clash that's personal AND group-wide
-// always resolves to one identity across both stores. Expands the box
-// (and its "show more" list, if the card's past the fold) so the target
-// is actually in the DOM before scrolling to it.
-function jumpToGroupDecision(key){
-  setPlanView("compare");
-  groupDecisionsCollapsed = false;
-  const idx = groupClashPairs().findIndex(p=> p.key === key);
-  if(idx >= GROUP_DECISIONS_CAP) groupDecisionsExpanded = true;
-  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
-  requestAnimationFrame(()=>{
-    const card = document.querySelector(`.decision-card[data-decision-key="${CSS.escape(key)}"]`);
-    if(!card) return;
-    card.scrollIntoView({ behavior: "smooth", block: "center" });
-    card.classList.add("decision-jump-highlight");
-    setTimeout(()=> card.classList.remove("decision-jump-highlight"), 1600);
-  });
 }
 
 document.getElementById("viewListBtn").onclick = ()=> setPlanView("list");
@@ -5203,7 +5159,7 @@ function renderBigPictureSummary(containerId){
   const all = Object.values(byArtist);
   const sharedMustSees = all.filter(a=> Object.values(a.interest).filter(Boolean).length >= 2).length;
   const clashCount = groupClashPairs().length;
-  const decisionsRemaining = outstandingGroupDecisionsCount();
+  const invitesOut = outstandingGroupInvitesCount();
   const nowMin = nowMinutesSinceFestivalStart();
   const nextShared = all
     .filter(a=> a.startMin !== null && a.startMin > nowMin && Object.keys(a.interest).length >= 2)
@@ -5211,7 +5167,7 @@ function renderBigPictureSummary(containerId){
   const parts = [
     `${sharedMustSees} shared Must See${sharedMustSees===1?"":"s"}`,
     `${clashCount} clash${clashCount===1?"":"es"}`,
-    `${decisionsRemaining} decision${decisionsRemaining===1?"":"s"} remaining`,
+    `${invitesOut} group invite${invitesOut===1?"":"s"}`,
   ];
   if(nextShared) parts.push(`Next shared artist ${timeLabel(nextShared)}`);
   box.innerHTML = `<p class="empty-note big-picture-line">${parts.join(" · ")}</p>`;
@@ -5669,7 +5625,7 @@ function updateNextEvent(){
     }
   }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
-  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+  if(typeof renderGroupInvites === "function") renderGroupInvites();
 }
 
 function renderNowNext(){
@@ -8773,12 +8729,16 @@ function buildSyncPayload(){
     // peopleStatus[personId] on the receiving end, never merged into
     // anyone else's own myStatus.
     status: Store.get("myStatus") || null,
-    // The shared meeting point and group decisions aren't per-device —
+    // The shared meeting point and group invites aren't per-device —
     // every device just carries its own last-known copy of them here,
     // piggybacking on this same already-working per-member write. On
     // merge, whichever copy has the newest updatedAt wins (see
     // mergeSyncPayload below) — a simple last-write-wins spread across
     // however many devices happen to sync, no separate document needed.
+    // `decisions` is the field name on the wire (see groupInviteKey/
+    // toggleGroupInvite) — kept as-is rather than renamed, since a new
+    // top-level sync field needs firestore.rules updated everywhere
+    // before it'll accept writes.
     meeting: Store.get("meetingUpdatedAt") ? { place: Store.get("meeting") || "", by: Store.get("meetingBy") || "", updatedAt: Store.get("meetingUpdatedAt") } : null,
     decisions: Store.get("groupDecisions") || {},
     // Same read-only-snapshot treatment as schedule/bingo/character/status
@@ -9081,11 +9041,11 @@ function mergeSyncPayload(payload){
     Store.set("peopleWantTogether", peopleWantTogether);
   }
 
-  // The shared meeting point and group decisions ride along on every
+  // The shared meeting point and group invites ride along on every
   // device's own payload (see buildSyncPayload above) rather than a
-  // separate document — last-write-wins by comparing updatedAt against
-  // whatever's already cached locally, same as every other shared
-  // single-value field in this app.
+  // separate document — last-write-wins PER KEY by comparing updatedAt
+  // against whatever's already cached locally, same as every other
+  // shared single-value field in this app.
   if(payload.meeting && (payload.meeting.updatedAt || 0) > (Store.get("meetingUpdatedAt") || 0)){
     Store.set("meeting", payload.meeting.place || "");
     Store.set("meetingBy", payload.meeting.by || "");
@@ -9678,7 +9638,7 @@ function refreshAfterMerge(){
   if(typeof renderMyCharacterPersonTabs === "function"){ renderMyCharacterPersonTabs(); renderMyCharacter(); }
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
   if(typeof renderAllFriendStatusUI === "function") renderAllFriendStatusUI();
-  if(typeof renderGroupDecisions === "function") renderGroupDecisions();
+  if(typeof renderGroupInvites === "function") renderGroupInvites();
   if(typeof renderDiscoverForYou === "function") renderDiscoverForYou();
   if(typeof renderRecentActivity === "function") renderRecentActivity("recentActivityList");
 }
@@ -10012,16 +9972,14 @@ function wireLocationReminderToggle(){
 wireLocationReminderToggle();
 
 // ===============================
-// GROUP DECISIONS — clash resolution across the WHOLE GROUP's saved
-// artists, not just this device's own (that's the existing
-// findClashes() above, used by the Plan "Clashes" view). A group clash
-// is two different saved artists overlapping in time where at least one
-// person is interested in each. The artists themselves (day + name) are
-// the stable identity a decision is keyed on — not a list index, which
-// differs per person and reshuffles as people add/remove picks.
-// Persisted like the shared meeting point: one map on the room document
-// (not a per-member doc), since a decision belongs to the group, not to
-// whoever happened to record it.
+// GROUP CLASH DETECTION — informational only: how many of the WHOLE
+// GROUP's saved artists overlap in time, not just this device's own
+// (that's the existing findClashes() above, used by the Plan "Clashes"
+// view). A group clash is two different saved artists overlapping in
+// time where at least one person is interested in each. Surfaced as a
+// simple count (Big Picture, Today's GROUP section) — there's no
+// group-wide "resolve this clash" flow any more; see GROUP INVITES
+// further down for how the group actually coordinates on a set.
 // ===============================
 // Combines this device's own saved artists with every synced teammate's
 // (peopleSchedules) into one map keyed by day+name, each entry carrying
@@ -10094,233 +10052,165 @@ function wantTogetherEntries(){
   return [];
 }
 
-function outstandingGroupDecisionsCount(){
-  const decisions = Store.get("groupDecisions") || {};
-  const outstandingPairs = groupClashPairs().filter(p=>{
-    const d = decisions[p.key];
-    return !d || d.status === "later";
-  }).length;
-  const outstandingWant = wantTogetherEntries().filter(e=>{
-    const d = decisions[e.key];
-    return !d || d.status === "later";
-  }).length;
-  return outstandingPairs + outstandingWant;
+function truncateName(name, max){
+  return name.length > max ? name.slice(0, max - 1).trimEnd() + "…" : name;
 }
 
-// Sets it locally, then pushes this device's own regular sync doc right
-// away so it reaches the group without waiting for the next periodic
-// auto-sync — see buildSyncPayload/mergeSyncPayload's `decisions`
-// handling above for how it actually gets to everyone else (piggybacked
-// on the same per-member document that's always worked, not a separate
-// document with its own permissions to worry about).
-// detail is an optional free-text note ("going alone", "meeting X
-// there") — omitted (undefined) keeps whatever detail was already
-// saved, so tapping a status button never wipes out a note someone
-// already added; pass "" explicitly to clear it.
-async function setGroupDecision(decisionKey, status, choiceName, detail){
-  const name = currentContributorName() || "Someone";
+// ===============================
+// GROUP INVITES — replaces the old clash-resolution "Group decisions"
+// flow (together/split/half/decide-later, one card per overlapping
+// pair) with something much lighter: a single ❤️ on any artist card
+// (see inviteHeartBtnHTML/wireInviteHeartBtn, wired from showArtists(),
+// scheduleItemHTML() and showTimelineDetailModal()) that tells the rest
+// of the group "this is a must-see for me, come with me". Whether to
+// actually go stays each person's own call — the same star/must-see
+// mechanism already merges that into their own Plan/Timeline — this is
+// just the shared nudge that says "ask the group to go".
+// Reuses the existing groupDecisions Store key and `decisions` sync
+// field rather than adding a new one — same reasoning as
+// wantTogetherEntries() below: a new top-level sync field needs
+// firestore.rules updated (and deployed) before it'll accept writes,
+// which risks rejecting syncs from any device that hasn't updated yet.
+// Keyed by day+artist name (not a pair) since an invite is about ONE
+// set, not a clash between two.
+// ===============================
+function groupInviteKey(day, name){
+  return `${day || "TBC"}|${name}`;
+}
+function getGroupInvite(day, name){
+  return (Store.get("groupDecisions") || {})[groupInviteKey(day, name)] || null;
+}
+function amInvitingGroup(day, name){
+  const invite = getGroupInvite(day, name);
+  const me = currentContributorName() || "You";
+  return !!(invite && invite.invitedBy && invite.invitedBy.includes(me));
+}
+
+// Toggles THIS PERSON's own heart on an artist — adds/removes their name
+// from invitedBy, deleting the entry entirely once nobody's left
+// inviting. Pushes to cloud right away (same as the old setGroupDecision
+// did) so the invite reaches the group without waiting for the next
+// periodic auto-sync.
+async function toggleGroupInvite(artist){
+  const me = currentContributorName() || "You";
+  const key = groupInviteKey(artist.day, artist.name);
   const decisions = Store.get("groupDecisions") || {};
-  const prev = decisions[decisionKey];
-  const entry = {
-    status,
-    choice: choiceName || null,
-    by: name,
-    updatedAt: Date.now(),
-    detail: detail !== undefined ? (detail.trim() || null) : ((prev && prev.detail) || null)
-  };
-  decisions[decisionKey] = entry;
+  const existing = decisions[key];
+  const invitedBy = existing && Array.isArray(existing.invitedBy) ? existing.invitedBy.slice() : [];
+  const idx = invitedBy.indexOf(me);
+  if(idx === -1) invitedBy.push(me); else invitedBy.splice(idx, 1);
+  if(invitedBy.length){
+    decisions[key] = {
+      invitedBy,
+      artist: { name: artist.name, day: artist.day, stage: artist.stage, start: artist.start, end: artist.end },
+      updatedAt: Date.now()
+    };
+  } else {
+    delete decisions[key];
+  }
   Store.set("groupDecisions", decisions);
-  renderGroupDecisions();
-  if(typeof renderTodayDecisions === "function") renderTodayDecisions();
+  if(typeof renderGroupInvites === "function") renderGroupInvites();
+  if(typeof renderTodayInvites === "function") renderTodayInvites();
   if(typeof renderHomeContextBanner === "function") renderHomeContextBanner();
+  if(typeof refreshAfterStarChange === "function") refreshAfterStarChange();
   if(typeof pushToCloud === "function"){
     try{ await pushToCloud(); return true; }catch(err){ return false; }
   }
   return false;
 }
 
-function decisionStatusPillHTML(status){
-  const map = {
-    needs: { cls: "needs", label: "🟡 Needs decision" },
-    together: { cls: "together", label: "🟢 Everyone together" },
-    split: { cls: "split", label: "🔵 Split up" },
-    half: { cls: "half", label: "🟣 Half &amp; half" },
-    later: { cls: "later", label: "⚪ Decide later" }
-  };
-  const m = map[status] || map.needs;
-  return `<span class="decision-pill ${m.cls}">${m.label}</span>`;
+function outstandingGroupInvitesCount(){
+  return Object.values(Store.get("groupDecisions") || {}).filter(d=> d && d.invitedBy && d.invitedBy.length).length;
 }
 
-function truncateName(name, max){
-  return name.length > max ? name.slice(0, max - 1).trimEnd() + "…" : name;
+// Small heart button, reused wherever an artist card shows a star/seen
+// pair — filled once THIS PERSON has invited the group to it.
+function inviteHeartBtnHTML(artist){
+  const active = amInvitingGroup(artist.day, artist.name);
+  return `<button class="ghost invite-heart-btn${active ? " active" : ""}" aria-label="${active ? "Cancel your group invite" : "Invite the group to this one"}" title="${active ? "You've invited the group — tap to cancel" : "Invite the group to join you at this set"}">${active ? "❤️" : "🤍"}</button>`;
+}
+function wireInviteHeartBtn(btn, artist){
+  if(!btn) return;
+  btn.onclick = (e)=>{ e.stopPropagation(); toggleGroupInvite(artist); };
 }
 
-function decisionCardHTML(pair, decision){
-  const status = decision ? decision.status : "needs";
-  const needsDecision = status === "needs" || status === "later";
-  const ownerLine = (interest)=> Object.entries(interest).map(([owner, mustSee])=> `${escapeHtml(owner)} ${mustSee ? "★" : "👍"}`).join(" · ") || "no one yet";
-  const shortA = escapeHtml(truncateName(pair.a.name, 16));
-  const shortB = escapeHtml(truncateName(pair.b.name, 16));
-  // Group's call is just "everyone splits and catches part of each" — the
-  // exact minutes are inherently personal (you and a teammate could each
-  // trim the overlap differently), so this reads YOUR OWN saved times for
-  // this pair via the same personalClashTimes mechanism the personal
-  // clash picker uses, never a single shared "order" for the whole group.
-  const myHalfTimes = status === "half" ? getPersonalClashTimes(pair.day, pair.a.name, pair.b.name) : null;
-  const myHalfNote = myHalfTimes ? `${escapeHtml(timeLabel({ ...pair.a, ...myHalfTimes[pair.a.name] }))} · ${escapeHtml(timeLabel({ ...pair.b, ...myHalfTimes[pair.b.name] }))}` : null;
-  const statusNote = status === "together" && decision ? `Group's call: everyone's going to <strong>${escapeHtml(decision.choice)}</strong>`
-    : status === "split" && decision ? `Group's call: splitting up — everyone catches their own pick`
-    : status === "half" && decision ? `Group's call: catching part of each${myHalfNote ? ` — your plan: <strong>${myHalfNote}</strong>` : " — set your own times below"}`
-    : status === "later" && decision ? `Left open for now — still needs a decision`
-    : "";
+function inviteCardHTML(entry){
+  const artist = entry.artist;
+  const me = currentContributorName() || "You";
+  const invitedBy = entry.invitedBy || [];
+  const others = invitedBy.filter(n=> n !== me);
+  const whoLine = invitedBy.includes(me)
+    ? (others.length ? `You and ${escapeHtml(others.join(", "))} invited the group` : `You invited the group`)
+    : `${escapeHtml(invitedBy.join(", ") || "Someone")} invited the group`;
+  const saved = Store.get("schedule").some(x=> x.name === artist.name);
+  const mustSee = isMustSee(artist.name);
   return `
-    <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(pair.key)}" data-day="${escapeHtml(pair.day)}">
-      <div class="decision-head"><span>⚡ ${escapeHtml(timeLabel(pair.a))}</span>${decisionStatusPillHTML(status)}</div>
+    <div class="decision-card" data-invite-key="${escapeHtml(groupInviteKey(artist.day, artist.name))}">
+      <div class="decision-head"><span>❤️ ${escapeHtml(timeLabel(artist))}</span><span class="decision-pill together">Must-see for them</span></div>
       <div class="decision-vs">
-        <div class="decision-vs-side"><strong>${escapeHtml(pair.a.name)}</strong><span class="decision-vs-stage">${escapeHtml(pair.a.stage)}</span><span class="decision-vs-owners">${ownerLine(pair.a.interest)}</span></div>
-        <div class="decision-vs-divider">vs</div>
-        <div class="decision-vs-side"><strong>${escapeHtml(pair.b.name)}</strong><span class="decision-vs-stage">${escapeHtml(pair.b.stage)}</span><span class="decision-vs-owners">${ownerLine(pair.b.interest)}</span></div>
+        <div class="decision-vs-side"><strong>${escapeHtml(artist.name)}</strong><span class="decision-vs-stage">${escapeHtml(artist.stage)}</span><span class="decision-vs-owners">${whoLine}</span></div>
       </div>
-      ${statusNote || (decision && decision.detail) ? `<p class="empty-note decision-status-note">${statusNote}${statusNote && decision.detail ? " · " : ""}${decision && decision.detail ? `📝 ${escapeHtml(decision.detail)}` : ""}${decision ? ` <span class="decision-by">(${escapeHtml(decision.by)})</span>` : ""}</p>` : ""}
-      <p class="empty-note decision-actions-hint">Tapping one of these sets it for the whole group, not just you:</p>
       <div class="decision-actions">
         <div class="decision-actions-row decision-actions-together">
-          <button data-action="together-a" title="Everyone in the group goes to ${escapeHtml(pair.a.name)} — nobody catches ${escapeHtml(pair.b.name)}" class="${decision && decision.status==="together" && decision.choice===pair.a.name ? "active" : ""}">👥 All together<br><strong>${shortA}</strong></button>
-          <button data-action="together-b" title="Everyone in the group goes to ${escapeHtml(pair.b.name)} — nobody catches ${escapeHtml(pair.a.name)}" class="${decision && decision.status==="together" && decision.choice===pair.b.name ? "active" : ""}">👥 All together<br><strong>${shortB}</strong></button>
-        </div>
-        <div class="decision-actions-row">
-          <button data-action="split" title="No group pick — everyone catches whichever one they've chosen in their own plan" class="${decision && decision.status==="split" ? "active" : ""}">↔️ Split up<br><span>everyone picks their own</span></button>
-          <button data-action="half" title="Catch part of ${escapeHtml(pair.a.name)}, part of ${escapeHtml(pair.b.name)} — you'll set your own exact times" class="${decision && decision.status==="half" ? "active" : ""}">◐ Split the set<br><span>pick your own times</span></button>
-          <button data-action="later" title="Leave it open — this clash keeps showing as needing a decision" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Decide later<br><span>leave it open</span></button>
+          <button data-invite-action="heart" class="${invitedBy.includes(me) ? "active" : ""}">❤️ ${invitedBy.includes(me) ? "You're in on this" : "I'm in too"}<br><span>${invitedBy.includes(me) ? "tap to cancel your invite" : "invite from you too"}</span></button>
+          <button data-invite-action="save" class="${mustSee ? "active" : ""}">${mustSee ? "★" : "☆"} ${saved ? "In your plan" : "Add to my plan"}<br><span>${mustSee ? "already must-see" : "star it as must-see"}</span></button>
         </div>
       </div>
-      ${decision ? `<div class="decision-detail-row">
-        <input type="text" class="decision-detail-input" placeholder="Add detail — e.g. going alone (optional)" value="${escapeHtml(decision.detail || "")}">
-        <button class="ghost decision-detail-save">Save</button>
-      </div>` : ""}
     </div>
   `;
 }
-
-function wireDecisionCard(el, pair){
-  const performAction = (action)=>{
-    if(action === "together-a") return setGroupDecision(pair.key, "together", pair.a.name);
-    if(action === "together-b") return setGroupDecision(pair.key, "together", pair.b.name);
-    if(action === "half"){
-      // Always asks (even re-confirming an existing split) — that's also
-      // how you'd come back and change your mind about your own timings.
-      // Sets the GROUP's status (shared, synced) but the exact times
-      // themselves stay purely personal — see getPersonalClashTimes above.
-      showCustomClashTimeModal(pair.day, pair.a, pair.b, (timesByName)=>{
-        if(!timesByName) return; // cancelled — leave the group status as-is
-        setPersonalClashTimes(pair.day, pair.a.name, pair.b.name, timesByName);
-        setGroupDecision(pair.key, "half", null);
-      });
-      return;
-    }
-    return setGroupDecision(pair.key, action, null);
-  };
-  el.querySelectorAll(".decision-actions button").forEach(btn=>{
-    btn.onclick = ()=> performAction(btn.getAttribute("data-action"));
-  });
-  const detailInput = el.querySelector(".decision-detail-input");
-  const detailSaveBtn = el.querySelector(".decision-detail-save");
-  if(detailInput && detailSaveBtn){
-    const decisions = Store.get("groupDecisions") || {};
-    const current = decisions[pair.key];
-    const save = ()=>{
-      if(!current) return;
-      setGroupDecision(pair.key, current.status, current.choice, detailInput.value);
+function wireInviteCard(el, entry){
+  const artist = entry.artist;
+  el.querySelectorAll("[data-invite-action]").forEach(btn=>{
+    btn.onclick = ()=>{
+      const action = btn.getAttribute("data-invite-action");
+      if(action === "heart") return toggleGroupInvite(artist);
+      if(action === "save") setMustSee(artist, true);
     };
-    detailSaveBtn.onclick = save;
-    detailInput.onkeydown = (e)=>{ if(e.key === "Enter"){ e.preventDefault(); save(); } };
-  }
-}
-
-// Same card shell as decisionCardHTML above, simplified to one artist
-// instead of a vs-pair — no "split"/"half" actions make sense without a
-// clash forcing a choice, just "we're going together" or "not yet".
-function wantTogetherCardHTML(entry, decision){
-  const status = decision ? decision.status : "needs";
-  const needsDecision = status === "needs" || status === "later";
-  const statusNote = status === "together" && decision ? `Group's call: going together` : "";
-  return `
-    <div class="decision-card${needsDecision ? " decision-needed" : ""}" data-decision-key="${escapeHtml(entry.key)}" data-day="${escapeHtml(entry.day)}">
-      <div class="decision-head"><span>❤️ ${escapeHtml(timeLabel(entry.artist))}</span>${decisionStatusPillHTML(status)}</div>
-      <div class="decision-vs">
-        <div class="decision-vs-side"><strong>${escapeHtml(entry.artist.name)}</strong><span class="decision-vs-stage">${escapeHtml(entry.artist.stage)}</span><span class="decision-vs-owners">${escapeHtml(entry.names.join(" · "))} want to see this together</span></div>
-      </div>
-      ${statusNote ? `<p class="empty-note decision-status-note">${statusNote}${decision ? ` <span class="decision-by">(${escapeHtml(decision.by)})</span>` : ""}</p>` : ""}
-      <div class="decision-actions">
-        <div class="decision-actions-row decision-actions-together">
-          <button data-action="together" title="Everyone in the group plans to catch this one together" class="${decision && decision.status==="together" ? "active" : ""}">👥 We're going<br><span>together</span></button>
-          <button data-action="later" title="Leave it open for now" class="${decision && decision.status==="later" ? "active" : ""}">🕐 Not yet<br><span>leave it open</span></button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-function wireWantTogetherCard(el, entry){
-  el.querySelectorAll(".decision-actions button").forEach(btn=>{
-    const action = btn.getAttribute("data-action");
-    btn.onclick = ()=> setGroupDecision(entry.key, action, action === "together" ? entry.artist.name : null);
   });
 }
 
 // Reusable so the same render backs both the Plan tab's box and Today's
-// DECISIONS section — no separate data path, same groupClashPairs()/
-// wantTogetherEntries()/groupDecisions Store key either way. Capped with
-// a "show more" toggle so a busy lineup with several real group clashes
-// (or want-together prompts) can't crowd out the actual Plan list
-// underneath it.
-function renderGroupDecisions(containerId){
-  const box = document.getElementById(containerId || "groupDecisionsBox");
+// INVITES section — no separate data path, same groupDecisions Store
+// key either way. Capped with a "show more" toggle so a busy lineup with
+// several live invites can't crowd out the actual Plan list underneath.
+function renderGroupInvites(containerId){
+  const box = document.getElementById(containerId || "groupInvitesBox");
   if(!box) return;
-  const pairs = groupClashPairs();
-  const wantEntries = (typeof wantTogetherEntries === "function") ? wantTogetherEntries() : [];
   const decisions = Store.get("groupDecisions") || {};
-  const totalCount = pairs.length + wantEntries.length;
-  if(!totalCount){ box.innerHTML = ""; box.style.display = "none"; return; }
+  const entries = Object.values(decisions).filter(d=> d && d.invitedBy && d.invitedBy.length)
+    .sort((a,b)=> (b.updatedAt||0) - (a.updatedAt||0));
+  if(!entries.length){ box.innerHTML = ""; box.style.display = "none"; return; }
   box.style.display = "";
-  const outstanding = pairs.filter(p=>{ const d = decisions[p.key]; return !d || d.status === "later"; }).length
-    + wantEntries.filter(e=>{ const d = decisions[e.key]; return !d || d.status === "later"; }).length;
   // Collapsed to one summary line by default — this used to sit full-
   // height above Compare's own list every time, effectively hiding the
   // thing Compare is actually for. The header/toggle is a "card" of its
   // own so it reads as collapsible rather than as a heading.
-  const collapseHeader = `<div class="decisions-box-header${groupDecisionsCollapsed ? "" : " expanded"}" id="groupDecisionsCollapseToggle">
-    <h3 style="margin:0; font-size:14px;">⚡ Group decisions <span class="empty-note" style="font-weight:400;">${totalCount} item${totalCount===1?"":"s"}${outstanding ? ` · ${outstanding} still needed` : " · all set"}</span></h3>
-    <span class="decisions-box-chevron">${groupDecisionsCollapsed ? "▾" : "▴"}</span>
+  const collapseHeader = `<div class="decisions-box-header${groupInvitesCollapsed ? "" : " expanded"}" id="groupInvitesCollapseToggle">
+    <h3 style="margin:0; font-size:14px;">❤️ Group invites <span class="empty-note" style="font-weight:400;">${entries.length} live</span></h3>
+    <span class="decisions-box-chevron">${groupInvitesCollapsed ? "▾" : "▴"}</span>
   </div>`;
-  if(groupDecisionsCollapsed){
+  if(groupInvitesCollapsed){
     box.innerHTML = collapseHeader;
-    document.getElementById("groupDecisionsCollapseToggle").onclick = ()=>{ groupDecisionsCollapsed = false; renderGroupDecisions(containerId); };
+    document.getElementById("groupInvitesCollapseToggle").onclick = ()=>{ groupInvitesCollapsed = false; renderGroupInvites(containerId); };
     return;
   }
-  // Clash pairs first (usually more time-critical since something has
-  // to give), then want-together prompts — one combined list under one
-  // cap/expand toggle rather than two separate sections.
-  const allItems = [...pairs.map(p=>({ kind:"pair", data:p })), ...wantEntries.map(e=>({ kind:"want", data:e }))];
-  const visible = groupDecisionsExpanded ? allItems : allItems.slice(0, GROUP_DECISIONS_CAP);
+  const visible = groupInvitesExpanded ? entries : entries.slice(0, GROUP_INVITES_CAP);
   box.innerHTML = collapseHeader
-    + visible.map(item=> item.kind === "pair" ? decisionCardHTML(item.data, decisions[item.data.key]) : wantTogetherCardHTML(item.data, decisions[item.data.key])).join("")
-    + (allItems.length > GROUP_DECISIONS_CAP ? `<button class="ghost" id="groupDecisionsToggle" style="margin-top:2px;">${groupDecisionsExpanded ? "Show fewer" : `Show ${allItems.length - GROUP_DECISIONS_CAP} more`}</button>` : "");
-  document.getElementById("groupDecisionsCollapseToggle").onclick = ()=>{ groupDecisionsCollapsed = true; renderGroupDecisions(containerId); };
+    + visible.map(inviteCardHTML).join("")
+    + (entries.length > GROUP_INVITES_CAP ? `<button class="ghost" id="groupInvitesToggle" style="margin-top:2px;">${groupInvitesExpanded ? "Show fewer" : `Show ${entries.length - GROUP_INVITES_CAP} more`}</button>` : "");
+  document.getElementById("groupInvitesCollapseToggle").onclick = ()=>{ groupInvitesCollapsed = true; renderGroupInvites(containerId); };
   const cards = box.querySelectorAll(".decision-card");
-  visible.forEach((item,i)=>{
-    if(!cards[i]) return;
-    if(item.kind === "pair") wireDecisionCard(cards[i], item.data);
-    else wireWantTogetherCard(cards[i], item.data);
-  });
-  const toggleBtn = document.getElementById("groupDecisionsToggle");
-  if(toggleBtn) toggleBtn.onclick = ()=>{ groupDecisionsExpanded = !groupDecisionsExpanded; renderGroupDecisions(containerId); };
+  visible.forEach((entry,i)=>{ if(cards[i]) wireInviteCard(cards[i], entry); });
+  const toggleBtn = document.getElementById("groupInvitesToggle");
+  if(toggleBtn) toggleBtn.onclick = ()=>{ groupInvitesExpanded = !groupInvitesExpanded; renderGroupInvites(containerId); };
 }
-renderGroupDecisions();
+renderGroupInvites();
 
 // ===============================
 // TODAY / FESTIVAL MODE — a single-glance "what should we be doing
 // right now" dashboard, built entirely from data the app already has
-// (own Plan, group sync, group decisions, shared meeting point) — no
+// (own Plan, group sync, group invites, shared meeting point) — no
 // new state of its own beyond which tab is active.
 // ===============================
 // UTC-anchored, not a bare local-time string — the festival is in the
@@ -10424,14 +10314,10 @@ function renderTodayGroup(){
   const all = Object.values(byArtist);
   const shared = all.filter(a=> Object.keys(a.interest).length >= 2).sort((a,b)=> Object.keys(b.interest).length - Object.keys(a.interest).length);
   const sharedMustSees = shared.filter(a=> Object.values(a.interest).filter(Boolean).length >= 2);
-  const decisions = Store.get("groupDecisions") || {};
-  const outstandingClashes = groupClashPairs().filter(p=>{
-    const d = decisions[p.key];
-    return !d || d.status === "later";
-  });
+  const clashCount = groupClashPairs().length;
   box.innerHTML = `
     <h3 style="margin-bottom:6px;">GROUP</h3>
-    <p style="font-size:13px; margin-bottom:6px; color:var(--text-muted);">🔥 ${sharedMustSees.length} shared Must See${sharedMustSees.length===1?"":"s"} · ⚡ ${outstandingClashes.length} clash${outstandingClashes.length===1?"":"es"} needing a decision</p>
+    <p style="font-size:13px; margin-bottom:6px; color:var(--text-muted);">🔥 ${sharedMustSees.length} shared Must See${sharedMustSees.length===1?"":"s"} · ⚡ ${clashCount} clash${clashCount===1?"":"es"} in the group's picks</p>
     ${shared.length ? shared.slice(0,4).map(a=>{
       const owners = Object.entries(a.interest).map(([o,m])=> `${escapeHtml(o)}${m ? " ★" : " 👍"}`).join(" · ");
       return `<div class="decision-artist-line"><strong>${escapeHtml(a.name)}</strong> — ${owners}</div>`;
@@ -10439,25 +10325,22 @@ function renderTodayGroup(){
   `;
 }
 
-function renderTodayDecisions(){
+function renderTodayInvites(){
   const box = document.getElementById("todayDecisions");
   if(!box) return;
-  const decisions = Store.get("groupDecisions") || {};
-  const outstanding = groupClashPairs().filter(p=>{
-    const d = decisions[p.key];
-    return !d || d.status === "later";
-  });
+  const entries = Object.values(Store.get("groupDecisions") || {}).filter(d=> d && d.invitedBy && d.invitedBy.length)
+    .sort((a,b)=> (b.updatedAt||0) - (a.updatedAt||0));
   box.innerHTML = `
-    <h3 style="margin-bottom:6px;">DECISIONS</h3>
-    ${outstanding.length
-      ? `<p style="font-size:13px; margin-bottom:8px;">⚡ ${outstanding.length} decision${outstanding.length===1?"":"s"} still needed</p>`
-        + outstanding.slice(0,3).map(p=> decisionCardHTML(p, decisions[p.key])).join("")
-        + (outstanding.length > 3 ? `<p class="empty-note">+${outstanding.length-3} more — see Plan.</p>` : "")
-      : `<p class="empty-note">✅ No outstanding decisions.</p>`}
+    <h3 style="margin-bottom:6px;">GROUP INVITES</h3>
+    ${entries.length
+      ? `<p style="font-size:13px; margin-bottom:8px;">❤️ ${entries.length} live invite${entries.length===1?"":"s"}</p>`
+        + entries.slice(0,3).map(inviteCardHTML).join("")
+        + (entries.length > 3 ? `<p class="empty-note">+${entries.length-3} more — see Plan.</p>` : "")
+      : `<p class="empty-note">No group invites yet — tap the ❤️ on any artist to invite the group.</p>`}
   `;
-  if(outstanding.length){
+  if(entries.length){
     const cards = box.querySelectorAll(".decision-card");
-    outstanding.slice(0,3).forEach((p,i)=>{ if(cards[i]) wireDecisionCard(cards[i], p); });
+    entries.slice(0,3).forEach((entry,i)=>{ if(cards[i]) wireInviteCard(cards[i], entry); });
   }
 }
 
@@ -10478,7 +10361,7 @@ function renderTodayDashboard(){
   renderTodayNow();
   renderTodayNextUp();
   renderTodayGroup();
-  renderTodayDecisions();
+  renderTodayInvites();
   renderTodayMeet();
 }
 renderTodayDashboard();
@@ -10571,15 +10454,11 @@ function buildRecentActivity(){
     events.push({ ts: myStatus.updatedAt, text: `You updated your location to ${escapeHtml(myStatus.place)}`, icon: personDotHtml(currentContributorName() || "You") });
   }
 
-  const decisions = Store.get("groupDecisions") || {};
-  Object.values(decisions).forEach(d=>{
-    if(!d || !d.updatedAt) return;
-    const label = d.status === "together" ? `decided to go together to ${escapeHtml(d.choice || "")}`
-      : d.status === "split" ? "decided to split up"
-      : d.status === "half" ? "decided to catch half of each"
-      : "marked a clash to decide later";
-    const detailSuffix = d.detail ? ` — ${escapeHtml(d.detail)}` : "";
-    events.push({ ts: d.updatedAt, text: `${escapeHtml(d.by || "Someone")} ${label}${detailSuffix}`, icon: "⚡" });
+  const invites = Store.get("groupDecisions") || {};
+  Object.values(invites).forEach(d=>{
+    if(!d || !d.updatedAt || !d.artist || !d.invitedBy || !d.invitedBy.length) return;
+    const latest = d.invitedBy[d.invitedBy.length - 1] || "Someone";
+    events.push({ ts: d.updatedAt, text: `${escapeHtml(latest)} invited the group to ${escapeHtml(d.artist.name)}`, icon: "❤️" });
   });
 
   const meetingUpdatedAt = Store.get("meetingUpdatedAt");
