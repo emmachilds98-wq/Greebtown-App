@@ -37,5 +37,9 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
+      # --force auto-accepts the Artifact Registry cleanup-policy prompt
+      # deploy would otherwise ask about interactively (which just isn't
+      # possible in --non-interactive CI) — cosmetic only, about lifecycle
+      # rules for old container build images, not app behaviour.
       - name: Deploy functions + Firestore rules
-        run: npx firebase-tools@13 deploy --only functions,firestore:rules --project greebtown --non-interactive
+        run: npx firebase-tools@13 deploy --only functions,firestore:rules --project greebtown --non-interactive --force
