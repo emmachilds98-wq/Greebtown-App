@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v241";
-const APP_BUILD_TIME = "2026-08-01T05:46:02Z";
+const APP_CACHE_VERSION = "v242";
+const APP_BUILD_TIME = "2026-08-01T05:49:12Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6387,6 +6387,26 @@ function buildMapGeoJSON(){
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.8, i * 41 + 9, 10)) ] }
   }));
 
+  // Bunting/flag accents scattered around each main stage plaza — the
+  // Tribe of Frog frame shows small bright pink flag/flower dots dotted
+  // through the clearing around a stage, decoration this map had none
+  // of; every other point-scatter texture (trees, tent confetti, cars)
+  // already exists, main stages had nothing of their own.
+  const BUNTING_COLORS = ["rgba(235,95,150,0.8)", "rgba(255,205,60,0.8)", "rgba(120,220,190,0.8)"];
+  let buntingPts = [];
+  locations.filter(p=>p.kind === "stage").forEach((s,i)=>{
+    const rand = seededRand(2600 + i * 13);
+    for(let k=0;k<8;k++){
+      const a = rand() * Math.PI * 2, r = 1.4 + rand() * 2.2;
+      const x = parseFloat(s.x) + Math.cos(a) * r, y = parseFloat(s.y) + Math.sin(a) * r * 0.85;
+      buntingPts.push({ x, y, color: BUNTING_COLORS[Math.floor(rand() * BUNTING_COLORS.length)] });
+    }
+  });
+  const buntingFeatures = buntingPts.map(t=>{
+    const c = schematicToLatLon(t.x, t.y);
+    return { type:"Feature", properties:{ color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
+  });
+
   // Spokes from every stage (major + minor) to its nearest district — the
   // main walkable "roads" of the path network.
   const spokeTargets = locations.filter(p=>p.kind === "stage").concat(minorStages);
@@ -6448,11 +6468,20 @@ function buildMapGeoJSON(){
   // districtSpreadR above uses) so district interiors read as an actual
   // built-up town, matching the reference video's dense scatter of
   // building-block shapes around every venue icon, instead of just a
-  // bare coloured clearing with pins floating on it.
-  const buildingFeatures = districtMemberPoints.map((p,i)=>({
-    type: "Feature", properties: {},
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(parseFloat(p.x), parseFloat(p.y), i * 29 + 5)) ] }
-  }));
+  // bare coloured clearing with pins floating on it. One in four is a
+  // hollow outline-only "fenced enclosure" instead of a solid fill (see
+  // "Trough Love" in Oldtown in the reference video — a beer-garden-style
+  // fenced yard, not a roofed building) — every prior pass drew every
+  // single venue the same solid-block way, which reads as more uniform
+  // than the video's own mix of buildings and open fenced areas.
+  const solidBuildingFeatures = [];
+  const fencedEnclosureFeatures = [];
+  districtMemberPoints.forEach((p,i)=>{
+    const ring = schematicRingToLngLat(buildingFootprint(parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
+    const feature = { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } };
+    if(i % 4 === 3) fencedEnclosureFeatures.push(feature);
+    else solidBuildingFeatures.push(feature);
+  });
 
   // Decorative infill buildings — a wide reference-video frame showing
   // several districts at once (Botanica/Metropolis together) has
@@ -6732,11 +6761,13 @@ function buildMapGeoJSON(){
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
     stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
+    bunting: { type:"FeatureCollection", features: buntingFeatures },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
     capillaries: { type:"FeatureCollection", features: capillaryFeatures },
     campSpokes: { type:"FeatureCollection", features: campSpokeFeatures },
     parkingSpokes: { type:"FeatureCollection", features: parkingSpokeFeatures },
-    buildings: { type:"FeatureCollection", features: buildingFeatures },
+    buildings: { type:"FeatureCollection", features: solidBuildingFeatures },
+    fencedEnclosures: { type:"FeatureCollection", features: fencedEnclosureFeatures },
     infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
     stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
@@ -7086,6 +7117,12 @@ function loadMap(){
       mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", paint: { "fill-color": "rgba(214,186,146,0.55)" } });
       mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", paint: { "line-color": "rgba(120,95,60,0.5)", "line-width": 1 } });
 
+      mapGL.addSource("mapBunting", { type: "geojson", data: geo.bunting });
+      mapGL.addLayer({ id: "bunting-circle", type: "circle", source: "mapBunting", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1, 19, 3],
+        "circle-color": ["get", "color"]
+      } });
+
       mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(55,42,28,0.7)", "line-width": 5.5 } });
       mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(232,208,168,0.95)", "line-width": 2.6 } });
 
@@ -7144,6 +7181,11 @@ function loadMap(){
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
       mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(196,140,90,0.65)" } });
       mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
+
+      // Hollow fenced enclosures — outline only, no fill, so the ground
+      // colour shows through (a beer-garden/yard, not a roofed building).
+      mapGL.addSource("mapFencedEnclosures", { type: "geojson", data: geo.fencedEnclosures });
+      mapGL.addLayer({ id: "fenced-enclosures-line", type: "line", source: "mapFencedEnclosures", paint: { "line-color": "rgba(120,80,50,0.8)", "line-width": 1.3, "line-dasharray": [2, 1] } });
 
       // A small packed-earth "plaza" where every path actually converges
       // at each district's centre, instead of every spoke fading out
