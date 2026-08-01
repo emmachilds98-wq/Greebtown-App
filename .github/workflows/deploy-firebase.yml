@@ -37,9 +37,29 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
+      # Split into two independent steps (was one combined
+      # `--only functions,firestore:rules` command). This CI service
+      # account (FIREBASE_SERVICE_ACCOUNT) has repeatedly failed on
+      # Functions specifically with "Missing permissions... you must
+      # have iam.serviceAccounts.ActAs on greebtown@appspot.gserviceaccount.com"
+      # — a manual `firebase deploy` from a developer's own logged-in
+      # Google account works fine (different identity, already has
+      # broad project rights), which is NOT the same as this CI service
+      # account having that specific IAM grant. Firestore rules deploy
+      # needs no such permission, so it's split out and required (job
+      # fails loudly if it breaks); Functions is allowed to fail on its
+      # own without blocking rules, until iam.serviceAccounts.ActAs on
+      # that app-engine default service account is actually granted to
+      # THIS CI service account (not a developer's personal account) at
+      # https://console.cloud.google.com/iam-admin/iam?project=greebtown
+      # — still visible as a failed/red step here, just not blocking.
       # --force auto-accepts the Artifact Registry cleanup-policy prompt
-      # deploy would otherwise ask about interactively (which just isn't
-      # possible in --non-interactive CI) — cosmetic only, about lifecycle
-      # rules for old container build images, not app behaviour.
-      - name: Deploy functions + Firestore rules
-        run: npx firebase-tools@13 deploy --only functions,firestore:rules --project greebtown --non-interactive --force
+      # the Functions deploy would otherwise ask about interactively
+      # (not possible in --non-interactive CI) — cosmetic only, about
+      # lifecycle rules for old container build images.
+      - name: Deploy Firestore rules
+        run: npx firebase-tools@13 deploy --only firestore:rules --project greebtown --non-interactive
+
+      - name: Deploy Cloud Functions
+        continue-on-error: true
+        run: npx firebase-tools@13 deploy --only functions --project greebtown --non-interactive --force
