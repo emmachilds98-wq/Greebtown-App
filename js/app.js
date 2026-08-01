@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v253";
-const APP_BUILD_TIME = "2026-08-01T10:11:36Z";
+const APP_CACHE_VERSION = "v254";
+const APP_BUILD_TIME = "2026-08-01T10:25:17Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5871,12 +5871,19 @@ const locations = [
   { name:"Area 404", kind:"district", x:"50%", y:"30%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
   { name:"Botanica", kind:"district", x:"28%", y:"20%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
   { name:"Thrutopia", kind:"district", x:"56%", y:"16%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
-  { name:"Copperwood", kind:"district", x:"68%", y:"26%", info:"A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
+  { name:"Copperwood", kind:"district", x:"68%", y:"26%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
   { name:"Oldtown", kind:"district", x:"88%", y:"52%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
   { name:"Letsbe Avenue", kind:"district", x:"40%", y:"14%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
   { name:"Metropolis", kind:"district", x:"15%", y:"34%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
   { name:"Grand Central", kind:"stage", x:"66%", y:"30%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
-  { name:"The Lion's Den", kind:"stage", x:"93%", y:"38%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
+  // Moved from a guessed (93,38), up near Temple Valley Camping, to
+  // (90,58) — the second reference video's own wide Copperwood/Grand
+  // Central/Oldtown/Hilltop shot shows THE LION'S DEN's own glow right
+  // next to QUANTUM, at the south end of the Hilltop zone, not up by the
+  // camping field of a similar name. "Temple Valley" in the story text
+  // below is Boomtown's own in-universe area name — evidently distinct
+  // from "Temple Valley Camping" the camp field, despite the shared name.
+  { name:"The Lion's Den", kind:"stage", x:"90%", y:"58%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
   { name:"Hydro XL", kind:"stage", x:"28%", y:"34%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
   { name:"Anara Forest", kind:"stage", x:"72%", y:"44%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
   { name:"Hidden Woods", kind:"stage", x:"18%", y:"8%", info:"One of two woodland stages tucked among the trees, with its own beach bar and treetop walks. Leans eclectic bass and reggae/dub, often billing bigger DnB names alongside newer acts — explore carefully after dark." },
@@ -5917,8 +5924,12 @@ const otherStages = [
 // Metropolis — its own label appears right beside "METROPOLIS" on
 // camera. Síbín Beag moved to sit by Oldtown — its own label appears
 // there repeatedly on camera, alongside Mining for (g)Old Town and Den
-// of Dis Order (both explicitly Oldtown-themed).
-const minorStagePositions = [[46,34],[60,18],[34,16],[56,38],[30,58],[62,52],[44,42],[72,66],[86,58],[54,26],[24,40]];
+// of Dis Order (both explicitly Oldtown-themed). Tribe of Frog moved
+// from a guessed (72,66) — far southeast, in otherwise-empty ground —
+// to (80,55): its own label appears on camera right next to OLDTOWN and
+// QUANTUM, in the same wide shot as Grand Central and the yellow
+// "HILLTOP" ground zone, not out on its own.
+const minorStagePositions = [[46,34],[60,18],[34,16],[56,38],[30,58],[62,52],[44,42],[80,55],[86,58],[54,26],[24,40]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -5971,7 +5982,14 @@ const thingsToFind = [
   // lineup data sourced yet; Nachtlicker already had a genre/lineup
   // entry in venueDirectory below but was missing its own map pin.
   { name:"Loconnection", near:"Metropolis", x:"12%", y:"33%", info:"Seen labelled on the official app's own map on the same path as Sub Lab, just south of it — no lineup or theme details sourced yet." },
-  { name:"Nachtlicker", near:"Metropolis", x:"13%", y:"37%", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Seen on the official app's own map just south of Sub Lab and Loconnection." }
+  { name:"Nachtlicker", near:"Metropolis", x:"13%", y:"37%", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Seen on the official app's own map just south of Sub Lab and Loconnection." },
+  // Spotted clustered together in the second reference video, right by
+  // THE RETREAT and ANCIENT FUTURES (Thrutopia) — NOT Downtown, despite
+  // Rebel Girls Club's existing venueDirectory entry guessing "Downtown
+  // Village"; that guess is corrected below to match.
+  { name:"Rebel Girls Club", near:"Thrutopia", x:"47%", y:"22%", info:"Women-led wellbeing/empowerment venue — confirmed for 2026. Seen on the official app's own map right by The Retreat and Ancient Futures, on the Thrutopia hilltop, not in Downtown." },
+  { name:"Tinker Station", near:"Thrutopia", x:"48%", y:"20%", info:"Seen labelled on the official app's own map right by Ancient Futures/The Retreat — no lineup or theme details sourced yet." },
+  { name:"Circus", near:"Thrutopia", x:"45%", y:"24%", info:"Seen labelled on the official app's own map right by Ancient Futures/The Retreat — no lineup or theme details sourced yet." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -5989,7 +6007,7 @@ const landmarks = [
   { name:"Pepperpot Market", x:"46%", y:"50%", info:"A reliable food-and-drink hub roughly central to the site, also home to one of the two 24-hour medical centres and the Safer Spaces welfare team.", hours:"Medical centre & welfare: 24 hours." },
   { name:"The Retreat", x:"60%", y:"12%", info:"Boomtown's paid spa space in the Thrutopia woodlands — spa/hot-tub sessions, sauna and cold splash, sound baths and massages. Book ahead; it's separate from your festival ticket." },
   { name:"The Observatory", x:"52%", y:"14%", info:"New for 2026 — a genuine academic research hub embedded in the festival, led by psychologist Dr Martha Newson with researchers from 10+ UK universities studying identity, belonging and collective behaviour at live events. Take part in a study or the before/after survey if you're curious." },
-  { name:"Lion's Gate Portal", x:"90%", y:"34%", info:"The story's central portal art piece near the Lion's Den — last chapter's closing ceremony used it to foretell the Lion's Den's return to Temple Valley this year." },
+  { name:"Lion's Gate Portal", x:"88%", y:"56%", info:"The story's central portal art piece near the Lion's Den — last chapter's closing ceremony used it to foretell the Lion's Den's return to Temple Valley this year." },
   { name:"Medical Centre — Hilltop", x:"72%", y:"50%", info:"One of two confirmed 24-hour medical centres for Chapter Five (the other is at Pepperpot Market).", hours:"24 hours." },
   { name:"Public Transport Hub", x:"6%", y:"42%", info:"Near West Gate — coach, shuttle and accessible-transport drop-off/pick-up point." },
   { name:"Lockers — Hidden Woods", x:"14%", y:"12%", info:"One of the confirmed 2026 locker locations, alongside Thrutopia, the Lion's Den/Orchid area and Downtown Village." },
@@ -6001,7 +6019,19 @@ const landmarks = [
   // spanning a wide chunk of that side of the site — a real protected-
   // land designation rather than a festival feature, so it's marked
   // here as a single reference label rather than guessed as a POI.
-  { name:"Site of Special Scientific Interest", x:"7%", y:"40%", info:"Protected woodland/hillside bordering Metropolis on the site's western edge — seen labelled on the official app's own map. Not a festival area; treat it as off-limits terrain, not a place to explore." }
+  { name:"Site of Special Scientific Interest", x:"7%", y:"40%", info:"Protected woodland/hillside bordering Metropolis on the site's western edge — seen labelled on the official app's own map. Not a festival area; treat it as off-limits terrain, not a place to explore." },
+  // A large yellow-ground zone labelled "HILLTOP" on the official app's
+  // own map, between Copperwood and Oldtown/Temple Valley Camping — a
+  // real mapped terrain area, not just the "Hilltop." prefix already
+  // used in several district info texts (Thrutopia/Copperwood/Oldtown).
+  // Shown with a warning-triangle icon in the reference video, next to
+  // a dotted/hatched ground texture suggesting a car park or overflow
+  // field rather than a walkable venue area — marked as a reference
+  // label for the same reason SSSI is, not guessed as a POI.
+  { name:"Hilltop", x:"77%", y:"40%", info:"A large marked ground area between Copperwood and Oldtown/Temple Valley Camping, seen labelled on the official app's own map — likely an overflow/car park field given its hatched ground texture on camera, not a confirmed venue area." },
+  // Seen labelled at the south end of the Hilltop zone, right by Quantum
+  // and The Lion's Den, in the same shot used to reposition both.
+  { name:"Sunset Hill", x:"75%", y:"62%", info:"Seen labelled on the official app's own map at the south end of the Hilltop zone, right by Quantum and The Lion's Den — no further details sourced yet." }
 ];
 
 // Named camping fields & gates, positioned from a real (previous-year)
@@ -6077,7 +6107,20 @@ const amenities = [
   { category:"Reception", x:"46%", y:"52%", note:"Pepperpot Market" },
   { category:"First Aid", x:"49%", y:"50%", note:"Pepperpot Market" },
   { category:"Welfare", x:"43%", y:"50%", note:"Pepperpot Market" },
-  { category:"Cash Point", x:"46%", y:"47%", note:"Pepperpot Market" }
+  { category:"Cash Point", x:"46%", y:"47%", note:"Pepperpot Market" },
+  // Copperwood — a dense scatter of toilets/food/welfare icons along the
+  // district's own paths, seen clearly in the same wide shot as the
+  // GRAND CENTRAL/HILLTOP/OLDTOWN/QUANTUM labels.
+  { category:"Toilets", x:"64%", y:"22%", note:"Copperwood" },
+  { category:"Toilets", x:"69%", y:"25%", note:"Copperwood" },
+  { category:"Food", x:"66%", y:"27%", note:"Copperwood" },
+  { category:"Welfare", x:"63%", y:"28%", note:"Copperwood" },
+  { category:"Water Point", x:"70%", y:"23%", note:"Copperwood" },
+  // West Camping, right where its access track meets Alresford Rd — a
+  // toilet pair and an accessible-facilities marker on the dashed
+  // accessible path leading in from the road.
+  { category:"Toilets", x:"13%", y:"5%", note:"West Camping / Alresford Rd" },
+  { category:"Accessible Facilities", x:"14%", y:"6%", note:"West Camping / Alresford Rd" }
 ];
 
 const gates = [
@@ -6142,7 +6185,7 @@ const venueDirectory = [
   { name:"Twisted Time Machine (Bad Apple Bar)", type:"Hidden venue", status:"confirmed", music:true, genre:"Rotates by slot: emo, nu-metal, jungle disco, 90s rave", near:"Site-wide", info:"Long-running takeover of Boomtown's historic Bad Apple Bar — confirmed for 2026 with themed nights Wed-Sat (One Welcome Party, The Abba Party, My Chemical Hoemance, The Fleetwood Mac Celebration, UNKLE Psyence Fiction album playback)." },
   { name:"Circus Tent", type:"Hidden venue", status:"confirmed", music:true, genre:"Circus, live performance", near:"Oldtown (likely)", info:"Performance-led rather than a straight dancefloor." },
   { name:"Airetiko", type:"Hidden venue", status:"confirmed", music:false, genre:"Aerial circus — trapeze, rope, silks, hoop", near:"Site-wide", info:"Real aerial-arts collective (trapeze, rope, silks, hoop) — confirmed for 2026 with dated Trapeze and Giant Marionettes slots running Wed-Fri." },
-  { name:"Rebel Girls Club", type:"Hidden venue", status:"confirmed", music:false, genre:"Wellbeing, empowerment-themed workshops", near:"Downtown Village", info:"Women-led venue — confirmed for 2026 with a wellbeing programme Wed-Fri (Opening Ceremony, burlesque/twerk workshops, morning yoga, herbal balm making)." },
+  { name:"Rebel Girls Club", type:"Hidden venue", status:"confirmed", music:false, genre:"Wellbeing, empowerment-themed workshops", near:"Thrutopia", info:"Women-led venue — confirmed for 2026 with a wellbeing programme Wed-Fri (Opening Ceremony, burlesque/twerk workshops, morning yoga, herbal balm making). Corrected from an earlier 'Downtown Village' guess — the official app's own map shows it right by The Retreat and Ancient Futures on the Thrutopia hilltop." },
   { name:"Mining for (g)Old Town", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, party", near:"Oldtown", info:"Mining/prospecting theme playing on Oldtown's rebuild-uphill storyline." },
   { name:"XR", type:"Installation / talks", status:"confirmed", music:false, genre:"Climate activism, talks", near:"Thrutopia", info:"Extinction Rebellion-linked space — confirmed for 2026, running Wed-Fri (Cassandra the Oracle, Big Oil Drumming Parade, Last Chance Salon, Art Blocking)." },
   { name:"End of the Line", type:"Hidden venue", status:"confirmed", music:true, genre:"Atmospheric, genre unclear", near:"Unclear", info:"Train-station-themed venue — confirmed for 2026, running Thu-Sat (Donkline Takeover, DJ Shnoo, Négo, Riguana)." },
@@ -6599,28 +6642,47 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
   });
 
-  // Stage plazas — a soft tan clearing under every main stage. The
-  // reference video shows paths widening into a real open plaza around
-  // a stage (see the Tribe of Frog frame) rather than staying a thin
-  // line all the way up to the building — every other path in this
-  // basemap is a constant-width line, so main stages (the one place a
-  // path visibly widens) had nothing to show that.
+  // Stage plazas — a soft tan clearing under every stage. The reference
+  // video shows paths widening into a real open plaza around a stage
+  // (see the Tribe of Frog frame) rather than staying a thin line all
+  // the way up to the building — every other path in this basemap is a
+  // constant-width line, so stages (the one place a path visibly widens)
+  // had nothing to show that. Originally only main stages got this —
+  // minor stages (otherStages/minorStages, Tribe of Frog itself among
+  // them, standing alone outside any district clearing) were left with
+  // just a single generic building and nothing else, so that whole
+  // stretch of the map read noticeably flatter/emptier than the parts
+  // covered by a district. Minor stages get the same treatment now, at
+  // a slightly smaller radius since they're a smaller real footprint.
   const stagePlazaFeatures = locations.filter(p=>p.kind === "stage").map((s,i)=>({
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.8, i * 41 + 9, 10)) ] }
-  }));
+  })).concat(minorStages.map((s,i)=>({
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.1, i * 53 + 4000, 9)) ] }
+  })));
 
-  // Bunting/flag accents scattered around each main stage plaza — the
-  // Tribe of Frog frame shows small bright pink flag/flower dots dotted
+  // Bunting/flag accents scattered around each stage plaza — the Tribe
+  // of Frog frame shows small bright pink flag/flower dots dotted
   // through the clearing around a stage, decoration this map had none
   // of; every other point-scatter texture (trees, tent confetti, cars)
-  // already exists, main stages had nothing of their own.
+  // already exists, stages had nothing of their own. Minor stages get a
+  // lighter scatter (5 points vs 8) — present, but visibly less dressed
+  // than a main stage, matching how they read in the video.
   const BUNTING_COLORS = ["rgba(235,95,150,0.8)", "rgba(255,205,60,0.8)", "rgba(120,220,190,0.8)"];
   let buntingPts = [];
   locations.filter(p=>p.kind === "stage").forEach((s,i)=>{
     const rand = seededRand(2600 + i * 13);
     for(let k=0;k<8;k++){
       const a = rand() * Math.PI * 2, r = 1.4 + rand() * 2.2;
+      const x = parseFloat(s.x) + Math.cos(a) * r, y = parseFloat(s.y) + Math.sin(a) * r * 0.85;
+      buntingPts.push({ x, y, color: BUNTING_COLORS[Math.floor(rand() * BUNTING_COLORS.length)] });
+    }
+  });
+  minorStages.forEach((s,i)=>{
+    const rand = seededRand(4600 + i * 13);
+    for(let k=0;k<5;k++){
+      const a = rand() * Math.PI * 2, r = 1.2 + rand() * 1.7;
       const x = parseFloat(s.x) + Math.cos(a) * r, y = parseFloat(s.y) + Math.sin(a) * r * 0.85;
       buntingPts.push({ x, y, color: BUNTING_COLORS[Math.floor(rand() * BUNTING_COLORS.length)] });
     }
@@ -6728,6 +6790,27 @@ function buildMapGeoJSON(){
       infillBuildingFeatures.push({
         type: "Feature", properties: {},
         geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, di * 137 + 19 + k * 7)) ] }
+      });
+    }
+  });
+  // Same infill treatment for minor stages (fewer buildings than a
+  // whole district gets, since it's one stage's worth of ground, not a
+  // district's) — closes the same density gap around standalone minor
+  // stages that stagePlazaFeatures/buntingFeatures above address, so a
+  // minor stage sitting outside any district clearing (Tribe of Frog,
+  // in the reference video's own southern stretch, among others) reads
+  // as a real built-up spot rather than one bare building on plain grass.
+  minorStages.forEach((s,mi)=>{
+    const cx = parseFloat(s.x), cy = parseFloat(s.y);
+    const rand = seededRand(mi * 149 + 6000);
+    const count = 2;
+    for(let k=0;k<count;k++){
+      const a = rand() * Math.PI * 2;
+      const dist = 2.6 + rand() * 1.6;
+      const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+      infillBuildingFeatures.push({
+        type: "Feature", properties: {},
+        geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, mi * 149 + 6000 + k * 7)) ] }
       });
     }
   });
