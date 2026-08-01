@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v243";
-const APP_BUILD_TIME = "2026-08-01T05:51:43Z";
+const APP_CACHE_VERSION = "v244";
+const APP_BUILD_TIME = "2026-08-01T05:56:03Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6677,7 +6677,25 @@ function buildMapGeoJSON(){
     }
   });
   let confettiPts = [];
-  ordinaryCamps.forEach((c,i)=>{ confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 20, campFieldRadii.get(c) * 0.85, 800 + i * 47)); });
+  // Campervan Field gets small rectangular "vehicle" footprints instead
+  // of round tent-confetti dots — it's parked campervans, not tents, and
+  // every other camp field using the same round-dot texture regardless
+  // of what's actually pitched there was one texture standing in for
+  // two different real things.
+  const campervanFeatures = [];
+  ordinaryCamps.forEach((c,i)=>{
+    if(/campervan/i.test(c.text)){
+      const cx = parseFloat(c.x), cy = parseFloat(c.y), r = campFieldRadii.get(c) * 0.8;
+      const rand = seededRand(1900 + i * 31);
+      for(let k=0;k<16;k++){
+        const a = rand() * Math.PI * 2, dist = rand() * r;
+        const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+        campervanFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Polygon", coordinates:[ schematicRingToLngLat(buildingFootprint(x, y, 1900 + i * 31 + k * 7)) ] } });
+      }
+    } else {
+      confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 20, campFieldRadii.get(c) * 0.85, 800 + i * 47));
+    }
+  });
   const confettiFeatures = confettiPts.map(t=>{
     const c = schematicToLatLon(t.x, t.y);
     return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
@@ -6792,6 +6810,7 @@ function buildMapGeoJSON(){
     trees: { type:"FeatureCollection", features: treeFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
+    campervans: { type:"FeatureCollection", features: campervanFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
     hillContours: { type:"FeatureCollection", features: hillContourFeatures },
     boundary: { type:"FeatureCollection", features: [boundaryFeature] }
@@ -7117,7 +7136,10 @@ function loadMap(){
       // The triangular tree-ring/hedge feature inside Camp Orchid
       // Downtown — seen clearly, twice, across both reference videos.
       mapGL.addSource("mapCampTriangle", { type: "geojson", data: geo.campTriangle });
-      mapGL.addLayer({ id: "camp-triangle-line", type: "line", source: "mapCampTriangle", paint: { "line-color": "rgba(30,70,45,0.7)", "line-width": 2 } });
+      // Colour changed from dark green to near-black — the reference
+      // video's own triangle reads as a plain dark outline regardless of
+      // the pink camp fill under it, not tinted to match the ground.
+      mapGL.addLayer({ id: "camp-triangle-line", type: "line", source: "mapCampTriangle", paint: { "line-color": "rgba(35,32,28,0.75)", "line-width": 2 } });
 
       // A rounder hedge-ring inside each Camp Skylark site, giving them
       // their own distinguishing feature (Downtown Orchid's triangle
@@ -7229,6 +7251,10 @@ function loadMap(){
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.5], 19, ["*", ["get", "size"], 2.2]],
         "circle-color": ["get", "color"]
       } });
+
+      mapGL.addSource("mapCampervans", { type: "geojson", data: geo.campervans });
+      mapGL.addLayer({ id: "campervans-fill", type: "fill", source: "mapCampervans", paint: { "fill-color": "rgba(210,210,215,0.85)" } });
+      mapGL.addLayer({ id: "campervans-outline", type: "line", source: "mapCampervans", paint: { "line-color": "rgba(90,90,95,0.7)", "line-width": 0.6 } });
 
       mapGL.addSource("mapTrees", { type: "geojson", data: geo.trees });
       mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", paint: {
