@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v266";
-const APP_BUILD_TIME = "2026-08-01T23:35:09Z";
+const APP_CACHE_VERSION = "v267";
+const APP_BUILD_TIME = "2026-08-01T23:55:47Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3613,6 +3613,36 @@ function mainStageNames(){
   return _mainStageNames;
 }
 
+// Four broad buckets for colour-coding the timeline row heads (see
+// buildTimelineHTML below) — purely visual grouping, doesn't touch the
+// existing main-stages-first-then-alphabetical sort or row order at all.
+// Maps every venueDirectory `type` string onto "main"/"venue"/"workshop"/
+// "activity"; a stage name with no venueDirectory entry (e.g. a group
+// member's own "<name>'s activities" personal row) just gets no class
+// and falls back to the neutral default styling.
+const VENUE_TYPE_CATEGORY = {
+  "Main stage": "main",
+  "Hidden venue": "venue",
+  "Shop / hidden venue": "venue",
+  "Workshop / shop": "workshop",
+  "Talks / installation": "workshop",
+  "Installation": "workshop",
+  "Installation / talks": "workshop",
+  "Research hub": "workshop",
+  "Leisure / ride": "activity",
+  "Chill space": "activity",
+  "Welfare / support": "activity",
+  "Food & drink": "activity",
+  "Shop / cafe": "activity"
+};
+let _venueCategoryByName = null;
+function venueCategoryFor(stageName){
+  if(!_venueCategoryByName){
+    _venueCategoryByName = new Map(venueDirectory.map(v=> [v.name, VENUE_TYPE_CATEGORY[v.type] || null]));
+  }
+  return _venueCategoryByName.get(stageName) || null;
+}
+
 function buildTimelineHTML(items, opts){
   opts = opts || {};
   const pxPerMin = opts.pxPerMin || 2.6;
@@ -3724,7 +3754,12 @@ function buildTimelineHTML(items, opts){
         : "";
       return `<div class="${cls}" style="left:${left}px; width:${width}px; top:${top}px; height:${blockHeight}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
-    return `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${stageRowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
+    // Category class is purely cosmetic (colours the row head/left edge
+    // via CSS) — doesn't touch the stage sort above or any block/lane
+    // logic, so the grid's actual structure and behaviour is unchanged.
+    const category = venueCategoryFor(stage);
+    const rowCls = "timeline-row" + (category ? " cat-" + category : "");
+    return `<div class="${rowCls}"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${stageRowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
   }).join("");
 
   // Same line repeated into every row-body above (each positioned in
@@ -6785,7 +6820,14 @@ function buildMapGeoJSON(){
     districtRadii.set(d, r);
     return {
       type: "Feature",
-      properties: { name: d.name, fill: `rgba(${rgb},0.32)`, line: `rgba(${rgb},0.95)`, casing: `rgba(${rgb},0.35)` },
+      // Fill/line/casing alpha halved-ish from 0.32/0.95/0.35 — districts
+      // were washing colour under every stage/amenity/hidden-venue marker
+      // plotted inside them and the bold outline competed with those
+      // markers for attention. Still a clearly legible tinted zone with a
+      // visible boundary, just reading as background context now rather
+      // than the loudest thing in its own area (see the layer paint
+      // definitions below for the matching line-width trims).
+      properties: { name: d.name, fill: `rgba(${rgb},0.16)`, line: `rgba(${rgb},0.55)`, casing: `rgba(${rgb},0.22)` },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 31 + 7, 18)) ] }
     };
   });
@@ -7691,23 +7733,18 @@ function loadMap(){
       } });
 
       // Districts get a soft outer "casing" (like the paths' own
-      // casing/line pairing below) under a bold solid outline — the
-      // previous thin dashed line at 1.6px was easy to lose against the
-      // grass, especially for the paler palette colours. The casing
-      // widens the boundary into something visible at a glance even
-      // before you register the exact hue, the same way the solid
-      // outline itself now reads as a real border instead of a scatter
-      // of dashes.
+      // casing/line pairing below) under a solid outline, boundary still
+      // legible at a glance without registering the exact hue first — but
+      // trimmed narrower here (was 4px/2.4px at much higher opacity) since
+      // the earlier bold treatment started competing with the actual
+      // stage/amenity/hidden-venue markers plotted inside every district,
+      // which matter more than the zone boundary itself. See the fill/
+      // line/casing alpha values on districtFeatures above for the other
+      // half of this same "district is context, not the main event" pass.
       mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
-      // Casing narrowed from 6px to 4px (with slightly higher opacity to
-      // compensate) — the wider casing plus the now-larger zone sizes
-      // below started reading as a thick coloured ring eating into the
-      // grass around each district rather than a boundary; a district's
-      // own bigger, more legible fill area does more of the "where does
-      // this end" work now than a heavy outline needs to.
-      mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 4 } });
+      mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 3 } });
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 2.4 } });
+      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 1.8 } });
 
       // Pepperpot Market's clearing — same casing/fill/line trio as a
       // district, drawn right after them, so the real (GPS, not
@@ -7925,7 +7962,7 @@ function loadMap(){
   locations.filter(place=> place.kind === "stage").forEach(place=>{
     const coord = realCoordFor(place);
     addMapMarker("main", coord.lat, coord.lon,
-      mapMarkerHtml("stage", "", place.name),
+      mapMarkerHtml("stage", "stage", place.name),
       { name: place.name, title: place.name, onClick: ()=>{
         showMapInfoCard(`
           <div class="card">
@@ -7951,7 +7988,7 @@ function loadMap(){
     const isRumoured = place.status === "rumoured";
     const coord = realCoordFor(place);
     addMapMarker("minor", coord.lat, coord.lon,
-      mapMarkerHtml("stage minor" + (isRumoured ? " rumoured" : ""), isRumoured ? "rumoured" : "", place.name),
+      mapMarkerHtml("stage minor" + (isRumoured ? " rumoured" : ""), "minor" + (isRumoured ? " rumoured" : ""), place.name),
       { name: place.name, title: place.name + (isRumoured ? " (rumoured — no 2026 confirmation)" : ""), onClick: ()=> showMapInfoCard(`
         <div class="card">
           <span class="tag">stage${isRumoured ? " — rumoured" : ""}</span>
