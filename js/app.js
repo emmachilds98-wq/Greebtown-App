@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v228";
-const APP_BUILD_TIME = "2026-08-01T03:13:16Z";
+const APP_CACHE_VERSION = "v229";
+const APP_BUILD_TIME = "2026-08-01T03:19:12Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6304,13 +6304,6 @@ function buildMapGeoJSON(){
     return Math.min(Math.max(2, Math.min(desired, minDist * 0.36)), safeMax);
   }
 
-  // Every zone shape actually drawn (district/camp/parking), collected
-  // as {x,y,r} while each is built below — exposed as geo.zoneShapes so
-  // loadMap()'s marker-adding code can skip any pin that doesn't land
-  // near a real drawn zone, instead of scattering icons across open
-  // ground/woods that the real site doesn't have anything on.
-  const zoneShapes = [];
-
   function districtSpreadR(d){
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     let maxDist = 0;
@@ -6327,7 +6320,6 @@ function buildMapGeoJSON(){
     const rgb = DISTRICT_PALETTE[i % DISTRICT_PALETTE.length];
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const r = districtSpreadR(d);
-    zoneShapes.push({ x: cx, y: cy, r });
     return {
       type: "Feature",
       properties: { name: d.name, fill: `rgba(${rgb},0.32)`, line: `rgba(${rgb},0.95)`, casing: `rgba(${rgb},0.28)` },
@@ -6417,7 +6409,6 @@ function buildMapGeoJSON(){
   const parkingFeatures = parkingAreas.map((p,i)=>{
     const cx = parseFloat(p.x), cy = parseFloat(p.y);
     const r = clearanceRadius(cx, cy, p, p.r);
-    zoneShapes.push({ x: cx, y: cy, r });
     return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 1200 + i * 37, 10)) ] } };
   });
   let parkingRowFeatures = [];
@@ -6444,7 +6435,6 @@ function buildMapGeoJSON(){
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const r = clearanceRadius(cx, cy, c, 10);
     campAreaRadii.set(c, r);
-    zoneShapes.push({ x: cx, y: cy, r });
     return {
       type: "Feature",
       properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
@@ -6497,7 +6487,6 @@ function buildMapGeoJSON(){
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const r = clearanceRadius(cx, cy, c, 8);
     campFieldRadii.set(c, r);
-    zoneShapes.push({ x: cx, y: cy, r });
     return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 600 + i * 43, 12)) ] } };
   });
   let campFieldLineFeatures = [];
@@ -6605,8 +6594,7 @@ function buildMapGeoJSON(){
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
-    boundary: { type:"FeatureCollection", features: [boundaryFeature] },
-    zoneShapes
+    boundary: { type:"FeatureCollection", features: [boundaryFeature] }
   };
 }
 
@@ -6656,37 +6644,6 @@ function schematicToLatLon(xPercent, yPercent){
     lat: fit.a * xPercent + fit.b * yPercent + fit.c,
     lon: fit.d * xPercent + fit.e * yPercent + fit.f
   };
-}
-// The inverse of schematicToLatLon — solves the same 2x2 linear system
-// (lat = a*x + b*y + c, lon = d*x + e*y + f) for x/y given lat/lon, so a
-// REAL lat/lon point (the official-app POI data) can be tested against
-// the schematic-space zone shapes (mapZoneShapes) everything else on
-// this map already uses, with one shared nearZone() check instead of
-// two different distance systems.
-function latLonToSchematic(lat, lon){
-  const fit = SCHEMATIC_TO_LATLON_FIT;
-  const det = fit.a * fit.e - fit.b * fit.d;
-  const dLat = lat - fit.c, dLon = lon - fit.f;
-  return {
-    x: (fit.e * dLat - fit.b * dLon) / det,
-    y: (fit.a * dLon - fit.d * dLat) / det
-  };
-}
-// True if (x,y) — schematic 0-100 space — lands inside (or within
-// `buffer` schematic units of) any real drawn zone (district clearing,
-// camping field, parking area). Used to skip marker pins that would
-// otherwise float on open field/woods the real site doesn't have
-// anything on. Buffer defaults generous (this map's schematic/real
-// calibration has real error, see SCHEMATIC_TO_LATLON_FIT's own
-// comment) so it only cuts pins that are genuinely far from every zone,
-// not ones just past a blob's literal edge.
-function nearZone(x, y, buffer){
-  // Before the map's first "load" event fires, mapZoneShapes is still
-  // empty — treat that as "unknown" and show everything rather than
-  // hiding every marker for that one frame.
-  if(!mapZoneShapes.length) return true;
-  buffer = buffer == null ? 6 : buffer;
-  return mapZoneShapes.some(z=> Math.hypot(z.x - x, z.y - y) <= z.r + buffer);
 }
 function realStageMatch(name){
   const data = window.BOOMTOWN_LOCATIONS_2026;
@@ -6738,14 +6695,6 @@ function realCoordFor(place){
 let mapGL = null;
 let mapMarkerGroups = {};
 let mapMarkersByName = {};
-// Every drawn ground zone (district clearing, camping field, parking
-// area) as {x, y, r} in the same schematic 0-100 space everything else
-// uses — built once inside buildMapGeoJSON (see mapGL.on("load", ...)
-// below) and read by the marker-adding code further down loadMap() to
-// skip pins that land outside every real zone (open field/woods with
-// nothing actually there on the real site) instead of scattering icons
-// across plain ground with no zone under them.
-let mapZoneShapes = [];
 
 // Every marker on this map is one combined DOM element (a positioning
 // dot plus its label) rather than two separate layers per place —
@@ -6848,7 +6797,6 @@ function loadMap(){
     // drawn every frame from then on.
     mapGL.on("load", ()=>{
       const geo = buildMapGeoJSON();
-      mapZoneShapes = geo.zoneShapes;
 
       // Bottom-to-top: faint ground texture first, then area fills, then
       // paths, then icon-like points on top — the same layering a real
@@ -7050,11 +6998,14 @@ function loadMap(){
     );
   });
 
-  // Filtered to points that actually land near a drawn zone (district/
-  // camp/parking) — the schematic positions here predate the tighter,
-  // clearance-checked zone shapes above, so some used to end up floating
-  // on open field/woods the real site doesn't have anything on.
-  minorStages.filter(place=> nearZone(parseFloat(place.x), parseFloat(place.y))).forEach(place=>{
+  // (Tried filtering these to only ones landing near a drawn zone —
+  // reverted. Several of these positions are stale placeholders that
+  // realCoordFor() below actually overrides with a precise real
+  // coordinate, e.g. Foggers Mill/The Fools Leap per the comment above,
+  // so testing the stale schematic position against the drawn zones
+  // just meant real, confirmed 2026 stages could get hidden based on a
+  // position that was never actually used to place their marker.)
+  minorStages.forEach(place=>{
     const isRumoured = place.status === "rumoured";
     const coord = realCoordFor(place);
     addMapMarker("minor", coord.lat, coord.lon,
@@ -7069,7 +7020,7 @@ function loadMap(){
     );
   });
 
-  thingsToFind.filter(spot=> nearZone(parseFloat(spot.x), parseFloat(spot.y))).forEach(spot=>{
+  thingsToFind.forEach(spot=>{
     const coord = realCoordFor(spot);
     addMapMarker("secret", coord.lat, coord.lon,
       mapMarkerHtml("secret", "secret", spot.name, "?"),
@@ -7129,20 +7080,20 @@ function loadMap(){
     );
   });
 
-  // Real official-app amenity data — genuine positions, but genuine
-  // doesn't mean "inside one of this map's drawn zones": the schematic
-  // basemap is only an approximation, so some real POIs land in open
-  // field/woods on this map's own geometry even though they're
-  // legitimate on the real site. latLonToSchematic converts each one
-  // back into the same schematic space the zone shapes use so they can
-  // be checked against the same nearZone() rule as everything else,
-  // with a wider buffer (12 vs the default 6) since these positions
-  // never went through the same approximate placement the rest of the
-  // schematic data did, and shouldn't be held to as tight a leash.
-  ((window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois) || []).filter(poi=>{
-    const sc = latLonToSchematic(poi.lat, poi.lon);
-    return nearZone(sc.x, sc.y, 12);
-  }).forEach(poi=>{
+  // Real official-app amenity data is NOT run through nearZone() —
+  // tried that (converting each poi's real lat/lon back into schematic
+  // space and checking it against the drawn zone shapes) and it was
+  // actively harmful: with a 12-unit buffer it still dropped 36 of 53
+  // real POIs, including the ONLY marked First Aid, Reception and Cash
+  // Point pins. These are genuine positions straight from the official
+  // app's own map data — they ARE on the real site by definition; a
+  // "looks like it's outside our hand-approximated district blob" test
+  // just means our blob (built from an affine fit with up to ~35%
+  // residual error, see SCHEMATIC_TO_LATLON_FIT's own comment) doesn't
+  // line up with them, not that the amenity itself is misplaced.
+  // Hiding safety info (first aid, welfare) over a rendering
+  // approximation isn't a trade worth making.
+  ((window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois) || []).forEach(poi=>{
     addMapMarker("poi", poi.lat, poi.lon,
       `<div class="marker poi">${POI_ICONS[poi.category] || "📍"}</div>`,
       { title: poi.category, onClick: ()=> showMapInfoCard(`
