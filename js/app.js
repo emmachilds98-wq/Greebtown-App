@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v240";
-const APP_BUILD_TIME = "2026-08-01T05:42:26Z";
+const APP_CACHE_VERSION = "v241";
+const APP_BUILD_TIME = "2026-08-01T05:46:02Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6251,12 +6251,43 @@ function buildMapGeoJSON(){
   // large, barely-there alternating-tint blobs across the open ground
   // (drawn first/bottom, so forests/districts/camps layer over it where
   // they overlap) breaks up what would otherwise be a big flat colour.
-  const FIELD_SPOTS = [[8,60],[30,45],[50,55],[68,55],[85,70],[92,40],[55,80],[20,65],[40,85],[75,85],[10,15],[60,40]];
+  // Widened from a fixed 12-spot list to a jittered grid spanning past
+  // the schematic 0-100 box into the padded margin MAX_BOUNDS actually
+  // shows (schematicToLatLon extrapolates fine past 0-100) — the old
+  // list left the outer regions (especially near the pan-bounds edge,
+  // fully visible at the new zoomed-out-a-bit views) reading as flatter,
+  // emptier colour than the middle of the map, exactly backwards from a
+  // real aerial view where the working farmland stretches further than
+  // the festival footprint itself.
+  const FIELD_SPOTS = [];
+  { const fieldRand = seededRand(2200);
+    for(let gx=-10; gx<=110; gx+=18){
+      for(let gy=-10; gy<=110; gy+=18){
+        FIELD_SPOTS.push([gx + (fieldRand() - 0.5) * 10, gy + (fieldRand() - 0.5) * 10]);
+      }
+    }
+  }
   const fieldFeatures = FIELD_SPOTS.map(([cx,cy],i)=>({
     type: "Feature",
     properties: { fill: i % 2 === 0 ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)" },
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, 13, 1000 + i * 71, 12)) ] }
   }));
+
+  // Straight hedgerow lines scattered across the outer open ground —
+  // real farmland (Matterley Estate) shows field-division hedges well
+  // beyond the festival's own fenced footprint; the FIELD_SPOTS mottling
+  // above breaks up flat colour but has no actual line texture the way
+  // camp fields already got a few passes back.
+  const hedgeFeatures = [];
+  { const hedgeRand = seededRand(2300);
+    for(let i=0;i<22;i++){
+      const cx = -8 + hedgeRand() * 116, cy = -8 + hedgeRand() * 116;
+      const a = hedgeRand() * Math.PI;
+      const len = 10 + hedgeRand() * 14;
+      const dx = Math.cos(a) * len / 2, dy = Math.sin(a) * len / 2;
+      hedgeFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - dx, cy - dy], [cx + dx, cy + dy]]) } });
+    }
+  }
 
   // District clearings are sized to the town/venue cluster they actually
   // contain, not a fixed guess — a flat 16%-radius blob (the old
@@ -6620,9 +6651,20 @@ function buildMapGeoJSON(){
   // with visible gaps of bare green between them.
   let treePts = [];
   forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 30, 13, 17 + i * 41)); });
-  [[9,14,11,8,5],[91,86,11,8,61],[90,10,9,7,23],[10,90,9,7,37],[50,4,7,6,71],[96,50,7,6,83]].forEach(([cx,cy,count,spread,seed])=>{
-    treePts = treePts.concat(treeClusterPoints(cx, cy, count, spread, seed));
-  });
+  // Widened from 6 fixed corner clusters to a fuller ring running the
+  // whole perimeter — real UK farm estates like Matterley typically
+  // have tree-lined boundary hedgerows/copses all the way round, not
+  // just at a handful of corners, and the old sparse set left long
+  // stretches of the outer edge looking like bare empty field.
+  { const edgeRand = seededRand(2400);
+    const perimeterPoints = [
+      [50,-8],[80,-6],[20,-6],[-8,30],[-8,70],[108,30],[108,70],
+      [30,108],[70,108],[95,15],[95,85],[5,15],[5,85]
+    ];
+    perimeterPoints.forEach(([cx,cy],i)=>{
+      treePts = treePts.concat(treeClusterPoints(cx + (edgeRand()-0.5)*6, cy + (edgeRand()-0.5)*6, 6 + Math.floor(edgeRand()*4), 6, 2500 + i * 31));
+    });
+  }
   const treeFeatures = treePts.map(t=>{
     const c = schematicToLatLon(t.x, t.y);
     return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
@@ -6675,6 +6717,7 @@ function buildMapGeoJSON(){
 
   return {
     fields: { type:"FeatureCollection", features: fieldFeatures },
+    hedges: { type:"FeatureCollection", features: hedgeFeatures },
     stream: { type:"FeatureCollection", features: [streamFeature] },
     districts: { type:"FeatureCollection", features: districtFeatures },
     plazas: { type:"FeatureCollection", features: plazaFeatures },
@@ -6933,6 +6976,9 @@ function loadMap(){
       // competing on one flat plane.
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
       mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", paint: { "fill-color": ["get", "fill"] } });
+
+      mapGL.addSource("mapHedges", { type: "geojson", data: geo.hedges });
+      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", paint: { "line-color": "rgba(0,0,0,0.06)", "line-width": 1 } });
 
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
       mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.1)", "line-width": 1.2 } });
