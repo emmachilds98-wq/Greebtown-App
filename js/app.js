@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v223";
-const APP_BUILD_TIME = "2026-08-01T02:28:12Z";
+const APP_CACHE_VERSION = "v224";
+const APP_BUILD_TIME = "2026-08-01T02:48:32Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6373,11 +6373,31 @@ function buildMapGeoJSON(){
   }
   const streamFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(streamRing) } };
 
-  // Ordinary camping fields get a scatter of small confetti-coloured tent
-  // dots instead — matches the reference video (every plain camping
-  // field shows as bright orange/blue/pink/teal tent shapes dotted over
-  // green, not a solid fill like the premium camps get).
+  // Ordinary camping fields — a soft sandy-yellow ground fill (the
+  // reference video's own plain camping fields read as a warm
+  // yellow-green, clearly lighter/warmer than both the dark stippled
+  // woods and the bright open district grass), crossed by a couple of
+  // straight real-farmland field-division lines the same way the video's
+  // fields show, THEN the confetti tent dots scattered on top — before
+  // this pass ordinary camping fields had no ground fill of their own at
+  // all, just tent dots floating on whatever background/field-texture
+  // happened to be underneath, which made them hard to tell apart from
+  // plain open ground at a glance.
   const ordinaryCamps = campLabels.filter(c=> !/premium/i.test(c.text));
+  const campFieldFeatures = ordinaryCamps.map((c,i)=>({
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(c.x), parseFloat(c.y), 8, 600 + i * 43, 12)) ] }
+  }));
+  let campFieldLineFeatures = [];
+  ordinaryCamps.forEach((c,i)=>{
+    const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const rand = seededRand(650 + i * 19);
+    for(let l=0;l<2;l++){
+      const a = rand() * Math.PI;
+      const dx = Math.cos(a) * 7, dy = Math.sin(a) * 7 * 0.8;
+      campFieldLineFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - dx, cy - dy], [cx + dx, cy + dy]]) } });
+    }
+  });
   let confettiPts = [];
   ordinaryCamps.forEach((c,i)=>{ confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 14, 7, 800 + i * 47)); });
   const confettiFeatures = confettiPts.map(t=>{
@@ -6459,6 +6479,8 @@ function buildMapGeoJSON(){
     parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
     parkingRows: { type:"FeatureCollection", features: parkingRowFeatures },
     campAreas: { type:"FeatureCollection", features: campFeatures },
+    campFields: { type:"FeatureCollection", features: campFieldFeatures },
+    campFieldLines: { type:"FeatureCollection", features: campFieldLineFeatures },
     campTriangle: { type:"FeatureCollection", features: triangleFeature ? [triangleFeature] : [] },
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
@@ -6644,7 +6666,13 @@ function loadMap(){
       // glyph URLs — so the map needs zero network requests once
       // MapLibre itself has loaded, same "works with zero signal" goal
       // as the rest of this PWA's service worker.
-      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#1e3a28" } }] },
+      // Brighter open-grass base tone than before (was #1e3a28, a dark
+      // green close enough to the forest fill below that open ground and
+      // woods barely read as different) — the reference video's own open
+      // ground (camping fields aside) is a clear mid-bright green, with
+      // woods reading as a distinctly darker patch on top of it, not a
+      // background that's already nearly as dark as the woods.
+      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#3f7a4e" } }] },
       center: [-1.2394, 51.0534],
       // Opens zoomed OUT to the whole site (zoom 14.4, just above
       // minZoom) rather than straight into one corner — the official
@@ -6687,7 +6715,7 @@ function loadMap(){
       mapGL.addLayer({ id: "stream-line", type: "line", source: "mapStream", paint: { "line-color": "rgba(90,150,190,0.65)", "line-width": 2 } });
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
-      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(30,70,45,0.5)" } });
+      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(15,45,28,0.68)" } });
       mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(90,140,100,0.4)", "line-width": 1 } });
 
       // Parking — flat grey fields with a few straight "row" lines, kept
@@ -6710,6 +6738,16 @@ function loadMap(){
       mapGL.addSource("mapCampAreas", { type: "geojson", data: geo.campAreas });
       mapGL.addLayer({ id: "camp-areas-fill", type: "fill", source: "mapCampAreas", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "camp-areas-line", type: "line", source: "mapCampAreas", paint: { "line-color": "rgba(255,255,255,0.25)", "line-width": 1, "line-dasharray": [1, 1.5] } });
+
+      // Ordinary (non-premium) camping fields — a soft sandy-yellow fill
+      // plus a couple of straight field-division lines, so plain camping
+      // reads as its own kind of ground rather than tent dots floating
+      // on bare district/forest colour.
+      mapGL.addSource("mapCampFields", { type: "geojson", data: geo.campFields });
+      mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(210,190,95,0.4)" } });
+      mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(150,130,60,0.35)", "line-width": 1 } });
+      mapGL.addSource("mapCampFieldLines", { type: "geojson", data: geo.campFieldLines });
+      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(150,130,60,0.25)", "line-width": 1 } });
 
       // The triangular tree-ring/hedge feature inside Camp Orchid
       // Downtown — seen clearly, twice, across both reference videos.
