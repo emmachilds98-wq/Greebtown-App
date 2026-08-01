@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v259";
-const APP_BUILD_TIME = "2026-08-01T12:25:34Z";
+const APP_CACHE_VERSION = "v260";
+const APP_BUILD_TIME = "2026-08-01T14:09:14Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6026,7 +6026,16 @@ const campLabels = [
   { x:"95%", y:"64%", text:"Quiet Camping" },
   { x:"9%", y:"39%", text:"Camp Orchid Downtown (premium, public transport)" },
   { x:"75%", y:"22%", text:"Camp Skylark Hilltop (premium)" },
-  { x:"74%", y:"87%", text:"Camp Skylark Sunset (premium)" }
+  { x:"74%", y:"87%", text:"Camp Skylark Sunset (premium)" },
+  // Newly spotted in this session's own reference video, clearly legible
+  // right beside Camp Orchid Downtown's own label, just south of the
+  // Downtown district triangle near West Gate — placed adjacent to
+  // Downtown Camping/Camp Orchid Downtown since that's where it appeared
+  // on camera. Unclear whether it's a genuinely distinct field or the
+  // real name behind the existing "Downtown Camping" guess — kept as its
+  // own entry rather than overwriting that one, since both labels were
+  // visible on screen at once.
+  { x:"4%", y:"37%", text:"Camplight" }
 ];
 
 // Amenity markers (toilets, food, bars, water, welfare, etc.) — replaced
