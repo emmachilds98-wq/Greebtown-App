@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v247";
-const APP_BUILD_TIME = "2026-08-01T06:29:44Z";
+const APP_CACHE_VERSION = "v248";
+const APP_BUILD_TIME = "2026-08-01T06:35:32Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6837,6 +6837,20 @@ function buildMapGeoJSON(){
   boundaryRing.push(boundaryRing[0]);
   const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: boundaryRing } };
 
+  // Perimeter fence posts — small evenly-spaced dots walking the
+  // boundary ring, so the site edge reads as an actual (illustrated)
+  // fence line instead of just a dashed sketch with nothing on it.
+  const fencePostFeatures = [];
+  for(let i=0;i<boundaryRing.length-1;i++){
+    const [lon0,lat0] = boundaryRing[i], [lon1,lat1] = boundaryRing[i+1];
+    const segLen = Math.hypot(lon1-lon0, lat1-lat0);
+    const postsOnSeg = Math.max(1, Math.round(segLen / (jitterLon * 6)));
+    for(let j=0;j<postsOnSeg;j++){
+      const t = j / postsOnSeg;
+      fencePostFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[lon0 + (lon1-lon0)*t, lat0 + (lat1-lat0)*t] } });
+    }
+  }
+
   return {
     fields: { type:"FeatureCollection", features: fieldFeatures },
     hedges: { type:"FeatureCollection", features: hedgeFeatures },
@@ -6869,7 +6883,8 @@ function buildMapGeoJSON(){
     campervans: { type:"FeatureCollection", features: campervanFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
     hillContours: { type:"FeatureCollection", features: hillContourFeatures },
-    boundary: { type:"FeatureCollection", features: [boundaryFeature] }
+    boundary: { type:"FeatureCollection", features: [boundaryFeature] },
+    fencePosts: { type:"FeatureCollection", features: fencePostFeatures }
   };
 }
 
@@ -7121,6 +7136,15 @@ function loadMap(){
 
       mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
       mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
+
+      // Perimeter fence posts — small dots walking the boundary so the
+      // site edge reads as an actual illustrated fence line, not just an
+      // empty dashed sketch.
+      mapGL.addSource("mapFencePosts", { type: "geojson", data: geo.fencePosts });
+      mapGL.addLayer({ id: "fence-posts-circle", type: "circle", source: "mapFencePosts", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 0.6, 19, 2.2],
+        "circle-color": "rgba(143,168,156,0.5)"
+      } });
 
       // A real winding stream near Botanica/Hydro XL, visible across the
       // reference video — drawn with a casing like the paths so it reads
