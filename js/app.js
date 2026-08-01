@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v242";
-const APP_BUILD_TIME = "2026-08-01T05:49:12Z";
+const APP_CACHE_VERSION = "v243";
+const APP_BUILD_TIME = "2026-08-01T05:51:43Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6367,6 +6367,25 @@ function buildMapGeoJSON(){
   if(centers.length) centers.push(centers[0]);
   const trailFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(centers) } };
 
+  // Hill-shading contour rings — every district's own info text is
+  // explicitly tagged "Downtown." or "Hilltop." (Thrutopia/Oldtown are
+  // Hilltop, Area 404/Botanica/Letsbe Avenue/Metropolis are Downtown),
+  // a real elevation distinction the map itself never showed — flat
+  // ground colour everywhere regardless of which half of the site a
+  // district sits on. Three loose concentric rings around each Hilltop
+  // district (wider than the site-wide decorative contours, tan/brown
+  // rather than white so they read as ground shading, not path) hint at
+  // raised terrain without needing real elevation data.
+  const hillContourFeatures = [];
+  districts.filter(d=> /^Hilltop/.test(d.info)).forEach((d,di)=>{
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    const baseR = (districtRadii.get(d) || 6) * 1.6;
+    [1, 1.6, 2.2].forEach((mult,ri)=>{
+      const ring = blobRing(cx, cy, baseR * mult, di * 61 + ri * 13 + 4000, 14);
+      hillContourFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(ring) } });
+    });
+  });
+
   // A small "plaza" dot at each district's exact centre — every stage/
   // venue path converges there, and without something to converge ON it
   // just looked like every path faded out into empty grass at the
@@ -6774,6 +6793,7 @@ function buildMapGeoJSON(){
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
+    hillContours: { type:"FeatureCollection", features: hillContourFeatures },
     boundary: { type:"FeatureCollection", features: [boundaryFeature] }
   };
 }
@@ -7013,6 +7033,13 @@ function loadMap(){
 
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
       mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.1)", "line-width": 1.2 } });
+
+      // Hill-shading rings around Hilltop-tagged districts (Thrutopia,
+      // Oldtown) — tan/brown so they read as raised-ground shading, not
+      // another path. Drawn early/underneath so district fills and
+      // buildings sit on top where they overlap.
+      mapGL.addSource("mapHillContours", { type: "geojson", data: geo.hillContours });
+      mapGL.addLayer({ id: "hill-contours-line", type: "line", source: "mapHillContours", paint: { "line-color": "rgba(90,70,40,0.12)", "line-width": 1.5 } });
 
       mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
       mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
