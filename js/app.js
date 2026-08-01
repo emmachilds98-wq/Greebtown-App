@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v256";
-const APP_BUILD_TIME = "2026-08-01T10:43:00Z";
+const APP_CACHE_VERSION = "v257";
+const APP_BUILD_TIME = "2026-08-01T10:53:27Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5884,8 +5884,12 @@ const otherStages = [
 // from a guessed (72,66) — far southeast, in otherwise-empty ground —
 // to (80,55): its own label appears on camera right next to OLDTOWN and
 // QUANTUM, in the same wide shot as Grand Central and the yellow
-// "HILLTOP" ground zone, not out on its own.
-const minorStagePositions = [[46,34],[60,18],[34,16],[56,38],[30,58],[62,52],[44,42],[80,55],[86,58],[54,26],[24,40]];
+// "HILLTOP" ground zone, not out on its own. Síbín Beag nudged from
+// (86,58) to (85,46) — right on top of The Lion's Den's own (90,58)
+// once that moved (see its own comment), the two labels visually
+// collided; moved toward The Feckless Wrecked (92,48)/Trough Love
+// (84,48) instead, still Oldtown-adjacent but with real separation.
+const minorStagePositions = [[46,34],[60,18],[34,16],[56,38],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,40]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -5928,7 +5932,7 @@ const thingsToFind = [
   { name:"Endor", near:"Metropolis", x:"14%", y:"38%", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
   { name:"Mango", near:"Botanica", x:"24%", y:"20%", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
   { name:"Karma Ceuticals", near:"Botanica", x:"30%", y:"24%", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
-  { name:"Trough Love", near:"Oldtown", x:"84%", y:"48%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"Trough Love", near:"Oldtown", x:"87%", y:"49%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
   { name:"Da Graaf's Reformatory", near:"Oldtown", x:"80%", y:"44%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"La Luna Coven", near:"Oldtown", x:"82%", y:"50%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"The Common Ground", near:"Oldtown", x:"86%", y:"46%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
@@ -6738,7 +6742,13 @@ function buildMapGeoJSON(){
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const r = districtRadii.get(d);
     const rand = seededRand(di * 137 + 19);
-    const count = 5;
+    // Bumped 5 -> 11 — reference-image comparisons (the official app's
+    // own screenshots) show districts reading as genuinely built-up,
+    // dense clusters of small buildings even at a fairly zoomed-out
+    // view; 5 generic infill buildings per district plus whatever named
+    // venues happen to sit there left large stretches of bare clearing
+    // that don't match that density.
+    const count = 11;
     for(let k=0;k<count;k++){
       const a = rand() * Math.PI * 2;
       const dist = r * (0.35 + rand() * 0.5);
@@ -6759,7 +6769,7 @@ function buildMapGeoJSON(){
   minorStages.forEach((s,mi)=>{
     const cx = parseFloat(s.x), cy = parseFloat(s.y);
     const rand = seededRand(mi * 149 + 6000);
-    const count = 2;
+    const count = 4;
     for(let k=0;k<count;k++){
       const a = rand() * Math.PI * 2;
       const dist = 2.6 + rand() * 1.6;
@@ -7488,7 +7498,7 @@ function loadMap(){
       mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(232,208,168,0.9)", "line-width": 1.5 } });
 
       mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
-      mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
+      mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.5)", "line-width": 1, "line-dasharray": [0.2, 1.6] } });
 
       // Camp access paths — same casing/line pairing as the main spokes
       // (medium weight, since a camp field is a real walked-to
