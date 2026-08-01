@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v239";
-const APP_BUILD_TIME = "2026-08-01T05:40:08Z";
+const APP_CACHE_VERSION = "v240";
+const APP_BUILD_TIME = "2026-08-01T05:42:26Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6353,7 +6353,7 @@ function buildMapGeoJSON(){
   // path visibly widens) had nothing to show that.
   const stagePlazaFeatures = locations.filter(p=>p.kind === "stage").map((s,i)=>({
     type: "Feature", properties: {},
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.4, i * 41 + 9, 10)) ] }
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.8, i * 41 + 9, 10)) ] }
   }));
 
   // Spokes from every stage (major + minor) to its nearest district — the
@@ -6541,6 +6541,20 @@ function buildMapGeoJSON(){
     })()) }
   } : null;
 
+  // Camp Skylark's two sites (Hilltop/Sunset) got no distinguishing
+  // feature of their own — only Downtown Orchid's triangle. A rounder
+  // hedge-ring (more points than the triangle, so it reads as a
+  // different shape at a glance) gives each Skylark site the same
+  // "there's something specific here" cue without inventing a new
+  // real-world detail neither reference video actually showed for them.
+  const skylarkCamps = campAreaDefs.filter(c=> /skylark/i.test(c.text));
+  const skylarkRingFeatures = skylarkCamps.map((c,i)=>{
+    const ringR = Math.min(3.2, campAreaRadii.get(c) * 0.45);
+    const ring = blobRing(parseFloat(c.x), parseFloat(c.y), ringR, 950 + i * 17, 10);
+    ring.push(ring[0]);
+    return { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: schematicRingToLngLat(ring) } };
+  });
+
   // A real winding stream visible near Botanica/Hydro XL across the
   // reference video, running roughly past both — built from a few
   // waypoints each gently curved into the next for a winding look,
@@ -6601,9 +6615,12 @@ function buildMapGeoJSON(){
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), 15, 400 + i * 53, 16)) ] }
   }));
 
+  // Density bumped 22 -> 30 per named forest spot — the reference
+  // video's woods read as densely stippled throughout, not sparse dots
+  // with visible gaps of bare green between them.
   let treePts = [];
-  forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 22, 13, 17 + i * 41)); });
-  [[9,14,9,8,5],[91,86,9,8,61],[90,10,7,7,23],[10,90,7,7,37],[50,4,5,6,71],[96,50,5,6,83]].forEach(([cx,cy,count,spread,seed])=>{
+  forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 30, 13, 17 + i * 41)); });
+  [[9,14,11,8,5],[91,86,11,8,61],[90,10,9,7,23],[10,90,9,7,37],[50,4,7,6,71],[96,50,7,6,83]].forEach(([cx,cy,count,spread,seed])=>{
     treePts = treePts.concat(treeClusterPoints(cx, cy, count, spread, seed));
   });
   const treeFeatures = treePts.map(t=>{
@@ -6668,6 +6685,7 @@ function buildMapGeoJSON(){
     campFields: { type:"FeatureCollection", features: campFieldFeatures },
     campFieldLines: { type:"FeatureCollection", features: campFieldLineFeatures },
     campTriangle: { type:"FeatureCollection", features: triangleFeature ? [triangleFeature] : [] },
+    skylarkRings: { type:"FeatureCollection", features: skylarkRingFeatures },
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
     stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
@@ -6997,6 +7015,12 @@ function loadMap(){
       mapGL.addSource("mapCampTriangle", { type: "geojson", data: geo.campTriangle });
       mapGL.addLayer({ id: "camp-triangle-line", type: "line", source: "mapCampTriangle", paint: { "line-color": "rgba(30,70,45,0.7)", "line-width": 2 } });
 
+      // A rounder hedge-ring inside each Camp Skylark site, giving them
+      // their own distinguishing feature (Downtown Orchid's triangle
+      // above was the only camp with one until now).
+      mapGL.addSource("mapSkylarkRings", { type: "geojson", data: geo.skylarkRings });
+      mapGL.addLayer({ id: "skylark-ring-line", type: "line", source: "mapSkylarkRings", paint: { "line-color": "rgba(160,120,40,0.6)", "line-width": 2 } });
+
       // Path network — three tiers so the map reads as a connected route
       // system rather than isolated markers on plain grass: a solid main
       // trail linking every district (drawn with a dark "casing" line
@@ -7014,6 +7038,7 @@ function loadMap(){
       // run INTO the clearing rather than sitting on top of a flat edge.
       mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
       mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", paint: { "fill-color": "rgba(214,186,146,0.55)" } });
+      mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", paint: { "line-color": "rgba(120,95,60,0.5)", "line-width": 1 } });
 
       mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(55,42,28,0.7)", "line-width": 5.5 } });
       mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(232,208,168,0.95)", "line-width": 2.6 } });
