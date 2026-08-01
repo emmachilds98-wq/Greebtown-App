@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v223";
-const APP_BUILD_TIME = "2026-08-01T06:24:37Z";
+const APP_CACHE_VERSION = "v247";
+const APP_BUILD_TIME = "2026-08-01T06:29:44Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5947,7 +5947,25 @@ const thingsToFind = [
   { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
   { name:"Deviant Lounge", near:"Metropolis", x:"19%", y:"38%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
   { name:"The Pomegranate Parlour", near:"Site-wide", x:"86%", y:"20%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor." },
-  { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." }
+  { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." },
+  // The following 10 were spotted as real named labels on the official
+  // app's own map in the reference screen recording, but weren't in any
+  // list here before this pass — no lineup/schedule data was sourced
+  // for them, so info text stays to what's visible (name + district)
+  // rather than inventing a theme or backstory this file can't confirm.
+  // Positions are estimated from where each label sat in the recording
+  // relative to its district, same "approximate, not surveyed" honesty
+  // as everything else in this list.
+  { name:"Quantum", near:"Oldtown", x:"78%", y:"50%", info:"Seen labelled on the official app's own map, near Oldtown/Temple Valley — no lineup or theme details sourced yet." },
+  { name:"The Hide Out Downtown", near:"Metropolis", x:"20%", y:"30%", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
+  { name:"Endor", near:"Metropolis", x:"14%", y:"38%", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
+  { name:"Mango", near:"Botanica", x:"24%", y:"20%", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
+  { name:"Karma Ceuticals", near:"Botanica", x:"30%", y:"24%", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
+  { name:"Trough Love", near:"Oldtown", x:"84%", y:"48%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"Da Graaf's Reformatory", near:"Oldtown", x:"80%", y:"44%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"La Luna Coven", near:"Oldtown", x:"82%", y:"50%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Common Ground", near:"Oldtown", x:"86%", y:"46%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Feckless Wrecked", near:"Oldtown", x:"92%", y:"48%", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -5996,6 +6014,16 @@ const gates = [
   { name:"West Gate", x:"3%", y:"46%", info:"Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, plus the Public Transport Hub and the premium Camp Orchid Downtown pitches (built for coach/shuttle arrivals — closest gate access is here, not South Gate).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
   { name:"East Gate", x:"96%", y:"32%", info:"Nearest the White Carparks, motorcycle and cycle parking, and Campervan Field.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
   { name:"South Gate", x:"78%", y:"93%", info:"Nearest White Carpark 4 and Camp Skylark Sunset (one of two Camp Skylark premium sites for 2026 — the other, Camp Skylark Hilltop, sits up on Hilltop instead).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
+];
+
+// The White Carparks — the reference video shows a large grid-lined grey
+// car park field on the site's east/south-east edge, next to (not part
+// of) the camping fields, matching the "White Carparks"/"White Carpark 4"
+// East Gate and South Gate already name in their own info text above.
+// Positioned near those two gates rather than guessed elsewhere on site.
+const parkingAreas = [
+  { x:"97%", y:"38%", r:10, text:"White Carparks (East Gate)" },
+  { x:"80%", y:"86%", r:8, text:"White Carpark 4 (South Gate)" }
 ];
 
 // ===============================
@@ -6084,7 +6112,22 @@ const venueDirectory = [
   { name:"Burger-van Classics", type:"Food & drink", status:"confirmed", music:false, genre:"—", near:"Site-wide", info:"Confirmed 2026 food category, dotted around the bigger stages and camping fields." },
   { name:"Paelleria", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Pepperpot Market (2025)", info:"A 2025 trader-list name (paella). Treat as an example of the kind of stall to expect, not a return guarantee for 2026." },
   { name:"Burger Shack", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." },
-  { name:"Greek Gyros", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." }
+  { name:"Greek Gyros", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." },
+  // Same 10 real map labels added to thingsToFind above — mirrored here
+  // so they also show in the full venue directory, not just as map
+  // pins. "confirmed" because the name itself is confirmed real (seen
+  // on the official app's own map), even though no lineup/genre data
+  // was sourced for any of them.
+  { name:"Quantum", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map, near Oldtown/Temple Valley — no lineup or theme details sourced yet." },
+  { name:"The Hide Out Downtown", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Metropolis", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
+  { name:"Endor", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Metropolis", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
+  { name:"Mango", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Botanica", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
+  { name:"Karma Ceuticals", type:"Shop / hidden venue", status:"confirmed", music:false, genre:"—", near:"Botanica", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
+  { name:"Trough Love", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"Da Graaf's Reformatory", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"La Luna Coven", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Common Ground", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Feckless Wrecked", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." }
 ];
 
 const map = document.getElementById("map");
@@ -6141,6 +6184,43 @@ function nearestDistrict(x, y, districts){
   return best;
 }
 
+// A small rotated-rectangle footprint around a point — the reference
+// video's district interiors are dense with tan/orange building-block
+// shapes under every stage/venue icon, not just a bare dot on grass;
+// this gives every district venue the same "there's a real structure
+// here" footprint instead of markers floating on empty clearing colour.
+// Rotated by a seeded angle (not axis-aligned) so a cluster of these
+// reads as a scatter of individual buildings, not a grid.
+// A tiny rotated-square "tent" glyph — the reference video's own camp
+// confetti reads as small diamond/square tent shapes scattered on the
+// grass, not the plain round dots this was originally built with. Size
+// is in the same schematic 0-100 units as everything else (buildings
+// run 1.5-2.8 wide, so ~0.3-0.6 here reads as tent-scale, not building-
+// scale) — deliberately not reusing the old pixel-radius "size" value
+// confettiClusterPoints produced, which was tuned for a circle layer's
+// zoom-interpolated radius, not a schematic-space polygon.
+function tentDiamond(cx, cy, size, seed){
+  const rand = seededRand(seed);
+  const angle = Math.PI / 4 + (rand() - 0.5) * 0.6;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const half = size / 2;
+  const corners = [[-half,-half],[half,-half],[half,half],[-half,half]];
+  const pts = corners.map(([x,y])=> [cx + (x * cos - y * sin), cy + (x * sin + y * cos) * 0.85]);
+  pts.push(pts[0]);
+  return pts;
+}
+
+function buildingFootprint(cx, cy, seed){
+  const rand = seededRand(seed);
+  const w = 1.5 + rand() * 1.3, h = 1.0 + rand() * 0.9;
+  const angle = rand() * Math.PI;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const corners = [[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];
+  const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
+  pts.push(pts[0]);
+  return pts;
+}
+
 // A gently bowed 3-point path between two schematic points instead of a
 // dead-straight line — a whole hub's worth of spokes drawn perfectly
 // straight reads as an artificial "spider web" converging on one dot;
@@ -6159,7 +6239,7 @@ function curvedLine(p0, p1, seed){
 
 // Converts a ring/list of [x,y] points in the existing 0-100 schematic
 // space into [lon,lat] pairs (GeoJSON coordinate order) via the same
-// SCHEMATIC_TO_LATLON_FIT every other approximate position in this file uses.
+// schematicToLatLon() every other approximate position in this file uses.
 function schematicRingToLngLat(ring){
   return ring.map(([x,y])=>{ const c = schematicToLatLon(x, y); return [c.lon, c.lat]; });
 }
@@ -6177,7 +6257,7 @@ function treeClusterPoints(cx, cy, count, spread, seed){
     const x = cx + Math.cos(a) * r;
     const y = cy + Math.sin(a) * r * 0.7;
     const hue = 100 + Math.floor(rand() * 20);
-    pts.push({ x, y, size: 2.2 + rand() * 1.8, color: `hsla(${hue},40%,42%,0.55)` });
+    pts.push({ x, y, size: 2.6 + rand() * 2.0, color: `hsla(${hue},48%,38%,0.75)` });
   }
   return pts;
 }
@@ -6197,7 +6277,10 @@ function confettiClusterPoints(cx, cy, count, spread, seed){
     const r = rand() * spread;
     const x = cx + Math.cos(a) * r;
     const y = cy + Math.sin(a) * r * 0.7;
-    pts.push({ x, y, size: 1.6 + rand() * 1.2, color: CONFETTI_COLORS[Math.floor(rand() * CONFETTI_COLORS.length)] });
+    // Schematic-unit size (tent-scale, well under a building footprint's
+    // 1.5-2.8 range) — not the old pixel-radius value, now that confetti
+    // renders as tiny diamond polygons instead of a circle layer.
+    pts.push({ x, y, size: 0.35 + rand() * 0.25, color: CONFETTI_COLORS[Math.floor(rand() * CONFETTI_COLORS.length)] });
   }
   return pts;
 }
@@ -6206,10 +6289,14 @@ function confettiClusterPoints(cx, cy, count, spread, seed){
 // hand straight to mapGL.addSource(). Districts/trail/spokes/trees/tents
 // mirror the previous SVG illustration's shapes and layout 1:1, just
 // expressed as real-world geometry instead of drawing instructions.
-// A small fixed palette so neighbouring district clearings read as
-// visually distinct areas instead of identical translucent blobs —
-// cycled by index, not tied to any real Boomtown branding/colour.
-const DISTRICT_PALETTE = ["242,168,60", "75,190,227", "196,150,255", "180,214,120", "230,130,150"];
+// One colour per district (7, matching the real district count — the
+// old 5-colour palette cycled, so two districts always ended up sharing
+// a colour) picked to stay clear of every other ground colour already
+// on the map: no greens (open grass/forest), no yellow-gold (camping
+// fields), no grey (parking), no tan/brown (paths, buildings) — so a
+// district's own fill/outline colour is never confusable with the
+// zone type around it.
+const DISTRICT_PALETTE = ["242,140,60", "70,170,235", "175,120,235", "235,100,150", "225,80,80", "60,200,190", "210,90,200"];
 
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
@@ -6220,25 +6307,140 @@ function buildMapGeoJSON(){
   // large, barely-there alternating-tint blobs across the open ground
   // (drawn first/bottom, so forests/districts/camps layer over it where
   // they overlap) breaks up what would otherwise be a big flat colour.
-  const FIELD_SPOTS = [[8,60],[30,45],[50,55],[68,55],[85,70],[92,40],[55,80],[20,65],[40,85],[75,85],[10,15],[60,40]];
+  // Widened from a fixed 12-spot list to a jittered grid spanning past
+  // the schematic 0-100 box into the padded margin MAX_BOUNDS actually
+  // shows (schematicToLatLon extrapolates fine past 0-100) — the old
+  // list left the outer regions (especially near the pan-bounds edge,
+  // fully visible at the new zoomed-out-a-bit views) reading as flatter,
+  // emptier colour than the middle of the map, exactly backwards from a
+  // real aerial view where the working farmland stretches further than
+  // the festival footprint itself.
+  const FIELD_SPOTS = [];
+  { const fieldRand = seededRand(2200);
+    for(let gx=-10; gx<=110; gx+=18){
+      for(let gy=-10; gy<=110; gy+=18){
+        FIELD_SPOTS.push([gx + (fieldRand() - 0.5) * 10, gy + (fieldRand() - 0.5) * 10]);
+      }
+    }
+  }
   const fieldFeatures = FIELD_SPOTS.map(([cx,cy],i)=>({
     type: "Feature",
-    properties: { fill: i % 2 === 0 ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.03)" },
+    properties: { fill: i % 2 === 0 ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)" },
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, 13, 1000 + i * 71, 12)) ] }
   }));
 
+  // Straight hedgerow lines scattered across the outer open ground —
+  // real farmland (Matterley Estate) shows field-division hedges well
+  // beyond the festival's own fenced footprint; the FIELD_SPOTS mottling
+  // above breaks up flat colour but has no actual line texture the way
+  // camp fields already got a few passes back.
+  const hedgeFeatures = [];
+  { const hedgeRand = seededRand(2300);
+    for(let i=0;i<22;i++){
+      const cx = -8 + hedgeRand() * 116, cy = -8 + hedgeRand() * 116;
+      const a = hedgeRand() * Math.PI;
+      const len = 10 + hedgeRand() * 14;
+      const dx = Math.cos(a) * len / 2, dy = Math.sin(a) * len / 2;
+      hedgeFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - dx, cy - dy], [cx + dx, cy + dy]]) } });
+    }
+  }
+
+  // District clearings are sized to the town/venue cluster they actually
+  // contain, not a fixed guess — a flat 16%-radius blob (the old
+  // approach) reached well past every district's real stages/hidden
+  // venues and into the neighbouring camping fields, which is exactly
+  // the "boundary drawn over the campsite instead of the real
+  // interactive town" problem the reference video's own district
+  // outlines don't have. districtSpreadR walks every stage/minor-stage/
+  // hidden-venue this district actually owns (same nearestDistrict()
+  // assignment the path network below uses, so the clearing and its
+  // paths agree on what belongs to it) and sizes the clearing to just
+  // past the furthest one — small district, small clearing.
+  const districtMemberPoints = locations.filter(p=>p.kind === "stage").concat(minorStages).concat(thingsToFind);
+
+  // Master registry of every ground-zone centre (districts, camping
+  // fields, parking) this pass considers purely to keep neighbouring
+  // zones from geometrically overlapping — shrinking district radius
+  // alone (the previous pass) wasn't enough on its own: a camping
+  // field's own blob (radius ~8-10) can reach past a district centre
+  // that's only a few schematic units away regardless of how small the
+  // district's own radius is (Oldtown sits just ~5 units from East
+  // Camping, for example). clearanceRadius caps whichever radius is
+  // being asked for so it can reach at most 40% of the way to the
+  // NEAREST other zone's centre — two neighbouring zones each capped at
+  // 40% still leaves a real gap between their edges, even accounting for
+  // blobRing's own up-to-22%-oversize irregularity.
+  const zoneCenters = districts.map(d=>({ x: parseFloat(d.x), y: parseFloat(d.y), ref: d }))
+    .concat(campLabels.map(c=>({ x: parseFloat(c.x), y: parseFloat(c.y), ref: c })))
+    .concat(parkingAreas.map(p=>({ x: parseFloat(p.x), y: parseFloat(p.y), ref: p })));
+  function clearanceRadius(cx, cy, selfRef, desired){
+    let minDist = Infinity;
+    zoneCenters.forEach(z=>{
+      if(z.ref === selfRef) return;
+      minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy));
+    });
+    // The floor below (2) exists so a zone tucked close to a neighbour
+    // doesn't shrink away to nothing — but a floor alone can't be
+    // allowed to win: if BOTH of a close pair hit the same floor, their
+    // radii can sum to MORE than the distance between them (this
+    // actually happened for Oldtown/East Camping, ~5 units apart — a
+    // floor of 3 each summed to 6). minDist/2 is a hard ceiling no floor
+    // is allowed to cross, since two neighbours each capped at half the
+    // distance between them can never sum past that distance — so it's
+    // safe to raise the ratio below (0.36 -> 0.42, more legible zones
+    // without touching) since the hard ceiling, not the ratio, is what
+    // actually guarantees no overlap.
+    const safeMax = Math.max(1.5, minDist / 2 - 0.4);
+    return Math.min(Math.max(2, Math.min(desired, minDist * 0.42)), safeMax);
+  }
+
+  function districtSpreadR(d){
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    let maxDist = 0;
+    districtMemberPoints.forEach(p=>{
+      const nd = nearestDistrict(parseFloat(p.x), parseFloat(p.y), districts);
+      if(nd !== d) return;
+      const dx = parseFloat(p.x) - cx, dy = parseFloat(p.y) - cy;
+      maxDist = Math.max(maxDist, Math.sqrt(dx * dx + dy * dy));
+    });
+    const desired = Math.min(13, Math.max(6, maxDist + 3));
+    return clearanceRadius(cx, cy, d, desired);
+  }
+  const districtRadii = new Map();
   const districtFeatures = districts.map((d,i)=>{
     const rgb = DISTRICT_PALETTE[i % DISTRICT_PALETTE.length];
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    const r = districtSpreadR(d);
+    districtRadii.set(d, r);
     return {
       type: "Feature",
-      properties: { name: d.name, fill: `rgba(${rgb},0.22)`, line: `rgba(${rgb},0.65)` },
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(d.x), parseFloat(d.y), 16, i * 31 + 7, 18)) ] }
+      properties: { name: d.name, fill: `rgba(${rgb},0.32)`, line: `rgba(${rgb},0.95)`, casing: `rgba(${rgb},0.35)` },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 31 + 7, 18)) ] }
     };
   });
 
   const centers = districts.map(d=>[parseFloat(d.x), parseFloat(d.y)]);
   if(centers.length) centers.push(centers[0]);
   const trailFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(centers) } };
+
+  // Hill-shading contour rings — every district's own info text is
+  // explicitly tagged "Downtown." or "Hilltop." (Thrutopia/Oldtown are
+  // Hilltop, Area 404/Botanica/Letsbe Avenue/Metropolis are Downtown),
+  // a real elevation distinction the map itself never showed — flat
+  // ground colour everywhere regardless of which half of the site a
+  // district sits on. Three loose concentric rings around each Hilltop
+  // district (wider than the site-wide decorative contours, tan/brown
+  // rather than white so they read as ground shading, not path) hint at
+  // raised terrain without needing real elevation data.
+  const hillContourFeatures = [];
+  districts.filter(d=> /^Hilltop/.test(d.info)).forEach((d,di)=>{
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    const baseR = (districtRadii.get(d) || 6) * 1.6;
+    [1, 1.6, 2.2].forEach((mult,ri)=>{
+      const ring = blobRing(cx, cy, baseR * mult, di * 61 + ri * 13 + 4000, 14);
+      hillContourFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(ring) } });
+    });
+  });
 
   // A small "plaza" dot at each district's exact centre — every stage/
   // venue path converges there, and without something to converge ON it
@@ -6247,6 +6449,37 @@ function buildMapGeoJSON(){
   const plazaFeatures = districts.map(d=>{
     const c = schematicToLatLon(parseFloat(d.x), parseFloat(d.y));
     return { type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
+  });
+
+  // Stage plazas — a soft tan clearing under every main stage. The
+  // reference video shows paths widening into a real open plaza around
+  // a stage (see the Tribe of Frog frame) rather than staying a thin
+  // line all the way up to the building — every other path in this
+  // basemap is a constant-width line, so main stages (the one place a
+  // path visibly widens) had nothing to show that.
+  const stagePlazaFeatures = locations.filter(p=>p.kind === "stage").map((s,i)=>({
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.8, i * 41 + 9, 10)) ] }
+  }));
+
+  // Bunting/flag accents scattered around each main stage plaza — the
+  // Tribe of Frog frame shows small bright pink flag/flower dots dotted
+  // through the clearing around a stage, decoration this map had none
+  // of; every other point-scatter texture (trees, tent confetti, cars)
+  // already exists, main stages had nothing of their own.
+  const BUNTING_COLORS = ["rgba(235,95,150,0.8)", "rgba(255,205,60,0.8)", "rgba(120,220,190,0.8)"];
+  let buntingPts = [];
+  locations.filter(p=>p.kind === "stage").forEach((s,i)=>{
+    const rand = seededRand(2600 + i * 13);
+    for(let k=0;k<8;k++){
+      const a = rand() * Math.PI * 2, r = 1.4 + rand() * 2.2;
+      const x = parseFloat(s.x) + Math.cos(a) * r, y = parseFloat(s.y) + Math.sin(a) * r * 0.85;
+      buntingPts.push({ x, y, color: BUNTING_COLORS[Math.floor(rand() * BUNTING_COLORS.length)] });
+    }
+  });
+  const buntingFeatures = buntingPts.map(t=>{
+    const c = schematicToLatLon(t.x, t.y);
+    return { type:"Feature", properties:{ color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
   });
 
   // Spokes from every stage (major + minor) to its nearest district — the
@@ -6259,19 +6492,150 @@ function buildMapGeoJSON(){
   });
 
   // Thinner "capillary" paths from every smaller point (hidden venues,
-  // landmarks, gates) to its nearest district — without these, only the
-  // dozen main/minor stages had any path at all, so every hidden venue,
-  // landmark and gate looked like a marker dropped on plain grass with no
-  // way to reach it. Drawing a path to each one, thinner and fainter than
-  // the main stage spokes, makes the whole map read as one connected
-  // network instead of isolated pins — same layering idea real
-  // illustrated maps use (thick main routes, thin capillary paths to
-  // individual stalls/venues).
-  const capillaryTargets = thingsToFind.concat(landmarks).concat(gates);
+  // gates) to its nearest district — without these, only the dozen
+  // main/minor stages had any path at all, so every hidden venue and
+  // gate looked like a marker dropped on plain grass with no way to
+  // reach it. Drawing a path to each one, thinner and fainter than the
+  // main stage spokes, makes the whole map read as one connected network
+  // instead of isolated pins — same layering idea real illustrated maps
+  // use (thick main routes, thin capillary paths to individual stalls/
+  // venues). `landmarks` (lockers, charge points, welfare tents etc.) is
+  // deliberately left out here — those are scattered utility markers,
+  // off by default via the "Landmarks" chip, and drawing paths out to
+  // them made the woods/open ground look like it had real infrastructure
+  // wherever one happened to be plotted, which is the exact "icons
+  // outside the real camping/parking/music zones" clutter the reference
+  // video's own map doesn't show.
+  const capillaryTargets = thingsToFind.concat(gates);
   const capillaryFeatures = capillaryTargets.map((p,i)=>{
     const px = parseFloat(p.x), py = parseFloat(p.y);
     const nd = nearestDistrict(px, py, districts);
     return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nd.x), parseFloat(nd.y)], i * 23 + 11)) } };
+  });
+
+  // Camp access paths — every named camping field (campLabels) to its
+  // nearest district, same medium-weight spoke treatment stages get.
+  // Camp fields got their own ground fill/texture a few passes back but
+  // never a path — the field itself reads as camping ground, but the
+  // marker/label sitting on it still looked disconnected from the rest
+  // of the walkable network, exactly the "floating in dead space" gap.
+  const campSpokeFeatures = campLabels.map((c,i)=>{
+    const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const nd = nearestDistrict(cx, cy, districts);
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([cx,cy], [parseFloat(nd.x), parseFloat(nd.y)], i * 19 + 5)) } };
+  });
+
+  // Parking access roads — each parking area to its nearest GATE (real
+  // car parks connect to a gate/road, not the town centre) rather than
+  // reusing nearestDistrict. Short, thick, deliberately road-like.
+  const parkingSpokeFeatures = parkingAreas.map((p,i)=>{
+    const px = parseFloat(p.x), py = parseFloat(p.y);
+    let nearestG = gates[0], bestD = Infinity;
+    gates.forEach(g=>{
+      const dd = (parseFloat(g.x) - px) ** 2 + (parseFloat(g.y) - py) ** 2;
+      if(dd < bestD){ bestD = dd; nearestG = g; }
+    });
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nearestG.x), parseFloat(nearestG.y)], i * 29 + 13)) } };
+  });
+
+  // Building footprints — a small tan/orange rotated-rectangle under
+  // every stage/hidden-venue marker (districtMemberPoints, the same list
+  // districtSpreadR above uses) so district interiors read as an actual
+  // built-up town, matching the reference video's dense scatter of
+  // building-block shapes around every venue icon, instead of just a
+  // bare coloured clearing with pins floating on it. One in four is a
+  // hollow outline-only "fenced enclosure" instead of a solid fill (see
+  // "Trough Love" in Oldtown in the reference video — a beer-garden-style
+  // fenced yard, not a roofed building) — every prior pass drew every
+  // single venue the same solid-block way, which reads as more uniform
+  // than the video's own mix of buildings and open fenced areas.
+  const solidBuildingFeatures = [];
+  const fencedEnclosureFeatures = [];
+  districtMemberPoints.forEach((p,i)=>{
+    const ring = schematicRingToLngLat(buildingFootprint(parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
+    const feature = { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } };
+    if(i % 4 === 3) fencedEnclosureFeatures.push(feature);
+    else solidBuildingFeatures.push(feature);
+  });
+
+  // Decorative infill buildings — a wide reference-video frame showing
+  // several districts at once (Botanica/Metropolis together) has
+  // noticeably MORE small building blocks scattered through each
+  // district than this map has named venues to place them at — generic
+  // stalls/toilets/backstage structures with no name of their own. A
+  // handful of small unlabeled rectangles scattered through each
+  // district's own clearing (same buildingFootprint shape, offset from
+  // its centre so they don't stack on the plaza) fills that density gap
+  // without needing real data for each one.
+  const infillBuildingFeatures = [];
+  districts.forEach((d,di)=>{
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    const r = districtRadii.get(d);
+    const rand = seededRand(di * 137 + 19);
+    const count = 5;
+    for(let k=0;k<count;k++){
+      const a = rand() * Math.PI * 2;
+      const dist = r * (0.35 + rand() * 0.5);
+      const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+      infillBuildingFeatures.push({
+        type: "Feature", properties: {},
+        geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, di * 137 + 19 + k * 7)) ] }
+      });
+    }
+  });
+
+  // Main-stage glow — the reference video shows every major stage as a
+  // soft coloured halo bleeding into the ground around it (orange around
+  // The Lion's Den, purple around ENDOR, etc), a strong at-a-glance
+  // "this is a live music area" cue our stages didn't have at all. One
+  // point per stage, three stacked circle layers (see loadMap) fake a
+  // blur by shrinking radius/raising opacity toward the centre — real
+  // radial-gradient blur isn't expressible in a MapLibre circle paint.
+  const STAGE_GLOW_COLORS = ["255,140,60", "190,110,255", "90,200,255", "255,90,150", "255,210,80", "120,255,170"];
+  const glowStages = locations.filter(p=>p.kind === "stage");
+  const stageGlowFeatures = glowStages.map((s,i)=>{
+    const c = schematicToLatLon(parseFloat(s.x), parseFloat(s.y));
+    const rgb = STAGE_GLOW_COLORS[i % STAGE_GLOW_COLORS.length];
+    return {
+      type:"Feature",
+      properties:{ colorOuter: `rgba(${rgb},0.05)`, colorMid: `rgba(${rgb},0.09)`, colorCore: `rgba(${rgb},0.18)` },
+      geometry:{ type:"Point", coordinates:[c.lon, c.lat] }
+    };
+  });
+
+  // Parking AREAS — grey fields (the reference video shows these as flat
+  // grey/salmon grid-lined ground, clearly separate from both the
+  // green/yellow camping fields and the busy district clearings), with a
+  // few straight internal "row" lines so it reads as a car park rather
+  // than just another grey blob.
+  const parkingFeatures = parkingAreas.map((p,i)=>{
+    const cx = parseFloat(p.x), cy = parseFloat(p.y);
+    const r = clearanceRadius(cx, cy, p, p.r);
+    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 1200 + i * 37, 10)) ] } };
+  });
+  let parkingRowFeatures = [];
+  let parkingCarFeatures = [];
+  parkingAreas.forEach((p,i)=>{
+    const cx = parseFloat(p.x), cy = parseFloat(p.y);
+    const r = clearanceRadius(cx, cy, p, p.r);
+    const rand = seededRand(1300 + i * 53);
+    for(let row=-2;row<=2;row++){
+      const y = cy + row * (r / 3);
+      parkingRowFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - r * 0.8, y], [cx + r * 0.8, y]]) } });
+      // Small evenly-spaced "car" dots along each row line — the
+      // reference video's own car parks read as a dense grid of tiny
+      // rectangles, not a flat grey fill with a few guide lines; a
+      // scatter of small pale dots along the rows gives the same
+      // "parked in rows" impression without drawing 100+ individual
+      // vehicle shapes.
+      const carsPerRow = 7;
+      for(let k=0;k<carsPerRow;k++){
+        if(rand() < 0.15) continue; // a few gaps so the row doesn't look perfectly full
+        const x = cx - r * 0.72 + (r * 1.44) * (k / (carsPerRow - 1));
+        const c = schematicToLatLon(x, y + (rand() - 0.5) * (r / 12));
+        parkingCarFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
+      }
+    }
   });
 
   // Premium camp AREAS — the reference videos show Camp Orchid Downtown
@@ -6283,27 +6647,48 @@ function buildMapGeoJSON(){
   // than a circle (seen clearly, twice, across both videos), so it gets
   // fewer ring points for a more angular shape than the Skylark camps.
   const campAreaDefs = campLabels.filter(c=> /premium/i.test(c.text));
+  const campAreaRadii = new Map();
   const campFeatures = campAreaDefs.map((c,i)=>{
     const isDowntown = /downtown/i.test(c.text);
+    const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const r = clearanceRadius(cx, cy, c, 11);
+    campAreaRadii.set(c, r);
     return {
       type: "Feature",
       properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(c.x), parseFloat(c.y), 10, 700 + i * 61, isDowntown ? 6 : 14)) ] }
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 700 + i * 61, isDowntown ? 6 : 14)) ] }
     };
   });
 
   // A small triangular tree-ring/hedge path inside Camp Orchid Downtown —
   // a distinctive real feature visible clearly (and repeatedly) in both
-  // reference videos, not present anywhere else on the map.
+  // reference videos, not present anywhere else on the map. Sized to
+  // half the camp's own (possibly clearance-shrunk) radius so it always
+  // stays inside the camp area fill instead of poking out past its edge.
   const downtownCamp = campAreaDefs.find(c=> /downtown/i.test(c.text));
   const triangleFeature = downtownCamp ? {
     type: "Feature", properties: {},
     geometry: { type: "LineString", coordinates: schematicRingToLngLat((()=>{
-      const ring = blobRing(parseFloat(downtownCamp.x), parseFloat(downtownCamp.y), 4, 850, 3);
+      const triR = Math.min(4, campAreaRadii.get(downtownCamp) * 0.5);
+      const ring = blobRing(parseFloat(downtownCamp.x), parseFloat(downtownCamp.y), triR, 850, 3);
       ring.push(ring[0]);
       return ring;
     })()) }
   } : null;
+
+  // Camp Skylark's two sites (Hilltop/Sunset) got no distinguishing
+  // feature of their own — only Downtown Orchid's triangle. A rounder
+  // hedge-ring (more points than the triangle, so it reads as a
+  // different shape at a glance) gives each Skylark site the same
+  // "there's something specific here" cue without inventing a new
+  // real-world detail neither reference video actually showed for them.
+  const skylarkCamps = campAreaDefs.filter(c=> /skylark/i.test(c.text));
+  const skylarkRingFeatures = skylarkCamps.map((c,i)=>{
+    const ringR = Math.min(3.2, campAreaRadii.get(c) * 0.45);
+    const ring = blobRing(parseFloat(c.x), parseFloat(c.y), ringR, 950 + i * 17, 10);
+    ring.push(ring[0]);
+    return { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: schematicRingToLngLat(ring) } };
+  });
 
   // A real winding stream visible near Botanica/Hydro XL across the
   // reference video, running roughly past both — built from a few
@@ -6318,17 +6703,59 @@ function buildMapGeoJSON(){
   }
   const streamFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(streamRing) } };
 
-  // Ordinary camping fields get a scatter of small confetti-coloured tent
-  // dots instead — matches the reference video (every plain camping
-  // field shows as bright orange/blue/pink/teal tent shapes dotted over
-  // green, not a solid fill like the premium camps get).
+  // Ordinary camping fields — a soft sandy-yellow ground fill (the
+  // reference video's own plain camping fields read as a warm
+  // yellow-green, clearly lighter/warmer than both the dark stippled
+  // woods and the bright open district grass), crossed by a couple of
+  // straight real-farmland field-division lines the same way the video's
+  // fields show, THEN the confetti tent dots scattered on top — before
+  // this pass ordinary camping fields had no ground fill of their own at
+  // all, just tent dots floating on whatever background/field-texture
+  // happened to be underneath, which made them hard to tell apart from
+  // plain open ground at a glance.
   const ordinaryCamps = campLabels.filter(c=> !/premium/i.test(c.text));
-  let confettiPts = [];
-  ordinaryCamps.forEach((c,i)=>{ confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 14, 7, 800 + i * 47)); });
-  const confettiFeatures = confettiPts.map(t=>{
-    const c = schematicToLatLon(t.x, t.y);
-    return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
+  const campFieldRadii = new Map();
+  const campFieldFeatures = ordinaryCamps.map((c,i)=>{
+    const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const r = clearanceRadius(cx, cy, c, 9);
+    campFieldRadii.set(c, r);
+    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 600 + i * 43, 12)) ] } };
   });
+  let campFieldLineFeatures = [];
+  ordinaryCamps.forEach((c,i)=>{
+    const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const r = campFieldRadii.get(c) * 0.85;
+    const rand = seededRand(650 + i * 19);
+    for(let l=0;l<2;l++){
+      const a = rand() * Math.PI;
+      const dx = Math.cos(a) * r, dy = Math.sin(a) * r * 0.8;
+      campFieldLineFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - dx, cy - dy], [cx + dx, cy + dy]]) } });
+    }
+  });
+  let confettiPts = [];
+  // Campervan Field gets small rectangular "vehicle" footprints instead
+  // of round tent-confetti dots — it's parked campervans, not tents, and
+  // every other camp field using the same round-dot texture regardless
+  // of what's actually pitched there was one texture standing in for
+  // two different real things.
+  const campervanFeatures = [];
+  ordinaryCamps.forEach((c,i)=>{
+    if(/campervan/i.test(c.text)){
+      const cx = parseFloat(c.x), cy = parseFloat(c.y), r = campFieldRadii.get(c) * 0.8;
+      const rand = seededRand(1900 + i * 31);
+      for(let k=0;k<16;k++){
+        const a = rand() * Math.PI * 2, dist = rand() * r;
+        const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+        campervanFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Polygon", coordinates:[ schematicRingToLngLat(buildingFootprint(x, y, 1900 + i * 31 + k * 7)) ] } });
+      }
+    } else {
+      confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 20, campFieldRadii.get(c) * 0.85, 800 + i * 47));
+    }
+  });
+  const confettiFeatures = confettiPts.map((t,i)=>({
+    type: "Feature", properties: { color: t.color },
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(tentDiamond(t.x, t.y, t.size, 3100 + i * 11)) ] }
+  }));
 
   // Forest AREAS — a solid mottled-green clearing shape under each named
   // forest/woods spot, not just a scatter of tree dots floating on bare
@@ -6341,11 +6768,25 @@ function buildMapGeoJSON(){
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), 15, 400 + i * 53, 16)) ] }
   }));
 
+  // Density bumped 22 -> 30 per named forest spot — the reference
+  // video's woods read as densely stippled throughout, not sparse dots
+  // with visible gaps of bare green between them.
   let treePts = [];
-  forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 22, 13, 17 + i * 41)); });
-  [[9,14,9,8,5],[91,86,9,8,61],[90,10,7,7,23],[10,90,7,7,37],[50,4,5,6,71],[96,50,5,6,83]].forEach(([cx,cy,count,spread,seed])=>{
-    treePts = treePts.concat(treeClusterPoints(cx, cy, count, spread, seed));
-  });
+  forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 30, 13, 17 + i * 41)); });
+  // Widened from 6 fixed corner clusters to a fuller ring running the
+  // whole perimeter — real UK farm estates like Matterley typically
+  // have tree-lined boundary hedgerows/copses all the way round, not
+  // just at a handful of corners, and the old sparse set left long
+  // stretches of the outer edge looking like bare empty field.
+  { const edgeRand = seededRand(2400);
+    const perimeterPoints = [
+      [50,-8],[80,-6],[20,-6],[-8,30],[-8,70],[108,30],[108,70],
+      [30,108],[70,108],[95,15],[95,85],[5,15],[5,85]
+    ];
+    perimeterPoints.forEach(([cx,cy],i)=>{
+      treePts = treePts.concat(treeClusterPoints(cx + (edgeRand()-0.5)*6, cy + (edgeRand()-0.5)*6, 6 + Math.floor(edgeRand()*4), 6, 2500 + i * 31));
+    });
+  }
   const treeFeatures = treePts.map(t=>{
     const c = schematicToLatLon(t.x, t.y);
     return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
@@ -6398,19 +6839,36 @@ function buildMapGeoJSON(){
 
   return {
     fields: { type:"FeatureCollection", features: fieldFeatures },
+    hedges: { type:"FeatureCollection", features: hedgeFeatures },
     stream: { type:"FeatureCollection", features: [streamFeature] },
     districts: { type:"FeatureCollection", features: districtFeatures },
     plazas: { type:"FeatureCollection", features: plazaFeatures },
+    parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
+    parkingRows: { type:"FeatureCollection", features: parkingRowFeatures },
+    parkingCars: { type:"FeatureCollection", features: parkingCarFeatures },
     campAreas: { type:"FeatureCollection", features: campFeatures },
+    campFields: { type:"FeatureCollection", features: campFieldFeatures },
+    campFieldLines: { type:"FeatureCollection", features: campFieldLineFeatures },
     campTriangle: { type:"FeatureCollection", features: triangleFeature ? [triangleFeature] : [] },
+    skylarkRings: { type:"FeatureCollection", features: skylarkRingFeatures },
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
+    stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
+    bunting: { type:"FeatureCollection", features: buntingFeatures },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
     capillaries: { type:"FeatureCollection", features: capillaryFeatures },
+    campSpokes: { type:"FeatureCollection", features: campSpokeFeatures },
+    parkingSpokes: { type:"FeatureCollection", features: parkingSpokeFeatures },
+    buildings: { type:"FeatureCollection", features: solidBuildingFeatures },
+    fencedEnclosures: { type:"FeatureCollection", features: fencedEnclosureFeatures },
+    infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
+    stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
+    campervans: { type:"FeatureCollection", features: campervanFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
+    hillContours: { type:"FeatureCollection", features: hillContourFeatures },
     boundary: { type:"FeatureCollection", features: [boundaryFeature] }
   };
 }
@@ -6431,35 +6889,38 @@ let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false
 //  1. EXACT — a schematic entry's name matches a BOOMTOWN_LOCATIONS_2026
 //     stage's label exactly (case-insensitive): use that stage's real
 //     lat/lon directly.
-//  2. APPROXIMATE — everything else is projected through a fitted affine
-//     transform (least-squares fit over the 7 confirmed exact-name
-//     matches between the old schematic layout and the real data).
-//     This is honest, not precise — residual error against the 7 known
-//     points runs up to ~35% of the site's own scale, so treat every
-//     approximate pin exactly like this app's existing "illustrative,
-//     not surveyed" framing for hidden venues/minor stages, just now
-//     anchored to a real base map instead of a hand-drawn one, rather
-//     than claiming survey-grade accuracy it doesn't have.
+//  2. APPROXIMATE — everything else is projected with a straight linear
+//     scale onto SITE_SW/SITE_NE (x:0-100 -> SITE_SW.lon-SITE_NE.lon,
+//     y:0-100 -> SITE_NE.lat-SITE_SW.lat, matching this file's existing
+//     y-down-is-south convention). This replaces an earlier fitted
+//     affine transform (least-squares over 7 exact-name matches) that
+//     turned out to have a real, confirmed bug: its own coefficients
+//     implied the whole 0-100 schematic box was only ~180m across in
+//     real terms, while SITE_SW/SITE_NE (the box this file already
+//     trusts for pan bounds and the boundary polygon) spans a real
+//     ~890m x 730m — a ~5x scale mismatch between two calibrations that
+//     should agree. That's why real POI markers (accurate GPS, spread
+//     across the true ~890x730m site) kept reading as "outside" the
+//     approximate markers, which were all compressed into a patch a
+//     fraction of the real site's size. This straight linear mapping is
+//     less "precise" than a rotated/skewed fit would be IF that fit had
+//     the right scale, but it's verifiably consistent with the one real
+//     bounding box already used everywhere else in this file, which the
+//     old fit demonstrably was not.
 // ===============================
-const SCHEMATIC_TO_LATLON_FIT = {
-  a: -0.00000753841074987542, b: -0.000014664845893481546, c: 51.05428102686477,
-  d: 0.000021936335977474345, e: -0.000012665002121025999, f: -1.2407495567557247
-};
 // Real-world bounds of the site, from the extracted map data's own
 // coverage (js/boomtown-locations-2026.js) — shared by loadMap() (as the
-// map's pan/zoom bounds) and buildMapGeoJSON() (as the basemap's
-// decorative site-boundary shape), so both are built from the same
-// source of truth. They used to disagree: the boundary was hand-traced
-// in schematic space and run through the (imprecise) affine fit above,
-// which put it in a different spot to almost every real captured
-// stage/POI coordinate — the boundary was wrong, not the markers.
+// map's pan/zoom bounds), buildMapGeoJSON() (as the basemap's decorative
+// site-boundary shape), AND schematicToLatLon() below, so every
+// approximate position in this file is anchored to the same one real
+// box instead of disagreeing calibrations.
 const SITE_SW = { lat: 51.0495, lon: -1.2445 };
 const SITE_NE = { lat: 51.0575, lon: -1.2340 };
 function schematicToLatLon(xPercent, yPercent){
-  const fit = SCHEMATIC_TO_LATLON_FIT;
+  const latSpan = SITE_NE.lat - SITE_SW.lat, lonSpan = SITE_NE.lon - SITE_SW.lon;
   return {
-    lat: fit.a * xPercent + fit.b * yPercent + fit.c,
-    lon: fit.d * xPercent + fit.e * yPercent + fit.f
+    lat: SITE_NE.lat - (yPercent / 100) * latSpan,
+    lon: SITE_SW.lon + (xPercent / 100) * lonSpan
   };
 }
 function realStageMatch(name){
@@ -6587,16 +7048,48 @@ function loadMap(){
       // glyph URLs — so the map needs zero network requests once
       // MapLibre itself has loaded, same "works with zero signal" goal
       // as the rest of this PWA's service worker.
-      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#1e3a28" } }] },
+      // Brighter open-grass base tone than before (was #1e3a28, a dark
+      // green close enough to the forest fill below that open ground and
+      // woods barely read as different) — the reference video's own open
+      // ground (camping fields aside) is a clear mid-bright green, with
+      // woods reading as a distinctly darker patch on top of it, not a
+      // background that's already nearly as dark as the woods.
+      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#3f7a4e" } }] },
       center: [-1.2394, 51.0534],
-      // Default zoom shows most of the site at once (a festival-map
-      // overview) rather than starting zoomed into one cluster — you can
-      // still pinch/tap + in for street-level detail up to maxZoom.
-      zoom: 15, minZoom: 14, maxZoom: 19,
+      // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
+      // 14.4 view (previous pass) showed a lot of surrounding blank
+      // countryside/MAX_BOUNDS padding around a small festival footprint
+      // in the middle; 15.4 has the actual site grounds fill most of the
+      // screen on open, closer to how the official app's own map reads,
+      // while still starting one step looser than a specific corner
+      // (minZoom 14 still lets you zoom all the way out from here).
+      // Bearing/pitch start at 0/0 (north-up, flat), matching the
+      // official app's own opening view — but rotation itself stays
+      // enabled (two-finger twist, right-click-drag), same as the
+      // official app, rather than locked. showCompass:true on the
+      // NavigationControl below gives a tap-to-reset-north button once
+      // rotated, so "can still move/rotate freely" doesn't mean "no way
+      // back to north".
+      zoom: 15.4, minZoom: 14, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
-    mapGL.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
+    mapGL.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-left");
+
+    // Label thinning by zoom — see the #map.map-labels-thin CSS rule.
+    // Every marker's text label is a plain positioned DOM element with
+    // no MapLibre-level collision detection, so the default (zoomed-out)
+    // view packs 20+ names into one small cluster and they stack on top
+    // of each other unreadably. Below LABEL_ZOOM_THRESHOLD only district
+    // names show; zooming in past it brings every other label back once
+    // there's actually room for them. Runs on every "zoom" tick (cheap —
+    // it's one class toggle, not a re-render) plus once on load so the
+    // very first frame is already correct.
+    const LABEL_ZOOM_THRESHOLD = 16.4;
+    const updateLabelDensity = ()=> map.classList.toggle("map-labels-thin", mapGL.getZoom() < LABEL_ZOOM_THRESHOLD);
+    mapGL.on("zoom", updateLabelDensity);
+    mapGL.on("load", updateLabelDensity);
+    updateLabelDensity();
     // The illustrated basemap (buildMapGeoJSON, defined above) — added
     // once the style has finished loading (required before addSource/
     // addLayer are valid calls) and never rebuilt afterwards, same as
@@ -6613,8 +7106,18 @@ function loadMap(){
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
       mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", paint: { "fill-color": ["get", "fill"] } });
 
+      mapGL.addSource("mapHedges", { type: "geojson", data: geo.hedges });
+      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", paint: { "line-color": "rgba(0,0,0,0.06)", "line-width": 1 } });
+
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
-      mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.05)", "line-width": 1 } });
+      mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.1)", "line-width": 1.2 } });
+
+      // Hill-shading rings around Hilltop-tagged districts (Thrutopia,
+      // Oldtown) — tan/brown so they read as raised-ground shading, not
+      // another path. Drawn early/underneath so district fills and
+      // buildings sit on top where they overlap.
+      mapGL.addSource("mapHillContours", { type: "geojson", data: geo.hillContours });
+      mapGL.addLayer({ id: "hill-contours-line", type: "line", source: "mapHillContours", paint: { "line-color": "rgba(90,70,40,0.12)", "line-width": 1.5 } });
 
       mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
       mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
@@ -6627,24 +7130,81 @@ function loadMap(){
       mapGL.addLayer({ id: "stream-line", type: "line", source: "mapStream", paint: { "line-color": "rgba(90,150,190,0.65)", "line-width": 2 } });
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
-      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(30,70,45,0.5)" } });
-      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(90,140,100,0.4)", "line-width": 1 } });
+      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(15,45,28,0.68)" } });
+      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(10,30,18,0.6)", "line-width": 1.4 } });
 
+      // Parking — flat grey fields with a few straight "row" lines, kept
+      // visually distinct from both camping (green/yellow, textured) and
+      // district clearings (coloured, busy with venues/paths) so all
+      // three read as different kinds of ground at a glance.
+      mapGL.addSource("mapParkingAreas", { type: "geojson", data: geo.parkingAreas });
+      mapGL.addLayer({ id: "parking-fill", type: "fill", source: "mapParkingAreas", paint: { "fill-color": "rgba(160,160,155,0.7)" } });
+      // A soft outer casing under the solid boundary line, same
+      // dual-line technique the district boundaries use — reads as a
+      // surveyed/marked-out boundary rather than a single flat outline.
+      mapGL.addLayer({ id: "parking-casing", type: "line", source: "mapParkingAreas", paint: { "line-color": "rgba(60,60,58,0.3)", "line-width": 5 } });
+      mapGL.addLayer({ id: "parking-outline", type: "line", source: "mapParkingAreas", paint: { "line-color": "rgba(60,60,58,0.85)", "line-width": 2 } });
+      mapGL.addSource("mapParkingRows", { type: "geojson", data: geo.parkingRows });
+      mapGL.addLayer({ id: "parking-rows-line", type: "line", source: "mapParkingRows", paint: { "line-color": "rgba(255,255,255,0.4)", "line-width": 1.2 } });
+      mapGL.addSource("mapParkingCars", { type: "geojson", data: geo.parkingCars });
+      mapGL.addLayer({ id: "parking-cars-circle", type: "circle", source: "mapParkingCars", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1, 19, 3.2],
+        "circle-color": "rgba(235,235,230,0.85)",
+        "circle-stroke-width": 0.6, "circle-stroke-color": "rgba(60,60,58,0.6)"
+      } });
+
+      // Districts get a soft outer "casing" (like the paths' own
+      // casing/line pairing below) under a bold solid outline — the
+      // previous thin dashed line at 1.6px was easy to lose against the
+      // grass, especially for the paler palette colours. The casing
+      // widens the boundary into something visible at a glance even
+      // before you register the exact hue, the same way the solid
+      // outline itself now reads as a real border instead of a scatter
+      // of dashes.
       mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
+      // Casing narrowed from 6px to 4px (with slightly higher opacity to
+      // compensate) — the wider casing plus the now-larger zone sizes
+      // below started reading as a thick coloured ring eating into the
+      // grass around each district rather than a boundary; a district's
+      // own bigger, more legible fill area does more of the "where does
+      // this end" work now than a heavy outline needs to.
+      mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 4 } });
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 1.6, "line-dasharray": [2, 2] } });
+      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 2.4 } });
 
       // Camp areas drawn AFTER districts/forests so they sit on top —
       // Camp Orchid Downtown in particular overlaps Metropolis's own
       // district clearing, and a fill drawn underneath it just vanished.
       mapGL.addSource("mapCampAreas", { type: "geojson", data: geo.campAreas });
       mapGL.addLayer({ id: "camp-areas-fill", type: "fill", source: "mapCampAreas", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "camp-areas-line", type: "line", source: "mapCampAreas", paint: { "line-color": "rgba(255,255,255,0.25)", "line-width": 1, "line-dasharray": [1, 1.5] } });
+      mapGL.addLayer({ id: "camp-areas-line", type: "line", source: "mapCampAreas", paint: { "line-color": "rgba(255,255,255,0.55)", "line-width": 1.6, "line-dasharray": [1, 1.5] } });
+
+      // Ordinary (non-premium) camping fields — a soft sandy-yellow fill
+      // plus a couple of straight field-division lines, so plain camping
+      // reads as its own kind of ground rather than tent dots floating
+      // on bare district/forest colour. Outline strengthened to a solid
+      // warm brown so the field boundary itself is legible, not just
+      // implied by the confetti dots scattered inside it.
+      mapGL.addSource("mapCampFields", { type: "geojson", data: geo.campFields });
+      mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(224,200,90,0.55)" } });
+      mapGL.addLayer({ id: "camp-fields-casing", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.28)", "line-width": 4.5 } });
+      mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.75)", "line-width": 1.8 } });
+      mapGL.addSource("mapCampFieldLines", { type: "geojson", data: geo.campFieldLines });
+      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(120,100,40,0.5)", "line-width": 1.2 } });
 
       // The triangular tree-ring/hedge feature inside Camp Orchid
       // Downtown — seen clearly, twice, across both reference videos.
       mapGL.addSource("mapCampTriangle", { type: "geojson", data: geo.campTriangle });
-      mapGL.addLayer({ id: "camp-triangle-line", type: "line", source: "mapCampTriangle", paint: { "line-color": "rgba(30,70,45,0.7)", "line-width": 2 } });
+      // Colour changed from dark green to near-black — the reference
+      // video's own triangle reads as a plain dark outline regardless of
+      // the pink camp fill under it, not tinted to match the ground.
+      mapGL.addLayer({ id: "camp-triangle-line", type: "line", source: "mapCampTriangle", paint: { "line-color": "rgba(35,32,28,0.75)", "line-width": 2 } });
+
+      // A rounder hedge-ring inside each Camp Skylark site, giving them
+      // their own distinguishing feature (Downtown Orchid's triangle
+      // above was the only camp with one until now).
+      mapGL.addSource("mapSkylarkRings", { type: "geojson", data: geo.skylarkRings });
+      mapGL.addLayer({ id: "skylark-ring-line", type: "line", source: "mapSkylarkRings", paint: { "line-color": "rgba(160,120,40,0.6)", "line-width": 2 } });
 
       // Path network — three tiers so the map reads as a connected route
       // system rather than isolated markers on plain grass: a solid main
@@ -6654,15 +7214,86 @@ function loadMap(){
       // medium spokes carrying that trail out to every stage, and thin
       // dotted capillaries reaching every hidden venue, landmark and gate.
       mapGL.addSource("mapTrail", { type: "geojson", data: geo.trail });
-      mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(70,54,38,0.55)", "line-width": 5.5 } });
-      mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(214,186,146,0.9)", "line-width": 2.6 } });
+      // Same widths as before (no extra bulk) but both layers pushed
+      // toward more contrast — darker casing, lighter/warmer line — so
+      // the path reads clearly against every ground colour it crosses
+      // (district green, camp yellow, parking grey, forest) instead of
+      // just the grass it was originally tuned for.
+      // Stage plazas — drawn before the path lines so the paths visibly
+      // run INTO the clearing rather than sitting on top of a flat edge.
+      mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
+      mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", paint: { "fill-color": "rgba(214,186,146,0.55)" } });
+      mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", paint: { "line-color": "rgba(120,95,60,0.5)", "line-width": 1 } });
+
+      mapGL.addSource("mapBunting", { type: "geojson", data: geo.bunting });
+      mapGL.addLayer({ id: "bunting-circle", type: "circle", source: "mapBunting", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1, 19, 3],
+        "circle-color": ["get", "color"]
+      } });
+
+      mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(55,42,28,0.7)", "line-width": 5.5 } });
+      mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(232,208,168,0.95)", "line-width": 2.6 } });
 
       mapGL.addSource("mapSpokes", { type: "geojson", data: geo.spokes });
-      mapGL.addLayer({ id: "spokes-casing", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(70,54,38,0.4)", "line-width": 3.2 } });
-      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(214,186,146,0.7)", "line-width": 1.5 } });
+      mapGL.addLayer({ id: "spokes-casing", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(55,42,28,0.65)", "line-width": 3.2 } });
+      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(232,208,168,0.9)", "line-width": 1.5 } });
 
       mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
       mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
+
+      // Camp access paths — same casing/line pairing as the main spokes
+      // (medium weight, since a camp field is a real walked-to
+      // destination, not a minor capillary stop) so every named camping
+      // field connects visibly into the path network instead of its
+      // label just sitting on a field with no way drawn to reach it.
+      mapGL.addSource("mapCampSpokes", { type: "geojson", data: geo.campSpokes });
+      mapGL.addLayer({ id: "camp-spokes-casing", type: "line", source: "mapCampSpokes", paint: { "line-color": "rgba(55,42,28,0.55)", "line-width": 2.8 } });
+      mapGL.addLayer({ id: "camp-spokes-line", type: "line", source: "mapCampSpokes", paint: { "line-color": "rgba(232,208,168,0.8)", "line-width": 1.3 } });
+
+      // Parking access roads — thicker/flatter grey (a real access road,
+      // not a walking path) from each parking area to its nearest gate.
+      mapGL.addSource("mapParkingSpokes", { type: "geojson", data: geo.parkingSpokes });
+      mapGL.addLayer({ id: "parking-spokes-casing", type: "line", source: "mapParkingSpokes", paint: { "line-color": "rgba(40,40,38,0.55)", "line-width": 3.6 } });
+      mapGL.addLayer({ id: "parking-spokes-line", type: "line", source: "mapParkingSpokes", paint: { "line-color": "rgba(190,190,185,0.85)", "line-width": 1.8 } });
+
+      // Main-stage glow — three stacked circle layers per stage, widest/
+      // faintest first so the smaller/brighter ones layer on top and it
+      // reads as one soft blurred halo rather than three hard rings.
+      // Toned down (both radius and opacity) from the first version —
+      // it was overpowering everything else on the map (buildings,
+      // paths, district colour) instead of being one cue among several;
+      // stages should still stand out, just not dominate.
+      mapGL.addSource("mapStageGlow", { type: "geojson", data: geo.stageGlow });
+      mapGL.addLayer({ id: "stage-glow-outer", type: "circle", source: "mapStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 9, 19, 38],
+        "circle-color": ["get", "colorOuter"]
+      } });
+      mapGL.addLayer({ id: "stage-glow-mid", type: "circle", source: "mapStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 5.5, 19, 22],
+        "circle-color": ["get", "colorMid"]
+      } });
+      mapGL.addLayer({ id: "stage-glow-core", type: "circle", source: "mapStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 19, 11],
+        "circle-color": ["get", "colorCore"]
+      } });
+
+      // Decorative infill buildings first (fainter/paler — no name, so
+      // they read as background density, not a specific place), then
+      // real named-venue building footprints on top, both drawn after
+      // the path network so they sit on top of it (a path running
+      // "under" a building reads wrong) but before the marker icons.
+      mapGL.addSource("mapInfillBuildings", { type: "geojson", data: geo.infillBuildings });
+      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": "rgba(196,140,90,0.32)" } });
+      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", paint: { "line-color": "rgba(120,80,50,0.35)", "line-width": 0.8 } });
+
+      mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
+      mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(196,140,90,0.65)" } });
+      mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
+
+      // Hollow fenced enclosures — outline only, no fill, so the ground
+      // colour shows through (a beer-garden/yard, not a roofed building).
+      mapGL.addSource("mapFencedEnclosures", { type: "geojson", data: geo.fencedEnclosures });
+      mapGL.addLayer({ id: "fenced-enclosures-line", type: "line", source: "mapFencedEnclosures", paint: { "line-color": "rgba(120,80,50,0.8)", "line-width": 1.3, "line-dasharray": [2, 1] } });
 
       // A small packed-earth "plaza" where every path actually converges
       // at each district's centre, instead of every spoke fading out
@@ -6674,11 +7305,15 @@ function loadMap(){
         "circle-stroke-width": 1, "circle-stroke-color": "rgba(70,54,38,0.6)"
       } });
 
+      // Diamond polygons now (was a circle layer) — the reference
+      // video's own camp confetti reads as small tent-shaped diamonds,
+      // not round dots.
       mapGL.addSource("mapConfetti", { type: "geojson", data: geo.confetti });
-      mapGL.addLayer({ id: "confetti-circle", type: "circle", source: "mapConfetti", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.5], 19, ["*", ["get", "size"], 2.2]],
-        "circle-color": ["get", "color"]
-      } });
+      mapGL.addLayer({ id: "confetti-fill", type: "fill", source: "mapConfetti", paint: { "fill-color": ["get", "color"] } });
+
+      mapGL.addSource("mapCampervans", { type: "geojson", data: geo.campervans });
+      mapGL.addLayer({ id: "campervans-fill", type: "fill", source: "mapCampervans", paint: { "fill-color": "rgba(210,210,215,0.85)" } });
+      mapGL.addLayer({ id: "campervans-outline", type: "line", source: "mapCampervans", paint: { "line-color": "rgba(90,90,95,0.7)", "line-width": 0.6 } });
 
       mapGL.addSource("mapTrees", { type: "geojson", data: geo.trees });
       mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", paint: {
@@ -6751,6 +7386,13 @@ function loadMap(){
     );
   });
 
+  // (Tried filtering these to only ones landing near a drawn zone —
+  // reverted. Several of these positions are stale placeholders that
+  // realCoordFor() below actually overrides with a precise real
+  // coordinate, e.g. Foggers Mill/The Fools Leap per the comment above,
+  // so testing the stale schematic position against the drawn zones
+  // just meant real, confirmed 2026 stages could get hidden based on a
+  // position that was never actually used to place their marker.)
   minorStages.forEach(place=>{
     const isRumoured = place.status === "rumoured";
     const coord = realCoordFor(place);
@@ -6826,6 +7468,21 @@ function loadMap(){
     );
   });
 
+  // Real official-app amenity data is NOT run through nearZone() —
+  // tried that (converting each poi's real lat/lon back into schematic
+  // space and checking it against the drawn zone shapes) and it was
+  // actively harmful: with a 12-unit buffer it still dropped 36 of 53
+  // real POIs, including the ONLY marked First Aid, Reception and Cash
+  // Point pins. That test was ALSO run against the old
+  // SCHEMATIC_TO_LATLON_FIT affine transform, since replaced by
+  // schematicToLatLon()'s straight SITE_SW/SITE_NE scaling above (that
+  // old fit had a real, confirmed ~5x real-world scale bug — see its
+  // replacement's own comment) — but the actual reasoning for not
+  // filtering real POI markers by "does it look inside our drawn zone"
+  // stands regardless of transform accuracy: these are genuine positions
+  // straight from the official app's own map data, and hiding safety
+  // info (first aid, welfare) because a zone shape doesn't happen to
+  // reach it isn't a trade worth making.
   ((window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois) || []).forEach(poi=>{
     addMapMarker("poi", poi.lat, poi.lon,
       `<div class="marker poi">${POI_ICONS[poi.category] || "📍"}</div>`,
