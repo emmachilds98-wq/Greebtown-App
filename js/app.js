@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v229";
-const APP_BUILD_TIME = "2026-08-01T03:19:12Z";
+const APP_CACHE_VERSION = "v230";
+const APP_BUILD_TIME = "2026-08-01T03:31:07Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6003,8 +6003,8 @@ const gates = [
 // East Gate and South Gate already name in their own info text above.
 // Positioned near those two gates rather than guessed elsewhere on site.
 const parkingAreas = [
-  { x:"97%", y:"38%", r:9, text:"White Carparks (East Gate)" },
-  { x:"80%", y:"86%", r:7, text:"White Carpark 4 (South Gate)" }
+  { x:"97%", y:"38%", r:10, text:"White Carparks (East Gate)" },
+  { x:"80%", y:"86%", r:8, text:"White Carpark 4 (South Gate)" }
 ];
 
 // ===============================
@@ -6299,9 +6299,12 @@ function buildMapGeoJSON(){
     // actually happened for Oldtown/East Camping, ~5 units apart — a
     // floor of 3 each summed to 6). minDist/2 is a hard ceiling no floor
     // is allowed to cross, since two neighbours each capped at half the
-    // distance between them can never sum past that distance.
+    // distance between them can never sum past that distance — so it's
+    // safe to raise the ratio below (0.36 -> 0.42, more legible zones
+    // without touching) since the hard ceiling, not the ratio, is what
+    // actually guarantees no overlap.
     const safeMax = Math.max(1.5, minDist / 2 - 0.4);
-    return Math.min(Math.max(2, Math.min(desired, minDist * 0.36)), safeMax);
+    return Math.min(Math.max(2, Math.min(desired, minDist * 0.42)), safeMax);
   }
 
   function districtSpreadR(d){
@@ -6313,7 +6316,7 @@ function buildMapGeoJSON(){
       const dx = parseFloat(p.x) - cx, dy = parseFloat(p.y) - cy;
       maxDist = Math.max(maxDist, Math.sqrt(dx * dx + dy * dy));
     });
-    const desired = Math.min(13, Math.max(5, maxDist + 3));
+    const desired = Math.min(13, Math.max(6, maxDist + 3));
     return clearanceRadius(cx, cy, d, desired);
   }
   const districtFeatures = districts.map((d,i)=>{
@@ -6322,7 +6325,7 @@ function buildMapGeoJSON(){
     const r = districtSpreadR(d);
     return {
       type: "Feature",
-      properties: { name: d.name, fill: `rgba(${rgb},0.32)`, line: `rgba(${rgb},0.95)`, casing: `rgba(${rgb},0.28)` },
+      properties: { name: d.name, fill: `rgba(${rgb},0.32)`, line: `rgba(${rgb},0.95)`, casing: `rgba(${rgb},0.35)` },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 31 + 7, 18)) ] }
     };
   });
@@ -6433,7 +6436,7 @@ function buildMapGeoJSON(){
   const campFeatures = campAreaDefs.map((c,i)=>{
     const isDowntown = /downtown/i.test(c.text);
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
-    const r = clearanceRadius(cx, cy, c, 10);
+    const r = clearanceRadius(cx, cy, c, 11);
     campAreaRadii.set(c, r);
     return {
       type: "Feature",
@@ -6485,7 +6488,7 @@ function buildMapGeoJSON(){
   const campFieldRadii = new Map();
   const campFieldFeatures = ordinaryCamps.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
-    const r = clearanceRadius(cx, cy, c, 8);
+    const r = clearanceRadius(cx, cy, c, 9);
     campFieldRadii.set(c, r);
     return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 600 + i * 43, 12)) ] } };
   });
@@ -6841,7 +6844,13 @@ function loadMap(){
       // outline itself now reads as a real border instead of a scatter
       // of dashes.
       mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
-      mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 6 } });
+      // Casing narrowed from 6px to 4px (with slightly higher opacity to
+      // compensate) — the wider casing plus the now-larger zone sizes
+      // below started reading as a thick coloured ring eating into the
+      // grass around each district rather than a boundary; a district's
+      // own bigger, more legible fill area does more of the "where does
+      // this end" work now than a heavy outline needs to.
+      mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 4 } });
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 2.4 } });
 
@@ -6877,12 +6886,17 @@ function loadMap(){
       // medium spokes carrying that trail out to every stage, and thin
       // dotted capillaries reaching every hidden venue, landmark and gate.
       mapGL.addSource("mapTrail", { type: "geojson", data: geo.trail });
-      mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(70,54,38,0.55)", "line-width": 5.5 } });
-      mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(214,186,146,0.9)", "line-width": 2.6 } });
+      // Same widths as before (no extra bulk) but both layers pushed
+      // toward more contrast — darker casing, lighter/warmer line — so
+      // the path reads clearly against every ground colour it crosses
+      // (district green, camp yellow, parking grey, forest) instead of
+      // just the grass it was originally tuned for.
+      mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(55,42,28,0.7)", "line-width": 5.5 } });
+      mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(232,208,168,0.95)", "line-width": 2.6 } });
 
       mapGL.addSource("mapSpokes", { type: "geojson", data: geo.spokes });
-      mapGL.addLayer({ id: "spokes-casing", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(70,54,38,0.55)", "line-width": 3.2 } });
-      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(224,198,158,0.85)", "line-width": 1.5 } });
+      mapGL.addLayer({ id: "spokes-casing", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(55,42,28,0.65)", "line-width": 3.2 } });
+      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(232,208,168,0.9)", "line-width": 1.5 } });
 
       mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
       mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
