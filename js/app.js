@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v222";
-const APP_BUILD_TIME = "2026-08-01T01:03:33Z";
+const APP_CACHE_VERSION = "v223";
+const APP_BUILD_TIME = "2026-08-01T06:24:37Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5915,9 +5915,10 @@ const otherStages = [
 // finds a precise real-coordinate match for both, so their actual map
 // position never reads from this array. Infinity moved next to
 // Metropolis — its own label appears right beside "METROPOLIS" on
-// camera. Síbín Beag left unchanged — no clear match found in the
-// reference video, so untouched rather than guessed.
-const minorStagePositions = [[46,34],[60,18],[34,16],[56,38],[30,58],[62,52],[44,42],[72,66],[40,76],[54,26],[24,40]];
+// camera. Síbín Beag moved to sit by Oldtown — its own label appears
+// there repeatedly on camera, alongside Mining for (g)Old Town and Den
+// of Dis Order (both explicitly Oldtown-themed).
+const minorStagePositions = [[46,34],[60,18],[34,16],[56,38],[30,58],[62,52],[44,42],[72,66],[86,58],[54,26],[24,40]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6588,7 +6589,10 @@ function loadMap(){
       // as the rest of this PWA's service worker.
       style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#1e3a28" } }] },
       center: [-1.2394, 51.0534],
-      zoom: 16, minZoom: 14, maxZoom: 19,
+      // Default zoom shows most of the site at once (a festival-map
+      // overview) rather than starting zoomed into one cluster — you can
+      // still pinch/tap + in for street-level detail up to maxZoom.
+      zoom: 15, minZoom: 14, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
