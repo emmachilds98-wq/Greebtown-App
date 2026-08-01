@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v250";
-const APP_BUILD_TIME = "2026-08-01T09:44:25Z";
+const APP_CACHE_VERSION = "v251";
+const APP_BUILD_TIME = "2026-08-01T09:51:41Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7085,14 +7085,21 @@ function loadMap(){
       // NavigationControl below gives a tap-to-reset-north button once
       // rotated, so "can still move/rotate freely" doesn't mean "no way
       // back to north".
-      // Bumped 15.4 -> 17.6 (and minZoom 14 -> 16) after the
-      // schematicToLatLon scale fix — that fix corrected a real ~4.7x
-      // real-world-scale bug, which means the same zoom level now shows
-      // ~4.7x more real ground than before (log2(4.7) ≈ +2.2 zoom
-      // levels needed to show the same visual extent as pre-fix). Left
-      // uncorrected, the site would render tiny again, undoing the
-      // earlier "zoom in so grounds fill the box" pass.
-      zoom: 17.6, minZoom: 16, maxZoom: 19,
+      // The 17.6/minZoom:16 retune (previous pass) got the direction of
+      // the schematicToLatLon scale fix backwards: that fix made the
+      // real SITE_SW/SITE_NE box the actual coordinate space (previously
+      // points were compressed toward the centre by the old broken fit,
+      // so the "site" rendered as an artificially small cluster that
+      // needed a big zoom-in to fill the screen). With points now
+      // correctly spread across the real ~890m x 735m site footprint,
+      // showing the whole site needs a real-world-distance calculation,
+      // not a repeat of the old compressed-view zoom level — worked out
+      // from Web Mercator's meters-per-pixel formula (156543*cos(lat)/2^z)
+      // against the site's actual span, ~zoom 15.6 shows the full site
+      // with a little padding on a typical phone screen. minZoom dropped
+      // back down so pinch/tap "-" can actually zoom out from there
+      // instead of being capped right at the opening view.
+      zoom: 15.6, minZoom: 13.5, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
