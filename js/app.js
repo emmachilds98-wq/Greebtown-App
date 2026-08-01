@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v255";
-const APP_BUILD_TIME = "2026-08-01T10:31:08Z";
+const APP_CACHE_VERSION = "v256";
+const APP_BUILD_TIME = "2026-08-01T10:43:00Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -10182,15 +10182,22 @@ async function toggleGroupInvite(artist){
   const invitedBy = existing && Array.isArray(existing.invitedBy) ? existing.invitedBy.slice() : [];
   const idx = invitedBy.indexOf(me);
   if(idx === -1) invitedBy.push(me); else invitedBy.splice(idx, 1);
-  if(invitedBy.length){
-    decisions[key] = {
-      invitedBy,
-      artist: { name: artist.name, day: artist.day, stage: artist.stage, start: artist.start, end: artist.end },
-      updatedAt: Date.now()
-    };
-  } else {
-    delete decisions[key];
-  }
+  // Always keep the entry, even once invitedBy is empty — never delete
+  // it outright. mergeSyncPayload (see its own comment) only ever
+  // ADDS/UPDATES keys it finds in an incoming payload; a deleted key
+  // simply isn't present in this device's own outgoing payload, so
+  // other devices that already cached the invite would never learn it
+  // was cancelled and would show it forever. An empty-invitedBy entry
+  // with a fresh updatedAt is a proper tombstone instead: it wins the
+  // same last-write-wins merge as any other update, and every read site
+  // below (getGroupInvite/renderGroupInvites/renderTodayInvites/
+  // outstandingGroupInvitesCount) already filters on invitedBy.length,
+  // so an empty one is correctly treated as "not shown" everywhere.
+  decisions[key] = {
+    invitedBy,
+    artist: { name: artist.name, day: artist.day, stage: artist.stage, start: artist.start, end: artist.end },
+    updatedAt: Date.now()
+  };
   Store.set("groupDecisions", decisions);
   if(typeof renderGroupInvites === "function") renderGroupInvites();
   if(typeof renderTodayInvites === "function") renderTodayInvites();
