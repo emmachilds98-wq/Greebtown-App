@@ -335,7 +335,14 @@
      — only the text labels hide, so presence/position is still visible.*/
   #map.map-labels-thin .map-label:not(.district){display:none;}
   .map-label.district{background:none; border:none; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:rgba(242,168,60,.9); text-shadow:0 1px 4px rgba(0,0,0,.75); transform:translate(-50%, -24px); padding:0;}
-  .map-label.minor{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55);}
+  /* Main stages previously rendered with no label class at all — same
+     plain pill as every other marker on the map, despite the marker dot
+     itself already being the biggest/only-pulsing one. Bigger, bolder,
+     teal-tinted (matching .marker.stage's own colour) so the 15-ish main
+     stage names read as the clear anchor points of the map, with minor
+     stages (below) visibly the smaller, secondary tier. */
+  .map-label.stage{font-size:12px; font-weight:800; color:var(--accent-teal); background:rgba(11,21,18,.8); border-color:rgba(75,227,172,.45); padding:3px 9px; letter-spacing:.02em;}
+  .map-label.minor{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55); color:rgba(238,246,241,.65);}
   .map-label.secret{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55); color:rgba(238,246,241,.75); font-style:italic;}
   .map-label.camp{background:none; border:none; padding:0; font-size:8px; text-transform:uppercase; letter-spacing:.08em; color:rgba(238,246,241,.6); text-shadow:0 1px 3px rgba(0,0,0,.7); transform:translate(-50%, -50%);}
   .stagelist{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
@@ -523,6 +530,18 @@
      rest for the actual act blocks. */
   .timeline-row-head{position:sticky; left:0; z-index:2; width:88px; flex-shrink:0; background:var(--bg-panel-2); padding:8px 6px; display:flex; align-items:center; font-size:11px; font-weight:700; line-height:1.2; border-right:1px solid var(--line); border-bottom:1px solid var(--line); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .timeline-hours-row .timeline-row-head{background:var(--bg-panel);}
+  /* Purely cosmetic left-edge stripe + text tint per venueCategoryFor()
+     bucket (js/app.js) — main stage/hidden venue/workshop/activity read
+     as distinct groups at a glance in a long scrolling stage list,
+     without touching the row order or any block/lane logic at all. Main
+     stages get the boldest treatment (same teal as their map marker) so
+     they're the clear anchor points; activities (food/welfare/rides/
+     chill spaces — not something to "catch") get the calmest, so the
+     eye isn't pulled toward them the way it is toward an actual stage. */
+  .timeline-row.cat-main .timeline-row-head{color:var(--accent-teal); font-weight:800; border-left:3px solid var(--accent-teal); padding-left:3px;}
+  .timeline-row.cat-venue .timeline-row-head{color:var(--accent-lightblue); border-left:3px solid var(--accent-lightblue); padding-left:3px;}
+  .timeline-row.cat-workshop .timeline-row-head{color:var(--accent-amber); border-left:3px solid var(--accent-amber); padding-left:3px;}
+  .timeline-row.cat-activity .timeline-row-head{color:var(--text-muted); font-weight:600; border-left:3px solid var(--line); padding-left:3px;}
   .timeline-hours-body{position:relative; flex-shrink:0; height:26px; border-bottom:1px solid var(--line);}
   .timeline-hour-label{position:absolute; top:0; bottom:0; font-size:10px; color:var(--text-muted); padding:2px 4px; display:flex; align-items:center;}
   .timeline-row{display:flex;}
