@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v225";
-const APP_BUILD_TIME = "2026-08-01T02:54:14Z";
+const APP_CACHE_VERSION = "v226";
+const APP_BUILD_TIME = "2026-08-01T02:56:06Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6341,6 +6341,25 @@ function buildMapGeoJSON(){
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(parseFloat(p.x), parseFloat(p.y), i * 29 + 5)) ] }
   }));
 
+  // Main-stage glow — the reference video shows every major stage as a
+  // soft coloured halo bleeding into the ground around it (orange around
+  // The Lion's Den, purple around ENDOR, etc), a strong at-a-glance
+  // "this is a live music area" cue our stages didn't have at all. One
+  // point per stage, three stacked circle layers (see loadMap) fake a
+  // blur by shrinking radius/raising opacity toward the centre — real
+  // radial-gradient blur isn't expressible in a MapLibre circle paint.
+  const STAGE_GLOW_COLORS = ["255,140,60", "190,110,255", "90,200,255", "255,90,150", "255,210,80", "120,255,170"];
+  const glowStages = locations.filter(p=>p.kind === "stage");
+  const stageGlowFeatures = glowStages.map((s,i)=>{
+    const c = schematicToLatLon(parseFloat(s.x), parseFloat(s.y));
+    const rgb = STAGE_GLOW_COLORS[i % STAGE_GLOW_COLORS.length];
+    return {
+      type:"Feature",
+      properties:{ colorOuter: `rgba(${rgb},0.10)`, colorMid: `rgba(${rgb},0.18)`, colorCore: `rgba(${rgb},0.32)` },
+      geometry:{ type:"Point", coordinates:[c.lon, c.lat] }
+    };
+  });
+
   // Parking AREAS — grey fields (the reference video shows these as flat
   // grey/salmon grid-lined ground, clearly separate from both the
   // green/yellow camping fields and the busy district clearings), with a
@@ -6516,6 +6535,7 @@ function buildMapGeoJSON(){
     spokes: { type:"FeatureCollection", features: spokeFeatures },
     capillaries: { type:"FeatureCollection", features: capillaryFeatures },
     buildings: { type:"FeatureCollection", features: buildingFeatures },
+    stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
@@ -6801,6 +6821,23 @@ function loadMap(){
 
       mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
       mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
+
+      // Main-stage glow — three stacked circle layers per stage, widest/
+      // faintest first so the smaller/brighter ones layer on top and it
+      // reads as one soft blurred halo rather than three hard rings.
+      mapGL.addSource("mapStageGlow", { type: "geojson", data: geo.stageGlow });
+      mapGL.addLayer({ id: "stage-glow-outer", type: "circle", source: "mapStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 14, 19, 60],
+        "circle-color": ["get", "colorOuter"]
+      } });
+      mapGL.addLayer({ id: "stage-glow-mid", type: "circle", source: "mapStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 8, 19, 34],
+        "circle-color": ["get", "colorMid"]
+      } });
+      mapGL.addLayer({ id: "stage-glow-core", type: "circle", source: "mapStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 4, 19, 16],
+        "circle-color": ["get", "colorCore"]
+      } });
 
       // Building footprints — drawn after the path network so they sit
       // on top of it (a path running "under" a building reads wrong),
