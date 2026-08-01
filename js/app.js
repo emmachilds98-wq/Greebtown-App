@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v224";
-const APP_BUILD_TIME = "2026-08-01T02:48:32Z";
+const APP_CACHE_VERSION = "v225";
+const APP_BUILD_TIME = "2026-08-01T02:54:14Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6150,6 +6150,24 @@ function nearestDistrict(x, y, districts){
   return best;
 }
 
+// A small rotated-rectangle footprint around a point — the reference
+// video's district interiors are dense with tan/orange building-block
+// shapes under every stage/venue icon, not just a bare dot on grass;
+// this gives every district venue the same "there's a real structure
+// here" footprint instead of markers floating on empty clearing colour.
+// Rotated by a seeded angle (not axis-aligned) so a cluster of these
+// reads as a scatter of individual buildings, not a grid.
+function buildingFootprint(cx, cy, seed){
+  const rand = seededRand(seed);
+  const w = 1.5 + rand() * 1.3, h = 1.0 + rand() * 0.9;
+  const angle = rand() * Math.PI;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const corners = [[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];
+  const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
+  pts.push(pts[0]);
+  return pts;
+}
+
 // A gently bowed 3-point path between two schematic points instead of a
 // dead-straight line — a whole hub's worth of spokes drawn perfectly
 // straight reads as an artificial "spider web" converging on one dot;
@@ -6311,6 +6329,17 @@ function buildMapGeoJSON(){
     const nd = nearestDistrict(px, py, districts);
     return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nd.x), parseFloat(nd.y)], i * 23 + 11)) } };
   });
+
+  // Building footprints — a small tan/orange rotated-rectangle under
+  // every stage/hidden-venue marker (districtMemberPoints, the same list
+  // districtSpreadR above uses) so district interiors read as an actual
+  // built-up town, matching the reference video's dense scatter of
+  // building-block shapes around every venue icon, instead of just a
+  // bare coloured clearing with pins floating on it.
+  const buildingFeatures = districtMemberPoints.map((p,i)=>({
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(parseFloat(p.x), parseFloat(p.y), i * 29 + 5)) ] }
+  }));
 
   // Parking AREAS — grey fields (the reference video shows these as flat
   // grey/salmon grid-lined ground, clearly separate from both the
@@ -6486,6 +6515,7 @@ function buildMapGeoJSON(){
     trail: { type:"FeatureCollection", features: [trailFeature] },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
     capillaries: { type:"FeatureCollection", features: capillaryFeatures },
+    buildings: { type:"FeatureCollection", features: buildingFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
@@ -6771,6 +6801,13 @@ function loadMap(){
 
       mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
       mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
+
+      // Building footprints — drawn after the path network so they sit
+      // on top of it (a path running "under" a building reads wrong),
+      // but before the marker icons that go on top of each one.
+      mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
+      mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(196,140,90,0.65)" } });
+      mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
 
       // A small packed-earth "plaza" where every path actually converges
       // at each district's centre, instead of every spoke fading out
