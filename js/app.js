@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v231";
-const APP_BUILD_TIME = "2026-08-01T03:48:14Z";
+const APP_CACHE_VERSION = "v232";
+const APP_BUILD_TIME = "2026-08-01T03:57:07Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6204,7 +6204,7 @@ function treeClusterPoints(cx, cy, count, spread, seed){
     const x = cx + Math.cos(a) * r;
     const y = cy + Math.sin(a) * r * 0.7;
     const hue = 100 + Math.floor(rand() * 20);
-    pts.push({ x, y, size: 2.2 + rand() * 1.8, color: `hsla(${hue},40%,42%,0.55)` });
+    pts.push({ x, y, size: 2.6 + rand() * 2.0, color: `hsla(${hue},48%,38%,0.75)` });
   }
   return pts;
 }
@@ -6224,7 +6224,7 @@ function confettiClusterPoints(cx, cy, count, spread, seed){
     const r = rand() * spread;
     const x = cx + Math.cos(a) * r;
     const y = cy + Math.sin(a) * r * 0.7;
-    pts.push({ x, y, size: 1.6 + rand() * 1.2, color: CONFETTI_COLORS[Math.floor(rand() * CONFETTI_COLORS.length)] });
+    pts.push({ x, y, size: 2.0 + rand() * 1.4, color: CONFETTI_COLORS[Math.floor(rand() * CONFETTI_COLORS.length)] });
   }
   return pts;
 }
@@ -6254,7 +6254,7 @@ function buildMapGeoJSON(){
   const FIELD_SPOTS = [[8,60],[30,45],[50,55],[68,55],[85,70],[92,40],[55,80],[20,65],[40,85],[75,85],[10,15],[60,40]];
   const fieldFeatures = FIELD_SPOTS.map(([cx,cy],i)=>({
     type: "Feature",
-    properties: { fill: i % 2 === 0 ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.03)" },
+    properties: { fill: i % 2 === 0 ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)" },
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, 13, 1000 + i * 71, 12)) ] }
   }));
 
@@ -6781,13 +6781,15 @@ function loadMap(){
       // background that's already nearly as dark as the woods.
       style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#3f7a4e" } }] },
       center: [-1.2394, 51.0534],
-      // Opens zoomed OUT to the whole site (zoom 14.4, just above
-      // minZoom) rather than straight into one corner — the official
-      // app's own map (reference video) opens on a full-site view you
-      // then zoom into yourself, not pre-zoomed into the middle.
-      // Bearing/pitch are left at their 0/0 defaults (north-up, flat)
-      // to match that same opening view.
-      zoom: 14.4, minZoom: 14, maxZoom: 19,
+      // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
+      // 14.4 view (previous pass) showed a lot of surrounding blank
+      // countryside/MAX_BOUNDS padding around a small festival footprint
+      // in the middle; 15.4 has the actual site grounds fill most of the
+      // screen on open, closer to how the official app's own map reads,
+      // while still starting one step looser than a specific corner
+      // (minZoom 14 still lets you zoom all the way out from here).
+      // Bearing/pitch are left at their 0/0 defaults (north-up, flat).
+      zoom: 15.4, minZoom: 14, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
@@ -6809,7 +6811,7 @@ function loadMap(){
       mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", paint: { "fill-color": ["get", "fill"] } });
 
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
-      mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.05)", "line-width": 1 } });
+      mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.1)", "line-width": 1.2 } });
 
       mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
       mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
@@ -6833,7 +6835,7 @@ function loadMap(){
       mapGL.addLayer({ id: "parking-fill", type: "fill", source: "mapParkingAreas", paint: { "fill-color": "rgba(160,160,155,0.7)" } });
       mapGL.addLayer({ id: "parking-outline", type: "line", source: "mapParkingAreas", paint: { "line-color": "rgba(60,60,58,0.85)", "line-width": 2 } });
       mapGL.addSource("mapParkingRows", { type: "geojson", data: geo.parkingRows });
-      mapGL.addLayer({ id: "parking-rows-line", type: "line", source: "mapParkingRows", paint: { "line-color": "rgba(255,255,255,0.28)", "line-width": 1 } });
+      mapGL.addLayer({ id: "parking-rows-line", type: "line", source: "mapParkingRows", paint: { "line-color": "rgba(255,255,255,0.4)", "line-width": 1.2 } });
 
       // Districts get a soft outer "casing" (like the paths' own
       // casing/line pairing below) under a bold solid outline — the
@@ -6871,7 +6873,7 @@ function loadMap(){
       mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(224,200,90,0.55)" } });
       mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.75)", "line-width": 1.8 } });
       mapGL.addSource("mapCampFieldLines", { type: "geojson", data: geo.campFieldLines });
-      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(120,100,40,0.35)", "line-width": 1 } });
+      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(120,100,40,0.5)", "line-width": 1.2 } });
 
       // The triangular tree-ring/hedge feature inside Camp Orchid
       // Downtown — seen clearly, twice, across both reference videos.
