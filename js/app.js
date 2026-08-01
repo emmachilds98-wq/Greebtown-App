@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v246";
-const APP_BUILD_TIME = "2026-08-01T06:11:26Z";
+const APP_CACHE_VERSION = "v247";
+const APP_BUILD_TIME = "2026-08-01T09:36:33Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7069,7 +7069,14 @@ function loadMap(){
       // NavigationControl below gives a tap-to-reset-north button once
       // rotated, so "can still move/rotate freely" doesn't mean "no way
       // back to north".
-      zoom: 15.4, minZoom: 14, maxZoom: 19,
+      // Bumped 15.4 -> 17.6 (and minZoom 14 -> 16) after the
+      // schematicToLatLon scale fix — that fix corrected a real ~4.7x
+      // real-world-scale bug, which means the same zoom level now shows
+      // ~4.7x more real ground than before (log2(4.7) ≈ +2.2 zoom
+      // levels needed to show the same visual extent as pre-fix). Left
+      // uncorrected, the site would render tiny again, undoing the
+      // earlier "zoom in so grounds fill the box" pass.
+      zoom: 17.6, minZoom: 16, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
