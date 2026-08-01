@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v233";
-const APP_BUILD_TIME = "2026-08-01T04:07:59Z";
+const APP_CACHE_VERSION = "v234";
+const APP_BUILD_TIME = "2026-08-01T04:11:17Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6440,11 +6440,27 @@ function buildMapGeoJSON(){
     return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 1200 + i * 37, 10)) ] } };
   });
   let parkingRowFeatures = [];
+  let parkingCarFeatures = [];
   parkingAreas.forEach((p,i)=>{
     const cx = parseFloat(p.x), cy = parseFloat(p.y);
     const r = clearanceRadius(cx, cy, p, p.r);
+    const rand = seededRand(1300 + i * 53);
     for(let row=-2;row<=2;row++){
-      parkingRowFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - r * 0.8, cy + row * (r / 3)], [cx + r * 0.8, cy + row * (r / 3)]]) } });
+      const y = cy + row * (r / 3);
+      parkingRowFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - r * 0.8, y], [cx + r * 0.8, y]]) } });
+      // Small evenly-spaced "car" dots along each row line — the
+      // reference video's own car parks read as a dense grid of tiny
+      // rectangles, not a flat grey fill with a few guide lines; a
+      // scatter of small pale dots along the rows gives the same
+      // "parked in rows" impression without drawing 100+ individual
+      // vehicle shapes.
+      const carsPerRow = 7;
+      for(let k=0;k<carsPerRow;k++){
+        if(rand() < 0.15) continue; // a few gaps so the row doesn't look perfectly full
+        const x = cx - r * 0.72 + (r * 1.44) * (k / (carsPerRow - 1));
+        const c = schematicToLatLon(x, y + (rand() - 0.5) * (r / 12));
+        parkingCarFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
+      }
     }
   });
 
@@ -6529,7 +6545,7 @@ function buildMapGeoJSON(){
     }
   });
   let confettiPts = [];
-  ordinaryCamps.forEach((c,i)=>{ confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 14, campFieldRadii.get(c) * 0.85, 800 + i * 47)); });
+  ordinaryCamps.forEach((c,i)=>{ confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 20, campFieldRadii.get(c) * 0.85, 800 + i * 47)); });
   const confettiFeatures = confettiPts.map(t=>{
     const c = schematicToLatLon(t.x, t.y);
     return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
@@ -6608,6 +6624,7 @@ function buildMapGeoJSON(){
     plazas: { type:"FeatureCollection", features: plazaFeatures },
     parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
     parkingRows: { type:"FeatureCollection", features: parkingRowFeatures },
+    parkingCars: { type:"FeatureCollection", features: parkingCarFeatures },
     campAreas: { type:"FeatureCollection", features: campFeatures },
     campFields: { type:"FeatureCollection", features: campFieldFeatures },
     campFieldLines: { type:"FeatureCollection", features: campFieldLineFeatures },
@@ -6867,6 +6884,12 @@ function loadMap(){
       mapGL.addLayer({ id: "parking-outline", type: "line", source: "mapParkingAreas", paint: { "line-color": "rgba(60,60,58,0.85)", "line-width": 2 } });
       mapGL.addSource("mapParkingRows", { type: "geojson", data: geo.parkingRows });
       mapGL.addLayer({ id: "parking-rows-line", type: "line", source: "mapParkingRows", paint: { "line-color": "rgba(255,255,255,0.4)", "line-width": 1.2 } });
+      mapGL.addSource("mapParkingCars", { type: "geojson", data: geo.parkingCars });
+      mapGL.addLayer({ id: "parking-cars-circle", type: "circle", source: "mapParkingCars", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1, 19, 3.2],
+        "circle-color": "rgba(235,235,230,0.85)",
+        "circle-stroke-width": 0.6, "circle-stroke-color": "rgba(60,60,58,0.6)"
+      } });
 
       // Districts get a soft outer "casing" (like the paths' own
       // casing/line pairing below) under a bold solid outline — the
