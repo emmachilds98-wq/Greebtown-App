@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v251";
-const APP_BUILD_TIME = "2026-08-01T09:51:41Z";
+const APP_CACHE_VERSION = "v252";
+const APP_BUILD_TIME = "2026-08-01T10:04:41Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5965,7 +5965,13 @@ const thingsToFind = [
   { name:"Da Graaf's Reformatory", near:"Oldtown", x:"80%", y:"44%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"La Luna Coven", near:"Oldtown", x:"82%", y:"50%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"The Common Ground", near:"Oldtown", x:"86%", y:"46%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
-  { name:"The Feckless Wrecked", near:"Oldtown", x:"92%", y:"48%", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." }
+  { name:"The Feckless Wrecked", near:"Oldtown", x:"92%", y:"48%", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." },
+  // Both spotted in the same reference-video pan as Sub Lab, strung
+  // along the same footpath just south of it — Loconnection has no
+  // lineup data sourced yet; Nachtlicker already had a genre/lineup
+  // entry in venueDirectory below but was missing its own map pin.
+  { name:"Loconnection", near:"Metropolis", x:"12%", y:"33%", info:"Seen labelled on the official app's own map on the same path as Sub Lab, just south of it — no lineup or theme details sourced yet." },
+  { name:"Nachtlicker", near:"Metropolis", x:"13%", y:"37%", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Seen on the official app's own map just south of Sub Lab and Loconnection." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -5989,7 +5995,13 @@ const landmarks = [
   { name:"Lockers — Hidden Woods", x:"14%", y:"12%", info:"One of the confirmed 2026 locker locations, alongside Thrutopia, the Lion's Den/Orchid area and Downtown Village." },
   { name:"Lockers — Thrutopia", x:"58%", y:"10%", info:"Locker point in the Thrutopia woodlands." },
   { name:"Amnesty Points — West Gate", x:"5%", y:"50%", info:"Dispose of anything prohibited before you're searched, no questions asked — every gate has one." },
-  { name:"Charge Candy — Pepperpot Market", x:"50%", y:"52%", info:"One of six confirmed phone-charging points dotted across the site." }
+  { name:"Charge Candy — Pepperpot Market", x:"50%", y:"52%", info:"One of six confirmed phone-charging points dotted across the site." },
+  // Seen labelled on the official app's own map as a large dark-green
+  // block of woodland/hillside immediately southwest of Metropolis,
+  // spanning a wide chunk of that side of the site — a real protected-
+  // land designation rather than a festival feature, so it's marked
+  // here as a single reference label rather than guessed as a POI.
+  { name:"Site of Special Scientific Interest", x:"7%", y:"40%", info:"Protected woodland/hillside bordering Metropolis on the site's western edge — seen labelled on the official app's own map. Not a festival area; treat it as off-limits terrain, not a place to explore." }
 ];
 
 // Named camping fields & gates, positioned from a real (previous-year)
@@ -6063,7 +6075,7 @@ const venueDirectory = [
   { name:"Topsy Turvy Trims", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Barbershop novelty, party", near:"Oldtown", info:"Barbershop/salon-themed spot — fits Oldtown's topsy-turvy rebuild." },
   { name:"PFP Robot", type:"Hidden venue", status:"confirmed", music:true, genre:"Electro, makina, trance, acid, techno", near:"Area 404", info:"PFP's robotic soundsystem — confirmed back for 2026 (Tripl3 B, Audio Gutter, Agent Scully, TEOTEK)." },
   { name:"Sub Lab", type:"Hidden venue", status:"confirmed", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — confirmed for 2026 (Bennett ft. Sylla/Limmz, Stasis, Nio B, Ruggz b2b Sonia Sol)." },
-  { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Area 404", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL)." },
+  { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Metropolis", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Corrected from an earlier 'near Area 404' guess — the official app's own map shows it on the same footpath as Sub Lab and Loconnection, just south of Metropolis." },
   { name:"Deviant Lounge", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, after-hours", near:"Metropolis", info:"Confirmed for 2026, running Thu-Sat (Wrong'un Crew, Church of Donkology, DJ Safe N Sound, Bunn13) — previously listed as unverified, now on the 2026 schedule." },
   { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Dystopian kebab-shop gabber stage running since 2023 — confirmed for 2026 with a full Thu-Sun DJ programme." },
   { name:"E Numbers", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Hyperpop, party, eclectic", near:"Metropolis", info:"Hyperpop 'sweetshop' venue — confirmed for 2026, running Thu-Sat (Kid Cosmit, Lounicorn, D0LLSW4G, Mannequins b2b sets)." },
@@ -6370,9 +6382,23 @@ function buildMapGeoJSON(){
   // NEAREST other zone's centre — two neighbouring zones each capped at
   // 40% still leaves a real gap between their edges, even accounting for
   // blobRing's own up-to-22%-oversize irregularity.
+  // Pepperpot Market is the real hub the extracted-from-the-official-app
+  // POI data (js/boomtown-locations-2026.js — 53 real-GPS toilets/food/
+  // bars/welfare/etc. markers) actually clusters around once converted
+  // into schematic space: their centroid lands within ~2 schematic units
+  // of this landmark's own hand-placed (46%,50%) position. Those markers
+  // render at their real GPS spot regardless of any ground shape, so
+  // without one they sat on bare grass between the district blobs —
+  // looking like they were "in the wrong place" even though the
+  // positions themselves are the most accurate data this map has (real
+  // GPS, not schematic guesswork). Giving the hub its own clearing (same
+  // sizing/overlap-safe machinery as a district) grounds them the same
+  // way districts ground stages.
+  const marketHubRef = landmarks.find(l=> l.name === "Pepperpot Market");
   const zoneCenters = districts.map(d=>({ x: parseFloat(d.x), y: parseFloat(d.y), ref: d }))
     .concat(campLabels.map(c=>({ x: parseFloat(c.x), y: parseFloat(c.y), ref: c })))
-    .concat(parkingAreas.map(p=>({ x: parseFloat(p.x), y: parseFloat(p.y), ref: p })));
+    .concat(parkingAreas.map(p=>({ x: parseFloat(p.x), y: parseFloat(p.y), ref: p })))
+    .concat(marketHubRef ? [{ x: parseFloat(marketHubRef.x), y: parseFloat(marketHubRef.y), ref: marketHubRef }] : []);
   function clearanceRadius(cx, cy, selfRef, desired){
     let minDist = Infinity;
     zoneCenters.forEach(z=>{
@@ -6418,6 +6444,46 @@ function buildMapGeoJSON(){
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 31 + 7, 18)) ] }
     };
   });
+
+  // Sized the same way a district is (spread of its real members, capped
+  // by clearanceRadius so it can't eat into a neighbouring district) —
+  // "members" here are the real POI markers themselves, converted from
+  // GPS into schematic space so they're comparable to everything else
+  // this function measures in.
+  const marketHubFeatures = [];
+  if(marketHubRef){
+    const cx = parseFloat(marketHubRef.x), cy = parseFloat(marketHubRef.y);
+    const poiDists = (window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois || [])
+      .map(p=>{ const s = latLonToSchematic(p.lat, p.lon); return Math.hypot(s.x - cx, s.y - cy); })
+      .sort((a,b)=> a - b);
+    // 75th percentile, not the single furthest POI — districts don't try
+    // to reach their one most-outlying member either (districtSpreadR
+    // caps at 13 regardless), and the real POI data has a much wider
+    // raw scatter than any hand-guessed district, so chasing literally
+    // every outlier would force an oversized shape that swallows
+    // neighbouring districts just to cover a handful of stragglers.
+    const p75 = poiDists.length ? poiDists[Math.floor(poiDists.length * 0.75)] : 10;
+    const desired = Math.min(16, Math.max(7, p75 + 2));
+    // Not clearanceRadius's usual 0.42-of-nearest-neighbour ratio: that
+    // ratio exists so two same-kind zones (district vs district, camp vs
+    // camp) never visually touch. The market hub is the one real-GPS-
+    // verified shape on this whole map — everything else here is
+    // schematic guesswork — so letting it reach further toward a
+    // guessed district (up to 65% of the gap, still leaving a real
+    // margin) is trusting the more accurate data over the guess, not
+    // sloppiness.
+    let minDist = Infinity;
+    zoneCenters.forEach(z=>{
+      if(z.ref === marketHubRef) return;
+      minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy));
+    });
+    const r = Math.min(Math.max(6, desired), minDist * 0.65);
+    marketHubFeatures.push({
+      type: "Feature",
+      properties: { name: marketHubRef.name, fill: "rgba(210,150,70,0.30)", line: "rgba(210,150,70,0.9)", casing: "rgba(210,150,70,0.32)" },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 5150, 16)) ] }
+    });
+  }
 
   const centers = districts.map(d=>[parseFloat(d.x), parseFloat(d.y)]);
   if(centers.length) centers.push(centers[0]);
@@ -6856,6 +6922,7 @@ function buildMapGeoJSON(){
     hedges: { type:"FeatureCollection", features: hedgeFeatures },
     stream: { type:"FeatureCollection", features: [streamFeature] },
     districts: { type:"FeatureCollection", features: districtFeatures },
+    marketHub: { type:"FeatureCollection", features: marketHubFeatures },
     plazas: { type:"FeatureCollection", features: plazaFeatures },
     parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
     parkingRows: { type:"FeatureCollection", features: parkingRowFeatures },
@@ -6936,6 +7003,19 @@ function schematicToLatLon(xPercent, yPercent){
   return {
     lat: SITE_NE.lat - (yPercent / 100) * latSpan,
     lon: SITE_SW.lon + (xPercent / 100) * lonSpan
+  };
+}
+// Exact inverse of schematicToLatLon — since that's a straight linear
+// box-scaling (no rotation), this just runs the same two lines backwards.
+// Used to place the real (GPS, not schematic-guessed) POI data from
+// js/boomtown-locations-2026.js into the same 0-100 schematic space
+// everything else in buildMapGeoJSON measures distance/overlap in, e.g.
+// sizing the Pepperpot Market hub clearing to its real POI cluster.
+function latLonToSchematic(lat, lon){
+  const latSpan = SITE_NE.lat - SITE_SW.lat, lonSpan = SITE_NE.lon - SITE_SW.lon;
+  return {
+    x: (lon - SITE_SW.lon) / lonSpan * 100,
+    y: (SITE_NE.lat - lat) / latSpan * 100
   };
 }
 function realStageMatch(name){
@@ -7209,6 +7289,16 @@ function loadMap(){
       mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 4 } });
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 2.4 } });
+
+      // Pepperpot Market's clearing — same casing/fill/line trio as a
+      // district, drawn right after them, so the real (GPS, not
+      // schematic-guessed) toilets/food/bars/welfare/etc. markers that
+      // cluster here (see buildMapGeoJSON's marketHub comment) land on
+      // themed ground instead of bare grass.
+      mapGL.addSource("mapMarketHub", { type: "geojson", data: geo.marketHub });
+      mapGL.addLayer({ id: "market-hub-casing", type: "line", source: "mapMarketHub", paint: { "line-color": ["get", "casing"], "line-width": 4 } });
+      mapGL.addLayer({ id: "market-hub-fill", type: "fill", source: "mapMarketHub", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "market-hub-line", type: "line", source: "mapMarketHub", paint: { "line-color": ["get", "line"], "line-width": 2.4 } });
 
       // Camp areas drawn AFTER districts/forests so they sit on top —
       // Camp Orchid Downtown in particular overlaps Metropolis's own
