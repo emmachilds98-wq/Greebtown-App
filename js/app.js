@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v234";
-const APP_BUILD_TIME = "2026-08-01T04:11:17Z";
+const APP_CACHE_VERSION = "v235";
+const APP_BUILD_TIME = "2026-08-01T04:16:32Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6832,11 +6832,24 @@ function loadMap(){
       // screen on open, closer to how the official app's own map reads,
       // while still starting one step looser than a specific corner
       // (minZoom 14 still lets you zoom all the way out from here).
-      // Bearing/pitch are left at their 0/0 defaults (north-up, flat).
+      // Bearing/pitch stay at 0/0 (north-up, flat) — and dragRotate is
+      // switched off below so they STAY there. bearing:0 alone only sets
+      // the starting orientation; MapLibre's default two-finger touch
+      // twist (and right-click-drag on desktop) can rotate the map away
+      // from north with no compass/reset control shown to get back
+      // (NavigationControl below already has showCompass:false), which
+      // is a real way to end up with north no longer at the top and no
+      // way back short of reloading. Disabling rotation entirely is the
+      // simplest guarantee that north stays at mid-top and west stays on
+      // the west side of the screen, permanently.
       zoom: 15.4, minZoom: 14, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
-      attributionControl: false
+      attributionControl: false,
+      dragRotate: false,
+      touchPitch: false,
+      pitchWithRotate: false
     });
+    mapGL.touchZoomRotate.disableRotation();
     mapGL.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
     // The illustrated basemap (buildMapGeoJSON, defined above) — added
     // once the style has finished loading (required before addSource/
