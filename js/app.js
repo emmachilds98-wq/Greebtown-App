@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v238";
-const APP_BUILD_TIME = "2026-08-01T05:36:29Z";
+const APP_CACHE_VERSION = "v239";
+const APP_BUILD_TIME = "2026-08-01T05:40:08Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6319,10 +6319,12 @@ function buildMapGeoJSON(){
     const desired = Math.min(13, Math.max(6, maxDist + 3));
     return clearanceRadius(cx, cy, d, desired);
   }
+  const districtRadii = new Map();
   const districtFeatures = districts.map((d,i)=>{
     const rgb = DISTRICT_PALETTE[i % DISTRICT_PALETTE.length];
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const r = districtSpreadR(d);
+    districtRadii.set(d, r);
     return {
       type: "Feature",
       properties: { name: d.name, fill: `rgba(${rgb},0.32)`, line: `rgba(${rgb},0.95)`, casing: `rgba(${rgb},0.35)` },
@@ -6421,6 +6423,32 @@ function buildMapGeoJSON(){
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(parseFloat(p.x), parseFloat(p.y), i * 29 + 5)) ] }
   }));
 
+  // Decorative infill buildings — a wide reference-video frame showing
+  // several districts at once (Botanica/Metropolis together) has
+  // noticeably MORE small building blocks scattered through each
+  // district than this map has named venues to place them at — generic
+  // stalls/toilets/backstage structures with no name of their own. A
+  // handful of small unlabeled rectangles scattered through each
+  // district's own clearing (same buildingFootprint shape, offset from
+  // its centre so they don't stack on the plaza) fills that density gap
+  // without needing real data for each one.
+  const infillBuildingFeatures = [];
+  districts.forEach((d,di)=>{
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    const r = districtRadii.get(d);
+    const rand = seededRand(di * 137 + 19);
+    const count = 5;
+    for(let k=0;k<count;k++){
+      const a = rand() * Math.PI * 2;
+      const dist = r * (0.35 + rand() * 0.5);
+      const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+      infillBuildingFeatures.push({
+        type: "Feature", properties: {},
+        geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, di * 137 + 19 + k * 7)) ] }
+      });
+    }
+  });
+
   // Main-stage glow — the reference video shows every major stage as a
   // soft coloured halo bleeding into the ground around it (orange around
   // The Lion's Den, purple around ENDOR, etc), a strong at-a-glance
@@ -6435,7 +6463,7 @@ function buildMapGeoJSON(){
     const rgb = STAGE_GLOW_COLORS[i % STAGE_GLOW_COLORS.length];
     return {
       type:"Feature",
-      properties:{ colorOuter: `rgba(${rgb},0.10)`, colorMid: `rgba(${rgb},0.18)`, colorCore: `rgba(${rgb},0.32)` },
+      properties:{ colorOuter: `rgba(${rgb},0.05)`, colorMid: `rgba(${rgb},0.09)`, colorCore: `rgba(${rgb},0.18)` },
       geometry:{ type:"Point", coordinates:[c.lon, c.lat] }
     };
   });
@@ -6648,6 +6676,7 @@ function buildMapGeoJSON(){
     campSpokes: { type:"FeatureCollection", features: campSpokeFeatures },
     parkingSpokes: { type:"FeatureCollection", features: parkingSpokeFeatures },
     buildings: { type:"FeatureCollection", features: buildingFeatures },
+    infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
     stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
@@ -7014,23 +7043,33 @@ function loadMap(){
       // Main-stage glow — three stacked circle layers per stage, widest/
       // faintest first so the smaller/brighter ones layer on top and it
       // reads as one soft blurred halo rather than three hard rings.
+      // Toned down (both radius and opacity) from the first version —
+      // it was overpowering everything else on the map (buildings,
+      // paths, district colour) instead of being one cue among several;
+      // stages should still stand out, just not dominate.
       mapGL.addSource("mapStageGlow", { type: "geojson", data: geo.stageGlow });
       mapGL.addLayer({ id: "stage-glow-outer", type: "circle", source: "mapStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 14, 19, 60],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 9, 19, 38],
         "circle-color": ["get", "colorOuter"]
       } });
       mapGL.addLayer({ id: "stage-glow-mid", type: "circle", source: "mapStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 8, 19, 34],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 5.5, 19, 22],
         "circle-color": ["get", "colorMid"]
       } });
       mapGL.addLayer({ id: "stage-glow-core", type: "circle", source: "mapStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 4, 19, 16],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 19, 11],
         "circle-color": ["get", "colorCore"]
       } });
 
-      // Building footprints — drawn after the path network so they sit
-      // on top of it (a path running "under" a building reads wrong),
-      // but before the marker icons that go on top of each one.
+      // Decorative infill buildings first (fainter/paler — no name, so
+      // they read as background density, not a specific place), then
+      // real named-venue building footprints on top, both drawn after
+      // the path network so they sit on top of it (a path running
+      // "under" a building reads wrong) but before the marker icons.
+      mapGL.addSource("mapInfillBuildings", { type: "geojson", data: geo.infillBuildings });
+      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": "rgba(196,140,90,0.32)" } });
+      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", paint: { "line-color": "rgba(120,80,50,0.35)", "line-width": 0.8 } });
+
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
       mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(196,140,90,0.65)" } });
       mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
