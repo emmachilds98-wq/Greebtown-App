@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v244";
-const APP_BUILD_TIME = "2026-08-01T05:56:03Z";
+const APP_CACHE_VERSION = "v245";
+const APP_BUILD_TIME = "2026-08-01T05:59:56Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5946,7 +5946,25 @@ const thingsToFind = [
   { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
   { name:"Deviant Lounge", near:"Metropolis", x:"19%", y:"38%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
   { name:"The Pomegranate Parlour", near:"Site-wide", x:"86%", y:"20%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor." },
-  { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." }
+  { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." },
+  // The following 10 were spotted as real named labels on the official
+  // app's own map in the reference screen recording, but weren't in any
+  // list here before this pass — no lineup/schedule data was sourced
+  // for them, so info text stays to what's visible (name + district)
+  // rather than inventing a theme or backstory this file can't confirm.
+  // Positions are estimated from where each label sat in the recording
+  // relative to its district, same "approximate, not surveyed" honesty
+  // as everything else in this list.
+  { name:"Quantum", near:"Oldtown", x:"78%", y:"50%", info:"Seen labelled on the official app's own map, near Oldtown/Temple Valley — no lineup or theme details sourced yet." },
+  { name:"The Hide Out Downtown", near:"Metropolis", x:"20%", y:"30%", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
+  { name:"Endor", near:"Metropolis", x:"14%", y:"38%", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
+  { name:"Mango", near:"Botanica", x:"24%", y:"20%", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
+  { name:"Karma Ceuticals", near:"Botanica", x:"30%", y:"24%", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
+  { name:"Trough Love", near:"Oldtown", x:"84%", y:"48%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"Da Graaf's Reformatory", near:"Oldtown", x:"80%", y:"44%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"La Luna Coven", near:"Oldtown", x:"82%", y:"50%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Common Ground", near:"Oldtown", x:"86%", y:"46%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Feckless Wrecked", near:"Oldtown", x:"92%", y:"48%", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -6093,7 +6111,22 @@ const venueDirectory = [
   { name:"Burger-van Classics", type:"Food & drink", status:"confirmed", music:false, genre:"—", near:"Site-wide", info:"Confirmed 2026 food category, dotted around the bigger stages and camping fields." },
   { name:"Paelleria", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Pepperpot Market (2025)", info:"A 2025 trader-list name (paella). Treat as an example of the kind of stall to expect, not a return guarantee for 2026." },
   { name:"Burger Shack", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." },
-  { name:"Greek Gyros", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." }
+  { name:"Greek Gyros", type:"Food & drink", status:"rumoured", music:false, genre:"—", near:"Site-wide (2025)", info:"A 2025 trader-list name; no 2026 confirmation." },
+  // Same 10 real map labels added to thingsToFind above — mirrored here
+  // so they also show in the full venue directory, not just as map
+  // pins. "confirmed" because the name itself is confirmed real (seen
+  // on the official app's own map), even though no lineup/genre data
+  // was sourced for any of them.
+  { name:"Quantum", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map, near Oldtown/Temple Valley — no lineup or theme details sourced yet." },
+  { name:"The Hide Out Downtown", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Metropolis", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
+  { name:"Endor", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Metropolis", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
+  { name:"Mango", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Botanica", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
+  { name:"Karma Ceuticals", type:"Shop / hidden venue", status:"confirmed", music:false, genre:"—", near:"Botanica", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
+  { name:"Trough Love", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"Da Graaf's Reformatory", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"La Luna Coven", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Common Ground", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Feckless Wrecked", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." }
 ];
 
 const map = document.getElementById("map");
