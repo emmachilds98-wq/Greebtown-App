@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v220";
-const APP_BUILD_TIME = "2026-07-31T21:51:54Z";
+const APP_CACHE_VERSION = "v221";
+const APP_BUILD_TIME = "2026-08-01T00:55:56Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6273,20 +6273,49 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nd.x), parseFloat(nd.y)], i * 23 + 11)) } };
   });
 
-  // Premium camp AREAS — the reference video shows Camp Orchid Downtown
+  // Premium camp AREAS — the reference videos show Camp Orchid Downtown
   // and the two Camp Skylark sites as solid colour-filled fields (pink
   // for Orchid, warm yellow for Skylark), distinct from the plain green
   // used for ordinary camping — matched here for the same reason the
   // forest/district areas got fills instead of a floating text label.
+  // Camp Orchid Downtown specifically reads as a rounded diamond rather
+  // than a circle (seen clearly, twice, across both videos), so it gets
+  // fewer ring points for a more angular shape than the Skylark camps.
   const campAreaDefs = campLabels.filter(c=> /premium/i.test(c.text));
   const campFeatures = campAreaDefs.map((c,i)=>{
     const isDowntown = /downtown/i.test(c.text);
     return {
       type: "Feature",
       properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(c.x), parseFloat(c.y), 10, 700 + i * 61, 14)) ] }
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(c.x), parseFloat(c.y), 10, 700 + i * 61, isDowntown ? 6 : 14)) ] }
     };
   });
+
+  // A small triangular tree-ring/hedge path inside Camp Orchid Downtown —
+  // a distinctive real feature visible clearly (and repeatedly) in both
+  // reference videos, not present anywhere else on the map.
+  const downtownCamp = campAreaDefs.find(c=> /downtown/i.test(c.text));
+  const triangleFeature = downtownCamp ? {
+    type: "Feature", properties: {},
+    geometry: { type: "LineString", coordinates: schematicRingToLngLat((()=>{
+      const ring = blobRing(parseFloat(downtownCamp.x), parseFloat(downtownCamp.y), 4, 850, 3);
+      ring.push(ring[0]);
+      return ring;
+    })()) }
+  } : null;
+
+  // A real winding stream visible near Botanica/Hydro XL across the
+  // reference video, running roughly past both — built from a few
+  // waypoints each gently curved into the next for a winding look,
+  // rather than one single bow (a stream over this distance visibly
+  // bends more than once).
+  const streamWaypoints = [[22,8],[27,18],[24,28],[30,40],[26,50]];
+  let streamRing = [streamWaypoints[0]];
+  for(let i=0;i<streamWaypoints.length-1;i++){
+    const seg = curvedLine(streamWaypoints[i], streamWaypoints[i+1], 900 + i * 13);
+    streamRing = streamRing.concat(seg.slice(1));
+  }
+  const streamFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(streamRing) } };
 
   // Ordinary camping fields get a scatter of small confetti-coloured tent
   // dots instead — matches the reference video (every plain camping
@@ -6357,9 +6386,11 @@ function buildMapGeoJSON(){
 
   return {
     fields: { type:"FeatureCollection", features: fieldFeatures },
+    stream: { type:"FeatureCollection", features: [streamFeature] },
     districts: { type:"FeatureCollection", features: districtFeatures },
     plazas: { type:"FeatureCollection", features: plazaFeatures },
     campAreas: { type:"FeatureCollection", features: campFeatures },
+    campTriangle: { type:"FeatureCollection", features: triangleFeature ? [triangleFeature] : [] },
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
@@ -6563,6 +6594,13 @@ function loadMap(){
       mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
       mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
 
+      // A real winding stream near Botanica/Hydro XL, visible across the
+      // reference video — drawn with a casing like the paths so it reads
+      // as water rather than another path.
+      mapGL.addSource("mapStream", { type: "geojson", data: geo.stream });
+      mapGL.addLayer({ id: "stream-casing", type: "line", source: "mapStream", paint: { "line-color": "rgba(20,40,50,0.4)", "line-width": 4 } });
+      mapGL.addLayer({ id: "stream-line", type: "line", source: "mapStream", paint: { "line-color": "rgba(90,150,190,0.65)", "line-width": 2 } });
+
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
       mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(30,70,45,0.5)" } });
       mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(90,140,100,0.4)", "line-width": 1 } });
@@ -6577,6 +6615,11 @@ function loadMap(){
       mapGL.addSource("mapCampAreas", { type: "geojson", data: geo.campAreas });
       mapGL.addLayer({ id: "camp-areas-fill", type: "fill", source: "mapCampAreas", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "camp-areas-line", type: "line", source: "mapCampAreas", paint: { "line-color": "rgba(255,255,255,0.25)", "line-width": 1, "line-dasharray": [1, 1.5] } });
+
+      // The triangular tree-ring/hedge feature inside Camp Orchid
+      // Downtown — seen clearly, twice, across both reference videos.
+      mapGL.addSource("mapCampTriangle", { type: "geojson", data: geo.campTriangle });
+      mapGL.addLayer({ id: "camp-triangle-line", type: "line", source: "mapCampTriangle", paint: { "line-color": "rgba(30,70,45,0.7)", "line-width": 2 } });
 
       // Path network — three tiers so the map reads as a connected route
       // system rather than isolated markers on plain grass: a solid main
