@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v237";
-const APP_BUILD_TIME = "2026-08-01T05:34:34Z";
+const APP_CACHE_VERSION = "v238";
+const APP_BUILD_TIME = "2026-08-01T05:36:29Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6343,6 +6343,17 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
   });
 
+  // Stage plazas — a soft tan clearing under every main stage. The
+  // reference video shows paths widening into a real open plaza around
+  // a stage (see the Tribe of Frog frame) rather than staying a thin
+  // line all the way up to the building — every other path in this
+  // basemap is a constant-width line, so main stages (the one place a
+  // path visibly widens) had nothing to show that.
+  const stagePlazaFeatures = locations.filter(p=>p.kind === "stage").map((s,i)=>({
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.4, i * 41 + 9, 10)) ] }
+  }));
+
   // Spokes from every stage (major + minor) to its nearest district — the
   // main walkable "roads" of the path network.
   const spokeTargets = locations.filter(p=>p.kind === "stage").concat(minorStages);
@@ -6631,6 +6642,7 @@ function buildMapGeoJSON(){
     campTriangle: { type:"FeatureCollection", features: triangleFeature ? [triangleFeature] : [] },
     forests: { type:"FeatureCollection", features: forestFeatures },
     trail: { type:"FeatureCollection", features: [trailFeature] },
+    stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
     capillaries: { type:"FeatureCollection", features: capillaryFeatures },
     campSpokes: { type:"FeatureCollection", features: campSpokeFeatures },
@@ -6969,6 +6981,11 @@ function loadMap(){
       // the path reads clearly against every ground colour it crosses
       // (district green, camp yellow, parking grey, forest) instead of
       // just the grass it was originally tuned for.
+      // Stage plazas — drawn before the path lines so the paths visibly
+      // run INTO the clearing rather than sitting on top of a flat edge.
+      mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
+      mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", paint: { "fill-color": "rgba(214,186,146,0.55)" } });
+
       mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(55,42,28,0.7)", "line-width": 5.5 } });
       mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(232,208,168,0.95)", "line-width": 2.6 } });
 
