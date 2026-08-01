@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v226";
-const APP_BUILD_TIME = "2026-08-01T02:56:06Z";
+const APP_CACHE_VERSION = "v227";
+const APP_BUILD_TIME = "2026-08-01T03:01:03Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6233,10 +6233,14 @@ function confettiClusterPoints(cx, cy, count, spread, seed){
 // hand straight to mapGL.addSource(). Districts/trail/spokes/trees/tents
 // mirror the previous SVG illustration's shapes and layout 1:1, just
 // expressed as real-world geometry instead of drawing instructions.
-// A small fixed palette so neighbouring district clearings read as
-// visually distinct areas instead of identical translucent blobs —
-// cycled by index, not tied to any real Boomtown branding/colour.
-const DISTRICT_PALETTE = ["242,168,60", "75,190,227", "196,150,255", "180,214,120", "230,130,150"];
+// One colour per district (7, matching the real district count — the
+// old 5-colour palette cycled, so two districts always ended up sharing
+// a colour) picked to stay clear of every other ground colour already
+// on the map: no greens (open grass/forest), no yellow-gold (camping
+// fields), no grey (parking), no tan/brown (paths, buildings) — so a
+// district's own fill/outline colour is never confusable with the
+// zone type around it.
+const DISTRICT_PALETTE = ["242,140,60", "70,170,235", "175,120,235", "235,100,150", "225,80,80", "60,200,190", "210,90,200"];
 
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
@@ -6281,7 +6285,7 @@ function buildMapGeoJSON(){
     const rgb = DISTRICT_PALETTE[i % DISTRICT_PALETTE.length];
     return {
       type: "Feature",
-      properties: { name: d.name, fill: `rgba(${rgb},0.22)`, line: `rgba(${rgb},0.65)` },
+      properties: { name: d.name, fill: `rgba(${rgb},0.32)`, line: `rgba(${rgb},0.95)`, casing: `rgba(${rgb},0.28)` },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(d.x), parseFloat(d.y), districtSpreadR(d), i * 31 + 7, 18)) ] }
     };
   });
@@ -6766,38 +6770,49 @@ function loadMap(){
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
       mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(15,45,28,0.68)" } });
-      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(90,140,100,0.4)", "line-width": 1 } });
+      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(10,30,18,0.6)", "line-width": 1.4 } });
 
       // Parking — flat grey fields with a few straight "row" lines, kept
       // visually distinct from both camping (green/yellow, textured) and
       // district clearings (coloured, busy with venues/paths) so all
       // three read as different kinds of ground at a glance.
       mapGL.addSource("mapParkingAreas", { type: "geojson", data: geo.parkingAreas });
-      mapGL.addLayer({ id: "parking-fill", type: "fill", source: "mapParkingAreas", paint: { "fill-color": "rgba(150,150,145,0.55)" } });
-      mapGL.addLayer({ id: "parking-outline", type: "line", source: "mapParkingAreas", paint: { "line-color": "rgba(90,90,86,0.5)", "line-width": 1 } });
+      mapGL.addLayer({ id: "parking-fill", type: "fill", source: "mapParkingAreas", paint: { "fill-color": "rgba(160,160,155,0.7)" } });
+      mapGL.addLayer({ id: "parking-outline", type: "line", source: "mapParkingAreas", paint: { "line-color": "rgba(60,60,58,0.85)", "line-width": 2 } });
       mapGL.addSource("mapParkingRows", { type: "geojson", data: geo.parkingRows });
-      mapGL.addLayer({ id: "parking-rows-line", type: "line", source: "mapParkingRows", paint: { "line-color": "rgba(255,255,255,0.18)", "line-width": 1 } });
+      mapGL.addLayer({ id: "parking-rows-line", type: "line", source: "mapParkingRows", paint: { "line-color": "rgba(255,255,255,0.28)", "line-width": 1 } });
 
+      // Districts get a soft outer "casing" (like the paths' own
+      // casing/line pairing below) under a bold solid outline — the
+      // previous thin dashed line at 1.6px was easy to lose against the
+      // grass, especially for the paler palette colours. The casing
+      // widens the boundary into something visible at a glance even
+      // before you register the exact hue, the same way the solid
+      // outline itself now reads as a real border instead of a scatter
+      // of dashes.
       mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
+      mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 6 } });
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 1.6, "line-dasharray": [2, 2] } });
+      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 2.4 } });
 
       // Camp areas drawn AFTER districts/forests so they sit on top —
       // Camp Orchid Downtown in particular overlaps Metropolis's own
       // district clearing, and a fill drawn underneath it just vanished.
       mapGL.addSource("mapCampAreas", { type: "geojson", data: geo.campAreas });
       mapGL.addLayer({ id: "camp-areas-fill", type: "fill", source: "mapCampAreas", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "camp-areas-line", type: "line", source: "mapCampAreas", paint: { "line-color": "rgba(255,255,255,0.25)", "line-width": 1, "line-dasharray": [1, 1.5] } });
+      mapGL.addLayer({ id: "camp-areas-line", type: "line", source: "mapCampAreas", paint: { "line-color": "rgba(255,255,255,0.55)", "line-width": 1.6, "line-dasharray": [1, 1.5] } });
 
       // Ordinary (non-premium) camping fields — a soft sandy-yellow fill
       // plus a couple of straight field-division lines, so plain camping
       // reads as its own kind of ground rather than tent dots floating
-      // on bare district/forest colour.
+      // on bare district/forest colour. Outline strengthened to a solid
+      // warm brown so the field boundary itself is legible, not just
+      // implied by the confetti dots scattered inside it.
       mapGL.addSource("mapCampFields", { type: "geojson", data: geo.campFields });
-      mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(210,190,95,0.4)" } });
-      mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(150,130,60,0.35)", "line-width": 1 } });
+      mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(224,200,90,0.55)" } });
+      mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.75)", "line-width": 1.8 } });
       mapGL.addSource("mapCampFieldLines", { type: "geojson", data: geo.campFieldLines });
-      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(150,130,60,0.25)", "line-width": 1 } });
+      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(120,100,40,0.35)", "line-width": 1 } });
 
       // The triangular tree-ring/hedge feature inside Camp Orchid
       // Downtown — seen clearly, twice, across both reference videos.
@@ -6816,8 +6831,8 @@ function loadMap(){
       mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(214,186,146,0.9)", "line-width": 2.6 } });
 
       mapGL.addSource("mapSpokes", { type: "geojson", data: geo.spokes });
-      mapGL.addLayer({ id: "spokes-casing", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(70,54,38,0.4)", "line-width": 3.2 } });
-      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(214,186,146,0.7)", "line-width": 1.5 } });
+      mapGL.addLayer({ id: "spokes-casing", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(70,54,38,0.55)", "line-width": 3.2 } });
+      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(224,198,158,0.85)", "line-width": 1.5 } });
 
       mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
       mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
