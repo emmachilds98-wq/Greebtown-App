@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v265";
-const APP_BUILD_TIME = "2026-08-01T22:06:48Z";
+const APP_CACHE_VERSION = "v266";
+const APP_BUILD_TIME = "2026-08-01T23:35:09Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6014,7 +6014,39 @@ const thingsToFind = [
   // its own distinct spot near Anara Forest, not the Ancient Futures
   // cluster the other three moved to.
   { name:"XR", near:"Anara Forest", x:"70%", y:"50%", info:"Extinction Rebellion-linked space — confirmed for 2026, running Wed-Fri (Cassandra the Oracle, Big Oil Drumming Parade, Last Chance Salon, Art Blocking). Real surveyed GPS puts it near Anara Forest/Hilltop, not Thrutopia." },
-  { name:"Circus Tent", near:"Ancient Futures", x:"53%", y:"41%", info:"Performance-led circus venue — confirmed for 2026. Real surveyed GPS puts it right by Ancient Futures/Grand Central, not Oldtown — possibly the same real venue as this list's own \"Circus\" entry, kept as a separate nearby pin since that's unconfirmed." }
+  { name:"Circus Tent", near:"Ancient Futures", x:"53%", y:"41%", info:"Performance-led circus venue — confirmed for 2026. Real surveyed GPS puts it right by Ancient Futures/Grand Central, not Oldtown — possibly the same real venue as this list's own \"Circus\" entry, kept as a separate nearby pin since that's unconfirmed." },
+  // A full sweep of every venueDirectory entry against js/boomtown-
+  // locations-2026.js's real GPS turned up 9 more "lineup-match" (highest
+  // confidence — appeared in a real schedule listing) matches for
+  // confirmed venues that had never been pinned anywhere, same gap as
+  // Ancient Futures/XR/Circus Tent above. Five land in the same Ancient
+  // Futures/Grand Central cluster those three already moved to:
+  { name:"Energy Garden", near:"Ancient Futures", x:"56%", y:"35%", info:"Sustainable-energy themed space — confirmed for 2026 with a full dated workshop programme Wed-Fri. Real surveyed GPS puts it by Ancient Futures/Grand Central, not Thrutopia." },
+  { name:"Climate Live", near:"Ancient Futures", x:"48%", y:"38%", info:"Climate talks and programming — confirmed for 2026 with a full dated workshop programme Wed-Fri. Real surveyed GPS puts it by Ancient Futures/Grand Central, not Thrutopia." },
+  { name:"The Magic Teapot", near:"Ancient Futures", x:"54%", y:"37%", info:"Tea-themed chill spot and cafe. Real surveyed GPS puts it by Ancient Futures/Grand Central, not Thrutopia." },
+  { name:"Cocaine Anonymous", near:"Ancient Futures", x:"61%", y:"44%", info:"On-site 12-step support meeting — explicitly named as a 2026 welfare partner on Boomtown's own Chapter Five safety page. Real surveyed GPS puts it right by Craft Tent/Ancient Futures, not Pepperpot Market/Thrutopia." },
+  { name:"Spinney Hollow", near:"Ancient Futures", x:"54%", y:"45%", info:"Small grove venue tucked into wooded ground. Real surveyed GPS puts it by Ancient Futures/Grand Central, not the guessed Anara Forest/Hidden Woods woodland edge." },
+  // Three more cluster together further southeast, right by XR — a
+  // second, distinct "Thrutopia-branded content actually sits near
+  // Anara Forest/Hilltop" pocket rather than the Ancient Futures one.
+  { name:"Hapitat", near:"Anara Forest", x:"71%", y:"49%", info:"Wellbeing/habitat-themed space — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00, alongside The Retreat. Real surveyed GPS puts it by Anara Forest/Hilltop, right next to XR — not up on the Thrutopia hilltop with The Retreat as its own info text assumed." },
+  { name:"Crafty Rascals", near:"Anara Forest", x:"69%", y:"50%", info:"Family/kids craft activities — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00. Real surveyed GPS puts it by Anara Forest/Hilltop, right next to XR/Hapitat, not Thrutopia." },
+  { name:"Permaculture", near:"Anara Forest", x:"66%", y:"49%", info:"Growing and permaculture talks — confirmed for 2026 with a full dated workshop programme Wed-Fri. Real surveyed GPS puts it by Anara Forest/Hilltop, not the Thrutopia hilltop." },
+  // Topsy Turvy Trims' real match is a genuine outlier — nowhere near
+  // Oldtown (the thematic guess its own info text was built on: "fits
+  // Oldtown's topsy-turvy rebuild"), instead landing by Botanica/
+  // Metropolis on the map's west side. Still a "lineup-match" (same
+  // confidence tier as everything else moved this pass), so trusted over
+  // the thematic guess rather than discarded — Boomtown's own venue
+  // theming doesn't always match its physical district.
+  { name:"Topsy Turvy Trims", near:"Botanica", x:"29%", y:"32%", info:"Barbershop/salon-themed spot. Real surveyed GPS puts it by Botanica/Metropolis, not Oldtown as its 'topsy-turvy rebuild' theming would suggest." },
+  // Postal Posse — real match is the one lower-confidence "camelcase-
+  // split" source in this batch (same tier as The Retreat's own match
+  // above) and sits well isolated from every other plotted point (21+
+  // schematic units from Pepperpot Market, its nearest neighbour) rather
+  // than corroborating an existing cluster the way the others do —
+  // flagged accordingly rather than presented with the same confidence.
+  { name:"Postal Posse", near:"Pepperpot Market", x:"40%", y:"71%", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Real surveyed GPS puts it well south of Botanica, isolated from other plotted points — lower-confidence match than most of this map, treat the position as a rougher guess than usual." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -6361,7 +6393,7 @@ const venueDirectory = [
   { name:"The Garden Centre", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Chill, eclectic", near:"Botanica", info:"Garden-centre-fronted spot fitting Botanica's plant-temple theme — confirmed for 2026 (Funkmaster General, Redpeppa, Rodderz, Dovetail, plus a Diversion Audio takeover)." },
   { name:"Botanica Zoo", type:"Hidden venue", status:"confirmed", music:true, genre:"Jungle, hardcore, breaks, UK garage, bass", near:"Botanica", info:"Feral, animal-led 'anarcho-squat zoo' venue — 2026 event listings (Killa P, DJ Hybrid, 14 Aug) and its own 'just over 2 weeks til Boomtown' July 2026 post confirm it's back for Chapter Five." },
   { name:"The Immortal Children of the Eternal Seed", type:"Hidden venue", status:"confirmed", music:true, genre:"Ritual, ambient/eclectic", near:"Botanica", info:"Botanica-flavoured cult/ritual-themed micro venue — confirmed for 2026, running Thu-Sat (Loose Forms takeover, Kritical Mass, Safe N Sound)." },
-  { name:"Topsy Turvy Trims", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Barbershop novelty, party", near:"Oldtown", info:"Barbershop/salon-themed spot — fits Oldtown's topsy-turvy rebuild." },
+  { name:"Topsy Turvy Trims", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Barbershop novelty, party", near:"Botanica", info:"Barbershop/salon-themed spot — fits Oldtown's topsy-turvy rebuild theming, but real surveyed GPS puts it by Botanica/Metropolis instead." },
   { name:"PFP Robot", type:"Hidden venue", status:"confirmed", music:true, genre:"Electro, makina, trance, acid, techno", near:"Area 404", info:"PFP's robotic soundsystem — confirmed back for 2026 (Tripl3 B, Audio Gutter, Agent Scully, TEOTEK)." },
   { name:"Sub Lab", type:"Hidden venue", status:"confirmed", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — confirmed for 2026 (Bennett ft. Sylla/Limmz, Stasis, Nio B, Ruggz b2b Sonia Sol)." },
   { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Metropolis", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Corrected from an earlier 'near Area 404' guess — the official app's own map shows it on the same footpath as Sub Lab and Loconnection, just south of Metropolis." },
@@ -6380,19 +6412,19 @@ const venueDirectory = [
   { name:"Cas's Costumes", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Dress-up, party", near:"Oldtown", info:"Costume-shop-fronted micro venue fitting Oldtown's circus theme." },
   { name:"Garden", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Botanica (likely)", info:"Planting/chill space, likely Botanica or Thrutopia-adjacent." },
   { name:"Craft Tent", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Craft-making workshops and stalls — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00." },
-  { name:"Hapitat", type:"Installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Wellbeing/habitat-themed space — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00, alongside The Retreat." },
+  { name:"Hapitat", type:"Installation", status:"confirmed", music:false, genre:"—", near:"Anara Forest", info:"Wellbeing/habitat-themed space — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00. Real surveyed GPS puts it by Anara Forest/Hilltop, not up with The Retreat on the Thrutopia hilltop as its own info text once assumed." },
   { name:"The Retreat", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Thrutopia (woodland)", info:"New wellness sanctuary for Chapter Five, with its own page on Boomtown's site — professional massage, holistic treatments, communal saunas, hot tubs, sound baths, breathwork and artisan workshops; book slots in advance as they fill fast." },
-  { name:"Crafty Rascals", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Family/kids craft activities — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00." },
-  { name:"Spinney Hollow", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, woodland", near:"Woodland edge (Anara/Hidden Woods)", info:"Small grove venue tucked into wooded ground." },
+  { name:"Crafty Rascals", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Anara Forest", info:"Family/kids craft activities — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00. Real surveyed GPS puts it by Anara Forest/Hilltop, not Thrutopia." },
+  { name:"Spinney Hollow", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, woodland", near:"Ancient Futures", info:"Small grove venue tucked into wooded ground. Real surveyed GPS puts it by Ancient Futures/Grand Central, not the guessed Anara Forest/Hidden Woods woodland edge." },
   { name:"Tinker Station", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Ancient Futures", info:"Repair/maker space, pairs with the Reparium ethos — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00. Real surveyed GPS puts it near Ancient Futures/Grand Central, not Thrutopia." },
   { name:"Blink Mental Health", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market / Thrutopia", info:"On-site mental health support — named alongside The Samaritans and Cocaine Anonymous as a 2026 welfare partner on Boomtown's own Chapter Five safety page." },
-  { name:"Energy Garden", type:"Installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Sustainable-energy themed space — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
-  { name:"Climate Live", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Climate talks and programming — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
+  { name:"Energy Garden", type:"Installation", status:"confirmed", music:false, genre:"—", near:"Ancient Futures", info:"Sustainable-energy themed space — confirmed for 2026 with a full dated workshop programme Wed-Fri. Real surveyed GPS puts it by Ancient Futures/Grand Central, not Thrutopia." },
+  { name:"Climate Live", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Ancient Futures", info:"Climate talks and programming — confirmed for 2026 with a full dated workshop programme Wed-Fri. Real surveyed GPS puts it by Ancient Futures/Grand Central, not Thrutopia." },
   { name:"Reparium", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia (hilltop)", info:"Free volunteer repair hub — Boomtown's own 2026 coverage confirms it 'will return this year' in Pepperpot Market/on the Thrutopia hilltop to fix camping gear and kit." },
   { name:"Games Lounge", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Grand Central", info:"Games and downtime area away from the stages — seen on the official app's own map near Grand Central/Hilltop, corrected from an earlier unsourced 'near Pepperpot Market' guess." },
-  { name:"Permaculture", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Growing and permaculture talks — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
-  { name:"The Magic Teapot", type:"Shop / cafe", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Tea-themed chill spot and cafe." },
-  { name:"Cocaine Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market / Thrutopia", info:"On-site 12-step support meeting — explicitly named as a 2026 welfare partner on Boomtown's own Chapter Five safety page." },
+  { name:"Permaculture", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Anara Forest", info:"Growing and permaculture talks — confirmed for 2026 with a full dated workshop programme Wed-Fri. Real surveyed GPS puts it by Anara Forest/Hilltop, not Thrutopia." },
+  { name:"The Magic Teapot", type:"Shop / cafe", status:"confirmed", music:false, genre:"—", near:"Ancient Futures", info:"Tea-themed chill spot and cafe. Real surveyed GPS puts it by Ancient Futures/Grand Central, not Thrutopia." },
+  { name:"Cocaine Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Ancient Futures", info:"On-site 12-step support meeting — explicitly named as a 2026 welfare partner on Boomtown's own Chapter Five safety page. Real surveyed GPS puts it right by Craft Tent/Ancient Futures, not Pepperpot Market/Thrutopia." },
   { name:"Narcotics Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market", info:"On-site 12-step support meeting — confirmed for 2026 with a recurring daily meeting slot (08:00-09:00 and others), despite not being named on Boomtown's own welfare-partner list alongside Blink Mental Health/Cocaine Anonymous." },
   { name:"Ancient Futures", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Grand Central", info:"Future-facing talks — confirmed for 2026 with a full dated workshop programme Wed-Fri. Seen on the official app's own map near Grand Central/Hilltop, not Thrutopia." },
   { name:"Reel News", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, spoken-word", near:"Copperwood", info:"Newsreel/cinema-themed spot tying into Copperwood's film-district story." },
@@ -6401,7 +6433,7 @@ const venueDirectory = [
   { name:"Retro Amusements Arcade", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Unclear", info:"Past chapters have run a retro amusements arcade among the site's entertainment; not explicitly reconfirmed for 2026 yet." },
   { name:"Vintage Fairground (waltzers & rides)", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Oldtown / Area 404 (typical)", info:"Past chapters have included a vintage fairground with waltzers and similar rides alongside the chair-o-plane; general presence expected but exact 2026 line-up of rides unconfirmed." },
   { name:"Little Pharma", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic party DJs", near:"Unclear", info:"Seen in past chapters; no 2026 listing found — chase it but don't bank on it." },
-  { name:"Postal Posse", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic", near:"Botanica", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations." },
+  { name:"Postal Posse", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic", near:"Pepperpot Market", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Real surveyed GPS (lower-confidence match than most of this map) puts it well south of Botanica, closest to Pepperpot Market but still isolated from it." },
   { name:"Copper Feel Cabaret", type:"Hidden venue", status:"rumoured", music:true, genre:"Cabaret, live", near:"Copperwood (past chapters)", info:"Copperwood-adjacent name from past searches; not confirmed for 2026." },
   { name:"Cosmic Junkyard", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic bass", near:"Unclear", info:"Turned up in past-chapter searches with no dedicated account; treat as unconfirmed." },
   { name:"Clik Clik", type:"Hidden venue", status:"rumoured", music:false, genre:"Photo-booth / party novelty", near:"Unclear", info:"Seen in past social mentions; no 2026 confirmation found." },
