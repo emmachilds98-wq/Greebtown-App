@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v262";
-const APP_BUILD_TIME = "2026-08-01T14:50:17Z";
+const APP_CACHE_VERSION = "v263";
+const APP_BUILD_TIME = "2026-08-01T15:00:15Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6171,7 +6171,72 @@ const amenities = [
   { category:"Water Point", x:"94%", y:"66%", note:"Quiet Camping" },
   // Tangerine Fields was the next-worst at 16 — same reasoning.
   { category:"Toilets", x:"68%", y:"4%", note:"Tangerine Fields" },
-  { category:"Water Point", x:"72%", y:"8%", note:"Tangerine Fields" }
+  { category:"Water Point", x:"72%", y:"8%", note:"Tangerine Fields" },
+  // Density pass from this session's own reference video — the original
+  // ~40-marker set above only covered the handful of clusters that came
+  // up while cross-checking specific names/positions; a slower pass
+  // through the same footage shows dense icon rows along literally every
+  // footpath on the map. Extending coverage to the districts/stages that
+  // had zero amenity markers at all, same "representative spread, not
+  // surveyed one-by-one" honesty as the rest of this array.
+  //
+  // Downtown Camping's own east edge, the footpath spur leading out
+  // toward Metropolis — a toilet/photobooth/food cluster cascading down
+  // the path in the same opening shot the West Gate/Downtown Camping/
+  // Camplight labels came from.
+  { category:"Accessible Facilities", x:"11%", y:"24%", note:"Downtown Camping path" },
+  { category:"Photobooth", x:"11%", y:"26%", note:"Downtown Camping path" },
+  { category:"Food", x:"12%", y:"30%", note:"Downtown Camping path" },
+  { category:"Toilets", x:"13%", y:"32%", note:"Downtown Camping path" },
+  // Hidden Woods — a row of food stalls along its western tree line.
+  { category:"Food", x:"14%", y:"10%", note:"Hidden Woods" },
+  { category:"Food", x:"15%", y:"13%", note:"Hidden Woods" },
+  { category:"Food", x:"16%", y:"17%", note:"Hidden Woods" },
+  // Letsbe Avenue — a bar pair right by its own label.
+  { category:"Bar", x:"38%", y:"16%", note:"Letsbe Avenue" },
+  { category:"Bar", x:"39%", y:"18%", note:"Letsbe Avenue" },
+  // Botanica itself (its NEXUS/food-stall paths, not just the district
+  // label) — food and an accessible-toilet marker.
+  { category:"Food", x:"30%", y:"18%", note:"Botanica" },
+  { category:"Accessible Facilities", x:"32%", y:"26%", note:"Botanica" },
+  { category:"Food", x:"34%", y:"30%", note:"Botanica" },
+  // The open path between Botanica and Area 404 — toilets, food, a water
+  // point and a bar strung along it.
+  { category:"Toilets", x:"40%", y:"23%", note:"Botanica / Area 404 path" },
+  { category:"Water Point", x:"41%", y:"24%", note:"Botanica / Area 404 path" },
+  { category:"Food", x:"42%", y:"25%", note:"Botanica / Area 404 path" },
+  { category:"Bar", x:"37%", y:"28%", note:"Botanica / Area 404 path" },
+  // Tangled Roots' own path, between Letsbe Avenue and Copperwood — a bar
+  // pair (it's a cocktail-bar stage, per its own venueDirectory entry).
+  { category:"Bar", x:"57%", y:"19%", note:"Tangled Roots path" },
+  { category:"Bar", x:"58%", y:"21%", note:"Tangled Roots path" },
+  // Grand Central itself — bars, food and a cash point right by the
+  // stage, seen in the same close-up shot as its own reception/daily-bar
+  // labels.
+  { category:"Bar", x:"63%", y:"31%", note:"Grand Central" },
+  { category:"Bar", x:"67%", y:"32%", note:"Grand Central" },
+  { category:"Food", x:"65%", y:"33%", note:"Grand Central" },
+  { category:"Cash Point", x:"64%", y:"29%", note:"Grand Central" },
+  // Oldtown's own northern edge, coming down from Copperwood — a bar,
+  // photobooth, water point and first-aid marker, distinct from the
+  // Fools Leap cluster already plotted further south.
+  { category:"Bar", x:"80%", y:"43%", note:"Oldtown (north)" },
+  { category:"Photobooth", x:"81%", y:"44%", note:"Oldtown (north)" },
+  { category:"Water Point", x:"82%", y:"45%", note:"Oldtown (north)" },
+  { category:"First Aid", x:"92%", y:"42%", note:"Oldtown (north)" },
+  // Quantum — a single toilet marker on its own path.
+  { category:"Toilets", x:"77%", y:"51%", note:"Quantum" },
+  // The Lion's Den — photobooth, bar, toilets and a water point right by
+  // the stage's own glow in the reference video.
+  { category:"Photobooth", x:"89%", y:"57%", note:"The Lion's Den" },
+  { category:"Bar", x:"89%", y:"58%", note:"The Lion's Den" },
+  { category:"Toilets", x:"92%", y:"59%", note:"The Lion's Den" },
+  { category:"Water Point", x:"93%", y:"60%", note:"The Lion's Den" },
+  // Anara Forest's own western edge, between it and Temple Valley
+  // Camping — toilets, an accessible marker and a water point.
+  { category:"Toilets", x:"73%", y:"43%", note:"Anara Forest" },
+  { category:"Accessible Facilities", x:"74%", y:"42%", note:"Anara Forest" },
+  { category:"Water Point", x:"75%", y:"44%", note:"Anara Forest" }
 ];
 
 const gates = [
