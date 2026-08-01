@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v232";
-const APP_BUILD_TIME = "2026-08-01T03:57:07Z";
+const APP_CACHE_VERSION = "v233";
+const APP_BUILD_TIME = "2026-08-01T04:07:59Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6374,6 +6374,31 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nd.x), parseFloat(nd.y)], i * 23 + 11)) } };
   });
 
+  // Camp access paths — every named camping field (campLabels) to its
+  // nearest district, same medium-weight spoke treatment stages get.
+  // Camp fields got their own ground fill/texture a few passes back but
+  // never a path — the field itself reads as camping ground, but the
+  // marker/label sitting on it still looked disconnected from the rest
+  // of the walkable network, exactly the "floating in dead space" gap.
+  const campSpokeFeatures = campLabels.map((c,i)=>{
+    const cx = parseFloat(c.x), cy = parseFloat(c.y);
+    const nd = nearestDistrict(cx, cy, districts);
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([cx,cy], [parseFloat(nd.x), parseFloat(nd.y)], i * 19 + 5)) } };
+  });
+
+  // Parking access roads — each parking area to its nearest GATE (real
+  // car parks connect to a gate/road, not the town centre) rather than
+  // reusing nearestDistrict. Short, thick, deliberately road-like.
+  const parkingSpokeFeatures = parkingAreas.map((p,i)=>{
+    const px = parseFloat(p.x), py = parseFloat(p.y);
+    let nearestG = gates[0], bestD = Infinity;
+    gates.forEach(g=>{
+      const dd = (parseFloat(g.x) - px) ** 2 + (parseFloat(g.y) - py) ** 2;
+      if(dd < bestD){ bestD = dd; nearestG = g; }
+    });
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nearestG.x), parseFloat(nearestG.y)], i * 29 + 13)) } };
+  });
+
   // Building footprints — a small tan/orange rotated-rectangle under
   // every stage/hidden-venue marker (districtMemberPoints, the same list
   // districtSpreadR above uses) so district interiors read as an actual
@@ -6591,6 +6616,8 @@ function buildMapGeoJSON(){
     trail: { type:"FeatureCollection", features: [trailFeature] },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
     capillaries: { type:"FeatureCollection", features: capillaryFeatures },
+    campSpokes: { type:"FeatureCollection", features: campSpokeFeatures },
+    parkingSpokes: { type:"FeatureCollection", features: parkingSpokeFeatures },
     buildings: { type:"FeatureCollection", features: buildingFeatures },
     stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
@@ -6833,6 +6860,10 @@ function loadMap(){
       // three read as different kinds of ground at a glance.
       mapGL.addSource("mapParkingAreas", { type: "geojson", data: geo.parkingAreas });
       mapGL.addLayer({ id: "parking-fill", type: "fill", source: "mapParkingAreas", paint: { "fill-color": "rgba(160,160,155,0.7)" } });
+      // A soft outer casing under the solid boundary line, same
+      // dual-line technique the district boundaries use — reads as a
+      // surveyed/marked-out boundary rather than a single flat outline.
+      mapGL.addLayer({ id: "parking-casing", type: "line", source: "mapParkingAreas", paint: { "line-color": "rgba(60,60,58,0.3)", "line-width": 5 } });
       mapGL.addLayer({ id: "parking-outline", type: "line", source: "mapParkingAreas", paint: { "line-color": "rgba(60,60,58,0.85)", "line-width": 2 } });
       mapGL.addSource("mapParkingRows", { type: "geojson", data: geo.parkingRows });
       mapGL.addLayer({ id: "parking-rows-line", type: "line", source: "mapParkingRows", paint: { "line-color": "rgba(255,255,255,0.4)", "line-width": 1.2 } });
@@ -6871,6 +6902,7 @@ function loadMap(){
       // implied by the confetti dots scattered inside it.
       mapGL.addSource("mapCampFields", { type: "geojson", data: geo.campFields });
       mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(224,200,90,0.55)" } });
+      mapGL.addLayer({ id: "camp-fields-casing", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.28)", "line-width": 4.5 } });
       mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.75)", "line-width": 1.8 } });
       mapGL.addSource("mapCampFieldLines", { type: "geojson", data: geo.campFieldLines });
       mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(120,100,40,0.5)", "line-width": 1.2 } });
@@ -6902,6 +6934,21 @@ function loadMap(){
 
       mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
       mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.35)", "line-width": 0.8, "line-dasharray": [0.2, 1.6] } });
+
+      // Camp access paths — same casing/line pairing as the main spokes
+      // (medium weight, since a camp field is a real walked-to
+      // destination, not a minor capillary stop) so every named camping
+      // field connects visibly into the path network instead of its
+      // label just sitting on a field with no way drawn to reach it.
+      mapGL.addSource("mapCampSpokes", { type: "geojson", data: geo.campSpokes });
+      mapGL.addLayer({ id: "camp-spokes-casing", type: "line", source: "mapCampSpokes", paint: { "line-color": "rgba(55,42,28,0.55)", "line-width": 2.8 } });
+      mapGL.addLayer({ id: "camp-spokes-line", type: "line", source: "mapCampSpokes", paint: { "line-color": "rgba(232,208,168,0.8)", "line-width": 1.3 } });
+
+      // Parking access roads — thicker/flatter grey (a real access road,
+      // not a walking path) from each parking area to its nearest gate.
+      mapGL.addSource("mapParkingSpokes", { type: "geojson", data: geo.parkingSpokes });
+      mapGL.addLayer({ id: "parking-spokes-casing", type: "line", source: "mapParkingSpokes", paint: { "line-color": "rgba(40,40,38,0.55)", "line-width": 3.6 } });
+      mapGL.addLayer({ id: "parking-spokes-line", type: "line", source: "mapParkingSpokes", paint: { "line-color": "rgba(190,190,185,0.85)", "line-width": 1.8 } });
 
       // Main-stage glow — three stacked circle layers per stage, widest/
       // faintest first so the smaller/brighter ones layer on top and it
