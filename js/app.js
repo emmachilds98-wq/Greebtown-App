@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v260";
-const APP_BUILD_TIME = "2026-08-01T14:09:14Z";
+const APP_CACHE_VERSION = "v261";
+const APP_BUILD_TIME = "2026-08-01T14:39:49Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5959,7 +5959,42 @@ const thingsToFind = [
   // Downtown" up by Metropolis. Placed near Foggers Mill's own southern
   // Copperwood-adjacent spot, the general area both labels shared on
   // screen.
-  { name:"The Hide Out Hilltop", near:"Copperwood", x:"58%", y:"48%", info:"Seen labelled on the official app's own map just south of Copperwood Heights, right by Foggers Mill — no lineup or theme details sourced yet." }
+  { name:"The Hide Out Hilltop", near:"Copperwood", x:"58%", y:"48%", info:"Seen labelled on the official app's own map just south of Copperwood Heights, right by Foggers Mill — no lineup or theme details sourced yet." },
+  // Odd gap this pass turned up: Ancient Futures already has a full
+  // Wed-Sun workshop schedule, a venueDirectory entry and its own cluster
+  // of amenity markers (Top-Up Point/Photobooth/Food x2/Welfare/First Aid,
+  // all noted "Ancient Futures" below) — but no pin of its own here, so it
+  // never actually showed up on the map. Clearly labelled, large text, in
+  // this session's own reference video, cascading into "GAMES"/"CRAFTS"
+  // labels alongside it — but that pan segment sat right after Copperwood/
+  // Grand Central/Hilltop, not the earlier Letsbe Avenue/Botanica/
+  // Thrutopia segment, and js/boomtown-locations-2026.js turns out to
+  // have real surveyed GPS for this one ("AncientFutures", lat 51.054277,
+  // lon -1.238332) — realCoordFor() picks that up automatically via its
+  // exact-name match, so x/y below is only a fallback. Converted through
+  // latLonToSchematic() that real point lands around (59,40) — next to
+  // Grand Central/Hilltop, NOT the (56,16) Thrutopia hilltop the existing
+  // Rebel Girls Club/Tinker Station/Circus entries above assume. Left
+  // those three alone since re-deriving their own position is a bigger
+  // question than this pass's scope — flagging it for a follow-up rather
+  // than guessing.
+  { name:"Ancient Futures", near:"Grand Central", x:"59%", y:"40%", info:"Future-facing talks and workshops — confirmed for 2026 with a full dated Wed-Fri programme (breathwork, sound baths, ecstatic dance, opening/closing ceremonies). Real surveyed position sits near Grand Central/Hilltop, not the Thrutopia hilltop." },
+  // Craft Tent and Games Lounge — same gap as Ancient Futures above (full
+  // schedule/venueDirectory entries, never actually pinned). Both seen as
+  // short "CRAFTS"/"GAMES" labels cascading southeast from Ancient
+  // Futures in this session's own reference video. Games Lounge has its
+  // own real GPS match ("games", lat 51.054162, lon -1.238236) — same
+  // (59,40)-ish cluster as Ancient Futures, picked up automatically by
+  // realCoordFor(); x/y below is fallback only. Games Lounge's
+  // venueDirectory entry below previously guessed "near Pepperpot
+  // Market" with no coordinate of its own — corrected to match, since it
+  // never had a real sourced position before this. Craft Tent has no
+  // exact-name match (js/boomtown-locations-2026.js has it as "Crafts",
+  // not "Craft Tent", so realStageMatch's exact-match lookup misses it) —
+  // x/y set directly from that "Crafts" real point (lat 51.054088, lon
+  // -1.238139) via latLonToSchematic() instead of a video guess.
+  { name:"Craft Tent", near:"Grand Central", x:"61%", y:"43%", info:"Craft-making workshops and stalls — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00. Seen on the official app's own map just southeast of Ancient Futures; position sourced from js/boomtown-locations-2026.js's \"Crafts\" GPS point." },
+  { name:"Games Lounge", near:"Grand Central", x:"60%", y:"42%", info:"Games and downtime area away from the stages. Seen on the official app's own map just southeast of Ancient Futures, between it and Craft Tent — corrected from an earlier unsourced 'near Pepperpot Market' guess." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -6219,12 +6254,12 @@ const venueDirectory = [
   { name:"Energy Garden", type:"Installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Sustainable-energy themed space — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
   { name:"Climate Live", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Climate talks and programming — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
   { name:"Reparium", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia (hilltop)", info:"Free volunteer repair hub — Boomtown's own 2026 coverage confirms it 'will return this year' in Pepperpot Market/on the Thrutopia hilltop to fix camping gear and kit." },
-  { name:"Games Lounge", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market", info:"Games and downtime area away from the stages." },
+  { name:"Games Lounge", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Grand Central", info:"Games and downtime area away from the stages — real surveyed GPS puts it near Grand Central/Hilltop, corrected from an earlier unsourced 'near Pepperpot Market' guess." },
   { name:"Permaculture", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Growing and permaculture talks — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
   { name:"The Magic Teapot", type:"Shop / cafe", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Tea-themed chill spot and cafe." },
   { name:"Cocaine Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market / Thrutopia", info:"On-site 12-step support meeting — explicitly named as a 2026 welfare partner on Boomtown's own Chapter Five safety page." },
   { name:"Narcotics Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market", info:"On-site 12-step support meeting — confirmed for 2026 with a recurring daily meeting slot (08:00-09:00 and others), despite not being named on Boomtown's own welfare-partner list alongside Blink Mental Health/Cocaine Anonymous." },
-  { name:"Ancient Futures", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Future-facing talks — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
+  { name:"Ancient Futures", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Grand Central", info:"Future-facing talks — confirmed for 2026 with a full dated workshop programme Wed-Fri. Real surveyed GPS puts it near Grand Central/Hilltop, not Thrutopia." },
   { name:"Reel News", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, spoken-word", near:"Copperwood", info:"Newsreel/cinema-themed spot tying into Copperwood's film-district story." },
   { name:"The Chair-o-Plane", type:"Leisure / ride", status:"confirmed", music:false, genre:"—", near:"Area 404 / Downtown", info:"A classic swing-carousel fairground ride, named in Boomtown's own 2026 essential guide near the Hide Out Downtown venue." },
   { name:"The Boomtown Bank", type:"Leisure / ride", status:"rumoured", music:false, genre:"Games, novelty", near:"Unclear", info:"A recurring past-chapter attraction offering fun-and-nonsense games rather than real banking; not explicitly reconfirmed for 2026 yet." },
