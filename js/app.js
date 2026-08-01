@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v264";
-const APP_BUILD_TIME = "2026-08-01T18:25:42Z";
+const APP_CACHE_VERSION = "v265";
+const APP_BUILD_TIME = "2026-08-01T22:06:48Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5943,13 +5943,22 @@ const thingsToFind = [
   // entry in venueDirectory below but was missing its own map pin.
   { name:"Loconnection", near:"Metropolis", x:"12%", y:"33%", info:"Seen labelled on the official app's own map on the same path as Sub Lab, just south of it — no lineup or theme details sourced yet." },
   { name:"Nachtlicker", near:"Metropolis", x:"13%", y:"37%", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Seen on the official app's own map just south of Sub Lab and Loconnection." },
-  // Spotted clustered together in the second reference video, right by
-  // THE RETREAT and ANCIENT FUTURES (Thrutopia) — NOT Downtown, despite
-  // Rebel Girls Club's existing venueDirectory entry guessing "Downtown
-  // Village"; that guess is corrected below to match.
-  { name:"Rebel Girls Club", near:"Thrutopia", x:"47%", y:"22%", info:"Women-led wellbeing/empowerment venue — confirmed for 2026. Seen on the official app's own map right by The Retreat and Ancient Futures, on the Thrutopia hilltop, not in Downtown." },
-  { name:"Tinker Station", near:"Thrutopia", x:"48%", y:"20%", info:"Seen labelled on the official app's own map right by Ancient Futures/The Retreat — no lineup or theme details sourced yet." },
-  { name:"Circus", near:"Thrutopia", x:"45%", y:"24%", info:"Seen labelled on the official app's own map right by Ancient Futures/The Retreat — no lineup or theme details sourced yet." },
+  // Spotted clustered together in the second reference video, described
+  // at the time as "right by THE RETREAT and ANCIENT FUTURES (Thrutopia)"
+  // — corrected from an earlier "Downtown Village" guess to (47,22)/
+  // (48,20)/(45,24) on that basis. That description turned out to be its
+  // own mistake: Ancient Futures' OWN position got corrected in a later
+  // pass (see thingsToFind's Ancient Futures entry below) once real
+  // surveyed GPS in js/boomtown-locations-2026.js placed it near Grand
+  // Central, not Thrutopia — and these three have real GPS matches of
+  // their own ("RebelGirlsClub", "TinkerStation", the "Circus"/"Circus
+  // Tent" id/label mismatch below) that cluster at (51,39)/(53,35)/
+  // (52,40), right next to that corrected Ancient Futures position, NOT
+  // near The Retreat's own hand-placed (60,12). Moved to match; The
+  // Retreat's own landmark entry corrected the same way below.
+  { name:"Rebel Girls Club", near:"Ancient Futures", x:"51%", y:"39%", info:"Women-led wellbeing/empowerment venue — confirmed for 2026. Real surveyed GPS puts it right by Ancient Futures/Grand Central, not the Thrutopia hilltop this session's earlier guess assumed." },
+  { name:"Tinker Station", near:"Ancient Futures", x:"53%", y:"35%", info:"Seen labelled on the official app's own map right by Ancient Futures — no lineup or theme details sourced yet. Real surveyed GPS confirms this is near Grand Central, not Thrutopia." },
+  { name:"Circus", near:"Ancient Futures", x:"52%", y:"40%", info:"Seen labelled on the official app's own map right by Ancient Futures — no lineup or theme details sourced yet. Real surveyed GPS (filed as \"Circus Tent\") puts it near Grand Central, not Thrutopia — possibly the same real venue as venueDirectory's own separate \"Circus Tent\" entry, kept distinct here since that's unconfirmed." },
   // Was already half-wired: POI_ICONS below has had a "The Hideout
   // Hilltop":"🏕" entry for a while with nothing in this array actually
   // using it. Seen labelled on the official app's own map (and again in
@@ -5969,8 +5978,9 @@ const thingsToFind = [
   // labels alongside it — that pan segment sat right after Copperwood/
   // Grand Central/Hilltop, not the earlier Letsbe Avenue/Botanica/
   // Thrutopia segment, so x/y below is placed near Grand Central rather
-  // than the (56,16) Thrutopia hilltop the existing Rebel Girls Club/
-  // Tinker Station/Circus entries above assume.
+  // than the (56,16) Thrutopia hilltop the Rebel Girls Club/Tinker
+  // Station/Circus entries above originally assumed (since corrected to
+  // match, per their own comment).
   //
   // js/boomtown-locations-2026.js does have real surveyed GPS for this
   // one ("AncientFutures") that happens to land close to this same video-
@@ -5992,7 +6002,19 @@ const thingsToFind = [
   // own — corrected to match, since it never had a video-sourced position
   // before this.
   { name:"Craft Tent", near:"Grand Central", x:"61%", y:"43%", info:"Craft-making workshops and stalls — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00. Seen on the official app's own map just southeast of Ancient Futures." },
-  { name:"Games Lounge", near:"Grand Central", x:"60%", y:"42%", info:"Games and downtime area away from the stages. Seen on the official app's own map just southeast of Ancient Futures, between it and Craft Tent — corrected from an earlier unsourced 'near Pepperpot Market' guess." }
+  { name:"Games Lounge", near:"Grand Central", x:"60%", y:"42%", info:"Games and downtime area away from the stages. Seen on the official app's own map just southeast of Ancient Futures, between it and Craft Tent — corrected from an earlier unsourced 'near Pepperpot Market' guess." },
+  // XR and Circus Tent — both confirmed in venueDirectory (full dated
+  // programme for XR; genre/type only for Circus Tent) but never pinned
+  // anywhere on the map, same gap Ancient Futures/Craft Tent/Games Lounge
+  // had. Both have real surveyed GPS in js/boomtown-locations-2026.js
+  // ("XR" and "Circus" — the latter labelled "Circus Tent" there, an
+  // id/label mismatch against this file's own separate "Circus" entry
+  // above; likely the same real venue, kept as two pins near each other
+  // rather than guessing which name is more correct). XR's real point is
+  // its own distinct spot near Anara Forest, not the Ancient Futures
+  // cluster the other three moved to.
+  { name:"XR", near:"Anara Forest", x:"70%", y:"50%", info:"Extinction Rebellion-linked space — confirmed for 2026, running Wed-Fri (Cassandra the Oracle, Big Oil Drumming Parade, Last Chance Salon, Art Blocking). Real surveyed GPS puts it near Anara Forest/Hilltop, not Thrutopia." },
+  { name:"Circus Tent", near:"Ancient Futures", x:"53%", y:"41%", info:"Performance-led circus venue — confirmed for 2026. Real surveyed GPS puts it right by Ancient Futures/Grand Central, not Oldtown — possibly the same real venue as this list's own \"Circus\" entry, kept as a separate nearby pin since that's unconfirmed." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -6008,7 +6030,16 @@ const secretSpots = [
 // them. Toggle these on/off with the "Landmarks" chip above the map.
 const landmarks = [
   { name:"Pepperpot Market", x:"46%", y:"50%", info:"A reliable food-and-drink hub roughly central to the site, also home to one of the two 24-hour medical centres and the Safer Spaces welfare team.", hours:"Medical centre & welfare: 24 hours." },
-  { name:"The Retreat", x:"60%", y:"12%", info:"Boomtown's paid spa space in the Thrutopia woodlands — spa/hot-tub sessions, sauna and cold splash, sound baths and massages. Book ahead; it's separate from your festival ticket." },
+  // Pulled from (60,12) to (55,30) — real surveyed GPS in
+  // js/boomtown-locations-2026.js ("TheRetreat") lands right by the same
+  // Ancient Futures/Rebel Girls Club/Tinker Station cluster those three
+  // got corrected to nearby, not up on the Thrutopia hilltop this
+  // session's earlier guess (and the video description that originally
+  // placed Rebel Girls Club "right by The Retreat") assumed. Kept the
+  // "Thrutopia woodlands" wording in its own info text below — that's
+  // Boomtown's own branding for the space, not a claim about exactly
+  // where the district polygon sits on this schematic map.
+  { name:"The Retreat", x:"55%", y:"30%", info:"Boomtown's paid spa space in the Thrutopia woodlands — spa/hot-tub sessions, sauna and cold splash, sound baths and massages. Book ahead; it's separate from your festival ticket." },
   { name:"The Observatory", x:"52%", y:"14%", info:"New for 2026 — a genuine academic research hub embedded in the festival, led by psychologist Dr Martha Newson with researchers from 10+ UK universities studying identity, belonging and collective behaviour at live events. Take part in a study or the before/after survey if you're curious." },
   { name:"Lion's Gate Portal", x:"88%", y:"56%", info:"The story's central portal art piece near the Lion's Den — last chapter's closing ceremony used it to foretell the Lion's Den's return to Temple Valley this year." },
   { name:"Medical Centre — Hilltop", x:"72%", y:"50%", info:"One of two confirmed 24-hour medical centres for Chapter Five (the other is at Pepperpot Market).", hours:"24 hours." },
@@ -6340,11 +6371,11 @@ const venueDirectory = [
   { name:"The Pomegranate Parlour", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic party DJs", near:"Site-wide", info:"Actor-led parlour-style venue — confirmed for 2026 (Cassia, SCARBA, Mattana, DJ Shakey, Estère)." },
   { name:"Busker's Wharf", type:"Hidden venue", status:"confirmed", music:true, genre:"Live/acoustic, folk", near:"Site-wide", info:"Wharf/street-performance themed spot — a real, recurring hidden venue, though no year-dated source was found to pin down a specific chapter." },
   { name:"Twisted Time Machine (Bad Apple Bar)", type:"Hidden venue", status:"confirmed", music:true, genre:"Rotates by slot: emo, nu-metal, jungle disco, 90s rave", near:"Site-wide", info:"Long-running takeover of Boomtown's historic Bad Apple Bar — confirmed for 2026 with themed nights Wed-Sat (One Welcome Party, The Abba Party, My Chemical Hoemance, The Fleetwood Mac Celebration, UNKLE Psyence Fiction album playback)." },
-  { name:"Circus Tent", type:"Hidden venue", status:"confirmed", music:true, genre:"Circus, live performance", near:"Oldtown (likely)", info:"Performance-led rather than a straight dancefloor." },
+  { name:"Circus Tent", type:"Hidden venue", status:"confirmed", music:true, genre:"Circus, live performance", near:"Ancient Futures", info:"Performance-led rather than a straight dancefloor. Real surveyed GPS (filed as \"Circus Tent\" in js/boomtown-locations-2026.js) puts it right by Ancient Futures/Grand Central, not Oldtown — likely the same real venue as thingsToFind's own \"Circus\" entry, kept as a separate pin since that's unconfirmed." },
   { name:"Airetiko", type:"Hidden venue", status:"confirmed", music:false, genre:"Aerial circus — trapeze, rope, silks, hoop", near:"Site-wide", info:"Real aerial-arts collective (trapeze, rope, silks, hoop) — confirmed for 2026 with dated Trapeze and Giant Marionettes slots running Wed-Fri." },
-  { name:"Rebel Girls Club", type:"Hidden venue", status:"confirmed", music:false, genre:"Wellbeing, empowerment-themed workshops", near:"Thrutopia", info:"Women-led venue — confirmed for 2026 with a wellbeing programme Wed-Fri (Opening Ceremony, burlesque/twerk workshops, morning yoga, herbal balm making). Corrected from an earlier 'Downtown Village' guess — the official app's own map shows it right by The Retreat and Ancient Futures on the Thrutopia hilltop." },
+  { name:"Rebel Girls Club", type:"Hidden venue", status:"confirmed", music:false, genre:"Wellbeing, empowerment-themed workshops", near:"Ancient Futures", info:"Women-led venue — confirmed for 2026 with a wellbeing programme Wed-Fri (Opening Ceremony, burlesque/twerk workshops, morning yoga, herbal balm making). Real surveyed GPS puts it right by Ancient Futures/Grand Central, not the Thrutopia hilltop an earlier guess assumed." },
   { name:"Mining for (g)Old Town", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, party", near:"Oldtown", info:"Mining/prospecting theme playing on Oldtown's rebuild-uphill storyline." },
-  { name:"XR", type:"Installation / talks", status:"confirmed", music:false, genre:"Climate activism, talks", near:"Thrutopia", info:"Extinction Rebellion-linked space — confirmed for 2026, running Wed-Fri (Cassandra the Oracle, Big Oil Drumming Parade, Last Chance Salon, Art Blocking)." },
+  { name:"XR", type:"Installation / talks", status:"confirmed", music:false, genre:"Climate activism, talks", near:"Anara Forest", info:"Extinction Rebellion-linked space — confirmed for 2026, running Wed-Fri (Cassandra the Oracle, Big Oil Drumming Parade, Last Chance Salon, Art Blocking). Real surveyed GPS puts it near Anara Forest/Hilltop, not Thrutopia." },
   { name:"End of the Line", type:"Hidden venue", status:"confirmed", music:true, genre:"Atmospheric, genre unclear", near:"Unclear", info:"Train-station-themed venue — confirmed for 2026, running Thu-Sat (Donkline Takeover, DJ Shnoo, Négo, Riguana)." },
   { name:"Cas's Costumes", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Dress-up, party", near:"Oldtown", info:"Costume-shop-fronted micro venue fitting Oldtown's circus theme." },
   { name:"Garden", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Botanica (likely)", info:"Planting/chill space, likely Botanica or Thrutopia-adjacent." },
@@ -6353,7 +6384,7 @@ const venueDirectory = [
   { name:"The Retreat", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Thrutopia (woodland)", info:"New wellness sanctuary for Chapter Five, with its own page on Boomtown's site — professional massage, holistic treatments, communal saunas, hot tubs, sound baths, breathwork and artisan workshops; book slots in advance as they fill fast." },
   { name:"Crafty Rascals", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Family/kids craft activities — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00." },
   { name:"Spinney Hollow", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, woodland", near:"Woodland edge (Anara/Hidden Woods)", info:"Small grove venue tucked into wooded ground." },
-  { name:"Tinker Station", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Repair/maker space, pairs with the Reparium ethos — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00." },
+  { name:"Tinker Station", type:"Workshop / shop", status:"confirmed", music:false, genre:"—", near:"Ancient Futures", info:"Repair/maker space, pairs with the Reparium ethos — confirmed for 2026 with a full daily programme Wed-Fri, 10:00-18:00. Real surveyed GPS puts it near Ancient Futures/Grand Central, not Thrutopia." },
   { name:"Blink Mental Health", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market / Thrutopia", info:"On-site mental health support — named alongside The Samaritans and Cocaine Anonymous as a 2026 welfare partner on Boomtown's own Chapter Five safety page." },
   { name:"Energy Garden", type:"Installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Sustainable-energy themed space — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
   { name:"Climate Live", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Thrutopia", info:"Climate talks and programming — confirmed for 2026 with a full dated workshop programme Wed-Fri." },
