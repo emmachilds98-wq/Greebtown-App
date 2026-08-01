@@ -318,6 +318,16 @@
   .line-swatch{width:16px; height:0; border-top:2px dashed var(--text-muted); display:inline-block;}
   .map-bg{position:absolute; inset:0; width:100%; height:100%; z-index:0;}
   .map-label{position:absolute; left:0; top:0; z-index:1; font-size:10px; color:var(--text-primary); background:rgba(11,21,18,.65); padding:2px 7px; border-radius:8px; white-space:nowrap; pointer-events:none; transform:translate(-50%, 8px); border:1px solid rgba(255,255,255,.08);}
+  /* Zoomed-out label thinning (see loadMap()'s updateLabelDensity) — the
+     default view has 20+ names (stages, camps, gates, hidden venues)
+     packed into one small cluster with no collision detection (these are
+     plain positioned DOM elements, not a MapLibre symbol layer), so they
+     overlap into unreadable stacked text. Below the zoom threshold, only
+     the district names (the site's own top-level "you are here" labels)
+     stay visible; every other label reappears once zoomed in enough to
+     have room to read it. The dot/icon markers themselves are untouched
+     — only the text labels hide, so presence/position is still visible.*/
+  #map.map-labels-thin .map-label:not(.district){display:none;}
   .map-label.district{background:none; border:none; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:rgba(242,168,60,.9); text-shadow:0 1px 4px rgba(0,0,0,.75); transform:translate(-50%, -24px); padding:0;}
   .map-label.minor{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55);}
   .map-label.secret{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55); color:rgba(238,246,241,.75); font-style:italic;}
