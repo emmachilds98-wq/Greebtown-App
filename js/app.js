@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v221";
-const APP_BUILD_TIME = "2026-08-01T00:55:56Z";
+const APP_CACHE_VERSION = "v222";
+const APP_BUILD_TIME = "2026-08-01T01:03:33Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6369,20 +6369,31 @@ function buildMapGeoJSON(){
     { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[-5,68],[20,58],[50,54],[80,62],[105,72]]) } }
   ];
 
-  // The site boundary — traced from the reference video's own wide
-  // overview shots (an irregular rounded pentagon with a camping bulge
-  // to the south-west, not a plain circle), anchored on the gates and
-  // outermost camping fields whose positions are already set from that
-  // same video, then lightly jittered per-point for a hand-sketched feel
-  // rather than a mechanically straight-edged polygon.
-  const boundaryAnchors = [
-    [3,46], [9,20], [14,7], [48,4], [70,6], [86,14], [96,32],
-    [91,48], [95,64], [78,93], [74,87], [48,90], [25,75], [7,58], [5,35]
-  ];
+  // The site boundary — built directly from SITE_SW/SITE_NE (the same
+  // real-world box loadMap() uses for pan bounds, covering the extracted
+  // map data's own real coordinates), NOT from the schematic space/affine
+  // fit like everything else on this basemap. A hand-traced boundary in
+  // schematic space, run through that fit, landed nowhere near almost
+  // every real captured stage/POI coordinate — the boundary itself was
+  // wrong, not the markers, so this is anchored to real lat/lon instead
+  // and only lightly jittered (not hand-shaped) to guarantee it actually
+  // contains everything real that's plotted on the map.
+  const bPad = 0.08;
+  const bLatPad = (SITE_NE.lat - SITE_SW.lat) * bPad;
+  const bLonPad = (SITE_NE.lon - SITE_SW.lon) * bPad;
+  const bS = SITE_SW.lat - bLatPad, bN = SITE_NE.lat + bLatPad;
+  const bW = SITE_SW.lon - bLonPad, bE = SITE_NE.lon + bLonPad;
   const boundaryRand = seededRand(555);
-  const boundaryRing = boundaryAnchors.map(([x,y])=> [x + (boundaryRand() - 0.5) * 3, y + (boundaryRand() - 0.5) * 3]);
+  const jitterLat = (bN - bS) * 0.04, jitterLon = (bE - bW) * 0.04;
+  const perSide = 4;
+  const rawBoundary = [];
+  for(let i=0;i<=perSide;i++) rawBoundary.push([bW + (bE - bW) * i / perSide, bS]);
+  for(let i=1;i<=perSide;i++) rawBoundary.push([bE, bS + (bN - bS) * i / perSide]);
+  for(let i=1;i<=perSide;i++) rawBoundary.push([bE - (bE - bW) * i / perSide, bN]);
+  for(let i=1;i<perSide;i++) rawBoundary.push([bW, bN - (bN - bS) * i / perSide]);
+  const boundaryRing = rawBoundary.map(([lon,lat])=> [lon + (boundaryRand() - 0.5) * jitterLon, lat + (boundaryRand() - 0.5) * jitterLat]);
   boundaryRing.push(boundaryRing[0]);
-  const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(boundaryRing) } };
+  const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: boundaryRing } };
 
   return {
     fields: { type:"FeatureCollection", features: fieldFeatures },
@@ -6433,6 +6444,16 @@ const SCHEMATIC_TO_LATLON_FIT = {
   a: -0.00000753841074987542, b: -0.000014664845893481546, c: 51.05428102686477,
   d: 0.000021936335977474345, e: -0.000012665002121025999, f: -1.2407495567557247
 };
+// Real-world bounds of the site, from the extracted map data's own
+// coverage (js/boomtown-locations-2026.js) — shared by loadMap() (as the
+// map's pan/zoom bounds) and buildMapGeoJSON() (as the basemap's
+// decorative site-boundary shape), so both are built from the same
+// source of truth. They used to disagree: the boundary was hand-traced
+// in schematic space and run through the (imprecise) affine fit above,
+// which put it in a different spot to almost every real captured
+// stage/POI coordinate — the boundary was wrong, not the markers.
+const SITE_SW = { lat: 51.0495, lon: -1.2445 };
+const SITE_NE = { lat: 51.0575, lon: -1.2340 };
 function schematicToLatLon(xPercent, yPercent){
   const fit = SCHEMATIC_TO_LATLON_FIT;
   return {
@@ -6549,9 +6570,9 @@ function loadMap(){
     // zoom chosen to fit the ~1.2km span the extracted map data
     // actually covers (see js/boomtown-locations-2026.js's coverage
     // caveat), padded and bounded so panning can't wander off into
-    // blank space with nothing plotted on it.
-    const SITE_SW = { lat: 51.0495, lon: -1.2445 };
-    const SITE_NE = { lat: 51.0575, lon: -1.2340 };
+    // blank space with nothing plotted on it. SITE_SW/SITE_NE are
+    // shared module-level consts (see above) — buildMapGeoJSON's
+    // decorative boundary shape is built from the same two points.
     const pad = 0.25;
     const latPad = (SITE_NE.lat - SITE_SW.lat) * pad;
     const lonPad = (SITE_NE.lon - SITE_SW.lon) * pad;
