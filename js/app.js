@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v263";
-const APP_BUILD_TIME = "2026-08-01T15:00:15Z";
+const APP_CACHE_VERSION = "v264";
+const APP_BUILD_TIME = "2026-08-01T18:25:42Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6059,7 +6059,13 @@ const campLabels = [
   { x:"95%", y:"64%", text:"Quiet Camping" },
   { x:"9%", y:"39%", text:"Camp Orchid Downtown (premium, public transport)" },
   { x:"75%", y:"22%", text:"Camp Skylark Hilltop (premium)" },
-  { x:"74%", y:"87%", text:"Camp Skylark Sunset (premium)" },
+  // Pulled up from (74,87) — that put a 25+ schematic-unit gap between
+  // Sunset Hill (75,62, the nearest already-plotted feature to the
+  // north) and this field, reading as a stranded outpost even after the
+  // gate spoke path was added to connect it. Compressed the whole south
+  // end (Camp Skylark Sunset/South Gate/White Carpark 4) into roughly
+  // half that gap instead, keeping the same north-south order.
+  { x:"74%", y:"72%", text:"Camp Skylark Sunset (premium)" },
   // Newly spotted in this session's own reference video, clearly legible
   // right beside Camp Orchid Downtown's own label, just south of the
   // Downtown district triangle near West Gate — placed adjacent to
@@ -6146,7 +6152,11 @@ const amenities = [
   // info text), one per site since Hilltop and Sunset are on opposite
   // sides of the whole map.
   { category:"Skylark Entry", x:"76%", y:"21%", note:"Camp Skylark Hilltop" },
-  { category:"Skylark Entry", x:"75%", y:"85%", note:"Camp Skylark Sunset" },
+  // Camp Skylark Sunset's own cluster (Skylark Entry/Welfare) and South
+  // Gate's own baseline provisions below — all pulled up in y to match
+  // Camp Skylark Sunset's own campLabels entry moving from (74,87) to
+  // (74,72), see that entry's own comment for why.
+  { category:"Skylark Entry", x:"75%", y:"70%", note:"Camp Skylark Sunset" },
   // South Gate never got any amenity markers at all, unlike the other
   // two gates (West Gate has its own toilet pair above; East Gate's own
   // cluster is with Temple Valley Camping/Copperwood). Not from a
@@ -6154,11 +6164,11 @@ const amenities = [
   // gate needs the same baseline provisions, so this mirrors West Gate's
   // own toilet-pair-plus-accessible density rather than leaving South
   // Gate as the one gate on the whole map with nothing around it.
-  { category:"Toilets", x:"77%", y:"90%", note:"South Gate" },
-  { category:"Toilets", x:"79%", y:"91%", note:"South Gate" },
-  { category:"Accessible Facilities", x:"78%", y:"92%", note:"South Gate" },
-  { category:"Water Point", x:"76%", y:"89%", note:"South Gate" },
-  { category:"Welfare", x:"73%", y:"84%", note:"Camp Skylark Sunset" },
+  { category:"Toilets", x:"77%", y:"76%", note:"South Gate" },
+  { category:"Toilets", x:"79%", y:"77%", note:"South Gate" },
+  { category:"Accessible Facilities", x:"78%", y:"78%", note:"South Gate" },
+  { category:"Water Point", x:"76%", y:"75%", note:"South Gate" },
+  { category:"Welfare", x:"73%", y:"71%", note:"Camp Skylark Sunset" },
   // Measured nearest-amenity distance for every campLabels field (schematic
   // units): Quiet Camping was the clear outlier at 22 — more than double
   // the next-worst field (Tangerine Fields, 16) and over 4x a typical
@@ -6236,13 +6246,43 @@ const amenities = [
   // Camping — toilets, an accessible marker and a water point.
   { category:"Toilets", x:"73%", y:"43%", note:"Anara Forest" },
   { category:"Accessible Facilities", x:"74%", y:"42%", note:"Anara Forest" },
-  { category:"Water Point", x:"75%", y:"44%", note:"Anara Forest" }
+  { category:"Water Point", x:"75%", y:"44%", note:"Anara Forest" },
+  // The whole south end of the map (Sunset Hill down through Camp
+  // Skylark Sunset to South Gate) reads as a near-blank gap on the
+  // rendered map — Temple Valley Camping and East Camping had zero
+  // amenity markers of their own despite being full named camp fields,
+  // same gap Quiet Camping/Tangerine Fields had before an earlier pass
+  // fixed those two. Same "every camp field needs baseline provisions"
+  // reasoning, not a specific reference-video frame — nothing in this
+  // session's footage lingered on the deep south long enough to read
+  // exact icon positions here.
+  { category:"Toilets", x:"84%", y:"30%", note:"Temple Valley Camping" },
+  { category:"Water Point", x:"87%", y:"33%", note:"Temple Valley Camping" },
+  { category:"Toilets", x:"90%", y:"46%", note:"East Camping" },
+  { category:"Water Point", x:"93%", y:"49%", note:"East Camping" },
+  // Sunset Hill itself sits roughly midway on the walk from Quantum/The
+  // Lion's Den down to Camp Skylark Sunset/South Gate, with nothing
+  // marked anywhere along that stretch — same baseline reasoning. y
+  // values tightened to match the whole south end's compressed range
+  // (62-79 now, was 62-93 — see Camp Skylark Sunset's own campLabels
+  // entry for why).
+  { category:"Toilets", x:"78%", y:"63%", note:"Sunset Hill" },
+  { category:"Water Point", x:"76%", y:"65%", note:"Sunset Hill" },
+  { category:"Toilets", x:"74%", y:"68%", note:"Sunset Hill / Camp Skylark Sunset approach" },
+  // Camp Skylark Sunset already had a Welfare/Skylark-Entry pair; adding
+  // a food stall and toilet block, the same density its Hilltop sibling
+  // site gets.
+  { category:"Food", x:"72%", y:"73%", note:"Camp Skylark Sunset" },
+  { category:"Toilets", x:"77%", y:"73%", note:"Camp Skylark Sunset" }
 ];
 
 const gates = [
   { name:"West Gate", x:"3%", y:"46%", info:"Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, plus the Public Transport Hub and the premium Camp Orchid Downtown pitches (built for coach/shuttle arrivals — closest gate access is here, not South Gate).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
   { name:"East Gate", x:"96%", y:"32%", info:"Nearest the White Carparks, motorcycle and cycle parking, and Campervan Field.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
-  { name:"South Gate", x:"78%", y:"93%", info:"Nearest White Carpark 4 and Camp Skylark Sunset (one of two Camp Skylark premium sites for 2026 — the other, Camp Skylark Hilltop, sits up on Hilltop instead).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
+  // Pulled up from (78,93) to (78,79) — same south-end compression as
+  // Camp Skylark Sunset's own campLabels entry above, so the gate spoke
+  // path added to connect it back to Oldtown isn't a huge lonely stretch.
+  { name:"South Gate", x:"78%", y:"79%", info:"Nearest White Carpark 4 and Camp Skylark Sunset (one of two Camp Skylark premium sites for 2026 — the other, Camp Skylark Hilltop, sits up on Hilltop instead).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
 ];
 
 // The White Carparks — the reference video shows a large grid-lined grey
@@ -6252,7 +6292,8 @@ const gates = [
 // Positioned near those two gates rather than guessed elsewhere on site.
 const parkingAreas = [
   { x:"97%", y:"38%", r:10, text:"White Carparks (East Gate)" },
-  { x:"80%", y:"86%", r:8, text:"White Carpark 4 (South Gate)" }
+  // Pulled up from y:86 to y:71 alongside South Gate/Camp Skylark Sunset.
+  { x:"80%", y:"71%", r:8, text:"White Carpark 4 (South Gate)" }
 ];
 
 // ===============================
@@ -6876,6 +6917,21 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nearestG.x), parseFloat(nearestG.y)], i * 29 + 13)) } };
   });
 
+  // Gate access roads — every camp/parking spoke above terminates AT a
+  // gate, but nothing ever connected a gate onward into the main
+  // district loop, so South Gate in particular (whose only spoke is
+  // Camp Skylark Sunset, itself stranded in the map's near-empty south
+  // end) had no path at all running back up to the rest of the site —
+  // a real, visible gap, not just a sparse-icon one. Same road-like
+  // casing/line pairing as parkingSpokeFeatures (gates are real vehicle
+  // access points too, matching Alresford Rd/Petersfield Rd running past
+  // them in the reference video), gate to its nearest district.
+  const gateSpokeFeatures = gates.map((g,i)=>{
+    const gx = parseFloat(g.x), gy = parseFloat(g.y);
+    const nd = nearestDistrict(gx, gy, districts);
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([gx,gy], [parseFloat(nd.x), parseFloat(nd.y)], i * 37 + 11)) } };
+  });
+
   // Building footprints — a small tan/orange rotated-rectangle under
   // every stage/hidden-venue marker (districtMemberPoints, the same list
   // districtSpreadR above uses) so district interiors read as an actual
@@ -7239,6 +7295,7 @@ function buildMapGeoJSON(){
     capillaries: { type:"FeatureCollection", features: capillaryFeatures },
     campSpokes: { type:"FeatureCollection", features: campSpokeFeatures },
     parkingSpokes: { type:"FeatureCollection", features: parkingSpokeFeatures },
+    gateSpokes: { type:"FeatureCollection", features: gateSpokeFeatures },
     buildings: { type:"FeatureCollection", features: solidBuildingFeatures },
     fencedEnclosures: { type:"FeatureCollection", features: fencedEnclosureFeatures },
     infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
@@ -7682,6 +7739,13 @@ function loadMap(){
       mapGL.addSource("mapParkingSpokes", { type: "geojson", data: geo.parkingSpokes });
       mapGL.addLayer({ id: "parking-spokes-casing", type: "line", source: "mapParkingSpokes", paint: { "line-color": "rgba(40,40,38,0.55)", "line-width": 3.6 } });
       mapGL.addLayer({ id: "parking-spokes-line", type: "line", source: "mapParkingSpokes", paint: { "line-color": "rgba(190,190,185,0.85)", "line-width": 1.8 } });
+
+      // Gate access roads — see gateSpokeFeatures' own comment above for
+      // why this exists: without it, gates (South Gate especially) had no
+      // path connecting them back to the district loop at all.
+      mapGL.addSource("mapGateSpokes", { type: "geojson", data: geo.gateSpokes });
+      mapGL.addLayer({ id: "gate-spokes-casing", type: "line", source: "mapGateSpokes", paint: { "line-color": "rgba(40,40,38,0.55)", "line-width": 3.6 } });
+      mapGL.addLayer({ id: "gate-spokes-line", type: "line", source: "mapGateSpokes", paint: { "line-color": "rgba(190,190,185,0.85)", "line-width": 1.8 } });
 
       // Main-stage glow — three stacked circle layers per stage, widest/
       // faintest first so the smaller/brighter ones layer on top and it
