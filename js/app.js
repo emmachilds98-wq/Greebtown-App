@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v258";
-const APP_BUILD_TIME = "2026-08-01T11:41:26Z";
+const APP_CACHE_VERSION = "v259";
+const APP_BUILD_TIME = "2026-08-01T12:25:34Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6116,7 +6116,20 @@ const amenities = [
   { category:"Toilets", x:"79%", y:"91%", note:"South Gate" },
   { category:"Accessible Facilities", x:"78%", y:"92%", note:"South Gate" },
   { category:"Water Point", x:"76%", y:"89%", note:"South Gate" },
-  { category:"Welfare", x:"73%", y:"84%", note:"Camp Skylark Sunset" }
+  { category:"Welfare", x:"73%", y:"84%", note:"Camp Skylark Sunset" },
+  // Measured nearest-amenity distance for every campLabels field (schematic
+  // units): Quiet Camping was the clear outlier at 22 — more than double
+  // the next-worst field (Tangerine Fields, 16) and over 4x a typical
+  // camp's 5-10 — because it sits alone in the map's sparse southeast
+  // corner, far past East Camping/Oldtown where the nearest real cluster
+  // is. Same "every camp field needs baseline provisions" reasoning as
+  // South Gate above, not a specific reference-video frame.
+  { category:"Toilets", x:"93%", y:"61%", note:"Quiet Camping" },
+  { category:"Toilets", x:"96%", y:"62%", note:"Quiet Camping" },
+  { category:"Water Point", x:"94%", y:"66%", note:"Quiet Camping" },
+  // Tangerine Fields was the next-worst at 16 — same reasoning.
+  { category:"Toilets", x:"68%", y:"4%", note:"Tangerine Fields" },
+  { category:"Water Point", x:"72%", y:"8%", note:"Tangerine Fields" }
 ];
 
 const gates = [
