@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v236";
-const APP_BUILD_TIME = "2026-08-01T04:22:40Z";
+const APP_CACHE_VERSION = "v237";
+const APP_BUILD_TIME = "2026-08-01T05:34:34Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6832,25 +6832,18 @@ function loadMap(){
       // screen on open, closer to how the official app's own map reads,
       // while still starting one step looser than a specific corner
       // (minZoom 14 still lets you zoom all the way out from here).
-      // Bearing/pitch stay at 0/0 (north-up, flat) — and dragRotate is
-      // switched off below so they STAY there. bearing:0 alone only sets
-      // the starting orientation; MapLibre's default two-finger touch
-      // twist (and right-click-drag on desktop) can rotate the map away
-      // from north with no compass/reset control shown to get back
-      // (NavigationControl below already has showCompass:false), which
-      // is a real way to end up with north no longer at the top and no
-      // way back short of reloading. Disabling rotation entirely is the
-      // simplest guarantee that north stays at mid-top and west stays on
-      // the west side of the screen, permanently.
+      // Bearing/pitch start at 0/0 (north-up, flat), matching the
+      // official app's own opening view — but rotation itself stays
+      // enabled (two-finger twist, right-click-drag), same as the
+      // official app, rather than locked. showCompass:true on the
+      // NavigationControl below gives a tap-to-reset-north button once
+      // rotated, so "can still move/rotate freely" doesn't mean "no way
+      // back to north".
       zoom: 15.4, minZoom: 14, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
-      attributionControl: false,
-      dragRotate: false,
-      touchPitch: false,
-      pitchWithRotate: false
+      attributionControl: false
     });
-    mapGL.touchZoomRotate.disableRotation();
-    mapGL.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
+    mapGL.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-left");
 
     // Label thinning by zoom — see the #map.map-labels-thin CSS rule.
     // Every marker's text label is a plain positioned DOM element with
