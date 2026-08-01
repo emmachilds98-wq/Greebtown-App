@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v245";
-const APP_BUILD_TIME = "2026-08-01T05:59:56Z";
+const APP_CACHE_VERSION = "v246";
+const APP_BUILD_TIME = "2026-08-01T06:11:26Z";
 
 // Used by renderGroupDecisions (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6190,6 +6190,25 @@ function nearestDistrict(x, y, districts){
 // here" footprint instead of markers floating on empty clearing colour.
 // Rotated by a seeded angle (not axis-aligned) so a cluster of these
 // reads as a scatter of individual buildings, not a grid.
+// A tiny rotated-square "tent" glyph — the reference video's own camp
+// confetti reads as small diamond/square tent shapes scattered on the
+// grass, not the plain round dots this was originally built with. Size
+// is in the same schematic 0-100 units as everything else (buildings
+// run 1.5-2.8 wide, so ~0.3-0.6 here reads as tent-scale, not building-
+// scale) — deliberately not reusing the old pixel-radius "size" value
+// confettiClusterPoints produced, which was tuned for a circle layer's
+// zoom-interpolated radius, not a schematic-space polygon.
+function tentDiamond(cx, cy, size, seed){
+  const rand = seededRand(seed);
+  const angle = Math.PI / 4 + (rand() - 0.5) * 0.6;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const half = size / 2;
+  const corners = [[-half,-half],[half,-half],[half,half],[-half,half]];
+  const pts = corners.map(([x,y])=> [cx + (x * cos - y * sin), cy + (x * sin + y * cos) * 0.85]);
+  pts.push(pts[0]);
+  return pts;
+}
+
 function buildingFootprint(cx, cy, seed){
   const rand = seededRand(seed);
   const w = 1.5 + rand() * 1.3, h = 1.0 + rand() * 0.9;
@@ -6219,7 +6238,7 @@ function curvedLine(p0, p1, seed){
 
 // Converts a ring/list of [x,y] points in the existing 0-100 schematic
 // space into [lon,lat] pairs (GeoJSON coordinate order) via the same
-// SCHEMATIC_TO_LATLON_FIT every other approximate position in this file uses.
+// schematicToLatLon() every other approximate position in this file uses.
 function schematicRingToLngLat(ring){
   return ring.map(([x,y])=>{ const c = schematicToLatLon(x, y); return [c.lon, c.lat]; });
 }
@@ -6257,7 +6276,10 @@ function confettiClusterPoints(cx, cy, count, spread, seed){
     const r = rand() * spread;
     const x = cx + Math.cos(a) * r;
     const y = cy + Math.sin(a) * r * 0.7;
-    pts.push({ x, y, size: 2.0 + rand() * 1.4, color: CONFETTI_COLORS[Math.floor(rand() * CONFETTI_COLORS.length)] });
+    // Schematic-unit size (tent-scale, well under a building footprint's
+    // 1.5-2.8 range) — not the old pixel-radius value, now that confetti
+    // renders as tiny diamond polygons instead of a circle layer.
+    pts.push({ x, y, size: 0.35 + rand() * 0.25, color: CONFETTI_COLORS[Math.floor(rand() * CONFETTI_COLORS.length)] });
   }
   return pts;
 }
@@ -6729,10 +6751,10 @@ function buildMapGeoJSON(){
       confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 20, campFieldRadii.get(c) * 0.85, 800 + i * 47));
     }
   });
-  const confettiFeatures = confettiPts.map(t=>{
-    const c = schematicToLatLon(t.x, t.y);
-    return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
-  });
+  const confettiFeatures = confettiPts.map((t,i)=>({
+    type: "Feature", properties: { color: t.color },
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(tentDiamond(t.x, t.y, t.size, 3100 + i * 11)) ] }
+  }));
 
   // Forest AREAS — a solid mottled-green clearing shape under each named
   // forest/woods spot, not just a scatter of tree dots floating on bare
@@ -6866,35 +6888,38 @@ let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false
 //  1. EXACT — a schematic entry's name matches a BOOMTOWN_LOCATIONS_2026
 //     stage's label exactly (case-insensitive): use that stage's real
 //     lat/lon directly.
-//  2. APPROXIMATE — everything else is projected through a fitted affine
-//     transform (least-squares fit over the 7 confirmed exact-name
-//     matches between the old schematic layout and the real data).
-//     This is honest, not precise — residual error against the 7 known
-//     points runs up to ~35% of the site's own scale, so treat every
-//     approximate pin exactly like this app's existing "illustrative,
-//     not surveyed" framing for hidden venues/minor stages, just now
-//     anchored to a real base map instead of a hand-drawn one, rather
-//     than claiming survey-grade accuracy it doesn't have.
+//  2. APPROXIMATE — everything else is projected with a straight linear
+//     scale onto SITE_SW/SITE_NE (x:0-100 -> SITE_SW.lon-SITE_NE.lon,
+//     y:0-100 -> SITE_NE.lat-SITE_SW.lat, matching this file's existing
+//     y-down-is-south convention). This replaces an earlier fitted
+//     affine transform (least-squares over 7 exact-name matches) that
+//     turned out to have a real, confirmed bug: its own coefficients
+//     implied the whole 0-100 schematic box was only ~180m across in
+//     real terms, while SITE_SW/SITE_NE (the box this file already
+//     trusts for pan bounds and the boundary polygon) spans a real
+//     ~890m x 730m — a ~5x scale mismatch between two calibrations that
+//     should agree. That's why real POI markers (accurate GPS, spread
+//     across the true ~890x730m site) kept reading as "outside" the
+//     approximate markers, which were all compressed into a patch a
+//     fraction of the real site's size. This straight linear mapping is
+//     less "precise" than a rotated/skewed fit would be IF that fit had
+//     the right scale, but it's verifiably consistent with the one real
+//     bounding box already used everywhere else in this file, which the
+//     old fit demonstrably was not.
 // ===============================
-const SCHEMATIC_TO_LATLON_FIT = {
-  a: -0.00000753841074987542, b: -0.000014664845893481546, c: 51.05428102686477,
-  d: 0.000021936335977474345, e: -0.000012665002121025999, f: -1.2407495567557247
-};
 // Real-world bounds of the site, from the extracted map data's own
 // coverage (js/boomtown-locations-2026.js) — shared by loadMap() (as the
-// map's pan/zoom bounds) and buildMapGeoJSON() (as the basemap's
-// decorative site-boundary shape), so both are built from the same
-// source of truth. They used to disagree: the boundary was hand-traced
-// in schematic space and run through the (imprecise) affine fit above,
-// which put it in a different spot to almost every real captured
-// stage/POI coordinate — the boundary was wrong, not the markers.
+// map's pan/zoom bounds), buildMapGeoJSON() (as the basemap's decorative
+// site-boundary shape), AND schematicToLatLon() below, so every
+// approximate position in this file is anchored to the same one real
+// box instead of disagreeing calibrations.
 const SITE_SW = { lat: 51.0495, lon: -1.2445 };
 const SITE_NE = { lat: 51.0575, lon: -1.2340 };
 function schematicToLatLon(xPercent, yPercent){
-  const fit = SCHEMATIC_TO_LATLON_FIT;
+  const latSpan = SITE_NE.lat - SITE_SW.lat, lonSpan = SITE_NE.lon - SITE_SW.lon;
   return {
-    lat: fit.a * xPercent + fit.b * yPercent + fit.c,
-    lon: fit.d * xPercent + fit.e * yPercent + fit.f
+    lat: SITE_NE.lat - (yPercent / 100) * latSpan,
+    lon: SITE_SW.lon + (xPercent / 100) * lonSpan
   };
 }
 function realStageMatch(name){
@@ -7279,11 +7304,11 @@ function loadMap(){
         "circle-stroke-width": 1, "circle-stroke-color": "rgba(70,54,38,0.6)"
       } });
 
+      // Diamond polygons now (was a circle layer) — the reference
+      // video's own camp confetti reads as small tent-shaped diamonds,
+      // not round dots.
       mapGL.addSource("mapConfetti", { type: "geojson", data: geo.confetti });
-      mapGL.addLayer({ id: "confetti-circle", type: "circle", source: "mapConfetti", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.5], 19, ["*", ["get", "size"], 2.2]],
-        "circle-color": ["get", "color"]
-      } });
+      mapGL.addLayer({ id: "confetti-fill", type: "fill", source: "mapConfetti", paint: { "fill-color": ["get", "color"] } });
 
       mapGL.addSource("mapCampervans", { type: "geojson", data: geo.campervans });
       mapGL.addLayer({ id: "campervans-fill", type: "fill", source: "mapCampervans", paint: { "fill-color": "rgba(210,210,215,0.85)" } });
@@ -7447,14 +7472,16 @@ function loadMap(){
   // space and checking it against the drawn zone shapes) and it was
   // actively harmful: with a 12-unit buffer it still dropped 36 of 53
   // real POIs, including the ONLY marked First Aid, Reception and Cash
-  // Point pins. These are genuine positions straight from the official
-  // app's own map data — they ARE on the real site by definition; a
-  // "looks like it's outside our hand-approximated district blob" test
-  // just means our blob (built from an affine fit with up to ~35%
-  // residual error, see SCHEMATIC_TO_LATLON_FIT's own comment) doesn't
-  // line up with them, not that the amenity itself is misplaced.
-  // Hiding safety info (first aid, welfare) over a rendering
-  // approximation isn't a trade worth making.
+  // Point pins. That test was ALSO run against the old
+  // SCHEMATIC_TO_LATLON_FIT affine transform, since replaced by
+  // schematicToLatLon()'s straight SITE_SW/SITE_NE scaling above (that
+  // old fit had a real, confirmed ~5x real-world scale bug — see its
+  // replacement's own comment) — but the actual reasoning for not
+  // filtering real POI markers by "does it look inside our drawn zone"
+  // stands regardless of transform accuracy: these are genuine positions
+  // straight from the official app's own map data, and hiding safety
+  // info (first aid, welfare) because a zone shape doesn't happen to
+  // reach it isn't a trade worth making.
   ((window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.pois) || []).forEach(poi=>{
     addMapMarker("poi", poi.lat, poi.lon,
       `<div class="marker poi">${POI_ICONS[poi.category] || "📍"}</div>`,
