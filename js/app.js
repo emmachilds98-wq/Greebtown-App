@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v257";
-const APP_BUILD_TIME = "2026-08-01T10:53:27Z";
+const APP_CACHE_VERSION = "v258";
+const APP_BUILD_TIME = "2026-08-01T11:41:26Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5949,7 +5949,17 @@ const thingsToFind = [
   // Village"; that guess is corrected below to match.
   { name:"Rebel Girls Club", near:"Thrutopia", x:"47%", y:"22%", info:"Women-led wellbeing/empowerment venue — confirmed for 2026. Seen on the official app's own map right by The Retreat and Ancient Futures, on the Thrutopia hilltop, not in Downtown." },
   { name:"Tinker Station", near:"Thrutopia", x:"48%", y:"20%", info:"Seen labelled on the official app's own map right by Ancient Futures/The Retreat — no lineup or theme details sourced yet." },
-  { name:"Circus", near:"Thrutopia", x:"45%", y:"24%", info:"Seen labelled on the official app's own map right by Ancient Futures/The Retreat — no lineup or theme details sourced yet." }
+  { name:"Circus", near:"Thrutopia", x:"45%", y:"24%", info:"Seen labelled on the official app's own map right by Ancient Futures/The Retreat — no lineup or theme details sourced yet." },
+  // Was already half-wired: POI_ICONS below has had a "The Hideout
+  // Hilltop":"🏕" entry for a while with nothing in this array actually
+  // using it. Seen labelled on the official app's own map (and again in
+  // this session's own reference screenshots) right next to Foggers Mill
+  // and the Copperwood Heights/Full Moon Ballroom cluster, on the south
+  // side of Copperwood — distinct from the already-plotted "The Hide Out
+  // Downtown" up by Metropolis. Placed near Foggers Mill's own southern
+  // Copperwood-adjacent spot, the general area both labels shared on
+  // screen.
+  { name:"The Hide Out Hilltop", near:"Copperwood", x:"58%", y:"48%", info:"Seen labelled on the official app's own map just south of Copperwood Heights, right by Foggers Mill — no lineup or theme details sourced yet." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -5972,6 +5982,13 @@ const landmarks = [
   { name:"Public Transport Hub", x:"6%", y:"42%", info:"Near West Gate — coach, shuttle and accessible-transport drop-off/pick-up point." },
   { name:"Lockers — Hidden Woods", x:"14%", y:"12%", info:"One of the confirmed 2026 locker locations, alongside Thrutopia, the Lion's Den/Orchid area and Downtown Village." },
   { name:"Lockers — Thrutopia", x:"58%", y:"10%", info:"Locker point in the Thrutopia woodlands." },
+  // The Hidden Woods locker's own info text above names FOUR confirmed
+  // 2026 locker locations, but only two (Hidden Woods, Thrutopia) ever
+  // got plotted — this is the "Lion's Den/Orchid area" one. Placed at
+  // The Lion's Den itself rather than Camp Orchid Downtown (the other
+  // half of that ambiguous source label) since it's the more specific,
+  // already-confirmed anchor point of the two.
+  { name:"Lockers — The Lion's Den", x:"89%", y:"57%", info:"One of the confirmed 2026 locker locations (the source only says \"the Lion's Den/Orchid area\" — placed here as the more specific of the two)." },
   { name:"Amnesty Points — West Gate", x:"5%", y:"50%", info:"Dispose of anything prohibited before you're searched, no questions asked — every gate has one." },
   { name:"Charge Candy — Pepperpot Market", x:"50%", y:"52%", info:"One of six confirmed phone-charging points dotted across the site." },
   // Seen labelled on the official app's own map as a large dark-green
@@ -6080,7 +6097,26 @@ const amenities = [
   // toilet pair and an accessible-facilities marker on the dashed
   // accessible path leading in from the road.
   { category:"Toilets", x:"13%", y:"5%", note:"West Camping / Alresford Rd" },
-  { category:"Accessible Facilities", x:"14%", y:"6%", note:"West Camping / Alresford Rd" }
+  { category:"Accessible Facilities", x:"14%", y:"6%", note:"West Camping / Alresford Rd" },
+  // POI_ICONS has carried a "Skylark Entry":"🚪" icon for a while with
+  // nothing in this array ever using it — the dedicated check-in point
+  // for Boomtown's premium Camp Skylark sites (see the campLabels/gate
+  // info text), one per site since Hilltop and Sunset are on opposite
+  // sides of the whole map.
+  { category:"Skylark Entry", x:"76%", y:"21%", note:"Camp Skylark Hilltop" },
+  { category:"Skylark Entry", x:"75%", y:"85%", note:"Camp Skylark Sunset" },
+  // South Gate never got any amenity markers at all, unlike the other
+  // two gates (West Gate has its own toilet pair above; East Gate's own
+  // cluster is with Temple Valley Camping/Copperwood). Not from a
+  // specific reference-video frame the way most of this array is — every
+  // gate needs the same baseline provisions, so this mirrors West Gate's
+  // own toilet-pair-plus-accessible density rather than leaving South
+  // Gate as the one gate on the whole map with nothing around it.
+  { category:"Toilets", x:"77%", y:"90%", note:"South Gate" },
+  { category:"Toilets", x:"79%", y:"91%", note:"South Gate" },
+  { category:"Accessible Facilities", x:"78%", y:"92%", note:"South Gate" },
+  { category:"Water Point", x:"76%", y:"89%", note:"South Gate" },
+  { category:"Welfare", x:"73%", y:"84%", note:"Camp Skylark Sunset" }
 ];
 
 const gates = [
@@ -6683,16 +6719,28 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nd.x), parseFloat(nd.y)], i * 23 + 11)) } };
   });
 
-  // Camp access paths — every named camping field (campLabels) to its
-  // nearest district, same medium-weight spoke treatment stages get.
-  // Camp fields got their own ground fill/texture a few passes back but
-  // never a path — the field itself reads as camping ground, but the
-  // marker/label sitting on it still looked disconnected from the rest
-  // of the walkable network, exactly the "floating in dead space" gap.
+  // Camp access paths — every named camping field (campLabels) to
+  // whichever is closer, its nearest district OR its nearest gate, same
+  // medium-weight spoke treatment stages get. Originally always routed
+  // to the nearest district regardless of distance, which reads fine for
+  // camps that actually sit near the town centre but produced absurdly
+  // long diagonal routes for camps that are genuinely closer to a gate —
+  // Camp Skylark Sunset down by South Gate routing all the way to
+  // Oldtown (3x further than South Gate) chief among them, plus Meadow
+  // Camping/West Gate and Campervan Field/East Gate (that field's own
+  // gate info text already names it as East Gate's nearest camp — the
+  // route just never matched). Real campers walk to whichever's actually
+  // closer, so the path should too.
   const campSpokeFeatures = campLabels.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const nd = nearestDistrict(cx, cy, districts);
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([cx,cy], [parseFloat(nd.x), parseFloat(nd.y)], i * 19 + 5)) } };
+    const ndDist = Math.hypot(parseFloat(nd.x) - cx, parseFloat(nd.y) - cy);
+    let target = nd, targetDist = ndDist;
+    gates.forEach(g=>{
+      const gd = Math.hypot(parseFloat(g.x) - cx, parseFloat(g.y) - cy);
+      if(gd < targetDist){ target = g; targetDist = gd; }
+    });
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([cx,cy], [parseFloat(target.x), parseFloat(target.y)], i * 19 + 5)) } };
   });
 
   // Parking access roads — each parking area to its nearest GATE (real
