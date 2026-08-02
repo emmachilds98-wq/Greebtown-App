@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v276";
-const APP_BUILD_TIME = "2026-08-02T14:40:36Z";
+const APP_CACHE_VERSION = "v277";
+const APP_BUILD_TIME = "2026-08-02T15:08:50Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5930,8 +5930,20 @@ updateNextEvent();
 // SCHEMATIC MAP — real districts & key stages, approximate layout
 // ===============================
 const locations = [
-  { name:"Area 404", kind:"district", x:"50%", y:"30%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
-  { name:"Botanica", kind:"district", x:"28%", y:"20%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
+  // Downtown cluster (Area 404/Botanica/Letsbe Avenue/Metropolis/NEXUS/
+  // Hydro XL/Spectrum 360/Rose and Clown) re-derived together this pass,
+  // not one pair at a time — an earlier single-pair fix (Spectrum 360 vs
+  // Area 404 alone) had left Spectrum 360 sitting NORTH of NEXUS/Botanica,
+  // when a wider single frame this session (showing NEXUS, Botanica,
+  // Letsbe Avenue, Metropolis, Area 404 and Spectrum 360 all together)
+  // shows Spectrum 360 clearly south of both, near Area 404 as originally
+  // intended. Also opens up the vertical spacing between Letsbe Avenue
+  // and Botanica specifically — the two labels were rendering as
+  // overlapping/illegible text on the live map (this map's markers are
+  // plain DOM elements with no built-in collision avoidance, so crowded
+  // coordinates show up directly as garbled overlapping labels).
+  { name:"Area 404", kind:"district", x:"50%", y:"37%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
+  { name:"Botanica", kind:"district", x:"28%", y:"18%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
   { name:"Thrutopia", kind:"district", x:"56%", y:"16%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
   // Pulled from (68,26) to (58,23) — this session's reference video shows
   // COPPERWOOD's own label sitting clearly north-WEST of GRAND CENTRAL's
@@ -5941,8 +5953,8 @@ const locations = [
   // Roots) shifted by the same delta to keep that cluster together.
   { name:"Copperwood", kind:"district", x:"58%", y:"23%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
   { name:"Oldtown", kind:"district", x:"88%", y:"52%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
-  { name:"Letsbe Avenue", kind:"district", x:"40%", y:"14%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
-  { name:"Metropolis", kind:"district", x:"15%", y:"34%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
+  { name:"Letsbe Avenue", kind:"district", x:"40%", y:"9%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
+  { name:"Metropolis", kind:"district", x:"15%", y:"36%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
   { name:"Grand Central", kind:"stage", x:"66%", y:"30%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
   // Moved from a guessed (93,38), up near Temple Valley Camping, to
   // (90,58) — the second reference video's own wide Copperwood/Grand
@@ -5956,20 +5968,25 @@ const locations = [
   // This session's reference video shows Hydro XL's own glowing stage
   // marker and label sitting clearly south-WEST of METROPOLIS's own
   // label, not east of it/toward Area 404 as the old position implied.
-  { name:"Hydro XL", kind:"stage", x:"9%", y:"39%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
+  { name:"Hydro XL", kind:"stage", x:"9%", y:"46%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
   // Pulled from (72,44) — south of Grand Central — to (75,22). Two
   // independent reference-video frames (both this session's videos) show
   // ANARA's own label sitting clearly NORTH of Grand Central, not south —
   // and south/west of Temple Valley Camping's label (also corrected
   // below), consistent with "Hilltop edge" woodland between the two.
   { name:"Anara Forest", kind:"stage", x:"75%", y:"22%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
-  { name:"Hidden Woods", kind:"stage", x:"18%", y:"8%", info:"One of two woodland stages tucked among the trees, with its own beach bar and treetop walks. Leans eclectic bass and reggae/dub, often billing bigger DnB names alongside newer acts — explore carefully after dark." },
+  // Nudged from y=8 to y=2 — this session's frame showing Hidden Woods,
+  // Letsbe Avenue and Botanica all together shows Hidden Woods sitting a
+  // clear gap further north of Letsbe Avenue, not almost level with it
+  // (which is what happened once Letsbe Avenue's own y moved up to 9
+  // during this pass's Downtown-cluster re-derivation).
+  { name:"Hidden Woods", kind:"stage", x:"18%", y:"2%", info:"One of two woodland stages tucked among the trees, with its own beach bar and treetop walks. Leans eclectic bass and reggae/dub, often billing bigger DnB names alongside newer acts — explore carefully after dark." },
   // Pulled from (32,22) — east of Botanica's own (28,20) — to (23,24).
   // This session's reference video shows NEXUS's own glowing stage marker
   // sitting clearly WEST (and a bit south) of the BOTANICA label, not
   // east of it. "The Garden Centre" below (also "near Botanica") shifted
   // by the same delta to stay with it.
-  { name:"NEXUS", kind:"stage", x:"23%", y:"24%", info:"Right in Botanica — its main stage, 'where nature connects', celebrating live music and the freshest names on the scene. The hip-hop, grime and garage side has previously pulled in names like Bashy, MJ Cole and Lady Leshurr." },
+  { name:"NEXUS", kind:"stage", x:"23%", y:"22%", info:"Right in Botanica — its main stage, 'where nature connects', celebrating live music and the freshest names on the scene. The hip-hop, grime and garage side has previously pulled in names like Bashy, MJ Cole and Lady Leshurr." },
   { name:"Helix", kind:"stage", x:"20%", y:"38%", info:"Alongside Metropolis. Breaks, big beat and bass-heavy line-up." },
   { name:"Meeting Point", kind:"meeting", x:"48%", y:"58%", info:"Your chosen meetup spot — set this with your group before you split up." }
 ];
@@ -6020,11 +6037,17 @@ const otherStages = [
 // "COPPERWOOD HEIGHTS"/TANGLED ROOTS label pairing) both show Tangled
 // Roots sitting northWEST of Copperwood with the north offset clearly
 // bigger than the west one — not an even diagonal.
-// Spectrum 360 (index 0) and Rose and Clown (index 3) corrected from a
-// third reference video — both labels appear on camera right by AREA 404,
-// but clearly NORTH of it (Rose and Clown further north than Spectrum
-// 360), not south as the old (46,34)/(56,38) guess had them.
-const minorStagePositions = [[52,20],[51,14],[34,16],[52,12],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,40]];
+// Spectrum 360 (index 0) and Rose and Clown (index 3) corrected AGAIN
+// this pass — the previous fix (north of Area 404) put them at (52,20)/
+// (52,12), which put Spectrum 360 north of even NEXUS/Botanica once
+// those got re-derived together (see the Downtown-cluster comment on
+// the `locations` array above); a wider single frame this session
+// showing NEXUS, Botanica, Metropolis, Area 404 and Spectrum 360 all
+// together confirms Spectrum 360 sits south of NEXUS/Botanica, close to
+// Area 404 — only slightly north of Area 404's own label, not miles
+// north of the whole district. Rose and Clown stays north of Spectrum
+// 360 (per the original video comparison) but now south of Botanica too.
+const minorStagePositions = [[52,32],[51,14],[34,16],[52,26],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6042,7 +6065,7 @@ const thingsToFind = [
   { name:"The Boomtown Bobbies", near:"Area 404", x:"46%", y:"26%", info:"A mock police station hidden venue playing on Area 404's Guardians — expect in-character 'officers', a booking-desk bar and a wink at the district's own policing storyline." },
   { name:"Luck Exchange Casino", near:"Area 404", x:"54%", y:"34%", info:"A casino-themed hidden venue in Area 404's territory — cards, chips and a party underneath the gambling dressing." },
   { name:"Botanica Zoo", near:"Botanica", x:"24%", y:"16%", info:"A character-led 'zoo' micro-venue inside Botanica — the theme is the clue, so follow the animal keepers and see where they lead." },
-  { name:"The Garden Centre", near:"Botanica", x:"23%", y:"26%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
+  { name:"The Garden Centre", near:"Botanica", x:"23%", y:"24%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
   { name:"Hotel Paradiso", near:"Copperwood", x:"54%", y:"19%", info:"A faded-glamour hotel-themed micro venue — sits well with Copperwood's 1925 film-world setting; check in at the 'front desk'." },
   { name:"Reel News", near:"Copperwood", x:"62%", y:"27%", info:"A newsreel/cinema-themed hidden spot tying into Von Vanderhaus's film empire — expect projected clips and in-character 'reporters'." },
   { name:"Mining for (g)Old Town", near:"Oldtown", x:"84%", y:"48%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
@@ -6066,7 +6089,7 @@ const thingsToFind = [
   // Pulled from (20,30) — northeast of Metropolis — to (22,42). A third
   // reference video this session shows THE HIDE OUT DOWNTOWN's own label
   // sitting clearly southEAST of METROPOLIS, not north of it.
-  { name:"The Hide Out Downtown", near:"Metropolis", x:"22%", y:"42%", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
+  { name:"The Hide Out Downtown", near:"Metropolis", x:"22%", y:"44%", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
   { name:"Endor", near:"Metropolis", x:"14%", y:"38%", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
   { name:"Mango", near:"Botanica", x:"24%", y:"20%", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
   { name:"Karma Ceuticals", near:"Botanica", x:"30%", y:"24%", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
@@ -6415,10 +6438,10 @@ const amenities = [
   // toilet pair (one accessible), a water point and a bar all sit right
   // by the stage's own glow in the reference video, closer than the
   // wider Botanica scatter above.
-  { category:"Toilets", x:"21%", y:"26%", note:"NEXUS" },
-  { category:"Accessible Facilities", x:"22%", y:"27%", note:"NEXUS" },
-  { category:"Water Point", x:"21%", y:"27%", note:"NEXUS" },
-  { category:"Bar", x:"25%", y:"23%", note:"NEXUS" },
+  { category:"Toilets", x:"21%", y:"24%", note:"NEXUS" },
+  { category:"Accessible Facilities", x:"22%", y:"25%", note:"NEXUS" },
+  { category:"Water Point", x:"21%", y:"25%", note:"NEXUS" },
+  { category:"Bar", x:"25%", y:"21%", note:"NEXUS" },
   { category:"Food", x:"34%", y:"30%", note:"Botanica" },
   // The open path between Botanica and Area 404 — toilets, food, a water
   // point and a bar strung along it.
@@ -6491,9 +6514,9 @@ const amenities = [
   // itself, unlike NEXUS/Grand Central/The Lion's Den above. Same
   // baseline reasoning as Sunset Hill/the camp fields above, not a
   // specific frame — every main stage needs basic provisions.
-  { category:"Toilets", x:"7%", y:"41%", note:"Hydro XL" },
-  { category:"Water Point", x:"11%", y:"42%", note:"Hydro XL" },
-  { category:"Bar", x:"9%", y:"36%", note:"Hydro XL" }
+  { category:"Toilets", x:"7%", y:"48%", note:"Hydro XL" },
+  { category:"Water Point", x:"11%", y:"49%", note:"Hydro XL" },
+  { category:"Bar", x:"9%", y:"43%", note:"Hydro XL" }
 ];
 
 const gates = [
