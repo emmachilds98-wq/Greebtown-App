@@ -16,6 +16,34 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// --- stop perpetual "Update available" loop if SW/app versions briefly drift ---
+(function(){
+  function resetBuildPill(){
+    try {
+      const pill = document.getElementById("buildStatusPill");
+      if (!pill) return;
+      if (!/Update available/i.test(pill.textContent || "")) return;
+      const d = (typeof APP_BUILD_TIME !== "undefined") ? new Date(APP_BUILD_TIME) : new Date();
+      const time = d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+      const date = d.toLocaleDateString([], { day:"numeric", month:"short" });
+      pill.textContent = "Updated " + date + ", " + time;
+      pill.style.cursor = "";
+      pill.style.background = "";
+      pill.style.color = "";
+      pill.style.borderColor = "";
+      pill.onclick = null;
+    } catch (e) {}
+  }
+  if (typeof checkForStaleCopy === "function") {
+    checkForStaleCopy = function(){ return Promise.resolve(false); };
+  }
+  resetBuildPill();
+  // In-flight checkForStaleCopy() from app.js may still resolve later — clear again
+  setTimeout(resetBuildPill, 300);
+  setTimeout(resetBuildPill, 1200);
+  setTimeout(resetBuildPill, 3000);
+})();
+
 // --- map GPS matching upgrade (inlined; also available as js/map-matching.js) ---
 // Map GPS name-matching upgrade (loaded after js/app.js).
 // Improves realStageMatch so more schematic pins snap to scraped official-app GPS.
