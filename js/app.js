@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v272";
-const APP_BUILD_TIME = "2026-08-02T14:00:43Z";
+const APP_CACHE_VERSION = "v273";
+const APP_BUILD_TIME = "2026-08-02T14:07:08Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6010,11 +6010,12 @@ const otherStages = [
 // once that moved (see its own comment), the two labels visually
 // collided; moved toward The Feckless Wrecked (92,48)/Trough Love
 // (84,48) instead, still Oldtown-adjacent but with real separation.
-// Tangled Roots (index 1) nudged from (60,18) to (50,15) — this session's
-// Copperwood fix (68,26)→(58,23) moved Copperwood itself to just west of
-// where Tangled Roots sat, so the old value no longer reads as "just west
-// of Copperwood"; shifted by the same delta to preserve that relationship.
-const minorStagePositions = [[46,34],[50,15],[34,16],[56,38],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,40]];
+// Tangled Roots (index 1) nudged to (51,14) — TWO independent reference-
+// video frames this session (the original pass and a second video, same
+// "COPPERWOOD HEIGHTS"/TANGLED ROOTS label pairing) both show Tangled
+// Roots sitting northWEST of Copperwood with the north offset clearly
+// bigger than the west one — not an even diagonal.
+const minorStagePositions = [[46,34],[51,14],[34,16],[56,38],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,40]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6084,16 +6085,14 @@ const thingsToFind = [
   { name:"Rebel Girls Club", near:"Ancient Futures", x:"51%", y:"39%", info:"Women-led wellbeing/empowerment venue — confirmed for 2026. Real surveyed GPS puts it right by Ancient Futures/Grand Central, not the Thrutopia hilltop this session's earlier guess assumed." },
   { name:"Tinker Station", near:"Ancient Futures", x:"53%", y:"35%", info:"Seen labelled on the official app's own map right by Ancient Futures — no lineup or theme details sourced yet. Real surveyed GPS confirms this is near Grand Central, not Thrutopia." },
   { name:"Circus", near:"Ancient Futures", x:"52%", y:"40%", info:"Seen labelled on the official app's own map right by Ancient Futures — no lineup or theme details sourced yet. Real surveyed GPS (filed as \"Circus Tent\") puts it near Grand Central, not Thrutopia — possibly the same real venue as venueDirectory's own separate \"Circus Tent\" entry, kept distinct here since that's unconfirmed." },
-  // Was already half-wired: POI_ICONS below has had a "The Hideout
-  // Hilltop":"🏕" entry for a while with nothing in this array actually
-  // using it. Seen labelled on the official app's own map (and again in
-  // this session's own reference screenshots) right next to Foggers Mill
-  // and the Copperwood Heights/Full Moon Ballroom cluster, on the south
-  // side of Copperwood — distinct from the already-plotted "The Hide Out
-  // Downtown" up by Metropolis. Placed near Foggers Mill's own southern
-  // Copperwood-adjacent spot, the general area both labels shared on
-  // screen.
-  { name:"The Hide Out Hilltop", near:"Copperwood", x:"58%", y:"48%", info:"Seen labelled on the official app's own map just south of Copperwood Heights, right by Foggers Mill — no lineup or theme details sourced yet." },
+  // Corrected this session: two independent reference-video frames (both
+  // the original pass and this session's second video, same "COPPERWOOD
+  // HEIGHTS" wide shot) show THE HIDE OUT HILLTOP's own label sitting
+  // clearly EAST of Copperwood Heights' label, roughly the same latitude
+  // (barely north) — not south of it as the previous guess assumed.
+  // Distinct from the already-plotted "The Hide Out Downtown" up by
+  // Metropolis.
+  { name:"The Hide Out Hilltop", near:"Copperwood", x:"66%", y:"21%", info:"Seen labelled on the official app's own map just east of Copperwood Heights — no lineup or theme details sourced yet." },
   // Odd gap this pass turned up: Ancient Futures already has a full
   // Wed-Sun workshop schedule, a venueDirectory entry and its own cluster
   // of amenity markers (Top-Up Point/Photobooth/Food x2/Welfare/First Aid,
