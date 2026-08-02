@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v300";
-const APP_BUILD_TIME = "2026-08-02T23:50:16Z";
+const APP_CACHE_VERSION = "v301";
+const APP_BUILD_TIME = "2026-08-02T23:52:45Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -8689,12 +8689,21 @@ function loadMap(){
   // filtered list) — reference screenshots show every district name
   // rendered in its own distinct, bold treatment (BOTANICA in one hue,
   // AREA 404 in another, etc.), not one flat colour for all of them.
+  // Two districts have a repeatedly-confirmed text TREATMENT beyond just
+  // colour: Area 404's own label reads as a bold red/green "glitch"
+  // double-exposure in every reference frame it appears in, and Botanica/
+  // Metropolis both show a shimmering multi-hue gradient rather than a
+  // flat colour. Everything else keeps the plain --district-rgb colour
+  // treatment above — inventing a special look for a district with no
+  // specific evidence for one would be a guess, not an accuracy fix.
+  const DISTRICT_TEXT_STYLE = { "Area 404": "glitch", "Botanica": "shimmer", "Metropolis": "shimmer" };
   const districtList = locations.filter(p=> p.kind === "district");
   districtList.forEach(place=>{
     const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
     const rgb = DISTRICT_PALETTE[districtList.indexOf(place) % DISTRICT_PALETTE.length];
+    const styleClass = DISTRICT_TEXT_STYLE[place.name] ? ` ${DISTRICT_TEXT_STYLE[place.name]}` : "";
     addMapMarker("main", coord.lat, coord.lon,
-      `<div class="map-label district" style="--district-rgb:${rgb}">${escapeHtml(place.name)}</div>`,
+      `<div class="map-label district${styleClass}" style="--district-rgb:${rgb}">${escapeHtml(place.name)}</div>`,
       { name: place.name, title: place.name, onClick: ()=> showMapInfoCard(`
         <div class="card">
           <span class="tag">district — approximate area</span>
