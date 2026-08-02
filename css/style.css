@@ -614,8 +614,13 @@
   .marker.landmark::after{content:none;}
   .map-label.landmark{color:rgba(150,200,242,.95); font-weight:700; font-size:9px; background:rgba(11,21,18,.6); border:1px solid rgba(45,168,242,.3);}
   /* Real amenity POIs (toilets, food, bars, water, etc.) — small emoji
-     badge, no pulse/label clutter since there can be 50+ of these. */
-  .marker.poi{width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:rgba(11,21,18,.75); border:1px solid rgba(255,255,255,.18); font-size:11px;}
+     badge, no pulse/label clutter since there can be 50+ of these.
+     Ring colour comes from each marker's own --poi-rgb custom property
+     (set in JS from POI_RING_COLORS, keyed by category) instead of one
+     flat neutral border for every category — matching the official
+     app's own colour-coded category icons (its Bar/Food/Toilet/Medical
+     pill buttons each use a distinct hue too). */
+  .marker.poi{width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:rgba(11,21,18,.75); border:1.5px solid rgba(var(--poi-rgb, 255,255,255),.75); box-shadow:0 0 0 1px rgba(var(--poi-rgb, 255,255,255),.25); font-size:11px;}
   .marker.poi::before, .marker.poi::after{content:none;}
 
   /* ===== "Add a place" markers — friend-created pins from the ＋ button,
