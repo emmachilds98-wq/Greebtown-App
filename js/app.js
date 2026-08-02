@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v290";
-const APP_BUILD_TIME = "2026-08-02T20:01:37Z";
+const APP_CACHE_VERSION = "v291";
+const APP_BUILD_TIME = "2026-08-02T20:07:26Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7779,7 +7779,14 @@ function buildMapGeoJSON(){
   // background, so a wooded zone actually reads as one continuous area
   // (the individual tree dots below add texture on top of this, the way
   // a real illustrated map layers a base tone under icon detail).
-  const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name));
+  // Tribe of Frog added explicitly — its name doesn't match /Forest|Woods/
+  // so it was getting no forest treatment at all, despite every reference
+  // video this session describing it as sitting in its own wooded
+  // clearing between Oldtown and Area 404 (reached via forked paths
+  // through trees), and being called out directly as visibly wrong —
+  // "just floating in open ground" — without one.
+  const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name))
+    .concat(minorStages.filter(p=> p.name === "Tribe of Frog"));
   const forestFeatures = forestSpots.map((f,i)=>({
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), 15, 400 + i * 53, 16)) ] }
