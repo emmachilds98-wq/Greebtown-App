@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v297";
-const APP_BUILD_TIME = "2026-08-02T23:25:23Z";
+const APP_CACHE_VERSION = "v298";
+const APP_BUILD_TIME = "2026-08-02T23:29:58Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7616,20 +7616,36 @@ function buildMapGeoJSON(){
   });
 
   // Building footprints — a small tan/orange rotated-rectangle under
-  // every stage/hidden-venue marker (districtMemberPoints, the same list
-  // districtSpreadR above uses) so district interiors read as an actual
-  // built-up town, matching the reference video's dense scatter of
-  // building-block shapes around every venue icon, instead of just a
-  // bare coloured clearing with pins floating on it. One in four is a
-  // hollow outline-only "fenced enclosure" instead of a solid fill (see
-  // "Trough Love" in Oldtown in the reference video — a beer-garden-style
-  // fenced yard, not a roofed building) — every prior pass drew every
-  // single venue the same solid-block way, which reads as more uniform
-  // than the video's own mix of buildings and open fenced areas.
+  // every CONFIRMED stage marker (main or minor) so district interiors
+  // read as an actual built-up town, matching the reference video's
+  // dense scatter of building-block shapes around every venue icon,
+  // instead of just a bare coloured clearing with pins floating on it.
+  // One in four is a hollow outline-only "fenced enclosure" instead of a
+  // solid fill (see "Trough Love" in Oldtown in the reference video — a
+  // beer-garden-style fenced yard, not a roofed building).
+  //
+  // Deliberately NOT `districtMemberPoints` (which also includes
+  // thingsToFind, i.e. hidden venues) — the official app never draws a
+  // building for a hidden venue; it's not marked on the map at all
+  // beyond a vague "?" (this map's own equivalent is the dashed "secret"
+  // marker thingsToFind already renders as, see the "?" markers further
+  // down). Drawing a real building box under every hidden venue on top
+  // of each district's own generic infill scatter was stacking two
+  // unrelated things in the same small area — reported as "various
+  // squares overlapping in smaller venue areas... where hidden venues
+  // might be", when a real district should read as a handful of
+  // buildings, not a dozen boxes crammed together. Hidden venues still
+  // affect district sizing (districtSpreadR above still counts them, so
+  // the district's clearing still reaches far enough to cover them) and
+  // still get a collision-avoidance slot so a generic infill building
+  // doesn't render directly on top of one's "?" marker (see
+  // placedBuildingCenters below, still seeded from thingsToFind too) —
+  // they just don't get their own drawn building shape.
+  const namedBuildingPoints = locations.filter(p=>p.kind === "stage").concat(minorStages);
   const solidBuildingFeatures = [];
   const fencedEnclosureFeatures = [];
   const SPECIAL_SHAPE_VENUES = new Set(["Full Moon Ballroom", "Spectrum 360", "NEXUS"]);
-  districtMemberPoints.forEach((p,i)=>{
+  namedBuildingPoints.forEach((p,i)=>{
     const ring = schematicRingToLngLat(venueFootprint(p.name, parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
     const feature = { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } };
     // Special-shape venues are solid, confirmed structures, never the
@@ -7707,7 +7723,11 @@ function buildMapGeoJSON(){
   minorStages.forEach((s,mi)=>{
     const cx = parseFloat(s.x), cy = parseFloat(s.y);
     const rand = seededRand(mi * 149 + 6000);
-    const count = 4;
+    // 5, not 4 — with hidden-venue boxes removed (see namedBuildingPoints
+    // above), a minor stage's own little cluster reads as roughly the
+    // "5-6 real buildings" a small venue area should show, not padded
+    // out by boxes that used to represent hidden venues nearby.
+    const count = 5;
     for(let k=0;k<count;k++){
       const [x, y] = pickClearBuildingSpot(cx, cy, 2.6, 4.2, rand);
       infillBuildingFeatures.push({
@@ -8380,7 +8400,11 @@ function loadMap(){
       mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
       mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 3 } });
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 1.8 } });
+      // Width bumped 1.8 -> 2.2 — reference screenshots show each
+      // district's own boundary as a clear, continuous outline, not a
+      // faint line competing with the fill; borders should read at a
+      // glance, matching the ask for "clear square/outlines" for zones.
+      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 2.2 } });
 
       // Pepperpot Market's clearing — same casing/fill/line trio as a
       // district, drawn right after them, so the real (GPS, not
@@ -8408,7 +8432,10 @@ function loadMap(){
       mapGL.addSource("mapCampFields", { type: "geojson", data: geo.campFields });
       mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(224,200,90,0.55)" } });
       mapGL.addLayer({ id: "camp-fields-casing", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.28)", "line-width": 4.5 } });
-      mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.75)", "line-width": 1.8 } });
+      // Width bumped 1.8 -> 2.4, same "clear border" reasoning as
+      // districts-line above — camp fields are the biggest ground use on
+      // site and should read as clearly-bounded areas at a glance.
+      mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.75)", "line-width": 2.4 } });
       mapGL.addSource("mapCampFieldLines", { type: "geojson", data: geo.campFieldLines });
       mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(120,100,40,0.5)", "line-width": 1.2 } });
 

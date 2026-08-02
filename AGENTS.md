@@ -80,6 +80,30 @@ Before telling a user a fix is ready to test: run `node --check js/app.js`,
 bump both version strings, and grep the diff's changed identifiers for any
 other load-time call site that reaches them (rule #1).
 
+## Critical rule #3: never write a diff/patch fragment as a file's content
+
+A real incident (2 Aug 2026): direct commits to the deploy branch replaced
+`service-worker.js`'s actual content with a **raw unified-diff fragment** —
+literal `+`/`-`-prefixed hunk lines (e.g. `+  self.skipWaiting();`) saved
+as if they were the file itself, instead of applying the change and saving
+the resulting text. The live file was left referencing an undefined
+variable, missing large chunks of real logic, and not valid enough to
+reliably register as a service worker at all — which meant no user could
+ever receive an update, regardless of `CACHE_VERSION`.
+
+A valid source file never contains bare `+`/`-` hunk lines, `@@ ... @@`
+markers, or `<<<<<<<`/`=======`/`>>>>>>>` conflict markers. If what you're
+about to save looks like that, you have a diff in hand, not a file — edit
+the real file in place and save the resulting content, never the diff
+itself. **After editing any file, read back what actually landed on disk
+before committing** — for JS, `node --check <file>` (or, for a service
+worker using `self`/`importScripts` that can't run under plain Node,
+parsing it with `new Function(source)`) catches a corrupted file
+immediately and costs nothing. A green PR review is not a substitute for
+this either — the same incident's other half was a PR that merged with
+`js/app.js` reduced to the single word `PLACEHOLDER`, because nobody
+checked the file was still complete before merging it.
+
 ## Git workflow — read this or you will corrupt your own PR
 
 - The actual GitHub Pages deploy branch is **`emmachilds98-wq-patch-2`**, not
