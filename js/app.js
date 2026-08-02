@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v275";
-const APP_BUILD_TIME = "2026-08-02T14:27:01Z";
+const APP_CACHE_VERSION = "v276";
+const APP_BUILD_TIME = "2026-08-02T14:40:36Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6788,6 +6788,92 @@ function confettiClusterPoints(cx, cy, count, spread, seed){
 // zone type around it.
 const DISTRICT_PALETTE = ["242,140,60", "70,170,235", "175,120,235", "235,100,150", "225,80,80", "60,200,190", "210,90,200"];
 
+// ===============================
+// TRUNK PATH NETWORK — the real footpath topology this session's four
+// reference videos actually show, replacing two much cruder stand-ins:
+// the old "trail" (every district joined in whatever order they happen
+// to sit in the `locations` array — not real adjacency at all) and the
+// old "nearest district" spoke targeting (every stage/venue/gate/camp
+// drew a straight line to the closest district's centre point,
+// regardless of whether that's actually the route you'd walk). Edges
+// below are [nameA, nameB] pairs — resolved by name against locations/
+// minorStages/thingsToFind/campLabels/gates via findNamedNode() — for
+// which areas the videos repeatedly show connected by a footpath, in
+// the order you'd actually walk between them. This asserts CONNECTIVITY
+// as evidence-based; the exact curve shape of each segment still uses
+// the same curvedLine() bow as the old spokes did (real path curvature
+// isn't reliably readable at this video resolution — see the position-
+// fix comments elsewhere in this file for why precise pixel tracing
+// doesn't hold up here).
+const TRUNK_PATH_EDGES = [
+  ["West Gate", "Downtown Camping"],
+  ["Downtown Camping", "Metropolis"],
+  ["Metropolis", "Botanica"],
+  ["Metropolis", "Area 404"],
+  ["Botanica", "Area 404"],
+  ["Metropolis", "Hydro XL"],
+  ["Botanica", "Letsbe Avenue"],
+  ["Letsbe Avenue", "Copperwood"],
+  ["Copperwood", "Grand Central"],
+  ["Copperwood", "Temple Valley Camping"],
+  ["Grand Central", "Anara Forest"],
+  ["Grand Central", "Oldtown"],
+  ["Oldtown", "Quantum"],
+  ["Oldtown", "Tribe of Frog"],
+  ["Quantum", "The Lion's Den"],
+  ["Quantum", "Sunset Hill"],
+  ["Sunset Hill", "Camp Skylark Sunset (premium)"],
+  ["Camp Skylark Sunset (premium)", "South Gate"],
+  ["East Gate", "Temple Valley Camping"]
+];
+
+// Looks a name up across every array a trunk-path endpoint could name —
+// stages/districts (locations), minor stages, unconfirmed-but-labelled
+// spots (thingsToFind), named camp fields (campLabels, keyed on `text`
+// not `name`), and gates — so TRUNK_PATH_EDGES can reference any of them
+// interchangeably by their display name.
+function findNamedNode(name){
+  const loc = locations.find(l=> l.name === name);
+  if(loc) return { x: parseFloat(loc.x), y: parseFloat(loc.y) };
+  const minor = minorStages.find(s=> s.name === name);
+  if(minor) return { x: parseFloat(minor.x), y: parseFloat(minor.y) };
+  const find = thingsToFind.find(t=> t.name === name);
+  if(find) return { x: parseFloat(find.x), y: parseFloat(find.y) };
+  const landmark = landmarks.find(l=> l.name === name);
+  if(landmark) return { x: parseFloat(landmark.x), y: parseFloat(landmark.y) };
+  const camp = campLabels.find(c=> c.text === name);
+  if(camp) return { x: parseFloat(camp.x), y: parseFloat(camp.y) };
+  const gate = gates.find(g=> g.name === name);
+  if(gate) return { x: parseFloat(gate.x), y: parseFloat(gate.y) };
+  return null;
+}
+
+const TRUNK_PATH_SEGMENTS = TRUNK_PATH_EDGES.map(([a, b], i)=>{
+  const pa = findNamedNode(a), pb = findNamedNode(b);
+  if(!pa || !pb) return null;
+  return { a: pa, b: pb, seed: i * 31 + 7 };
+}).filter(Boolean);
+
+// Closest point on any trunk-path segment to (x,y), clamped to each
+// segment's own extent — used so a stage/venue/gate/camp spoke visibly
+// joins the real path network at a sensible spot along it, instead of
+// every spoke converging on one exact district dot the way
+// nearestDistrict() alone used to draw them.
+function nearestPointOnTrunk(x, y){
+  let best = null, bestDist = Infinity;
+  TRUNK_PATH_SEGMENTS.forEach(seg=>{
+    const { a, b } = seg;
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const lenSq = dx * dx + dy * dy || 1;
+    let t = ((x - a.x) * dx + (y - a.y) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const px = a.x + dx * t, py = a.y + dy * t;
+    const dist = (px - x) ** 2 + (py - y) ** 2;
+    if(dist < bestDist){ bestDist = dist; best = { x: px, y: py }; }
+  });
+  return best;
+}
+
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
 
@@ -6994,9 +7080,13 @@ function buildMapGeoJSON(){
     });
   }
 
-  const centers = districts.map(d=>[parseFloat(d.x), parseFloat(d.y)]);
-  if(centers.length) centers.push(centers[0]);
-  const trailFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(centers) } };
+  // Main "trail" backbone — the real trunk-path segments traced from
+  // the reference videos (see TRUNK_PATH_EDGES above), not the old
+  // district-array-order loop this used to draw.
+  const trailFeatures = TRUNK_PATH_SEGMENTS.map(seg=>({
+    type: "Feature", properties: {},
+    geometry: { type: "LineString", coordinates: schematicRingToLngLat(curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed)) }
+  }));
 
   // Hill-shading contour rings — every district's own info text is
   // explicitly tagged "Downtown." or "Hilltop." (Thrutopia/Oldtown are
@@ -7076,35 +7166,43 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{ color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
   });
 
-  // Spokes from every stage (major + minor) to its nearest district — the
-  // main walkable "roads" of the path network.
+  // Spokes from every stage (major + minor) to the nearest point on the
+  // real trunk path (TRUNK_PATH_SEGMENTS above) — previously drew
+  // straight to the nearest district's centre point regardless of
+  // whether that's actually where the path runs; joining the trunk
+  // itself reads as "this stage branches off the real route" instead.
   const spokeTargets = locations.filter(p=>p.kind === "stage").concat(minorStages);
   const spokeFeatures = spokeTargets.map((s,i)=>{
     const sx = parseFloat(s.x), sy = parseFloat(s.y);
     const nd = nearestDistrict(sx, sy, districts);
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([sx,sy], [parseFloat(nd.x), parseFloat(nd.y)], i * 17 + 3)) } };
+    const target = nearestPointOnTrunk(sx, sy) || { x: parseFloat(nd.x), y: parseFloat(nd.y) };
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([sx,sy], [target.x, target.y], i * 17 + 3)) } };
   });
 
-  // Thinner "capillary" paths from every smaller point (hidden venues,
-  // gates) to its nearest district — without these, only the dozen
-  // main/minor stages had any path at all, so every hidden venue and
-  // gate looked like a marker dropped on plain grass with no way to
+  // Thinner "capillary" paths from every smaller point (hidden venues)
+  // to the nearest point on the real trunk path — without these, only
+  // the dozen main/minor stages had any path at all, so every hidden
+  // venue looked like a marker dropped on plain grass with no way to
   // reach it. Drawing a path to each one, thinner and fainter than the
   // main stage spokes, makes the whole map read as one connected network
   // instead of isolated pins — same layering idea real illustrated maps
   // use (thick main routes, thin capillary paths to individual stalls/
-  // venues). `landmarks` (lockers, charge points, welfare tents etc.) is
-  // deliberately left out here — those are scattered utility markers,
-  // off by default via the "Landmarks" chip, and drawing paths out to
-  // them made the woods/open ground look like it had real infrastructure
-  // wherever one happened to be plotted, which is the exact "icons
-  // outside the real camping/parking/music zones" clutter the reference
-  // video's own map doesn't show.
-  const capillaryTargets = thingsToFind.concat(gates);
-  const capillaryFeatures = capillaryTargets.map((p,i)=>{
+  // venues). Gates dropped from this list — they already get their own
+  // road-styled connection via gateSpokeFeatures below, and now also sit
+  // directly on the trunk path itself, so a third generic line out of
+  // each gate was pure redundant clutter. `landmarks` (lockers, charge
+  // points, welfare tents etc.) is deliberately left out here too —
+  // those are scattered utility markers, off by default via the
+  // "Landmarks" chip, and drawing paths out to them made the woods/open
+  // ground look like it had real infrastructure wherever one happened to
+  // be plotted, which is the exact "icons outside the real camping/
+  // parking/music zones" clutter the reference video's own map doesn't
+  // show.
+  const capillaryFeatures = thingsToFind.map((p,i)=>{
     const px = parseFloat(p.x), py = parseFloat(p.y);
     const nd = nearestDistrict(px, py, districts);
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nd.x), parseFloat(nd.y)], i * 23 + 11)) } };
+    const target = nearestPointOnTrunk(px, py) || { x: parseFloat(nd.x), y: parseFloat(nd.y) };
+    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [target.x, target.y], i * 23 + 11)) } };
   });
 
   // Camp access paths — every named camping field (campLabels) to
@@ -7515,7 +7613,7 @@ function buildMapGeoJSON(){
     campTriangle: { type:"FeatureCollection", features: triangleFeature ? [triangleFeature] : [] },
     skylarkRings: { type:"FeatureCollection", features: skylarkRingFeatures },
     forests: { type:"FeatureCollection", features: forestFeatures },
-    trail: { type:"FeatureCollection", features: [trailFeature] },
+    trail: { type:"FeatureCollection", features: trailFeatures },
     stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
     bunting: { type:"FeatureCollection", features: buntingFeatures },
     spokes: { type:"FeatureCollection", features: spokeFeatures },
