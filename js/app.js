@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v270";
-const APP_BUILD_TIME = "2026-08-02T12:33:58Z";
+const APP_CACHE_VERSION = "v271";
+const APP_BUILD_TIME = "2026-08-02T13:16:04Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3234,7 +3234,7 @@ const artists = [
   {name:"EVE",stage:"The Lion's Den",day:"Sun",start:"17:10",end:"18:10",genre:"Hip Hop"},
   {name:"FCUKERS",stage:"The Lion's Den",day:"Sun",start:"18:40",end:"19:40"},
   {name:"Scissor Sisters",stage:"The Lion's Den",day:"Sun",start:"20:10",end:"21:40",genre:"Pop / Dance"},
-  {name:"Faithless",stage:"The Lion's Den",day:"Sun",start:"22:15",end:"23:45",genre:"Electronic"},
+  {name:"Faithless",stage:"The Lion's Den",day:"Sun",start:"22:15",end:"23:45",genre:"House / Dance"},
   {name:"Boomtown Closing Ceremony",stage:"The Lion's Den",day:"Sun",start:"23:50",end:"00:00"},
   // --- Sun: The Magic Teapot ---
   {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sun",start:"12:00",end:"00:00"},
@@ -3659,21 +3659,15 @@ promptArtistSearch();
 // while the stage list — unbounded, 12 main stages plus 50+ hidden
 // venues — scrolls naturally downward instead of forcing an ever-wider
 // row of columns.
-// venueDirectory is declared further down the file, so this set is built
-// lazily on first use rather than at module-evaluation time.
-let _mainStageNames = null;
-function mainStageNames(){
-  if(!_mainStageNames) _mainStageNames = new Set(venueDirectory.filter(v=>v.type==="Main stage").map(v=>v.name));
-  return _mainStageNames;
-}
+// venueDirectory is declared further down the file, so category lookups
+// below are built lazily on first use rather than at module-evaluation time.
 
-// Four broad buckets for colour-coding the timeline row heads (see
-// buildTimelineHTML below) — purely visual grouping, doesn't touch the
-// existing main-stages-first-then-alphabetical sort or row order at all.
-// Maps every venueDirectory `type` string onto "main"/"venue"/"workshop"/
+// Four broad buckets, collapsed into the three tiers below (CATEGORY_TIER)
+// for grouping the timeline's stage list (see buildTimelineHTML). Maps
+// every venueDirectory `type` string onto "main"/"venue"/"workshop"/
 // "activity"; a stage name with no venueDirectory entry (e.g. a group
-// member's own "<name>'s activities" personal row) just gets no class
-// and falls back to the neutral default styling.
+// member's own "<name>'s activities" personal row) gets null and falls
+// into its own trailing tier.
 const VENUE_TYPE_CATEGORY = {
   "Main stage": "main",
   "Hidden venue": "venue",
@@ -3695,6 +3689,19 @@ function venueCategoryFor(stageName){
     _venueCategoryByName = new Map(venueDirectory.map(v=> [v.name, VENUE_TYPE_CATEGORY[v.type] || null]));
   }
   return _venueCategoryByName.get(stageName) || null;
+}
+
+// Three-tier grouping for the timeline's stage list — main stages, then
+// smaller stages/venues, then workshops/activities/support — rendered as
+// section-divider rows (see buildTimelineHTML) rather than per-name text
+// colour, so the distinction reads as an actual grouping in the list
+// instead of a colour key you have to learn. Anything with no
+// venueDirectory entry (e.g. a group member's own "<name>'s activities"
+// row) sorts into its own trailing tier, after everything else.
+const CATEGORY_TIER = { main: 0, venue: 1, workshop: 2, activity: 2 };
+const TIER_LABELS = { 0: "Main Stages", 1: "Stages & Venues", 2: "Activities & Support", 3: "Other" };
+function tierForCategory(category){
+  return (category != null && CATEGORY_TIER[category] != null) ? CATEGORY_TIER[category] : 3;
 }
 
 function buildTimelineHTML(items, opts){
@@ -3722,13 +3729,13 @@ function buildTimelineHTML(items, opts){
   });
   const minMin = Math.floor(Math.min(...parsed.map(p=>p._start))/60)*60;
   const maxMin = Math.ceil(Math.max(...parsed.map(p=>p._end))/60)*60;
-  // Main stages first (Grand Central, Hydro XL, etc.), then every smaller/
-  // hidden venue, alphabetically within each group.
-  const mainStages = mainStageNames();
+  // Main stages first (Grand Central, Hydro XL, etc.), then every smaller
+  // stage/hidden venue, then workshops/activities/support — alphabetically
+  // within each tier (see CATEGORY_TIER above).
   const stages = [...new Set(parsed.map(p=>p.stage))].sort((a,b)=>{
-    const aMain = mainStages.has(a) ? 0 : 1;
-    const bMain = mainStages.has(b) ? 0 : 1;
-    return aMain !== bMain ? aMain - bMain : a.localeCompare(b);
+    const ta = tierForCategory(venueCategoryFor(a));
+    const tb = tierForCategory(venueCategoryFor(b));
+    return ta !== tb ? ta - tb : a.localeCompare(b);
   });
   const totalWidth = Math.max((maxMin-minMin)*pxPerMin, 40);
   const savedNames = opts.savedNames || null;
@@ -3757,6 +3764,12 @@ function buildTimelineHTML(items, opts){
     hourLines += `<div class="timeline-vline" style="left:${left}px;"></div>`;
   }
 
+  // Section-divider rows between tiers (see CATEGORY_TIER/TIER_LABELS
+  // above) — only shown when the stage list actually spans more than one
+  // tier, so a Plan/Clash timeline that's all main-stage saves doesn't
+  // get a redundant single "Main Stages" header.
+  const tiersPresent = new Set(stages.map(s=>tierForCategory(venueCategoryFor(s))));
+  let lastTier = null;
   const rows = stages.map(stage=>{
     // Sorted by start time, then packed into lanes (extra vertical bands
     // within the row) via a greedy interval-scheduling pass — two items
@@ -3808,12 +3821,16 @@ function buildTimelineHTML(items, opts){
         : "";
       return `<div class="${cls}" style="left:${left}px; width:${width}px; top:${top}px; height:${blockHeight}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
-    // Category class is purely cosmetic (colours the row head/left edge
-    // via CSS) — doesn't touch the stage sort above or any block/lane
-    // logic, so the grid's actual structure and behaviour is unchanged.
-    const category = venueCategoryFor(stage);
-    const rowCls = "timeline-row" + (category ? " cat-" + category : "");
-    return `<div class="${rowCls}"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${stageRowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
+    // venueCategoryFor()'s only job here is deciding which tier this row
+    // falls into, for the section divider below — doesn't touch the
+    // stage sort above or any block/lane logic.
+    const tier = tierForCategory(venueCategoryFor(stage));
+    let divider = "";
+    if(tiersPresent.size > 1 && tier !== lastTier){
+      divider = `<div class="timeline-section-divider"><span class="timeline-section-divider-label">${escapeHtml(TIER_LABELS[tier] || "")}</span></div>`;
+      lastTier = tier;
+    }
+    return divider + `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${stageRowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
   }).join("");
 
   // Same line repeated into every row-body above (each positioned in
