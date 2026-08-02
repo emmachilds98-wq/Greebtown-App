@@ -1,19 +1,8 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v283";
+const CACHE_VERSION = "v284";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
 
-// ===============================
-// BACKGROUND PUSH (FCM) — lets a chat message reach the lock screen
-// with the app fully closed, not just backgrounded. A service worker
-// can't import js/app.js (no ES modules here, and FIREBASE_CONFIG lives
-// in a page-context script), so the same config is duplicated below —
-// keep both in sync if the Firebase project ever changes. Registering a
-// device for push (js/app.js's registerPushToken) and actually sending
-// one (functions/index.js's sendChatPush Cloud Function) are the other
-// two pieces of this feature. Wrapped in try/catch: if the CDN scripts
-// fail to load (offline first install, etc.), the rest of this worker
-// — caching, offline support — still needs to carry on regardless.
 try{
   importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js");
   importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js");
@@ -27,7 +16,7 @@ try{
   });
   firebase.messaging();
 }catch(err){
-  console.warn("Firebase Messaging unavailable in service worker (push notifications won't reach the lock screen, everything else still works):", err && err.message);
+  console.warn("Firebase Messaging unavailable in service worker:", err && err.message);
 }
 
 const PRECACHE_URLS = [
@@ -95,6 +84,18 @@ self.addEventListener("fetch", (event) => {
           return networkResponse;
         })
         .catch(() => caches.match(req).then((cached) => cached || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  // Network-first for JS so map/location updates always reach clients
+  if (url.pathname.includes("/js/") || url.pathname.endsWith(".js")) {
+    event.respondWith(
+      fetch(req).then((networkResponse) => {
+        const clone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+        return networkResponse;
+      }).catch(() => caches.match(req))
     );
     return;
   }

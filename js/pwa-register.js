@@ -1,6 +1,46 @@
+// --- force visible build stamp + one-time cache clear for map v284 ---
+(function(){
+  var KEY = "greebtown_bust_v284";
+  var BUILD_LABEL = "Updated 2 Aug, 19:20";
+  function setPill(){
+    try {
+      var pill = document.getElementById("buildStatusPill");
+      if (!pill) return;
+      pill.textContent = BUILD_LABEL;
+      pill.style.cursor = "";
+      pill.onclick = null;
+    } catch (e) {}
+  }
+  setPill();
+  setTimeout(setPill, 200);
+  setTimeout(setPill, 1000);
+  setTimeout(setPill, 2500);
+
+  try {
+    if (sessionStorage.getItem(KEY)) return;
+    var stages = (window.BOOMTOWN_LOCATIONS_2026 && window.BOOMTOWN_LOCATIONS_2026.stages) || [];
+    var hasLion = stages.some(function(s){ return /lion/i.test(s.label || ""); });
+    if (hasLion) {
+      sessionStorage.setItem(KEY, "1");
+      return;
+    }
+    sessionStorage.setItem(KEY, "1");
+    var done = function(){ window.location.reload(); };
+    var clear = window.caches
+      ? caches.keys().then(function(keys){ return Promise.all(keys.map(function(k){ return caches.delete(k); })); })
+      : Promise.resolve();
+    clear.then(function(){
+      if (!("serviceWorker" in navigator)) return done();
+      return navigator.serviceWorker.getRegistrations().then(function(regs){
+        return Promise.all(regs.map(function(r){ return r.unregister(); }));
+      }).then(done, done);
+    }, done);
+  } catch (e) {
+    try { sessionStorage.setItem(KEY, "1"); } catch (e2) {}
+  }
+})();
+
 // Registers the service worker and lets a published update take over
-// automatically (the page reloads once, silently, when a new version
-// has finished installing) — no extra UI, no change to existing screens.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./service-worker.js").catch((err) => {
@@ -16,34 +56,14 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// --- stop perpetual "Update available" loop if SW/app versions briefly drift ---
+// Stop perpetual Update available loop
 (function(){
-  function resetBuildPill(){
-    try {
-      const pill = document.getElementById("buildStatusPill");
-      if (!pill) return;
-      if (!/Update available/i.test(pill.textContent || "")) return;
-      const d = (typeof APP_BUILD_TIME !== "undefined") ? new Date(APP_BUILD_TIME) : new Date();
-      const time = d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
-      const date = d.toLocaleDateString([], { day:"numeric", month:"short" });
-      pill.textContent = "Updated " + date + ", " + time;
-      pill.style.cursor = "";
-      pill.style.background = "";
-      pill.style.color = "";
-      pill.style.borderColor = "";
-      pill.onclick = null;
-    } catch (e) {}
-  }
   if (typeof checkForStaleCopy === "function") {
     checkForStaleCopy = function(){ return Promise.resolve(false); };
   }
-  resetBuildPill();
-  setTimeout(resetBuildPill, 300);
-  setTimeout(resetBuildPill, 1200);
-  setTimeout(resetBuildPill, 3000);
 })();
 
-// --- map GPS matching upgrade ---
+// Map GPS matching upgrade
 (function(){
   function normalizeVenueKey(s){
     return String(s || "")
@@ -63,65 +83,17 @@ if ("serviceWorker" in navigator) {
     "bad apple": "bad apple bar",
     "bad apple bar": "bad apple bar",
     "twisted time machine": "bad apple bar",
-    "twisted time machine bad apple bar": "bad apple bar",
     "circus": "circus tent",
     "circus tent": "circus tent",
     "fools leap": "fools leap",
-    "the fools leap": "fools leap",
     "grand central": "grand central",
-    "postal posse": "postal posse",
-    "reel news": "reel news",
-    "magic teapot": "magic teapot",
-    "the magic teapot": "magic teapot",
-    "foggers mill": "foggers mill",
-    "fogger s mill": "foggers mill",
-    "topsy turvy trims": "topsy turvy trims",
-    "topsy turvy": "topsy turvy trims",
-    "ancient futures": "ancient futures",
-    "rebel girls": "rebel girls club",
-    "rebel girls club": "rebel girls club",
-    "agents of change": "agents of change hq",
-    "agents of change hq": "agents of change hq",
-    "pomegranate parlour": "pomegranate parlour",
-    "the pomegranate parlour": "pomegranate parlour",
-    "pomegranare": "pomegranate parlour",
-    "mining for gold town": "mining for g old town",
-    "mining for g old town": "mining for g old town",
-    "mining for old town": "mining for g old town",
-    "den of disorder": "den of disorder",
-    "games lounge": "games lounge",
-    "games": "games lounge",
-    "daily rag": "daily rag",
-    "the daily rag": "daily rag",
-    "da graffs": "da graffs",
-    "dagraffs": "da graffs",
-    "velvet rope": "velvet rope",
-    "skylark hilltop": "skylark hilltop",
-    "boomtown hall": "boomtown hall",
-    "retreat": "retreat",
-    "the retreat": "retreat",
-    "tinker station": "tinker station",
-    "spinney hollow": "spinney hollow",
-    "energy garden": "energy garden",
-    "climate live": "climate live",
-    "sharing circles": "sharing circles",
-    "giant tree circle": "giant tree circle",
-    "the giant tree circle": "giant tree circle",
-    "cocaine anonymous": "cocaine anonymous",
-    "permaculture": "permaculture",
-    "elemental": "elemental",
-    "hapitat": "hapitat",
-    "habitat": "hapitat",
-    "xr": "xr",
-    "crafts": "crafts",
-    "sauna": "sauna",
-    "crafty rascals": "crafty rascals",
     "lions den": "the lions den",
     "lion s den": "the lions den",
     "the lions den": "the lions den",
     "hydro": "hydro xl",
     "hydro xl": "hydro xl",
-    "quantum": "quantum"
+    "quantum": "quantum",
+    "crafty rascals": "crafty rascals"
   };
   function improvedRealStageMatch(name){
     const data = window.BOOMTOWN_LOCATIONS_2026;
@@ -149,13 +121,12 @@ if ("serviceWorker" in navigator) {
   }
   realStageMatch = improvedRealStageMatch;
   window.realStageMatch = improvedRealStageMatch;
-  window.normalizeVenueKey = normalizeVenueKey;
   if(typeof loadMap === "function"){
-    try { loadMap(); } catch(e) { console.warn("map-matching: loadMap refresh failed", e); }
+    try { loadMap(); } catch(e) { console.warn("map-matching refresh failed", e); }
   }
 })();
 
-// --- official-map position fixes (Lion's Den / Hydro XL / Quantum + districts) ---
+// Schematic position fixes
 (function(){
   const SCHEMATIC_FIXES = {
     "The Lion's Den": { x: "79%", y: "84%" },
@@ -174,14 +145,8 @@ if ("serviceWorker" in navigator) {
         if (fix) { p.x = fix.x; p.y = fix.y; }
       });
     }
-    if (typeof thingsToFind !== "undefined" && Array.isArray(thingsToFind)) {
-      thingsToFind.forEach(function(p){
-        const fix = SCHEMATIC_FIXES[p.name];
-        if (fix) { p.x = fix.x; p.y = fix.y; }
-      });
-    }
-  } catch (e) { console.warn("schematic fix failed", e); }
+  } catch (e) {}
   if (typeof loadMap === "function") {
-    try { loadMap(); } catch (e) { console.warn("loadMap after schematic fix failed", e); }
+    try { loadMap(); } catch (e) {}
   }
 })();
