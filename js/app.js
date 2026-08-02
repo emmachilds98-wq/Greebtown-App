@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v269";
-const APP_BUILD_TIME = "2026-08-02T00:11:15Z";
+const APP_CACHE_VERSION = "v270";
+const APP_BUILD_TIME = "2026-08-02T12:33:58Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -1040,12 +1040,35 @@ loadCustomSocials();
 //    literally saying "Dub, roots" and a confirmed lineup act called
 //    "Roots Ginjah" — retagged to use the word already in its own
 //    description, and reads less like a typo of "Dubstep / Bass" now.
+//
+// A later pass went further: several stages blend genres that are
+// genuinely distinct (DnB vs jungle, punk vs metal, dub vs reggae, D&B
+// vs ska) into one stage-wide tag, which is the best a per-STAGE-only
+// system can do — but individual acts within those stages, took under a
+// named record label/night/set title, gave real per-ACT evidence to do
+// better. genreOf() already checks `a.genre` before falling back to
+// STAGE_GENRE, so ~77 individual schedule entries below now carry their
+// own `genre`, sourced only from unambiguous evidence in the data
+// itself (a takeover branded after a real, identifiable label/night, or
+// a set explicitly named after its genre) or, for The Lion's Den/Grand
+// Central's headline-level bookings, the act's own well-established
+// public genre (Madness = ska, Andy C = drum & bass, Kneecap = hip hop,
+// etc.) — never a guess at an unfamiliar/local DJ's specific style.
+// Stage defaults below are left as the best single fallback tag for
+// whatever's NOT individually confirmed this way (e.g. Anara Forest's
+// default "Drum & Bass" alongside its own confirmed-"Jungle" Flexout
+// Audio/20 Years Of Rupture sets) rather than forced to a false single
+// label for a stage that's genuinely mixed. No "Ska" chip exists on its
+// own for the same reason — searched the full 1621 acts for it and only
+// found two real ska-punk names (Inner Terrestrials, Popes Of
+// Chillitown, both tagged "Ska / Punk" below) among Hangar 161's mostly-
+// unfamiliar punk/DIY roster, not enough evidence to retag the rest.
 // ===============================
 const STAGE_GENRE = {
   "Acid Leak":"Acid / Techno", "Agents of Change HQ":"Talks / Community",
-  "Airetiko":"Circus / Performance", "Anara Forest":"Bass / Drum & Bass",
+  "Airetiko":"Circus / Performance", "Anara Forest":"Drum & Bass",
   "Ancient Futures":"Talks / Community", "Blink Mental Health":"Welfare / Support",
-  "Botanica Zoo":"Bass / Drum & Bass", "Busker's Wharf":"Folk / Acoustic",
+  "Botanica Zoo":"Jungle", "Busker's Wharf":"Folk / Acoustic",
   "Cas's Costumes":"Party / Variety", "Circus Tent":"Circus / Performance",
   "Climate Live":"Talks / Community", "Cocaine Anonymous":"Welfare / Support",
   "Community Fire":"Talks / Community", "Craft Tent":"Workshop / Craft",
@@ -1054,7 +1077,7 @@ const STAGE_GENRE = {
   "Energy Garden":"Talks / Community", "Foggers Mill":"Eclectic / DJ",
   "Full Moon Ballroom":"Swing / Variety", "Gabber Kebabber":"Hardcore / Gabber",
   "Games Lounge":"Chill / Downtime", "Garden":"Chill / Downtime",
-  "Grand Central":"Bands / Hip Hop", "Hangar 161":"Alt / Punk / Metal",
+  "Grand Central":"Bands / Hip Hop", "Hangar 161":"Punk",
   "Hapitat":"Chill / Downtime", "Helix":"Breaks / Big Beat",
   "Hidden Woods":"Bass / Dub / Jungle", "Hotel Paradiso":"Eclectic / DJ",
   "Hydro XL":"House / Dance", "Infinity":"House / UK Garage",
@@ -1084,10 +1107,8 @@ function genreOf(a){ return a.genre || STAGE_GENRE[a.stage] || "Unconfirmed"; }
 // recognise still tells you roughly what you're walking into.
 const GENRE_INFO = {
   "Acid / Techno": "Squelchy 303 acid lines over driving, hypnotic techno.",
-  "Alt / Punk / Metal": "Guitar-led live bands — punk energy through to heavier metal.",
-  "Bands / Hip Hop": "Live bands and hip hop headliners on the same bill — the flagship main stage's own eclectic mix.",
+  "Bands / Hip Hop": "Live bands and hip hop headliners on the same bill — the flagship main stage's own eclectic mix (see individual acts below for a more specific tag where one's confirmed).",
   "Bass / Alt": "Bass-weight production with an alternative, less-club-standard edge.",
-  "Bass / Drum & Bass": "Fast breakbeats and heavy sub-bass — the jungle/drum & bass/UK garage family.",
   "Bass / Dub / Jungle": "Sound-system bass culture — dub weight and jungle's chopped breaks.",
   "Bass / Party": "Crowd-pleasing bass music built for singalongs and big drops.",
   "Breaks / Big Beat": "Chunky breakbeats and big, riffy drops — festival breaks.",
@@ -1095,21 +1116,31 @@ const GENRE_INFO = {
   "Chill / Downtime": "A low-key space to sit down and recharge, not a dancefloor.",
   "Circus / Performance": "Live circus and physical performance — aerial, acrobatics, theatre.",
   "Comedy / Game-show": "Hosted comedy and game-show-style segments rather than DJs.",
-  "D&B / Reggae / Headline": "Big-stage drum & bass headliners alongside reggae/sound-system sets.",
+  "D&B / Reggae / Headline": "Big-stage drum & bass headliners alongside reggae/sound-system sets (see individual acts below for a more specific tag where one's confirmed).",
+  "Drum & Bass": "Fast breakbeats and heavy sub-bass at full drum & bass tempo — the polished, modern end of the family jungle grew into.",
   "Dub / Roots": "Deep, echo-laden dub and roots reggae with sub-bass at its core.",
   "Dubstep / Bass": "Half-time wobble and weight — classic and modern dubstep.",
   "Eclectic / DJ": "Genre-hopping DJ sets that don't sit still in one lane.",
+  "Electronic": "Full-spectrum electronic/dance production that doesn't sit neatly in one club genre.",
   "Folk / Acoustic": "Live, mostly-unplugged folk and acoustic sets.",
   "Folk / Balkan / Party": "Brass-heavy Balkan folk turned into a full-on party set.",
   "Garage / Gabber": "A genuinely wide spread — UK garage's bounce at one end, gabber's distorted extreme at the other.",
   "Hardcore / Gabber": "Very fast, distorted kicks — the hardcore/gabber end of the spectrum.",
+  "Hip Hop": "Rap and hip hop — UK and international, live MCs through to full crews.",
   "House / Dance": "Classic four-to-the-floor house built for dancing.",
   "House / UK Garage": "Four-to-the-floor house crossed with UK garage's bounce and skip.",
   "Hyperpop / Party": "Hyperpop's sugar-rush, genre-warping energy built for a party crowd.",
+  "Indie / Alt Rock": "Guitar-led indie and alternative rock, outside the DJ/electronic lineup.",
   "Irish Folk / Trad": "Traditional Irish folk, played live and built for a sing-along.",
+  "Jungle": "Chopped breakbeats and reggae-sampling bass at jungle's classic, rawer tempo — the genre drum & bass grew out of.",
+  "Metal": "Heavy, guitar-driven metal — metalcore through to extreme/death metal.",
   "Party / Playback Sets": "Themed nostalgia/playback sets built around a single album or era.",
   "Party / Variety": "Feel-good party sets — a bit of everything, low on pretension.",
+  "Pop / Dance": "Chart-pop and Eurodance built for a singalong, not a serious DJ set.",
   "Psytrance / Trance": "Fast, hypnotic, high-energy trance and psytrance.",
+  "Punk": "Loud, fast, guitar-led punk.",
+  "Reggae": "Classic and modern reggae — song-based, distinct from dub's heavier studio-effects cousin.",
+  "Ska / Punk": "Ska's off-beat horns and skank rhythm fused with punk's speed and attitude.",
   "Swing / Variety": "Swing-era music and variety entertainment, live and danceable.",
   "Talks / Community": "Panels, workshops and community-led conversation rather than a DJ set.",
   "Techno / Electro": "Driving, machine-built techno and electro.",
@@ -1494,12 +1525,12 @@ const artists = [
   {name:"Jimbitch B2B Stan Da Man [Uncommon Records Takeover]",stage:"Anara Forest",day:"Thu",start:"14:00",end:"15:00"},
   {name:"Astar B2B Kaisha [Uncommon Records Takeover]",stage:"Anara Forest",day:"Thu",start:"15:00",end:"16:00"},
   {name:"G-Class B2B RJD [Uncommon Records Takeover]",stage:"Anara Forest",day:"Thu",start:"16:00",end:"17:00"},
-  {name:"Bassi B2B Charli Brix [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"17:00",end:"18:30"},
-  {name:"Para B2B Umbra Ft. Strategy [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"18:30",end:"20:00"},
-  {name:"Sydney Bryce - Live PA [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"20:00",end:"21:00"},
-  {name:"QZB Ft. Ellis Esco [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"21:00",end:"22:00"},
-  {name:"TeeBee Ft. MC Fokus [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"22:00",end:"23:00"},
-  {name:"Amoss Ft. MC Fokus [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"23:00",end:"00:00"},
+  {name:"Bassi B2B Charli Brix [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"17:00",end:"18:30",genre:"Jungle"},
+  {name:"Para B2B Umbra Ft. Strategy [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"18:30",end:"20:00",genre:"Jungle"},
+  {name:"Sydney Bryce - Live PA [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"20:00",end:"21:00",genre:"Jungle"},
+  {name:"QZB Ft. Ellis Esco [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"21:00",end:"22:00",genre:"Jungle"},
+  {name:"TeeBee Ft. MC Fokus [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"22:00",end:"23:00",genre:"Jungle"},
+  {name:"Amoss Ft. MC Fokus [Flexout Audio Takeover]",stage:"Anara Forest",day:"Thu",start:"23:00",end:"00:00",genre:"Jungle"},
   // --- Thu: Ancient Futures ---
   {name:"Scroll Loop Bingo",stage:"Ancient Futures",day:"Thu",start:"11:30",end:"12:30"},
   {name:"Divine union in a divide world",stage:"Ancient Futures",day:"Thu",start:"13:00",end:"15:00"},
@@ -2032,24 +2063,24 @@ const artists = [
   // --- Fri: Garden ---
   {name:"Wildflower Fortunes",stage:"Garden",day:"Fri",start:"10:00",end:"18:00"},
   // --- Fri: Grand Central ---
-  {name:"Dutty Moonshine Big Band",stage:"Grand Central",day:"Fri",start:"12:30",end:"14:00"},
-  {name:"Frankie Stew & Harvey Gunn",stage:"Grand Central",day:"Fri",start:"14:30",end:"15:30"},
-  {name:"Havoc of Mobb Deep w/ Big Noyd + DJ L.E.S",stage:"Grand Central",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"Big Special",stage:"Grand Central",day:"Fri",start:"17:30",end:"18:30"},
-  {name:"Kae Tempest",stage:"Grand Central",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"High Vis",stage:"Grand Central",day:"Fri",start:"20:30",end:"21:30"},
+  {name:"Dutty Moonshine Big Band",stage:"Grand Central",day:"Fri",start:"12:30",end:"14:00",genre:"Swing / Variety"},
+  {name:"Frankie Stew & Harvey Gunn",stage:"Grand Central",day:"Fri",start:"14:30",end:"15:30",genre:"Hip Hop"},
+  {name:"Havoc of Mobb Deep w/ Big Noyd + DJ L.E.S",stage:"Grand Central",day:"Fri",start:"16:00",end:"17:00",genre:"Hip Hop"},
+  {name:"Big Special",stage:"Grand Central",day:"Fri",start:"17:30",end:"18:30",genre:"Indie / Alt Rock"},
+  {name:"Kae Tempest",stage:"Grand Central",day:"Fri",start:"19:00",end:"20:00",genre:"Hip Hop"},
+  {name:"High Vis",stage:"Grand Central",day:"Fri",start:"20:30",end:"21:30",genre:"Punk"},
   {name:"L'Entourloop",stage:"Grand Central",day:"Fri",start:"22:00",end:"23:00"},
   // --- Fri: Hangar 161 ---
-  {name:"The Screaming Dolls [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"13:00",end:"13:40"},
-  {name:"Ruena [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"14:00",end:"14:40"},
-  {name:"Baddy Issues [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"15:00",end:"15:40"},
-  {name:"Crae Wolf [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"Ward XVI [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"17:30",end:"18:30"},
-  {name:"Vexed [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"19:00",end:"20:00"},
-  {name:"Cody Frost [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"20:30",end:"21:30"},
-  {name:"Nightlives [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"22:00",end:"23:00"},
-  {name:"Hyphen [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"23:30",end:"00:30"},
-  {name:"PENGSHUi [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"01:00",end:"02:00"},
+  {name:"The Screaming Dolls [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"13:00",end:"13:40",genre:"Metal"},
+  {name:"Ruena [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"14:00",end:"14:40",genre:"Metal"},
+  {name:"Baddy Issues [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"15:00",end:"15:40",genre:"Metal"},
+  {name:"Crae Wolf [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"16:00",end:"17:00",genre:"Metal"},
+  {name:"Ward XVI [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"17:30",end:"18:30",genre:"Metal"},
+  {name:"Vexed [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"19:00",end:"20:00",genre:"Metal"},
+  {name:"Cody Frost [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"20:30",end:"21:30",genre:"Metal"},
+  {name:"Nightlives [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"22:00",end:"23:00",genre:"Metal"},
+  {name:"Hyphen [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"23:30",end:"00:30",genre:"Metal"},
+  {name:"PENGSHUi [Earache Records Takeover]",stage:"Hangar 161",day:"Fri",start:"01:00",end:"02:00",genre:"Metal"},
   // --- Fri: Hapitat ---
   {name:"Hapitat",stage:"Hapitat",day:"Fri",start:"10:00",end:"18:00"},
   // --- Fri: Helix ---
@@ -2241,12 +2272,12 @@ const artists = [
   {name:"Special Guest",stage:"Sub Lab",day:"Fri",start:"02:30",end:"03:59"},
   // --- Fri: Tangled Roots ---
   {name:"Lionpulse x Sinai",stage:"Tangled Roots",day:"Fri",start:"12:00",end:"13:00"},
-  {name:"Akira B2B Jaz Imsky (Buntai) Ft. Cunning MC [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"13:00",end:"14:30"},
-  {name:"Skalah [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"14:30",end:"16:00"},
-  {name:"Darkai B2B Felixculpah [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"16:00",end:"17:00"},
-  {name:"Commodo B2B Pinch [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Silkie [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"18:00",end:"19:30"},
-  {name:"Mala [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"19:30",end:"21:00"},
+  {name:"Akira B2B Jaz Imsky (Buntai) Ft. Cunning MC [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"13:00",end:"14:30",genre:"Dubstep / Bass"},
+  {name:"Skalah [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"14:30",end:"16:00",genre:"Dubstep / Bass"},
+  {name:"Darkai B2B Felixculpah [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"16:00",end:"17:00",genre:"Dubstep / Bass"},
+  {name:"Commodo B2B Pinch [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"17:00",end:"18:00",genre:"Dubstep / Bass"},
+  {name:"Silkie [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"18:00",end:"19:30",genre:"Dubstep / Bass"},
+  {name:"Mala [20 Years of DEEP MEDi]",stage:"Tangled Roots",day:"Fri",start:"19:30",end:"21:00",genre:"Dubstep / Bass"},
   // --- Fri: The Boomtown Bobbies ---
   {name:"Music from the Mothership",stage:"The Boomtown Bobbies",day:"Fri",start:"15:00",end:"16:30"},
   {name:"Uncle Boomy",stage:"The Boomtown Bobbies",day:"Fri",start:"16:30",end:"17:15"},
@@ -2296,15 +2327,15 @@ const artists = [
   {name:"Mowgli b2b Slewy",stage:"The Immortal Children of the Eternal Seed",day:"Fri",start:"03:00",end:"04:00"},
   // --- Fri: The Lion's Den ---
   {name:"Boomtown Opening Ceremony",stage:"The Lion's Den",day:"Fri",start:"12:00",end:"12:30"},
-  {name:"Madness",stage:"The Lion's Den",day:"Fri",start:"12:30",end:"13:50"},
-  {name:"Shy FX Ft. Rage",stage:"The Lion's Den",day:"Fri",start:"14:05",end:"15:30"},
-  {name:"Sub Focus",stage:"The Lion's Den",day:"Fri",start:"15:30",end:"16:30"},
-  {name:"Alborosie & Shengen Clan",stage:"The Lion's Den",day:"Fri",start:"17:00",end:"18:00"},
-  {name:"Gentleman's Dub Club & Friends",stage:"The Lion's Den",day:"Fri",start:"18:30",end:"20:00"},
-  {name:"Ren",stage:"The Lion's Den",day:"Fri",start:"20:30",end:"21:30"},
-  {name:"Kneecap",stage:"The Lion's Den",day:"Fri",start:"22:15",end:"23:30"},
-  {name:"Wilkinson Ft. MC AD-APT",stage:"The Lion's Den",day:"Fri",start:"23:15",end:"00:30"},
-  {name:"Camo & Krooked B2B Mefjus Ft. Daxta",stage:"The Lion's Den",day:"Fri",start:"00:30",end:"02:00"},
+  {name:"Madness",stage:"The Lion's Den",day:"Fri",start:"12:30",end:"13:50",genre:"Ska / Punk"},
+  {name:"Shy FX Ft. Rage",stage:"The Lion's Den",day:"Fri",start:"14:05",end:"15:30",genre:"Jungle"},
+  {name:"Sub Focus",stage:"The Lion's Den",day:"Fri",start:"15:30",end:"16:30",genre:"Drum & Bass"},
+  {name:"Alborosie & Shengen Clan",stage:"The Lion's Den",day:"Fri",start:"17:00",end:"18:00",genre:"Reggae"},
+  {name:"Gentleman's Dub Club & Friends",stage:"The Lion's Den",day:"Fri",start:"18:30",end:"20:00",genre:"Dub / Roots"},
+  {name:"Ren",stage:"The Lion's Den",day:"Fri",start:"20:30",end:"21:30",genre:"Hip Hop"},
+  {name:"Kneecap",stage:"The Lion's Den",day:"Fri",start:"22:15",end:"23:30",genre:"Hip Hop"},
+  {name:"Wilkinson Ft. MC AD-APT",stage:"The Lion's Den",day:"Fri",start:"23:15",end:"00:30",genre:"Drum & Bass"},
+  {name:"Camo & Krooked B2B Mefjus Ft. Daxta",stage:"The Lion's Den",day:"Fri",start:"00:30",end:"02:00",genre:"Drum & Bass"},
   // --- Fri: The Magic Teapot ---
   {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Fri",start:"12:00",end:"00:00"},
   // --- Fri: The Pomegranate Parlour ---
@@ -2399,14 +2430,14 @@ const artists = [
   // --- Sat: Anara Forest ---
   {name:"ELOQ B2B ESC",stage:"Anara Forest",day:"Sat",start:"14:00",end:"15:00"},
   {name:"HiTech",stage:"Anara Forest",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"Pete Cannon - Live",stage:"Anara Forest",day:"Sat",start:"16:00",end:"17:00"},
+  {name:"Pete Cannon - Live",stage:"Anara Forest",day:"Sat",start:"16:00",end:"17:00",genre:"Jungle"},
   {name:"Ivy Lab",stage:"Anara Forest",day:"Sat",start:"17:00",end:"18:30"},
   {name:"Buunshin",stage:"Anara Forest",day:"Sat",start:"18:30",end:"19:45"},
-  {name:"J:Kenzo B2B Skeptical (140 Set) Ft. SP:MC [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"19:45",end:"21:15"},
-  {name:"Breakage B2B Flight [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"21:15",end:"22:45"},
-  {name:"Mantra B2B Tim Reaper [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"22:45",end:"00:15"},
-  {name:"Double O B2B SHERELLE [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"00:15",end:"01:45"},
-  {name:"DJ Die B2B Krust [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"01:45",end:"03:00"},
+  {name:"J:Kenzo B2B Skeptical (140 Set) Ft. SP:MC [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"19:45",end:"21:15",genre:"Jungle"},
+  {name:"Breakage B2B Flight [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"21:15",end:"22:45",genre:"Jungle"},
+  {name:"Mantra B2B Tim Reaper [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"22:45",end:"00:15",genre:"Jungle"},
+  {name:"Double O B2B SHERELLE [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"00:15",end:"01:45",genre:"Jungle"},
+  {name:"DJ Die B2B Krust [20 Years Of Rupture]",stage:"Anara Forest",day:"Sat",start:"01:45",end:"03:00",genre:"Jungle"},
   // --- Sat: Ancient Futures ---
   {name:"Deep Chill Yoga",stage:"Ancient Futures",day:"Sat",start:"11:30",end:"13:30"},
   {name:"The Future of Cannabis",stage:"Ancient Futures",day:"Sat",start:"14:00",end:"15:00"},
@@ -2542,8 +2573,8 @@ const artists = [
   // --- Sat: Garden ---
   {name:"Wildflower Fortunes",stage:"Garden",day:"Sat",start:"10:00",end:"18:00"},
   // --- Sat: Grand Central ---
-  {name:"Hak Baker",stage:"Grand Central",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Rose Gray",stage:"Grand Central",day:"Sat",start:"14:30",end:"15:30"},
+  {name:"Hak Baker",stage:"Grand Central",day:"Sat",start:"13:00",end:"14:00",genre:"Indie / Alt Rock"},
+  {name:"Rose Gray",stage:"Grand Central",day:"Sat",start:"14:30",end:"15:30",genre:"Pop / Dance"},
   {name:"Antony Szmierek",stage:"Grand Central",day:"Sat",start:"16:00",end:"17:00"},
   {name:"Songer",stage:"Grand Central",day:"Sat",start:"17:30",end:"18:30"},
   {name:"Sampa The Great",stage:"Grand Central",day:"Sat",start:"19:00",end:"20:00"},
@@ -2557,8 +2588,8 @@ const artists = [
   {name:"Vegan Meat Raffle",stage:"Hangar 161",day:"Sat",start:"16:00",end:"16:40"},
   {name:"Bruise Control",stage:"Hangar 161",day:"Sat",start:"17:00",end:"17:40"},
   {name:"The Restarts",stage:"Hangar 161",day:"Sat",start:"18:00",end:"18:40"},
-  {name:"Inner Terrestrials",stage:"Hangar 161",day:"Sat",start:"19:00",end:"20:00"},
-  {name:"Popes Of Chillitown",stage:"Hangar 161",day:"Sat",start:"20:30",end:"21:30"},
+  {name:"Inner Terrestrials",stage:"Hangar 161",day:"Sat",start:"19:00",end:"20:00",genre:"Ska / Punk"},
+  {name:"Popes Of Chillitown",stage:"Hangar 161",day:"Sat",start:"20:30",end:"21:30",genre:"Ska / Punk"},
   {name:"Svetlanas",stage:"Hangar 161",day:"Sat",start:"22:00",end:"23:00"},
   {name:"China Shop Bull",stage:"Hangar 161",day:"Sat",start:"23:30",end:"00:30"},
   {name:"Silverwingkiller",stage:"Hangar 161",day:"Sat",start:"01:00",end:"02:00"},
@@ -2575,8 +2606,8 @@ const artists = [
   {name:"DJ Cosworth B2B Oldboy",stage:"Helix",day:"Sat",start:"01:30",end:"03:00"},
   // --- Sat: Hidden Woods ---
   {name:"Rebel Clash",stage:"Hidden Woods",day:"Sat",start:"12:00",end:"13:30"},
-  {name:"DJ Hype: Reggae 2 Jungle",stage:"Hidden Woods",day:"Sat",start:"13:30",end:"15:00"},
-  {name:"General Levy - Live PA",stage:"Hidden Woods",day:"Sat",start:"15:00",end:"15:30"},
+  {name:"DJ Hype: Reggae 2 Jungle",stage:"Hidden Woods",day:"Sat",start:"13:30",end:"15:00",genre:"Jungle"},
+  {name:"General Levy - Live PA",stage:"Hidden Woods",day:"Sat",start:"15:00",end:"15:30",genre:"Jungle"},
   {name:"Sir Spyro Ft. Killa P & Lady Chann",stage:"Hidden Woods",day:"Sat",start:"15:30",end:"17:00"},
   {name:"Saint Ludo",stage:"Hidden Woods",day:"Sat",start:"17:00",end:"18:00"},
   {name:"Arthi",stage:"Hidden Woods",day:"Sat",start:"18:00",end:"19:00"},
@@ -2585,7 +2616,7 @@ const artists = [
   {name:"Neffa-T Ft. D Double E",stage:"Hidden Woods",day:"Sat",start:"22:00",end:"23:30"},
   {name:"Cesco B2B Halogenix Ft. Strategy",stage:"Hidden Woods",day:"Sat",start:"23:30",end:"01:00"},
   {name:"Zero",stage:"Hidden Woods",day:"Sat",start:"01:00",end:"02:30"},
-  {name:"Voltage - Jungle Classics Ft. Shabba D",stage:"Hidden Woods",day:"Sat",start:"02:30",end:"04:00"},
+  {name:"Voltage - Jungle Classics Ft. Shabba D",stage:"Hidden Woods",day:"Sat",start:"02:30",end:"04:00",genre:"Jungle"},
   // --- Sat: Hotel Paradiso ---
   {name:"Vibe Roulette",stage:"Hotel Paradiso",day:"Sat",start:"19:30",end:"21:30"},
   {name:"DJ Andres Cervero",stage:"Hotel Paradiso",day:"Sat",start:"21:30",end:"22:00"},
@@ -2812,15 +2843,15 @@ const artists = [
   {name:"Glume b2b Phossa b2b Samba",stage:"The Immortal Children of the Eternal Seed",day:"Sat",start:"01:00",end:"03:00"},
   {name:"Ellament",stage:"The Immortal Children of the Eternal Seed",day:"Sat",start:"03:00",end:"04:00"},
   // --- Sat: The Lion's Den ---
-  {name:"Crossy B2B Gray B2B Harriet Jaxxon Ft. Spyda [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"13:00",end:"14:00"},
-  {name:"Benny L B2B Break B2B Skeptical Ft. MC GQ & MC Det [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"14:00",end:"15:00"},
-  {name:"Kings of the Rollers Present: Royal Rumble",stage:"The Lion's Den",day:"Sat",start:"15:00",end:"16:00"},
-  {name:"Brockie B2B Micky Finn B2B Ray Keith Ft. Jolie P & Shabba D [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"16:00",end:"17:00"},
-  {name:"Mungo's Hi Fi Allstars Ft. Aziza Jaye, Charlie P, Eva Lazarus, Flowdan, Gardna, Killa P, Magugu & Solo Banton",stage:"The Lion's Den",day:"Sat",start:"17:00",end:"19:00"},
-  {name:"Shaggy",stage:"The Lion's Den",day:"Sat",start:"19:30",end:"20:30"},
-  {name:"Scooter",stage:"The Lion's Den",day:"Sat",start:"21:00",end:"22:10"},
-  {name:"Alix Perez Ft. SP:MC",stage:"The Lion's Den",day:"Sat",start:"22:30",end:"00:00"},
-  {name:"Andy C Presents: Nightlife",stage:"The Lion's Den",day:"Sat",start:"00:00",end:"02:00"},
+  {name:"Crossy B2B Gray B2B Harriet Jaxxon Ft. Spyda [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"13:00",end:"14:00",genre:"Drum & Bass"},
+  {name:"Benny L B2B Break B2B Skeptical Ft. MC GQ & MC Det [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"14:00",end:"15:00",genre:"Drum & Bass"},
+  {name:"Kings of the Rollers Present: Royal Rumble",stage:"The Lion's Den",day:"Sat",start:"15:00",end:"16:00",genre:"Drum & Bass"},
+  {name:"Brockie B2B Micky Finn B2B Ray Keith Ft. Jolie P & Shabba D [Royal Rumble]",stage:"The Lion's Den",day:"Sat",start:"16:00",end:"17:00",genre:"Drum & Bass"},
+  {name:"Mungo's Hi Fi Allstars Ft. Aziza Jaye, Charlie P, Eva Lazarus, Flowdan, Gardna, Killa P, Magugu & Solo Banton",stage:"The Lion's Den",day:"Sat",start:"17:00",end:"19:00",genre:"Dub / Roots"},
+  {name:"Shaggy",stage:"The Lion's Den",day:"Sat",start:"19:30",end:"20:30",genre:"Reggae"},
+  {name:"Scooter",stage:"The Lion's Den",day:"Sat",start:"21:00",end:"22:10",genre:"Hardcore / Gabber"},
+  {name:"Alix Perez Ft. SP:MC",stage:"The Lion's Den",day:"Sat",start:"22:30",end:"00:00",genre:"Drum & Bass"},
+  {name:"Andy C Presents: Nightlife",stage:"The Lion's Den",day:"Sat",start:"00:00",end:"02:00",genre:"Drum & Bass"},
   {name:"A.M.C Ft Phantom",stage:"The Lion's Den",day:"Sat",start:"02:00",end:"03:00"},
   // --- Sat: The Magic Teapot ---
   {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sat",start:"12:00",end:"00:00"},
@@ -2915,7 +2946,7 @@ const artists = [
   // --- Sun: Anara Forest ---
   {name:"Silva Snipa B2B VXRGO",stage:"Anara Forest",day:"Sun",start:"14:00",end:"15:30"},
   {name:"Sabrina Ft. Dread MC",stage:"Anara Forest",day:"Sun",start:"15:30",end:"16:30"},
-  {name:"Skantia Ft. Strategy",stage:"Anara Forest",day:"Sun",start:"16:30",end:"18:00"},
+  {name:"Skantia Ft. Strategy",stage:"Anara Forest",day:"Sun",start:"16:30",end:"18:00",genre:"Jungle"},
   {name:"Kyrist B2B Waeys Ft. Strategy [Overview Takeover]",stage:"Anara Forest",day:"Sun",start:"18:00",end:"19:00"},
   {name:"Molecular B2B Wingz Ft. Jakes [Overview Takeover]",stage:"Anara Forest",day:"Sun",start:"19:00",end:"20:00"},
   {name:"Visages Ft. SP:MC",stage:"Anara Forest",day:"Sun",start:"20:00",end:"21:30"},
@@ -3041,17 +3072,17 @@ const artists = [
   {name:"Selecta J-Man",stage:"Helix",day:"Sun",start:"20:30",end:"22:00"},
   {name:"Strategy - DJ Set",stage:"Helix",day:"Sun",start:"22:00",end:"23:00"},
   // --- Sun: Hidden Woods ---
-  {name:"Grooverider [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"13:00",end:"14:00"},
-  {name:"Shades Of Rhythm [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"14:00",end:"15:00"},
-  {name:"K-Klass B2B Morgan Seatree [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"15:00",end:"16:00"},
-  {name:"Sonique [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"16:00",end:"17:00"},
-  {name:"Kings of the Rave: 2 Bad Mice B2B Ellis Dee B2B Mark XTC Ft. MC GQ [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"17:00",end:"18:00"},
-  {name:"Pete Cannon B2B Time To Rush [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Ratty & Serum Ft. Mad P [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"19:00",end:"20:00"},
-  {name:"Cheff The Boy B2B Hypershé B2B Origin8a & Propa [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"20:00",end:"21:00"},
-  {name:"Altern 8 B2B Slipmatt Ft. Dread MC [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"21:00",end:"22:00"},
-  {name:"Anz B2B Special Request [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"22:00",end:"23:00"},
-  {name:"Ratpack [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"23:00",end:"00:00"},
+  {name:"Grooverider [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"13:00",end:"14:00",genre:"Jungle"},
+  {name:"Shades Of Rhythm [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"14:00",end:"15:00",genre:"Jungle"},
+  {name:"K-Klass B2B Morgan Seatree [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"15:00",end:"16:00",genre:"Jungle"},
+  {name:"Sonique [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"16:00",end:"17:00",genre:"Jungle"},
+  {name:"Kings of the Rave: 2 Bad Mice B2B Ellis Dee B2B Mark XTC Ft. MC GQ [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"17:00",end:"18:00",genre:"Jungle"},
+  {name:"Pete Cannon B2B Time To Rush [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"18:00",end:"19:00",genre:"Jungle"},
+  {name:"Ratty & Serum Ft. Mad P [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"19:00",end:"20:00",genre:"Jungle"},
+  {name:"Cheff The Boy B2B Hypershé B2B Origin8a & Propa [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"20:00",end:"21:00",genre:"Jungle"},
+  {name:"Altern 8 B2B Slipmatt Ft. Dread MC [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"21:00",end:"22:00",genre:"Jungle"},
+  {name:"Anz B2B Special Request [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"22:00",end:"23:00",genre:"Jungle"},
+  {name:"Ratpack [Fantazia Takeover]",stage:"Hidden Woods",day:"Sun",start:"23:00",end:"00:00",genre:"Jungle"},
   // --- Sun: Hydro XL ---
   {name:"nimino - Live",stage:"Hydro XL",day:"Sun",start:"15:00",end:"16:20"},
   {name:"KILIMANJARO B2B Oppidan",stage:"Hydro XL",day:"Sun",start:"16:30",end:"18:00"},
@@ -3177,7 +3208,7 @@ const artists = [
   {name:"Top Cat",stage:"Tangled Roots",day:"Sun",start:"16:00",end:"17:00"},
   {name:"Jolie P",stage:"Tangled Roots",day:"Sun",start:"17:00",end:"18:00"},
   {name:"SIMMS",stage:"Tangled Roots",day:"Sun",start:"18:00",end:"19:00"},
-  {name:"Aries (Jungle Set) Ft. Carasel",stage:"Tangled Roots",day:"Sun",start:"19:00",end:"20:15"},
+  {name:"Aries (Jungle Set) Ft. Carasel",stage:"Tangled Roots",day:"Sun",start:"19:00",end:"20:15",genre:"Jungle"},
   {name:"IRAH",stage:"Tangled Roots",day:"Sun",start:"20:15",end:"21:00"},
   // --- Sun: The Fools Leap ---
   {name:"Somerset Velvet",stage:"The Fools Leap",day:"Sun",start:"12:00",end:"13:00"},
@@ -3198,12 +3229,12 @@ const artists = [
   // --- Sun: The Immortal Children of the Eternal Seed ---
   {name:"Aerial Takeover",stage:"The Immortal Children of the Eternal Seed",day:"Sun",start:"20:00",end:"23:00"},
   // --- Sun: The Lion's Den ---
-  {name:"David Rodigan Presents: Ram Jam Ft D Double E, Hollie Cook & Irah",stage:"The Lion's Den",day:"Sun",start:"14:30",end:"15:45"},
-  {name:"Vengaboys",stage:"The Lion's Den",day:"Sun",start:"16:00",end:"16:50"},
-  {name:"EVE",stage:"The Lion's Den",day:"Sun",start:"17:10",end:"18:10"},
+  {name:"David Rodigan Presents: Ram Jam Ft D Double E, Hollie Cook & Irah",stage:"The Lion's Den",day:"Sun",start:"14:30",end:"15:45",genre:"Reggae"},
+  {name:"Vengaboys",stage:"The Lion's Den",day:"Sun",start:"16:00",end:"16:50",genre:"Pop / Dance"},
+  {name:"EVE",stage:"The Lion's Den",day:"Sun",start:"17:10",end:"18:10",genre:"Hip Hop"},
   {name:"FCUKERS",stage:"The Lion's Den",day:"Sun",start:"18:40",end:"19:40"},
-  {name:"Scissor Sisters",stage:"The Lion's Den",day:"Sun",start:"20:10",end:"21:40"},
-  {name:"Faithless",stage:"The Lion's Den",day:"Sun",start:"22:15",end:"23:45"},
+  {name:"Scissor Sisters",stage:"The Lion's Den",day:"Sun",start:"20:10",end:"21:40",genre:"Pop / Dance"},
+  {name:"Faithless",stage:"The Lion's Den",day:"Sun",start:"22:15",end:"23:45",genre:"Electronic"},
   {name:"Boomtown Closing Ceremony",stage:"The Lion's Den",day:"Sun",start:"23:50",end:"00:00"},
   // --- Sun: The Magic Teapot ---
   {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sun",start:"12:00",end:"00:00"},
