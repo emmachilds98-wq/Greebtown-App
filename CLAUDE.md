@@ -111,3 +111,56 @@ left the live site in a genuinely broken state for a while:
    index.html change" — that's a sign the real fix (updating the
    function in place) was skipped for a shortcut, and the two copies
    will silently drift apart, which is exactly what happened here.
+
+## Incident: `service-worker.js` corrupted into raw diff text by direct commits (2 Aug 2026, later same day)
+
+Rule 1 above got violated again, within hours, in a new and worse way.
+A run of direct commits to `emmachilds98-wq-patch-2` — again bypassing
+PRs — did two separate kinds of damage:
+
+- **A merge landed with `js/app.js` reduced to the single word
+  `PLACEHOLDER`.** Whatever branch/session produced that merge had
+  already truncated its own copy of `js/app.js` to a placeholder stub
+  before merging — meaning the file was never actually verified as
+  complete/valid before being merged into the deploy branch. This alone
+  would break the entire app for every live user.
+- **Two direct commits titled "Update service-worker.js" each replaced
+  the file's content with a raw unified-diff fragment** — literal
+  `+`/`-` hunk lines (e.g. `+  self.skipWaiting();`, `-    )`) pasted in
+  as if they *were* the file, instead of applying the change and saving
+  the real resulting text. The live file was left at ~23 lines,
+  referencing an undefined `APP_FILES` array, missing the Firebase
+  messaging setup, and with no `fetch` handler at all — not valid
+  enough to reliably register as a service worker. A service worker
+  that can't register can never deliver an update to anyone, regardless
+  of what `CACHE_VERSION` says — this was likely the real cause of a
+  "no recent update / refresh fails" report that same session.
+
+Both a human pasting a `git diff`/PR-review view directly into a file,
+and an agent mistaking a diff-style tool result for literal file
+content, produce exactly this failure — the rule below is written to
+catch either.
+
+**Rules going forward, in addition to 1–6 above:**
+
+7. **Never write a diff/patch fragment as a file's content.** A valid
+   source file never contains bare `+`/`-`-prefixed hunk lines, `@@ ...
+   @@` markers, or `<<<<<<<`/`=======`/`>>>>>>>` conflict markers. If
+   you're about to save something that looks like that, you have a diff
+   in hand, not a file — apply it properly (edit the real file in
+   place) and save the *resulting* content, never the diff itself.
+8. **After editing any file, read back what actually landed on disk
+   before committing it** — don't trust that an edit "must have worked."
+   For JS specifically, `node --check <file>` (or, for a service worker
+   using `self`/`importScripts`, parsing it with `new Function(source)`)
+   catches a corrupted file immediately and costs nothing. This incident
+   would have been caught instantly by either check; neither was run
+   before committing.
+9. **A PR merge is not a substitute for verifying the file you're
+   merging.** The `PLACEHOLDER` truncation above went through an actual
+   PR (not a direct commit) — the process rule alone didn't save it,
+   because nobody checked that the file being merged still had real
+   content. Before merging any PR that touches `js/app.js` or
+   `service-worker.js`, confirm both files are still full-length and
+   pass the checks in rule 8 — a green PR review still needs this, not
+   just direct commits.
