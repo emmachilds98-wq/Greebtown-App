@@ -1,6 +1,6 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v294";
+const CACHE_VERSION = "v295";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
 
 try{
@@ -10,114 +10,74 @@ try{
     apiKey: "AIzaSyAgiBfNu3IpTCpumJQrYkFOh03VNFTWOVQ",
     authDomain: "greebtown.firebaseapp.com",
     projectId: "greebtown",
-    storageBucket: "greebtown.firebasestorage.app",
-    messagingSenderId: "944940862671",
-    appId: "1:944940862671:web:f84ece4e66b052b4f97bba"
+    storageBucket: "greebtown.appspot.com",
+    messagingSenderId: "102345678901",
+    appId: "1:102345678901:web:abc123"
   });
-  firebase.messaging();
-}catch(err){
-  console.warn("Firebase Messaging unavailable in service worker:", err && err.message);
-}
+  const messaging = firebase.messaging();
+  messaging.onBackgroundMessage((payload)=>{
+    const title = (payload.notification && payload.notification.title) || "Greebtown";
+    const options = {
+      body: (payload.notification && payload.notification.body) || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: payload.data || {}
+    };
+    self.registration.showNotification(title, options);
+  });
+}catch(e){}
 
-const PRECACHE_URLS = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./css/style.css",
-  "./js/app.js",
-  "./js/artist-bios.js",
-  "./js/artist-previews.js",
-  "./js/boomtown-locations-2026.js",
-  "./js/pwa-register.js",
-  "./icons/icon-72.png",
-  "./icons/icon-96.png",
-  "./icons/icon-128.png",
-  "./icons/icon-144.png",
-  "./icons/icon-152.png",
-  "./icons/icon-167.png",
-  "./icons/icon-180.png",
-  "./icons/icon-192.png",
-  "./icons/icon-256.png",
-  "./icons/icon-384.png",
-  "./icons/icon-512.png",
-  "./icons/icon-maskable-512.png",
-  "./icons/apple-touch-icon.png",
-  "./icons/favicon-32.png",
-  "./icons/favicon-16.png"
-];
-
-self.addEventListener("install", (event) => {
+self.addEventListener("install", (event)=>{
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache)=> cache.addAll([
+      "/",
+      "/index.html",
+      "/manifest.json",
+      "/css/styles.css",
+      "/js/app.js",
+      "/js/pwa-register.js",
+      "/js/boomtown-locations-2026.js",
+      "/js/artist-bios.js",
+      "/js/artist-previews.js",
+      "/icons/icon-192.png",
+      "/icons/icon-512.png"
+    ]).catch(()=>{}))
   );
 });
 
-self.addEventListener("activate", (event) => {
+self.addEventListener("activate", (event)=>{
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys
-          .filter((key) => key.startsWith("boomtown-companion-") && key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
+    caches.keys().then((keys)=> Promise.all(
+      keys.filter((k)=> k.startsWith("boomtown-companion-") && k !== CACHE_NAME).map((k)=> caches.delete(k))
+    )).then(()=> self.clients.claim())
   );
 });
 
-self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  const url = new URL(req.url);
-
-  if (url.origin !== self.location.origin) {
-    return;
-  }
-
-  if (req.mode === "navigate") {
+self.addEventListener("fetch", (event)=>{
+  const url = new URL(event.request.url);
+  if(event.request.method !== "GET") return;
+  // Network-first for JS so map/data updates reach clients quickly
+  if(url.pathname.endsWith(".js") || url.pathname.endsWith("service-worker.js")){
     event.respondWith(
-      fetch(req)
-        .then((networkResponse) => {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-          return networkResponse;
-        })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match("./index.html")))
+      fetch(event.request).then((res)=>{
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((c)=> c.put(event.request, copy));
+        return res;
+      }).catch(()=> caches.match(event.request))
     );
     return;
   }
-
-  // Network-first for JS so map/location updates always reach clients
-  if (url.pathname.includes("/js/") || url.pathname.endsWith(".js")) {
-    event.respondWith(
-      fetch(req).then((networkResponse) => {
-        const clone = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-        return networkResponse;
-      }).catch(() => caches.match(req))
-    );
-    return;
-  }
-
   event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req).then((networkResponse) => {
-        const clone = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-        return networkResponse;
-      }).catch(() => cached);
-    })
+    caches.match(event.request).then((cached)=> cached || fetch(event.request).then((res)=>{
+      const copy = res.clone();
+      caches.open(CACHE_NAME).then((c)=> c.put(event.request, copy));
+      return res;
+    }).catch(()=> cached))
   );
 });
 
-self.addEventListener("notificationclick", (event) => {
+self.addEventListener("notificationclick", (event)=>{
   event.notification.close();
-  event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
-      const existing = clientsArr.find((c) => "focus" in c);
-      if (existing) return existing.focus();
-      return self.clients.openWindow("./");
-    })
-  );
+  event.waitUntil(clients.openWindow("/"));
 });
