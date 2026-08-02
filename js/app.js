@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v294";
-const APP_BUILD_TIME = "2026-08-02T20:21:36Z";
+const APP_CACHE_VERSION = "v297";
+const APP_BUILD_TIME = "2026-08-02T23:25:23Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6190,7 +6190,10 @@ const thingsToFind = [
   // mismatch already documented elsewhere in this file, so only the
   // relative placement is used here, not the raw GPS number.
   { name:"The Pomegranate Parlour", near:"Oldtown", x:"66%", y:"33%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor. Seen on the official app's own map inside Oldtown, next to Mining for (g)Old Town." },
-  { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." },
+  // "near" corrected from "Site-wide" — a genuine reference frame this
+  // session placed it in the same wooded cluster as Spinney Hollow/The
+  // Magic Teapot/Ancient Futures, not an unplaced site-wide venue.
+  { name:"Twisted Time Machine (Bad Apple Bar)", near:"Ancient Futures", x:"56%", y:"30%", info:"A themed bar/party room in the Ancient Futures/Grand Central cluster; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." },
   // The following 10 were spotted as real named labels on the official
   // app's own map in the reference screen recording, but weren't in any
   // list here before this pass — no lineup/schedule data was sourced
@@ -6752,7 +6755,7 @@ const venueDirectory = [
   { name:"E Numbers", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Hyperpop, party, eclectic", near:"Metropolis", info:"Hyperpop 'sweetshop' venue — confirmed for 2026, running Thu-Sat (Kid Cosmit, Lounicorn, D0LLSW4G, Mannequins b2b sets)." },
   { name:"The Pomegranate Parlour", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic party DJs", near:"Oldtown", info:"Actor-led parlour-style venue — confirmed for 2026 (Cassia, SCARBA, Mattana, DJ Shakey, Estère). Seen on the official app's own map inside Oldtown, not site-wide as previously guessed." },
   { name:"Busker's Wharf", type:"Hidden venue", status:"confirmed", music:true, genre:"Live/acoustic, folk", near:"Site-wide", info:"Wharf/street-performance themed spot — a real, recurring hidden venue, though no year-dated source was found to pin down a specific chapter." },
-  { name:"Twisted Time Machine (Bad Apple Bar)", type:"Hidden venue", status:"confirmed", music:true, genre:"Rotates by slot: emo, nu-metal, jungle disco, 90s rave", near:"Site-wide", info:"Long-running takeover of Boomtown's historic Bad Apple Bar — confirmed for 2026 with themed nights Wed-Sat (One Welcome Party, The Abba Party, My Chemical Hoemance, The Fleetwood Mac Celebration, UNKLE Psyence Fiction album playback)." },
+  { name:"Twisted Time Machine (Bad Apple Bar)", type:"Hidden venue", status:"confirmed", music:true, genre:"Rotates by slot: emo, nu-metal, jungle disco, 90s rave", near:"Ancient Futures", info:"Long-running takeover of Boomtown's historic Bad Apple Bar, in the Ancient Futures/Grand Central cluster — confirmed for 2026 with themed nights Wed-Sat (One Welcome Party, The Abba Party, My Chemical Hoemance, The Fleetwood Mac Celebration, UNKLE Psyence Fiction album playback)." },
   { name:"Circus Tent", type:"Hidden venue", status:"confirmed", music:true, genre:"Circus, live performance", near:"Ancient Futures", info:"Performance-led rather than a straight dancefloor. Real surveyed GPS (filed as \"Circus Tent\" in js/boomtown-locations-2026.js) puts it right by Ancient Futures/Grand Central, not Oldtown — likely the same real venue as thingsToFind's own \"Circus\" entry, kept as a separate pin since that's unconfirmed." },
   { name:"Airetiko", type:"Hidden venue", status:"confirmed", music:false, genre:"Aerial circus — trapeze, rope, silks, hoop", near:"Site-wide", info:"Real aerial-arts collective (trapeze, rope, silks, hoop) — confirmed for 2026 with dated Trapeze and Giant Marionettes slots running Wed-Fri." },
   { name:"Rebel Girls Club", type:"Hidden venue", status:"confirmed", music:false, genre:"Wellbeing, empowerment-themed workshops", near:"Ancient Futures", info:"Women-led venue — confirmed for 2026 with a wellbeing programme Wed-Fri (Opening Ceremony, burlesque/twerk workshops, morning yoga, herbal balm making). Real surveyed GPS puts it right by Ancient Futures/Grand Central, not the Thrutopia hilltop an earlier guess assumed." },
@@ -7126,6 +7129,7 @@ const TRUNK_PATH_EDGES = [
   ["Ancient Futures", "Rebel Girls Club"],
   ["Rebel Girls Club", "Tinker Station"],
   ["Ancient Futures", "The Retreat"],
+  ["Ancient Futures", "Twisted Time Machine (Bad Apple Bar)"],
   ["Ancient Futures", "Energy Garden"],
   ["Energy Garden", "Climate Live"],
   ["Climate Live", "The Magic Teapot"],
