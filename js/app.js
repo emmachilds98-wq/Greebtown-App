@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v267";
-const APP_BUILD_TIME = "2026-08-01T23:55:47Z";
+const APP_CACHE_VERSION = "v268";
+const APP_BUILD_TIME = "2026-08-02T00:06:55Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -1016,21 +1016,45 @@ loadCustomSocials();
 // below) rather than each stage's own longer description, since these
 // values also double as the Lineup tab's genre filter chips — one chip
 // per unique value here, not per stage.
+//
+// A pass cross-checking every tag here against both its own
+// venueDirectory `genre` text AND a sample of its actual booked acts
+// (below the schedule, not just the short blurb) turned up five that
+// didn't hold up:
+//  - Botanica Zoo was "Bass / D&B" while Anara Forest — practically the
+//    same jungle/UK-garage/bass family per both their own venueDirectory
+//    descriptions — was "Bass / Drum & Bass": two chips for one genre.
+//    Merged onto the fuller name.
+//  - E Numbers was "Bass / Rave" despite its own venueDirectory genre
+//    reading "Hyperpop, party, eclectic" — confirmed by its actual
+//    lineup (Kid Cosmit, D0LLSW4G, Lounicorn — hyperpop/alt-rave scene
+//    names, nothing rave-specific).
+//  - Grand Central was "Live / Alternative" despite its own
+//    venueDirectory genre naming "Bands, hip hop, headline sets" — its
+//    lineup confirms real hip hop headliners (Havoc of Mobb Deep, Kae
+//    Tempest) alongside bands, not an "alternative" scene specifically.
+//  - Spectrum 360 was "Bass / Hardstyle" despite its own venueDirectory
+//    genre reading "UK garage through to gabber" — hardstyle isn't
+//    mentioned at all; retagged to match what's actually sourced.
+//  - Tangled Roots was "Dub / Bass" despite its own venueDirectory genre
+//    literally saying "Dub, roots" and a confirmed lineup act called
+//    "Roots Ginjah" — retagged to use the word already in its own
+//    description, and reads less like a typo of "Dubstep / Bass" now.
 // ===============================
 const STAGE_GENRE = {
   "Acid Leak":"Acid / Techno", "Agents of Change HQ":"Talks / Community",
   "Airetiko":"Circus / Performance", "Anara Forest":"Bass / Drum & Bass",
   "Ancient Futures":"Talks / Community", "Blink Mental Health":"Welfare / Support",
-  "Botanica Zoo":"Bass / D&B", "Busker's Wharf":"Folk / Acoustic",
+  "Botanica Zoo":"Bass / Drum & Bass", "Busker's Wharf":"Folk / Acoustic",
   "Cas's Costumes":"Party / Variety", "Circus Tent":"Circus / Performance",
   "Climate Live":"Talks / Community", "Cocaine Anonymous":"Welfare / Support",
   "Community Fire":"Talks / Community", "Craft Tent":"Workshop / Craft",
   "Crafty Rascals":"Workshop / Craft", "Deviant Lounge":"Bass / Alt",
-  "E Numbers":"Bass / Rave", "End of the Line":"Eclectic / DJ",
+  "E Numbers":"Hyperpop / Party", "End of the Line":"Eclectic / DJ",
   "Energy Garden":"Talks / Community", "Foggers Mill":"Eclectic / DJ",
   "Full Moon Ballroom":"Swing / Variety", "Gabber Kebabber":"Hardcore / Gabber",
   "Games Lounge":"Chill / Downtime", "Garden":"Chill / Downtime",
-  "Grand Central":"Live / Alternative", "Hangar 161":"Alt / Punk / Metal",
+  "Grand Central":"Bands / Hip Hop", "Hangar 161":"Alt / Punk / Metal",
   "Hapitat":"Chill / Downtime", "Helix":"Breaks / Big Beat",
   "Hidden Woods":"Bass / Dub / Jungle", "Hotel Paradiso":"Eclectic / DJ",
   "Hydro XL":"House / Dance", "Infinity":"House / UK Garage",
@@ -1041,9 +1065,9 @@ const STAGE_GENRE = {
   "Rebel Girls Club":"Welfare / Support", "Reel News":"Eclectic / DJ",
   "Reparium":"Workshop / Craft", "Rose and Clown":"Cabaret / Variety",
   "Sharing Circles":"Talks / Community", "Sibín Beag":"Irish Folk / Trad",
-  "Soapranos Laundrette":"House / Dance", "Spectrum 360":"Bass / Hardstyle",
+  "Soapranos Laundrette":"House / Dance", "Spectrum 360":"Garage / Gabber",
   "Spinney Hollow":"Eclectic / DJ", "Sub Lab":"Dubstep / Bass",
-  "Tangled Roots":"Dub / Bass", "The Boomtown Bobbies":"Bass / Party",
+  "Tangled Roots":"Dub / Roots", "The Boomtown Bobbies":"Bass / Party",
   "The Fools Leap":"Folk / Balkan / Party", "The Garden Centre":"Eclectic / DJ",
   "The Immortal Children of the Eternal Seed":"World / Eclectic", "The Lion's Den":"D&B / Reggae / Headline",
   "The Magic Teapot":"Chill / Downtime", "The Pomegranate Parlour":"World / Eclectic",
@@ -1061,29 +1085,28 @@ function genreOf(a){ return a.genre || STAGE_GENRE[a.stage] || "Unconfirmed"; }
 const GENRE_INFO = {
   "Acid / Techno": "Squelchy 303 acid lines over driving, hypnotic techno.",
   "Alt / Punk / Metal": "Guitar-led live bands — punk energy through to heavier metal.",
+  "Bands / Hip Hop": "Live bands and hip hop headliners on the same bill — the flagship main stage's own eclectic mix.",
   "Bass / Alt": "Bass-weight production with an alternative, less-club-standard edge.",
-  "Bass / D&B": "Fast breakbeats and heavy sub-bass — the drum & bass family.",
-  "Bass / Drum & Bass": "Fast breakbeats and heavy sub-bass at full drum & bass tempo.",
+  "Bass / Drum & Bass": "Fast breakbeats and heavy sub-bass — the jungle/drum & bass/UK garage family.",
   "Bass / Dub / Jungle": "Sound-system bass culture — dub weight and jungle's chopped breaks.",
-  "Bass / Hardstyle": "Hard, distorted kicks and euphoric leads at high tempo.",
   "Bass / Party": "Crowd-pleasing bass music built for singalongs and big drops.",
-  "Bass / Rave": "Old-school rave stabs and breakbeats with modern bass weight.",
   "Breaks / Big Beat": "Chunky breakbeats and big, riffy drops — festival breaks.",
   "Cabaret / Variety": "Live hosted variety — burlesque, comedy, circus and song.",
   "Chill / Downtime": "A low-key space to sit down and recharge, not a dancefloor.",
   "Circus / Performance": "Live circus and physical performance — aerial, acrobatics, theatre.",
   "Comedy / Game-show": "Hosted comedy and game-show-style segments rather than DJs.",
   "D&B / Reggae / Headline": "Big-stage drum & bass headliners alongside reggae/sound-system sets.",
-  "Dub / Bass": "Deep, echo-laden dub reggae with sub-bass at its core.",
+  "Dub / Roots": "Deep, echo-laden dub and roots reggae with sub-bass at its core.",
   "Dubstep / Bass": "Half-time wobble and weight — classic and modern dubstep.",
   "Eclectic / DJ": "Genre-hopping DJ sets that don't sit still in one lane.",
   "Folk / Acoustic": "Live, mostly-unplugged folk and acoustic sets.",
   "Folk / Balkan / Party": "Brass-heavy Balkan folk turned into a full-on party set.",
+  "Garage / Gabber": "A genuinely wide spread — UK garage's bounce at one end, gabber's distorted extreme at the other.",
   "Hardcore / Gabber": "Very fast, distorted kicks — the hardcore/gabber end of the spectrum.",
   "House / Dance": "Classic four-to-the-floor house built for dancing.",
   "House / UK Garage": "Four-to-the-floor house crossed with UK garage's bounce and skip.",
+  "Hyperpop / Party": "Hyperpop's sugar-rush, genre-warping energy built for a party crowd.",
   "Irish Folk / Trad": "Traditional Irish folk, played live and built for a sing-along.",
-  "Live / Alternative": "Live bands outside the DJ/electronic lineup — alternative/indie leaning.",
   "Party / Playback Sets": "Themed nostalgia/playback sets built around a single album or era.",
   "Party / Variety": "Feel-good party sets — a bit of everything, low on pretension.",
   "Psytrance / Trance": "Fast, hypnotic, high-energy trance and psytrance.",
