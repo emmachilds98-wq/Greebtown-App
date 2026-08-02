@@ -339,7 +339,14 @@
      untouched either way — only the text labels hide, so presence/
      position is still visible even for the labels that do thin out.*/
   #map.map-labels-thin .map-label:not(.district):not(.stage){display:none;}
-  .map-label.district{background:none; border:none; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:rgba(242,168,60,.9); text-shadow:0 1px 4px rgba(0,0,0,.75); transform:translate(-50%, -24px); padding:0;}
+  /* Colour now comes from each marker's own --district-rgb custom
+     property (set in JS from DISTRICT_PALETTE, the same 7-colour cycle
+     the district's ground-fill zone uses) instead of one flat amber for
+     every district — reference screenshots of the official app show
+     each district name in its own distinct, poster-bold treatment, not
+     a uniform colour. Falls back to the old amber if --district-rgb is
+     ever unset (shouldn't happen, but keeps this rule safe on its own). */
+  .map-label.district{background:none; border:none; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:rgba(var(--district-rgb, 242,168,60),1); text-shadow:0 1px 3px rgba(0,0,0,.85), 0 0 10px rgba(var(--district-rgb, 242,168,60),.55); transform:translate(-50%, -24px); padding:0;}
   /* Main stages previously rendered with no label class at all — same
      plain pill as every other marker on the map, despite the marker dot
      itself already being the biggest/only-pulsing one. Bigger, bolder,

@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v288";
-const APP_BUILD_TIME = "2026-08-02T19:50:26Z";
+const APP_CACHE_VERSION = "v289";
+const APP_BUILD_TIME = "2026-08-02T19:56:26Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7250,14 +7250,13 @@ function buildMapGeoJSON(){
     districtRadii.set(d, r);
     return {
       type: "Feature",
-      // Fill/line/casing alpha halved-ish from 0.32/0.95/0.35 — districts
-      // were washing colour under every stage/amenity/hidden-venue marker
-      // plotted inside them and the bold outline competed with those
-      // markers for attention. Still a clearly legible tinted zone with a
-      // visible boundary, just reading as background context now rather
-      // than the loudest thing in its own area (see the layer paint
-      // definitions below for the matching line-width trims).
-      properties: { name: d.name, fill: `rgba(${rgb},0.16)`, line: `rgba(${rgb},0.55)`, casing: `rgba(${rgb},0.22)` },
+      // Fill/casing alpha nudged back up a little (0.16->0.22, 0.22->0.28)
+      // against this pass's brighter background green — reference
+      // screenshots show each district reading as a clearly brighter,
+      // distinctly-tinted patch against the surrounding open ground, not
+      // a subtle wash; line stays at its existing 0.55 so the boundary
+      // doesn't get louder than the markers plotted inside it.
+      properties: { name: d.name, fill: `rgba(${rgb},0.22)`, line: `rgba(${rgb},0.55)`, casing: `rgba(${rgb},0.28)` },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 31 + 7, 18)) ] }
     };
   });
@@ -8044,13 +8043,13 @@ function loadMap(){
       // glyph URLs — so the map needs zero network requests once
       // MapLibre itself has loaded, same "works with zero signal" goal
       // as the rest of this PWA's service worker.
-      // Brighter open-grass base tone than before (was #1e3a28, a dark
-      // green close enough to the forest fill below that open ground and
-      // woods barely read as different) — the reference video's own open
-      // ground (camping fields aside) is a clear mid-bright green, with
-      // woods reading as a distinctly darker patch on top of it, not a
-      // background that's already nearly as dark as the woods.
-      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#3f7a4e" } }] },
+      // Brighter, more saturated open-grass tone than before (was
+      // #3f7a4e) — reference screenshots of the official app's own map
+      // show a noticeably more vivid, almost lawn-like green for open
+      // ground, with woods/forest fill reading as a clearly darker patch
+      // on top of it (see forests-fill below) rather than the two being
+      // close in tone.
+      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#4fa35c" } }] },
       center: [-1.2394, 51.0534],
       // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
       // 14.4 view (previous pass) showed a lot of surrounding blank
@@ -8387,10 +8386,18 @@ function loadMap(){
   // rather than a second overlapping circle drawn on top of it); always
   // approximate (Boomtown's districts don't correspond to any one
   // surveyed spot even in the official app).
-  locations.filter(place=> place.kind === "district").forEach(place=>{
+  // Each district's label now takes its own colour from DISTRICT_PALETTE
+  // (the same 7-colour cycle its ground-fill zone already uses in
+  // buildMapGeoJSON, same index order since both read from this same
+  // filtered list) — reference screenshots show every district name
+  // rendered in its own distinct, bold treatment (BOTANICA in one hue,
+  // AREA 404 in another, etc.), not one flat colour for all of them.
+  const districtList = locations.filter(p=> p.kind === "district");
+  districtList.forEach(place=>{
     const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
+    const rgb = DISTRICT_PALETTE[districtList.indexOf(place) % DISTRICT_PALETTE.length];
     addMapMarker("main", coord.lat, coord.lon,
-      `<div class="map-label district">${escapeHtml(place.name)}</div>`,
+      `<div class="map-label district" style="--district-rgb:${rgb}">${escapeHtml(place.name)}</div>`,
       { name: place.name, title: place.name, onClick: ()=> showMapInfoCard(`
         <div class="card">
           <span class="tag">district — approximate area</span>
