@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v292";
-const APP_BUILD_TIME = "2026-08-02T20:12:16Z";
+const APP_CACHE_VERSION = "v293";
+const APP_BUILD_TIME = "2026-08-02T20:16:45Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6119,7 +6119,12 @@ const otherStages = [
 // (65,34) sat almost on top of Den of Dis Order (63,34); moved south to
 // sit between Mining for (g)Old Town (64,36) and The Feckless Wrecked
 // (72,36), matching that confirmed order.
-const minorStagePositions = [[52,32],[51,14],[62,26],[52,26],[58,29],[68,25],[40,43],[64,44],[67,39],[46,44],[24,42]];
+// Infinity (index 10) moved from (24,42) to (32,42) — a genuine frame
+// shows it as a large orange circular stage east of the Metropolis
+// chain (Memory Mart/Better You/BBXL Info/Distractoverse/E Numbers/
+// Gabber Kebabber — see E Numbers/Gabber Kebabber's own comment above),
+// not west of/inside that chain.
+const minorStagePositions = [[52,32],[51,14],[62,26],[52,26],[58,29],[68,25],[40,43],[64,44],[67,39],[46,44],[32,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6153,8 +6158,15 @@ const thingsToFind = [
   { name:"Mining for (g)Old Town", near:"Oldtown", x:"64%", y:"36%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
   { name:"Cas's Costumes", near:"Oldtown", x:"72%", y:"44%", info:"A costume-shop-fronted micro venue fitting Oldtown's circus and rogues theme — worth a look if you want to dress into the story." },
   { name:"Soapranos Laundrette", near:"Letsbe Avenue", x:"36%", y:"10%", info:"A laundrette-fronted hidden venue — in 2025 it hosted dance-music DJ sets behind the washing machines. Look for the set dressing, not a normal stage entrance." },
-  { name:"E Numbers", near:"Letsbe Avenue", x:"10%", y:"26%", info:"A sweet-shop/E-numbers-themed party spot fitting Letsbe Avenue's consumer-product BLIP storyline — small, high-energy, easy to walk past." },
-  { name:"Gabber Kebabber", near:"Letsbe Avenue", x:"22%", y:"30%", info:"Kebab-shop chaos paired with gabber and hardcore — a tiny, loud find rather than a destination with a published pin." },
+  // Both corrected this session — a genuine official-app frame shows a
+  // chain (Memory Mart, Better You(tm), BBXL Info, Distractoverse(tm), E
+  // Numbers, Gabber Kebabber) running roughly north-south EAST of
+  // Metropolis, with Infinity further east again — not west near Letsbe
+  // Avenue as previously guessed (the venueDirectory copy of E Numbers
+  // already said "near Metropolis", inconsistent with this entry's own
+  // old "near Letsbe Avenue" — this was that drift, now resolved one way).
+  { name:"E Numbers", near:"Metropolis", x:"22%", y:"38%", info:"A sweet-shop/E-numbers-themed party spot east of Metropolis, in a chain with Gabber Kebabber and Infinity." },
+  { name:"Gabber Kebabber", near:"Metropolis", x:"26%", y:"40%", info:"Kebab-shop chaos paired with gabber and hardcore, east of Metropolis in the same chain as E Numbers." },
   { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
   // Corrected this session from "near Metropolis" (19,38) — a frame
   // showing SPECTRUM 360/HANGAR 161/ACID LEAK/DEVIANT LOUNGE/BBXL all
@@ -6736,7 +6748,7 @@ const venueDirectory = [
   { name:"Sub Lab", type:"Hidden venue", status:"confirmed", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — confirmed for 2026 (Bennett ft. Sylla/Limmz, Stasis, Nio B, Ruggz b2b Sonia Sol)." },
   { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Metropolis", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Corrected from an earlier 'near Area 404' guess — the official app's own map shows it on the same footpath as Sub Lab and Loconnection, just south of Metropolis." },
   { name:"Deviant Lounge", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, after-hours", near:"Area 404", info:"Confirmed for 2026, running Thu-Sat (Wrong'un Crew, Church of Donkology, DJ Safe N Sound, Bunn13) — previously listed as unverified, now on the 2026 schedule. Real position is in the Area 404 cluster, not Metropolis as an earlier guess assumed." },
-  { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Dystopian kebab-shop gabber stage running since 2023 — confirmed for 2026 with a full Thu-Sun DJ programme." },
+  { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Metropolis", info:"Dystopian kebab-shop gabber stage running since 2023 — confirmed for 2026 with a full Thu-Sun DJ programme, east of Metropolis alongside E Numbers." },
   { name:"E Numbers", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Hyperpop, party, eclectic", near:"Metropolis", info:"Hyperpop 'sweetshop' venue — confirmed for 2026, running Thu-Sat (Kid Cosmit, Lounicorn, D0LLSW4G, Mannequins b2b sets)." },
   { name:"The Pomegranate Parlour", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic party DJs", near:"Oldtown", info:"Actor-led parlour-style venue — confirmed for 2026 (Cassia, SCARBA, Mattana, DJ Shakey, Estère). Seen on the official app's own map inside Oldtown, not site-wide as previously guessed." },
   { name:"Busker's Wharf", type:"Hidden venue", status:"confirmed", music:true, genre:"Live/acoustic, folk", near:"Site-wide", info:"Wharf/street-performance themed spot — a real, recurring hidden venue, though no year-dated source was found to pin down a specific chapter." },
@@ -6895,6 +6907,31 @@ function buildingFootprint(cx, cy, seed){
   const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
   pts.push(pts[0]);
   return pts;
+}
+
+// A few named venues have a distinctly different real silhouette from
+// the generic rotated-rectangle every other venue gets, confirmed
+// repeatedly in this session's reference footage — Full Moon Ballroom
+// is its own white dome/marquee tent, Spectrum 360 is a circular
+// container-ring arena (not a rectangular building), NEXUS sits on a
+// dark triangular mound. Every other named venue still uses the plain
+// rectangle, since that's genuinely what most of them look like and
+// inventing a distinctive shape without evidence would be a guess, not
+// an accuracy improvement.
+function venueFootprint(name, cx, cy, seed){
+  if(name === "Full Moon Ballroom" || name === "Spectrum 360"){
+    return blobRing(cx, cy, name === "Full Moon Ballroom" ? 1.7 : 1.5, seed, 14);
+  }
+  if(name === "NEXUS"){
+    const rand = seededRand(seed);
+    const size = 1.7, angle = rand() * Math.PI;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const corners = [[0,-size],[size * 0.87, size * 0.5],[-size * 0.87, size * 0.5]];
+    const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
+    pts.push(pts[0]);
+    return pts;
+  }
+  return buildingFootprint(cx, cy, seed);
 }
 
 // A gently bowed 3-point path between two schematic points instead of a
@@ -7574,10 +7611,14 @@ function buildMapGeoJSON(){
   // than the video's own mix of buildings and open fenced areas.
   const solidBuildingFeatures = [];
   const fencedEnclosureFeatures = [];
+  const SPECIAL_SHAPE_VENUES = new Set(["Full Moon Ballroom", "Spectrum 360", "NEXUS"]);
   districtMemberPoints.forEach((p,i)=>{
-    const ring = schematicRingToLngLat(buildingFootprint(parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
+    const ring = schematicRingToLngLat(venueFootprint(p.name, parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
     const feature = { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } };
-    if(i % 4 === 3) fencedEnclosureFeatures.push(feature);
+    // Special-shape venues are solid, confirmed structures, never the
+    // hollow "fenced enclosure" treatment below — that's for the
+    // otherwise-random 1-in-4 open-yard look, not these.
+    if(!SPECIAL_SHAPE_VENUES.has(p.name) && i % 4 === 3) fencedEnclosureFeatures.push(feature);
     else solidBuildingFeatures.push(feature);
   });
 
