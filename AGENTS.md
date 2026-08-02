@@ -1,0 +1,193 @@
+# AGENTS.md — onboarding brief for AI coding agents
+
+Read this before touching the code. It's a snapshot of how this build actually
+works today, not aspirational architecture. If something here conflicts with
+what you find in the repo, trust the repo and update this file.
+
+## What this app is
+
+Greebtown is a PWA "companion app" for Boomtown Fair 2026 (a UK festival,
+12–16 Aug 2026): lineup/timeline browsing, a personal schedule with clash
+detection, a live map, a group chat/sync feature, bingo, and misc extras.
+It's built and used by a small friend group attending the festival together
+— not a public product, but treat data accuracy (especially the map) as
+safety/user-trust critical: wrong stage positions cost real people real time
+at a real event.
+
+## Stack and non-architecture
+
+- **No build step.** Plain HTML/CSS/JS served as static files (GitHub Pages).
+  No bundler, no npm install for the app itself, no TypeScript, no framework.
+- **`js/app.js` is one script, ~14,000 lines, executed top to bottom.** It is
+  not organized into modules — everything is a top-level `const`/`let`/
+  `function` in the same scope. Treat it like a single giant function body,
+  not a collection of independent files.
+- Other JS files loaded via `<script>` tags in `index.html`: `js/pwa-register.js`
+  (service worker registration only), `js/artist-bios.js`, `js/artist-previews.js`,
+  `js/boomtown-locations-2026.js` (real scraped GPS data, see below).
+- `service-worker.js` handles offline caching + push notifications (Firebase
+  Cloud Messaging).
+- Firebase (Firestore + Cloud Functions) backs the group chat/sync/presence
+  feature — see `functions/index.js`, `firestore.rules`, `firebase.json`.
+- `scripts/*.mjs` are one-off Node scripts for scraping/importing official
+  Boomtown lineup data — not part of the runtime app, run manually/offline.
+
+## Critical rule #1: load-time code + TDZ
+
+Several features call functions **immediately at the top level of `app.js`**
+as the script executes — not inside event handlers. Examples: the IIFE at
+line ~60 (`renderBuildStatusPill`), `renderHomeSyncStatus()` called directly
+at module scope (~line 10235), `autoSyncNow("on open")` (~line 12105), the
+`setInterval` right after it, pull-to-refresh wiring.
+
+Because the whole file is one scope evaluated top to bottom, any load-time
+call that reaches a `const`/`let` declared **further down the file** than
+the call site throws `ReferenceError: Cannot access 'X' before
+initialization` — a temporal-dead-zone (TDZ) bug. This is NOT the same as
+"undefined" and is easy to miss in review because the code looks fine
+read top-down inside its own function.
+
+**Before adding or moving any module-level `const`/`let`, trace whether any
+top-level (unindented) call in the file can reach it, directly or through a
+function-call chain.** If yes, declare it near the top of the file, above
+the load-time call sites, with a short comment explaining why it's up there
+(see `FIREBASE_CONFIG` / `_firestoreDb` / `getFirestoreDb`, and
+`APP_CACHE_VERSION` at the very top, for the pattern to follow).
+
+`node --check js/app.js` catches syntax errors but **not** TDZ bugs — you
+still have to trace the call path manually. This has caused two real
+incidents already (`STATUS_STALE_MS`, `_firestoreDb`). Full rule text lives
+in `CLAUDE.md`.
+
+## Critical rule #2: publishing / cache versions must move together
+
+The app has a self-update mechanism: `APP_CACHE_VERSION` /
+`APP_BUILD_TIME` (top of `js/app.js`) and `CACHE_VERSION` (top of
+`service-worker.js`) drive an "update available" pill and force the service
+worker to fetch fresh JS. **Every time you ship a change that should reach
+users, bump both version strings in the same commit** — `APP_CACHE_VERSION`
+in `app.js` and `CACHE_VERSION` in `service-worker.js` — and set
+`APP_BUILD_TIME` to the real current UTC time (`date -u`), never a
+hand-guessed or incremented value (a guess ahead of real UTC will show as
+more than an hour fast to a UK viewer once their local BST offset stacks on
+top). These two files having drifted out of sync via direct commits is
+exactly what caused a real production incident (see `CLAUDE.md`'s incident
+writeup) where the pill silently stopped working and someone "fixed" the
+symptom by disabling the update-check code entirely instead of fixing the
+drift.
+
+Before telling a user a fix is ready to test: run `node --check js/app.js`,
+bump both version strings, and grep the diff's changed identifiers for any
+other load-time call site that reaches them (rule #1).
+
+## Git workflow — read this or you will corrupt your own PR
+
+- The actual GitHub Pages deploy branch is **`emmachilds98-wq-patch-2`**, not
+  `main`. All work ships there via PR, squash-merged.
+- **Never commit directly to `emmachilds98-wq-patch-2`.** Direct commits
+  bypass review and are what caused the version-drift incident above.
+- Squash-merging means your local branch's commit hash diverges from what's
+  now on the deploy branch after merge. If you start new work without
+  re-syncing, your next PR will show `mergeable_state: "dirty"`.
+  Before starting new work (and especially at the start of a fresh agent
+  session): `git fetch origin emmachilds98-wq-patch-2`, then
+  `git checkout -B <your-branch> origin/emmachilds98-wq-patch-2` (this
+  preserves any uncommitted working-tree changes), then confirm
+  `git diff --stat` looks sane before committing.
+- If a PR for your branch has already been merged and you're asked to keep
+  working, treat it as done — restart your branch from the latest deploy
+  branch rather than stacking on merged history.
+
+## Data model — where things live in `app.js`
+
+- `artists` (~line 1391): the full lineup, each act has `name`, `stage`,
+  `day`, `start`/`end`, `genre` (optional — falls back to `STAGE_GENRE[stage]`
+  via `genreOf()`).
+- `STAGE_GENRE` (~1067) / `GENRE_INFO` (~1108): stage-level genre defaults and
+  genre descriptions. Genre tags were recently cleaned up to avoid
+  single-act-only categories — merge sparse/blended tags into existing
+  sensible categories rather than inventing new ones for one act.
+- `CATEGORY_TIER` / `TIER_LABELS` (~3701): timeline grouping is by tier
+  (Main Stages / Stages & Venues / Activities & Support), not by color. Do
+  not reintroduce color-coding or per-name highlighting in the timeline —
+  this was deliberately removed.
+- `buildTimelineHTML()` (~3707): renders the timeline. Positioning of rows
+  within the table can be adjusted; the timeline's underlying
+  scheduling/clash logic should not be changed casually — it's load-bearing
+  for the personal-plan feature.
+- Map-related arrays (~5932 onward): `locations` (main stages), `otherStages`
+  / `minorStagePositions` / `minorStages`, `thingsToFind`, `secretSpots`,
+  `landmarks`, `campLabels`, `amenities`, `gates`, `parkingAreas`,
+  `venueDirectory`. All positions are **schematic coordinates**, 0–100 on
+  both axes, not lat/lon.
+
+## Map system
+
+This has been the highest-effort, highest-error area of the app. Key things
+to know before touching any map code or data:
+
+- **Two coordinate systems**: schematic (0–100%, used for almost all map
+  data arrays) and real lat/lon (`SITE_SW`/`SITE_NE` bounding box, ~line
+  7785, via `schematicToLatLon()` / `latLonToSchematic()`). MapLibre GL JS
+  renders from the lat/lon conversion.
+- **`js/boomtown-locations-2026.js`** holds real scraped GPS data pulled from
+  the official Boomtown app/site. It is reconciled against our schematic
+  stage list via fuzzy name matching: `normalizeVenueKey()` and
+  `STAGE_ALIASES` (~7815–7865) feed `realStageMatch()`, which is the single
+  source of truth for "does this schematic stage correspond to a real GPS
+  point." Do not duplicate this matching logic elsewhere in the codebase —
+  there was previously a second, competing implementation in a dead file
+  (`js/map-matching.js`, since deleted) that silently disagreed with this
+  one. One implementation, one place.
+- **`buildMapGeoJSON()`** (~6982, ~750 lines) is where districts, paths, and
+  markers actually get turned into renderable map layers.
+- **`TRUNK_PATH_EDGES`** (~6913) + `findNamedNode()` + `nearestPointOnTrunk()`
+  form a real path/trunk network graph for navigation between named points,
+  replacing an earlier naive "nearest district" approach. If you add new
+  stages/venues, consider whether the path network needs a new edge to
+  reach them.
+- **Many map positions were derived from user-supplied screen-recording
+  video of the official Boomtown app**, frame-traced by hand (ffmpeg frame
+  extraction + pixel-position reasoning), because the official map images
+  and planning documents are not fetchable (403s from boomtownfair.co.uk,
+  thefestivals.uk, South Downs National Park planning PDFs — don't waste
+  time retrying those URLs, they're blocked in this environment). Treat any
+  position not evidenced by a video frame as a guess, and prefer directional/
+  adjacency evidence (X is north of Y, X is between Y and Z) over precise
+  pixel-distance measurement — video perspective/scale is not reliable
+  enough for exact magnitudes even from ostensibly top-down footage.
+- **Known unconfirmed-by-video positions as of the last audit**: Helix, Full
+  Moon Ballroom, Síbín Beag's exact position, and Thrutopia. If you get new
+  reference footage, these are the priority gaps to close. Always re-check
+  whether newer PRs already addressed some of these before redoing the work.
+- If you change one stage's position in isolation, re-check its neighbors —
+  a real regression happened this way (fixing Spectrum 360 alone put it
+  north of NEXUS/Botanica once those got independently re-derived). When
+  correcting a cluster of nearby stages, re-derive the whole cluster together
+  from the same evidence, not pairwise.
+
+## Incident history and hard rules
+
+`CLAUDE.md` in the repo root has the authoritative, detailed writeup of a
+real production incident (2 Aug 2026: version drift between
+`APP_CACHE_VERSION` and `CACHE_VERSION`, "fixed" by disabling the update
+pill's check function via a runtime monkey-patch in `pwa-register.js`, plus
+a second hack that silently overwrote map position data at runtime) and the
+six numbered rules written in response. Read it. In short:
+1. No direct commits to the deploy branch — always PR.
+2. One source of truth per concern (e.g. map data) — never a runtime
+   override/monkey-patch layered on top of the real implementation.
+3. `APP_CACHE_VERSION`/`CACHE_VERSION` move together, same commit.
+4. Root-cause fixes over monkey-patches when something looks "stuck" or
+   "looping" — find out why, don't paper over it.
+5. `js/pwa-register.js` stays service-worker-registration-only. If you find
+   anything else in it, that's a hack that snuck back in — remove it.
+6. No duplicate implementations of the same feature across files.
+
+## Current known gaps / open threads
+
+- Map: Helix, Full Moon Ballroom, exact Síbín Beag position, Thrutopia
+  remain unconfirmed by video evidence (see Map system section above).
+- Always check for other open PRs touching the map before starting new map
+  work — this area has had multiple concurrent contributors/sessions and
+  conflicting position edits have happened before.
