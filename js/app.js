@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v274";
-const APP_BUILD_TIME = "2026-08-02T14:18:58Z";
+const APP_CACHE_VERSION = "v275";
+const APP_BUILD_TIME = "2026-08-02T14:27:01Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6020,7 +6020,11 @@ const otherStages = [
 // "COPPERWOOD HEIGHTS"/TANGLED ROOTS label pairing) both show Tangled
 // Roots sitting northWEST of Copperwood with the north offset clearly
 // bigger than the west one — not an even diagonal.
-const minorStagePositions = [[46,34],[51,14],[34,16],[56,38],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,40]];
+// Spectrum 360 (index 0) and Rose and Clown (index 3) corrected from a
+// third reference video — both labels appear on camera right by AREA 404,
+// but clearly NORTH of it (Rose and Clown further north than Spectrum
+// 360), not south as the old (46,34)/(56,38) guess had them.
+const minorStagePositions = [[52,20],[51,14],[34,16],[52,12],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,40]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6059,7 +6063,10 @@ const thingsToFind = [
   // relative to its district, same "approximate, not surveyed" honesty
   // as everything else in this list.
   { name:"Quantum", near:"Oldtown", x:"78%", y:"50%", info:"Seen labelled on the official app's own map, near Oldtown/Temple Valley — no lineup or theme details sourced yet." },
-  { name:"The Hide Out Downtown", near:"Metropolis", x:"20%", y:"30%", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
+  // Pulled from (20,30) — northeast of Metropolis — to (22,42). A third
+  // reference video this session shows THE HIDE OUT DOWNTOWN's own label
+  // sitting clearly southEAST of METROPOLIS, not north of it.
+  { name:"The Hide Out Downtown", near:"Metropolis", x:"22%", y:"42%", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
   { name:"Endor", near:"Metropolis", x:"14%", y:"38%", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
   { name:"Mango", near:"Botanica", x:"24%", y:"20%", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
   { name:"Karma Ceuticals", near:"Botanica", x:"30%", y:"24%", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
