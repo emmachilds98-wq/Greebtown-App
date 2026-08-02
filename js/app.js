@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v286";
-const APP_BUILD_TIME = "2026-08-02T19:17:03Z";
+const APP_CACHE_VERSION = "v287";
+const APP_BUILD_TIME = "2026-08-02T19:29:33Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5944,6 +5944,13 @@ const locations = [
   // coordinates show up directly as garbled overlapping labels).
   { name:"Area 404", kind:"district", x:"50%", y:"37%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
   { name:"Botanica", kind:"district", x:"28%", y:"18%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
+  // Still unconfirmed by real footage as of this session — the only
+  // "sighting" found in this pass's evidence was a screen recording of
+  // THIS APP'S OWN in-progress map (visible mid-pan in one video, caught
+  // by its "Greebtown!" app-switcher label), not the official Boomtown
+  // app. Using that would just be circularly confirming our own guess, so
+  // it wasn't used. Position below is unchanged pending a genuine
+  // official-app sighting.
   { name:"Thrutopia", kind:"district", x:"56%", y:"16%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
   // Pulled from (68,26) to (58,23) — this session's reference video shows
   // COPPERWOOD's own label sitting clearly north-WEST of GRAND CENTRAL's
@@ -6001,7 +6008,15 @@ const locations = [
   // east of it. "The Garden Centre" below (also "near Botanica") shifted
   // by the same delta to stay with it.
   { name:"NEXUS", kind:"stage", x:"23%", y:"22%", info:"Right in Botanica — its main stage, 'where nature connects', celebrating live music and the freshest names on the scene. The hip-hop, grime and garage side has previously pulled in names like Bashy, MJ Cole and Lady Leshurr." },
-  { name:"Helix", kind:"stage", x:"20%", y:"38%", info:"Alongside Metropolis. Breaks, big beat and bass-heavy line-up." },
+  // Corrected this session from a guessed (20,38) "alongside Metropolis" —
+  // that guess was never actually visible on the map before now (GPS
+  // silently overrode it, see the note above realStageMatch's removal),
+  // so it had never been checked against real footage. Genuine official-
+  // app frames this session (a video pan showing "QUANTUM" then, moving
+  // south, a salmon/orange "HELIX" stage circle, then open field/services,
+  // then THE LION'S DEN) place Helix clearly between Quantum and The
+  // Lion's Den, not anywhere near Metropolis.
+  { name:"Helix", kind:"stage", x:"78%", y:"52%", info:"Between Quantum and The Lion's Den, on the Hilltop side of the site. Breaks, big beat and bass-heavy line-up." },
   { name:"Meeting Point", kind:"meeting", x:"48%", y:"58%", info:"Your chosen meetup spot — set this with your group before you split up." }
 ];
 
@@ -6074,7 +6089,30 @@ const otherStages = [
 // happened to already read close to right; Acid Leak's (54,26) — north
 // of Area 404 — was backwards: the frame shows it clearly south of
 // Area 404/Spectrum 360, not north.
-const minorStagePositions = [[52,32],[51,14],[34,16],[52,26],[30,58],[62,52],[40,43],[64,44],[65,34],[46,44],[24,42]];
+// Full Moon Ballroom (index 2), The Fools Leap (index 4) and Foggers Mill
+// (index 5) corrected this session from guessed placeholder positions
+// that had NEVER actually rendered on the map before now — GPS silently
+// overrode all three every time (see the note above realStageMatch's
+// removal), so nobody could ever have checked them against real footage.
+// Two independent genuine official-app frames this session show Full
+// Moon Ballroom (a white dome/marquee) sitting south-west of "The Hide
+// Out Hilltop", with Foggers Mill east of it across a gap, and Velvet
+// Rope/Silver Swan Talent Agency/Topsy Turvy Twins in the same small
+// cluster — moved both to sit either side of that cluster, near
+// Copperwood Heights. The Fools Leap confirmed as the north end of
+// Oldtown's western venue chain (Fools Leap -> Da Graaf's Reformatory ->
+// La Luna Coven -> Buskers Wharf) — moved to sit just north of Da
+// Graaf's Reformatory, in line with that chain, replacing a guess that
+// had it far southeast in open ground near nothing.
+// Síbín Beag (index 8) refined from (65,34) to (67,39) — THREE
+// independent genuine official-app frames this session (screenshots and
+// two separate videos) all agree on the same ordering down Oldtown's
+// eastern venue chain: The Pomegranate Parlour -> Den of Dis Order ->
+// Mining for (g)Old Town -> Síbín Beag -> The Feckless Wrecked. The old
+// (65,34) sat almost on top of Den of Dis Order (63,34); moved south to
+// sit between Mining for (g)Old Town (64,36) and The Feckless Wrecked
+// (72,36), matching that confirmed order.
+const minorStagePositions = [[52,32],[51,14],[62,26],[52,26],[58,29],[68,25],[40,43],[64,44],[67,39],[46,44],[24,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6150,7 +6188,13 @@ const thingsToFind = [
   // the same (-20,-12) delta as Oldtown's own re-derivation this session
   // — they're small venues inside Oldtown's own building cluster, so they
   // move with it rather than getting independently re-measured.
-  { name:"Trough Love", near:"Oldtown", x:"67%", y:"37%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
+  // Nudged from (67,37) to (63,36) this session — three independent
+  // genuine official-app frames all show Trough Love in a small loop with
+  // Postal Posse, sitting BETWEEN Oldtown's two venue chains (Fools Leap/
+  // Da Graaf's/La Luna Coven/Buskers Wharf to the west, Pomegranate
+  // Parlour/Den of Dis Order/Mining for (g)Old Town/Síbín Beag/The
+  // Feckless Wrecked to the east), not out toward the east chain alone.
+  { name:"Trough Love", near:"Oldtown", x:"63%", y:"36%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
   { name:"Da Graaf's Reformatory", near:"Oldtown", x:"60%", y:"32%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"La Luna Coven", near:"Oldtown", x:"62%", y:"38%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"The Common Ground", near:"Oldtown", x:"66%", y:"34%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
@@ -6271,7 +6315,13 @@ const thingsToFind = [
   // schematic units from Pepperpot Market, its nearest neighbour) rather
   // than corroborating an existing cluster the way the others do —
   // flagged accordingly rather than presented with the same confidence.
-  { name:"Postal Posse", near:"Pepperpot Market", x:"40%", y:"71%", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Real surveyed GPS puts it well south of Botanica, isolated from other plotted points — lower-confidence match than most of this map, treat the position as a rougher guess than usual." }
+  // Corrected this session from (40,71)/"near Pepperpot Market" — that
+  // position came from raw scraped GPS ("Real surveyed GPS puts it..."),
+  // exactly the kind of position this session's fix removed from map
+  // rendering. Genuine official-app footage instead shows Postal Posse
+  // in a small loop path with Trough Love, sitting between Oldtown's two
+  // venue chains — moved there instead.
+  { name:"Postal Posse", near:"Oldtown", x:"64%", y:"38%", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Seen on the official app's own map in a small loop with Trough Love, inside Oldtown — not near Pepperpot Market as an earlier GPS-derived guess assumed." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -6688,7 +6738,7 @@ const venueDirectory = [
   { name:"Retro Amusements Arcade", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Unclear", info:"Past chapters have run a retro amusements arcade among the site's entertainment; not explicitly reconfirmed for 2026 yet." },
   { name:"Vintage Fairground (waltzers & rides)", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Oldtown / Area 404 (typical)", info:"Past chapters have included a vintage fairground with waltzers and similar rides alongside the chair-o-plane; general presence expected but exact 2026 line-up of rides unconfirmed." },
   { name:"Little Pharma", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic party DJs", near:"Unclear", info:"Seen in past chapters; no 2026 listing found — chase it but don't bank on it." },
-  { name:"Postal Posse", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic", near:"Pepperpot Market", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Real surveyed GPS (lower-confidence match than most of this map) puts it well south of Botanica, closest to Pepperpot Market but still isolated from it." },
+  { name:"Postal Posse", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic", near:"Oldtown", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Seen on the official app's own map in a small loop with Trough Love, inside Oldtown." },
   { name:"Copper Feel Cabaret", type:"Hidden venue", status:"rumoured", music:true, genre:"Cabaret, live", near:"Copperwood (past chapters)", info:"Copperwood-adjacent name from past searches; not confirmed for 2026." },
   { name:"Cosmic Junkyard", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic bass", near:"Unclear", info:"Turned up in past-chapter searches with no dedicated account; treat as unconfirmed." },
   { name:"Clik Clik", type:"Hidden venue", status:"rumoured", music:false, genre:"Photo-booth / party novelty", near:"Unclear", info:"Seen in past social mentions; no 2026 confirmation found." },
@@ -6923,11 +6973,38 @@ const TRUNK_PATH_EDGES = [
   ["Grand Central", "Oldtown"],
   ["Oldtown", "Quantum"],
   ["Oldtown", "Tribe of Frog"],
-  ["Quantum", "The Lion's Den"],
+  // Helix inserted onto the Quantum -> Lion's Den walk this session —
+  // genuine official-app footage places it directly between the two,
+  // not the "alongside Metropolis" guess it carried before (see Helix's
+  // own comment in the `locations` array above).
+  ["Quantum", "Helix"],
+  ["Helix", "The Lion's Den"],
   ["Quantum", "Sunset Hill"],
   ["Sunset Hill", "Camp Skylark Sunset (premium)"],
   ["Camp Skylark Sunset (premium)", "South Gate"],
-  ["East Gate", "Temple Valley Camping"]
+  ["East Gate", "Temple Valley Camping"],
+  // Oldtown's twin venue chains, added this session — three independent
+  // genuine official-app frames all show these as two parallel winding
+  // paths either side of a small Postal Posse/Trough Love loop, both
+  // running roughly north-south between Oldtown itself and Quantum/the
+  // Hilltop yellow zone to the south.
+  ["Oldtown", "Trough Love"],
+  ["Trough Love", "Postal Posse"],
+  ["Oldtown", "The Fools Leap"],
+  ["The Fools Leap", "Da Graaf's Reformatory"],
+  ["Da Graaf's Reformatory", "La Luna Coven"],
+  ["La Luna Coven", "Buskers Wharf"],
+  ["Oldtown", "The Pomegranate Parlour"],
+  ["The Pomegranate Parlour", "Den of Dis Order"],
+  ["Den of Dis Order", "Mining for (g)Old Town"],
+  ["Mining for (g)Old Town", "Síbín Beag"],
+  ["Síbín Beag", "The Feckless Wrecked"],
+  // Full Moon Ballroom / Foggers Mill cluster, added this session — two
+  // independent genuine official-app frames show this pair either side
+  // of "The Hide Out Hilltop", near Copperwood Heights, reached off the
+  // same spine as Grand Central/Oldtown rather than floating disconnected.
+  ["Copperwood", "Full Moon Ballroom"],
+  ["Full Moon Ballroom", "Foggers Mill"]
 ];
 
 // Looks a name up across every array a trunk-path endpoint could name —
