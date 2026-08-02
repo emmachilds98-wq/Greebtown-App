@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v289";
-const APP_BUILD_TIME = "2026-08-02T19:56:26Z";
+const APP_CACHE_VERSION = "v290";
+const APP_BUILD_TIME = "2026-08-02T20:01:37Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7041,12 +7041,62 @@ const TRUNK_PATH_EDGES = [
   ["Den of Dis Order", "Mining for (g)Old Town"],
   ["Mining for (g)Old Town", "Síbín Beag"],
   ["Síbín Beag", "The Feckless Wrecked"],
-  // Full Moon Ballroom / Foggers Mill cluster, added this session — two
-  // independent genuine official-app frames show this pair either side
-  // of "The Hide Out Hilltop", near Copperwood Heights, reached off the
-  // same spine as Grand Central/Oldtown rather than floating disconnected.
-  ["Copperwood", "Full Moon Ballroom"],
-  ["Full Moon Ballroom", "Foggers Mill"]
+  // Full Moon Ballroom / Foggers Mill cluster — "The Hide Out Hilltop"
+  // itself is the real node off Copperwood (its own label sits right by
+  // Copperwood Heights on camera), with Full Moon Ballroom and Foggers
+  // Mill either side of it, matching the confirmed on-camera order.
+  ["Copperwood", "The Hide Out Hilltop"],
+  ["The Hide Out Hilltop", "Full Moon Ballroom"],
+  ["Full Moon Ballroom", "Foggers Mill"],
+  ["Copperwood", "Tangled Roots"],
+
+  // Botanica's wider venue cluster, added this pass — previously only
+  // reachable via generic auto-generated capillary spokes; these are
+  // real confirmed adjacencies from reference footage (Botanica Zoo/
+  // Karma Ceuticals/Mango on one path, Nexus its own stage marker, Sub
+  // Lab/Loconnection/Nachtlicker strung along a separate path south of
+  // Metropolis, Rose and Clown on Botanica's own east side).
+  ["Botanica", "NEXUS"],
+  ["Botanica", "Botanica Zoo"],
+  ["Botanica Zoo", "Karma Ceuticals"],
+  ["Karma Ceuticals", "Mango"],
+  ["Botanica", "Rose and Clown"],
+  ["Metropolis", "Sub Lab"],
+  ["Sub Lab", "Loconnection"],
+  ["Loconnection", "Nachtlicker"],
+  ["Metropolis", "The Hide Out Downtown"],
+
+  // Area 404's own venue cluster — a single reference frame this session
+  // showed Spectrum 360/Hangar 161/Deviant Lounge/Acid Leak/BBXL all
+  // together, in this order.
+  ["Area 404", "Spectrum 360"],
+  ["Spectrum 360", "Hangar 161"],
+  ["Hangar 161", "Deviant Lounge"],
+  ["Deviant Lounge", "BBXL"],
+  ["BBXL", "Acid Leak"],
+
+  // Ancient Futures/Grand Central's own cluster of workshops/hidden
+  // venues — all confirmed sitting near Grand Central on camera (several
+  // had previously been guessed near Thrutopia/Pepperpot Market before
+  // this session's video evidence moved them here; see their own
+  // comments above), now actually reachable by a real path rather than
+  // floating on generic spokes.
+  ["Grand Central", "Ancient Futures"],
+  ["Ancient Futures", "Craft Tent"],
+  ["Craft Tent", "Games Lounge"],
+  ["Ancient Futures", "Circus Tent"],
+  ["Ancient Futures", "Circus"],
+  ["Ancient Futures", "Rebel Girls Club"],
+  ["Rebel Girls Club", "Tinker Station"],
+  ["Ancient Futures", "The Retreat"],
+  ["Ancient Futures", "Energy Garden"],
+  ["Energy Garden", "Climate Live"],
+  ["Climate Live", "The Magic Teapot"],
+  ["The Magic Teapot", "Cocaine Anonymous"],
+  ["Cocaine Anonymous", "Spinney Hollow"],
+
+  // Anara Forest's own hidden venue.
+  ["Anara Forest", "Hapitat"]
 ];
 
 // Looks a name up across every array a trunk-path endpoint could name —
