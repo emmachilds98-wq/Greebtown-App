@@ -35,15 +35,25 @@ find" filter chip row instead.
 - `findings_screenshots.md` — written findings from reviewing all screenshots.
 - `findings_vidAB.md`, `findings_vidCD.md`, `findings_vidE1.md`,
   `findings_vidE2.md` — written findings from reviewing frames extracted
-  from the 5 source videos (grouped into batches for review). These
-  reference frame filenames (e.g. `f_0045`) from the original videos, which
-  aren't included here — the written facts are what's actionable, not the
-  frame numbers themselves.
+  from the first session's 5 source videos (grouped into batches for
+  review). These reference frame filenames (e.g. `f_0045`) from the
+  original videos, which aren't included here — the written facts are
+  what's actionable, not the frame numbers themselves.
+- `findings_vidF.md` — a follow-up video (someone searching "thrutopia" in
+  the official app and panning nearly the whole site). Confirmed Thrutopia
+  has no findable pin anywhere on the real map after two sessions' worth of
+  footage, so its map pin was removed entirely (it's kept as a narrative/
+  schedule district only — see the comment on its old `locations` entry in
+  `js/app.js`). Also caught and fixed a wrong placement from the first
+  session: Postal Posse (and Hotel Paradiso, Luck Exchange Casino) had been
+  placed near Oldtown/Copperwood/Area 404 on weaker evidence, but this
+  clearer video shows them on Botanica's Letsbe Avenue loop path instead.
 
 ## Known gaps as of this pass
 
-- **Thrutopia**'s position is still unconfirmed by any genuine official-app
-  footage — see the comment on its `locations` entry in `js/app.js`.
+- **Thrutopia** has no map pin — confirmed absent from the map itself after
+  two sessions' footage (including a search for it), so it's tracked as a
+  narrative district only until a genuine sighting turns up.
 - Several `thingsToFind` entries still carry positions originally derived
   from scraped GPS lat/lon (converted to schematic x/y) rather than footage
   — flagged in their own comments with "Real surveyed GPS puts it..." — and

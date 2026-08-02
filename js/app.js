@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v287";
-const APP_BUILD_TIME = "2026-08-02T19:29:33Z";
+const APP_CACHE_VERSION = "v288";
+const APP_BUILD_TIME = "2026-08-02T19:50:26Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5944,14 +5944,21 @@ const locations = [
   // coordinates show up directly as garbled overlapping labels).
   { name:"Area 404", kind:"district", x:"50%", y:"37%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
   { name:"Botanica", kind:"district", x:"28%", y:"18%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
-  // Still unconfirmed by real footage as of this session — the only
-  // "sighting" found in this pass's evidence was a screen recording of
-  // THIS APP'S OWN in-progress map (visible mid-pan in one video, caught
-  // by its "Greebtown!" app-switcher label), not the official Boomtown
-  // app. Using that would just be circularly confirming our own guess, so
-  // it wasn't used. Position below is unchanged pending a genuine
-  // official-app sighting.
-  { name:"Thrutopia", kind:"district", x:"56%", y:"16%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
+  // Thrutopia's map pin removed entirely (not just repositioned) — still
+  // unconfirmed by any real footage after two separate sessions' worth of
+  // reference video, including one clip of someone typing "thrutopia"
+  // into the official app's own search bar and manually panning almost
+  // the entire site: no pin, label, or highlighted result for it ever
+  // appeared anywhere. The one "sighting" found earlier was a screen
+  // recording of THIS APP'S OWN in-progress map (caught mid-pan by its
+  // "Greebtown!" app-switcher label), not the official app — using that
+  // would have been circularly confirming our own guess. Thrutopia is
+  // still a real district narratively (schedule, GUIDE_DISTRICT_NAMES,
+  // Discover cards below all keep it — it clearly exists, e.g. the
+  // opening ceremony is held there) but showing a guessed pin on a map
+  // people navigate by risks sending someone to the wrong place, which
+  // is worse than showing nothing. Re-add a pin only once a genuine
+  // official-app sighting turns up.
   // Pulled from (68,26) to (58,23) — this session's reference video shows
   // COPPERWOOD's own label sitting clearly north-WEST of GRAND CENTRAL's
   // glowing stage marker in the same wide shot (Copperwood/Hilltop/
@@ -6128,10 +6135,18 @@ const minorStages = otherStages.map((s, i)=>({
 // not a surveyed spot — the same caveat as the plain "?" markers below.
 const thingsToFind = [
   { name:"The Boomtown Bobbies", near:"Area 404", x:"46%", y:"26%", info:"A mock police station hidden venue playing on Area 404's Guardians — expect in-character 'officers', a booking-desk bar and a wink at the district's own policing storyline." },
-  { name:"Luck Exchange Casino", near:"Area 404", x:"54%", y:"34%", info:"A casino-themed hidden venue in Area 404's territory — cards, chips and a party underneath the gambling dressing." },
+  // Moved from a guessed "near Area 404" (54,34) — a clearer reference
+  // video this session shows LUCK EXCHANGE labelled at the top of
+  // Botanica's Letsbe Avenue loop path, right below Letsbe Avenue
+  // itself, not in Area 404's own cluster.
+  { name:"Luck Exchange Casino", near:"Botanica", x:"37%", y:"12%", info:"A casino-themed hidden venue on Botanica's Letsbe Avenue loop path — cards, chips and a party underneath the gambling dressing." },
   { name:"Botanica Zoo", near:"Botanica", x:"24%", y:"16%", info:"A character-led 'zoo' micro-venue inside Botanica — the theme is the clue, so follow the animal keepers and see where they lead." },
   { name:"The Garden Centre", near:"Botanica", x:"23%", y:"24%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
-  { name:"Hotel Paradiso", near:"Copperwood", x:"54%", y:"19%", info:"A faded-glamour hotel-themed micro venue — sits well with Copperwood's 1925 film-world setting; check in at the 'front desk'." },
+  // Moved from a guessed "near Copperwood" (54,19) — a clearer reference
+  // video this session shows HOTEL PARADISO labelled on Botanica's
+  // Letsbe Avenue loop path, right by Postal Posse/Network Comms
+  // Station, not near Copperwood at all.
+  { name:"Hotel Paradiso", near:"Botanica", x:"30%", y:"15%", info:"A faded-glamour hotel-themed micro venue on Botanica's Letsbe Avenue loop path. Check in at the 'front desk'." },
   { name:"Reel News", near:"Copperwood", x:"62%", y:"27%", info:"A newsreel/cinema-themed hidden spot tying into Von Vanderhaus's film empire — expect projected clips and in-character 'reporters'." },
   // Shifted by the same (-20,-12) delta as Oldtown's own re-derivation
   // this session, to stay clustered with it.
@@ -6194,6 +6209,12 @@ const thingsToFind = [
   // Da Graaf's/La Luna Coven/Buskers Wharf to the west, Pomegranate
   // Parlour/Den of Dis Order/Mining for (g)Old Town/Síbín Beag/The
   // Feckless Wrecked to the east), not out toward the east chain alone.
+  // The "loop with Postal Posse" reasoning from this session's earlier
+  // pass was withdrawn — a clearer reference video shows Postal Posse is
+  // actually in Botanica, not Oldtown (see its own entry above). Trough
+  // Love itself is still Oldtown-placed on its own separate evidence
+  // (multiple frames show it labelled inside Oldtown's venue cluster),
+  // just no longer paired with Postal Posse specifically.
   { name:"Trough Love", near:"Oldtown", x:"63%", y:"36%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
   { name:"Da Graaf's Reformatory", near:"Oldtown", x:"60%", y:"32%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"La Luna Coven", near:"Oldtown", x:"62%", y:"38%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
@@ -6321,7 +6342,19 @@ const thingsToFind = [
   // rendering. Genuine official-app footage instead shows Postal Posse
   // in a small loop path with Trough Love, sitting between Oldtown's two
   // venue chains — moved there instead.
-  { name:"Postal Posse", near:"Oldtown", x:"64%", y:"38%", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Seen on the official app's own map in a small loop with Trough Love, inside Oldtown — not near Pepperpot Market as an earlier GPS-derived guess assumed." }
+  // Corrected AGAIN this session — the previous fix (this session's
+  // earlier pass) put it near Oldtown "in a loop with Trough Love",
+  // based on a less certain read of a small chip label in that cluster.
+  // A new, much clearer reference video (someone typing "thrutopia" into
+  // the official app's search bar and panning the whole site) shows
+  // "POSTAL POSSE" unambiguously labelled on the Letsbe Avenue loop path
+  // INSIDE BOTANICA, right next to Hotel Paradiso/Network Comms Station/
+  // The Daily Rag/Luck Exchange — not Oldtown at all. Its own info text's
+  // "tied to Botanica's postal-worker subplot" always pointed this way;
+  // moved to match. Hotel Paradiso and Luck Exchange Casino (previously
+  // guessed "near Copperwood"/"near Area 404") moved into this same
+  // Botanica/Letsbe Avenue loop cluster for the same reason.
+  { name:"Postal Posse", near:"Botanica", x:"33%", y:"16%", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Seen on the official app's own map on Botanica's Letsbe Avenue loop path, next to Hotel Paradiso and Network Comms Station." }
 ];
 
 // A handful of plain, unnamed markers — a reminder that the 50+ hidden
@@ -6693,8 +6726,8 @@ const venueDirectory = [
   { name:"The Observatory", type:"Research hub", status:"confirmed", music:false, genre:"—", near:"Thrutopia (likely)", info:"Genuine 2026 academic study led by Dr Martha Newson, 10+ UK universities — real research, not story canon." },
   { name:"The Boomtown Bobbies", type:"Hidden venue", status:"confirmed", music:true, genre:"DJs, live takeovers", near:"Area 404 / Oldtown", info:"Long-running mock police station tied to the storyline's rising Area 404 crackdown — confirmed for 2026 with a full Thu-Sun DJ programme." },
   { name:"Soapranos Laundrette", type:"Hidden venue", status:"confirmed", music:true, genre:"Dance/house DJs", near:"Letsbe Avenue", info:"Laundrette-fronted micro venue on Letsbe Avenue's high street — confirmed for 2026 with a full Thu–Sun DJ programme including Laundry Night Live and Soapranos: Hotwash!" },
-  { name:"Hotel Paradiso", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, lounge", near:"Copperwood", info:"Faded-glamour hotel-themed micro venue in Copperwood — confirmed returning for 2026 ('Hotel on Wheels') with a full Thu–Sat lounge/DJ programme; check in at the 'front desk'." },
-  { name:"Luck Exchange Casino", type:"Hidden venue", status:"confirmed", music:false, genre:"Game-show / comedy", near:"Area 404", info:"Casino-themed venue — confirmed for 2026, but it's a game-show format rather than DJ sets: short comedy/game segments (Chattering Teeth Races, Play Your Cards Shite, Beyblade Tournament, Is It Piss?, TOYBOX)." },
+  { name:"Hotel Paradiso", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, lounge", near:"Botanica", info:"Faded-glamour hotel-themed micro venue on Botanica's Letsbe Avenue loop path — confirmed returning for 2026 ('Hotel on Wheels') with a full Thu–Sat lounge/DJ programme; check in at the 'front desk'." },
+  { name:"Luck Exchange Casino", type:"Hidden venue", status:"confirmed", music:false, genre:"Game-show / comedy", near:"Botanica", info:"Casino-themed venue on Botanica's Letsbe Avenue loop path — confirmed for 2026, but it's a game-show format rather than DJ sets: short comedy/game segments (Chattering Teeth Races, Play Your Cards Shite, Beyblade Tournament, Is It Piss?, TOYBOX)." },
   { name:"The Garden Centre", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Chill, eclectic", near:"Botanica", info:"Garden-centre-fronted spot fitting Botanica's plant-temple theme — confirmed for 2026 (Funkmaster General, Redpeppa, Rodderz, Dovetail, plus a Diversion Audio takeover)." },
   { name:"Botanica Zoo", type:"Hidden venue", status:"confirmed", music:true, genre:"Jungle, hardcore, breaks, UK garage, bass", near:"Botanica", info:"Feral, animal-led 'anarcho-squat zoo' venue — 2026 event listings (Killa P, DJ Hybrid, 14 Aug) and its own 'just over 2 weeks til Boomtown' July 2026 post confirm it's back for Chapter Five." },
   { name:"The Immortal Children of the Eternal Seed", type:"Hidden venue", status:"confirmed", music:true, genre:"Ritual, ambient/eclectic", near:"Botanica", info:"Botanica-flavoured cult/ritual-themed micro venue — confirmed for 2026, running Thu-Sat (Loose Forms takeover, Kritical Mass, Safe N Sound)." },
@@ -6738,7 +6771,7 @@ const venueDirectory = [
   { name:"Retro Amusements Arcade", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Unclear", info:"Past chapters have run a retro amusements arcade among the site's entertainment; not explicitly reconfirmed for 2026 yet." },
   { name:"Vintage Fairground (waltzers & rides)", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Oldtown / Area 404 (typical)", info:"Past chapters have included a vintage fairground with waltzers and similar rides alongside the chair-o-plane; general presence expected but exact 2026 line-up of rides unconfirmed." },
   { name:"Little Pharma", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic party DJs", near:"Unclear", info:"Seen in past chapters; no 2026 listing found — chase it but don't bank on it." },
-  { name:"Postal Posse", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic", near:"Oldtown", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Seen on the official app's own map in a small loop with Trough Love, inside Oldtown." },
+  { name:"Postal Posse", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic", near:"Botanica", info:"Character-led micro world tied to Botanica's postal-worker subplot — confirmed operating across all 2026 festival dates, programming DJs from noon to 2am daily around its giant post box and letter-writing stations. Seen on the official app's own map on Botanica's Letsbe Avenue loop path." },
   { name:"Copper Feel Cabaret", type:"Hidden venue", status:"rumoured", music:true, genre:"Cabaret, live", near:"Copperwood (past chapters)", info:"Copperwood-adjacent name from past searches; not confirmed for 2026." },
   { name:"Cosmic Junkyard", type:"Hidden venue", status:"rumoured", music:true, genre:"Eclectic bass", near:"Unclear", info:"Turned up in past-chapter searches with no dedicated account; treat as unconfirmed." },
   { name:"Clik Clik", type:"Hidden venue", status:"rumoured", music:false, genre:"Photo-booth / party novelty", near:"Unclear", info:"Seen in past social mentions; no 2026 confirmation found." },
@@ -6966,6 +6999,15 @@ const TRUNK_PATH_EDGES = [
   ["Botanica", "Area 404"],
   ["Metropolis", "Hydro XL"],
   ["Botanica", "Letsbe Avenue"],
+  // Letsbe Avenue's own loop path, added this session — a clear
+  // reference video (someone searching "thrutopia" and panning the
+  // whole site) shows this as a genuine closed loop, not just isolated
+  // points: Letsbe Avenue -> Luck Exchange Casino -> Hotel Paradiso ->
+  // Postal Posse -> back to Botanica.
+  ["Letsbe Avenue", "Luck Exchange Casino"],
+  ["Luck Exchange Casino", "Hotel Paradiso"],
+  ["Hotel Paradiso", "Postal Posse"],
+  ["Postal Posse", "Botanica"],
   ["Letsbe Avenue", "Copperwood"],
   ["Copperwood", "Grand Central"],
   ["Copperwood", "Temple Valley Camping"],
@@ -6985,11 +7027,11 @@ const TRUNK_PATH_EDGES = [
   ["East Gate", "Temple Valley Camping"],
   // Oldtown's twin venue chains, added this session — three independent
   // genuine official-app frames all show these as two parallel winding
-  // paths either side of a small Postal Posse/Trough Love loop, both
-  // running roughly north-south between Oldtown itself and Quantum/the
-  // Hilltop yellow zone to the south.
+  // paths, running roughly north-south between Oldtown itself and
+  // Quantum/the Hilltop yellow zone to the south. (Postal Posse was
+  // dropped from this cluster — a clearer video showed it's actually in
+  // Botanica, not Oldtown; see its own comment in `thingsToFind` above.)
   ["Oldtown", "Trough Love"],
-  ["Trough Love", "Postal Posse"],
   ["Oldtown", "The Fools Leap"],
   ["The Fools Leap", "Da Graaf's Reformatory"],
   ["Da Graaf's Reformatory", "La Luna Coven"],
