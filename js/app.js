@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v298";
-const APP_BUILD_TIME = "2026-08-02T23:29:58Z";
+const APP_CACHE_VERSION = "v299";
+const APP_BUILD_TIME = "2026-08-02T23:42:38Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6865,6 +6865,36 @@ function blobRing(cx, cy, baseR, seed, points){
   return pts;
 }
 
+// A field-like boundary — a handful of mostly-straight edges around an
+// elongated, rotated rectangle, with just enough per-vertex jitter to
+// avoid looking like a drawn ruler-rectangle. Reference screenshots of
+// the official app show camping fields and stage/plaza clearings as
+// real bounded AREAS with distinct edges (closer to a farm-field
+// boundary or a paved plaza outline), not the smooth circular blobs
+// blobRing draws — using blobRing for those specifically was reported
+// as "everything is circles with names in them, not clear areas with
+// edges." rx/ry set the field's half-width/half-height BEFORE rotation;
+// aspect (rx vs ry) and rotation are both seeded so repeat calls with
+// the same seed are stable across reloads, same as blobRing.
+function fieldRing(cx, cy, rx, ry, seed, sides){
+  sides = sides || 6;
+  const rand = seededRand(seed);
+  const rotation = rand() * Math.PI;
+  const cos = Math.cos(rotation), sin = Math.sin(rotation);
+  const pts = [];
+  for(let i=0;i<sides;i++){
+    const angle = (i / sides) * Math.PI * 2;
+    // Superellipse-ish corner jitter (0.8-1.08x) — enough irregularity to
+    // read as hand-drawn, not enough to lose the field's basic straight-
+    // edged silhouette the way blobRing's wider 0.72-1.22 range does.
+    const jitter = 0.8 + rand() * 0.28;
+    const lx = Math.cos(angle) * rx * jitter, ly = Math.sin(angle) * ry * jitter;
+    pts.push([cx + lx * cos - ly * sin, cy + (lx * sin + ly * cos) * 0.85]);
+  }
+  pts.push(pts[0]);
+  return pts;
+}
+
 function nearestDistrict(x, y, districts){
   let best = null, bestD = Infinity;
   districts.forEach(d=>{
@@ -7468,9 +7498,13 @@ function buildMapGeoJSON(){
     // green clearing); Quantum (a path fork, not a district) gets a flat
     // smaller footprint since it's a junction, not a town centre.
     const r = d ? Math.max(2.6, Math.min(5, (districtRadii.get(d) || 6) * 0.5)) : 3;
+    // fieldRing, not blobRing — a real plaza/concourse is a paved AREA
+    // with actual edges (like a town square), not a soft circular glow;
+    // 7 sides keeps it clearly a bounded shape without reading as a
+    // stiff geometric rectangle either.
     return {
       type: "Feature", properties: {},
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 43 + 19, 14)) ] }
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r, r * 0.85, i * 43 + 19, 7)) ] }
     };
   }).filter(Boolean);
 
@@ -7764,7 +7798,10 @@ function buildMapGeoJSON(){
   const parkingFeatures = parkingAreas.map((p,i)=>{
     const cx = parseFloat(p.x), cy = parseFloat(p.y);
     const r = clearanceRadius(cx, cy, p, p.r);
-    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 1200 + i * 37, 10)) ] } };
+    // fieldRing, not blobRing — a real car park is a rectangle with rows
+    // in it (see the row lines just below), not a circular blob; a
+    // slight rectangle (4 sides, low jitter) reads far closer to that.
+    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * 1.15, r * 0.75, 1200 + i * 37, 4)) ] } };
   });
   let parkingRowFeatures = [];
   let parkingCarFeatures = [];
@@ -7806,10 +7843,14 @@ function buildMapGeoJSON(){
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const r = campClearanceRadius(cx, cy, c, 18);
     campAreaRadii.set(c, r);
+    // fieldRing, not blobRing — same "real bounded area, not a circle"
+    // reasoning as the ordinary camp fields above. Orchid Downtown keeps
+    // its own evidenced rounded-diamond look (4 sides); Skylark gets a
+    // gentler 8-sided field shape, still faceted rather than smooth-round.
     return {
       type: "Feature",
       properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 700 + i * 61, isDowntown ? 6 : 14)) ] }
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r, r * (isDowntown ? 0.8 : 0.9), 700 + i * 61, isDowntown ? 4 : 8)) ] }
     };
   });
 
@@ -7872,7 +7913,13 @@ function buildMapGeoJSON(){
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const r = campClearanceRadius(cx, cy, c, 18);
     campFieldRadii.set(c, r);
-    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, 600 + i * 43, 12)) ] } };
+    // fieldRing, not blobRing — real camping fields are farm-field-shaped
+    // (mostly straight edges, an actual boundary), not a circular blob.
+    // Elongation (rx vs ry) is itself seeded per-field so neighbouring
+    // fields don't all read as the same stretched rectangle.
+    const seed = 600 + i * 43;
+    const aspect = 0.75 + seededRand(seed + 1)() * 0.5;
+    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, 6)) ] } };
   });
   let campFieldLineFeatures = [];
   ordinaryCamps.forEach((c,i)=>{
