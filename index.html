@@ -1,1 +1,119 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Greebtown</title>
+<script>
+(function(){
+  var errors = [];
+  function record(msg){ errors.push(msg); render(); }
+  window.addEventListener("error", function(e){
+    record((e.filename ? e.filename.split("/").pop() + ":" + e.lineno + " — " : "") + (e.message || "Unknown error"));
+  });
+  window.addEventListener("unhandledrejection", function(e){
+    var reason = e.reason;
+    record("Unhandled promise rejection — " + (reason && reason.message ? reason.message : String(reason)));
+  });
+  function render(){
+    if(!errors.length) return;
+    var el = document.getElementById("__crashReporter");
+    if(!el){
+      el = document.createElement("div");
+      el.id = "__crashReporter";
+      el.style.cssText = "position:fixed; top:0; left:0; right:0; z-index:999999; background:#3a0d0d; color:#ffdcdc; font:12px/1.5 monospace; padding:10px 12px; max-height:40vh; overflow:auto; border-bottom:3px solid #ff5555; white-space:pre-wrap;";
+      var title = document.createElement("div");
+      title.textContent = "⚠️ App error detected — screenshot this whole box and send it back:";
+      title.style.cssText = "font-weight:bold; margin-bottom:6px;";
+      el.appendChild(title);
+      var list = document.createElement("div");
+      list.id = "__crashReporterList";
+      el.appendChild(list);
+      (document.body || document.documentElement).appendChild(el);
+    }
+    document.getElementById("__crashReporterList").textContent = errors.join("\n\n");
+  }
+  if(document.body) render();
+  else document.addEventListener("DOMContentLoaded", render);
+})();
+</script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b1512">
+<meta name="background-color" content="#0b1512">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Greebtown!">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
+<link rel="stylesheet" href="css/style.css">
+<script>window.__boomtownSavedData={};</script>
+</head>
+<body style="padding-bottom: 156px;">
+<header class="appbar">
+  <div class="titles">
+    <h1>Boomtown 26</h1>
+    <div>Chapter Five: Radical Redesign · 12&ndash;16&nbsp;Aug</div>
+    <div class="ptr-hint" id="ptrHint">↓ Pull down to refresh & sync</div>
+  </div>
+  <span class="status-pill" id="buildStatusPill" title="If this looks old, your device has a cached copy — see Home for how to force-refresh.">Updated</span>
+  <div class="chat-btn-wrap">
+    <button type="button" class="chat-btn" id="chatOpenBtn" aria-label="Open group chat" title="Chat">💬<span class="chat-unread-badge" id="chatUnreadBadge" style="display:none;">0</span></button>
+    <button type="button" class="chat-btn" id="settingsOpenBtn" aria-label="Open settings" title="Settings">⚙️</button>
+    <div class="header-last-synced" id="headerLastSynced"></div>
+  </div>
+</header>
+<div id="ptrIndicator" class="ptr-indicator" aria-hidden="true">
+  <span class="ptr-indicator-arrow">↓</span>
+  <span class="ptr-indicator-spinner"></span>
+  <span class="ptr-indicator-text"></span>
+</div>
+<div id="friendStatusBar" class="friend-status-bar" style="display:none;"></div>
+<main>
+  <section id="home" class="screen active">
+    <div class="eyebrow">Made for our weekend</div>
+    <h2 style="margin-bottom:14px;">Our Greebtown</h2>
+    <div class="card" id="countdownCard">
+      <div id="countdownText" class="empty-note">Loading countdown…</div>
+    </div>
+    <div class="card" id="homeSyncStatus"></div>
+    <div class="card" id="homeLocationStatus"></div>
+    <div id="homeContextBanner"></div>
+    <div class="card" id="homeInfoCard"></div>
+    <div class="card">
+      <h3>⚙️ Settings</h3>
+      <p class="empty-note">Sync, merge, backups, location & GPS — under the <strong>⚙️ Settings</strong> button top right.</p>
+    </div>
+  </section>
+  <section id="today" class="screen"><div class="eyebrow">Right now</div><h2>Today</h2><div id="todayNow" class="card"></div></section>
+  <section id="artists" class="screen"><div class="eyebrow">Full lineup</div><h2>Lineup</h2><div id="artistResults"></div></section>
+  <section id="plan" class="screen"><div class="eyebrow">Your timetable</div><h2>My Boomtown</h2><div id="scheduleList"></div></section>
+  <section id="mapscreen" class="screen">
+    <div class="eyebrow">Find your way</div><h2>Map</h2>
+    <div id="map"></div>
+    <div id="mapInfo"></div>
+    <div class="card" id="jumpDirectory"><h3>Directory</h3><div id="venueTableBody"></div></div>
+  </section>
+  <section id="discover" class="screen"><div class="eyebrow">Discover</div><h2>Discover</h2></section>
+  <section id="settingsscreen" class="screen"><h2>Settings</h2></section>
+</main>
+<nav class="tabbar">
+  <button class="tab active" data-tab="home"><span class="icon">🏠</span>Home</button>
+  <button class="tab" data-tab="today"><span class="icon">☀️</span>Today</button>
+  <button class="tab" data-tab="artists"><span class="icon">🎵</span>Lineup</button>
+  <button class="tab" data-tab="plan"><span class="icon">⭐</span>Plan</button>
+  <button class="tab" data-tab="mapscreen"><span class="icon">🗺</span>Map</button>
+  <button class="tab" data-tab="discover"><span class="icon">✨</span>Discover</button>
+</nav>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
+<script src="js/artist-bios.js?v=283"></script>
+<script src="js/artist-previews.js?v=283"></script>
+<script src="js/boomtown-locations-2026.js?v=283"></script>
+<script src="js/app.js?v=283"></script>
+<script src="js/pwa-register.js?v=283"></script>
+</body></html>
