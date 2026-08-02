@@ -1,42 +1,12 @@
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v295";
+const CACHE_VERSION = "v296";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
-
-try {
-  importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js");
-  importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js");
-
-  firebase.initializeApp({
-    apiKey: "AIzaSyAgiBfNu3IpTCpumJQrYkFOh03VNFTWOVQ",
-    authDomain: "greebtown.firebaseapp.com",
-    projectId: "greebtown",
-    storageBucket: "greebtown.appspot.com",
-    messagingSenderId: "102345678901",
-    appId: "1:102345678901:web:abc123",
-  });
-
-  const messaging = firebase.messaging();
-
-  messaging.onBackgroundMessage((payload) => {
-    const title =
-      (payload.notification && payload.notification.title) || "Greebtown";
-
-    const options = {
-      body: (payload.notification && payload.notification.body) || "",
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
-      data: payload.data || {},
-    };
-
-    self.registration.showNotification(title, options);
-  });
-} catch (e) {}
 
 const ASSETS = [
   "/",
   "/index.html",
   "/manifest.json",
-  "/css/styles.css",
+  "/css/style.css",
   "/js/app.js",
   "/js/artist-bios.js",
   "/js/artist-previews.js",
@@ -47,13 +17,8 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (event) => {
-  self.skipWaiting();
-
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(ASSETS))
-      .catch(() => {})
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
@@ -65,9 +30,11 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           keys
             .filter(
-              (k) => k.startsWith("boomtown-companion-") && k !== CACHE_NAME
+              (key) =>
+                key.startsWith("boomtown-companion-") &&
+                key !== CACHE_NAME
             )
-            .map((k) => caches.delete(k))
+            .map((key) => caches.delete(key))
         )
       )
       .then(() => self.clients.claim())
@@ -79,7 +46,7 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(event.request.url);
 
-  // Network-first for JavaScript so map/data updates reach clients quickly.
+  // Keep JavaScript network-first so updates reach users quickly.
   if (
     url.pathname.endsWith(".js") ||
     url.pathname.endsWith("service-worker.js")
@@ -88,9 +55,11 @@ self.addEventListener("fetch", (event) => {
       fetch(event.request)
         .then((response) => {
           const clone = response.clone();
+
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, clone);
           });
+
           return response;
         })
         .catch(() => caches.match(event.request))
@@ -99,13 +68,25 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Cache-first for everything else.
+  // Navigation fallback for offline use.
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        caches.match("/index.html")
+      )
+    );
+
+    return;
+  }
+
+  // Cache-first for other assets, updating cache in background.
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      const fetched = fetch(event.request)
+      const network = fetch(event.request)
         .then((response) => {
           if (response && response.status === 200) {
             const clone = response.clone();
+
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, clone);
             });
@@ -115,7 +96,7 @@ self.addEventListener("fetch", (event) => {
         })
         .catch(() => cached);
 
-      return cached || fetched;
+      return cached || network;
     })
   );
 });
