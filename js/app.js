@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v292";
-const APP_BUILD_TIME = "2026-08-02T20:12:16Z";
+const APP_CACHE_VERSION = "v294";
+const APP_BUILD_TIME = "2026-08-02T20:21:36Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6119,7 +6119,12 @@ const otherStages = [
 // (65,34) sat almost on top of Den of Dis Order (63,34); moved south to
 // sit between Mining for (g)Old Town (64,36) and The Feckless Wrecked
 // (72,36), matching that confirmed order.
-const minorStagePositions = [[52,32],[51,14],[62,26],[52,26],[58,29],[68,25],[40,43],[64,44],[67,39],[46,44],[24,42]];
+// Infinity (index 10) moved from (24,42) to (32,42) — a genuine frame
+// shows it as a large orange circular stage east of the Metropolis
+// chain (Memory Mart/Better You/BBXL Info/Distractoverse/E Numbers/
+// Gabber Kebabber — see E Numbers/Gabber Kebabber's own comment above),
+// not west of/inside that chain.
+const minorStagePositions = [[52,32],[51,14],[62,26],[52,26],[58,29],[68,25],[40,43],[64,44],[67,39],[46,44],[32,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6153,8 +6158,15 @@ const thingsToFind = [
   { name:"Mining for (g)Old Town", near:"Oldtown", x:"64%", y:"36%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
   { name:"Cas's Costumes", near:"Oldtown", x:"72%", y:"44%", info:"A costume-shop-fronted micro venue fitting Oldtown's circus and rogues theme — worth a look if you want to dress into the story." },
   { name:"Soapranos Laundrette", near:"Letsbe Avenue", x:"36%", y:"10%", info:"A laundrette-fronted hidden venue — in 2025 it hosted dance-music DJ sets behind the washing machines. Look for the set dressing, not a normal stage entrance." },
-  { name:"E Numbers", near:"Letsbe Avenue", x:"10%", y:"26%", info:"A sweet-shop/E-numbers-themed party spot fitting Letsbe Avenue's consumer-product BLIP storyline — small, high-energy, easy to walk past." },
-  { name:"Gabber Kebabber", near:"Letsbe Avenue", x:"22%", y:"30%", info:"Kebab-shop chaos paired with gabber and hardcore — a tiny, loud find rather than a destination with a published pin." },
+  // Both corrected this session — a genuine official-app frame shows a
+  // chain (Memory Mart, Better You(tm), BBXL Info, Distractoverse(tm), E
+  // Numbers, Gabber Kebabber) running roughly north-south EAST of
+  // Metropolis, with Infinity further east again — not west near Letsbe
+  // Avenue as previously guessed (the venueDirectory copy of E Numbers
+  // already said "near Metropolis", inconsistent with this entry's own
+  // old "near Letsbe Avenue" — this was that drift, now resolved one way).
+  { name:"E Numbers", near:"Metropolis", x:"22%", y:"38%", info:"A sweet-shop/E-numbers-themed party spot east of Metropolis, in a chain with Gabber Kebabber and Infinity." },
+  { name:"Gabber Kebabber", near:"Metropolis", x:"26%", y:"40%", info:"Kebab-shop chaos paired with gabber and hardcore, east of Metropolis in the same chain as E Numbers." },
   { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
   // Corrected this session from "near Metropolis" (19,38) — a frame
   // showing SPECTRUM 360/HANGAR 161/ACID LEAK/DEVIANT LOUNGE/BBXL all
@@ -6736,7 +6748,7 @@ const venueDirectory = [
   { name:"Sub Lab", type:"Hidden venue", status:"confirmed", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — confirmed for 2026 (Bennett ft. Sylla/Limmz, Stasis, Nio B, Ruggz b2b Sonia Sol)." },
   { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Metropolis", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Corrected from an earlier 'near Area 404' guess — the official app's own map shows it on the same footpath as Sub Lab and Loconnection, just south of Metropolis." },
   { name:"Deviant Lounge", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, after-hours", near:"Area 404", info:"Confirmed for 2026, running Thu-Sat (Wrong'un Crew, Church of Donkology, DJ Safe N Sound, Bunn13) — previously listed as unverified, now on the 2026 schedule. Real position is in the Area 404 cluster, not Metropolis as an earlier guess assumed." },
-  { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Dystopian kebab-shop gabber stage running since 2023 — confirmed for 2026 with a full Thu-Sun DJ programme." },
+  { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Metropolis", info:"Dystopian kebab-shop gabber stage running since 2023 — confirmed for 2026 with a full Thu-Sun DJ programme, east of Metropolis alongside E Numbers." },
   { name:"E Numbers", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Hyperpop, party, eclectic", near:"Metropolis", info:"Hyperpop 'sweetshop' venue — confirmed for 2026, running Thu-Sat (Kid Cosmit, Lounicorn, D0LLSW4G, Mannequins b2b sets)." },
   { name:"The Pomegranate Parlour", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic party DJs", near:"Oldtown", info:"Actor-led parlour-style venue — confirmed for 2026 (Cassia, SCARBA, Mattana, DJ Shakey, Estère). Seen on the official app's own map inside Oldtown, not site-wide as previously guessed." },
   { name:"Busker's Wharf", type:"Hidden venue", status:"confirmed", music:true, genre:"Live/acoustic, folk", near:"Site-wide", info:"Wharf/street-performance themed spot — a real, recurring hidden venue, though no year-dated source was found to pin down a specific chapter." },
@@ -6895,6 +6907,31 @@ function buildingFootprint(cx, cy, seed){
   const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
   pts.push(pts[0]);
   return pts;
+}
+
+// A few named venues have a distinctly different real silhouette from
+// the generic rotated-rectangle every other venue gets, confirmed
+// repeatedly in this session's reference footage — Full Moon Ballroom
+// is its own white dome/marquee tent, Spectrum 360 is a circular
+// container-ring arena (not a rectangular building), NEXUS sits on a
+// dark triangular mound. Every other named venue still uses the plain
+// rectangle, since that's genuinely what most of them look like and
+// inventing a distinctive shape without evidence would be a guess, not
+// an accuracy improvement.
+function venueFootprint(name, cx, cy, seed){
+  if(name === "Full Moon Ballroom" || name === "Spectrum 360"){
+    return blobRing(cx, cy, name === "Full Moon Ballroom" ? 1.7 : 1.5, seed, 14);
+  }
+  if(name === "NEXUS"){
+    const rand = seededRand(seed);
+    const size = 1.7, angle = rand() * Math.PI;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const corners = [[0,-size],[size * 0.87, size * 0.5],[-size * 0.87, size * 0.5]];
+    const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
+    pts.push(pts[0]);
+    return pts;
+  }
+  return buildingFootprint(cx, cy, seed);
 }
 
 // A gently bowed 3-point path between two schematic points instead of a
@@ -7235,6 +7272,18 @@ function buildMapGeoJSON(){
     .concat(campLabels.map(c=>({ x: parseFloat(c.x), y: parseFloat(c.y), ref: c })))
     .concat(parkingAreas.map(p=>({ x: parseFloat(p.x), y: parseFloat(p.y), ref: p })))
     .concat(marketHubRef ? [{ x: parseFloat(marketHubRef.x), y: parseFloat(marketHubRef.y), ref: marketHubRef }] : []);
+  // Every zone shape drawn from a "radius" below is actually blobRing()'s
+  // irregular polygon, which reaches up to 1.22x its nominal radius at
+  // its widest bulge (see blobRing: r = baseR * (0.72 + rand()*0.5)).
+  // The ratios/floors here used to treat "radius" as if it were a true
+  // circle, so two neighbours each sized to "half the distance between
+  // them" could still visibly overlap once their bulges lined up toward
+  // each other (worst case: 0.42 * 1.22 * 2 = 1.02x the real distance,
+  // i.e. actual overlap, not just a close call) — this is the "campsite/
+  // stage/forest zoning overlaps and mishapenness" that was reported.
+  // Dividing by BLOB_MAX_OVERSIZE below makes the guarantee hold even at
+  // that worst-case bulge alignment, not just for the idealized average.
+  const BLOB_MAX_OVERSIZE = 1.22;
   function clearanceRadius(cx, cy, selfRef, desired){
     let minDist = Infinity;
     zoneCenters.forEach(z=>{
@@ -7248,36 +7297,37 @@ function buildMapGeoJSON(){
     // actually happened for Oldtown/East Camping, ~5 units apart — a
     // floor of 3 each summed to 6). minDist/2 is a hard ceiling no floor
     // is allowed to cross, since two neighbours each capped at half the
-    // distance between them can never sum past that distance — so it's
-    // safe to raise the ratio below (0.36 -> 0.42, more legible zones
-    // without touching) since the hard ceiling, not the ratio, is what
-    // actually guarantees no overlap.
-    const safeMax = Math.max(1.5, minDist / 2 - 0.4);
-    return Math.min(Math.max(2, Math.min(desired, minDist * 0.42)), safeMax);
+    // distance between them can never sum past that distance in the
+    // idealized-circle case — divided by BLOB_MAX_OVERSIZE so that still
+    // holds once blobRing's own irregularity is accounted for.
+    const safeMax = Math.max(1.5, (minDist / 2 - 0.4) / BLOB_MAX_OVERSIZE);
+    return Math.min(Math.max(2, Math.min(desired, minDist * 0.38 / BLOB_MAX_OVERSIZE)), safeMax);
   }
 
   // Camping fields off the official app read as by far the biggest
   // ground use on site — real Boomtown camping dwarfs the "town"
   // districts, not the other way round — but clearanceRadius above was
-  // sizing them the same conservative way as a district, capped at 9-11
-  // and shrunk against EVERY other zone including neighbouring camp
-  // fields. That last part doesn't match reality: two camping fields
-  // blending together at their edges (Camp Orchid Downtown sitting
-  // inside/beside the wider Downtown Camping, say) is normal — it's only
-  // running into a themed district, parking or the market hub that needs
-  // a hard boundary. So camp fields get their own clearance check against
-  // just those non-camp zones, a higher desired cap, and a ratio closer
-  // to the theoretical safe half-distance (0.48 vs 0.42) since that
-  // safety margin was designed for the tighter district-vs-district case.
-  const nonCampZoneCenters = zoneCenters.filter(z=> !campLabels.includes(z.ref));
+  // sizing them the same conservative way as a district, capped at 9-11.
+  // Camp fields get a higher desired cap and a more generous ratio than
+  // districts (0.44 vs 0.38) since neighbouring camp fields genuinely do
+  // sit closer/blend at their edges more than two themed districts would
+  // (Camp Orchid Downtown sitting inside/beside the wider Downtown
+  // Camping, say) — but they DO still get checked against OTHER camp
+  // fields now, not just districts/parking/the market hub. The previous
+  // version skipped camp-vs-camp entirely on the theory that "blending is
+  // normal", but with no check at all two same-sized camp fields several
+  // schematic units apart could draw fully on top of each other — reported
+  // as camp zoning "overlaps and mishapenness". A real (if slightly
+  // looser) limit still allows visible blending at the edges without
+  // letting one camp field's shape swallow its neighbour's whole.
   function campClearanceRadius(cx, cy, selfRef, desired){
     let minDist = Infinity;
-    nonCampZoneCenters.forEach(z=>{
+    zoneCenters.forEach(z=>{
       if(z.ref === selfRef) return;
       minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy));
     });
-    const safeMax = Math.max(1.5, minDist / 2 - 0.4);
-    return Math.min(Math.max(3, Math.min(desired, minDist * 0.48)), safeMax);
+    const safeMax = Math.max(1.5, (minDist / 2 - 0.4) / BLOB_MAX_OVERSIZE);
+    return Math.min(Math.max(3, Math.min(desired, minDist * 0.44 / BLOB_MAX_OVERSIZE)), safeMax);
   }
 
   function districtSpreadR(d){
@@ -7574,10 +7624,14 @@ function buildMapGeoJSON(){
   // than the video's own mix of buildings and open fenced areas.
   const solidBuildingFeatures = [];
   const fencedEnclosureFeatures = [];
+  const SPECIAL_SHAPE_VENUES = new Set(["Full Moon Ballroom", "Spectrum 360", "NEXUS"]);
   districtMemberPoints.forEach((p,i)=>{
-    const ring = schematicRingToLngLat(buildingFootprint(parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
+    const ring = schematicRingToLngLat(venueFootprint(p.name, parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
     const feature = { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } };
-    if(i % 4 === 3) fencedEnclosureFeatures.push(feature);
+    // Special-shape venues are solid, confirmed structures, never the
+    // hollow "fenced enclosure" treatment below — that's for the
+    // otherwise-random 1-in-4 open-yard look, not these.
+    if(!SPECIAL_SHAPE_VENUES.has(p.name) && i % 4 === 3) fencedEnclosureFeatures.push(feature);
     else solidBuildingFeatures.push(feature);
   });
 
@@ -7590,6 +7644,35 @@ function buildMapGeoJSON(){
   // district's own clearing (same buildingFootprint shape, offset from
   // its centre so they don't stack on the plaza) fills that density gap
   // without needing real data for each one.
+  //
+  // Every building placed below (both here and the named-venue ones
+  // above) used to have zero mutual collision-avoidance — each one
+  // placed independently by its own seeded random angle/distance, so two
+  // nearby buildings (especially in the busier 11-per-district infill
+  // scatter) could easily land on top of each other, reported as venues
+  // with "overlapping store boxes". Named-venue buildings above are
+  // never moved (their position IS the evidenced data, and real venues
+  // legitimately do sit close together in dense clusters like Oldtown),
+  // but every decorative infill building below now checks its centre
+  // against every already-placed building (named or infill) and retries
+  // a few times, keeping the least-bad spot if it can't clear the gap —
+  // bounded, so this can never loop forever.
+  const placedBuildingCenters = districtMemberPoints.map(p=> [parseFloat(p.x), parseFloat(p.y)]);
+  const MIN_BUILDING_SEP = 1.5;
+  function pickClearBuildingSpot(cx, cy, minDist, maxDist, rand){
+    let best = null, bestNearest = -Infinity;
+    for(let attempt=0; attempt<6; attempt++){
+      const a = rand() * Math.PI * 2;
+      const dist = minDist + rand() * (maxDist - minDist);
+      const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+      let nearest = Infinity;
+      placedBuildingCenters.forEach(p=>{ nearest = Math.min(nearest, Math.hypot(p[0] - x, p[1] - y)); });
+      if(nearest >= MIN_BUILDING_SEP){ placedBuildingCenters.push([x, y]); return [x, y]; }
+      if(nearest > bestNearest){ bestNearest = nearest; best = [x, y]; }
+    }
+    placedBuildingCenters.push(best);
+    return best;
+  }
   const infillBuildingFeatures = [];
   districts.forEach((d,di)=>{
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
@@ -7603,9 +7686,7 @@ function buildMapGeoJSON(){
     // that don't match that density.
     const count = 11;
     for(let k=0;k<count;k++){
-      const a = rand() * Math.PI * 2;
-      const dist = r * (0.35 + rand() * 0.5);
-      const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+      const [x, y] = pickClearBuildingSpot(cx, cy, r * 0.35, r * 0.85, rand);
       infillBuildingFeatures.push({
         type: "Feature", properties: {},
         geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, di * 137 + 19 + k * 7)) ] }
@@ -7624,9 +7705,7 @@ function buildMapGeoJSON(){
     const rand = seededRand(mi * 149 + 6000);
     const count = 4;
     for(let k=0;k<count;k++){
-      const a = rand() * Math.PI * 2;
-      const dist = 2.6 + rand() * 1.6;
-      const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+      const [x, y] = pickClearBuildingSpot(cx, cy, 2.6, 4.2, rand);
       infillBuildingFeatures.push({
         type: "Feature", properties: {},
         geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, mi * 149 + 6000 + k * 7)) ] }
@@ -7818,18 +7897,38 @@ function buildMapGeoJSON(){
   // clearing between Oldtown and Area 404 (reached via forked paths
   // through trees), and being called out directly as visibly wrong —
   // "just floating in open ground" — without one.
+  // Radius used to be a flat 15 regardless of how close a neighbouring
+  // district/camp/parking zone actually sat — with no clearance check at
+  // all (forests weren't in zoneCenters), a big flat blob could swallow
+  // right over a neighbour's centre, part of the "stage and forest space
+  // overlaps" reported alongside the camp-field one. Now capped the same
+  // safe way (accounting for blobRing's own up-to-1.22x bulge) against
+  // every district/camp/parking/market-hub zone, same as camp fields.
   const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name))
     .concat(minorStages.filter(p=> p.name === "Tribe of Frog"));
+  function forestClearanceRadius(cx, cy){
+    let minDist = Infinity;
+    zoneCenters.forEach(z=>{ minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy)); });
+    const safeMax = Math.max(4, (minDist / 2 - 0.4) / BLOB_MAX_OVERSIZE);
+    return Math.min(Math.max(6, Math.min(15, minDist * 0.46 / BLOB_MAX_OVERSIZE)), safeMax);
+  }
   const forestFeatures = forestSpots.map((f,i)=>({
     type: "Feature", properties: {},
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), 15, 400 + i * 53, 16)) ] }
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)), 400 + i * 53, 16)) ] }
   }));
 
   // Density bumped 22 -> 30 per named forest spot — the reference
   // video's woods read as densely stippled throughout, not sparse dots
   // with visible gaps of bare green between them.
   let treePts = [];
-  forestSpots.forEach((f,i)=>{ treePts = treePts.concat(treeClusterPoints(parseFloat(f.x), parseFloat(f.y), 30, 13, 17 + i * 41)); });
+  // Tree spread now matches each forest's own clearance-capped radius
+  // (was a flat 13, independent of the fill shape above) so the tree
+  // texture never spills past a forest that got shrunk to avoid a close
+  // neighbour, or leaves a bare gap inside one that didn't.
+  forestSpots.forEach((f,i)=>{
+    const fx = parseFloat(f.x), fy = parseFloat(f.y);
+    treePts = treePts.concat(treeClusterPoints(fx, fy, 30, forestClearanceRadius(fx, fy) * 0.87, 17 + i * 41));
+  });
   // Widened from 6 fixed corner clusters to a fuller ring running the
   // whole perimeter — real UK farm estates like Matterley typically
   // have tree-lined boundary hedgerows/copses all the way round, not
