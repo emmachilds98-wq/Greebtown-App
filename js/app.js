@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v278";
-const APP_BUILD_TIME = "2026-08-02T15:34:40Z";
+const APP_CACHE_VERSION = "v279";
+const APP_BUILD_TIME = "2026-08-02T16:48:31Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6115,7 +6115,18 @@ const thingsToFind = [
   // 161/Acid Leak/Deviant Lounge — no other source found for what BBXL
   // stands for or what it programmes, so kept to what's visible.
   { name:"BBXL", near:"Area 404", x:"50%", y:"46%", info:"Seen labelled on the official app's own map in the Area 404 cluster, alongside Hangar 161/Acid Leak/Deviant Lounge — no lineup or theme details sourced yet." },
-  { name:"The Pomegranate Parlour", near:"Site-wide", x:"86%", y:"20%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor." },
+  // Moved from (86%,20%)/"Site-wide" — a user-supplied screenshot of the
+  // official app's own map shows this labelled right inside the Oldtown
+  // cluster, next to Mining for (g)Old Town and Den of Dis Order (both
+  // just above), not out on its own. Placed within the cluster's own
+  // already-re-derived footprint (see the Oldtown district pin's own
+  // comment above) rather than recomputed from scratch — real surveyed
+  // GPS independently agrees this venue sits close to that cluster too,
+  // though its raw lat/lon-derived schematic position disagrees with the
+  // video-calibrated one by a wide margin, the same GPS-vs-hand-drawn
+  // mismatch already documented elsewhere in this file, so only the
+  // relative placement is used here, not the raw GPS number.
+  { name:"The Pomegranate Parlour", near:"Oldtown", x:"66%", y:"33%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor. Seen on the official app's own map inside Oldtown, next to Mining for (g)Old Town." },
   { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." },
   // The following 10 were spotted as real named labels on the official
   // app's own map in the reference screen recording, but weren't in any
@@ -6146,6 +6157,15 @@ const thingsToFind = [
   { name:"La Luna Coven", near:"Oldtown", x:"62%", y:"38%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"The Common Ground", near:"Oldtown", x:"66%", y:"34%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"The Feckless Wrecked", near:"Oldtown", x:"72%", y:"36%", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." },
+  // Both newly spotted on a user-supplied screenshot of the official app's
+  // own map, inside the Oldtown cluster. Den of Dis Order was already
+  // tracked here as a story faction (see the characters data below) but
+  // never had its own map pin — placed by the Mining for (g)Old Town/
+  // Pomegranate Parlour end of the cluster, where the screenshot shows
+  // it. Buskers Wharf placed at the cluster's southern edge, near La Luna
+  // Coven, matching the same screenshot.
+  { name:"Den of Dis Order", near:"Oldtown", x:"63%", y:"34%", info:"Rufus the Red's inner circle of circus hustlers, fortune tellers and rogues, running Oldtown's day-to-day chaos — seen labelled on the official app's own map inside Oldtown, next to Mining for (g)Old Town." },
+  { name:"Buskers Wharf", near:"Oldtown", x:"60%", y:"42%", info:"Seen labelled on the official app's own map at the southern edge of Oldtown — no lineup or theme details sourced yet." },
   // Both spotted in the same reference-video pan as Sub Lab, strung
   // along the same footpath just south of it — Loconnection has no
   // lineup data sourced yet; Nachtlicker already had a genre/lineup
@@ -6637,7 +6657,7 @@ const venueDirectory = [
   { name:"Deviant Lounge", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, after-hours", near:"Area 404", info:"Confirmed for 2026, running Thu-Sat (Wrong'un Crew, Church of Donkology, DJ Safe N Sound, Bunn13) — previously listed as unverified, now on the 2026 schedule. Real position is in the Area 404 cluster, not Metropolis as an earlier guess assumed." },
   { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Dystopian kebab-shop gabber stage running since 2023 — confirmed for 2026 with a full Thu-Sun DJ programme." },
   { name:"E Numbers", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Hyperpop, party, eclectic", near:"Metropolis", info:"Hyperpop 'sweetshop' venue — confirmed for 2026, running Thu-Sat (Kid Cosmit, Lounicorn, D0LLSW4G, Mannequins b2b sets)." },
-  { name:"The Pomegranate Parlour", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic party DJs", near:"Site-wide", info:"Actor-led parlour-style venue — confirmed for 2026 (Cassia, SCARBA, Mattana, DJ Shakey, Estère)." },
+  { name:"The Pomegranate Parlour", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic party DJs", near:"Oldtown", info:"Actor-led parlour-style venue — confirmed for 2026 (Cassia, SCARBA, Mattana, DJ Shakey, Estère). Seen on the official app's own map inside Oldtown, not site-wide as previously guessed." },
   { name:"Busker's Wharf", type:"Hidden venue", status:"confirmed", music:true, genre:"Live/acoustic, folk", near:"Site-wide", info:"Wharf/street-performance themed spot — a real, recurring hidden venue, though no year-dated source was found to pin down a specific chapter." },
   { name:"Twisted Time Machine (Bad Apple Bar)", type:"Hidden venue", status:"confirmed", music:true, genre:"Rotates by slot: emo, nu-metal, jungle disco, 90s rave", near:"Site-wide", info:"Long-running takeover of Boomtown's historic Bad Apple Bar — confirmed for 2026 with themed nights Wed-Sat (One Welcome Party, The Abba Party, My Chemical Hoemance, The Fleetwood Mac Celebration, UNKLE Psyence Fiction album playback)." },
   { name:"Circus Tent", type:"Hidden venue", status:"confirmed", music:true, genre:"Circus, live performance", near:"Ancient Futures", info:"Performance-led rather than a straight dancefloor. Real surveyed GPS (filed as \"Circus Tent\" in js/boomtown-locations-2026.js) puts it right by Ancient Futures/Grand Central, not Oldtown — likely the same real venue as thingsToFind's own \"Circus\" entry, kept as a separate pin since that's unconfirmed." },
@@ -6697,7 +6717,12 @@ const venueDirectory = [
   { name:"Da Graaf's Reformatory", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"La Luna Coven", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"The Common Ground", type:"Chill space", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
-  { name:"The Feckless Wrecked", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." }
+  { name:"The Feckless Wrecked", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." },
+  // Both newly spotted on a user-supplied screenshot of the official
+  // app's own map, mirrored here from thingsToFind above (see its own
+  // comment there for sourcing).
+  { name:"Den of Dis Order", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Rufus the Red's inner circle of circus hustlers, fortune tellers and rogues, running Oldtown's day-to-day chaos — seen labelled on the official app's own map inside Oldtown, next to Mining for (g)Old Town." },
+  { name:"Buskers Wharf", type:"Hidden venue", status:"confirmed", music:false, genre:"—", near:"Oldtown", info:"Seen labelled on the official app's own map at the southern edge of Oldtown — no lineup or theme details sourced yet." }
 ];
 
 const map = document.getElementById("map");
