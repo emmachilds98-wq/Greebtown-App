@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v277";
-const APP_BUILD_TIME = "2026-08-02T15:08:50Z";
+const APP_CACHE_VERSION = "v278";
+const APP_BUILD_TIME = "2026-08-02T15:34:40Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5952,7 +5952,18 @@ const locations = [
   // "Near Copperwood" entries below (Hotel Paradiso, Reel News, Tangled
   // Roots) shifted by the same delta to keep that cluster together.
   { name:"Copperwood", kind:"district", x:"58%", y:"23%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
-  { name:"Oldtown", kind:"district", x:"88%", y:"52%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
+  // Pulled from (88,52) to (68,40) — three independent reference frames
+  // this session (all showing Copperwood/Grand Central/Oldtown together,
+  // at three different zoom levels across two videos) consistently place
+  // Oldtown only a modest distance southeast of Grand Central, not far
+  // out toward the map's own east edge. This was very likely the actual
+  // cause of "Grand Central looks stuck in the middle" — Oldtown (and
+  // everything anchored to it below) was dragging the whole Hilltop
+  // cluster's apparent centre far to the east of where it visually reads
+  // on the real map, exactly the kind of over-wide spacing already fixed
+  // once for the Downtown cluster. Every "near Oldtown" hidden venue
+  // below shifted by the same delta (-20,-12) to stay clustered with it.
+  { name:"Oldtown", kind:"district", x:"68%", y:"40%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
   { name:"Letsbe Avenue", kind:"district", x:"40%", y:"9%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
   { name:"Metropolis", kind:"district", x:"15%", y:"36%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
   { name:"Grand Central", kind:"stage", x:"66%", y:"30%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
@@ -5963,18 +5974,21 @@ const locations = [
   // camping field of a similar name. "Temple Valley" in the story text
   // below is Boomtown's own in-universe area name — evidently distinct
   // from "Temple Valley Camping" the camp field, despite the shared name.
-  { name:"The Lion's Den", kind:"stage", x:"90%", y:"58%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
+  // Nudged again this session to (83,55) alongside the wider Oldtown
+  // re-derivation above — same direction, modestly closer in.
+  { name:"The Lion's Den", kind:"stage", x:"83%", y:"55%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
   // Pulled from (28,34) — between Metropolis and Area 404 — to (9,39).
   // This session's reference video shows Hydro XL's own glowing stage
   // marker and label sitting clearly south-WEST of METROPOLIS's own
   // label, not east of it/toward Area 404 as the old position implied.
   { name:"Hydro XL", kind:"stage", x:"9%", y:"46%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
-  // Pulled from (72,44) — south of Grand Central — to (75,22). Two
-  // independent reference-video frames (both this session's videos) show
-  // ANARA's own label sitting clearly NORTH of Grand Central, not south —
-  // and south/west of Temple Valley Camping's label (also corrected
-  // below), consistent with "Hilltop edge" woodland between the two.
-  { name:"Anara Forest", kind:"stage", x:"75%", y:"22%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
+  // Pulled from (72,44) — south of Grand Central — to (75,22), then to
+  // (85,22) this session. The y=22 already checked out well against two
+  // frames; re-measuring x carefully against three Grand-Central-anchored
+  // frames puts Anara consistently further east than 75 — the woodland
+  // reads as further along toward Temple Valley Camping (also moved
+  // east below) than a straight line up from Grand Central would suggest.
+  { name:"Anara Forest", kind:"stage", x:"85%", y:"22%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
   // Nudged from y=8 to y=2 — this session's frame showing Hidden Woods,
   // Letsbe Avenue and Botanica all together shows Hidden Woods sitting a
   // clear gap further north of Letsbe Avenue, not almost level with it
@@ -6047,7 +6061,22 @@ const otherStages = [
 // Area 404 — only slightly north of Area 404's own label, not miles
 // north of the whole district. Rose and Clown stays north of Spectrum
 // 360 (per the original video comparison) but now south of Botanica too.
-const minorStagePositions = [[52,32],[51,14],[34,16],[52,26],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,42]];
+// Tribe of Frog (index 7) pulled from (80,55) to (64,44) and Síbín Beag
+// (index 8) from (85,46) to (65,34) — both re-derived alongside Oldtown's
+// own big correction this session (see the `locations` array comment):
+// three Grand-Central-anchored frames put Tribe of Frog much closer in
+// (west+north of where it sat), consistent with it visibly sitting just
+// west of Oldtown/Quantum in every frame rather than far out to their
+// east. Síbín Beag shifted by the same delta as Oldtown to keep its own
+// "near Trough Love/Feckless Wrecked" placement (see thingsToFind below).
+// Hangar 161 (index 6) and Acid Leak (index 9) — both actually spotted
+// on camera this session (a frame showing SPECTRUM 360/HANGER 161/
+// DEVIANT LOUNGE/ACID LEAK/BBXL together), rather than the pre-session
+// guesses they'd carried until now. Hangar 161's old guess (44,42)
+// happened to already read close to right; Acid Leak's (54,26) — north
+// of Area 404 — was backwards: the frame shows it clearly south of
+// Area 404/Spectrum 360, not north.
+const minorStagePositions = [[52,32],[51,14],[34,16],[52,26],[30,58],[62,52],[40,43],[64,44],[65,34],[46,44],[24,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6068,13 +6097,24 @@ const thingsToFind = [
   { name:"The Garden Centre", near:"Botanica", x:"23%", y:"24%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
   { name:"Hotel Paradiso", near:"Copperwood", x:"54%", y:"19%", info:"A faded-glamour hotel-themed micro venue — sits well with Copperwood's 1925 film-world setting; check in at the 'front desk'." },
   { name:"Reel News", near:"Copperwood", x:"62%", y:"27%", info:"A newsreel/cinema-themed hidden spot tying into Von Vanderhaus's film empire — expect projected clips and in-character 'reporters'." },
-  { name:"Mining for (g)Old Town", near:"Oldtown", x:"84%", y:"48%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
-  { name:"Cas's Costumes", near:"Oldtown", x:"92%", y:"56%", info:"A costume-shop-fronted micro venue fitting Oldtown's circus and rogues theme — worth a look if you want to dress into the story." },
+  // Shifted by the same (-20,-12) delta as Oldtown's own re-derivation
+  // this session, to stay clustered with it.
+  { name:"Mining for (g)Old Town", near:"Oldtown", x:"64%", y:"36%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
+  { name:"Cas's Costumes", near:"Oldtown", x:"72%", y:"44%", info:"A costume-shop-fronted micro venue fitting Oldtown's circus and rogues theme — worth a look if you want to dress into the story." },
   { name:"Soapranos Laundrette", near:"Letsbe Avenue", x:"36%", y:"10%", info:"A laundrette-fronted hidden venue — in 2025 it hosted dance-music DJ sets behind the washing machines. Look for the set dressing, not a normal stage entrance." },
   { name:"E Numbers", near:"Letsbe Avenue", x:"10%", y:"26%", info:"A sweet-shop/E-numbers-themed party spot fitting Letsbe Avenue's consumer-product BLIP storyline — small, high-energy, easy to walk past." },
   { name:"Gabber Kebabber", near:"Letsbe Avenue", x:"22%", y:"30%", info:"Kebab-shop chaos paired with gabber and hardcore — a tiny, loud find rather than a destination with a published pin." },
   { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
-  { name:"Deviant Lounge", near:"Metropolis", x:"19%", y:"38%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
+  // Corrected this session from "near Metropolis" (19,38) — a frame
+  // showing SPECTRUM 360/HANGAR 161/ACID LEAK/DEVIANT LOUNGE/BBXL all
+  // together places Deviant Lounge clearly in the Area 404 cluster, not
+  // over by Metropolis at all. The old "near Metropolis" guess predates
+  // any video evidence for this one.
+  { name:"Deviant Lounge", near:"Area 404", x:"44%", y:"48%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
+  // Newly spotted this session in the same frame as Spectrum 360/Hangar
+  // 161/Acid Leak/Deviant Lounge — no other source found for what BBXL
+  // stands for or what it programmes, so kept to what's visible.
+  { name:"BBXL", near:"Area 404", x:"50%", y:"46%", info:"Seen labelled on the official app's own map in the Area 404 cluster, alongside Hangar 161/Acid Leak/Deviant Lounge — no lineup or theme details sourced yet." },
   { name:"The Pomegranate Parlour", near:"Site-wide", x:"86%", y:"20%", info:"A parlour-style oddity with eclectic party DJs — a good stop wherever a district venue is doing something theatrical rather than a straight dancefloor." },
   { name:"Twisted Time Machine (Bad Apple Bar)", near:"Site-wide", x:"56%", y:"30%", info:"A themed bar/party room; 2025 listings ranged from emo and nu-metal to jungle disco and a 90s rave cave — expect a different fancy-dress theme by time slot." },
   // The following 10 were spotted as real named labels on the official
@@ -6085,7 +6125,11 @@ const thingsToFind = [
   // Positions are estimated from where each label sat in the recording
   // relative to its district, same "approximate, not surveyed" honesty
   // as everything else in this list.
-  { name:"Quantum", near:"Oldtown", x:"78%", y:"50%", info:"Seen labelled on the official app's own map, near Oldtown/Temple Valley — no lineup or theme details sourced yet." },
+  // Pulled from (78,50) to (73,50) this session — directly measured
+  // (not just shifted by Oldtown's delta) against three Grand-Central-
+  // anchored frames, since Quantum reads as its own separate area south
+  // of Oldtown rather than a venue tucked inside Oldtown's own cluster.
+  { name:"Quantum", near:"Oldtown", x:"73%", y:"50%", info:"Seen labelled on the official app's own map, near Oldtown/Temple Valley — no lineup or theme details sourced yet." },
   // Pulled from (20,30) — northeast of Metropolis — to (22,42). A third
   // reference video this session shows THE HIDE OUT DOWNTOWN's own label
   // sitting clearly southEAST of METROPOLIS, not north of it.
@@ -6093,11 +6137,15 @@ const thingsToFind = [
   { name:"Endor", near:"Metropolis", x:"14%", y:"38%", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
   { name:"Mango", near:"Botanica", x:"24%", y:"20%", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
   { name:"Karma Ceuticals", near:"Botanica", x:"30%", y:"24%", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
-  { name:"Trough Love", near:"Oldtown", x:"87%", y:"49%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
-  { name:"Da Graaf's Reformatory", near:"Oldtown", x:"80%", y:"44%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
-  { name:"La Luna Coven", near:"Oldtown", x:"82%", y:"50%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
-  { name:"The Common Ground", near:"Oldtown", x:"86%", y:"46%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
-  { name:"The Feckless Wrecked", near:"Oldtown", x:"92%", y:"48%", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." },
+  // These five (Trough Love through The Feckless Wrecked) all shifted by
+  // the same (-20,-12) delta as Oldtown's own re-derivation this session
+  // — they're small venues inside Oldtown's own building cluster, so they
+  // move with it rather than getting independently re-measured.
+  { name:"Trough Love", near:"Oldtown", x:"67%", y:"37%", info:"Seen labelled on the official app's own map as a fenced open-air enclosure (not a roofed building) inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"Da Graaf's Reformatory", near:"Oldtown", x:"60%", y:"32%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"La Luna Coven", near:"Oldtown", x:"62%", y:"38%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Common Ground", near:"Oldtown", x:"66%", y:"34%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
+  { name:"The Feckless Wrecked", near:"Oldtown", x:"72%", y:"36%", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." },
   // Both spotted in the same reference-video pan as Sub Lab, strung
   // along the same footpath just south of it — Loconnection has no
   // lineup data sourced yet; Nachtlicker already had a genre/lineup
@@ -6232,7 +6280,7 @@ const landmarks = [
   // where the district polygon sits on this schematic map.
   { name:"The Retreat", x:"55%", y:"30%", info:"Boomtown's paid spa space in the Thrutopia woodlands — spa/hot-tub sessions, sauna and cold splash, sound baths and massages. Book ahead; it's separate from your festival ticket." },
   { name:"The Observatory", x:"52%", y:"14%", info:"New for 2026 — a genuine academic research hub embedded in the festival, led by psychologist Dr Martha Newson with researchers from 10+ UK universities studying identity, belonging and collective behaviour at live events. Take part in a study or the before/after survey if you're curious." },
-  { name:"Lion's Gate Portal", x:"88%", y:"56%", info:"The story's central portal art piece near the Lion's Den — last chapter's closing ceremony used it to foretell the Lion's Den's return to Temple Valley this year." },
+  { name:"Lion's Gate Portal", x:"81%", y:"53%", info:"The story's central portal art piece near the Lion's Den — last chapter's closing ceremony used it to foretell the Lion's Den's return to Temple Valley this year." },
   { name:"Medical Centre — Hilltop", x:"72%", y:"50%", info:"One of two confirmed 24-hour medical centres for Chapter Five (the other is at Pepperpot Market).", hours:"24 hours." },
   { name:"Public Transport Hub", x:"6%", y:"42%", info:"Near West Gate — coach, shuttle and accessible-transport drop-off/pick-up point." },
   { name:"Lockers — Hidden Woods", x:"14%", y:"12%", info:"One of the confirmed 2026 locker locations, alongside Thrutopia, the Lion's Den/Orchid area and Downtown Village." },
@@ -6243,7 +6291,7 @@ const landmarks = [
   // The Lion's Den itself rather than Camp Orchid Downtown (the other
   // half of that ambiguous source label) since it's the more specific,
   // already-confirmed anchor point of the two.
-  { name:"Lockers — The Lion's Den", x:"89%", y:"57%", info:"One of the confirmed 2026 locker locations (the source only says \"the Lion's Den/Orchid area\" — placed here as the more specific of the two)." },
+  { name:"Lockers — The Lion's Den", x:"82%", y:"54%", info:"One of the confirmed 2026 locker locations (the source only says \"the Lion's Den/Orchid area\" — placed here as the more specific of the two)." },
   { name:"Amnesty Points — West Gate", x:"5%", y:"50%", info:"Dispose of anything prohibited before you're searched, no questions asked — every gate has one." },
   { name:"Charge Candy — Pepperpot Market", x:"50%", y:"52%", info:"One of six confirmed phone-charging points dotted across the site." },
   // Seen labelled on the official app's own map as a large dark-green
@@ -6260,10 +6308,13 @@ const landmarks = [
   // a dotted/hatched ground texture suggesting a car park or overflow
   // field rather than a walkable venue area — marked as a reference
   // label for the same reason SSSI is, not guessed as a POI.
-  { name:"Hilltop", x:"77%", y:"40%", info:"A large marked ground area between Copperwood and Oldtown/Temple Valley Camping, seen labelled on the official app's own map — likely an overflow/car park field given its hatched ground texture on camera, not a confirmed venue area." },
+  { name:"Hilltop", x:"74%", y:"30%", info:"A large marked ground area between Copperwood and Oldtown/Temple Valley Camping, seen labelled on the official app's own map — likely an overflow/car park field given its hatched ground texture on camera, not a confirmed venue area." },
   // Seen labelled at the south end of the Hilltop zone, right by Quantum
   // and The Lion's Den, in the same shot used to reposition both.
-  { name:"Sunset Hill", x:"75%", y:"62%", info:"Seen labelled on the official app's own map at the south end of the Hilltop zone, right by Quantum and The Lion's Den — no further details sourced yet." }
+  // Nudged from (75,62) to (68,58) alongside Quantum/The Lion's Den's own
+  // re-derivation this session, to stay "right by" both as its own info
+  // text says.
+  { name:"Sunset Hill", x:"68%", y:"58%", info:"Seen labelled on the official app's own map at the south end of the Hilltop zone, right by Quantum and The Lion's Den — no further details sourced yet." }
 ];
 
 // Named camping fields & gates, positioned from a real (previous-year)
@@ -6276,11 +6327,12 @@ const campLabels = [
   { x:"48%", y:"4%", text:"Valley Camping" },
   { x:"70%", y:"6%", text:"Tangerine Fields" },
   { x:"86%", y:"14%", text:"Campervan Field" },
-  // Pulled from (85,32) to (85,18) — three independent reference-video
-  // frames across both this session's videos show TEMPLE VALLEY CAMPING's
-  // own label sitting clearly north of both Grand Central and Copperwood
-  // Heights, not barely south of Grand Central as the old y implied.
-  { x:"85%", y:"18%", text:"Temple Valley Camping" },
+  // Pulled from (85,32) to (85,18), then to (95,18) this session — the
+  // y already checked out well against three frames; re-measuring x
+  // against the same Grand-Central-anchored frames puts it further east,
+  // closer to East Gate (96,32), consistent with sitting right at the
+  // site's eastern edge alongside Campervan Field.
+  { x:"95%", y:"18%", text:"Temple Valley Camping" },
   { x:"91%", y:"48%", text:"East Camping" },
   { x:"95%", y:"64%", text:"Quiet Camping" },
   { x:"9%", y:"39%", text:"Camp Orchid Downtown (premium, public transport)" },
@@ -6462,24 +6514,29 @@ const amenities = [
   { category:"Cash Point", x:"64%", y:"29%", note:"Grand Central" },
   // Oldtown's own northern edge, coming down from Copperwood — a bar,
   // photobooth, water point and first-aid marker, distinct from the
-  // Fools Leap cluster already plotted further south.
-  { category:"Bar", x:"80%", y:"43%", note:"Oldtown (north)" },
-  { category:"Photobooth", x:"81%", y:"44%", note:"Oldtown (north)" },
-  { category:"Water Point", x:"82%", y:"45%", note:"Oldtown (north)" },
-  { category:"First Aid", x:"92%", y:"42%", note:"Oldtown (north)" },
+  // Fools Leap cluster already plotted further south. Shifted by the
+  // same (-20,-12) delta as Oldtown's own re-derivation this session.
+  { category:"Bar", x:"60%", y:"31%", note:"Oldtown (north)" },
+  { category:"Photobooth", x:"61%", y:"32%", note:"Oldtown (north)" },
+  { category:"Water Point", x:"62%", y:"33%", note:"Oldtown (north)" },
+  { category:"First Aid", x:"72%", y:"30%", note:"Oldtown (north)" },
   // Quantum — a single toilet marker on its own path.
-  { category:"Toilets", x:"77%", y:"51%", note:"Quantum" },
+  { category:"Toilets", x:"74%", y:"51%", note:"Quantum" },
   // The Lion's Den — photobooth, bar, toilets and a water point right by
-  // the stage's own glow in the reference video.
-  { category:"Photobooth", x:"89%", y:"57%", note:"The Lion's Den" },
-  { category:"Bar", x:"89%", y:"58%", note:"The Lion's Den" },
-  { category:"Toilets", x:"92%", y:"59%", note:"The Lion's Den" },
-  { category:"Water Point", x:"93%", y:"60%", note:"The Lion's Den" },
+  // the stage's own glow in the reference video. Shifted by the same
+  // (-7,-3) delta as The Lion's Den's own nudge this session.
+  { category:"Photobooth", x:"82%", y:"54%", note:"The Lion's Den" },
+  { category:"Bar", x:"82%", y:"55%", note:"The Lion's Den" },
+  { category:"Toilets", x:"85%", y:"56%", note:"The Lion's Den" },
+  { category:"Water Point", x:"86%", y:"57%", note:"The Lion's Den" },
   // Anara Forest's own western edge, between it and Temple Valley
-  // Camping — toilets, an accessible marker and a water point.
-  { category:"Toilets", x:"73%", y:"43%", note:"Anara Forest" },
-  { category:"Accessible Facilities", x:"74%", y:"42%", note:"Anara Forest" },
-  { category:"Water Point", x:"75%", y:"44%", note:"Anara Forest" },
+  // Camping — toilets, an accessible marker and a water point. Repinned
+  // this session — these had never been updated when Anara Forest's own
+  // position moved earlier this session (were still sitting at its old
+  // pre-session (72,44) spot).
+  { category:"Toilets", x:"84%", y:"23%", note:"Anara Forest" },
+  { category:"Accessible Facilities", x:"86%", y:"21%", note:"Anara Forest" },
+  { category:"Water Point", x:"87%", y:"23%", note:"Anara Forest" },
   // The whole south end of the map (Sunset Hill down through Camp
   // Skylark Sunset to South Gate) reads as a near-blank gap on the
   // rendered map — Temple Valley Camping and East Camping had zero
@@ -6577,7 +6634,7 @@ const venueDirectory = [
   { name:"PFP Robot", type:"Hidden venue", status:"confirmed", music:true, genre:"Electro, makina, trance, acid, techno", near:"Area 404", info:"PFP's robotic soundsystem — confirmed back for 2026 (Tripl3 B, Audio Gutter, Agent Scully, TEOTEK)." },
   { name:"Sub Lab", type:"Hidden venue", status:"confirmed", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — confirmed for 2026 (Bennett ft. Sylla/Limmz, Stasis, Nio B, Ruggz b2b Sonia Sol)." },
   { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Metropolis", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Corrected from an earlier 'near Area 404' guess — the official app's own map shows it on the same footpath as Sub Lab and Loconnection, just south of Metropolis." },
-  { name:"Deviant Lounge", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, after-hours", near:"Metropolis", info:"Confirmed for 2026, running Thu-Sat (Wrong'un Crew, Church of Donkology, DJ Safe N Sound, Bunn13) — previously listed as unverified, now on the 2026 schedule." },
+  { name:"Deviant Lounge", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, after-hours", near:"Area 404", info:"Confirmed for 2026, running Thu-Sat (Wrong'un Crew, Church of Donkology, DJ Safe N Sound, Bunn13) — previously listed as unverified, now on the 2026 schedule. Real position is in the Area 404 cluster, not Metropolis as an earlier guess assumed." },
   { name:"Gabber Kebabber", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Gabber, hardcore", near:"Letsbe Avenue", info:"Dystopian kebab-shop gabber stage running since 2023 — confirmed for 2026 with a full Thu-Sun DJ programme." },
   { name:"E Numbers", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Hyperpop, party, eclectic", near:"Metropolis", info:"Hyperpop 'sweetshop' venue — confirmed for 2026, running Thu-Sat (Kid Cosmit, Lounicorn, D0LLSW4G, Mannequins b2b sets)." },
   { name:"The Pomegranate Parlour", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic party DJs", near:"Site-wide", info:"Actor-led parlour-style venue — confirmed for 2026 (Cassia, SCARBA, Mattana, DJ Shakey, Estère)." },
