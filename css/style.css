@@ -330,10 +330,15 @@
      plain positioned DOM elements, not a MapLibre symbol layer), so they
      overlap into unreadable stacked text. Below the zoom threshold, only
      the district names (the site's own top-level "you are here" labels)
-     stay visible; every other label reappears once zoomed in enough to
-     have room to read it. The dot/icon markers themselves are untouched
-     — only the text labels hide, so presence/position is still visible.*/
-  #map.map-labels-thin .map-label:not(.district){display:none;}
+     AND main stage names stay visible; every other, more minor label
+     reappears once zoomed in enough to have room to read it. Main
+     stages used to thin out along with everything else — the default
+     opening zoom (15.6) sits below the threshold (16.4), so they were
+     invisible on first open, exactly the names you'd most want to see
+     without having to zoom in first. The dot/icon markers themselves are
+     untouched either way — only the text labels hide, so presence/
+     position is still visible even for the labels that do thin out.*/
+  #map.map-labels-thin .map-label:not(.district):not(.stage){display:none;}
   .map-label.district{background:none; border:none; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:rgba(242,168,60,.9); text-shadow:0 1px 4px rgba(0,0,0,.75); transform:translate(-50%, -24px); padding:0;}
   /* Main stages previously rendered with no label class at all — same
      plain pill as every other marker on the map, despite the marker dot
