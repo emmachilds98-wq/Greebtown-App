@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v285";
-const APP_BUILD_TIME = "2026-08-02T18:31:01Z";
+const APP_CACHE_VERSION = "v286";
+const APP_BUILD_TIME = "2026-08-02T19:17:03Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6031,9 +6031,7 @@ const otherStages = [
 // moved to sit by Area 404 per its own info text ("Area 404's acid
 // techno... stage"); Tangled Roots moved to sit just west of Copperwood,
 // where its own label appears on camera twice in the reference video.
-// Foggers Mill/The Fools Leap's entries here are unused — realCoordFor()
-// finds a precise real-coordinate match for both, so their actual map
-// position never reads from this array. Infinity moved next to
+// Infinity moved next to
 // Metropolis — its own label appears right beside "METROPOLIS" on
 // camera. Síbín Beag moved to sit by Oldtown — its own label appears
 // there repeatedly on camera, alongside Mining for (g)Old Town and Den
@@ -6389,8 +6387,8 @@ const campLabels = [
 // actually visible in specific reference-video frames rather than all 53
 // real points — each entry below notes which frame/area it's from.
 // Kept js/boomtown-locations-2026.js itself untouched as reference data
-// (also still used for precise stage-position matching via
-// realStageMatch) — just stopped rendering its POI list directly.
+// (no longer used to place anything — see the note above SITE_SW/SITE_NE —
+// just stopped rendering its POI list directly).
 const amenities = [
   // West Gate — two toilet blocks right beside the gate itself.
   { category:"Toilets", x:"4%", y:"44%", note:"West Gate" },
@@ -7804,94 +7802,17 @@ function latLonToSchematic(lat, lon){
     y: (SITE_NE.lat - lat) / latSpan * 100
   };
 }
-// Fuzzy name-matching for js/boomtown-locations-2026.js's scraped GPS
-// labels, folded in here as the single source of truth — this used to be
-// a runtime monkey-patch loaded from js/pwa-register.js (and duplicated a
-// second time in a since-deleted js/map-matching.js), silently
-// overriding this exact function after the fact. That pattern is exactly
-// what CLAUDE.md's "single source of truth" rule now forbids: two files
-// disagreeing about what realStageMatch does, with whichever loaded last
-// silently winning. Improve it here instead.
-function normalizeVenueKey(s){
-  return String(s || "")
-    .toLowerCase()
-    .replace(/[’']/g, "")
-    .replace(/[^a-z0-9]+/g, " ")
-    .replace(/\b(the|of|and|a|an|bar|stage|tent|club|hq)\b/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-const STAGE_ALIASES = {
-  "church veg": "church of veg", "churchof veg": "church of veg", "church of veg": "church of veg",
-  "tough love": "tough love", "v tough love": "tough love",
-  "bad apple": "bad apple bar", "bad apple bar": "bad apple bar",
-  "twisted time machine": "bad apple bar", "twisted time machine bad apple bar": "bad apple bar",
-  "circus": "circus tent", "circus tent": "circus tent",
-  "fools leap": "fools leap", "the fools leap": "fools leap",
-  "grand central": "grand central",
-  "postal posse": "postal posse", "reel news": "reel news",
-  "magic teapot": "magic teapot", "the magic teapot": "magic teapot",
-  "foggers mill": "foggers mill", "fogger s mill": "foggers mill",
-  "topsy turvy trims": "topsy turvy trims", "topsy turvy": "topsy turvy trims",
-  "ancient futures": "ancient futures",
-  "rebel girls": "rebel girls club", "rebel girls club": "rebel girls club",
-  "agents of change": "agents of change hq", "agents of change hq": "agents of change hq",
-  "pomegranate parlour": "pomegranate parlour", "the pomegranate parlour": "pomegranate parlour", "pomegranare": "pomegranate parlour",
-  "mining for gold town": "mining for g old town", "mining for g old town": "mining for g old town", "mining for old town": "mining for g old town",
-  "den of disorder": "den of disorder",
-  "games lounge": "games lounge", "games": "games lounge",
-  "daily rag": "daily rag", "the daily rag": "daily rag",
-  "da graffs": "da graffs", "dagraffs": "da graffs",
-  "velvet rope": "velvet rope",
-  "skylark hilltop": "skylark hilltop",
-  "boomtown hall": "boomtown hall",
-  "retreat": "retreat", "the retreat": "retreat",
-  "tinker station": "tinker station",
-  "spinney hollow": "spinney hollow",
-  "energy garden": "energy garden",
-  "climate live": "climate live",
-  "sharing circles": "sharing circles",
-  "giant tree circle": "giant tree circle", "the giant tree circle": "giant tree circle",
-  "cocaine anonymous": "cocaine anonymous",
-  "permaculture": "permaculture",
-  "elemental": "elemental",
-  "hapitat": "hapitat", "habitat": "hapitat",
-  "xr": "xr", "crafts": "crafts", "sauna": "sauna",
-  "crafty rascals": "crafty rascals",
-  "lions den": "the lions den", "lion s den": "the lions den", "the lions den": "the lions den",
-  "hydro": "hydro xl", "hydro xl": "hydro xl",
-  "quantum": "quantum"
-};
-function realStageMatch(name){
-  const data = window.BOOMTOWN_LOCATIONS_2026;
-  if(!data || !name) return null;
-  const raw = name.trim().toLowerCase();
-  let hit = data.stages.find(s=> s.label.trim().toLowerCase() === raw);
-  if(hit) return hit;
-  const norm = normalizeVenueKey(name);
-  const aliasTarget = STAGE_ALIASES[norm] || STAGE_ALIASES[raw] || null;
-  if(aliasTarget){
-    hit = data.stages.find(s=> normalizeVenueKey(s.label) === normalizeVenueKey(aliasTarget) || s.label.trim().toLowerCase() === aliasTarget);
-    if(hit) return hit;
-  }
-  hit = data.stages.find(s=> normalizeVenueKey(s.label) === norm);
-  if(hit) return hit;
-  if(norm.length >= 5){
-    hit = data.stages.find(s=>{
-      const sn = normalizeVenueKey(s.label);
-      return sn.length >= 5 && (sn.includes(norm) || norm.includes(sn));
-    });
-    if(hit) return hit;
-  }
-  return null;
-}
-// place: anything with {name, x, y} in the existing "NN%" schematic
-// convention — returns {lat, lon, precise}.
-function realCoordFor(place){
-  const real = realStageMatch(place.name);
-  if(real) return { lat: real.lat, lon: real.lon, precise: true };
-  return { ...schematicToLatLon(parseFloat(place.x), parseFloat(place.y)), precise: false };
-}
+// realStageMatch()/realCoordFor() (GPS name-matching used to place stage
+// markers from js/boomtown-locations-2026.js's scraped lat/lon) removed
+// entirely — repeated real incidents (see CLAUDE.md and the comment above
+// SITE_SW/SITE_NE) showed that auto-scraped GPS regularly disagreed with
+// the reference screen-recording/screenshot evidence of the official
+// app's own map, and every silent GPS override re-broke a position that
+// had just been hand-corrected against that footage. The footage is the
+// only thing users actually navigate by, so it's now the single source
+// of truth for every marker on this map — nothing here reads from
+// js/boomtown-locations-2026.js to place a marker anymore (see the
+// schematicToLatLon()-only calls below and in buildMapGeoJSON()).
 
 // ===============================
 // MAP — a real MapLibre GL (WebGL) map (real GPS positions where we have
@@ -8362,14 +8283,24 @@ function loadMap(){
   });
 
   // Main stages
+  // Deliberately schematicToLatLon() directly, NOT realCoordFor() — see
+  // the note above realCoordFor()'s definition. Auto-scraped real GPS in
+  // js/boomtown-locations-2026.js repeatedly disagreed with what our own
+  // screen-recording/screenshot evidence of the official app's map shows
+  // (sometimes by dozens of schematic units), and every time it silently
+  // overrode a hand-placed, video-confirmed position it re-broke work
+  // that had just been carefully corrected. The screen recordings/
+  // screenshots of the official app ARE the map users navigate by, so
+  // they're the only source of truth for where a marker actually sits —
+  // GPS is not used to place anything anymore, anywhere in this file.
   locations.filter(place=> place.kind === "stage").forEach(place=>{
-    const coord = realCoordFor(place);
+    const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
     addMapMarker("main", coord.lat, coord.lon,
       mapMarkerHtml("stage", "stage", place.name),
       { name: place.name, title: place.name, onClick: ()=>{
         showMapInfoCard(`
           <div class="card">
-            <span class="tag">${place.kind}${coord.precise ? "" : " — approximate position"}</span>
+            <span class="tag">${place.kind}</span>
             <h3>${place.name}</h3>
             <p>${place.info}</p>
             <button class="action" id="saveMeetingBtn">Save as meeting point</button>
@@ -8380,23 +8311,18 @@ function loadMap(){
     );
   });
 
-  // (Tried filtering these to only ones landing near a drawn zone —
-  // reverted. Several of these positions are stale placeholders that
-  // realCoordFor() below actually overrides with a precise real
-  // coordinate, e.g. Foggers Mill/The Fools Leap per the comment above,
-  // so testing the stale schematic position against the drawn zones
-  // just meant real, confirmed 2026 stages could get hidden based on a
-  // position that was never actually used to place their marker.)
+  // Minor stages — same schematicToLatLon()-only reasoning as the main
+  // stages above; no GPS override here either.
   minorStages.forEach(place=>{
     const isRumoured = place.status === "rumoured";
-    const coord = realCoordFor(place);
+    const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
     addMapMarker("minor", coord.lat, coord.lon,
       mapMarkerHtml("stage minor" + (isRumoured ? " rumoured" : ""), "minor" + (isRumoured ? " rumoured" : ""), place.name),
       { name: place.name, title: place.name + (isRumoured ? " (rumoured — no 2026 confirmation)" : ""), onClick: ()=> showMapInfoCard(`
         <div class="card">
           <span class="tag">stage${isRumoured ? " — rumoured" : ""}</span>
           <h3>${place.name}</h3>
-          <p>${place.info} <em>${coord.precise ? "" : "Position here is approximate, not surveyed."}</em></p>
+          <p>${place.info}</p>
         </div>
       `) }
     );
