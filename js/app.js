@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v291";
-const APP_BUILD_TIME = "2026-08-02T20:07:26Z";
+const APP_CACHE_VERSION = "v292";
+const APP_BUILD_TIME = "2026-08-02T20:12:16Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7387,6 +7387,39 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
   });
 
+  // OPEN CONCOURSES — a visibly wider, paler paved patch at the handful
+  // of spots reference footage actually shows opening up into a real
+  // town square/concourse, rather than staying a narrow path: Oldtown
+  // (the confirmed path-network hub, per the official app's own
+  // schematic overview — Grand Central/Copperwood/Anara Forest/Quantum
+  // all radiate from it), Grand Central (its stage front reads as a wide
+  // open concourse in every reference frame, not a thin approach path),
+  // Botanica (the Letsbe Avenue loop is a real closed "high street" with
+  // stalls strung along it, not a single-file track), Area 404 and
+  // Copperwood (both read as a walled/clustered plaza in reference
+  // frames, distinctly more open than the thin paths reaching them), and
+  // Metropolis/Quantum (both confirmed path forks/junctions where several
+  // routes meet). This exists so those specific spots read as "a place
+  // to actually stand," visually distinct from the constant-width trail
+  // lines connecting them — every other district still uses only its
+  // own broad, fainter clearing tint (districts-fill above), not this.
+  const OPEN_CONCOURSE_NAMES = ["Oldtown", "Grand Central", "Botanica", "Area 404", "Copperwood", "Metropolis", "Quantum"];
+  const openConcourseFeatures = OPEN_CONCOURSE_NAMES.map((name, i)=>{
+    const d = districts.find(dd=> dd.name === name);
+    const node = findNamedNode(name);
+    if(!node) return null;
+    const cx = node.x, cy = node.y;
+    // District hubs size their concourse off the district's own already-
+    // computed spread radius (a paved core sitting inside its bigger
+    // green clearing); Quantum (a path fork, not a district) gets a flat
+    // smaller footprint since it's a junction, not a town centre.
+    const r = d ? Math.max(2.6, Math.min(5, (districtRadii.get(d) || 6) * 0.5)) : 3;
+    return {
+      type: "Feature", properties: {},
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 43 + 19, 14)) ] }
+    };
+  }).filter(Boolean);
+
   // Stage plazas — a soft tan clearing under every stage. The reference
   // video shows paths widening into a real open plaza around a stage
   // (see the Tribe of Frog frame) rather than staying a thin line all
@@ -7882,6 +7915,7 @@ function buildMapGeoJSON(){
     districts: { type:"FeatureCollection", features: districtFeatures },
     marketHub: { type:"FeatureCollection", features: marketHubFeatures },
     plazas: { type:"FeatureCollection", features: plazaFeatures },
+    openConcourses: { type:"FeatureCollection", features: openConcourseFeatures },
     parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
     parkingRows: { type:"FeatureCollection", features: parkingRowFeatures },
     parkingCars: { type:"FeatureCollection", features: parkingCarFeatures },
@@ -8302,6 +8336,19 @@ function loadMap(){
       // the path reads clearly against every ground colour it crosses
       // (district green, camp yellow, parking grey, forest) instead of
       // just the grass it was originally tuned for.
+      // Open concourses — a visibly wider, paler paved patch at the
+      // handful of spots (Oldtown, Grand Central, Botanica, Area 404,
+      // Copperwood, Metropolis, Quantum) reference footage actually shows
+      // opening up into a real town square/junction, vs. the constant-
+      // width trail line everywhere else — drawn before the trail so
+      // paths visibly widen INTO it rather than just crossing over a flat
+      // patch. Lighter and larger than a single stage's own plaza (below)
+      // so the size difference itself reads as "this is the big open
+      // space, that's a stage forecourt."
+      mapGL.addSource("mapOpenConcourses", { type: "geojson", data: geo.openConcourses });
+      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", paint: { "fill-color": "rgba(224,202,164,0.45)" } });
+      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", paint: { "line-color": "rgba(120,95,60,0.4)", "line-width": 1.2, "line-dasharray": [2.5, 1.5] } });
+
       // Stage plazas — drawn before the path lines so the paths visibly
       // run INTO the clearing rather than sitting on top of a flat edge.
       mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
