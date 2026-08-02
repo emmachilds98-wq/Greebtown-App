@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v299";
-const APP_BUILD_TIME = "2026-08-02T23:42:38Z";
+const APP_CACHE_VERSION = "v300";
+const APP_BUILD_TIME = "2026-08-02T23:50:16Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -8280,6 +8280,22 @@ const POI_ICONS = {
   "Fire Pit":"🔥","Hooch Bar":"🍺","Sober Bar":"🥤","Skylark Entry":"🚪",
   "The Hideout Hilltop":"🏕"
 };
+// Category-coloured ring per amenity icon, matching the official app's
+// own colour-coded pill buttons (Bar/Food/Toilet/Medical, each a
+// distinct hue) and marker rings — every POI on this map previously
+// used the same neutral dark-grey ring regardless of category, which
+// read as far flatter/less legible-at-a-glance than the official app's
+// own colour-keyed icon set.
+const POI_RING_COLORS = {
+  "Toilets":"45,140,242", "Accessible Facilities":"45,140,242", "Showers":"45,140,242",
+  "Food":"242,168,60", "Market":"242,168,60", "Merch":"242,168,60",
+  "Bar":"227,80,140", "Hooch Bar":"227,80,140", "Sober Bar":"75,200,180",
+  "Water Point":"75,190,242",
+  "Welfare":"227,70,70", "First Aid":"227,70,70",
+  "Lockers":"170,170,175", "Power/Charging":"170,170,175", "Top-Up Point":"170,170,175", "Cash Point":"170,170,175",
+  "Reception":"200,200,205", "Photobooth":"196,150,255", "Pamper Area":"196,150,255",
+  "Fire Pit":"242,120,60", "Skylark Entry":"242,168,60", "The Hideout Hilltop":"196,140,90"
+};
 
 function loadMap(){
   if(!mapGL){
@@ -8824,8 +8840,9 @@ function loadMap(){
   // calibration than every hand-drawn district/camp/path on this map.
   amenities.forEach(poi=>{
     const coord = schematicToLatLon(parseFloat(poi.x), parseFloat(poi.y));
+    const ringRgb = POI_RING_COLORS[poi.category] || "255,255,255";
     addMapMarker("poi", coord.lat, coord.lon,
-      `<div class="marker poi">${POI_ICONS[poi.category] || "📍"}</div>`,
+      `<div class="marker poi" style="--poi-rgb:${ringRgb}">${POI_ICONS[poi.category] || "📍"}</div>`,
       { title: poi.category, onClick: ()=> showMapInfoCard(`
         <div class="card">
           <span class="tag">amenity</span>
