@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v270";
-const APP_BUILD_TIME = "2026-08-02T12:33:58Z";
+const APP_CACHE_VERSION = "v273";
+const APP_BUILD_TIME = "2026-08-02T14:07:08Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -3234,7 +3234,7 @@ const artists = [
   {name:"EVE",stage:"The Lion's Den",day:"Sun",start:"17:10",end:"18:10",genre:"Hip Hop"},
   {name:"FCUKERS",stage:"The Lion's Den",day:"Sun",start:"18:40",end:"19:40"},
   {name:"Scissor Sisters",stage:"The Lion's Den",day:"Sun",start:"20:10",end:"21:40",genre:"Pop / Dance"},
-  {name:"Faithless",stage:"The Lion's Den",day:"Sun",start:"22:15",end:"23:45",genre:"Electronic"},
+  {name:"Faithless",stage:"The Lion's Den",day:"Sun",start:"22:15",end:"23:45",genre:"House / Dance"},
   {name:"Boomtown Closing Ceremony",stage:"The Lion's Den",day:"Sun",start:"23:50",end:"00:00"},
   // --- Sun: The Magic Teapot ---
   {name:"The Magic Teapot",stage:"The Magic Teapot",day:"Sun",start:"12:00",end:"00:00"},
@@ -3659,21 +3659,15 @@ promptArtistSearch();
 // while the stage list — unbounded, 12 main stages plus 50+ hidden
 // venues — scrolls naturally downward instead of forcing an ever-wider
 // row of columns.
-// venueDirectory is declared further down the file, so this set is built
-// lazily on first use rather than at module-evaluation time.
-let _mainStageNames = null;
-function mainStageNames(){
-  if(!_mainStageNames) _mainStageNames = new Set(venueDirectory.filter(v=>v.type==="Main stage").map(v=>v.name));
-  return _mainStageNames;
-}
+// venueDirectory is declared further down the file, so category lookups
+// below are built lazily on first use rather than at module-evaluation time.
 
-// Four broad buckets for colour-coding the timeline row heads (see
-// buildTimelineHTML below) — purely visual grouping, doesn't touch the
-// existing main-stages-first-then-alphabetical sort or row order at all.
-// Maps every venueDirectory `type` string onto "main"/"venue"/"workshop"/
+// Four broad buckets, collapsed into the three tiers below (CATEGORY_TIER)
+// for grouping the timeline's stage list (see buildTimelineHTML). Maps
+// every venueDirectory `type` string onto "main"/"venue"/"workshop"/
 // "activity"; a stage name with no venueDirectory entry (e.g. a group
-// member's own "<name>'s activities" personal row) just gets no class
-// and falls back to the neutral default styling.
+// member's own "<name>'s activities" personal row) gets null and falls
+// into its own trailing tier.
 const VENUE_TYPE_CATEGORY = {
   "Main stage": "main",
   "Hidden venue": "venue",
@@ -3695,6 +3689,19 @@ function venueCategoryFor(stageName){
     _venueCategoryByName = new Map(venueDirectory.map(v=> [v.name, VENUE_TYPE_CATEGORY[v.type] || null]));
   }
   return _venueCategoryByName.get(stageName) || null;
+}
+
+// Three-tier grouping for the timeline's stage list — main stages, then
+// smaller stages/venues, then workshops/activities/support — rendered as
+// section-divider rows (see buildTimelineHTML) rather than per-name text
+// colour, so the distinction reads as an actual grouping in the list
+// instead of a colour key you have to learn. Anything with no
+// venueDirectory entry (e.g. a group member's own "<name>'s activities"
+// row) sorts into its own trailing tier, after everything else.
+const CATEGORY_TIER = { main: 0, venue: 1, workshop: 2, activity: 2 };
+const TIER_LABELS = { 0: "Main Stages", 1: "Stages & Venues", 2: "Activities & Support", 3: "Other" };
+function tierForCategory(category){
+  return (category != null && CATEGORY_TIER[category] != null) ? CATEGORY_TIER[category] : 3;
 }
 
 function buildTimelineHTML(items, opts){
@@ -3722,13 +3729,13 @@ function buildTimelineHTML(items, opts){
   });
   const minMin = Math.floor(Math.min(...parsed.map(p=>p._start))/60)*60;
   const maxMin = Math.ceil(Math.max(...parsed.map(p=>p._end))/60)*60;
-  // Main stages first (Grand Central, Hydro XL, etc.), then every smaller/
-  // hidden venue, alphabetically within each group.
-  const mainStages = mainStageNames();
+  // Main stages first (Grand Central, Hydro XL, etc.), then every smaller
+  // stage/hidden venue, then workshops/activities/support — alphabetically
+  // within each tier (see CATEGORY_TIER above).
   const stages = [...new Set(parsed.map(p=>p.stage))].sort((a,b)=>{
-    const aMain = mainStages.has(a) ? 0 : 1;
-    const bMain = mainStages.has(b) ? 0 : 1;
-    return aMain !== bMain ? aMain - bMain : a.localeCompare(b);
+    const ta = tierForCategory(venueCategoryFor(a));
+    const tb = tierForCategory(venueCategoryFor(b));
+    return ta !== tb ? ta - tb : a.localeCompare(b);
   });
   const totalWidth = Math.max((maxMin-minMin)*pxPerMin, 40);
   const savedNames = opts.savedNames || null;
@@ -3757,6 +3764,12 @@ function buildTimelineHTML(items, opts){
     hourLines += `<div class="timeline-vline" style="left:${left}px;"></div>`;
   }
 
+  // Section-divider rows between tiers (see CATEGORY_TIER/TIER_LABELS
+  // above) — only shown when the stage list actually spans more than one
+  // tier, so a Plan/Clash timeline that's all main-stage saves doesn't
+  // get a redundant single "Main Stages" header.
+  const tiersPresent = new Set(stages.map(s=>tierForCategory(venueCategoryFor(s))));
+  let lastTier = null;
   const rows = stages.map(stage=>{
     // Sorted by start time, then packed into lanes (extra vertical bands
     // within the row) via a greedy interval-scheduling pass — two items
@@ -3808,12 +3821,16 @@ function buildTimelineHTML(items, opts){
         : "";
       return `<div class="${cls}" style="left:${left}px; width:${width}px; top:${top}px; height:${blockHeight}px;" data-name="${escapeHtml(p.name)}" data-day="${escapeHtml(p.day||"")}">${ownerBadge}<b>${escapeHtml(p.name)}</b><span class="tb-time">${escapeHtml(p.start||"")}${p.end?"–"+escapeHtml(p.end):""}${isSaved?" ★":""}</span></div>`;
     }).join("");
-    // Category class is purely cosmetic (colours the row head/left edge
-    // via CSS) — doesn't touch the stage sort above or any block/lane
-    // logic, so the grid's actual structure and behaviour is unchanged.
-    const category = venueCategoryFor(stage);
-    const rowCls = "timeline-row" + (category ? " cat-" + category : "");
-    return `<div class="${rowCls}"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${stageRowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
+    // venueCategoryFor()'s only job here is deciding which tier this row
+    // falls into, for the section divider below — doesn't touch the
+    // stage sort above or any block/lane logic.
+    const tier = tierForCategory(venueCategoryFor(stage));
+    let divider = "";
+    if(tiersPresent.size > 1 && tier !== lastTier){
+      divider = `<div class="timeline-section-divider"><span class="timeline-section-divider-label">${escapeHtml(TIER_LABELS[tier] || "")}</span></div>`;
+      lastTier = tier;
+    }
+    return divider + `<div class="timeline-row"><div class="timeline-row-head stage-link" data-stage="${escapeHtml(stage)}">${escapeHtml(stage)}</div><div class="timeline-row-body" style="width:${totalWidth}px; height:${stageRowHeight}px;">${hourLines}${blocks}${nowLineHTML}</div></div>`;
   }).join("");
 
   // Same line repeated into every row-body above (each positioned in
@@ -5916,7 +5933,13 @@ const locations = [
   { name:"Area 404", kind:"district", x:"50%", y:"30%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
   { name:"Botanica", kind:"district", x:"28%", y:"20%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
   { name:"Thrutopia", kind:"district", x:"56%", y:"16%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
-  { name:"Copperwood", kind:"district", x:"68%", y:"26%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
+  // Pulled from (68,26) to (58,23) — this session's reference video shows
+  // COPPERWOOD's own label sitting clearly north-WEST of GRAND CENTRAL's
+  // glowing stage marker in the same wide shot (Copperwood/Hilltop/
+  // Oldtown/Quantum), not barely east of it as the old (68,26) implied.
+  // "Near Copperwood" entries below (Hotel Paradiso, Reel News, Tangled
+  // Roots) shifted by the same delta to keep that cluster together.
+  { name:"Copperwood", kind:"district", x:"58%", y:"23%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
   { name:"Oldtown", kind:"district", x:"88%", y:"52%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
   { name:"Letsbe Avenue", kind:"district", x:"40%", y:"14%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
   { name:"Metropolis", kind:"district", x:"15%", y:"34%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
@@ -5929,10 +5952,19 @@ const locations = [
   // below is Boomtown's own in-universe area name — evidently distinct
   // from "Temple Valley Camping" the camp field, despite the shared name.
   { name:"The Lion's Den", kind:"stage", x:"90%", y:"58%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
-  { name:"Hydro XL", kind:"stage", x:"28%", y:"34%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
+  // Pulled from (28,34) — between Metropolis and Area 404 — to (9,39).
+  // This session's reference video shows Hydro XL's own glowing stage
+  // marker and label sitting clearly south-WEST of METROPOLIS's own
+  // label, not east of it/toward Area 404 as the old position implied.
+  { name:"Hydro XL", kind:"stage", x:"9%", y:"39%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
   { name:"Anara Forest", kind:"stage", x:"72%", y:"44%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
   { name:"Hidden Woods", kind:"stage", x:"18%", y:"8%", info:"One of two woodland stages tucked among the trees, with its own beach bar and treetop walks. Leans eclectic bass and reggae/dub, often billing bigger DnB names alongside newer acts — explore carefully after dark." },
-  { name:"NEXUS", kind:"stage", x:"32%", y:"22%", info:"Right in Botanica — its main stage, 'where nature connects', celebrating live music and the freshest names on the scene. The hip-hop, grime and garage side has previously pulled in names like Bashy, MJ Cole and Lady Leshurr." },
+  // Pulled from (32,22) — east of Botanica's own (28,20) — to (23,24).
+  // This session's reference video shows NEXUS's own glowing stage marker
+  // sitting clearly WEST (and a bit south) of the BOTANICA label, not
+  // east of it. "The Garden Centre" below (also "near Botanica") shifted
+  // by the same delta to stay with it.
+  { name:"NEXUS", kind:"stage", x:"23%", y:"24%", info:"Right in Botanica — its main stage, 'where nature connects', celebrating live music and the freshest names on the scene. The hip-hop, grime and garage side has previously pulled in names like Bashy, MJ Cole and Lady Leshurr." },
   { name:"Helix", kind:"stage", x:"20%", y:"38%", info:"Alongside Metropolis. Breaks, big beat and bass-heavy line-up." },
   { name:"Meeting Point", kind:"meeting", x:"48%", y:"58%", info:"Your chosen meetup spot — set this with your group before you split up." }
 ];
@@ -5978,7 +6010,12 @@ const otherStages = [
 // once that moved (see its own comment), the two labels visually
 // collided; moved toward The Feckless Wrecked (92,48)/Trough Love
 // (84,48) instead, still Oldtown-adjacent but with real separation.
-const minorStagePositions = [[46,34],[60,18],[34,16],[56,38],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,40]];
+// Tangled Roots (index 1) nudged to (51,14) — TWO independent reference-
+// video frames this session (the original pass and a second video, same
+// "COPPERWOOD HEIGHTS"/TANGLED ROOTS label pairing) both show Tangled
+// Roots sitting northWEST of Copperwood with the north offset clearly
+// bigger than the west one — not an even diagonal.
+const minorStagePositions = [[46,34],[51,14],[34,16],[56,38],[30,58],[62,52],[44,42],[80,55],[85,46],[54,26],[24,40]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -5996,9 +6033,9 @@ const thingsToFind = [
   { name:"The Boomtown Bobbies", near:"Area 404", x:"46%", y:"26%", info:"A mock police station hidden venue playing on Area 404's Guardians — expect in-character 'officers', a booking-desk bar and a wink at the district's own policing storyline." },
   { name:"Luck Exchange Casino", near:"Area 404", x:"54%", y:"34%", info:"A casino-themed hidden venue in Area 404's territory — cards, chips and a party underneath the gambling dressing." },
   { name:"Botanica Zoo", near:"Botanica", x:"24%", y:"16%", info:"A character-led 'zoo' micro-venue inside Botanica — the theme is the clue, so follow the animal keepers and see where they lead." },
-  { name:"The Garden Centre", near:"Botanica", x:"32%", y:"24%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
-  { name:"Hotel Paradiso", near:"Copperwood", x:"64%", y:"22%", info:"A faded-glamour hotel-themed micro venue — sits well with Copperwood's 1925 film-world setting; check in at the 'front desk'." },
-  { name:"Reel News", near:"Copperwood", x:"72%", y:"30%", info:"A newsreel/cinema-themed hidden spot tying into Von Vanderhaus's film empire — expect projected clips and in-character 'reporters'." },
+  { name:"The Garden Centre", near:"Botanica", x:"23%", y:"26%", info:"A garden-centre-fronted hidden venue fitting Botanica's plant-temple theme — good spot to ask locals about the Great Mother's ritual plans." },
+  { name:"Hotel Paradiso", near:"Copperwood", x:"54%", y:"19%", info:"A faded-glamour hotel-themed micro venue — sits well with Copperwood's 1925 film-world setting; check in at the 'front desk'." },
+  { name:"Reel News", near:"Copperwood", x:"62%", y:"27%", info:"A newsreel/cinema-themed hidden spot tying into Von Vanderhaus's film empire — expect projected clips and in-character 'reporters'." },
   { name:"Mining for (g)Old Town", near:"Oldtown", x:"84%", y:"48%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
   { name:"Cas's Costumes", near:"Oldtown", x:"92%", y:"56%", info:"A costume-shop-fronted micro venue fitting Oldtown's circus and rogues theme — worth a look if you want to dress into the story." },
   { name:"Soapranos Laundrette", near:"Letsbe Avenue", x:"36%", y:"10%", info:"A laundrette-fronted hidden venue — in 2025 it hosted dance-music DJ sets behind the washing machines. Look for the set dressing, not a normal stage entrance." },
@@ -6048,16 +6085,14 @@ const thingsToFind = [
   { name:"Rebel Girls Club", near:"Ancient Futures", x:"51%", y:"39%", info:"Women-led wellbeing/empowerment venue — confirmed for 2026. Real surveyed GPS puts it right by Ancient Futures/Grand Central, not the Thrutopia hilltop this session's earlier guess assumed." },
   { name:"Tinker Station", near:"Ancient Futures", x:"53%", y:"35%", info:"Seen labelled on the official app's own map right by Ancient Futures — no lineup or theme details sourced yet. Real surveyed GPS confirms this is near Grand Central, not Thrutopia." },
   { name:"Circus", near:"Ancient Futures", x:"52%", y:"40%", info:"Seen labelled on the official app's own map right by Ancient Futures — no lineup or theme details sourced yet. Real surveyed GPS (filed as \"Circus Tent\") puts it near Grand Central, not Thrutopia — possibly the same real venue as venueDirectory's own separate \"Circus Tent\" entry, kept distinct here since that's unconfirmed." },
-  // Was already half-wired: POI_ICONS below has had a "The Hideout
-  // Hilltop":"🏕" entry for a while with nothing in this array actually
-  // using it. Seen labelled on the official app's own map (and again in
-  // this session's own reference screenshots) right next to Foggers Mill
-  // and the Copperwood Heights/Full Moon Ballroom cluster, on the south
-  // side of Copperwood — distinct from the already-plotted "The Hide Out
-  // Downtown" up by Metropolis. Placed near Foggers Mill's own southern
-  // Copperwood-adjacent spot, the general area both labels shared on
-  // screen.
-  { name:"The Hide Out Hilltop", near:"Copperwood", x:"58%", y:"48%", info:"Seen labelled on the official app's own map just south of Copperwood Heights, right by Foggers Mill — no lineup or theme details sourced yet." },
+  // Corrected this session: two independent reference-video frames (both
+  // the original pass and this session's second video, same "COPPERWOOD
+  // HEIGHTS" wide shot) show THE HIDE OUT HILLTOP's own label sitting
+  // clearly EAST of Copperwood Heights' label, roughly the same latitude
+  // (barely north) — not south of it as the previous guess assumed.
+  // Distinct from the already-plotted "The Hide Out Downtown" up by
+  // Metropolis.
+  { name:"The Hide Out Hilltop", near:"Copperwood", x:"66%", y:"21%", info:"Seen labelled on the official app's own map just east of Copperwood Heights — no lineup or theme details sourced yet." },
   // Odd gap this pass turned up: Ancient Futures already has a full
   // Wed-Sun workshop schedule, a venueDirectory entry and its own cluster
   // of amenity markers (Top-Up Point/Photobooth/Food x2/Welfare/First Aid,
@@ -6357,10 +6392,17 @@ const amenities = [
   // Letsbe Avenue — a bar pair right by its own label.
   { category:"Bar", x:"38%", y:"16%", note:"Letsbe Avenue" },
   { category:"Bar", x:"39%", y:"18%", note:"Letsbe Avenue" },
-  // Botanica itself (its NEXUS/food-stall paths, not just the district
-  // label) — food and an accessible-toilet marker.
+  // Botanica itself (its own food-stall paths, not just the district
+  // label).
   { category:"Food", x:"30%", y:"18%", note:"Botanica" },
-  { category:"Accessible Facilities", x:"32%", y:"26%", note:"Botanica" },
+  // NEXUS itself, now at (23,24) after this session's position fix — a
+  // toilet pair (one accessible), a water point and a bar all sit right
+  // by the stage's own glow in the reference video, closer than the
+  // wider Botanica scatter above.
+  { category:"Toilets", x:"21%", y:"26%", note:"NEXUS" },
+  { category:"Accessible Facilities", x:"22%", y:"27%", note:"NEXUS" },
+  { category:"Water Point", x:"21%", y:"27%", note:"NEXUS" },
+  { category:"Bar", x:"25%", y:"23%", note:"NEXUS" },
   { category:"Food", x:"34%", y:"30%", note:"Botanica" },
   // The open path between Botanica and Area 404 — toilets, food, a water
   // point and a bar strung along it.
@@ -6425,7 +6467,17 @@ const amenities = [
   // a food stall and toilet block, the same density its Hilltop sibling
   // site gets.
   { category:"Food", x:"72%", y:"73%", note:"Camp Skylark Sunset" },
-  { category:"Toilets", x:"77%", y:"73%", note:"Camp Skylark Sunset" }
+  { category:"Toilets", x:"77%", y:"73%", note:"Camp Skylark Sunset" },
+  // Hydro XL — a flagship main stage (20,000 capacity) had no amenity
+  // markers at all even after this session's position fix moved it to
+  // its real spot southwest of Metropolis; the reference video panned
+  // past too quickly to read exact icon positions right at the stage
+  // itself, unlike NEXUS/Grand Central/The Lion's Den above. Same
+  // baseline reasoning as Sunset Hill/the camp fields above, not a
+  // specific frame — every main stage needs basic provisions.
+  { category:"Toilets", x:"7%", y:"41%", note:"Hydro XL" },
+  { category:"Water Point", x:"11%", y:"42%", note:"Hydro XL" },
+  { category:"Bar", x:"9%", y:"36%", note:"Hydro XL" }
 ];
 
 const gates = [

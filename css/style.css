@@ -535,18 +535,13 @@
      rest for the actual act blocks. */
   .timeline-row-head{position:sticky; left:0; z-index:2; width:88px; flex-shrink:0; background:var(--bg-panel-2); padding:8px 6px; display:flex; align-items:center; font-size:11px; font-weight:700; line-height:1.2; border-right:1px solid var(--line); border-bottom:1px solid var(--line); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .timeline-hours-row .timeline-row-head{background:var(--bg-panel);}
-  /* Purely cosmetic left-edge stripe + text tint per venueCategoryFor()
-     bucket (js/app.js) — main stage/hidden venue/workshop/activity read
-     as distinct groups at a glance in a long scrolling stage list,
-     without touching the row order or any block/lane logic at all. Main
-     stages get the boldest treatment (same teal as their map marker) so
-     they're the clear anchor points; activities (food/welfare/rides/
-     chill spaces — not something to "catch") get the calmest, so the
-     eye isn't pulled toward them the way it is toward an actual stage. */
-  .timeline-row.cat-main .timeline-row-head{color:var(--accent-teal); font-weight:800; border-left:3px solid var(--accent-teal); padding-left:3px;}
-  .timeline-row.cat-venue .timeline-row-head{color:var(--accent-lightblue); border-left:3px solid var(--accent-lightblue); padding-left:3px;}
-  .timeline-row.cat-workshop .timeline-row-head{color:var(--accent-amber); border-left:3px solid var(--accent-amber); padding-left:3px;}
-  .timeline-row.cat-activity .timeline-row-head{color:var(--text-muted); font-weight:600; border-left:3px solid var(--line); padding-left:3px;}
+  /* Main stage / stages & venues / activities & support are grouped by
+     inserting a labelled section-divider row between tiers (see
+     CATEGORY_TIER/TIER_LABELS + buildTimelineHTML in js/app.js) instead
+     of colouring each stage name — doesn't touch the row order or any
+     block/lane logic at all. */
+  .timeline-section-divider{position:relative; display:flex; align-items:center; height:26px; flex-shrink:0; background:var(--bg-panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .timeline-section-divider-label{position:sticky; left:0; padding:0 10px; font-size:10px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); white-space:nowrap;}
   .timeline-hours-body{position:relative; flex-shrink:0; height:26px; border-bottom:1px solid var(--line);}
   .timeline-hour-label{position:absolute; top:0; bottom:0; font-size:10px; color:var(--text-muted); padding:2px 4px; display:flex; align-items:center;}
   .timeline-row{display:flex;}
