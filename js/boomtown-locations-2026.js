@@ -26,6 +26,8 @@
 // 2026-08-02 cleanup: deduped Crafty Rascals, fixed "Churchof Veg" ->
 // "Church of Veg", "V Tough Love" -> "Tough Love", shortened Bad Apple Bar
 // label; matching aliases live in app.js realStageMatch().
+// 2026-08-02: added The Lion's Den, Hydro XL, Quantum from official app
+// screenshots relative to surveyed Grand Central + site layout.
 window.BOOMTOWN_LOCATIONS_2026 = {
   "stages": [
     {
@@ -131,6 +133,30 @@ window.BOOMTOWN_LOCATIONS_2026 = {
       "lon": -1.240247,
       "unresolved": false,
       "source": "lineup-match"
+    },
+    {
+      "id": "lionsden",
+      "label": "The Lion's Den",
+      "lat": 51.05085,
+      "lon": -1.2359,
+      "unresolved": false,
+      "source": "official-app-screenshots-relative-2026"
+    },
+    {
+      "id": "hydrox",
+      "label": "Hydro XL",
+      "lat": 51.05255,
+      "lon": -1.24285,
+      "unresolved": false,
+      "source": "official-app-screenshots-relative-2026"
+    },
+    {
+      "id": "quantum",
+      "label": "Quantum",
+      "lat": 51.05155,
+      "lon": -1.23755,
+      "unresolved": false,
+      "source": "official-app-screenshots-relative-2026"
     },
     {
       "id": "CocaineAnonymous",
