@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v273";
-const APP_BUILD_TIME = "2026-08-02T14:07:08Z";
+const APP_CACHE_VERSION = "v274";
+const APP_BUILD_TIME = "2026-08-02T14:18:58Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5957,7 +5957,12 @@ const locations = [
   // marker and label sitting clearly south-WEST of METROPOLIS's own
   // label, not east of it/toward Area 404 as the old position implied.
   { name:"Hydro XL", kind:"stage", x:"9%", y:"39%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
-  { name:"Anara Forest", kind:"stage", x:"72%", y:"44%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
+  // Pulled from (72,44) — south of Grand Central — to (75,22). Two
+  // independent reference-video frames (both this session's videos) show
+  // ANARA's own label sitting clearly NORTH of Grand Central, not south —
+  // and south/west of Temple Valley Camping's label (also corrected
+  // below), consistent with "Hilltop edge" woodland between the two.
+  { name:"Anara Forest", kind:"stage", x:"75%", y:"22%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
   { name:"Hidden Woods", kind:"stage", x:"18%", y:"8%", info:"One of two woodland stages tucked among the trees, with its own beach bar and treetop walks. Leans eclectic bass and reggae/dub, often billing bigger DnB names alongside newer acts — explore carefully after dark." },
   // Pulled from (32,22) — east of Botanica's own (28,20) — to (23,24).
   // This session's reference video shows NEXUS's own glowing stage marker
@@ -6241,7 +6246,11 @@ const campLabels = [
   { x:"48%", y:"4%", text:"Valley Camping" },
   { x:"70%", y:"6%", text:"Tangerine Fields" },
   { x:"86%", y:"14%", text:"Campervan Field" },
-  { x:"85%", y:"32%", text:"Temple Valley Camping" },
+  // Pulled from (85,32) to (85,18) — three independent reference-video
+  // frames across both this session's videos show TEMPLE VALLEY CAMPING's
+  // own label sitting clearly north of both Grand Central and Copperwood
+  // Heights, not barely south of Grand Central as the old y implied.
+  { x:"85%", y:"18%", text:"Temple Valley Camping" },
   { x:"91%", y:"48%", text:"East Camping" },
   { x:"95%", y:"64%", text:"Quiet Camping" },
   { x:"9%", y:"39%", text:"Camp Orchid Downtown (premium, public transport)" },
