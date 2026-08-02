@@ -38,15 +38,12 @@ if ("serviceWorker" in navigator) {
     checkForStaleCopy = function(){ return Promise.resolve(false); };
   }
   resetBuildPill();
-  // In-flight checkForStaleCopy() from app.js may still resolve later — clear again
   setTimeout(resetBuildPill, 300);
   setTimeout(resetBuildPill, 1200);
   setTimeout(resetBuildPill, 3000);
 })();
 
-// --- map GPS matching upgrade (inlined; also available as js/map-matching.js) ---
-// Map GPS name-matching upgrade (loaded after js/app.js).
-// Improves realStageMatch so more schematic pins snap to scraped official-app GPS.
+// --- map GPS matching upgrade ---
 (function(){
   function normalizeVenueKey(s){
     return String(s || "")
@@ -118,7 +115,13 @@ if ("serviceWorker" in navigator) {
     "xr": "xr",
     "crafts": "crafts",
     "sauna": "sauna",
-    "crafty rascals": "crafty rascals"
+    "crafty rascals": "crafty rascals",
+    "lions den": "the lions den",
+    "lion s den": "the lions den",
+    "the lions den": "the lions den",
+    "hydro": "hydro xl",
+    "hydro xl": "hydro xl",
+    "quantum": "quantum"
   };
   function improvedRealStageMatch(name){
     const data = window.BOOMTOWN_LOCATIONS_2026;
@@ -144,13 +147,41 @@ if ("serviceWorker" in navigator) {
     }
     return null;
   }
-  // Override the function app.js defined (classic non-module scripts share globals).
   realStageMatch = improvedRealStageMatch;
   window.realStageMatch = improvedRealStageMatch;
   window.normalizeVenueKey = normalizeVenueKey;
-  // app.js calls loadMap() at the end of its own script, which runs before
-  // this file — re-run so markers use the improved matcher on first paint.
   if(typeof loadMap === "function"){
     try { loadMap(); } catch(e) { console.warn("map-matching: loadMap refresh failed", e); }
+  }
+})();
+
+// --- official-map position fixes (Lion's Den / Hydro XL / Quantum + districts) ---
+(function(){
+  const SCHEMATIC_FIXES = {
+    "The Lion's Den": { x: "79%", y: "84%" },
+    "Hydro XL":       { x: "16%", y: "62%" },
+    "Quantum":        { x: "66%", y: "74%" },
+    "Area 404":       { x: "28%", y: "38%" },
+    "Metropolis":     { x: "14%", y: "40%" },
+    "Botanica":       { x: "22%", y: "22%" },
+    "Oldtown":        { x: "62%", y: "48%" },
+    "Grand Central":  { x: "58%", y: "36%" }
+  };
+  try {
+    if (typeof locations !== "undefined" && Array.isArray(locations)) {
+      locations.forEach(function(p){
+        const fix = SCHEMATIC_FIXES[p.name];
+        if (fix) { p.x = fix.x; p.y = fix.y; }
+      });
+    }
+    if (typeof thingsToFind !== "undefined" && Array.isArray(thingsToFind)) {
+      thingsToFind.forEach(function(p){
+        const fix = SCHEMATIC_FIXES[p.name];
+        if (fix) { p.x = fix.x; p.y = fix.y; }
+      });
+    }
+  } catch (e) { console.warn("schematic fix failed", e); }
+  if (typeof loadMap === "function") {
+    try { loadMap(); } catch (e) { console.warn("loadMap after schematic fix failed", e); }
   }
 })();
