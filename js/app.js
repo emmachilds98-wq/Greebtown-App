@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v279";
-const APP_BUILD_TIME = "2026-08-02T16:48:31Z";
+const APP_CACHE_VERSION = "v285";
+const APP_BUILD_TIME = "2026-08-02T18:31:01Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7804,11 +7804,86 @@ function latLonToSchematic(lat, lon){
     y: (SITE_NE.lat - lat) / latSpan * 100
   };
 }
+// Fuzzy name-matching for js/boomtown-locations-2026.js's scraped GPS
+// labels, folded in here as the single source of truth — this used to be
+// a runtime monkey-patch loaded from js/pwa-register.js (and duplicated a
+// second time in a since-deleted js/map-matching.js), silently
+// overriding this exact function after the fact. That pattern is exactly
+// what CLAUDE.md's "single source of truth" rule now forbids: two files
+// disagreeing about what realStageMatch does, with whichever loaded last
+// silently winning. Improve it here instead.
+function normalizeVenueKey(s){
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\b(the|of|and|a|an|bar|stage|tent|club|hq)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+const STAGE_ALIASES = {
+  "church veg": "church of veg", "churchof veg": "church of veg", "church of veg": "church of veg",
+  "tough love": "tough love", "v tough love": "tough love",
+  "bad apple": "bad apple bar", "bad apple bar": "bad apple bar",
+  "twisted time machine": "bad apple bar", "twisted time machine bad apple bar": "bad apple bar",
+  "circus": "circus tent", "circus tent": "circus tent",
+  "fools leap": "fools leap", "the fools leap": "fools leap",
+  "grand central": "grand central",
+  "postal posse": "postal posse", "reel news": "reel news",
+  "magic teapot": "magic teapot", "the magic teapot": "magic teapot",
+  "foggers mill": "foggers mill", "fogger s mill": "foggers mill",
+  "topsy turvy trims": "topsy turvy trims", "topsy turvy": "topsy turvy trims",
+  "ancient futures": "ancient futures",
+  "rebel girls": "rebel girls club", "rebel girls club": "rebel girls club",
+  "agents of change": "agents of change hq", "agents of change hq": "agents of change hq",
+  "pomegranate parlour": "pomegranate parlour", "the pomegranate parlour": "pomegranate parlour", "pomegranare": "pomegranate parlour",
+  "mining for gold town": "mining for g old town", "mining for g old town": "mining for g old town", "mining for old town": "mining for g old town",
+  "den of disorder": "den of disorder",
+  "games lounge": "games lounge", "games": "games lounge",
+  "daily rag": "daily rag", "the daily rag": "daily rag",
+  "da graffs": "da graffs", "dagraffs": "da graffs",
+  "velvet rope": "velvet rope",
+  "skylark hilltop": "skylark hilltop",
+  "boomtown hall": "boomtown hall",
+  "retreat": "retreat", "the retreat": "retreat",
+  "tinker station": "tinker station",
+  "spinney hollow": "spinney hollow",
+  "energy garden": "energy garden",
+  "climate live": "climate live",
+  "sharing circles": "sharing circles",
+  "giant tree circle": "giant tree circle", "the giant tree circle": "giant tree circle",
+  "cocaine anonymous": "cocaine anonymous",
+  "permaculture": "permaculture",
+  "elemental": "elemental",
+  "hapitat": "hapitat", "habitat": "hapitat",
+  "xr": "xr", "crafts": "crafts", "sauna": "sauna",
+  "crafty rascals": "crafty rascals",
+  "lions den": "the lions den", "lion s den": "the lions den", "the lions den": "the lions den",
+  "hydro": "hydro xl", "hydro xl": "hydro xl",
+  "quantum": "quantum"
+};
 function realStageMatch(name){
   const data = window.BOOMTOWN_LOCATIONS_2026;
   if(!data || !name) return null;
-  const key = name.trim().toLowerCase();
-  return data.stages.find(s=> s.label.trim().toLowerCase() === key) || null;
+  const raw = name.trim().toLowerCase();
+  let hit = data.stages.find(s=> s.label.trim().toLowerCase() === raw);
+  if(hit) return hit;
+  const norm = normalizeVenueKey(name);
+  const aliasTarget = STAGE_ALIASES[norm] || STAGE_ALIASES[raw] || null;
+  if(aliasTarget){
+    hit = data.stages.find(s=> normalizeVenueKey(s.label) === normalizeVenueKey(aliasTarget) || s.label.trim().toLowerCase() === aliasTarget);
+    if(hit) return hit;
+  }
+  hit = data.stages.find(s=> normalizeVenueKey(s.label) === norm);
+  if(hit) return hit;
+  if(norm.length >= 5){
+    hit = data.stages.find(s=>{
+      const sn = normalizeVenueKey(s.label);
+      return sn.length >= 5 && (sn.includes(norm) || norm.includes(sn));
+    });
+    if(hit) return hit;
+  }
+  return null;
 }
 // place: anything with {name, x, y} in the existing "NN%" schematic
 // convention — returns {lat, lon, precise}.
