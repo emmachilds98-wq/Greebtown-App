@@ -3257,9 +3257,14 @@ window.GREEBTOWN_CAMP_ZONES = {
         "x": 14,
         "y": 7
       },
+      "footprint": {
+        "aspect": 1.55,
+        "sides": 6,
+        "rotation": -18
+      },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "North-west field beside West Gate."
+      "notes": "North-west field beside West Gate; broad, faceted field with diagonal internal divisions."
     },
     {
       "id": "camp-downtown",
@@ -3267,6 +3272,11 @@ window.GREEBTOWN_CAMP_ZONES = {
       "position": {
         "x": 7,
         "y": 43
+      },
+      "footprint": {
+        "aspect": 1.35,
+        "sides": 6,
+        "rotation": 20
       },
       "surface": "camp-green",
       "evidence": "official-overview",
@@ -3279,6 +3289,11 @@ window.GREEBTOWN_CAMP_ZONES = {
         "x": 7,
         "y": 58
       },
+      "footprint": {
+        "aspect": 1.45,
+        "sides": 5,
+        "rotation": -8
+      },
       "surface": "camp-green",
       "evidence": "official-overview",
       "notes": "Accessible meadow field."
@@ -3289,6 +3304,11 @@ window.GREEBTOWN_CAMP_ZONES = {
       "position": {
         "x": 10,
         "y": 58
+      },
+      "footprint": {
+        "aspect": 1.35,
+        "sides": 5,
+        "rotation": 12
       },
       "surface": "camp-green",
       "evidence": "official-overview",
@@ -3301,9 +3321,14 @@ window.GREEBTOWN_CAMP_ZONES = {
         "x": 48,
         "y": 4
       },
+      "footprint": {
+        "aspect": 1.7,
+        "sides": 6,
+        "rotation": -12
+      },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "Northern valley field."
+      "notes": "Northern valley field, wide and diagonally divided."
     },
     {
       "id": "camp-tangerine",
@@ -3311,6 +3336,11 @@ window.GREEBTOWN_CAMP_ZONES = {
       "position": {
         "x": 70,
         "y": 6
+      },
+      "footprint": {
+        "aspect": 1.45,
+        "sides": 6,
+        "rotation": 10
       },
       "surface": "camp-green",
       "evidence": "official-overview",
@@ -3323,9 +3353,14 @@ window.GREEBTOWN_CAMP_ZONES = {
         "x": 86,
         "y": 14
       },
+      "footprint": {
+        "aspect": 0.68,
+        "sides": 6,
+        "rotation": -6
+      },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "East-side vehicle field."
+      "notes": "East-side vertical vehicle field."
     },
     {
       "id": "camp-temple-valley",
@@ -3333,6 +3368,11 @@ window.GREEBTOWN_CAMP_ZONES = {
       "position": {
         "x": 95,
         "y": 18
+      },
+      "footprint": {
+        "aspect": 0.58,
+        "sides": 6,
+        "rotation": 4
       },
       "surface": "camp-green",
       "evidence": "official-overview",
@@ -3345,6 +3385,11 @@ window.GREEBTOWN_CAMP_ZONES = {
         "x": 91,
         "y": 48
       },
+      "footprint": {
+        "aspect": 0.72,
+        "sides": 6,
+        "rotation": -4
+      },
       "surface": "camp-green",
       "evidence": "official-overview",
       "notes": "East-side field south of Temple Valley."
@@ -3355,6 +3400,11 @@ window.GREEBTOWN_CAMP_ZONES = {
       "position": {
         "x": 95,
         "y": 64
+      },
+      "footprint": {
+        "aspect": 0.78,
+        "sides": 6,
+        "rotation": 8
       },
       "surface": "camp-green",
       "evidence": "official-overview",
@@ -3367,6 +3417,11 @@ window.GREEBTOWN_CAMP_ZONES = {
         "x": 10,
         "y": 46
       },
+      "footprint": {
+        "aspect": 1.25,
+        "sides": 4,
+        "rotation": 25
+      },
       "surface": "camp-premium",
       "evidence": "official-overview",
       "notes": "Premium public-transport camp; distinct pink field on the west side of the reviewed Downtown cluster."
@@ -3377,6 +3432,11 @@ window.GREEBTOWN_CAMP_ZONES = {
       "position": {
         "x": 75,
         "y": 22
+      },
+      "footprint": {
+        "aspect": 0.72,
+        "sides": 7,
+        "rotation": -8
       },
       "surface": "camp-premium",
       "evidence": "official-overview",
@@ -3389,6 +3449,11 @@ window.GREEBTOWN_CAMP_ZONES = {
         "x": 74,
         "y": 72
       },
+      "footprint": {
+        "aspect": 1.28,
+        "sides": 7,
+        "rotation": 8
+      },
       "surface": "camp-premium",
       "evidence": "official-overview",
       "notes": "Premium south-side camp near Sunset Hill."
@@ -3399,6 +3464,11 @@ window.GREEBTOWN_CAMP_ZONES = {
       "position": {
         "x": 5,
         "y": 45
+      },
+      "footprint": {
+        "aspect": 1.15,
+        "sides": 5,
+        "rotation": -12
       },
       "surface": "camp-green",
       "evidence": "official-overview",

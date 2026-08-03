@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v366";
-const APP_BUILD_TIME = "2026-08-03T07:19:25Z";
+const APP_CACHE_VERSION = "v367";
+const APP_BUILD_TIME = "2026-08-03T07:24:51Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6558,7 +6558,7 @@ const campLabels = (()=>{
   return zones.map(zone=> ({
     id: zone.id,
     x: `${zone.position.x}%`, y: `${zone.position.y}%`, text: `${zone.name}${zone.surface === "camp-premium" ? " (premium)" : ""}`,
-    surface: zone.surface, evidence: zone.evidence
+    surface: zone.surface, evidence: zone.evidence, footprint: zone.footprint
   }));
 })();
 const campGroundUseFields = Array.isArray(window.GREEBTOWN_CAMP_ZONES?.groundUseFields)
@@ -6820,10 +6820,10 @@ function blobRing(cx, cy, baseR, seed, points){
 // edges." rx/ry set the field's half-width/half-height BEFORE rotation;
 // aspect (rx vs ry) and rotation are both seeded so repeat calls with
 // the same seed are stable across reloads, same as blobRing.
-function fieldRing(cx, cy, rx, ry, seed, sides){
+function fieldRing(cx, cy, rx, ry, seed, sides, rotationDegrees){
   sides = sides || 6;
   const rand = seededRand(seed);
-  const rotation = rand() * Math.PI;
+  const rotation = Number.isFinite(rotationDegrees) ? rotationDegrees * Math.PI / 180 : rand() * Math.PI;
   const cos = Math.cos(rotation), sin = Math.sin(rotation);
   const pts = [];
   for(let i=0;i<sides;i++){
@@ -8216,7 +8216,9 @@ function buildMapGeoJSON(){
   const campFeatures = campAreaDefs.map((c,i)=>{
     const isDowntown = /downtown/i.test(c.text);
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
-    const r = campClearanceRadius(cx, cy, c, 18);
+    const footprint = c.footprint || { aspect: 1, sides: isDowntown ? 4 : 8 };
+    const reach = Math.max(footprint.aspect, 1 / footprint.aspect);
+    const r = campClearanceRadius(cx, cy, c, 18) / reach;
     campAreaRadii.set(c, r);
     // fieldRing, not blobRing — same "real bounded area, not a circle"
     // reasoning as the ordinary camp fields above. Orchid Downtown keeps
@@ -8225,7 +8227,7 @@ function buildMapGeoJSON(){
     return {
       type: "Feature",
       properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r, r * (isDowntown ? 0.8 : 0.9), 700 + i * 61, isDowntown ? 4 : 8)) ] }
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * footprint.aspect, r / footprint.aspect, 700 + i * 61, footprint.sides, footprint.rotation)) ] }
     };
   });
 
@@ -8309,18 +8311,20 @@ function buildMapGeoJSON(){
   ];
   const campFieldFeatures = ordinaryCamps.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
-    const r = campClearanceRadius(cx, cy, c, 18);
+    const footprint = c.footprint || { aspect: 1, sides: 6 };
+    const reach = Math.max(footprint.aspect, 1 / footprint.aspect);
+    const r = campClearanceRadius(cx, cy, c, 18) / reach;
     campFieldRadii.set(c, r);
     // fieldRing, not blobRing — real camping fields are farm-field-shaped
     // (mostly straight edges, an actual boundary), not a circular blob.
     // Elongation (rx vs ry) is itself seeded per-field so neighbouring
     // fields don't all read as the same stretched rectangle.
     const seed = 600 + i * 43;
-    const aspect = 0.75 + seededRand(seed + 1)() * 0.5;
+    const aspect = footprint.aspect;
     const style = /campervan/i.test(c.text)
       ? { fill: "rgba(104,183,122,0.70)", line: "rgba(51,104,65,0.78)" }
       : CAMP_FIELD_STYLES[i % CAMP_FIELD_STYLES.length];
-    return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, 6)) ] } };
+    return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, footprint.sides, footprint.rotation)) ] } };
   });
   // Ground-use fields are reviewed geometry, not an inferred ellipse.
   // In particular, Hilltop remains beside Anara Forest rather than

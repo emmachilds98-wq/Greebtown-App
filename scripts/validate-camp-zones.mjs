@@ -27,6 +27,8 @@ for(const zone of data.zones || []){
   ids.add(zone.id);
   if(!zone.name) errors.push(`${zone.id}: missing name`);
   for(const axis of ["x", "y"]) if(!Number.isFinite(zone.position?.[axis]) || zone.position[axis] < 0 || zone.position[axis] > 100) errors.push(`${zone.id}: ${axis} must be between 0 and 100`);
+  const footprint = zone.footprint;
+  if(!footprint || !Number.isFinite(footprint.aspect) || footprint.aspect < 0.5 || footprint.aspect > 2 || !Number.isInteger(footprint.sides) || footprint.sides < 4 || footprint.sides > 9 || !Number.isFinite(footprint.rotation) || footprint.rotation < -180 || footprint.rotation > 180) errors.push(`${zone.id}: requires a reviewed footprint aspect, sides and rotation`);
   if(!allowedSurfaces.has(zone.surface)) errors.push(`${zone.id}: invalid surface`);
   if(!allowedEvidence.has(zone.evidence)) errors.push(`${zone.id}: invalid evidence status`);
 }
