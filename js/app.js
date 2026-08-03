@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v395";
-const APP_BUILD_TIME = "2026-08-03T10:52:00Z";
+const APP_CACHE_VERSION = "v396";
+const APP_BUILD_TIME = "2026-08-03T10:56:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9659,12 +9659,12 @@ function loadMap(){
   // flat colour. Everything else keeps the plain --district-rgb colour
   // treatment above — inventing a special look for a district with no
   // specific evidence for one would be a guess, not an accuracy fix.
-  const DISTRICT_TEXT_STYLE = { "Area 404": "glitch", "Botanica": "shimmer", "Metropolis": "shimmer", "Oldtown": "gothic" };
+  const DISTRICT_TEXT_STYLE = { "Area 404": "glitch", "Botanica": "shimmer", "Metropolis": "shimmer", "Oldtown": "gothic", "Letsbe Avenue": "avenue" };
   // Label anchors are display-only nudges, never a substitute for moving
   // reviewed geometry. The central areas really are compact; shifting only
   // their names keeps the overview legible without inventing more distance.
   const DISTRICT_LABEL_OFFSETS = {
-    "Letsbe Avenue": [-15, -6],
+    "Letsbe Avenue": [-17, -16],
     "Botanica": [-9, 6],
     "Metropolis": [-12, 1],
     "Area 404": [12, 4],
