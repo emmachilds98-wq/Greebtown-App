@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v358";
-const APP_BUILD_TIME = "2026-08-03T06:28:58Z";
+const APP_CACHE_VERSION = "v359";
+const APP_BUILD_TIME = "2026-08-03T06:45:11Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6588,6 +6588,16 @@ function applyReferenceLayout(){
 }
 applyReferenceLayout();
 
+// A deliberately small, evidence-led illustrated layer for the named
+// workshops, stalls and micro venues visible in official detailed map
+// references. It points to `thingsToFind` by name rather than duplicating
+// coordinates, so a reviewed reference-layout move carries its little
+// buildings with the parent cluster. Edit the canonical JSON + run its
+// validator; do not add generic amenity pins here.
+const reviewedSmallVenueLayout = Array.isArray(window.GREEBTOWN_SMALL_VENUE_LAYOUT?.venues)
+  ? window.GREEBTOWN_SMALL_VENUE_LAYOUT.venues
+  : [];
+
 // a straight dump of js/boomtown-locations-2026.js's 53 real-GPS POI
 // points (see that file's own header: extracted from the official app's
 // live map data) after repeated reports that the icons "don't seem to be
@@ -7914,6 +7924,44 @@ function buildMapGeoJSON(){
     else solidBuildingFeatures.push(feature);
   });
 
+  // Reviewed small-venue massing. Detailed official references show these
+  // named places as a purposeful row of warm stalls, small round tents and
+  // fenced yards — not as a carpet of generic facility icons. Their source
+  // place is resolved after applyReferenceLayout(), retaining the same
+  // positional relationship to each reviewed cluster on future edits.
+  function reviewedVenueRing(cx, cy, venue){
+    const angle = venue.rotation * Math.PI / 180;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const sides = venue.shape === "round" ? 10 : 4;
+    const ring = [];
+    for(let step=0; step<sides; step++){
+      const theta = venue.shape === "round" ? (step / sides) * Math.PI * 2 : Math.PI / 4 + (step / sides) * Math.PI * 2;
+      const localX = Math.cos(theta) * venue.width / 2;
+      const localY = Math.sin(theta) * venue.height / 2;
+      ring.push([cx + localX * cos - localY * sin, cy + (localX * sin + localY * cos) * 0.85]);
+    }
+    ring.push(ring[0]);
+    return ring;
+  }
+  const smallVenueFeatures = [];
+  const smallVenueYardFeatures = [];
+  const SMALL_VENUE_FILLS = [
+    "rgba(229,151,93,0.92)", "rgba(212,139,75,0.9)",
+    "rgba(192,143,68,0.88)", "rgba(238,166,108,0.9)"
+  ];
+  reviewedSmallVenueLayout.forEach((venue, index)=>{
+    const sourcePlace = thingsToFind.find(place=> place.name === venue.sourceName);
+    if(!sourcePlace) return;
+    const ring = reviewedVenueRing(parseFloat(sourcePlace.x), parseFloat(sourcePlace.y), venue);
+    const feature = {
+      type:"Feature",
+      properties:{ name: venue.name, fill: SMALL_VENUE_FILLS[index % SMALL_VENUE_FILLS.length] },
+      geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(ring)] }
+    };
+    if(venue.shape === "yard") smallVenueYardFeatures.push(feature);
+    else smallVenueFeatures.push(feature);
+  });
+
   // Decorative infill buildings — a wide reference-video frame showing
   // several districts at once (Botanica/Metropolis together) has
   // noticeably MORE small building blocks scattered through each
@@ -7936,7 +7984,9 @@ function buildMapGeoJSON(){
   // against every already-placed building (named or infill) and retries
   // a few times, keeping the least-bad spot if it can't clear the gap —
   // bounded, so this can never loop forever.
-  const placedBuildingCenters = districtMemberPoints.map(p=> [parseFloat(p.x), parseFloat(p.y)]);
+  const placedBuildingCenters = districtMemberPoints
+    .concat(reviewedSmallVenueLayout.map(venue=> thingsToFind.find(place=> place.name === venue.sourceName)).filter(Boolean))
+    .map(p=> [parseFloat(p.x), parseFloat(p.y)]);
   const MIN_BUILDING_SEP = 1.5;
   // Decorative infill buildings now bias toward sitting along a real
   // trunk-path edge when one actually passes near this cluster, instead
@@ -8537,6 +8587,8 @@ function buildMapGeoJSON(){
     buildings: { type:"FeatureCollection", features: solidBuildingFeatures },
     venueAccents: { type:"FeatureCollection", features: venueAccentFeatures },
     fencedEnclosures: { type:"FeatureCollection", features: fencedEnclosureFeatures },
+    smallVenues: { type:"FeatureCollection", features: smallVenueFeatures },
+    smallVenueYards: { type:"FeatureCollection", features: smallVenueYardFeatures },
     infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
     stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
     minorStageGlow: { type:"FeatureCollection", features: minorStageGlowFeatures },
@@ -8560,7 +8612,7 @@ function buildMapGeoJSON(){
 // adding a hidden venue, etc. all refresh the map's markers). Off by
 // default for the busier layers so the map isn't crowded on first arrival —
 // "Other stages" and "Amenities" stay on since those are core wayfinding info.
-let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false, poi: true, friend: true, sssi: true, road: true };
+let mapLayerVisible = { minor: true, detail: true, secret: false, camp: false, landmark: false, poi: true, friend: true, sssi: true, road: true };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -9189,6 +9241,15 @@ function loadMap(){
       mapGL.addSource("mapFencedEnclosures", { type: "geojson", data: geo.fencedEnclosures });
       mapGL.addLayer({ id: "fenced-enclosures-line", type: "line", source: "mapFencedEnclosures", paint: { "line-color": "rgba(120,80,50,0.8)", "line-width": 1.3, "line-dasharray": [2, 1] } });
 
+      // Small named venue structures sit above general buildings so their
+      // coherent street-side clusters remain readable at close zoom.
+      mapGL.addSource("mapSmallVenues", { type: "geojson", data: geo.smallVenues });
+      mapGL.addLayer({ id: "small-venues-shadow", type: "fill", source: "mapSmallVenues", paint: { "fill-color": "rgba(44,30,17,0.25)", "fill-translate": [1.1, 1.4] } });
+      mapGL.addLayer({ id: "small-venues-fill", type: "fill", source: "mapSmallVenues", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "small-venues-outline", type: "line", source: "mapSmallVenues", paint: { "line-color": "rgba(104,65,30,0.78)", "line-width": 1 } });
+      mapGL.addSource("mapSmallVenueYards", { type: "geojson", data: geo.smallVenueYards });
+      mapGL.addLayer({ id: "small-venue-yards-line", type: "line", source: "mapSmallVenueYards", paint: { "line-color": "rgba(121,77,35,0.9)", "line-width": 1.25, "line-dasharray": [2, 1] } });
+
       // Diamond polygons now (was a circle layer) — the reference
       // video's own camp confetti reads as small tent-shaped diamonds,
       // not round dots.
@@ -9345,6 +9406,20 @@ function loadMap(){
           <p class="empty-note" style="margin-top:6px;">Nearest theme: ${spot.near}. Boomtown never publishes exact hidden-venue locations, so this pin is a "go exploring here" nudge, not a surveyed spot — log what you actually find in Map's hidden-venue log.</p>
         </div>
       `) }
+    );
+  });
+
+  // Detail labels are separate from the optional hidden-venue markers:
+  // they identify only the limited set of official-reference stalls and
+  // small venues whose illustrated footprint is visible on this map. The
+  // existing zoom-thinning rule keeps them out of the overview.
+  reviewedSmallVenueLayout.filter(venue=> venue.label).forEach(venue=>{
+    const place = thingsToFind.find(spot=> spot.name === venue.sourceName);
+    if(!place) return;
+    const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
+    addMapMarker("detail", coord.lat, coord.lon,
+      `<div class="map-label minor small-venue-label">${escapeHtml(venue.name)}</div>`,
+      { title: venue.name }
     );
   });
 

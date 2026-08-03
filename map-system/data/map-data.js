@@ -4148,3 +4148,208 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
     "Foggers Mill": "Grand Central"
   }
 };
+window.GREEBTOWN_SMALL_VENUE_LAYOUT = {
+  "schemaVersion": "1.0.0",
+  "purpose": "Reviewed illustrated footprints for named small venues, stalls and workshops. Positions come from the matching runtime place so reference-layout moves stay coupled.",
+  "evidencePolicy": "Only add a venue after it is visibly named in an official-map reference. Do not use this layer for generic toilets, bars, food pins or inferred market clusters.",
+  "venues": [
+    {
+      "name": "Energy Garden",
+      "sourceName": "Energy Garden",
+      "district": "Grand Central",
+      "shape": "stall",
+      "width": 2.2,
+      "height": 1.15,
+      "rotation": 18,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Tinker Station",
+      "sourceName": "Tinker Station",
+      "district": "Grand Central",
+      "shape": "stall",
+      "width": 2.1,
+      "height": 1.2,
+      "rotation": -24,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "The Magic Teapot",
+      "sourceName": "The Magic Teapot",
+      "district": "Grand Central",
+      "shape": "stall",
+      "width": 2.25,
+      "height": 1.25,
+      "rotation": 30,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Ancient Futures",
+      "sourceName": "Ancient Futures",
+      "district": "Grand Central",
+      "shape": "round",
+      "width": 2.55,
+      "height": 2.15,
+      "rotation": 0,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Circus",
+      "sourceName": "Circus",
+      "district": "Grand Central",
+      "shape": "round",
+      "width": 2.35,
+      "height": 2.05,
+      "rotation": 0,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Craft Tent",
+      "sourceName": "Craft Tent",
+      "district": "Grand Central",
+      "shape": "stall",
+      "width": 2.35,
+      "height": 1.2,
+      "rotation": 16,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Games Lounge",
+      "sourceName": "Games Lounge",
+      "district": "Grand Central",
+      "shape": "round",
+      "width": 2.25,
+      "height": 1.85,
+      "rotation": 0,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Cocaine Anonymous",
+      "sourceName": "Cocaine Anonymous",
+      "district": "Grand Central",
+      "shape": "stall",
+      "width": 1.85,
+      "height": 1.05,
+      "rotation": 18,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Spinney Hollow",
+      "sourceName": "Spinney Hollow",
+      "district": "Grand Central",
+      "shape": "yard",
+      "width": 2.3,
+      "height": 1.5,
+      "rotation": -14,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Reel News",
+      "sourceName": "Reel News",
+      "district": "Grand Central",
+      "shape": "stall",
+      "width": 2.1,
+      "height": 1.05,
+      "rotation": 2,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "The Pomegranate Parlour",
+      "sourceName": "The Pomegranate Parlour",
+      "district": "Oldtown",
+      "shape": "stall",
+      "width": 2.35,
+      "height": 1.2,
+      "rotation": -12,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Mining for (g)Old Town",
+      "sourceName": "Mining for (g)Old Town",
+      "district": "Oldtown",
+      "shape": "stall",
+      "width": 2.05,
+      "height": 1.1,
+      "rotation": 24,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Den of Dis Order",
+      "sourceName": "Den of Dis Order",
+      "district": "Oldtown",
+      "shape": "stall",
+      "width": 1.95,
+      "height": 1.05,
+      "rotation": -20,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Trough Love",
+      "sourceName": "Trough Love",
+      "district": "Oldtown",
+      "shape": "yard",
+      "width": 2.65,
+      "height": 1.8,
+      "rotation": 10,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Da Graaf's Reformatory",
+      "sourceName": "Da Graaf's Reformatory",
+      "district": "Oldtown",
+      "shape": "stall",
+      "width": 2.05,
+      "height": 1.05,
+      "rotation": 20,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "La Luna Coven",
+      "sourceName": "La Luna Coven",
+      "district": "Oldtown",
+      "shape": "stall",
+      "width": 1.95,
+      "height": 1.05,
+      "rotation": -18,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Buskers Wharf",
+      "sourceName": "Buskers Wharf",
+      "district": "Oldtown",
+      "shape": "stall",
+      "width": 2.2,
+      "height": 1.2,
+      "rotation": 4,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "The Feckless Wrecked",
+      "sourceName": "The Feckless Wrecked",
+      "district": "Oldtown",
+      "shape": "stall",
+      "width": 2.05,
+      "height": 1.1,
+      "rotation": 30,
+      "label": true,
+      "positionEvidence": "official-detail"
+    }
+  ]
+};

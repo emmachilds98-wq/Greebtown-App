@@ -236,6 +236,7 @@ node scripts/validate-camp-zones.mjs
 node scripts/validate-evidenced-paths.mjs
 node scripts/validate-district-footprints.mjs
 node scripts/validate-reference-layout.mjs
+node scripts/validate-small-venue-layout.mjs
 node scripts/audit-map-positions.mjs
 node --check js/app.js
 ```
@@ -250,3 +251,11 @@ footprint and entering/leaving paths in the same patch. Keep
 visual plausibility is not surveyed evidence. `referenceLayoutConfig` is
 consumed after the map data collections are declared in `app.js`; moving it
 into an earlier load-time path can reintroduce a TDZ `ReferenceError`.
+
+`map-system/data/small-venue-layout.json` is the canonical visual-massing
+source for verified small shops, stalls, workshops and micro venues. It uses
+`sourceName` to resolve a matching `thingsToFind` location after the
+reference layout is applied, avoiding a competing set of positional values.
+Use it for close-up visual passes rather than adding generic boxes directly
+to `buildMapGeoJSON()`. Its validator constrains shape, size and evidence
+level so both Codex and Claude can make a repeatable, reviewed change.
