@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v406";
-const APP_BUILD_TIME = "2026-08-03T12:17:58Z";
+const APP_CACHE_VERSION = "v407";
+const APP_BUILD_TIME = "2026-08-03T12:24:41Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8554,20 +8554,50 @@ function buildMapGeoJSON(){
     }
   }
   let campFieldLineFeatures = [];
-  // A central field division reinforces the long north–south shape from
-  // the reference map without turning it into a navigable path.
-  (hilltopField?.detailLines || []).forEach(points => campFieldLineFeatures.push({
-    type: "Feature", properties: {}, geometry: { type:"LineString", coordinates: schematicRingToLngLat(points) }
-  }));
+  // Subdivide each camping field into a grid of rectangular pitch plots the
+  // way the official app draws its camping fields — the big yellow Hilltop
+  // field especially reads as a lattice of numbered camping plots, not one
+  // flat colour block. Build a lattice of thin division lines clipped to the
+  // field outline. This is the "split correctly like the real map" the
+  // reference screenshots show; it replaces the previous single Hilltop
+  // divider and the two random diagonals per camp.
+  function fieldPlotGridLines(ring, spacing){
+    const xs = ring.map(p=> p[0]), ys = ring.map(p=> p[1]);
+    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+    const out = [];
+    const stepPx = 0.35;
+    const scan = fixedIsY => {
+      const lo = fixedIsY ? minY : minX, hi = fixedIsY ? maxY : maxX;
+      const aLo = fixedIsY ? minX : minY, aHi = fixedIsY ? maxX : maxY;
+      for(let f=lo + spacing; f<hi - spacing * 0.5; f+=spacing){
+        let runStart = null, last = null;
+        for(let a=aLo; a<=aHi; a+=stepPx){
+          const x = fixedIsY ? a : f, y = fixedIsY ? f : a;
+          if(pointInReviewedRing(x, y, ring)){ if(!runStart) runStart = [x, y]; last = [x, y]; }
+          else { if(runStart && last && Math.hypot(last[0] - runStart[0], last[1] - runStart[1]) > 1.2) out.push([runStart, last]); runStart = null; last = null; }
+        }
+        if(runStart && last && Math.hypot(last[0] - runStart[0], last[1] - runStart[1]) > 1.2) out.push([runStart, last]);
+      }
+    };
+    scan(true); scan(false);
+    return out;
+  }
+  if(hilltopCampingRing.length){
+    fieldPlotGridLines(hilltopCampingRing, 6).forEach(seg=> campFieldLineFeatures.push({
+      type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: schematicRingToLngLat(seg) }
+    }));
+  }
   ordinaryCamps.forEach((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
-    const r = campFieldRadii.get(c) * 0.85;
-    const rand = seededRand(650 + i * 19);
-    for(let l=0;l<2;l++){
-      const a = rand() * Math.PI;
-      const dx = Math.cos(a) * r, dy = Math.sin(a) * r * 0.8;
-      campFieldLineFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[cx - dx, cy - dy], [cx + dx, cy + dy]]) } });
-    }
+    const r = campFieldRadii.get(c);
+    if(!r || r < 3) return; // tiny clustered camps stay a plain block
+    const footprint = c.footprint || { aspect: 1, sides: 6 };
+    const aspect = footprint.aspect;
+    const seed = 600 + i * 43; // same seed as the field ring above, so the grid matches the field
+    const ring = fieldRing(cx, cy, r * aspect, r / aspect, seed, footprint.sides, footprint.rotation);
+    fieldPlotGridLines(ring, Math.max(2.4, r * 0.55)).forEach(seg=> campFieldLineFeatures.push({
+      type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: schematicRingToLngLat(seg) }
+    }));
   });
   let confettiPts = [];
   // Campervan Field gets small rectangular "vehicle" footprints instead
@@ -9435,7 +9465,7 @@ function loadMap(){
       // site and should read as clearly-bounded areas at a glance.
       mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": ["get", "line"], "line-width": 2.4 } });
       mapGL.addSource("mapCampFieldLines", { type: "geojson", data: geo.campFieldLines });
-      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(48,128,73,0.48)", "line-width": 1.2 } });
+      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(120,96,54,0.4)", "line-width": ["interpolate", ["linear"], ["zoom"], 14, 0.55, 19, 1.1] } });
 
       // The triangular tree-ring/hedge feature inside Camp Orchid
       // Downtown — seen clearly, twice, across both reference videos.
