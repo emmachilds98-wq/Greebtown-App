@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "schematic-percent-v1",
+  "anchors": {
+    "Botanica": { "from": [28,18], "to": [30,42] },
+    "Metropolis": { "from": [15,36], "to": [20,57] },
+    "Area 404": { "from": [36,37], "to": [41,60] },
+    "Letsbe Avenue": { "from": [40,9], "to": [38,31] },
+    "Grand Central": { "from": [72,30], "to": [61,40] },
+    "Oldtown": { "from": [68,40], "to": [62,54] },
+    "Hydro XL": { "from": [11,46], "to": [15,67] },
+    "Anara Forest": { "from": [85,22], "to": [82,35] },
+    "The Lion's Den": { "from": [83,55], "to": [78,70] },
+    "Helix": { "from": [78,52], "to": [73,64] },
+    "Hidden Woods": { "from": [18,2], "to": [18,26] }
+  },
+  "members": {
+    "NEXUS": "Botanica", "Rose and Clown": "Botanica",
+    "Spectrum 360": "Area 404", "Hangar 161": "Area 404", "Acid Leak": "Area 404", "Infinity": "Area 404",
+    "The Fools Leap": "Oldtown", "Tribe of Frog": "Oldtown", "Síbín Beag": "Oldtown",
+    "Tangled Roots": "Grand Central", "Full Moon Ballroom": "Grand Central", "Foggers Mill": "Grand Central"
+  }
+}

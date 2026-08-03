@@ -3829,36 +3829,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          3,
-          29
+          8,
+          50
         ],
         [
-          11,
-          25
-        ],
-        [
-          22,
-          27
-        ],
-        [
-          28,
-          33
+          16,
+          46
         ],
         [
           27,
-          42
-        ],
-        [
-          20,
           48
         ],
         [
-          8,
-          47
+          33,
+          54
         ],
         [
-          2,
-          41
+          32,
+          63
+        ],
+        [
+          25,
+          69
+        ],
+        [
+          13,
+          68
+        ],
+        [
+          7,
+          62
         ]
       ]
     },
@@ -3868,36 +3868,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          18,
-          10
+          20,
+          34
         ],
         [
-          29,
-          7
-        ],
-        [
-          38,
-          10
-        ],
-        [
-          42,
-          18
-        ],
-        [
-          37,
-          27
-        ],
-        [
-          29,
+          31,
           31
         ],
         [
-          20,
-          28
+          40,
+          34
         ],
         [
-          15,
-          20
+          44,
+          42
+        ],
+        [
+          39,
+          51
+        ],
+        [
+          31,
+          55
+        ],
+        [
+          22,
+          52
+        ],
+        [
+          17,
+          44
         ]
       ]
     },
@@ -3907,36 +3907,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          25,
-          30
+          30,
+          53
         ],
         [
-          38,
-          29
-        ],
-        [
-          47,
-          35
-        ],
-        [
-          50,
-          44
-        ],
-        [
-          45,
+          43,
           52
         ],
         [
-          34,
-          55
+          52,
+          58
         ],
         [
-          24,
-          50
+          55,
+          67
         ],
         [
-          21,
-          40
+          50,
+          75
+        ],
+        [
+          39,
+          78
+        ],
+        [
+          29,
+          73
+        ],
+        [
+          26,
+          63
         ]
       ]
     },
@@ -3946,32 +3946,32 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-detail",
       "points": [
         [
-          30,
-          3
+          28,
+          25
         ],
         [
-          43,
-          2
+          41,
+          24
         ],
         [
-          51,
-          7
+          49,
+          29
         ],
         [
-          52,
-          13
+          50,
+          35
         ],
         [
-          47,
-          18
+          45,
+          40
         ],
         [
-          37,
-          18
+          35,
+          40
         ],
         [
-          29,
-          14
+          27,
+          36
         ]
       ]
     },
@@ -3981,38 +3981,168 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-detail",
       "points": [
         [
-          61,
-          28
+          55,
+          42
         ],
         [
-          70,
-          26
-        ],
-        [
-          77,
-          32
-        ],
-        [
-          79,
+          64,
           40
         ],
         [
-          75,
-          47
+          71,
+          46
         ],
         [
-          68,
+          73,
+          54
+        ],
+        [
+          69,
+          61
+        ],
+        [
+          62,
+          64
+        ],
+        [
+          54,
+          59
+        ],
+        [
+          51,
           50
-        ],
-        [
-          60,
-          45
-        ],
-        [
-          57,
-          36
         ]
       ]
     }
   ]
+};
+window.GREEBTOWN_REFERENCE_LAYOUT = {
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "schematic-percent-v1",
+  "anchors": {
+    "Botanica": {
+      "from": [
+        28,
+        18
+      ],
+      "to": [
+        30,
+        42
+      ]
+    },
+    "Metropolis": {
+      "from": [
+        15,
+        36
+      ],
+      "to": [
+        20,
+        57
+      ]
+    },
+    "Area 404": {
+      "from": [
+        36,
+        37
+      ],
+      "to": [
+        41,
+        60
+      ]
+    },
+    "Letsbe Avenue": {
+      "from": [
+        40,
+        9
+      ],
+      "to": [
+        38,
+        31
+      ]
+    },
+    "Grand Central": {
+      "from": [
+        72,
+        30
+      ],
+      "to": [
+        61,
+        40
+      ]
+    },
+    "Oldtown": {
+      "from": [
+        68,
+        40
+      ],
+      "to": [
+        62,
+        54
+      ]
+    },
+    "Hydro XL": {
+      "from": [
+        11,
+        46
+      ],
+      "to": [
+        15,
+        67
+      ]
+    },
+    "Anara Forest": {
+      "from": [
+        85,
+        22
+      ],
+      "to": [
+        82,
+        35
+      ]
+    },
+    "The Lion's Den": {
+      "from": [
+        83,
+        55
+      ],
+      "to": [
+        78,
+        70
+      ]
+    },
+    "Helix": {
+      "from": [
+        78,
+        52
+      ],
+      "to": [
+        73,
+        64
+      ]
+    },
+    "Hidden Woods": {
+      "from": [
+        18,
+        2
+      ],
+      "to": [
+        18,
+        26
+      ]
+    }
+  },
+  "members": {
+    "NEXUS": "Botanica",
+    "Rose and Clown": "Botanica",
+    "Spectrum 360": "Area 404",
+    "Hangar 161": "Area 404",
+    "Acid Leak": "Area 404",
+    "Infinity": "Area 404",
+    "The Fools Leap": "Oldtown",
+    "Tribe of Frog": "Oldtown",
+    "Síbín Beag": "Oldtown",
+    "Tangled Roots": "Grand Central",
+    "Full Moon Ballroom": "Grand Central",
+    "Foggers Mill": "Grand Central"
+  }
 };

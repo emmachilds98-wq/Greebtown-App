@@ -2,10 +2,10 @@
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
   "footprints": [
-    { "id": "district-metropolis", "name": "Metropolis", "evidence": "official-overview", "points": [[3,29],[11,25],[22,27],[28,33],[27,42],[20,48],[8,47],[2,41]] },
-    { "id": "district-botanica", "name": "Botanica", "evidence": "official-overview", "points": [[18,10],[29,7],[38,10],[42,18],[37,27],[29,31],[20,28],[15,20]] },
-    { "id": "district-area-404", "name": "Area 404", "evidence": "official-overview", "points": [[25,30],[38,29],[47,35],[50,44],[45,52],[34,55],[24,50],[21,40]] },
-    { "id": "district-letsbe-avenue", "name": "Letsbe Avenue", "evidence": "official-detail", "points": [[30,3],[43,2],[51,7],[52,13],[47,18],[37,18],[29,14]] },
-    { "id": "district-oldtown", "name": "Oldtown", "evidence": "official-detail", "points": [[61,28],[70,26],[77,32],[79,40],[75,47],[68,50],[60,45],[57,36]] }
+    { "id": "district-metropolis", "name": "Metropolis", "evidence": "official-overview", "points": [[8,50],[16,46],[27,48],[33,54],[32,63],[25,69],[13,68],[7,62]] },
+    { "id": "district-botanica", "name": "Botanica", "evidence": "official-overview", "points": [[20,34],[31,31],[40,34],[44,42],[39,51],[31,55],[22,52],[17,44]] },
+    { "id": "district-area-404", "name": "Area 404", "evidence": "official-overview", "points": [[30,53],[43,52],[52,58],[55,67],[50,75],[39,78],[29,73],[26,63]] },
+    { "id": "district-letsbe-avenue", "name": "Letsbe Avenue", "evidence": "official-detail", "points": [[28,25],[41,24],[49,29],[50,35],[45,40],[35,40],[27,36]] },
+    { "id": "district-oldtown", "name": "Oldtown", "evidence": "official-detail", "points": [[55,42],[64,40],[71,46],[73,54],[69,61],[62,64],[54,59],[51,50]] }
   ]
 }

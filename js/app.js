@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v344";
-const APP_BUILD_TIME = "2026-08-03T05:07:21Z";
+const APP_CACHE_VERSION = "v345";
+const APP_BUILD_TIME = "2026-08-03T05:14:17Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6563,6 +6563,31 @@ const campLabels = (()=>{
 })();
 
 // Amenity markers (toilets, food, bars, water, welfare, etc.) — replaced
+// Reference-layout pass: move connected clusters as units, so a district,
+// its stages and nearby venues retain their relative structure. The editable
+// source is map-system/data/reference-layout.json, preventing isolated
+// marker nudges from pulling the layout apart again.
+const referenceLayoutConfig = window.GREEBTOWN_REFERENCE_LAYOUT;
+if(!referenceLayoutConfig?.anchors) throw new Error("Greebtown reference-layout authoring data failed to load");
+function referenceLayoutDelta(name, near=""){
+  const group = referenceLayoutConfig.members?.[name] || near || name;
+  const anchor = referenceLayoutConfig.anchors[group];
+  return anchor ? [anchor.to[0] - anchor.from[0], anchor.to[1] - anchor.from[1]] : [0,0];
+}
+function applyReferenceLayout(){
+  const move = place => {
+    const [dx,dy] = referenceLayoutDelta(place.name, place.near);
+    if(!dx && !dy) return;
+    const x = parseFloat(place.x), y = parseFloat(place.y);
+    place.x = `${x + dx}%`;
+    place.y = `${y + dy}%`;
+  };
+  locations.forEach(move);
+  minorStages.forEach(move);
+  thingsToFind.forEach(move);
+}
+applyReferenceLayout();
+
 // a straight dump of js/boomtown-locations-2026.js's 53 real-GPS POI
 // points (see that file's own header: extracted from the official app's
 // live map data) after repeated reports that the icons "don't seem to be
@@ -7251,7 +7276,16 @@ const EVIDENCED_PATH_SHAPES = (()=>{
   return Object.fromEntries(paths.map(path=> [`${path.from}|${path.to}`, path.points]));
 })();
 function evidencedPathShape(a, b){
-  return EVIDENCED_PATH_SHAPES[`${a}|${b}`] || EVIDENCED_PATH_SHAPES[`${b}|${a}`] || null;
+  const isForward = Boolean(EVIDENCED_PATH_SHAPES[`${a}|${b}`]);
+  const original = EVIDENCED_PATH_SHAPES[`${a}|${b}`] || EVIDENCED_PATH_SHAPES[`${b}|${a}`];
+  if(!original) return null;
+  const [startDx,startDy] = referenceLayoutDelta(isForward ? a : b);
+  const [endDx,endDy] = referenceLayoutDelta(isForward ? b : a);
+  const shifted = original.map((point,index)=>{
+    const t = original.length === 1 ? 0 : index / (original.length - 1);
+    return [point[0] + startDx + (endDx - startDx) * t, point[1] + startDy + (endDy - startDy) * t];
+  });
+  return isForward ? shifted : shifted.reverse();
 }
 const TRUNK_PATH_SEGMENTS = TRUNK_PATH_EDGES.map(([a, b], i)=>{
   const pa = findNamedNode(a), pb = findNamedNode(b);
