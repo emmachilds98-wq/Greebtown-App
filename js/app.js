@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v333";
-const APP_BUILD_TIME = "2026-08-03T04:22:31Z";
+const APP_CACHE_VERSION = "v334";
+const APP_BUILD_TIME = "2026-08-03T04:25:35Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6892,12 +6892,24 @@ const BUILDING_LAYER = {
   "NEXUS": { w: 3.4, h: 3.0, rotation: 20, category: "kite" },
   "Full Moon Ballroom": { w: 3.4, h: 3.4, rotation: 0, category: "dome" },
   "Spectrum 360": { w: 3.0, h: 3.0, rotation: 0, category: "ring" },
+  // The official-map references show the key stages as recognisably
+  // different structures, not one repeated generic brown block. These
+  // are deliberately original, simplified footprints that preserve the
+  // shown massing and orientation without reproducing official artwork.
+  "Grand Central": { w: 4.8, h: 1.9, rotation: 35, category: "rect" },
+  "The Lion's Den": { w: 5.2, h: 1.8, rotation: 8, category: "rect" },
+  "Hydro XL": { w: 4.4, h: 2.8, rotation: 20, category: "kite" },
+  "Anara Forest": { w: 3.8, h: 3.8, rotation: 0, category: "ring" },
+  "Hidden Woods": { w: 3.2, h: 2.2, rotation: 28, category: "rect" },
+  "Helix": { w: 3.2, h: 3.2, rotation: 0, category: "dome" },
+  "Tribe of Frog": { w: 3.4, h: 2.0, rotation: 18, category: "rect" },
+  "Infinity": { w: 3.4, h: 3.4, rotation: 0, category: "ring" },
   // Grand Central's own reference screenshot (findings this session)
   // shows its building rotated diagonally NW-SE relative to the
   // surrounding path network, not axis-aligned like a generic infill
   // building — the old procedural footprint had no fixed orientation
   // at all (a new random angle every reload).
-  "Grand Central": { w: 3.2, h: 1.6, rotation: 35, category: "rect" }
+  "Hangar 161": { w: 4.2, h: 1.5, rotation: 12, category: "rect" }
 };
 function buildingLayerFootprint(cx, cy, seed, layer){
   const angle = (layer.rotation || 0) * Math.PI / 180;
@@ -7237,14 +7249,29 @@ function edgeTier(a, b){
 // all other verified connections still use curvedLine() because their
 // detailed curvature was not visible reliably enough to claim precision.
 const EVIDENCED_PATH_SHAPES = {
+  "West Gate|Downtown Camping": [[3,46], [4,42], [5,38], [5,35]],
+  "Downtown Camping|Metropolis": [[5,35], [8,34], [11,35], [15,36]],
   "Grand Central|Oldtown": [[72,30], [71,34], [69,37], [68,40]],
   "Oldtown|Quantum": [[68,40], [69,44], [71,47], [73,50]],
   "Quantum|Helix": [[73,50], [75,51], [78,52]],
   "Helix|The Lion's Den": [[78,52], [80,55], [83,55]],
   "Botanica|Metropolis": [[28,18], [23,22], [18,29], [15,36]],
+  "Botanica|Letsbe Avenue": [[28,18], [31,16], [35,13], [40,9]],
+  "Letsbe Avenue|Luck Exchange Casino": [[40,9], [39,10], [37,12]],
+  "Luck Exchange Casino|Hotel Paradiso": [[37,12], [34,13], [30,15]],
+  "Hotel Paradiso|Postal Posse": [[30,15], [31,17], [32,19]],
+  "Postal Posse|Botanica": [[32,19], [30,19], [28,18]],
   "Metropolis|E Numbers": [[15,36], [17,37], [19,38]],
   "E Numbers|Gabber Kebabber": [[19,38], [21,39], [22,40]],
-  "Gabber Kebabber|Infinity": [[22,40], [31,41], [41,42]]
+  "Gabber Kebabber|Infinity": [[22,40], [31,41], [41,42]],
+  "Area 404|Spectrum 360": [[36,37], [36,35], [37,32]],
+  "Spectrum 360|Hangar 161": [[37,32], [34,36], [30,43]],
+  "Hangar 161|Deviant Lounge": [[30,43], [32,44], [34,45]],
+  "Oldtown|The Pomegranate Parlour": [[68,40], [67,36], [66,33]],
+  "The Pomegranate Parlour|Den of Dis Order": [[66,33], [65,34], [64,35]],
+  "Den of Dis Order|Mining for (g)Old Town": [[64,35], [64,36]],
+  "Mining for (g)Old Town|Síbín Beag": [[64,36], [68,38], [72,41]],
+  "Síbín Beag|The Feckless Wrecked": [[72,41], [73,42], [74,43]]
 };
 function evidencedPathShape(a, b){
   return EVIDENCED_PATH_SHAPES[`${a}|${b}`] || EVIDENCED_PATH_SHAPES[`${b}|${a}`] || null;
@@ -7514,11 +7541,19 @@ function buildMapGeoJSON(){
     return clearanceRadius(cx, cy, d, districtDesiredRaw.get(d));
   }
   const districtRadii = new Map();
+  // The built districts in the references have readable edges — plazas,
+  // street blocks and clearings — while Botanica remains a softer wooded
+  // enclosure. Give the built areas faceted field outlines so the ground
+  // plan reads as places to walk through rather than equal circular blobs.
+  const BUILT_DISTRICTS = new Set(["Area 404", "Metropolis", "Oldtown", "Letsbe Avenue"]);
   const districtFeatures = districts.map((d,i)=>{
     const rgb = DISTRICT_PALETTE[i % DISTRICT_PALETTE.length];
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const r = districtSpreadR(d);
     districtRadii.set(d, r);
+    const ring = BUILT_DISTRICTS.has(d.name)
+      ? fieldRing(cx, cy, r * 1.08, r * 0.84, i * 31 + 7, 7)
+      : blobRing(cx, cy, r, i * 31 + 7, 18);
     return {
       type: "Feature",
       // Fill/casing alpha nudged back up a little (0.16->0.22, 0.22->0.28)
@@ -7528,7 +7563,7 @@ function buildMapGeoJSON(){
       // a subtle wash; line stays at its existing 0.55 so the boundary
       // doesn't get louder than the markers plotted inside it.
       properties: { name: d.name, fill: `rgba(${rgb},0.22)`, line: `rgba(${rgb},0.55)`, casing: `rgba(${rgb},0.28)` },
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, r, i * 31 + 7, 18)) ] }
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(ring) ] }
     };
   });
 
@@ -7717,13 +7752,30 @@ function buildMapGeoJSON(){
   // stretch of the map read noticeably flatter/emptier than the parts
   // covered by a district. Minor stages get the same treatment now, at
   // a slightly smaller radius since they're a smaller real footprint.
-  const stagePlazaFeatures = locations.filter(p=>p.kind === "stage").map((s,i)=>({
-    type: "Feature", properties: {},
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.8, i * 41 + 9, 10)) ] }
-  })).concat(minorStages.map((s,i)=>({
-    type: "Feature", properties: {},
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(s.x), parseFloat(s.y), 2.1, i * 53 + 4000, 9)) ] }
-  })));
+  // Most real stage surroundings are bounded floor areas — a stage front,
+  // yard or marquee clearing — rather than equal circular glows. The
+  // confirmed headline-stage areas below therefore get their own faceted
+  // proportions; smaller/unconfirmed details retain a restrained organic
+  // clearing so the map stays honest where the reference is less precise.
+  const STAGE_PLAZA_LAYOUT = {
+    "Grand Central": [5.6, 3.0, 7], "The Lion's Den": [5.8, 2.7, 6],
+    "Hydro XL": [4.6, 3.5, 5], "Anara Forest": [4.1, 3.8, 8],
+    "NEXUS": [3.8, 3.3, 5], "Helix": [3.7, 3.4, 7],
+    "Spectrum 360": [3.5, 3.5, 10], "Hangar 161": [4.6, 2.4, 5],
+    "Full Moon Ballroom": [3.8, 3.4, 8], "Infinity": [3.8, 3.8, 9],
+    "Tribe of Frog": [3.6, 2.7, 6]
+  };
+  function stagePlazaFeature(stage, seed, fallbackRadius){
+    const x = parseFloat(stage.x), y = parseFloat(stage.y);
+    const layout = STAGE_PLAZA_LAYOUT[stage.name];
+    const ring = layout
+      ? fieldRing(x, y, layout[0], layout[1], seed, layout[2])
+      : blobRing(x, y, fallbackRadius, seed, 9);
+    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(ring) ] } };
+  }
+  const stagePlazaFeatures = locations.filter(p=>p.kind === "stage")
+    .map((s,i)=> stagePlazaFeature(s, i * 41 + 9, 2.8))
+    .concat(minorStages.map((s,i)=> stagePlazaFeature(s, i * 53 + 4000, 2.1)));
 
   // Bunting/flag accents scattered around each stage plaza — the Tribe
   // of Frog frame shows small bright pink flag/flower dots dotted
