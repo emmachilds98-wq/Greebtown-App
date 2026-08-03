@@ -661,7 +661,8 @@
         { "objectId": "district-oldtown", "field": "footprint", "previous": "overlapped the Hilltop corridor", "next": "relocated west of Hilltop around its reviewed anchor" },
         { "objectId": "stage-grand-central", "field": "reference anchor", "previous": [61, 40], "next": [47, 35] },
         { "objectId": "hilltop-field", "field": "footprint", "previous": "short northern patch", "next": "long tapered corridor ending west of Lion's Den woodland" },
-        { "objectId": "stage-helix", "field": "reference anchor", "previous": [73, 64], "next": [61, 64] }
+        { "objectId": "stage-helix", "field": "reference anchor", "previous": [73, 64], "next": [61, 64] },
+        { "objectId": "landmark-hilltop", "field": "position", "previous": [74, 30], "next": [64, 36] }
       ]
     }
   ]

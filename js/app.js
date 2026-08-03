@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v388";
-const APP_BUILD_TIME = "2026-08-03T10:16:56Z";
+const APP_CACHE_VERSION = "v389";
+const APP_BUILD_TIME = "2026-08-03T10:21:08Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6542,7 +6542,7 @@ const landmarks = [
   // a dotted/hatched ground texture suggesting a car park or overflow
   // field rather than a walkable venue area — marked as a reference
   // label for the same reason SSSI is, not guessed as a POI.
-  { name:"Hilltop", x:"74%", y:"30%", info:"A large marked ground area between Copperwood and Oldtown/Temple Valley Camping, seen labelled on the official app's own map — likely an overflow/car park field given its hatched ground texture on camera, not a confirmed venue area." },
+  { name:"Hilltop", x:"64%", y:"36%", info:"A large marked ground area between Copperwood and Oldtown/Temple Valley Camping, seen labelled on the official app's own map — likely an overflow/car park field given its hatched ground texture on camera, not a confirmed venue area." },
   // Seen labelled at the south end of the Hilltop zone, right by Quantum
   // and The Lion's Den, in the same shot used to reposition both.
   // Nudged from (75,62) to (68,58) alongside Quantum/The Lion's Den's own
