@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v317";
-const APP_BUILD_TIME = "2026-08-03T01:31:25Z";
+const APP_CACHE_VERSION = "v318";
+const APP_BUILD_TIME = "2026-08-03T01:43:21Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5970,13 +5970,28 @@ const locations = [
   // people navigate by risks sending someone to the wrong place, which
   // is worse than showing nothing. Re-add a pin only once a genuine
   // official-app sighting turns up.
-  // Pulled from (68,26) to (58,23) — this session's reference video shows
-  // COPPERWOOD's own label sitting clearly north-WEST of GRAND CENTRAL's
-  // glowing stage marker in the same wide shot (Copperwood/Hilltop/
-  // Oldtown/Quantum), not barely east of it as the old (68,26) implied.
-  // "Near Copperwood" entries below (Hotel Paradiso, Reel News, Tangled
-  // Roots) shifted by the same delta to keep that cluster together.
-  { name:"Copperwood", kind:"district", x:"58%", y:"23%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
+  // Copperwood's map pin removed entirely — same treatment as Thrutopia
+  // above. Earlier sessions' video-review notes (docs/map-evidence)
+  // repeatedly claimed a "COPPERWOOD HEIGHTS" label in this area across
+  // several independent frames, but two fresh screenshots of exactly
+  // this area (Grand Central close-up, and The Hide Out Hilltop/Full
+  // Moon Ballroom close-up — both covering precisely where Copperwood
+  // was placed) show every other venue label in the cluster (Tangled
+  // Roots, The Hide Out Hilltop, Silver Swan Talent Agency, Full Moon
+  // Ballroom, Foggers Mill, Boomtown Hall, Daily Rag, Ancient Futures,
+  // Elemental, Rebel Girls Club, Circus, etc.) clearly legible, with no
+  // "Copperwood"/"Copperwood Heights" text anywhere. Direct, current,
+  // targeted evidence beats the older secondhand video notes here.
+  // Copperwood still clearly exists NARRATIVELY (GUIDE_DISTRICT_NAMES,
+  // Discover card, Edna Von Vanderhaus/VVH/Von Vanderland character
+  // entries all keep it — same as Thrutopia) but showing a district pin
+  // with no confirmed on-map label risks sending someone to a place
+  // that isn't actually marked. The venues that were "near Copperwood"
+  // (The Hide Out Hilltop, Topsy Turvy Trims) keep their own confirmed
+  // positions and are now described relative to Grand Central instead,
+  // and the trunk-path edges that used Copperwood as a junction now
+  // connect directly to Grand Central, which both screenshots confirm
+  // as the real hub for this whole cluster.
   // Pulled from (88,52) to (68,40) — three independent reference frames
   // this session (all showing Copperwood/Grand Central/Oldtown together,
   // at three different zoom levels across two videos) consistently place
@@ -6320,8 +6335,10 @@ const thingsToFind = [
   // clearly EAST of Copperwood Heights' label, roughly the same latitude
   // (barely north) — not south of it as the previous guess assumed.
   // Distinct from the already-plotted "The Hide Out Downtown" up by
-  // Metropolis.
-  { name:"The Hide Out Hilltop", near:"Copperwood", x:"66%", y:"21%", info:"Seen labelled on the official app's own map just east of Copperwood Heights — no lineup or theme details sourced yet." },
+  // Metropolis. "near" updated from Copperwood to Grand Central —
+  // Copperwood's own map pin was removed (see its comment above), and
+  // Grand Central is the confirmed real hub for this cluster.
+  { name:"The Hide Out Hilltop", near:"Grand Central", x:"66%", y:"21%", info:"Seen labelled on the official app's own map north of Grand Central — no lineup or theme details sourced yet." },
   // Odd gap this pass turned up: Ancient Futures already has a full
   // Wed-Sun workshop schedule, a venueDirectory entry and its own cluster
   // of amenity markers (Top-Up Point/Photobooth/Food x2/Welfare/First Aid,
@@ -6396,7 +6413,7 @@ const thingsToFind = [
   // app frame this session shows it in the wooded Hilltop camping area
   // northeast of Grand Central, west/southwest of The Hide Out Hilltop,
   // beside a "Wet Factory" label — not near Botanica/Metropolis at all.
-  { name:"Topsy Turvy Trims", near:"Copperwood", x:"63%", y:"24%", info:"Barbershop/salon-themed spot, seen on the official app's own map in the wooded Hilltop camping area northeast of Grand Central, near The Hide Out Hilltop — not Botanica/Metropolis as an earlier guess assumed." },
+  { name:"Topsy Turvy Trims", near:"Grand Central", x:"63%", y:"24%", info:"Barbershop/salon-themed spot, seen on the official app's own map in the wooded Hilltop camping area northeast of Grand Central, near The Hide Out Hilltop — not Botanica/Metropolis as an earlier guess assumed." },
   // Postal Posse — real match is the one lower-confidence "camelcase-
   // split" source in this batch (same tier as The Retreat's own match
   // above) and sits well isolated from every other plotted point (21+
@@ -6590,16 +6607,18 @@ const amenities = [
   { category:"First Aid", x:"49%", y:"50%", note:"Pepperpot Market" },
   { category:"Welfare", x:"43%", y:"50%", note:"Pepperpot Market" },
   { category:"Cash Point", x:"46%", y:"47%", note:"Pepperpot Market" },
-  // Copperwood — a dense scatter of toilets/food/welfare icons along the
-  // district's own paths, seen clearly in the same wide shot as the
-  // GRAND CENTRAL/HILLTOP/OLDTOWN/QUANTUM labels. Nudged closer to
-  // Copperwood's own (58,23) this session — a post-session audit found
-  // this cluster's centroid had drifted 8.6 units from the district.
-  { category:"Toilets", x:"58%", y:"20%", note:"Copperwood" },
-  { category:"Toilets", x:"62%", y:"23%", note:"Copperwood" },
-  { category:"Food", x:"59%", y:"25%", note:"Copperwood" },
-  { category:"Welfare", x:"56%", y:"26%", note:"Copperwood" },
-  { category:"Water Point", x:"63%", y:"21%", note:"Copperwood" },
+  // Grand Central's north side — a dense scatter of toilets/food/
+  // welfare icons along this cluster's own paths, seen clearly in the
+  // same wide shot as the GRAND CENTRAL/HILLTOP/OLDTOWN/QUANTUM labels.
+  // Notes updated from "Copperwood" to "Grand Central" — Copperwood's
+  // own map pin was removed (see its comment in the locations array;
+  // fresh screenshots of this exact area show no "Copperwood" label at
+  // all), and these positions themselves weren't affected.
+  { category:"Toilets", x:"58%", y:"20%", note:"Grand Central" },
+  { category:"Toilets", x:"62%", y:"23%", note:"Grand Central" },
+  { category:"Food", x:"59%", y:"25%", note:"Grand Central" },
+  { category:"Welfare", x:"56%", y:"26%", note:"Grand Central" },
+  { category:"Water Point", x:"63%", y:"21%", note:"Grand Central" },
   // West Camping, right where its access track meets Alresford Rd — a
   // toilet pair and an accessible-facilities marker on the dashed
   // accessible path leading in from the road.
@@ -6822,7 +6841,7 @@ const venueDirectory = [
   { name:"The Garden Centre", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Chill, eclectic", near:"Botanica", info:"Garden-centre-fronted spot fitting Botanica's plant-temple theme — confirmed for 2026 (Funkmaster General, Redpeppa, Rodderz, Dovetail, plus a Diversion Audio takeover)." },
   { name:"Botanica Zoo", type:"Hidden venue", status:"confirmed", music:true, genre:"Jungle, hardcore, breaks, UK garage, bass", near:"Botanica", info:"Feral, animal-led 'anarcho-squat zoo' venue — 2026 event listings (Killa P, DJ Hybrid, 14 Aug) and its own 'just over 2 weeks til Boomtown' July 2026 post confirm it's back for Chapter Five." },
   { name:"The Immortal Children of the Eternal Seed", type:"Hidden venue", status:"confirmed", music:true, genre:"Ritual, ambient/eclectic", near:"Botanica", info:"Botanica-flavoured cult/ritual-themed micro venue — confirmed for 2026, running Thu-Sat (Loose Forms takeover, Kritical Mass, Safe N Sound)." },
-  { name:"Topsy Turvy Trims", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Barbershop novelty, party", near:"Copperwood", info:"Barbershop/salon-themed spot — seen on the official app's own map in the wooded Hilltop camping area northeast of Grand Central, near The Hide Out Hilltop." },
+  { name:"Topsy Turvy Trims", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Barbershop novelty, party", near:"Grand Central", info:"Barbershop/salon-themed spot — seen on the official app's own map in the wooded Hilltop camping area northeast of Grand Central, near The Hide Out Hilltop." },
   { name:"PFP Robot", type:"Hidden venue", status:"confirmed", music:true, genre:"Electro, makina, trance, acid, techno", near:"Area 404", info:"PFP's robotic soundsystem — confirmed back for 2026 (Tripl3 B, Audio Gutter, Agent Scully, TEOTEK)." },
   { name:"Sub Lab", type:"Hidden venue", status:"confirmed", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — confirmed for 2026 (Bennett ft. Sylla/Limmz, Stasis, Nio B, Ruggz b2b Sonia Sol)." },
   { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Metropolis", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Corrected from an earlier 'near Area 404' guess — the official app's own map shows it on the same footpath as Sub Lab and Loconnection, just south of Metropolis." },
@@ -7227,9 +7246,11 @@ const TRUNK_PATH_EDGES = [
   ["Hotel Paradiso", "Postal Posse"],
   ["Postal Posse", "Botanica"],
   ["Letsbe Avenue", "The Boomtown Bobbies"],
-  ["Letsbe Avenue", "Copperwood"],
-  ["Copperwood", "Grand Central"],
-  ["Copperwood", "Temple Valley Camping"],
+  // Copperwood removed as a junction node (its own map pin was removed —
+  // see the locations array comment); these two edges now connect
+  // straight to Grand Central, the confirmed real hub for this cluster.
+  ["Letsbe Avenue", "Grand Central"],
+  ["Grand Central", "Temple Valley Camping"],
   ["Grand Central", "Anara Forest"],
   ["Grand Central", "Oldtown"],
   ["Oldtown", "Quantum"],
@@ -7261,13 +7282,14 @@ const TRUNK_PATH_EDGES = [
   ["Mining for (g)Old Town", "Síbín Beag"],
   ["Síbín Beag", "The Feckless Wrecked"],
   // Full Moon Ballroom / Foggers Mill cluster — "The Hide Out Hilltop"
-  // itself is the real node off Copperwood (its own label sits right by
-  // Copperwood Heights on camera), with Full Moon Ballroom and Foggers
-  // Mill either side of it, matching the confirmed on-camera order.
-  ["Copperwood", "The Hide Out Hilltop"],
+  // itself is the real node off Grand Central (Copperwood's own former
+  // junction role, removed along with its map pin — see the locations
+  // array comment), with Full Moon Ballroom and Foggers Mill either side
+  // of it, matching the confirmed on-camera order.
+  ["Grand Central", "The Hide Out Hilltop"],
   ["The Hide Out Hilltop", "Full Moon Ballroom"],
   ["Full Moon Ballroom", "Foggers Mill"],
-  ["Copperwood", "Tangled Roots"],
+  ["Grand Central", "Tangled Roots"],
   ["The Hide Out Hilltop", "Topsy Turvy Trims"],
 
   // Botanica's wider venue cluster, added this pass — previously only
@@ -7788,19 +7810,22 @@ function buildMapGeoJSON(){
   // of spots reference footage actually shows opening up into a real
   // town square/concourse, rather than staying a narrow path: Oldtown
   // (the confirmed path-network hub, per the official app's own
-  // schematic overview — Grand Central/Copperwood/Anara Forest/Quantum
-  // all radiate from it), Grand Central (its stage front reads as a wide
-  // open concourse in every reference frame, not a thin approach path),
-  // Botanica (the Letsbe Avenue loop is a real closed "high street" with
-  // stalls strung along it, not a single-file track), Area 404 and
-  // Copperwood (both read as a walled/clustered plaza in reference
-  // frames, distinctly more open than the thin paths reaching them), and
-  // Metropolis/Quantum (both confirmed path forks/junctions where several
-  // routes meet). This exists so those specific spots read as "a place
-  // to actually stand," visually distinct from the constant-width trail
-  // lines connecting them — every other district still uses only its
-  // own broad, fainter clearing tint (districts-fill above), not this.
-  const OPEN_CONCOURSE_NAMES = ["Oldtown", "Grand Central", "Botanica", "Area 404", "Copperwood", "Metropolis", "Quantum"];
+  // schematic overview — Grand Central/Anara Forest/Quantum all radiate
+  // from it), Grand Central (its stage front reads as a wide open
+  // concourse in every reference frame, not a thin approach path —
+  // also now the real hub for the whole Hide Out Hilltop/Full Moon
+  // Ballroom/Tangled Roots cluster, since Copperwood's own map pin was
+  // removed, see the locations array comment), Botanica (the Letsbe
+  // Avenue loop is a real closed "high street" with stalls strung along
+  // it, not a single-file track), Area 404 (reads as a walled/clustered
+  // plaza in reference frames, distinctly more open than the thin paths
+  // reaching it), and Metropolis/Quantum (both confirmed path forks/
+  // junctions where several routes meet). This exists so those specific
+  // spots read as "a place to actually stand," visually distinct from
+  // the constant-width trail lines connecting them — every other
+  // district still uses only its own broad, fainter clearing tint
+  // (districts-fill above), not this.
+  const OPEN_CONCOURSE_NAMES = ["Oldtown", "Grand Central", "Botanica", "Area 404", "Metropolis", "Quantum"];
   const openConcourseFeatures = OPEN_CONCOURSE_NAMES.map((name, i)=>{
     const d = districts.find(dd=> dd.name === name);
     const node = findNamedNode(name);
