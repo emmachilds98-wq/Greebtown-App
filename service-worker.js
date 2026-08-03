@@ -1,6 +1,6 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v399";
+const CACHE_VERSION = "v400";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
 
 try{
