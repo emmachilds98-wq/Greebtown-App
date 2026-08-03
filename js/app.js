@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v404";
-const APP_BUILD_TIME = "2026-08-03T11:52:01Z";
+const APP_CACHE_VERSION = "v405";
+const APP_BUILD_TIME = "2026-08-03T11:56:37Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8137,7 +8137,11 @@ function buildMapGeoJSON(){
   const DISTRICT_MASSING_TONES = {
     terracotta: "rgba(221,132,78,0.88)",
     ochre: "rgba(180,139,56,0.86)",
-    dark: "rgba(77,101,72,0.86)",
+    // Warm dark-brown roof, not the olive-green it used to be: the official
+    // map's darker structures read as timber/brown buildings, and an
+    // olive-green mass just looked like a muddy green smudge sitting in the
+    // middle of each district rather than a building.
+    dark: "rgba(120,84,60,0.87)",
     canvas: "rgba(239,227,192,0.92)"
   };
   const authoredMassingFeatures = [];
