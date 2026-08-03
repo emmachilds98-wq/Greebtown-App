@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v390";
-const APP_BUILD_TIME = "2026-08-03T10:34:00Z";
+const APP_CACHE_VERSION = "v391";
+const APP_BUILD_TIME = "2026-08-03T10:38:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9156,20 +9156,19 @@ function loadMap(){
     }
     mapGL.once("load", ()=> showSiteOverview(0));
 
-    // Label thinning by zoom — see the #map.map-labels-thin CSS rule.
-    // Every marker's text label is a plain positioned DOM element with
-    // no MapLibre-level collision detection, so the default (zoomed-out)
-    // view packs 20+ names into one small cluster and they stack on top
-    // of each other unreadably. Below LABEL_ZOOM_THRESHOLD only district
-    // and main-stage names show (the two things worth seeing at a glance
-    // without zooming in — the default opening zoom of 15.6 sits below
-    // this threshold, so main stage names used to be invisible until you
-    // zoomed in past 16.4); zooming in past it brings every other, more
-    // minor label back once there's actually room for them. Runs on
-    // every "zoom" tick (cheap — it's one class toggle, not a re-render)
-    // plus once on load so the very first frame is already correct.
-    const LABEL_ZOOM_THRESHOLD = 16.1;
-    const updateLabelDensity = ()=> map.classList.toggle("map-labels-thin", mapGL.getZoom() < LABEL_ZOOM_THRESHOLD);
+    // Label density is deliberately a three-step reveal rather than one
+    // hard switch. DOM markers do not have MapLibre collision handling,
+    // so the old one-step threshold changed from a calm overview into a
+    // wall of tiny chips the instant a visitor started to zoom. The map
+    // now reads as territory first, then names its primary stages/camps,
+    // and only then reveals hidden venues and fine-grain wayfinding.
+    const LABEL_ZOOM_THRESHOLD = 15.8;
+    const LABEL_DETAIL_ZOOM_THRESHOLD = 16.5;
+    const updateLabelDensity = ()=>{
+      const zoom = mapGL.getZoom();
+      map.classList.toggle("map-labels-thin", zoom < LABEL_ZOOM_THRESHOLD);
+      map.classList.toggle("map-labels-mid", zoom >= LABEL_ZOOM_THRESHOLD && zoom < LABEL_DETAIL_ZOOM_THRESHOLD);
+    };
     mapGL.on("zoom", updateLabelDensity);
     mapGL.on("load", updateLabelDensity);
     updateLabelDensity();

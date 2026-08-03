@@ -366,6 +366,19 @@
      remain present there; the much denser food/bar/market detail returns
      naturally once the visitor zooms into a district. */
   #map.map-labels-thin .marker.poi-secondary{display:none;}
+  /* Middle zoom is the hand-off between orientation and exploration:
+     primary stage/camp labels remain, but the many hidden venue, landmark
+     and small-structure chips wait until a user has actually entered a
+     district. This avoids the sudden all-at-once label collision that
+     made the old map look unfinished while preserving the detail nearby. */
+  #map.map-labels-mid .map-label.minor,
+  #map.map-labels-mid .map-label.secret,
+  #map.map-labels-mid .map-label.landmark,
+  #map.map-labels-mid .map-label.gate,
+  #map.map-labels-mid .map-label.small-venue-label,
+  #map.map-labels-mid .map-label.sssi,
+  #map.map-labels-mid .map-label.road{display:none;}
+  #map.map-labels-mid .marker.poi-secondary{display:none;}
   /* Colour now comes from each marker's own --district-rgb custom
      property (set in JS from DISTRICT_PALETTE, the same 7-colour cycle
      the district's ground-fill zone uses) instead of one flat amber for
