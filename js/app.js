@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v325";
-const APP_BUILD_TIME = "2026-08-03T04:49:51Z";
+const APP_CACHE_VERSION = "v326";
+const APP_BUILD_TIME = "2026-08-03T04:56:34Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6178,7 +6178,11 @@ const otherStages = [
 // chain above — closing the "extremely large" reported gap between
 // Metropolis and Area 404 without changing any venue's position
 // relative to its own district cluster.
-const minorStagePositions = [[37,32],[51,14],[62,26],[35,20],[58,29],[68,25],[30,43],[64,44],[67,39],[34,44],[25,42]];
+// The official-map audit keeps the two Oldtown chains distinct: Síbín
+// Beag belongs east/south-east of the district label, with Feckless
+// Wrecked below it. Infinity is east of the Area 404/Hangar row, not
+// folded back into the Metropolis-side cluster.
+const minorStagePositions = [[37,32],[51,14],[62,26],[35,20],[58,29],[68,25],[30,43],[64,44],[72,41],[34,44],[41,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6311,7 +6315,7 @@ const thingsToFind = [
   { name:"Da Graaf's Reformatory", near:"Oldtown", x:"60%", y:"32%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"La Luna Coven", near:"Oldtown", x:"62%", y:"38%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
   { name:"The Common Ground", near:"Oldtown", x:"66%", y:"34%", info:"Seen labelled on the official app's own map inside Oldtown — no lineup or theme details sourced yet." },
-  { name:"The Feckless Wrecked", near:"Oldtown", x:"72%", y:"36%", info:"Seen labelled on the official app's own map inside Oldtown, near Síbín Beag — no lineup or theme details sourced yet." },
+  { name:"The Feckless Wrecked", near:"Oldtown", x:"74%", y:"43%", info:"Seen labelled on the official app's own map inside Oldtown, directly south of Síbín Beag on the eastern venue chain — no lineup or theme details sourced yet." },
   // Both newly spotted on a user-supplied screenshot of the official app's
   // own map, inside the Oldtown cluster. Den of Dis Order was already
   // tracked here as a story faction (see the characters data below) but
