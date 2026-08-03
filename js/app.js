@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v398";
-const APP_BUILD_TIME = "2026-08-03T10:56:23Z";
+const APP_CACHE_VERSION = "v399";
+const APP_BUILD_TIME = "2026-08-03T11:06:10Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8976,6 +8976,48 @@ function latLonToSchematic(lat, lon){
 let mapGL = null;
 let mapMarkerGroups = {};
 let mapMarkersByName = {};
+let mapLabelCollisionFrame = 0;
+
+// Labels are DOM markers rather than MapLibre symbol features, so they do
+// not receive automatic collision detection. Keep their placement legible
+// with a small, deterministic priority pass: district and stage names own
+// the overview; camps, gates and venue detail fill the available space only.
+function mapLabelPriority(label){
+  if(label.classList.contains("district")) return 100;
+  if(label.classList.contains("stage")) return 90;
+  if(label.classList.contains("camp")) return 75;
+  if(label.classList.contains("gate")) return 70;
+  if(label.classList.contains("landmark")) return 55;
+  if(label.classList.contains("minor")) return 45;
+  if(label.classList.contains("secret")) return 35;
+  return 25;
+}
+function runMapLabelCollisionPass(){
+  mapLabelCollisionFrame = 0;
+  if(!map || !mapGL) return;
+  const mapBounds = map.getBoundingClientRect();
+  const labels = [...map.querySelectorAll(".map-label")];
+  labels.forEach(label=> label.classList.remove("map-label-collided"));
+  const candidates = labels.map(label=>{
+    const box = label.getBoundingClientRect();
+    return { label, box, priority: mapLabelPriority(label) };
+  }).filter(item=> item.box.width && item.box.height && item.box.right > mapBounds.left && item.box.left < mapBounds.right && item.box.bottom > mapBounds.top && item.box.top < mapBounds.bottom)
+    .sort((a,b)=> b.priority - a.priority || a.box.top - b.box.top || a.box.left - b.box.left);
+  const placed = [];
+  const padding = 3;
+  candidates.forEach(candidate=>{
+    const overlaps = placed.some(other =>
+      candidate.box.left < other.box.right + padding && candidate.box.right > other.box.left - padding &&
+      candidate.box.top < other.box.bottom + padding && candidate.box.bottom > other.box.top - padding
+    );
+    if(overlaps) candidate.label.classList.add("map-label-collided");
+    else placed.push(candidate);
+  });
+}
+function queueMapLabelCollisionPass(){
+  if(mapLabelCollisionFrame) return;
+  mapLabelCollisionFrame = requestAnimationFrame(runMapLabelCollisionPass);
+}
 
 // Every marker on this map is one combined DOM element (a positioning
 // dot plus its label) rather than two separate layers per place —
@@ -8998,6 +9040,8 @@ function addMapMarker(groupName, lat, lon, html, opts){
   opts = opts || {};
   const el = document.createElement("div");
   el.innerHTML = html;
+  const mapLabel = el.querySelector(".map-label");
+  if(mapLabel) mapLabel.dataset.mapLabelPriority = String(mapLabelPriority(mapLabel));
   if(opts.title) el.title = opts.title;
   if(opts.onClick) el.addEventListener("click", (e)=>{ e.stopPropagation(); opts.onClick(); });
   // anchor:"top-left" (not MapLibre's default "center") so the element's
@@ -9009,6 +9053,7 @@ function addMapMarker(groupName, lat, lon, html, opts){
   if(!mapMarkerGroups[groupName]) mapMarkerGroups[groupName] = [];
   mapMarkerGroups[groupName].push(marker);
   if(opts.name) mapMarkersByName[opts.name] = { marker, onClick: opts.onClick || null };
+  queueMapLabelCollisionPass();
   return marker;
 }
 function showMapInfoCard(html){
@@ -9171,8 +9216,11 @@ function loadMap(){
       const zoom = mapGL.getZoom();
       map.classList.toggle("map-labels-thin", zoom < LABEL_ZOOM_THRESHOLD);
       map.classList.toggle("map-labels-mid", zoom >= LABEL_ZOOM_THRESHOLD && zoom < LABEL_DETAIL_ZOOM_THRESHOLD);
+      queueMapLabelCollisionPass();
     };
     mapGL.on("zoom", updateLabelDensity);
+    mapGL.on("moveend", queueMapLabelCollisionPass);
+    mapGL.on("resize", queueMapLabelCollisionPass);
     mapGL.on("load", updateLabelDensity);
     updateLabelDensity();
     // The illustrated basemap (buildMapGeoJSON, defined above) — added
@@ -9929,6 +9977,7 @@ function loadMap(){
   // name.
   const searchNames = document.getElementById("mapSearchNames");
   if(searchNames) searchNames.innerHTML = Object.keys(mapMarkersByName).sort((a,b)=> a.localeCompare(b)).map(n=> `<option value="${escapeHtml(n)}"></option>`).join("");
+  queueMapLabelCollisionPass();
 }
 
 function saveMeeting(name){

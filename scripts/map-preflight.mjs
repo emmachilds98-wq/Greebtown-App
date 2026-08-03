@@ -20,6 +20,7 @@ const steps = [
   ["scripts/validate-district-atmosphere-layout.mjs"],
   ["scripts/audit-district-composition.mjs"],
   ["scripts/audit-map-zoom-hierarchy.mjs"],
+  ["scripts/audit-map-label-collisions.mjs"],
   ["scripts/audit-ground-use-overlaps.mjs"],
   ["scripts/audit-map-positions.mjs"],
   ["--check", "js/app.js"],

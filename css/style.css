@@ -379,6 +379,9 @@
   #map.map-labels-mid .map-label.sssi,
   #map.map-labels-mid .map-label.road{display:none;}
   #map.map-labels-mid .marker.poi-secondary{display:none;}
+  /* JS determines this class from actual rendered label boxes, so close
+     labels no longer stack into unreadable piles on a dense mobile map. */
+  .map-label.map-label-collided{visibility:hidden;}
   /* Colour now comes from each marker's own --district-rgb custom
      property (set in JS from DISTRICT_PALETTE, the same 7-colour cycle
      the district's ground-fill zone uses) instead of one flat amber for
