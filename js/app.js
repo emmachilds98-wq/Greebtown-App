@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v370";
-const APP_BUILD_TIME = "2026-08-03T07:52:19Z";
+const APP_CACHE_VERSION = "v371";
+const APP_BUILD_TIME = "2026-08-03T08:02:57Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8904,6 +8904,17 @@ function loadMap(){
       [SITE_SW.lon - lonPad, SITE_SW.lat - latPad],
       [SITE_NE.lon + lonPad, SITE_NE.lat + latPad]
     ];
+    // The opening frame is driven by the reviewed illustrated perimeter,
+    // not a fixed zoom tuned for one screen size. This keeps the west
+    // fields, Hilltop corridor, Lion's Den woodland and road edge in one
+    // coherent first view on both a phone and a wider desktop card.
+    const overviewCorners = siteLayout.siteBoundary.points.map(([x,y])=> schematicToLatLon(x, y));
+    const SITE_OVERVIEW_BOUNDS = [
+      [Math.min(...overviewCorners.map(point=> point.lon)), Math.min(...overviewCorners.map(point=> point.lat))],
+      [Math.max(...overviewCorners.map(point=> point.lon)), Math.max(...overviewCorners.map(point=> point.lat))]
+    ];
+    const overviewPadding = { top: 30, right: 30, bottom: 30, left: 30 };
+    const showSiteOverview = duration => mapGL.fitBounds(SITE_OVERVIEW_BOUNDS, { padding: overviewPadding, duration });
     mapGL = new maplibregl.Map({
       container: map,
       // A fully local style — solid background colour, no tile/sprite/
@@ -8949,10 +8960,9 @@ function loadMap(){
       // with a little padding on a typical phone screen. minZoom dropped
       // back down so pinch/tap "-" can actually zoom out from there
       // instead of being capped right at the opening view.
-      // A width-led opening frame keeps Downtown and Grand Central inside
-      // a typical phone viewport, matching the official overview's full
-      // site orientation instead of starting on a clipped middle slice.
-      zoom: 14.9, minZoom: 13.5, maxZoom: 19,
+      // The precise opening extent is fitted from site-layout on "load"
+      // below. This zoom is only the brief pre-style fallback frame.
+      zoom: 14.3, minZoom: 13.5, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
@@ -8969,9 +8979,10 @@ function loadMap(){
     if(overviewButton){
       overviewButton.onclick = ()=>{
         mapGL.rotateTo(0, { duration: 280 });
-        mapGL.fitBounds(MAX_BOUNDS, { padding: { top: 42, right: 32, bottom: 42, left: 32 }, duration: 520 });
+        showSiteOverview(520);
       };
     }
+    mapGL.once("load", ()=> showSiteOverview(0));
 
     // Label thinning by zoom — see the #map.map-labels-thin CSS rule.
     // Every marker's text label is a plain positioned DOM element with
