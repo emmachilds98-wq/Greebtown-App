@@ -339,6 +339,10 @@
      untouched either way — only the text labels hide, so presence/
      position is still visible even for the labels that do thin out.*/
   #map.map-labels-thin .map-label:not(.district):not(.stage){display:none;}
+  /* The overview is for getting oriented. Safety and wayfinding facilities
+     remain present there; the much denser food/bar/market detail returns
+     naturally once the visitor zooms into a district. */
+  #map.map-labels-thin .marker.poi-secondary{display:none;}
   /* Colour now comes from each marker's own --district-rgb custom
      property (set in JS from DISTRICT_PALETTE, the same 7-colour cycle
      the district's ground-fill zone uses) instead of one flat amber for

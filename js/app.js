@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v324";
-const APP_BUILD_TIME = "2026-08-03T04:46:26Z";
+const APP_CACHE_VERSION = "v325";
+const APP_BUILD_TIME = "2026-08-03T04:49:51Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9135,8 +9135,13 @@ function loadMap(){
   amenities.forEach(poi=>{
     const coord = schematicToLatLon(parseFloat(poi.x), parseFloat(poi.y));
     const ringRgb = POI_RING_COLORS[poi.category] || "255,255,255";
+    // The authoring document carries every amenity so editors never have
+    // to remove a real location to make the overview legible. Instead,
+    // preserve safety/wayfinding points at every zoom and reveal the
+    // denser commercial/detail layer as the visitor zooms into an area.
+    const isEssentialAmenity = ["Toilets", "Water Point", "First Aid", "Accessible Facilities", "Welfare", "Medical"].includes(poi.category);
     addMapMarker("poi", coord.lat, coord.lon,
-      `<div class="marker poi" style="--poi-rgb:${ringRgb}">${POI_ICONS[poi.category] || "📍"}</div>`,
+      `<div class="marker poi ${isEssentialAmenity ? "poi-essential" : "poi-secondary"}" style="--poi-rgb:${ringRgb}">${POI_ICONS[poi.category] || "📍"}</div>`,
       { title: poi.category, onClick: ()=> showMapInfoCard(`
         <div class="card">
           <span class="tag">amenity</span>
