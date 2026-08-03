@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v402";
-const APP_BUILD_TIME = "2026-08-03T11:40:50Z";
+const APP_CACHE_VERSION = "v403";
+const APP_BUILD_TIME = "2026-08-03T11:47:51Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8504,7 +8504,12 @@ function buildMapGeoJSON(){
   const hilltopCampingRing = hilltopField?.points || [];
   if(hilltopField){
     campFieldFeatures.push({
-      type: "Feature", properties: { name: hilltopField.name, fill: "rgba(250,211,37,0.84)", line: "rgba(140,112,25,0.78)" },
+      // Softer, lighter and semi-transparent, with only a faint edge: the
+      // official app's yellow fields read as open pitched ground that blends
+      // into the grass, not a hard-edged saturated block. The previous
+      // fully-opaque bright gold + thick warm-brown border made this long
+      // field look like a solid "yellow box" laid over the map.
+      type: "Feature", properties: { name: hilltopField.name, fill: "rgba(248,209,80,0.7)", line: "rgba(221,192,108,0.38)" },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(hilltopCampingRing) ] }
     });
   }
@@ -8524,10 +8529,16 @@ function buildMapGeoJSON(){
   if(hilltopCampingRing.length){
     const xs = hilltopCampingRing.map(point => point[0]), ys = hilltopCampingRing.map(point => point[1]);
     const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+    // Jitter each point off the grid so the texture reads as scattered
+    // confetti/pitched ground like the official field, not a mechanical
+    // dot matrix. A couple of gaps (skip ~1 in 5) loosen it further.
+    const dotRand = seededRand(7700);
     for(let y=minY + 1.2, row=0; y<maxY - 0.8; y+=2.15, row++){
       for(let x=minX + 1.1 + (row % 2 ? 0.55 : 0); x<maxX - 0.8; x+=2.05){
-        if(!pointInReviewedRing(x, y, hilltopCampingRing)) continue;
-        const c = schematicToLatLon(x, y);
+        if(dotRand() < 0.2) continue;
+        const jx = x + (dotRand() - 0.5) * 1.5, jy = y + (dotRand() - 0.5) * 1.5;
+        if(!pointInReviewedRing(jx, jy, hilltopCampingRing)) continue;
+        const c = schematicToLatLon(jx, jy);
         hilltopFieldDotFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
       }
     }
@@ -9404,9 +9415,9 @@ function loadMap(){
       mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapHilltopFieldDots", { type: "geojson", data: geo.hilltopFieldDots });
       mapGL.addLayer({ id: "hilltop-field-dots", type: "circle", source: "mapHilltopFieldDots", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.2, 19, 3.5],
-        "circle-color": "rgba(255,247,202,0.78)",
-        "circle-stroke-width": 0.45, "circle-stroke-color": "rgba(171,138,28,0.28)"
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 0.85, 19, 2.6],
+        "circle-color": "rgba(255,250,220,0.5)",
+        "circle-stroke-width": 0.3, "circle-stroke-color": "rgba(190,165,70,0.18)"
       } });
       mapGL.addLayer({ id: "camp-fields-casing", type: "line", source: "mapCampFields", paint: { "line-color": ["get", "line"], "line-opacity": 0.28, "line-width": 4.5 } });
       // Width bumped 1.8 -> 2.4, same "clear border" reasoning as
