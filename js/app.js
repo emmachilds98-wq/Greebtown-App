@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v327";
-const APP_BUILD_TIME = "2026-08-03T05:01:10Z";
+const APP_CACHE_VERSION = "v328";
+const APP_BUILD_TIME = "2026-08-03T05:04:10Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8201,6 +8201,9 @@ function buildMapGeoJSON(){
   const bLonPad = (SITE_NE.lon - SITE_SW.lon) * bPad;
   const bS = SITE_SW.lat - bLatPad, bN = SITE_NE.lat + bLatPad;
   const bW = SITE_SW.lon - bLonPad, bE = SITE_NE.lon + bLonPad;
+  // Fence-post density follows the real longitude span, independently of
+  // the perimeter's illustrated silhouette.
+  const fencePostSpacing = (SITE_NE.lon - SITE_SW.lon) * 0.04;
   const siteBoundaryOutline = [
     [-8, 18], [18, -7], [72, -8], [101, 8], [104, 48],
     [95, 78], [78, 103], [28, 106], [-8, 81], [-12, 48]
@@ -8261,7 +8264,7 @@ function buildMapGeoJSON(){
   for(let i=0;i<boundaryRing.length-1;i++){
     const [lon0,lat0] = boundaryRing[i], [lon1,lat1] = boundaryRing[i+1];
     const segLen = Math.hypot(lon1-lon0, lat1-lat0);
-    const postsOnSeg = Math.max(1, Math.round(segLen / (jitterLon * 6)));
+    const postsOnSeg = Math.max(1, Math.round(segLen / (fencePostSpacing * 6)));
     for(let j=0;j<postsOnSeg;j++){
       const t = j / postsOnSeg;
       fencePostFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[lon0 + (lon1-lon0)*t, lat0 + (lat1-lat0)*t] } });
