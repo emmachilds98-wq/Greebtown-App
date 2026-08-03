@@ -1,0 +1,219 @@
+// Generated from map-system/data/map-document.json by scripts/build-map-data.mjs. Do not edit directly.
+window.GREEBTOWN_MAP_DOCUMENT = {
+  "schemaVersion": "1.0.0",
+  "documentId": "greebtown-2026-map",
+  "coordinateSystem": {
+    "name": "schematic-percent-v1",
+    "unit": "map-unit",
+    "origin": "top-left",
+    "xRange": [
+      0,
+      100
+    ],
+    "yRange": [
+      0,
+      100
+    ],
+    "description": "Matches the existing Greebtown schematic coordinate system. This document does not store latitude/longitude; the renderer owns the shared conversion."
+  },
+  "layers": [
+    {
+      "id": "terrain",
+      "name": "Terrain",
+      "order": 10,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "districts",
+      "name": "Districts",
+      "order": 20,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "paths",
+      "name": "Paths",
+      "order": 30,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "structures",
+      "name": "Structures",
+      "order": 40,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "amenities",
+      "name": "Amenities",
+      "order": 50,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "labels",
+      "name": "Labels",
+      "order": 60,
+      "visible": true,
+      "locked": false
+    }
+  ],
+  "objects": [
+    {
+      "id": "district-grand-central",
+      "type": "district",
+      "name": "Grand Central",
+      "position": {
+        "x": 66,
+        "y": 30
+      },
+      "dimensions": {
+        "width": 18,
+        "height": 15
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "districts",
+      "asset": null,
+      "metadata": {
+        "description": "Seed record for the authoring-system migration.",
+        "category": "district",
+        "accessibility": "",
+        "notes": "Verify against map evidence before changing."
+      }
+    },
+    {
+      "id": "stage-grand-central",
+      "type": "stage",
+      "name": "Grand Central",
+      "position": {
+        "x": 66,
+        "y": 30
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 35,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Main stage building footprint.",
+        "category": "stage",
+        "accessibility": "",
+        "notes": "Rotation is based on current renderer evidence."
+      }
+    },
+    {
+      "id": "entrance-west-gate",
+      "type": "entrance",
+      "name": "West Gate",
+      "position": {
+        "x": 3,
+        "y": 46
+      },
+      "dimensions": {
+        "width": 2,
+        "height": 2
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "amenities",
+      "asset": null,
+      "metadata": {
+        "description": "Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, the Public Transport Hub and Camp Orchid Downtown pitches.",
+        "category": "entrance",
+        "accessibility": "",
+        "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.",
+        "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30."
+      }
+    },
+    {
+      "id": "entrance-east-gate",
+      "type": "entrance",
+      "name": "East Gate",
+      "position": {
+        "x": 96,
+        "y": 32
+      },
+      "dimensions": {
+        "width": 2,
+        "height": 2
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "amenities",
+      "asset": null,
+      "metadata": {
+        "description": "Nearest the White Carparks, motorcycle and cycle parking, and Campervan Field.",
+        "category": "entrance",
+        "accessibility": "",
+        "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.",
+        "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30."
+      }
+    },
+    {
+      "id": "entrance-south-gate",
+      "type": "entrance",
+      "name": "South Gate",
+      "position": {
+        "x": 78,
+        "y": 79
+      },
+      "dimensions": {
+        "width": 2,
+        "height": 2
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "amenities",
+      "asset": null,
+      "metadata": {
+        "description": "Nearest White Carpark 4 and Camp Skylark Sunset; the other Camp Skylark premium site sits on Hilltop.",
+        "category": "entrance",
+        "accessibility": "",
+        "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.",
+        "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30."
+      }
+    },
+    {
+      "id": "entrance-campervan-gate",
+      "type": "entrance",
+      "name": "Campervan Gate",
+      "position": {
+        "x": 80,
+        "y": 81
+      },
+      "dimensions": {
+        "width": 2,
+        "height": 2
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "amenities",
+      "asset": null,
+      "metadata": {
+        "description": "A separately labelled entrance beside South Gate, serving the Campervan Field.",
+        "category": "entrance",
+        "accessibility": "",
+        "notes": "Seen in a whole-map reference screenshot. Migrated from the verified legacy gate collection.",
+        "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30."
+      }
+    }
+  ]
+};

@@ -11,8 +11,13 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v320";
-const APP_BUILD_TIME = "2026-08-03T02:25:00Z";
+const APP_CACHE_VERSION = "v321";
+const APP_BUILD_TIME = "2026-08-03T03:00:54Z";
+
+// Loaded by map-system/data/map-data.js before this script. Map data is
+// authored in map-system/data/map-document.json and compiled into that
+// browser-safe global; do not recreate a second source in this file.
+const MAP_SYSTEM_DOCUMENT = window.GREEBTOWN_MAP_DOCUMENT;
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6782,19 +6787,23 @@ const amenities = [
   { category:"Bar", x:"9%", y:"43%", note:"Hydro XL" }
 ];
 
-const gates = [
-  { name:"West Gate", x:"3%", y:"46%", info:"Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, plus the Public Transport Hub and the premium Camp Orchid Downtown pitches (built for coach/shuttle arrivals — closest gate access is here, not South Gate).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
-  { name:"East Gate", x:"96%", y:"32%", info:"Nearest the White Carparks, motorcycle and cycle parking, and Campervan Field.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
-  // Pulled up from (78,93) to (78,79) — same south-end compression as
-  // Camp Skylark Sunset's own campLabels entry above, so the gate spoke
-  // path added to connect it back to Oldtown isn't a huge lonely stretch.
-  { name:"South Gate", x:"78%", y:"79%", info:"Nearest White Carpark 4 and Camp Skylark Sunset (one of two Camp Skylark premium sites for 2026 — the other, Camp Skylark Hilltop, sits up on Hilltop instead).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
-  // A whole-map reference screenshot shows this as its own separately
-  // labelled gate icon right next to South Gate, at the edge of the
-  // Campervan Field — not the same entrance as South Gate itself, which
-  // was the only gate previously covering this corner of the site.
-  { name:"Campervan Gate", x:"80%", y:"81%", info:"Seen labelled on the official app's own map as its own entrance right next to South Gate, serving the Campervan Field — no further hours/detail sourced yet beyond the standard gate times.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
-];
+// The first live renderer migration: gates now come only from the canonical
+// authoring document. Keep this adapter deliberately small; it preserves the
+// legacy marker shape while removing the duplicate hard-coded gate collection.
+const gates = (()=>{
+  if(!MAP_SYSTEM_DOCUMENT || !Array.isArray(MAP_SYSTEM_DOCUMENT.objects)){
+    throw new Error("Greebtown map authoring data failed to load");
+  }
+  return MAP_SYSTEM_DOCUMENT.objects
+    .filter(object=> object.type === "entrance" || object.type === "exit")
+    .map(object=> ({
+      name: object.name,
+      x: `${object.position.x}%`,
+      y: `${object.position.y}%`,
+      info: object.metadata.description,
+      hours: object.metadata.hours || ""
+    }));
+})();
 
 // The White Carparks — the reference video shows a large grid-lined grey
 // car park field on the site's east/south-east edge, next to (not part

@@ -38,7 +38,7 @@ The live app converts schematic positions to MapLibre latitude/longitude through
 2. Make the smallest data-only change in `map-document.json`.
 3. Preserve stable IDs. Use lowercase kebab case: `<type>-<descriptive-name>`.
 4. Use an existing layer whenever possible. If adding a layer, give it a stable ID and a numeric `order` with room between neighbouring values.
-5. Run `node scripts/validate-map-document.mjs`.
+5. Run `node scripts/build-map-data.mjs`, then `node scripts/validate-map-document.mjs`. Never hand-edit the generated `map-system/data/map-data.js` file.
 6. Open `map-system/editor/index.html` through a static server or the deployed site, inspect the object placement, and export only after validation passes.
 7. Add a concise, GMT timestamped entry to `map-system/data/change-history.json` for a reviewed change. Describe old value, new value, evidence, and actor.
 8. If you change live app assets or renderer code, obey `AGENTS.md`: inspect for load-order/TDZ hazards and bump `APP_CACHE_VERSION` and `CACHE_VERSION` together in the same reviewed commit.

@@ -11,6 +11,6 @@ This directory is the long-lived home for editable map geometry. It is deliberat
 - `assets/` — map-specific image, sprite, and texture assets.
 - `documentation/` — renderer migration notes and editor-facing conventions.
 
-Run `node scripts/validate-map-document.mjs` before committing map data. The editor validates before it exports, but the command is the source of truth for automated checks.
+Edit `data/map-document.json`, then run `node scripts/build-map-data.mjs` and `node scripts/validate-map-document.mjs` before committing map data. `data/map-data.js` is generated for the browser and must never be hand-edited. The editor validates before it exports, but the command is the source of truth for automated checks.
 
 The initial document is an intentionally small, representative seed. The existing application map remains the live renderer while its present hard-coded map arrays are migrated into this document in audited batches. Do not duplicate or silently override live locations during that migration.

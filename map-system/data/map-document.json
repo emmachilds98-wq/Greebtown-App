@@ -41,15 +41,48 @@
       "metadata": { "description": "Main stage building footprint.", "category": "stage", "accessibility": "", "notes": "Rotation is based on current renderer evidence." }
     },
     {
-      "id": "entrance-south-gate",
+      "id": "entrance-west-gate",
       "type": "entrance",
-      "name": "South Gate",
-      "position": { "x": 52, "y": 89 },
+      "name": "West Gate",
+      "position": { "x": 3, "y": 46 },
       "dimensions": { "width": 2, "height": 2 },
       "transform": { "rotation": 0, "scale": 1 },
       "layer": "amenities",
       "asset": null,
-      "metadata": { "description": "Public entrance marker.", "category": "entrance", "accessibility": "", "notes": "Seed record; verify during migration." }
+      "metadata": { "description": "Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, the Public Transport Hub and Camp Orchid Downtown pitches.", "category": "entrance", "accessibility": "", "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.", "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
+    },
+    {
+      "id": "entrance-east-gate",
+      "type": "entrance",
+      "name": "East Gate",
+      "position": { "x": 96, "y": 32 },
+      "dimensions": { "width": 2, "height": 2 },
+      "transform": { "rotation": 0, "scale": 1 },
+      "layer": "amenities",
+      "asset": null,
+      "metadata": { "description": "Nearest the White Carparks, motorcycle and cycle parking, and Campervan Field.", "category": "entrance", "accessibility": "", "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.", "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
+    },
+    {
+      "id": "entrance-south-gate",
+      "type": "entrance",
+      "name": "South Gate",
+      "position": { "x": 78, "y": 79 },
+      "dimensions": { "width": 2, "height": 2 },
+      "transform": { "rotation": 0, "scale": 1 },
+      "layer": "amenities",
+      "asset": null,
+      "metadata": { "description": "Nearest White Carpark 4 and Camp Skylark Sunset; the other Camp Skylark premium site sits on Hilltop.", "category": "entrance", "accessibility": "", "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.", "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
+    },
+    {
+      "id": "entrance-campervan-gate",
+      "type": "entrance",
+      "name": "Campervan Gate",
+      "position": { "x": 80, "y": 81 },
+      "dimensions": { "width": 2, "height": 2 },
+      "transform": { "rotation": 0, "scale": 1 },
+      "layer": "amenities",
+      "asset": null,
+      "metadata": { "description": "A separately labelled entrance beside South Gate, serving the Campervan Field.", "category": "entrance", "accessibility": "", "notes": "Seen in a whole-map reference screenshot. Migrated from the verified legacy gate collection.", "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
     }
   ]
 }

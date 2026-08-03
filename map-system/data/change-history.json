@@ -7,6 +7,18 @@
       "actor": "system",
       "summary": "Created the map authoring-system seed document.",
       "changes": []
+    },
+    {
+      "id": "migrate-gates-2026-08-03T030054Z",
+      "timestamp": "2026-08-03T03:00:54Z",
+      "actor": "codex",
+      "summary": "Migrated the complete gate collection into the canonical map document.",
+      "changes": [
+        { "objectId": "entrance-west-gate", "field": "object", "previous": null, "next": "created from legacy gates collection" },
+        { "objectId": "entrance-east-gate", "field": "object", "previous": null, "next": "created from legacy gates collection" },
+        { "objectId": "entrance-south-gate", "field": "position", "previous": { "x": 52, "y": 89 }, "next": { "x": 78, "y": 79 } },
+        { "objectId": "entrance-campervan-gate", "field": "object", "previous": null, "next": "created from legacy gates collection" }
+      ]
     }
   ]
 }
