@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v371";
-const APP_BUILD_TIME = "2026-08-03T08:02:57Z";
+const APP_CACHE_VERSION = "v372";
+const APP_BUILD_TIME = "2026-08-03T08:11:43Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6600,6 +6600,9 @@ applyReferenceLayout();
 const reviewedSmallVenueLayout = Array.isArray(window.GREEBTOWN_SMALL_VENUE_LAYOUT?.venues)
   ? window.GREEBTOWN_SMALL_VENUE_LAYOUT.venues
   : [];
+const reviewedStagePrecinctLayout = Array.isArray(window.GREEBTOWN_STAGE_PRECINCT_LAYOUT?.precincts)
+  ? window.GREEBTOWN_STAGE_PRECINCT_LAYOUT.precincts
+  : [];
 // Natural areas use their own anchor-relative footprints for the same
 // reason: woodland must never inherit a generic circular zone or a camp
 // surface just because it happens to be near a venue.
@@ -7793,7 +7796,8 @@ function buildMapGeoJSON(){
   // district still uses only its own broad, fainter clearing tint
   // (districts-fill above), not this.
   const OPEN_CONCOURSE_NAMES = ["Oldtown", "Grand Central", "Botanica", "Area 404", "Metropolis", "Quantum"];
-  const openConcourseFeatures = OPEN_CONCOURSE_NAMES.map((name, i)=>{
+  const reviewedPrecinctBySource = new Map(reviewedStagePrecinctLayout.map(precinct => [precinct.sourceName, precinct]));
+  const openConcourseFeatures = OPEN_CONCOURSE_NAMES.filter(name => !reviewedPrecinctBySource.has(name)).map((name, i)=>{
     const d = districts.find(dd=> dd.name === name);
     const node = findNamedNode(name);
     if(!node) return null;
@@ -7811,7 +7815,16 @@ function buildMapGeoJSON(){
       type: "Feature", properties: {},
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r, r * 0.85, i * 43 + 19, 7)) ] }
     };
-  }).filter(Boolean);
+  }).filter(Boolean).concat(reviewedStagePrecinctLayout.map((precinct, i)=>{
+    const node = findNamedNode(precinct.sourceName);
+    if(!node) return null;
+    const { width, height, sides, rotation } = precinct.footprint;
+    const cx = node.x + precinct.offset.x, cy = node.y + precinct.offset.y;
+    return {
+      type: "Feature", properties: { reviewed: precinct.id },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, width / 2, height / 2, 6400 + i * 53, sides, rotation)) ] }
+    };
+  }).filter(Boolean));
 
   // Stage plazas — a soft tan clearing under every stage. The reference
   // video shows paths widening into a real open plaza around a stage

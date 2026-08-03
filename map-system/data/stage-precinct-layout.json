@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "anchor-relative-schematic-percent-v1",
+  "purpose": "Reviewed foreground courts and street-spines for the central Hilltop sequence. These are illustrated walkable surfaces, not new venue or amenity locations.",
+  "precincts": [
+    {
+      "id": "grand-central-forecourt",
+      "sourceName": "Grand Central",
+      "kind": "stage-forecourt",
+      "offset": { "x": -1.1, "y": 1.25 },
+      "footprint": { "width": 8.8, "height": 4.6, "sides": 7, "rotation": -12 },
+      "evidence": "official-detail",
+      "notes": "A broad, slightly south-west-facing main-stage forecourt, rather than a small circular plaza in the middle of the Hilltop sequence."
+    },
+    {
+      "id": "oldtown-street-spine",
+      "sourceName": "Oldtown",
+      "kind": "district-concourse",
+      "offset": { "x": -0.8, "y": 0.9 },
+      "footprint": { "width": 9.4, "height": 4.2, "sides": 6, "rotation": 72 },
+      "evidence": "official-detail",
+      "notes": "Long, tapering Oldtown civic spine that reads as a connected street and venue run below Grand Central, not an isolated round clearing."
+    },
+    {
+      "id": "ancient-futures-court",
+      "sourceName": "Ancient Futures",
+      "kind": "venue-court",
+      "offset": { "x": -0.5, "y": -0.7 },
+      "footprint": { "width": 7.3, "height": 3.5, "sides": 6, "rotation": -24 },
+      "evidence": "official-detail",
+      "notes": "Small shared workshop court for the Ancient Futures, Circus, Crafts and Games cluster above the main Oldtown run."
+    }
+  ]
+}
