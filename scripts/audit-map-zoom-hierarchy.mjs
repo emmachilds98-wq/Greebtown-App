@@ -19,12 +19,13 @@ const broadFieldZoom = matchNumber(/id: "fields-fill"[^\n]*minzoom: (\d+(?:\.\d+
 const treeZoom = matchNumber(/id: "trees-circle"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 const tentZoom = matchNumber(/id: "tents-circle"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 const trunkPathZoom = matchNumber(/id: "trail-main-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
+const smallVenueZoom = matchNumber(/id: "small-venues-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 
 if(!app.includes('data: geo.siteGround') || !app.includes('id: "site-ground-fill"')) errors.push("the reviewed site boundary must render as the primary festival-ground silhouette");
 if(!Number.isFinite(labelThreshold) || labelThreshold < 15.7 || labelThreshold > 16) errors.push("overview label thinning must cover the whole-site view");
 if(!Number.isFinite(labelDetailThreshold) || labelDetailThreshold < labelThreshold + .5 || labelDetailThreshold > 17) errors.push("fine labels must have a distinct later reveal threshold");
-if(!Number.isFinite(passageZoom) || passageZoom < 15.7 || passageZoom > 16) errors.push("district passages must emerge only after the overview, before close foreground detail");
-if(!Number.isFinite(massingZoom) || massingZoom < 15.7 || massingZoom > 16) errors.push("authored massing must emerge only after the overview, before close foreground detail");
+if(!Number.isFinite(passageZoom) || passageZoom < 14.3 || passageZoom > 15) errors.push("district passages must establish walking structure in the overview");
+if(!Number.isFinite(massingZoom) || massingZoom < 14.3 || massingZoom > 15) errors.push("authored massing must give the overview its built character");
 if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 16) errors.push("foreground atmosphere must remain deep-zoom only");
 if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom) errors.push("generic infill must not appear before authored foreground detail");
 if(!Number.isFinite(broadFieldZoom) || broadFieldZoom > 14) errors.push("broad farmland texture must establish the site overview");
@@ -33,7 +34,8 @@ if(!Number.isFinite(hedgeZoom) || hedgeZoom > 14) errors.push("outer hedgerows m
 if(!Number.isFinite(treeZoom) || treeZoom > 14) errors.push("woodland texture must support the site overview without venue clutter");
 if(!Number.isFinite(tentZoom) || tentZoom < 16) errors.push("individual tents must remain close-zoom texture");
 if(!Number.isFinite(trunkPathZoom) || trunkPathZoom < 15.7) errors.push("trunk paths must not dominate the whole-site overview");
+if(!Number.isFinite(smallVenueZoom) || smallVenueZoom > 15) errors.push("reviewed small venue footprints must appear before their dense text labels");
 if(!css.includes("#map.map-labels-thin .map-label:not(.district){display:none;}")) errors.push("thin mode must leave only district labels visible");
 if(!css.includes("#map.map-labels-mid .map-label.minor")) errors.push("middle zoom must defer minor labels until detailed exploration");
 if(errors.length){ console.error(errors.join("\n")); process.exit(1); }
-console.log(`Map zoom hierarchy passed: coherent site ground; overview/mid/detail labels ${labelThreshold}/${labelDetailThreshold}; paths/passages ${trunkPathZoom}/${passageZoom}; massing ${massingZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}; trees/tents ${treeZoom}/${tentZoom}.`);
+console.log(`Map zoom hierarchy passed: coherent site ground; overview/mid/detail labels ${labelThreshold}/${labelDetailThreshold}; paths/passages ${trunkPathZoom}/${passageZoom}; massing/small venues ${massingZoom}/${smallVenueZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}; trees/tents ${treeZoom}/${tentZoom}.`);

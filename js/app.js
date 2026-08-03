@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v397";
-const APP_BUILD_TIME = "2026-08-03T11:01:00Z";
+const APP_CACHE_VERSION = "v398";
+const APP_BUILD_TIME = "2026-08-03T10:56:23Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9416,14 +9416,14 @@ function loadMap(){
       // aid. At site scale the landmark silhouettes and ground-use areas
       // must lead; exposing all of this paving at once made the map read as
       // a tangle of disconnected tan shapes.
-      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", minzoom: 15.7, paint: {
+      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", minzoom: 14.3, paint: {
         "fill-color": ["match", ["get", "surface"],
           "stage-forecourt", "rgba(232,207,163,0.96)",
           "venue-court", "rgba(214,191,151,0.92)",
           "rgba(224,200,160,0.95)"
         ]
       } });
-      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", minzoom: 15.7, paint: {
+      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", minzoom: 14.3, paint: {
         "line-color": ["match", ["get", "surface"],
           "stage-forecourt", "rgba(137,98,46,0.66)",
           "venue-court", "rgba(111,87,59,0.48)",
@@ -9452,16 +9452,16 @@ function loadMap(){
       // these are walkable surfaces through the confirmed Oldtown and
       // Letsbe/Botanica venue runs, not extra invented connections.
       mapGL.addSource("mapDistrictStreets", { type: "geojson", data: geo.districtStreets });
-      mapGL.addLayer({ id: "district-streets-fill", type: "fill", source: "mapDistrictStreets", minzoom: 15.7, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "district-streets-outline", type: "line", source: "mapDistrictStreets", minzoom: 15.7, paint: { "line-color": "rgba(125,94,53,0.5)", "line-width": 1.1 } });
+      mapGL.addLayer({ id: "district-streets-fill", type: "fill", source: "mapDistrictStreets", minzoom: 14.3, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-streets-outline", type: "line", source: "mapDistrictStreets", minzoom: 14.3, paint: { "line-color": "rgba(125,94,53,0.5)", "line-width": 1.1 } });
 
       // Local district passages are deliberately more modest than the
       // primary site routes. At close zoom they reveal a walkable interior
       // for each compound; at the overview they stay out of the way of the
       // larger silhouette, camp fields and official trunk-path network.
       mapGL.addSource("mapDistrictPassages", { type: "geojson", data: geo.districtPassages });
-      mapGL.addLayer({ id: "district-passages-fill", type: "fill", source: "mapDistrictPassages", minzoom: 15.8, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "district-passages-outline", type: "line", source: "mapDistrictPassages", minzoom: 15.8, paint: {
+      mapGL.addLayer({ id: "district-passages-fill", type: "fill", source: "mapDistrictPassages", minzoom: 14.5, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-passages-outline", type: "line", source: "mapDistrictPassages", minzoom: 14.5, paint: {
         "line-color": ["match", ["get", "kind"], "street", "rgba(119,89,53,.48)", "lane", "rgba(121,97,62,.34)", "rgba(91,78,56,.3)"],
         "line-width": 0.75
       } });
@@ -9480,8 +9480,8 @@ function loadMap(){
       mapGL.addLayer({ id: "district-atmosphere-lights-core", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 16.0, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 15, 1.4, 19, 3.2]], "circle-color": ["get", "tone"], "circle-stroke-width": .45, "circle-stroke-color": "rgba(68,58,38,.55)" } });
 
       mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
-      mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", minzoom: 15.7, paint: { "fill-color": "rgba(224,200,160,0.95)" } });
-      mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", minzoom: 15.7, paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
+      mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", minzoom: 14.3, paint: { "fill-color": "rgba(224,200,160,0.95)" } });
+      mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", minzoom: 14.3, paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
 
       mapGL.addSource("mapBunting", { type: "geojson", data: geo.bunting });
       mapGL.addLayer({ id: "bunting-circle", type: "circle", source: "mapBunting", minzoom: 15.2, paint: {
@@ -9576,31 +9576,31 @@ function loadMap(){
       // varied roof tones and fenced yards make a close-up feel authored,
       // while their zoom threshold keeps the overview shape-led.
       mapGL.addSource("mapAuthoredMassing", { type: "geojson", data: geo.authoredMassing });
-      mapGL.addLayer({ id: "authored-massing-shadow", type: "fill", source: "mapAuthoredMassing", minzoom: 15.8, paint: { "fill-color": "rgba(18,28,20,.24)", "fill-translate": [1.2, 1.7] } });
-      mapGL.addLayer({ id: "authored-massing-fill", type: "fill", source: "mapAuthoredMassing", minzoom: 15.8, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "authored-massing-outline", type: "line", source: "mapAuthoredMassing", minzoom: 15.8, paint: { "line-color": "rgba(91,62,36,.68)", "line-width": 1 } });
+      mapGL.addLayer({ id: "authored-massing-shadow", type: "fill", source: "mapAuthoredMassing", minzoom: 14.4, paint: { "fill-color": "rgba(18,28,20,.24)", "fill-translate": [1.2, 1.7] } });
+      mapGL.addLayer({ id: "authored-massing-fill", type: "fill", source: "mapAuthoredMassing", minzoom: 14.4, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "authored-massing-outline", type: "line", source: "mapAuthoredMassing", minzoom: 14.4, paint: { "line-color": "rgba(91,62,36,.68)", "line-width": 1 } });
       mapGL.addSource("mapAuthoredMassingYards", { type: "geojson", data: geo.authoredMassingYards });
-      mapGL.addLayer({ id: "authored-massing-yards-fill", type: "fill", source: "mapAuthoredMassingYards", minzoom: 15.8, paint: { "fill-color": "rgba(57,72,52,.32)" } });
-      mapGL.addLayer({ id: "authored-massing-yards", type: "line", source: "mapAuthoredMassingYards", minzoom: 15.8, paint: { "line-color": "rgba(79,64,42,.78)", "line-width": 1.35, "line-dasharray": [2, 1] } });
+      mapGL.addLayer({ id: "authored-massing-yards-fill", type: "fill", source: "mapAuthoredMassingYards", minzoom: 14.4, paint: { "fill-color": "rgba(57,72,52,.32)" } });
+      mapGL.addLayer({ id: "authored-massing-yards", type: "line", source: "mapAuthoredMassingYards", minzoom: 14.4, paint: { "line-color": "rgba(79,64,42,.78)", "line-width": 1.35, "line-dasharray": [2, 1] } });
 
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
-      mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", minzoom: 15.9, paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
-      mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", minzoom: 15.9, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", minzoom: 15.9, paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
+      mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", minzoom: 14.6, paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
+      mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", minzoom: 14.6, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", minzoom: 14.6, paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
       mapGL.addSource("mapVenueAccents", { type: "geojson", data: geo.venueAccents });
-      mapGL.addLayer({ id: "venue-accents-line", type: "line", source: "mapVenueAccents", minzoom: 15.9, paint: { "line-color": ["get", "tone"], "line-width": 1.15 } });
+      mapGL.addLayer({ id: "venue-accents-line", type: "line", source: "mapVenueAccents", minzoom: 14.6, paint: { "line-color": ["get", "tone"], "line-width": 1.15 } });
 
       // Hollow fenced enclosures — outline only, no fill, so the ground
       // colour shows through (a beer-garden/yard, not a roofed building).
       mapGL.addSource("mapFencedEnclosures", { type: "geojson", data: geo.fencedEnclosures });
-      mapGL.addLayer({ id: "fenced-enclosures-line", type: "line", source: "mapFencedEnclosures", minzoom: 15.2, paint: { "line-color": "rgba(120,80,50,0.8)", "line-width": 1.3, "line-dasharray": [2, 1] } });
+      mapGL.addLayer({ id: "fenced-enclosures-line", type: "line", source: "mapFencedEnclosures", minzoom: 14.8, paint: { "line-color": "rgba(120,80,50,0.8)", "line-width": 1.3, "line-dasharray": [2, 1] } });
 
       // Small named venue structures sit above general buildings so their
       // coherent street-side clusters remain readable at close zoom.
       mapGL.addSource("mapSmallVenues", { type: "geojson", data: geo.smallVenues });
-      mapGL.addLayer({ id: "small-venues-shadow", type: "fill", source: "mapSmallVenues", minzoom: 15.2, paint: { "fill-color": "rgba(44,30,17,0.25)", "fill-translate": [1.1, 1.4] } });
-      mapGL.addLayer({ id: "small-venues-fill", type: "fill", source: "mapSmallVenues", minzoom: 15.2, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "small-venues-outline", type: "line", source: "mapSmallVenues", minzoom: 15.2, paint: { "line-color": "rgba(104,65,30,0.78)", "line-width": 1 } });
+      mapGL.addLayer({ id: "small-venues-shadow", type: "fill", source: "mapSmallVenues", minzoom: 14.8, paint: { "fill-color": "rgba(44,30,17,0.25)", "fill-translate": [1.1, 1.4] } });
+      mapGL.addLayer({ id: "small-venues-fill", type: "fill", source: "mapSmallVenues", minzoom: 14.8, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "small-venues-outline", type: "line", source: "mapSmallVenues", minzoom: 14.8, paint: { "line-color": "rgba(104,65,30,0.78)", "line-width": 1 } });
       mapGL.addSource("mapSmallVenueYards", { type: "geojson", data: geo.smallVenueYards });
       mapGL.addLayer({ id: "small-venue-yards-line", type: "line", source: "mapSmallVenueYards", minzoom: 15.2, paint: { "line-color": "rgba(121,77,35,0.9)", "line-width": 1.25, "line-dasharray": [2, 1] } });
 
