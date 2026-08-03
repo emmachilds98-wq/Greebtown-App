@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v332";
-const APP_BUILD_TIME = "2026-08-03T04:12:30Z";
+const APP_CACHE_VERSION = "v333";
+const APP_BUILD_TIME = "2026-08-03T04:22:31Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6211,6 +6211,20 @@ const minorStages = otherStages.map((s, i)=>({
 // their theme fits best. Boomtown deliberately never publishes exact
 // locations for these, so treat every pin here as "go looking round here",
 // not a surveyed spot — the same caveat as the plain "?" markers below.
+// The complete smaller-stage collection uses the same editor-owned
+// coordinate source as the main stages. Their separate marker styling in
+// the renderer remains unchanged; only the position authority moves.
+const authoredMinorStages = currentMapSystemObjects(object => object.type === "stage" && object.metadata.mapRole === "minor-stage");
+const authoredMinorStagesByName = new Map(authoredMinorStages.map(stage => [stage.name, stage]));
+if(authoredMinorStages.length !== minorStages.length || minorStages.some(place => !authoredMinorStagesByName.has(place.name))){
+  throw new Error("Greebtown map authoring data is missing a smaller-stage position");
+}
+minorStages.forEach(place => {
+  const authored = authoredMinorStagesByName.get(place.name);
+  place.x = `${authored.position.x}%`;
+  place.y = `${authored.position.y}%`;
+});
+
 const thingsToFind = [
   // Moved from a guessed "near Area 404" (46,26) — a genuine official-
   // app frame this session shows "BOOMTOWN BOBBIES" on Botanica's Letsbe

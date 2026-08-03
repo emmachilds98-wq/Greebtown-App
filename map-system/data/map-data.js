@@ -244,6 +244,292 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       }
     },
     {
+      "id": "stage-spectrum-360",
+      "type": "stage",
+      "name": "Spectrum 360",
+      "position": {
+        "x": 37,
+        "y": 32
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Area 404 container arena.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-tangled-roots",
+      "type": "stage",
+      "name": "Tangled Roots",
+      "position": {
+        "x": 51,
+        "y": 14
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Northern woodland-stage cluster.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-full-moon-ballroom",
+      "type": "stage",
+      "name": "Full Moon Ballroom",
+      "position": {
+        "x": 62,
+        "y": 26
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Hilltop clearing beside the Hide Out route.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-rose-and-clown",
+      "type": "stage",
+      "name": "Rose and Clown",
+      "position": {
+        "x": 35,
+        "y": 20
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Botanica east-arc stage.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-fools-leap",
+      "type": "stage",
+      "name": "The Fools Leap",
+      "position": {
+        "x": 58,
+        "y": 29
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "North end of Oldtown's western venue chain.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-foggers-mill",
+      "type": "stage",
+      "name": "Foggers Mill",
+      "position": {
+        "x": 68,
+        "y": 25
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Hilltop clearing route east of Full Moon Ballroom.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-hangar-161",
+      "type": "stage",
+      "name": "Hangar 161",
+      "position": {
+        "x": 30,
+        "y": 43
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Area 404 stage west of the eastbound venue chain.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-tribe-of-frog",
+      "type": "stage",
+      "name": "Tribe of Frog",
+      "position": {
+        "x": 64,
+        "y": 44
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Wooded clearing south of Oldtown.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-sibin-beag",
+      "type": "stage",
+      "name": "Síbín Beag",
+      "position": {
+        "x": 72,
+        "y": 41
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Eastern Oldtown venue chain, above The Feckless Wrecked.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-acid-leak",
+      "type": "stage",
+      "name": "Acid Leak",
+      "position": {
+        "x": 34,
+        "y": 44
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Area 404 acid-techno cluster.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
+      "id": "stage-infinity",
+      "type": "stage",
+      "name": "Infinity",
+      "position": {
+        "x": 41,
+        "y": 42
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "East of the Metropolis venue chain.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
+    },
+    {
       "id": "entrance-west-gate",
       "type": "entrance",
       "name": "West Gate",

@@ -632,6 +632,25 @@
         { "objectId": "stage-nexus", "field": "object", "previous": null, "next": "created from audited main-stage collection" },
         { "objectId": "stage-helix", "field": "object", "previous": null, "next": "created from audited main-stage collection" }
       ]
+    },
+    {
+      "id": "migrate-minor-stages-2026-08-03T041500Z",
+      "timestamp": "2026-08-03T04:15:00Z",
+      "actor": "codex",
+      "summary": "Migrated all eleven audited smaller-stage positions into the canonical map document.",
+      "changes": [
+        { "objectId": "stage-spectrum-360", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-tangled-roots", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-full-moon-ballroom", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-rose-and-clown", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-fools-leap", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-foggers-mill", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-hangar-161", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-tribe-of-frog", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-sibin-beag", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-acid-leak", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
+        { "objectId": "stage-infinity", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" }
+      ]
     }
   ]
 }
