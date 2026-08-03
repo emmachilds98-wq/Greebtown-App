@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v306";
-const APP_BUILD_TIME = "2026-08-03T00:19:46Z";
+const APP_CACHE_VERSION = "v307";
+const APP_BUILD_TIME = "2026-08-03T00:23:32Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6124,7 +6124,13 @@ const otherStages = [
 // chain (Memory Mart/Better You/BBXL Info/Distractoverse/E Numbers/
 // Gabber Kebabber — see E Numbers/Gabber Kebabber's own comment above),
 // not west of/inside that chain.
-const minorStagePositions = [[52,32],[51,14],[62,26],[52,26],[58,29],[68,25],[40,43],[64,44],[67,39],[46,44],[32,42]];
+// Rose and Clown (index 3) moved from (52,26) to (35,20) on a
+// validation pass this session — its own trunk-path edge to Botanica
+// was 25 schematic units long, an implausible distance for what
+// reference footage (vidCD) actually shows: Rose and Clown on
+// Botanica's own east arc, in the same loop as Sub Lab/Nachtlicker, not
+// out near Copperwood/Grand Central. Moved to sit in that loop.
+const minorStagePositions = [[52,32],[51,14],[62,26],[35,20],[58,29],[68,25],[40,43],[64,44],[67,39],[46,44],[32,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -7245,10 +7251,15 @@ const TRUNK_PATH_EDGES = [
   ["Energy Garden", "Climate Live"],
   ["Climate Live", "The Magic Teapot"],
   ["The Magic Teapot", "Cocaine Anonymous"],
-  ["Cocaine Anonymous", "Spinney Hollow"],
-
-  // Anara Forest's own hidden venue.
-  ["Anara Forest", "Hapitat"]
+  ["Cocaine Anonymous", "Spinney Hollow"]
+  // "Anara Forest" -> "Hapitat" removed on a validation pass — Hapitat's
+  // own (71,49) is still a scraped-GPS position (never footage-
+  // confirmed; see its own comment), while Anara Forest is at (85,22).
+  // The 30-schematic-unit gap between them was never an actual path
+  // seen on camera, just an inference from Hapitat's "near Anara
+  // Forest" info text — exactly the kind of invented connectivity this
+  // session's spoke-removal pass was meant to stop drawing. No edge
+  // until a genuine sighting confirms Hapitat's real position.
 ];
 
 // Looks a name up across every array a trunk-path endpoint could name —
@@ -8567,15 +8578,22 @@ function loadMap(){
       // patch. Lighter and larger than a single stage's own plaza (below)
       // so the size difference itself reads as "this is the big open
       // space, that's a stage forecourt."
+      // Open concourses, stage plazas and the trail ribbon (below) now
+      // all share ONE consistent "hardstanding" fill tone/opacity
+      // (rgba(224,200,160,0.95)) instead of three different translucent
+      // shades — they used to visibly seam where a path ran into a
+      // plaza or concourse, when they're meant to read as one continuous
+      // non-grass surface: "the areas we can be in and travel through",
+      // not three separately-tinted zone types that happen to touch.
       mapGL.addSource("mapOpenConcourses", { type: "geojson", data: geo.openConcourses });
-      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", paint: { "fill-color": "rgba(224,202,164,0.45)" } });
-      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", paint: { "line-color": "rgba(120,95,60,0.4)", "line-width": 1.2, "line-dasharray": [2.5, 1.5] } });
+      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", paint: { "fill-color": "rgba(224,200,160,0.95)" } });
+      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
 
       // Stage plazas — drawn before the path lines so the paths visibly
       // run INTO the clearing rather than sitting on top of a flat edge.
       mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
-      mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", paint: { "fill-color": "rgba(214,186,146,0.55)" } });
-      mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", paint: { "line-color": "rgba(120,95,60,0.5)", "line-width": 1 } });
+      mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", paint: { "fill-color": "rgba(224,200,160,0.95)" } });
+      mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
 
       mapGL.addSource("mapBunting", { type: "geojson", data: geo.bunting });
       mapGL.addLayer({ id: "bunting-circle", type: "circle", source: "mapBunting", paint: {
