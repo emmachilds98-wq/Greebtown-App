@@ -1,6 +1,19 @@
 {
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
+  "groundUseFields": [
+    {
+      "id": "hilltop-field",
+      "name": "Hilltop Field",
+      "kind": "ground-use",
+      "surface": "hilltop-yellow",
+      "evidence": "official-overview",
+      "points": [[73,15],[83,14],[88,19],[89,27],[85,32],[77,30],[72,24]],
+      "detailLines": [[[76,17],[78,23],[80,29]],[[81,15],[83,22],[85,29]]],
+      "excludes": ["Anara Forest"],
+      "notes": "Reviewed Hilltop field footprint. It sits alongside the Oldtown corridor and must remain distinct from the Anara Forest woodland stage."
+    }
+  ],
   "zones": [
     { "id": "camp-west", "name": "West Camping", "position": { "x": 14, "y": 7 }, "surface": "camp-green", "evidence": "official-overview", "notes": "North-west field beside West Gate." },
     { "id": "camp-downtown", "name": "Downtown Camping", "position": { "x": 7, "y": 43 }, "surface": "camp-green", "evidence": "official-overview", "notes": "West-side camping in the reviewed gap between Meadow fields and the Downtown cluster, separate from Camp Orchid." },

@@ -26,6 +26,12 @@ When changing `small-venue-layout.json`, run `node scripts/validate-small-venue-
 non-camping ground. It is anchor-relative, so an approved stage/cluster move
 carries the woodland outline with it. Run `node scripts/validate-natural-area-footprints.mjs` before rebuilding. Do not use a generic circular zone as a fallback when an official reference shows a specific natural-area silhouette.
 
+`reference-layout.json` includes an `observations` ledger for official-map
+readings. Record the source, region and non-geometric observation there first;
+then make the matching change in the specialised geometry source. Ground-use
+polygons in `camp-zones.json` can name exclusions, and validation rejects any
+polygon that covers an excluded reviewed anchor.
+
 Before committing a map pass, use `node scripts/map-preflight.mjs`. It rebuilds
 browser data and runs every cross-layer validation in the required order,
 including the safeguard against woodland/camping confusion.

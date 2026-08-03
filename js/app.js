@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v363";
-const APP_BUILD_TIME = "2026-08-03T07:01:48Z";
+const APP_CACHE_VERSION = "v364";
+const APP_BUILD_TIME = "2026-08-03T07:15:19Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6561,6 +6561,9 @@ const campLabels = (()=>{
     surface: zone.surface, evidence: zone.evidence
   }));
 })();
+const campGroundUseFields = Array.isArray(window.GREEBTOWN_CAMP_ZONES?.groundUseFields)
+  ? window.GREEBTOWN_CAMP_ZONES.groundUseFields
+  : [];
 
 // Amenity markers (toilets, food, bars, water, welfare, etc.) — replaced
 // Reference-layout pass: move connected clusters as units, so a district,
@@ -8316,39 +8319,47 @@ function buildMapGeoJSON(){
       : CAMP_FIELD_STYLES[i % CAMP_FIELD_STYLES.length];
     return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, 6)) ] } };
   });
-  // The official overview has a large, elongated yellow Hilltop field on
-  // the east side, running alongside the Oldtown/Quantum corridor. It is
-  // a wayfinding/ground-use field, not another generic campsite, so it
-  // remains yellow while the actual camp plots retain their green ground.
-  // This is deliberately placed beside — not over — the Oldtown spine.
-  const hilltopCampingRing = fieldRing(84, 35, 7.5, 18, 9820, 6);
-  campFieldFeatures.push({
-    type: "Feature", properties: { name: "Hilltop Field", fill: "rgba(250,211,37,0.84)", line: "rgba(140,112,25,0.78)" },
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(hilltopCampingRing) ] }
-  });
+  // Ground-use fields are reviewed geometry, not an inferred ellipse.
+  // In particular, Hilltop remains beside Anara Forest rather than
+  // colouring the woodland stage as a campsite.
+  const hilltopField = campGroundUseFields.find(field => field.id === "hilltop-field");
+  const hilltopCampingRing = hilltopField?.points || [];
+  if(hilltopField){
+    campFieldFeatures.push({
+      type: "Feature", properties: { name: hilltopField.name, fill: "rgba(250,211,37,0.84)", line: "rgba(140,112,25,0.78)" },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(hilltopCampingRing) ] }
+    });
+  }
   // The long Hilltop field has a distinct, light pitched-ground texture
   // at overview scale. A restrained, offset dot grid gives it that useful
   // visual character while remaining original map artwork rather than a
   // reproduction of the reference tiles.
   const hilltopFieldDotFeatures = [];
-  for(let row=0; row<13; row++){
-    for(let col=0; col<5; col++){
-      const x = 79.3 + col * 2.25 + (row % 2 ? 0.55 : 0);
-      const y = 19.5 + row * 2.45;
-      const horizontal = Math.abs(x - 84) / 7.1;
-      const vertical = Math.abs(y - 35) / 17.1;
-      if(horizontal * horizontal + vertical * vertical > 0.94) continue;
-      const c = schematicToLatLon(x, y);
-      hilltopFieldDotFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
+  function pointInReviewedRing(x, y, ring){
+    let inside = false;
+    for(let i=0, j=ring.length - 1; i<ring.length; j=i++){
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      if(((yi > y) !== (yj > y)) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  if(hilltopCampingRing.length){
+    const xs = hilltopCampingRing.map(point => point[0]), ys = hilltopCampingRing.map(point => point[1]);
+    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+    for(let y=minY + 1.2, row=0; y<maxY - 0.8; y+=2.15, row++){
+      for(let x=minX + 1.1 + (row % 2 ? 0.55 : 0); x<maxX - 0.8; x+=2.05){
+        if(!pointInReviewedRing(x, y, hilltopCampingRing)) continue;
+        const c = schematicToLatLon(x, y);
+        hilltopFieldDotFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
+      }
     }
   }
   let campFieldLineFeatures = [];
   // A central field division reinforces the long north–south shape from
   // the reference map without turning it into a navigable path.
-  campFieldLineFeatures.push({
-    type: "Feature", properties: {},
-    geometry: { type:"LineString", coordinates: schematicRingToLngLat([[84,18], [83,32], [84,48], [85,53]]) }
-  });
+  (hilltopField?.detailLines || []).forEach(points => campFieldLineFeatures.push({
+    type: "Feature", properties: {}, geometry: { type:"LineString", coordinates: schematicRingToLngLat(points) }
+  }));
   ordinaryCamps.forEach((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const r = campFieldRadii.get(c) * 0.85;
@@ -8637,6 +8648,7 @@ function buildMapGeoJSON(){
     skylarkRings: { type:"FeatureCollection", features: skylarkRingFeatures },
     forests: { type:"FeatureCollection", features: forestFeatures },
     forestFringe: { type:"FeatureCollection", features: forestFringeFeatures },
+    reviewedWoodlands: { type:"FeatureCollection", features: reviewedWoodlandFeatures },
     trail: { type:"FeatureCollection", features: trailFeatures },
     districtStreets: { type:"FeatureCollection", features: districtStreetFeatures },
     stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
@@ -9152,6 +9164,14 @@ function loadMap(){
       // above was the only camp with one until now).
       mapGL.addSource("mapSkylarkRings", { type: "geojson", data: geo.skylarkRings });
       mapGL.addLayer({ id: "skylark-ring-line", type: "line", source: "mapSkylarkRings", paint: { "line-color": "rgba(160,120,40,0.6)", "line-width": 2 } });
+
+      // A reviewed non-camping woodland is visually authoritative over
+      // broad ground-use fields. The data validator rejects a direct
+      // overlap, while this overlay makes the map resilient if a future
+      // field edit would otherwise make Anara or Hidden Woods look camped.
+      mapGL.addSource("mapReviewedWoodlands", { type: "geojson", data: geo.reviewedWoodlands });
+      mapGL.addLayer({ id: "reviewed-woodlands-fill", type: "fill", source: "mapReviewedWoodlands", paint: { "fill-color": "rgba(47,139,75,0.88)" } });
+      mapGL.addLayer({ id: "reviewed-woodlands-line", type: "line", source: "mapReviewedWoodlands", paint: { "line-color": "rgba(30,104,55,0.78)", "line-width": 1.7 } });
 
       // Path network — three tiers so the map reads as a connected route
       // system rather than isolated markers on plain grass: a solid main

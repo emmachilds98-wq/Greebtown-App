@@ -221,7 +221,8 @@ six numbered rules written in response. Read it. In short:
 The map has several generated authoring sources. Keep evidence, geometry and
 runtime rendering reviewable rather than reintroducing hard-coded overrides:
 
-- `map-system/data/camp-zones.json` â€” camps, surface and evidence level.
+- `map-system/data/camp-zones.json` â€” camps plus reviewed ground-use
+  polygons (including protected exclusions for non-camping places).
 - `map-system/data/evidenced-paths.json` â€” only reference-supported routes.
 - `map-system/data/district-footprints.json` â€” reviewed illustrated areas.
 - `map-system/data/reference-layout.json` â€” cluster anchors. This moves a
@@ -272,3 +273,9 @@ source for woodland and other non-camping natural areas. It stores a
 source-relative outline, fringe and tree clusters, and validates both the
 source name and relative geometry. Never use a generic radial zone as a
 fallback for a reviewed natural area; add a footprint here instead.
+
+Record every new official-map reading in `reference-layout.json`'s
+`observations` collection before using it to alter a footprint, path, field
+or anchor. It is evidence context, not runtime geometry; keep reviewed
+geometry in its specialised data file and let the validator protect named
+exclusions such as Anara Forest from ground-use fields.

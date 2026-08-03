@@ -3176,6 +3176,79 @@ window.GREEBTOWN_MAP_DOCUMENT = {
 window.GREEBTOWN_CAMP_ZONES = {
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
+  "groundUseFields": [
+    {
+      "id": "hilltop-field",
+      "name": "Hilltop Field",
+      "kind": "ground-use",
+      "surface": "hilltop-yellow",
+      "evidence": "official-overview",
+      "points": [
+        [
+          73,
+          15
+        ],
+        [
+          83,
+          14
+        ],
+        [
+          88,
+          19
+        ],
+        [
+          89,
+          27
+        ],
+        [
+          85,
+          32
+        ],
+        [
+          77,
+          30
+        ],
+        [
+          72,
+          24
+        ]
+      ],
+      "detailLines": [
+        [
+          [
+            76,
+            17
+          ],
+          [
+            78,
+            23
+          ],
+          [
+            80,
+            29
+          ]
+        ],
+        [
+          [
+            81,
+            15
+          ],
+          [
+            83,
+            22
+          ],
+          [
+            85,
+            29
+          ]
+        ]
+      ],
+      "excludes": [
+        "Anara Forest"
+      ],
+      "notes": "Reviewed Hilltop field footprint. It sits alongside the Oldtown corridor and must remain distinct from the Anara Forest woodland stage."
+    }
+  ],
   "zones": [
     {
       "id": "camp-west",
@@ -4021,6 +4094,49 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
   "coordinateSystem": "schematic-percent-v1",
   "reviewedOverview": true,
   "reviewNote": "Anchors re-derived as one full-site composition from the user-supplied official overview references.",
+  "observations": [
+    {
+      "id": "official-overview-2026-08-03",
+      "source": "User-provided official map overview screenshots",
+      "evidence": "official-overview",
+      "regions": [
+        "site-perimeter",
+        "arrival-roads",
+        "west-camping",
+        "downtown-camping",
+        "hilltop-field",
+        "lion-den-woodland",
+        "east-camping"
+      ],
+      "notes": "The western camping and Downtown cluster are distinct field systems; the yellow Hilltop corridor sits west of the Lion's Den woodland mass and must not subsume Anara Forest. Alresford Road and Petersfield Road remain outside the festival interior."
+    },
+    {
+      "id": "official-west-detail-2026-08-03",
+      "source": "User-provided official map west/detail screenshots",
+      "evidence": "official-detail",
+      "regions": [
+        "west-camping",
+        "meadow-fields",
+        "camp-orchid",
+        "hidden-woods",
+        "botanica"
+      ],
+      "notes": "West Camping is a large faceted field with internal divisions; Downtown Camping, Camplight and Meadow fields are separate labelled areas. Woodland runs continuously between the western fields and the Botanica/Letsbe edge."
+    },
+    {
+      "id": "official-east-detail-2026-08-03",
+      "source": "User-provided official map east/detail screenshots",
+      "evidence": "official-detail",
+      "regions": [
+        "hilltop-field",
+        "lion-den-woodland",
+        "temple-valley-camping",
+        "east-camping",
+        "south-gate"
+      ],
+      "notes": "Hilltop reads as a long faceted yellow ground-use corridor. The Lion's Den sits in its own green clearing/woodland mass to the east, while the east-side campsite is a separate vertical green field."
+    }
+  ],
   "anchors": {
     "Botanica": {
       "from": [
