@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v326";
-const APP_BUILD_TIME = "2026-08-03T04:56:34Z";
+const APP_CACHE_VERSION = "v327";
+const APP_BUILD_TIME = "2026-08-03T05:01:10Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6020,7 +6020,7 @@ const locations = [
   { name:"Oldtown", kind:"district", x:"68%", y:"40%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
   { name:"Letsbe Avenue", kind:"district", x:"40%", y:"9%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
   { name:"Metropolis", kind:"district", x:"15%", y:"36%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
-  { name:"Grand Central", kind:"stage", x:"66%", y:"30%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
+  { name:"Grand Central", kind:"stage", x:"72%", y:"30%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
   // Moved from a guessed (93,38), up near Temple Valley Camping, to
   // (90,58) — the second reference video's own wide Copperwood/Grand
   // Central/Oldtown/Hilltop shot shows THE LION'S DEN's own glow right
@@ -8190,31 +8190,33 @@ function buildMapGeoJSON(){
     { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[-5,68],[20,58],[50,54],[80,62],[105,72]]) } }
   ];
 
-  // The site boundary — built directly from SITE_SW/SITE_NE (the same
-  // real-world box loadMap() uses for pan bounds, covering the extracted
-  // map data's own real coordinates), NOT from the schematic space/affine
-  // fit like everything else on this basemap. A hand-traced boundary in
-  // schematic space, run through that fit, landed nowhere near almost
-  // every real captured stage/POI coordinate — the boundary itself was
-  // wrong, not the markers, so this is anchored to real lat/lon instead
-  // and only lightly jittered (not hand-shaped) to guarantee it actually
-  // contains everything real that's plotted on the map.
+  // The official full-site view has a rounded kite/pentagon footprint —
+  // not the rectangular data extent that was previously drawn here. This
+  // deliberately remains an illustrative perimeter (not a surveyed fence
+  // line), but now follows the evidenced west Downtown lobe, long eastern
+  // Hilltop lobe, and the south-road edge. The padded outer vertices keep
+  // every mapped point inside the visible working area.
   const bPad = 0.08;
   const bLatPad = (SITE_NE.lat - SITE_SW.lat) * bPad;
   const bLonPad = (SITE_NE.lon - SITE_SW.lon) * bPad;
   const bS = SITE_SW.lat - bLatPad, bN = SITE_NE.lat + bLatPad;
   const bW = SITE_SW.lon - bLonPad, bE = SITE_NE.lon + bLonPad;
-  const boundaryRand = seededRand(555);
-  const jitterLat = (bN - bS) * 0.04, jitterLon = (bE - bW) * 0.04;
-  const perSide = 4;
-  const rawBoundary = [];
-  for(let i=0;i<=perSide;i++) rawBoundary.push([bW + (bE - bW) * i / perSide, bS]);
-  for(let i=1;i<=perSide;i++) rawBoundary.push([bE, bS + (bN - bS) * i / perSide]);
-  for(let i=1;i<=perSide;i++) rawBoundary.push([bE - (bE - bW) * i / perSide, bN]);
-  for(let i=1;i<perSide;i++) rawBoundary.push([bW, bN - (bN - bS) * i / perSide]);
-  const boundaryRing = rawBoundary.map(([lon,lat])=> [lon + (boundaryRand() - 0.5) * jitterLon, lat + (boundaryRand() - 0.5) * jitterLat]);
+  const siteBoundaryOutline = [
+    [-8, 18], [18, -7], [72, -8], [101, 8], [104, 48],
+    [95, 78], [78, 103], [28, 106], [-8, 81], [-12, 48]
+  ];
+  const boundaryRing = schematicRingToLngLat(siteBoundaryOutline);
   boundaryRing.push(boundaryRing[0]);
   const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: boundaryRing } };
+
+  // A dark, thin north–south divider is visible immediately west of the
+  // Hilltop yellow field, running parallel to the Oldtown strip. It reads
+  // as a boundary/fence rather than a walkable route, so it gets its own
+  // layer and is never added to the path network.
+  const hilltopDividerFeature = {
+    type:"Feature", properties:{},
+    geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[73, 28], [71, 39], [72, 52], [74, 64]]) }
+  };
 
   // Real named roads bordering the site — Alresford Rd (diagonal, NW
   // corner), Petersfield Rd (west edge continuing along the south) and
@@ -8303,6 +8305,7 @@ function buildMapGeoJSON(){
     hillContours: { type:"FeatureCollection", features: hillContourFeatures },
     hillBands: { type:"FeatureCollection", features: hillBandFeatures },
     boundary: { type:"FeatureCollection", features: [boundaryFeature] },
+    hilltopDivider: { type:"FeatureCollection", features: [hilltopDividerFeature] },
     roads: { type:"FeatureCollection", features: roadFeatures },
     fencePosts: { type:"FeatureCollection", features: fencePostFeatures }
   };
@@ -8624,6 +8627,8 @@ function loadMap(){
 
       mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
       mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
+      mapGL.addSource("mapHilltopDivider", { type: "geojson", data: geo.hilltopDivider });
+      mapGL.addLayer({ id: "hilltop-divider-line", type: "line", source: "mapHilltopDivider", paint: { "line-color": "rgba(42,76,52,0.72)", "line-width": 1.5, "line-dasharray": [2, 1.5] } });
 
       // Real named roads outside the site (see roadFeatures comment in
       // buildMapGeoJSON) — casing first for a proper road look, then a
