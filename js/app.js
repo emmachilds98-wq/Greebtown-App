@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v329";
-const APP_BUILD_TIME = "2026-08-03T05:07:10Z";
+const APP_CACHE_VERSION = "v330";
+const APP_BUILD_TIME = "2026-08-03T05:10:10Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6629,7 +6629,7 @@ const venueDirectory = [
   { name:"Anara Forest", type:"Main stage", status:"confirmed", music:true, genre:"Jungle, reggae, bassline, UK garage, DnB, grime", near:"Hilltop edge", info:"Formerly Psyforest; 360° sound-and-visual stage on the Hilltop edge with a sand floor." },
   { name:"Hidden Woods", type:"Main stage", status:"confirmed", music:true, genre:"Eclectic bass, reggae, dub", near:"Woodland edge", info:"Woodland stage with its own beach bar and treetop walks." },
   { name:"NEXUS", type:"Main stage", status:"confirmed", music:true, genre:"Live music, hip hop, grime, garage", near:"Botanica", info:"Botanica's main stage — 'where nature connects'; past bills included Bashy, MJ Cole, Lady Leshurr." },
-  { name:"Helix", type:"Main stage", status:"confirmed", music:true, genre:"Breaks, big beat, bass", near:"Metropolis", info:"One of Metropolis-side's bass-heavy stages." },
+  { name:"Helix", type:"Main stage", status:"confirmed", music:true, genre:"Breaks, big beat, bass", near:"Quantum / Lion's Den corridor", info:"A bass-heavy stage on the open route south-east of Quantum, before The Lion's Den." },
   { name:"Spectrum 360", type:"Main stage", status:"confirmed", music:true, genre:"UK garage through to gabber, 360° visuals", near:"Area 404", info:"A circular arena entirely enclosed in shipping containers — Boomtown's main queer stage. Its 2026 DJ competition (for trans/non-binary/GNC DJs playing 13 Aug) confirms it for Chapter Five." },
   { name:"Tangled Roots", type:"Main stage", status:"confirmed", music:true, genre:"Dub, roots", near:"Unclear", info:"Laid-back stage with its own cocktail bar — confirmed for 2026 with a full Wed-Fri dub/roots programme (Lionpulse x Sinai, Roots Ginjah, DubTastic Music, Jam Jah Sound, Rompa's Reggae Shack) and a Friday dubstep takeover." },
   { name:"Full Moon Ballroom", type:"Main stage", status:"confirmed", music:true, genre:"Ballroom, eclectic", near:"Unclear", info:"A dressed-up, theatrical crowd rather than a straight dancefloor — confirmed for 2026 running Wed-Sun (Mad Apple Circus, She's Got Brass, Girl in the Year Above, Grooveline, CLADA, Agbeko)." },
@@ -8596,6 +8596,18 @@ function loadMap(){
       attributionControl: false
     });
     mapGL.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-left");
+
+    // A deliberate reset for the one moment people most need it: after
+    // following a friend or a venue deep into the map, return to the full
+    // north-up site without hunting for zoom controls or manually undoing
+    // rotation. Uses the same bounded site extent as the map itself.
+    const overviewButton = document.getElementById("mapOverviewBtn");
+    if(overviewButton){
+      overviewButton.onclick = ()=>{
+        mapGL.rotateTo(0, { duration: 280 });
+        mapGL.fitBounds(MAX_BOUNDS, { padding: { top: 42, right: 32, bottom: 42, left: 32 }, duration: 520 });
+      };
+    }
 
     // Label thinning by zoom — see the #map.map-labels-thin CSS rule.
     // Every marker's text label is a plain positioned DOM element with
