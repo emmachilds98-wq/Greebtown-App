@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v376";
-const APP_BUILD_TIME = "2026-08-03T08:44:03Z";
+const APP_CACHE_VERSION = "v377";
+const APP_BUILD_TIME = "2026-08-03T08:51:53Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7831,6 +7831,40 @@ function buildMapGeoJSON(){
     };
   }).filter(Boolean));
 
+  // Foregrounds get their own restrained illustrated detail, rather than
+  // relying on a growing number of markers to imply that people can spend
+  // time there. These are paving inlays and small light points only — not
+  // new amenities, paths or named locations — generated from the reviewed
+  // precinct source so future reshaping keeps the detail attached.
+  const precinctInlayFeatures = [];
+  const precinctLightFeatures = [];
+  reviewedStagePrecinctLayout.forEach((precinct, i)=>{
+    const node = findNamedNode(precinct.sourceName);
+    if(!node) return;
+    const { width, height, sides, rotation } = precinct.footprint;
+    const cx = node.x + precinct.offset.x, cy = node.y + precinct.offset.y;
+    const innerRing = fieldRing(cx, cy, width * 0.31, height * 0.31, 8400 + i * 47, sides, rotation);
+    precinctInlayFeatures.push({
+      type: "Feature",
+      properties: { surface: precinct.kind },
+      geometry: { type: "LineString", coordinates: schematicRingToLngLat(innerRing) }
+    });
+    const count = precinct.kind === "district-concourse" ? 7 : precinct.kind === "stage-forecourt" ? 6 : 5;
+    const start = rotation * Math.PI / 180;
+    const tone = precinct.kind === "stage-forecourt" ? "rgba(255,205,100,.92)" : precinct.kind === "venue-court" ? "rgba(239,232,192,.86)" : "rgba(201,170,116,.72)";
+    for(let step=0; step<count; step++){
+      const angle = start + (step / count) * Math.PI * 2;
+      const x = cx + Math.cos(angle) * width * 0.37;
+      const y = cy + Math.sin(angle) * height * 0.37;
+      const c = schematicToLatLon(x, y);
+      precinctLightFeatures.push({
+        type: "Feature",
+        properties: { tone, radius: precinct.kind === "stage-forecourt" ? 1.25 : 0.92 },
+        geometry: { type: "Point", coordinates: [c.lon, c.lat] }
+      });
+    }
+  });
+
   // Stage plazas — a soft tan clearing under every stage. The reference
   // video shows paths widening into a real open plaza around a stage
   // (see the Tribe of Frog frame) rather than staying a thin line all
@@ -8670,6 +8704,8 @@ function buildMapGeoJSON(){
     districts: { type:"FeatureCollection", features: districtFeatures },
     marketHub: { type:"FeatureCollection", features: marketHubFeatures },
     openConcourses: { type:"FeatureCollection", features: openConcourseFeatures },
+    precinctInlays: { type:"FeatureCollection", features: precinctInlayFeatures },
+    precinctLights: { type:"FeatureCollection", features: precinctLightFeatures },
     parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
     parkingRows: { type:"FeatureCollection", features: parkingRowFeatures },
     parkingCars: { type:"FeatureCollection", features: parkingCarFeatures },
@@ -9261,6 +9297,22 @@ function loadMap(){
           "rgba(120,95,60,0.55)"
         ],
         "line-width": ["match", ["get", "surface"], "stage-forecourt", 1.2, 1]
+      } });
+
+      // Quiet surface structure at close zoom: a court reads as paving,
+      // lights and a lived-in interior, not a flat shape underneath pins.
+      mapGL.addSource("mapPrecinctInlays", { type: "geojson", data: geo.precinctInlays });
+      mapGL.addLayer({ id: "precinct-inlays-line", type: "line", source: "mapPrecinctInlays", minzoom: 15.2, paint: {
+        "line-color": ["match", ["get", "surface"], "stage-forecourt", "rgba(129,93,47,.48)", "venue-court", "rgba(112,86,56,.35)", "rgba(118,93,61,.3)"],
+        "line-width": 0.8,
+        "line-dasharray": [1.2, 1.4]
+      } });
+      mapGL.addSource("mapPrecinctLights", { type: "geojson", data: geo.precinctLights });
+      mapGL.addLayer({ id: "precinct-lights-circle", type: "circle", source: "mapPrecinctLights", minzoom: 15.2, paint: {
+        "circle-radius": ["*", ["get", "radius"], ["interpolate", ["linear"], ["zoom"], 15, 1, 19, 2.1]],
+        "circle-color": ["get", "tone"],
+        "circle-stroke-width": 0.5,
+        "circle-stroke-color": "rgba(58,55,38,.52)"
       } });
 
       // Continuous town streets sit under their individual route segments:
