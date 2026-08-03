@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v315";
-const APP_BUILD_TIME = "2026-08-03T01:23:53Z";
+const APP_CACHE_VERSION = "v316";
+const APP_BUILD_TIME = "2026-08-03T01:26:31Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6766,7 +6766,12 @@ const gates = [
   // Pulled up from (78,93) to (78,79) — same south-end compression as
   // Camp Skylark Sunset's own campLabels entry above, so the gate spoke
   // path added to connect it back to Oldtown isn't a huge lonely stretch.
-  { name:"South Gate", x:"78%", y:"79%", info:"Nearest White Carpark 4 and Camp Skylark Sunset (one of two Camp Skylark premium sites for 2026 — the other, Camp Skylark Hilltop, sits up on Hilltop instead).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
+  { name:"South Gate", x:"78%", y:"79%", info:"Nearest White Carpark 4 and Camp Skylark Sunset (one of two Camp Skylark premium sites for 2026 — the other, Camp Skylark Hilltop, sits up on Hilltop instead).", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." },
+  // A whole-map reference screenshot shows this as its own separately
+  // labelled gate icon right next to South Gate, at the edge of the
+  // Campervan Field — not the same entrance as South Gate itself, which
+  // was the only gate previously covering this corner of the site.
+  { name:"Campervan Gate", x:"80%", y:"81%", info:"Seen labelled on the official app's own map as its own entrance right next to South Gate, serving the Campervan Field — no further hours/detail sourced yet beyond the standard gate times.", hours:"Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30." }
 ];
 
 // The White Carparks — the reference video shows a large grid-lined grey
