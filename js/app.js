@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v348";
-const APP_BUILD_TIME = "2026-08-03T05:49:24Z";
+const APP_CACHE_VERSION = "v349";
+const APP_BUILD_TIME = "2026-08-03T05:52:25Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7887,9 +7887,25 @@ function buildMapGeoJSON(){
     "rgba(180,109,74,0.76)", "rgba(199,151,91,0.75)",
     "rgba(164,112,86,0.74)"
   ];
+  function venueRoofFill(name, index){
+    const category = BUILDING_LAYER[name]?.category;
+    if(category === "dome") return "rgba(239,226,190,0.92)";
+    if(category === "ring") return "rgba(112,103,73,0.82)";
+    if(category === "kite") return "rgba(91,116,86,0.82)";
+    return BUILDING_PALETTE[index % BUILDING_PALETTE.length];
+  }
+  const venueAccentFeatures = [];
   namedBuildingPoints.forEach((p,i)=>{
-    const ring = schematicRingToLngLat(venueFootprint(p.name, parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
-    const feature = { type: "Feature", properties: { fill: BUILDING_PALETTE[i % BUILDING_PALETTE.length] }, geometry: { type: "Polygon", coordinates: [ring] } };
+    const x = parseFloat(p.x), y = parseFloat(p.y);
+    const ring = schematicRingToLngLat(venueFootprint(p.name, x, y, i * 29 + 5));
+    const feature = { type: "Feature", properties: { fill: venueRoofFill(p.name, i) }, geometry: { type: "Polygon", coordinates: [ring] } };
+    const layer = BUILDING_LAYER[p.name];
+    if(layer?.category === "ring" || layer?.category === "dome"){
+      venueAccentFeatures.push({
+        type: "Feature", properties: { tone: layer.category === "dome" ? "rgba(128,105,72,0.58)" : "rgba(242,220,139,0.62)" },
+        geometry: { type: "LineString", coordinates: schematicRingToLngLat(blobRing(x, y, layer.w * 0.27, i * 29 + 901, 12)) }
+      });
+    }
     // Special-shape venues are solid, confirmed structures, never the
     // hollow "fenced enclosure" treatment below — that's for the
     // otherwise-random 1-in-4 open-yard look, not these.
@@ -8484,6 +8500,7 @@ function buildMapGeoJSON(){
     stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
     bunting: { type:"FeatureCollection", features: buntingFeatures },
     buildings: { type:"FeatureCollection", features: solidBuildingFeatures },
+    venueAccents: { type:"FeatureCollection", features: venueAccentFeatures },
     fencedEnclosures: { type:"FeatureCollection", features: fencedEnclosureFeatures },
     infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
     stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
@@ -9124,6 +9141,8 @@ function loadMap(){
       mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
       mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
+      mapGL.addSource("mapVenueAccents", { type: "geojson", data: geo.venueAccents });
+      mapGL.addLayer({ id: "venue-accents-line", type: "line", source: "mapVenueAccents", paint: { "line-color": ["get", "tone"], "line-width": 1.15 } });
 
       // Hollow fenced enclosures — outline only, no fill, so the ground
       // colour shows through (a beer-garden/yard, not a roofed building).
