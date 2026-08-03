@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v401";
-const APP_BUILD_TIME = "2026-08-03T11:12:15Z";
+const APP_CACHE_VERSION = "v402";
+const APP_BUILD_TIME = "2026-08-03T11:40:50Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7418,11 +7418,14 @@ function buildMapGeoJSON(){
   const fieldFeatures = FIELD_SPOTS.map(([cx,cy],i)=>{
     const rand = seededRand(3000 + i * 13);
     const hue = 95 + rand() * 35;
-    const light = 30 + rand() * 16;
-    // The first map frame needs quiet field structure too. These remain
-    // intentionally translucent, but are now strong enough to stop the
-    // whole-site view reading as one undifferentiated patch of grass.
-    const alpha = 0.075 + rand() * 0.06;
+    // Lifted lighter and made subtler than before: the official app's grass
+    // reads as near-flat bright green with only a faint dapple, and the
+    // previous darker/stronger blobs turned the whole site into a visible
+    // faceted patchwork that fought the bright land-use colour zoning
+    // (green arena / salmon camping / yellow fields). Keep enough drift to
+    // avoid one dead-flat hue, but let the zone colours carry.
+    const light = 40 + rand() * 13;
+    const alpha = 0.038 + rand() * 0.038;
     return {
       type: "Feature",
       properties: { fill: `hsla(${hue.toFixed(0)},40%,${light.toFixed(0)}%,${alpha.toFixed(2)})` },
@@ -8454,25 +8457,26 @@ function buildMapGeoJSON(){
   ];
   const pondOutlineFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(pondRing) } };
 
-  // Ordinary camping fields — a pale camp-green ground fill. The official
-  // overview keeps the regular fields (West, Valley, Temple Valley and
-  // Campervan) in the same green family as open land, with a distinct
-  // boundary and tent texture; bright yellow is instead the wayfinding
-  // colour for the separate Hilltop/Sunset-style fields. Cross each camp
-  // with a couple of
-  // straight real-farmland field-division lines the same way the video's
-  // fields show, THEN the confetti tent dots scattered on top — before
-  // this pass ordinary camping fields had no ground fill of their own at
-  // all, just tent dots floating on whatever background/field-texture
-  // happened to be underneath, which made them hard to tell apart from
-  // plain open ground at a glance.
+  // Ordinary camping fields — a warm salmon ground fill. The user-supplied
+  // official-app overview screenshots (docs/map-evidence/screenshots) show
+  // the accommodation/camping blocks around the site rendered in a distinct
+  // salmon/pink land-use colour, clearly set apart from the bright-green
+  // arena/open ground and the bright-yellow wayfinding fields — that
+  // three-colour zoning (green arena / pink camping / yellow field) is the
+  // single most recognisable trait of the official map. An earlier pass
+  // here guessed camping stayed "in the green family"; the official
+  // screenshots contradict that, so camping now carries its own salmon so
+  // the site reads as real land-use zones at a glance instead of flat
+  // monochrome green. Each camp still gets straight farmland field-division
+  // lines and confetti tent dots on top (added below) so it reads as a
+  // pitched field, not a plain colour block.
   const ordinaryCamps = campLabels.filter(c=> !/premium/i.test(c.text));
   const campFieldRadii = new Map();
   const CAMP_FIELD_STYLES = [
-    { fill: "rgba(92,204,132,0.88)", line: "rgba(31,112,60,0.84)" },
-    { fill: "rgba(110,215,143,0.86)", line: "rgba(36,122,67,0.82)" },
-    { fill: "rgba(79,192,121,0.88)", line: "rgba(27,101,55,0.84)" },
-    { fill: "rgba(122,221,148,0.86)", line: "rgba(45,128,71,0.80)" }
+    { fill: "rgba(233,150,134,0.86)", line: "rgba(198,102,86,0.82)" },
+    { fill: "rgba(240,164,148,0.85)", line: "rgba(206,112,94,0.80)" },
+    { fill: "rgba(228,142,126,0.87)", line: "rgba(193,96,80,0.83)" },
+    { fill: "rgba(244,172,156,0.85)", line: "rgba(210,118,100,0.80)" }
   ];
   const campFieldFeatures = ordinaryCamps.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
@@ -8486,8 +8490,10 @@ function buildMapGeoJSON(){
     // fields don't all read as the same stretched rectangle.
     const seed = 600 + i * 43;
     const aspect = footprint.aspect;
+    // Campervan fields carry a slightly paler, sandier salmon so they still
+    // read as camping/accommodation but distinguish from tent camping.
     const style = /campervan/i.test(c.text)
-      ? { fill: "rgba(106,190,125,0.84)", line: "rgba(46,99,61,0.82)" }
+      ? { fill: "rgba(238,182,150,0.83)", line: "rgba(200,128,92,0.80)" }
       : CAMP_FIELD_STYLES[i % CAMP_FIELD_STYLES.length];
     return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, footprint.sides, footprint.rotation)) ] } };
   });
@@ -9490,7 +9496,7 @@ function loadMap(){
       } });
       mapGL.addSource("mapPrecinctLights", { type: "geojson", data: geo.precinctLights });
       mapGL.addLayer({ id: "precinct-lights-circle", type: "circle", source: "mapPrecinctLights", minzoom: 14.0, paint: {
-        "circle-radius": ["*", ["get", "radius"], ["interpolate", ["linear"], ["zoom"], 15, 1, 19, 2.1]],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 15, ["get", "radius"], 19, ["*", ["get", "radius"], 2.1]],
         "circle-color": ["get", "tone"],
         "circle-stroke-width": 0.5,
         "circle-stroke-color": "rgba(58,55,38,.52)"
@@ -9524,8 +9530,8 @@ function loadMap(){
       mapGL.addLayer({ id: "district-atmosphere-fill", type: "fill", source: "mapDistrictAtmosphere", minzoom: 13.8, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "district-atmosphere-outline", type: "line", source: "mapDistrictAtmosphere", minzoom: 13.8, paint: { "line-color": "rgba(76,63,39,.58)", "line-width": 0.65 } });
       mapGL.addSource("mapDistrictAtmosphereLights", { type: "geojson", data: geo.districtAtmosphereLights });
-      mapGL.addLayer({ id: "district-atmosphere-lights-glow", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 13.8, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 13.8, 2.8, 15, 5.5, 19, 13]], "circle-color": ["get", "tone"], "circle-opacity": .13 } });
-      mapGL.addLayer({ id: "district-atmosphere-lights-core", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 13.8, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 13.8, .8, 15, 1.4, 19, 3.2]], "circle-color": ["get", "tone"], "circle-stroke-width": .45, "circle-stroke-color": "rgba(68,58,38,.55)" } });
+      mapGL.addLayer({ id: "district-atmosphere-lights-glow", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 13.8, paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 13.8, ["*", ["get", "size"], 2.8], 15, ["*", ["get", "size"], 5.5], 19, ["*", ["get", "size"], 13]], "circle-color": ["get", "tone"], "circle-opacity": .13 } });
+      mapGL.addLayer({ id: "district-atmosphere-lights-core", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 13.8, paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 13.8, ["*", ["get", "size"], .8], 15, ["*", ["get", "size"], 1.4], 19, ["*", ["get", "size"], 3.2]], "circle-color": ["get", "tone"], "circle-stroke-width": .45, "circle-stroke-color": "rgba(68,58,38,.55)" } });
 
       mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
       mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", minzoom: 13.5, paint: { "fill-color": "rgba(224,200,160,0.95)" } });
@@ -9592,15 +9598,15 @@ function loadMap(){
       // (main stage = bigger, brighter glow) even though both now have one.
       mapGL.addSource("mapMinorStageGlow", { type: "geojson", data: geo.minorStageGlow });
       mapGL.addLayer({ id: "minor-stage-glow-outer", type: "circle", source: "mapMinorStageGlow", minzoom: 15.2, paint: {
-        "circle-radius": ["*", ["interpolate", ["linear"], ["zoom"], 14, 3.5, 19, 14], ["get", "scale"]],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "scale"], 3.5], 19, ["*", ["get", "scale"], 14]],
         "circle-color": ["get", "colorOuter"]
       } });
       mapGL.addLayer({ id: "minor-stage-glow-mid", type: "circle", source: "mapMinorStageGlow", minzoom: 15.2, paint: {
-        "circle-radius": ["*", ["interpolate", ["linear"], ["zoom"], 14, 2.2, 19, 8.5], ["get", "scale"]],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "scale"], 2.2], 19, ["*", ["get", "scale"], 8.5]],
         "circle-color": ["get", "colorMid"]
       } });
       mapGL.addLayer({ id: "minor-stage-glow-core", type: "circle", source: "mapMinorStageGlow", minzoom: 15.2, paint: {
-        "circle-radius": ["*", ["interpolate", ["linear"], ["zoom"], 14, 1.2, 19, 4.2], ["get", "scale"]],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "scale"], 1.2], 19, ["*", ["get", "scale"], 4.2]],
         "circle-color": ["get", "colorCore"]
       } });
 
