@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v362";
-const APP_BUILD_TIME = "2026-08-03T06:57:05Z";
+const APP_CACHE_VERSION = "v363";
+const APP_BUILD_TIME = "2026-08-03T07:01:48Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6597,6 +6597,12 @@ applyReferenceLayout();
 const reviewedSmallVenueLayout = Array.isArray(window.GREEBTOWN_SMALL_VENUE_LAYOUT?.venues)
   ? window.GREEBTOWN_SMALL_VENUE_LAYOUT.venues
   : [];
+// Natural areas use their own anchor-relative footprints for the same
+// reason: woodland must never inherit a generic circular zone or a camp
+// surface just because it happens to be near a venue.
+const reviewedNaturalAreaFootprints = Array.isArray(window.GREEBTOWN_NATURAL_AREA_FOOTPRINTS?.footprints)
+  ? window.GREEBTOWN_NATURAL_AREA_FOOTPRINTS.footprints
+  : [];
 
 // a straight dump of js/boomtown-locations-2026.js's 53 real-GPS POI
 // points (see that file's own header: extracted from the official app's
@@ -8397,7 +8403,16 @@ function buildMapGeoJSON(){
   // overlaps" reported alongside the camp-field one. Now capped the same
   // safe way (accounting for blobRing's own up-to-1.22x bulge) against
   // every district/camp/parking/market-hub zone, same as camp fields.
-  const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name) || p.name === "The Lion's Den")
+  // Reviewed natural footprints are anchored to the same post-layout map
+  // places as stages and venues. They therefore cannot drift if a cluster
+  // moves, and they never fall through to the generic circular zone.
+  const allNaturalAnchors = locations.concat(minorStages, SSSI_SPOTS);
+  const reviewedNaturalAreas = reviewedNaturalAreaFootprints.map(area=> ({ area, anchor: allNaturalAnchors.find(place=> place.name === area.sourceName) })).filter(item=> item.anchor);
+  // No named Forest/Woods place is allowed to fall back to a generic
+  // radial zone. The validator requires every one to have a reviewed
+  // footprint, while this runtime filter remains fail-closed even if a
+  // future agent forgets to run it.
+  const forestSpots = locations.filter(p=> p.name === "The Lion's Den")
     .concat(minorStages.filter(p=> p.name === "Tribe of Frog"))
     .concat(SSSI_SPOTS);
   function forestClearanceRadius(cx, cy){
@@ -8412,10 +8427,20 @@ function buildMapGeoJSON(){
   // three isolated coloured islands on open grass.
   const downtownWoodlandRing = [[5,31], [22,25], [40,27], [51,38], [55,54], [52,73], [44,81], [25,80], [8,70], [1,50], [5,31]];
   const downtownWoodlandFringeRing = [[1,28], [21,22], [45,24], [56,35], [60,55], [56,77], [46,85], [23,84], [5,74], [-4,50], [1,28]];
+  const reviewedWoodlandFeatures = reviewedNaturalAreas.filter(({area})=> area.kind === "woodland").map(({area, anchor})=>{
+    const x = parseFloat(anchor.x), y = parseFloat(anchor.y);
+    const ring = area.points.map(([dx,dy])=> [x + dx, y + dy]);
+    return { type:"Feature", properties:{}, geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(ring)] } };
+  });
+  const reviewedWoodlandFringeFeatures = reviewedNaturalAreas.filter(({area})=> area.kind === "woodland").map(({area, anchor})=>{
+    const x = parseFloat(anchor.x), y = parseFloat(anchor.y);
+    const ring = area.fringePoints.map(([dx,dy])=> [x + dx, y + dy]);
+    return { type:"Feature", properties:{}, geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(ring)] } };
+  });
   const forestFeatures = [{
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(downtownWoodlandRing) ] }
-  }].concat(forestSpots.map((f,i)=>({
+  }].concat(reviewedWoodlandFeatures).concat(forestSpots.map((f,i)=>({
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)), 400 + i * 53, 16)) ] }
   })));
@@ -8427,7 +8452,7 @@ function buildMapGeoJSON(){
   const forestFringeFeatures = [{
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(downtownWoodlandFringeRing) ] }
-  }].concat(forestSpots.map((f,i)=>({
+  }].concat(reviewedWoodlandFringeFeatures).concat(forestSpots.map((f,i)=>({
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)) * 1.4, 450 + i * 53, 16)) ] }
   })));
@@ -8443,6 +8468,12 @@ function buildMapGeoJSON(){
   forestSpots.forEach((f,i)=>{
     const fx = parseFloat(f.x), fy = parseFloat(f.y);
     treePts = treePts.concat(treeClusterPoints(fx, fy, 30, forestClearanceRadius(fx, fy) * 0.87, 17 + i * 41));
+  });
+  reviewedNaturalAreas.forEach(({area, anchor}, areaIndex)=>{
+    const x = parseFloat(anchor.x), y = parseFloat(anchor.y);
+    (area.treeClusters || []).forEach(([dx,dy,count,radius], clusterIndex)=>{
+      treePts = treePts.concat(treeClusterPoints(x + dx, y + dy, count, radius, 3600 + areaIndex * 101 + clusterIndex * 29));
+    });
   });
   // A light irregular tree line follows the Downtown enclosure itself.
   // This avoids a flat empty buffer between the dense district clusters

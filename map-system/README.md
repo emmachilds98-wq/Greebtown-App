@@ -21,3 +21,11 @@ Edit `data/map-document.json`, then run `node scripts/build-map-data.mjs` and `n
 The initial document is an intentionally small, representative seed. The existing application map remains the live renderer while its present hard-coded map arrays are migrated into this document in audited batches. Do not duplicate or silently override live locations during that migration.
 
 When changing `small-venue-layout.json`, run `node scripts/validate-small-venue-layout.mjs` and then `node scripts/build-map-data.mjs`. Use only `stall`, `round`, or `yard` footprints backed by an official-detail or official-overview reference. Keep generic facilities out of this layer: it is for the coherent illustrated street layout, not an amenity marker carpet.
+
+`natural-area-footprints.json` is the matching tool for woodland and other
+non-camping ground. It is anchor-relative, so an approved stage/cluster move
+carries the woodland outline with it. Run `node scripts/validate-natural-area-footprints.mjs` before rebuilding. Do not use a generic circular zone as a fallback when an official reference shows a specific natural-area silhouette.
+
+Before committing a map pass, use `node scripts/map-preflight.mjs`. It rebuilds
+browser data and runs every cross-layer validation in the required order,
+including the safeguard against woodland/camping confusion.

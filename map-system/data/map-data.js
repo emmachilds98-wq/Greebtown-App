@@ -4551,3 +4551,252 @@ window.GREEBTOWN_SMALL_VENUE_LAYOUT = {
     }
   ]
 };
+window.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = {
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "anchor-relative-schematic-percent-v1",
+  "purpose": "Reviewed non-camping natural-area silhouettes. A footprint follows its named source location after reference-layout transforms, preventing circular fallback zones.",
+  "footprints": [
+    {
+      "id": "woodland-anara-forest",
+      "name": "Anara Forest",
+      "sourceName": "Anara Forest",
+      "kind": "woodland",
+      "evidence": "official-detail",
+      "points": [
+        [
+          -7.2,
+          -4.8
+        ],
+        [
+          -4.7,
+          -8.5
+        ],
+        [
+          1.4,
+          -8.2
+        ],
+        [
+          6.4,
+          -4.7
+        ],
+        [
+          7.3,
+          0.5
+        ],
+        [
+          4.9,
+          5.7
+        ],
+        [
+          -0.6,
+          7.7
+        ],
+        [
+          -5.7,
+          4.9
+        ],
+        [
+          -8.1,
+          0.2
+        ]
+      ],
+      "fringePoints": [
+        [
+          -9.1,
+          -5.7
+        ],
+        [
+          -5.8,
+          -10.5
+        ],
+        [
+          2.1,
+          -10.1
+        ],
+        [
+          8,
+          -5.8
+        ],
+        [
+          9.2,
+          0.6
+        ],
+        [
+          6.2,
+          7
+        ],
+        [
+          -0.8,
+          9.4
+        ],
+        [
+          -7.3,
+          6.1
+        ],
+        [
+          -10,
+          0.2
+        ]
+      ],
+      "treeClusters": [
+        [
+          -4.9,
+          -3.2,
+          7,
+          2.15
+        ],
+        [
+          -1.2,
+          -6.1,
+          7,
+          2.15
+        ],
+        [
+          3.9,
+          -3,
+          7,
+          2.15
+        ],
+        [
+          4.8,
+          2.6,
+          7,
+          2.15
+        ],
+        [
+          0,
+          5.1,
+          7,
+          2.15
+        ],
+        [
+          -5.1,
+          2.2,
+          7,
+          2.15
+        ]
+      ]
+    },
+    {
+      "id": "woodland-hidden-woods",
+      "name": "Hidden Woods",
+      "sourceName": "Hidden Woods",
+      "kind": "woodland",
+      "evidence": "official-detail",
+      "points": [
+        [
+          -6,
+          -2.5
+        ],
+        [
+          -3.6,
+          -6.3
+        ],
+        [
+          1.8,
+          -6.8
+        ],
+        [
+          5.7,
+          -3.5
+        ],
+        [
+          6.2,
+          1.2
+        ],
+        [
+          3.7,
+          5.5
+        ],
+        [
+          -1.3,
+          7.1
+        ],
+        [
+          -5.7,
+          4.1
+        ],
+        [
+          -7,
+          0.3
+        ]
+      ],
+      "fringePoints": [
+        [
+          -7.7,
+          -3.2
+        ],
+        [
+          -4.6,
+          -8.1
+        ],
+        [
+          2.3,
+          -8.6
+        ],
+        [
+          7.1,
+          -4.4
+        ],
+        [
+          7.8,
+          1.5
+        ],
+        [
+          4.7,
+          6.8
+        ],
+        [
+          -1.7,
+          8.8
+        ],
+        [
+          -7.2,
+          5.2
+        ],
+        [
+          -8.8,
+          0.4
+        ]
+      ],
+      "treeClusters": [
+        [
+          -4,
+          -1.8,
+          6,
+          1.8
+        ],
+        [
+          -1.5,
+          -4.8,
+          7,
+          1.95
+        ],
+        [
+          2.7,
+          -3.2,
+          6,
+          1.8
+        ],
+        [
+          4.1,
+          1.4,
+          7,
+          1.95
+        ],
+        [
+          0.5,
+          4.8,
+          6,
+          1.8
+        ],
+        [
+          -4.1,
+          2.8,
+          6,
+          1.8
+        ]
+      ]
+    }
+  ]
+};

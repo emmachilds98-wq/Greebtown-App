@@ -237,9 +237,16 @@ node scripts/validate-evidenced-paths.mjs
 node scripts/validate-district-footprints.mjs
 node scripts/validate-reference-layout.mjs
 node scripts/validate-small-venue-layout.mjs
+node scripts/validate-natural-area-footprints.mjs
 node scripts/audit-map-positions.mjs
 node --check js/app.js
 ```
+
+For ordinary map work, prefer the single command `node scripts/map-preflight.mjs`.
+It rebuilds generated data and runs the full evidence, footprint, camping,
+position and runtime-syntax checks in the required order. Run `git diff --check`
+afterwards. The expanded sequence above remains the reference list when a
+specific failure needs investigation.
 
 `map-system/data/map-data.js` is generated and must be regenerated in the
 same commit; never hand-edit it. Run `node scripts/report-reference-layout.mjs`
@@ -259,3 +266,9 @@ reference layout is applied, avoiding a competing set of positional values.
 Use it for close-up visual passes rather than adding generic boxes directly
 to `buildMapGeoJSON()`. Its validator constrains shape, size and evidence
 level so both Codex and Claude can make a repeatable, reviewed change.
+
+`map-system/data/natural-area-footprints.json` is the equivalent canonical
+source for woodland and other non-camping natural areas. It stores a
+source-relative outline, fringe and tree clusters, and validates both the
+source name and relative geometry. Never use a generic radial zone as a
+fallback for a reviewed natural area; add a footprint here instead.
