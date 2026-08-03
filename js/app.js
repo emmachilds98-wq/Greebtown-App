@@ -8494,6 +8494,10 @@ function venueMetaHtml(name){
 }
 
 function loadMap(){
+  // Rebuild this map data on each call: later calls reuse the MapLibre
+  // instance but still rebuild the road-name markers below.
+  const geo = buildMapGeoJSON();
+
   if(!mapGL){
     // Centered on the real site (schematic (0,0) run through the same
     // calibration fit used everywhere else, not a hand-picked guess),
@@ -8581,7 +8585,6 @@ function loadMap(){
     // the rest of this one-time init block. Fill/line/circle layers are
     // triangulated into a GPU mesh by MapLibre right here, then just
     // drawn every frame from then on.
-    const geo = buildMapGeoJSON();
     mapGL.on("load", ()=>{
 
       // Bottom-to-top: faint ground texture first, then area fills, then
