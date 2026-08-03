@@ -285,12 +285,21 @@
      touch-action is deliberately NOT overridden here, unlike the old
      schematic version; MapLibre sets its own internally and needs full
      control of the gesture for pinch/pan/double-tap-zoom to work right. */
-  #map{height:460px; position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#b8cbaa;}
+  /* The map is the task, not a small card in a long settings screen.
+     Give it enough vertical room for the site's major terrain bands to
+     read at once, while retaining a sensible cap on taller desktops. */
+  #map{height:clamp(500px, 68vh, 680px); position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#b8cbaa; box-shadow:0 12px 28px rgba(18,45,29,.16);}
   .maplibregl-map{background:#b8cbaa; font:inherit;}
   .maplibregl-ctrl-group{background:rgba(255,252,238,.92) !important; border:1px solid rgba(72,83,58,.35) !important; box-shadow:0 2px 8px rgba(34,54,36,.18) !important;}
   .maplibregl-ctrl-group button{background-color:transparent !important;}
   .maplibregl-ctrl-group button + button{border-top:1px solid rgba(72,83,58,.22) !important;}
   .maplibregl-ctrl-icon{filter:none;}
+  /* Keep orientation controls in the lower-right utility zone: they are
+     reachable on a phone, don't cover the northern camp labels, and make
+     the artwork rather than chrome the first thing the eye sees. */
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group{border-radius:14px !important; overflow:hidden;}
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button{width:42px !important; height:42px !important;}
+  @media(max-width:460px){#map{height:clamp(480px, 70vh, 600px);}}
   .marker{position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; border-radius:50%; background:transparent; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center;}
   .marker::before{content:""; width:13px; height:13px; border-radius:50%; background:var(--accent-amber); box-shadow:0 0 0 4px rgba(242,168,60,.25); border:1.5px solid rgba(11,21,18,.6);}
   .marker.stage::before{width:16px; height:13px; border-radius:2px 2px 0 0; clip-path:polygon(50% 0%, 100% 100%, 0% 100%); background:var(--accent-teal); box-shadow:0 0 0 4px rgba(75,227,172,.22); border:none;}

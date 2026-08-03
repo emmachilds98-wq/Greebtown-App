@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v339";
-const APP_BUILD_TIME = "2026-08-03T04:41:24Z";
+const APP_CACHE_VERSION = "v340";
+const APP_BUILD_TIME = "2026-08-03T04:43:58Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8721,7 +8721,10 @@ function loadMap(){
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
-    mapGL.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-left");
+    // Place the compact map utility rail away from the dense northern
+    // labels. This mirrors a familiar mobile-map ergonomics pattern
+    // without reproducing another app's controls or artwork.
+    mapGL.addControl(new maplibregl.NavigationControl({ showCompass: true }), "bottom-right");
 
     // A deliberate reset for the one moment people most need it: after
     // following a friend or a venue deep into the map, return to the full
