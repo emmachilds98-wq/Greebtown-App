@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v405";
-const APP_BUILD_TIME = "2026-08-03T11:56:37Z";
+const APP_CACHE_VERSION = "v406";
+const APP_BUILD_TIME = "2026-08-03T12:17:58Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8486,7 +8486,13 @@ function buildMapGeoJSON(){
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const footprint = c.footprint || { aspect: 1, sides: 6 };
     const reach = Math.max(footprint.aspect, 1 / footprint.aspect);
-    const r = campClearanceRadius(cx, cy, c, 18) / reach;
+    // Larger desired size so the spacious perimeter camps (Temple Valley,
+    // East, Quiet, Valley, Tangerine) read as the big, bold salmon blocks
+    // the official map shows, rather than small scattered hexagons. The
+    // clearance function's own safeMax cap still holds each field to half
+    // the distance to its nearest neighbour, so the tightly-clustered west
+    // camps stay separated and the overlap audits keep passing.
+    const r = campClearanceRadius(cx, cy, c, 26) / reach;
     campFieldRadii.set(c, r);
     // fieldRing, not blobRing — real camping fields are farm-field-shaped
     // (mostly straight edges, an actual boundary), not a circular blob.
