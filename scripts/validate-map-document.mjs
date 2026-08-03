@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const file = path.join(root, "map-system", "data", "map-document.json");
+const generatedFile = path.join(root, "map-system", "data", "map-data.js");
 const document = JSON.parse(fs.readFileSync(file, "utf8"));
 const objectTypes = new Set(["terrain", "district", "building", "stage", "vendor", "toilet", "medical", "camping", "entrance", "exit", "path", "boundary", "decoration", "hidden-location"]);
 const errors = [];
@@ -29,6 +30,11 @@ for (const object of document.objects ?? []) {
   if (!(object.transform?.scale > 0) || !Number.isFinite(object.transform?.rotation)) fail(`${object.id}: invalid transform`);
   if (object.asset !== null && typeof object.asset !== "string") fail(`${object.id}: asset must be a string or null`);
   if (typeof object.asset === "string" && !object.asset.startsWith("assets/")) fail(`${object.id}: asset must be relative to map-system/assets`);
+}
+const generatedBanner = "// Generated from map-system/data/map-document.json by scripts/build-map-data.mjs. Do not edit directly.\n";
+const expectedGenerated = `${generatedBanner}window.GREEBTOWN_MAP_DOCUMENT = ${JSON.stringify(document, null, 2)};\n`;
+if (!fs.existsSync(generatedFile) || fs.readFileSync(generatedFile, "utf8") !== expectedGenerated) {
+  fail("map-system/data/map-data.js is stale; run node scripts/build-map-data.mjs");
 }
 if (errors.length) {
   console.error(`Map document validation failed (${errors.length} issue${errors.length === 1 ? "" : "s"}):`);
