@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v381";
-const APP_BUILD_TIME = "2026-08-03T09:30:26Z";
+const APP_CACHE_VERSION = "v382";
+const APP_BUILD_TIME = "2026-08-03T09:33:32Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7419,7 +7419,7 @@ function buildMapGeoJSON(){
     const rand = seededRand(3000 + i * 13);
     const hue = 95 + rand() * 35;
     const light = 30 + rand() * 16;
-    const alpha = 0.05 + rand() * 0.08;
+    const alpha = 0.025 + rand() * 0.04;
     return {
       type: "Feature",
       properties: { fill: `hsla(${hue.toFixed(0)},40%,${light.toFixed(0)}%,${alpha.toFixed(2)})` },
@@ -7442,7 +7442,7 @@ function buildMapGeoJSON(){
     const rand = seededRand(4200 + i * 17);
     const hue = 90 + rand() * 40;
     const light = 28 + rand() * 18;
-    const alpha = 0.04 + rand() * 0.06;
+    const alpha = 0.014 + rand() * 0.025;
     return {
       type: "Feature",
       properties: { fill: `hsla(${hue.toFixed(0)},38%,${light.toFixed(0)}%,${alpha.toFixed(2)})` },
@@ -9182,10 +9182,10 @@ function loadMap(){
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
       mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapFieldsFine", { type: "geojson", data: geo.fieldsFine });
-      mapGL.addLayer({ id: "fields-fine-fill", type: "fill", source: "mapFieldsFine", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "fields-fine-fill", type: "fill", source: "mapFieldsFine", minzoom: 15.4, paint: { "fill-color": ["get", "fill"] } });
 
       mapGL.addSource("mapHedges", { type: "geojson", data: geo.hedges });
-      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", paint: { "line-color": "rgba(0,0,0,0.06)", "line-width": 1 } });
+      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", minzoom: 14.2, paint: { "line-color": "rgba(31,72,45,0.14)", "line-width": 0.8 } });
 
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
       mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.1)", "line-width": 1.2 } });

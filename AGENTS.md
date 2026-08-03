@@ -342,7 +342,9 @@ district names stay readable before venue labels, authored paths and massing
 arrive before decorative foreground detail, and generic infill is last. Run
 it after any map-layer minzoom or label-density change. Do not make a new
 layer visible earlier merely because it is available—the audit exists to stop
-the common “cluster of shapes” regression at ordinary close zoom.
+the common “cluster of shapes” regression at ordinary close zoom. Fine field
+texture and outer hedgerows are also intentionally delayed, so the overview
+remains silhouette-first rather than becoming a mosaic of background parcels.
 
 Record every new official-map reading in `reference-layout.json`'s
 `observations` collection before using it to alter a footprint, path, field
