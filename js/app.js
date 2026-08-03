@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v328";
-const APP_BUILD_TIME = "2026-08-03T05:04:10Z";
+const APP_CACHE_VERSION = "v329";
+const APP_BUILD_TIME = "2026-08-03T05:07:10Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7202,10 +7202,28 @@ function edgeTier(a, b){
   const rank = Math.min(PATH_TIER_RANK[nodeTierOf(a)] || 2, PATH_TIER_RANK[nodeTierOf(b)] || 2);
   return rank === 3 ? "main" : rank === 2 ? "secondary" : "minor";
 }
+// A small number of corridor shapes are clear enough in the official-map
+// evidence to preserve their actual walk direction rather than applying a
+// generic random bow. These are centreline waypoints in schematic space;
+// all other verified connections still use curvedLine() because their
+// detailed curvature was not visible reliably enough to claim precision.
+const EVIDENCED_PATH_SHAPES = {
+  "Grand Central|Oldtown": [[72,30], [71,34], [69,37], [68,40]],
+  "Oldtown|Quantum": [[68,40], [69,44], [71,47], [73,50]],
+  "Quantum|Helix": [[73,50], [75,51], [78,52]],
+  "Helix|The Lion's Den": [[78,52], [80,55], [83,55]],
+  "Botanica|Metropolis": [[28,18], [23,22], [18,29], [15,36]],
+  "Metropolis|E Numbers": [[15,36], [17,37], [19,38]],
+  "E Numbers|Gabber Kebabber": [[19,38], [21,39], [22,40]],
+  "Gabber Kebabber|Infinity": [[22,40], [31,41], [41,42]]
+};
+function evidencedPathShape(a, b){
+  return EVIDENCED_PATH_SHAPES[`${a}|${b}`] || EVIDENCED_PATH_SHAPES[`${b}|${a}`] || null;
+}
 const TRUNK_PATH_SEGMENTS = TRUNK_PATH_EDGES.map(([a, b], i)=>{
   const pa = findNamedNode(a), pb = findNamedNode(b);
   if(!pa || !pb) return null;
-  return { a: pa, b: pb, seed: i * 31 + 7, tier: edgeTier(a, b) };
+  return { a: pa, b: pb, points: evidencedPathShape(a, b), seed: i * 31 + 7, tier: edgeTier(a, b) };
 }).filter(Boolean);
 
 // Closest point on any real trunk-path segment to (x,y), plus which
@@ -7549,7 +7567,7 @@ function buildMapGeoJSON(){
     minor: "rgba(200,185,150,0.55)"
   };
   const trailFeatures = TRUNK_PATH_SEGMENTS.map(seg=>{
-    const centreline = curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed);
+    const centreline = seg.points || curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed);
     return {
       type: "Feature", properties: { tier: seg.tier, fill: TRAIL_FILL[seg.tier] },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(ribbonFromPath(centreline, TRAIL_WIDTH[seg.tier])) ] }
@@ -7563,7 +7581,7 @@ function buildMapGeoJSON(){
   // exploratory ground rather than a maintained route.
   const pathScrubPoints = [];
   TRUNK_PATH_SEGMENTS.filter(seg=> seg.tier !== "minor").forEach((seg,i)=>{
-    const centreline = curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed);
+    const centreline = seg.points || curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed);
     const rand = seededRand(6000 + i * 19);
     const halfWidth = TRAIL_WIDTH[seg.tier] / 2 + 0.15;
     for(let j=1;j<centreline.length-1;j++){
