@@ -20,8 +20,8 @@ const tentZoom = matchNumber(/id: "tents-circle"[^\n]*minzoom: (\d+(?:\.\d+)?)/)
 
 if(!app.includes('data: geo.siteGround') || !app.includes('id: "site-ground-fill"')) errors.push("the reviewed site boundary must render as the primary festival-ground silhouette");
 if(!Number.isFinite(labelThreshold) || labelThreshold < 16) errors.push("label thinning must remain active through normal close zoom");
-if(!Number.isFinite(passageZoom) || passageZoom > 15) errors.push("district passages must appear before dense foreground detail");
-if(!Number.isFinite(massingZoom) || massingZoom > 15) errors.push("authored massing must appear before dense foreground detail");
+if(!Number.isFinite(passageZoom) || passageZoom < 15.7 || passageZoom > 16) errors.push("district passages must emerge only after the overview, before close foreground detail");
+if(!Number.isFinite(massingZoom) || massingZoom < 15.7 || massingZoom > 16) errors.push("authored massing must emerge only after the overview, before close foreground detail");
 if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 16) errors.push("foreground atmosphere must remain deep-zoom only");
 if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom) errors.push("generic infill must not appear before authored foreground detail");
 if(!Number.isFinite(broadFieldZoom) || broadFieldZoom < 16) errors.push("broad farmland texture must remain out of the silhouette-first overview");
