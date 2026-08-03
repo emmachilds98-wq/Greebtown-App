@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v360";
-const APP_BUILD_TIME = "2026-08-03T06:50:54Z";
+const APP_CACHE_VERSION = "v361";
+const APP_BUILD_TIME = "2026-08-03T06:54:53Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6884,7 +6884,8 @@ function buildingFootprint(cx, cy, seed){
 // category is a shape hint consulted by buildingLayerFootprint() below:
 // "rect" (rotated rectangle, the default), "kite" (NEXUS's dark
 // diamond-shaped mound), "dome" (Full Moon Ballroom's white marquee/
-// tent), "ring" (Spectrum 360's circular container arena). There is no
+// tent), "ring" (a circular container arena) or "canopy" (a small,
+// original radial outdoor structure). There is no
 // real image/sprite asset pipeline (this map is 100% vector shapes, no
 // sprite sheet, to stay a zero-network offline PWA) — category is both
 // the shape hint AND the closest thing to an "asset" identifier here.
@@ -6894,7 +6895,11 @@ function buildingFootprint(cx, cy, seed){
 const BUILDING_LAYER = {
   "NEXUS": { w: 3.4, h: 3.0, rotation: 20, category: "kite" },
   "Full Moon Ballroom": { w: 3.4, h: 3.4, rotation: 0, category: "dome" },
-  "Spectrum 360": { w: 3.0, h: 3.0, rotation: 0, category: "ring" },
+  // The Area 404 detail view shows Spectrum as a dark, radial outdoor
+  // structure surrounded by bright panels, not another circular marquee.
+  // A simplified canopy is deliberately original vector artwork, while
+  // preserving the distinctive small-footprint hierarchy in that pocket.
+  "Spectrum 360": { w: 3.25, h: 3.0, rotation: -10, category: "canopy" },
   // The official-map references show the key stages as recognisably
   // different structures, not one repeated generic brown block. These
   // are deliberately original, simplified footprints that preserve the
@@ -6912,7 +6917,12 @@ const BUILDING_LAYER = {
   // surrounding path network, not axis-aligned like a generic infill
   // building — the old procedural footprint had no fixed orientation
   // at all (a new random angle every reload).
-  "Hangar 161": { w: 4.2, h: 1.5, rotation: 12, category: "rect" }
+  "Hangar 161": { w: 4.2, h: 1.5, rotation: 12, category: "rect" },
+  // These three occupy recognisably different, fixed footprints in the
+  // Area 404 reference rather than arbitrary procedural rectangles.
+  "Deviant Lounge": { w: 2.45, h: 1.05, rotation: -8, category: "rect" },
+  "Acid Leak": { w: 2.15, h: 3.35, rotation: 15, category: "rect" },
+  "End of the Line": { w: 2.0, h: 3.05, rotation: -4, category: "rect" }
 };
 function buildingLayerFootprint(cx, cy, seed, layer){
   const angle = (layer.rotation || 0) * Math.PI / 180;
@@ -6926,6 +6936,17 @@ function buildingLayerFootprint(cx, cy, seed, layer){
   }
   if(layer.category === "dome" || layer.category === "ring"){
     return blobRing(cx, cy, layer.w / 2, seed, 14);
+  }
+  if(layer.category === "canopy"){
+    const points = [];
+    for(let i=0;i<12;i++){
+      const theta = (i / 12) * Math.PI * 2;
+      const r = (i % 2 ? 0.48 : 1) * layer.w / 2;
+      const x = Math.cos(theta) * r, y = Math.sin(theta) * r * (layer.h / layer.w);
+      points.push([cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
+    }
+    points.push(points[0]);
+    return points;
   }
   const corners = [[-layer.w/2,-layer.h/2],[layer.w/2,-layer.h/2],[layer.w/2,layer.h/2],[-layer.w/2,layer.h/2]];
   const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
@@ -7902,6 +7923,7 @@ function buildMapGeoJSON(){
     const category = BUILDING_LAYER[name]?.category;
     if(category === "dome") return "rgba(239,226,190,0.92)";
     if(category === "ring") return "rgba(112,103,73,0.82)";
+    if(category === "canopy") return "rgba(86,75,54,0.88)";
     if(category === "kite") return "rgba(91,116,86,0.82)";
     return BUILDING_PALETTE[index % BUILDING_PALETTE.length];
   }
@@ -7911,9 +7933,9 @@ function buildMapGeoJSON(){
     const ring = schematicRingToLngLat(venueFootprint(p.name, x, y, i * 29 + 5));
     const feature = { type: "Feature", properties: { fill: venueRoofFill(p.name, i) }, geometry: { type: "Polygon", coordinates: [ring] } };
     const layer = BUILDING_LAYER[p.name];
-    if(layer?.category === "ring" || layer?.category === "dome"){
+    if(layer?.category === "ring" || layer?.category === "dome" || layer?.category === "canopy"){
       venueAccentFeatures.push({
-        type: "Feature", properties: { tone: layer.category === "dome" ? "rgba(128,105,72,0.58)" : "rgba(242,220,139,0.62)" },
+        type: "Feature", properties: { tone: layer.category === "dome" ? "rgba(128,105,72,0.58)" : layer.category === "canopy" ? "rgba(239,173,74,0.72)" : "rgba(242,220,139,0.62)" },
         geometry: { type: "LineString", coordinates: schematicRingToLngLat(blobRing(x, y, layer.w * 0.27, i * 29 + 901, 12)) }
       });
     }
