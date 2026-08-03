@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v305";
-const APP_BUILD_TIME = "2026-08-03T00:16:45Z";
+const APP_CACHE_VERSION = "v306";
+const APP_BUILD_TIME = "2026-08-03T00:19:46Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7278,6 +7278,30 @@ const TRUNK_PATH_SEGMENTS = TRUNK_PATH_EDGES.map(([a, b], i)=>{
   return { a: pa, b: pb, seed: i * 31 + 7 };
 }).filter(Boolean);
 
+// Closest point on any real trunk-path segment to (x,y), plus which
+// segment it's on — used only to bias DECORATIVE infill building
+// placement toward sitting along a real path edge (see
+// pickBuildingSpotNearPath below), same way real festival stalls/tents
+// front onto a footpath rather than scattering randomly across open
+// ground. This is NOT used to draw a path (that would be inventing
+// connectivity the spokes-removal pass above deliberately stopped
+// doing) — only to place decoration that's already going to render
+// somewhere near a district/stage regardless.
+function nearestTrunkPoint(x, y){
+  let best = null, bestDist = Infinity;
+  TRUNK_PATH_SEGMENTS.forEach(seg=>{
+    const { a, b } = seg;
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const lenSq = dx * dx + dy * dy || 1;
+    let t = ((x - a.x) * dx + (y - a.y) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const px = a.x + dx * t, py = a.y + dy * t;
+    const dist = (px - x) ** 2 + (py - y) ** 2;
+    if(dist < bestDist){ bestDist = dist; best = { x: px, y: py, dx, dy, dist: Math.sqrt(dist) }; }
+  });
+  return best;
+}
+
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
 
@@ -7702,12 +7726,34 @@ function buildMapGeoJSON(){
   // bounded, so this can never loop forever.
   const placedBuildingCenters = districtMemberPoints.map(p=> [parseFloat(p.x), parseFloat(p.y)]);
   const MIN_BUILDING_SEP = 1.5;
+  // Decorative infill buildings now bias toward sitting along a real
+  // trunk-path edge when one actually passes near this cluster, instead
+  // of a pure random angle/distance from the centre — real festival
+  // stalls/tents front onto a footpath, they don't scatter freely across
+  // open ground. Falls back to the old radial-random placement when no
+  // trunk segment comes close enough to this cluster to plausibly be
+  // "the path it fronts onto" (most minor stages/small clusters still
+  // won't have one nearby, which is fine — not every building needs to
+  // be path-adjacent, just biased toward it where a real path exists).
   function pickClearBuildingSpot(cx, cy, minDist, maxDist, rand){
+    const trunk = nearestTrunkPoint(cx, cy);
+    const usePath = trunk && trunk.dist <= maxDist * 1.3;
     let best = null, bestNearest = -Infinity;
     for(let attempt=0; attempt<6; attempt++){
-      const a = rand() * Math.PI * 2;
-      const dist = minDist + rand() * (maxDist - minDist);
-      const x = cx + Math.cos(a) * dist, y = cy + Math.sin(a) * dist * 0.85;
+      let x, y;
+      if(usePath){
+        const dlen = Math.sqrt(trunk.dx * trunk.dx + trunk.dy * trunk.dy) || 1;
+        const ux = trunk.dx / dlen, uy = trunk.dy / dlen;
+        const nx = -uy, ny = ux;
+        const along = (rand() - 0.5) * maxDist * 1.6;
+        const side = (rand() < 0.5 ? -1 : 1) * (minDist + rand() * (maxDist - minDist)) * 0.6;
+        x = trunk.x + ux * along + nx * side;
+        y = trunk.y + uy * along + ny * side * 0.85;
+      } else {
+        const a = rand() * Math.PI * 2;
+        const dist = minDist + rand() * (maxDist - minDist);
+        x = cx + Math.cos(a) * dist; y = cy + Math.sin(a) * dist * 0.85;
+      }
       let nearest = Infinity;
       placedBuildingCenters.forEach(p=>{ nearest = Math.min(nearest, Math.hypot(p[0] - x, p[1] - y)); });
       if(nearest >= MIN_BUILDING_SEP){ placedBuildingCenters.push([x, y]); return [x, y]; }
