@@ -372,7 +372,12 @@
   .map-label.stage{font-size:12px; font-weight:800; color:var(--accent-teal); background:rgba(11,21,18,.8); border-color:rgba(75,227,172,.45); padding:3px 9px; letter-spacing:.02em;}
   .map-label.minor{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55); color:rgba(238,246,241,.65);}
   .map-label.secret{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55); color:rgba(238,246,241,.75); font-style:italic;}
-  .map-label.camp{background:none; border:none; padding:0; font-size:8px; text-transform:uppercase; letter-spacing:.08em; color:rgba(238,246,241,.6); text-shadow:0 1px 3px rgba(0,0,0,.7); transform:translate(-50%, -50%);}
+  /* Was plain floating text with no background — reference screenshots
+     show every camping-field name as a solid orange/tan banner-style
+     tag ("WEST", "EAST CAMPING", "VALLEY CAMPING"), not bare text
+     sitting directly on the field colour. Matches the same tan family
+     already used for buildings/paths on this map. */
+  .map-label.camp{background:rgba(196,150,80,.9); border:1px solid rgba(120,85,35,.6); padding:1px 6px; border-radius:3px; font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:rgba(30,20,10,.95); text-shadow:none; transform:translate(-50%, -50%);}
   .stagelist{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
   .stagelist span{font-size:12px; background:var(--bg-panel-2); border:1px solid var(--line); padding:4px 10px; border-radius:20px; color:var(--text-muted);}
   .stagelist button{font-size:12px; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-muted); padding:6px 12px; border-radius:20px; cursor:pointer; white-space:nowrap;}
