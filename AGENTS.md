@@ -235,6 +235,8 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   the single source for the broad festival-ground silhouette: keep that fill
   calm and continuous, then layer woodland, camps and districts above it
   rather than using scattered background polygons to approximate the site.
+  Keep individual trees, tents, cars and confetti as close-zoom texture, not
+  overview decoration; the regional silhouettes must remain legible first.
 - `map-system/data/stage-precinct-layout.json` â€” reviewed stage forecourts,
   shared venue courts and street spines. Use it for a named central-space
   silhouette; never stretch a district boundary or invent marker positions

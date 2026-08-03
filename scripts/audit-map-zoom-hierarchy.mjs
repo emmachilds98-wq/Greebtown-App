@@ -15,6 +15,8 @@ const infillZoom = matchNumber(/id: "infill-buildings-fill"[^\n]*minzoom: (\d+(?
 const fineFieldZoom = matchNumber(/id: "fields-fine-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 const hedgeZoom = matchNumber(/id: "hedges-line"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 const broadFieldZoom = matchNumber(/id: "fields-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
+const treeZoom = matchNumber(/id: "trees-circle"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
+const tentZoom = matchNumber(/id: "tents-circle"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 
 if(!app.includes('data: geo.siteGround') || !app.includes('id: "site-ground-fill"')) errors.push("the reviewed site boundary must render as the primary festival-ground silhouette");
 if(!Number.isFinite(labelThreshold) || labelThreshold < 16) errors.push("label thinning must remain active through normal close zoom");
@@ -25,6 +27,8 @@ if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom) errors.push("gen
 if(!Number.isFinite(broadFieldZoom) || broadFieldZoom < 16) errors.push("broad farmland texture must remain out of the silhouette-first overview");
 if(!Number.isFinite(fineFieldZoom) || fineFieldZoom < 17) errors.push("fine field mottling must remain deep-zoom only");
 if(!Number.isFinite(hedgeZoom) || hedgeZoom < 16) errors.push("outer hedgerows must remain secondary to the site silhouette");
+if(!Number.isFinite(treeZoom) || treeZoom < 15.5) errors.push("individual trees must not obscure the overview silhouette");
+if(!Number.isFinite(tentZoom) || tentZoom < 16) errors.push("individual tents must remain close-zoom texture");
 if(!css.includes("#map.map-labels-thin .map-label:not(.district){display:none;}")) errors.push("thin mode must leave only district labels visible");
 if(errors.length){ console.error(errors.join("\n")); process.exit(1); }
-console.log(`Map zoom hierarchy passed: coherent site ground; labels < ${labelThreshold}; passages ${passageZoom}; massing ${massingZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}.`);
+console.log(`Map zoom hierarchy passed: coherent site ground; labels < ${labelThreshold}; passages ${passageZoom}; massing ${massingZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}; trees/tents ${treeZoom}/${tentZoom}.`);

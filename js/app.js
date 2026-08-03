@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v384";
-const APP_BUILD_TIME = "2026-08-03T09:51:06Z";
+const APP_CACHE_VERSION = "v385";
+const APP_BUILD_TIME = "2026-08-03T09:55:32Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9264,7 +9264,7 @@ function loadMap(){
       mapGL.addSource("mapParkingRows", { type: "geojson", data: geo.parkingRows });
       mapGL.addLayer({ id: "parking-rows-line", type: "line", source: "mapParkingRows", paint: { "line-color": "rgba(255,255,255,0.4)", "line-width": 1.2 } });
       mapGL.addSource("mapParkingCars", { type: "geojson", data: geo.parkingCars });
-      mapGL.addLayer({ id: "parking-cars-circle", type: "circle", source: "mapParkingCars", paint: {
+      mapGL.addLayer({ id: "parking-cars-circle", type: "circle", source: "mapParkingCars", minzoom: 15.5, paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1, 19, 3.2],
         "circle-color": "rgba(235,235,230,0.85)",
         "circle-stroke-width": 0.6, "circle-stroke-color": "rgba(60,60,58,0.6)"
@@ -9591,21 +9591,21 @@ function loadMap(){
       // video's own camp confetti reads as small tent-shaped diamonds,
       // not round dots.
       mapGL.addSource("mapConfetti", { type: "geojson", data: geo.confetti });
-      mapGL.addLayer({ id: "confetti-fill", type: "fill", source: "mapConfetti", paint: { "fill-color": ["get", "color"] } });
+      mapGL.addLayer({ id: "confetti-fill", type: "fill", source: "mapConfetti", minzoom: 15.8, paint: { "fill-color": ["get", "color"] } });
 
       mapGL.addSource("mapCampervans", { type: "geojson", data: geo.campervans });
-      mapGL.addLayer({ id: "campervans-fill", type: "fill", source: "mapCampervans", paint: { "fill-color": "rgba(210,210,215,0.85)" } });
-      mapGL.addLayer({ id: "campervans-outline", type: "line", source: "mapCampervans", paint: { "line-color": "rgba(90,90,95,0.7)", "line-width": 0.6 } });
+      mapGL.addLayer({ id: "campervans-fill", type: "fill", source: "mapCampervans", minzoom: 15.8, paint: { "fill-color": "rgba(210,210,215,0.85)" } });
+      mapGL.addLayer({ id: "campervans-outline", type: "line", source: "mapCampervans", minzoom: 15.8, paint: { "line-color": "rgba(90,90,95,0.7)", "line-width": 0.6 } });
 
       mapGL.addSource("mapTrees", { type: "geojson", data: geo.trees });
-      mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", paint: {
+      mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", minzoom: 15.5, paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.6], 19, ["*", ["get", "size"], 2.6]],
         "circle-color": ["get", "color"],
         "circle-stroke-width": 0.6, "circle-stroke-color": "rgba(20,40,28,0.5)"
       } });
 
       mapGL.addSource("mapTents", { type: "geojson", data: geo.tents });
-      mapGL.addLayer({ id: "tents-circle", type: "circle", source: "mapTents", paint: {
+      mapGL.addLayer({ id: "tents-circle", type: "circle", source: "mapTents", minzoom: 16.0, paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.8, 19, 5.5],
         "circle-color": ["get", "color"],
         "circle-stroke-width": 1, "circle-stroke-color": "rgba(238,246,241,0.4)"
