@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v304";
-const APP_BUILD_TIME = "2026-08-03T00:09:19Z";
+const APP_CACHE_VERSION = "v305";
+const APP_BUILD_TIME = "2026-08-03T00:16:45Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6173,6 +6173,15 @@ const thingsToFind = [
   // Avenue as previously guessed (the venueDirectory copy of E Numbers
   // already said "near Metropolis", inconsistent with this entry's own
   // old "near Letsbe Avenue" — this was that drift, now resolved one way).
+  // Four more names from that same confirmed chain, spotted on camera
+  // this session but never added as their own pins until now — the gap
+  // between Metropolis and Area 404 was reported as looking "extremely
+  // large" with nothing in it; these were seen but not yet tracked,
+  // exactly the detail needed to fill that space in.
+  { name:"Memory Mart", near:"Metropolis", x:"18%", y:"32%", info:"Seen labelled on the official app's own map east of Metropolis, north end of the E Numbers/Gabber Kebabber chain — no lineup or theme details sourced yet." },
+  { name:"Better You", near:"Metropolis", x:"19%", y:"34%", info:"Seen labelled on the official app's own map east of Metropolis, in the same chain as Memory Mart — no lineup or theme details sourced yet." },
+  { name:"BBXL Info", near:"Metropolis", x:"20%", y:"35%", info:"An info kiosk seen labelled on the official app's own map east of Metropolis — no further details sourced yet." },
+  { name:"Distractoverse", near:"Metropolis", x:"21%", y:"36%", info:"Seen labelled on the official app's own map as a speckled ground zone east of Metropolis, tying into Metropolis's Bettercorp/Betterverse storyline — no lineup or theme details sourced yet." },
   { name:"E Numbers", near:"Metropolis", x:"22%", y:"38%", info:"A sweet-shop/E-numbers-themed party spot east of Metropolis, in a chain with Gabber Kebabber and Infinity." },
   { name:"Gabber Kebabber", near:"Metropolis", x:"26%", y:"40%", info:"Kebab-shop chaos paired with gabber and hardcore, east of Metropolis in the same chain as E Numbers." },
   { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
@@ -7011,6 +7020,33 @@ function curvedLine(p0, p1, seed){
   return [p0, [mx + nx * offset, my + ny * offset], p1];
 }
 
+// Buffers a polyline (array of [x,y] schematic points) into a closed
+// ribbon polygon of the given total width — a real filled ground AREA a
+// path actually covers, not a stroked line at a fixed screen-pixel
+// width. At each point, offsets perpendicular to the path's local
+// direction (averaged from both neighbouring segments at interior
+// points, so the ribbon doesn't kink at the bend) by half the width
+// either side, then joins the two offset rows into one polygon ring.
+function ribbonFromPath(points, width){
+  const hw = width / 2;
+  const n = points.length;
+  const left = [], right = [];
+  for(let i=0;i<n;i++){
+    const p = points[i];
+    let dx, dy;
+    if(i === 0){ dx = points[1][0] - p[0]; dy = points[1][1] - p[1]; }
+    else if(i === n - 1){ dx = p[0] - points[i - 1][0]; dy = p[1] - points[i - 1][1]; }
+    else { dx = points[i + 1][0] - points[i - 1][0]; dy = points[i + 1][1] - points[i - 1][1]; }
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
+    const nx = -dy / len, ny = dx / len;
+    left.push([p[0] + nx * hw, p[1] + ny * hw]);
+    right.push([p[0] - nx * hw, p[1] - ny * hw]);
+  }
+  const ring = left.concat(right.reverse());
+  ring.push(ring[0]);
+  return ring;
+}
+
 // Converts a ring/list of [x,y] points in the existing 0-100 schematic
 // space into [lon,lat] pairs (GeoJSON coordinate order) via the same
 // schematicToLatLon() every other approximate position in this file uses.
@@ -7093,7 +7129,21 @@ const TRUNK_PATH_EDGES = [
   ["West Gate", "Downtown Camping"],
   ["Downtown Camping", "Metropolis"],
   ["Metropolis", "Botanica"],
-  ["Metropolis", "Area 404"],
+  // Metropolis <-> Area 404 previously jumped straight across the whole
+  // gap between them as one direct line, ignoring the real venues that
+  // actually sit in that space — reported as "the area between
+  // Metropolis and Area 404 seems extremely large" with nothing to
+  // break it up. Genuine footage shows a chain (Memory Mart/Better You/
+  // BBXL Info/Distractoverse/E Numbers/Gabber Kebabber, then Infinity)
+  // running east from Metropolis toward Area 404 — routing the path
+  // through the two of those already tracked as named venues (E Numbers,
+  // Gabber Kebabber) plus Infinity, instead of a single straight jump,
+  // so the gap reads as a real chain of stops, not empty space with one
+  // line drawn across it.
+  ["Metropolis", "E Numbers"],
+  ["E Numbers", "Gabber Kebabber"],
+  ["Gabber Kebabber", "Infinity"],
+  ["Infinity", "Area 404"],
   ["Botanica", "Area 404"],
   ["Metropolis", "Hydro XL"],
   ["Botanica", "Letsbe Avenue"],
@@ -7449,10 +7499,24 @@ function buildMapGeoJSON(){
   // Main "trail" backbone — the real trunk-path segments traced from
   // the reference videos (see TRUNK_PATH_EDGES above), not the old
   // district-array-order loop this used to draw.
-  const trailFeatures = TRUNK_PATH_SEGMENTS.map(seg=>({
-    type: "Feature", properties: {},
-    geometry: { type: "LineString", coordinates: schematicRingToLngLat(curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed)) }
-  }));
+  //
+  // Rendered as a real filled AREA (a buffered ribbon polygon), not a
+  // stroked line — a `line` layer's width is a fixed screen-pixel
+  // stroke that doesn't represent the path's actual real-world width or
+  // scale with zoom the way a genuine ground feature does. Reported
+  // directly: "footpaths should not be lines, it should be clearly
+  // defined by colour difference in the image and using pathways that
+  // cover the real width and coverage of the real floor." 0.6 schematic
+  // units (~5m at this site's real ~890x735m span) approximates a real
+  // festival trunk path's width.
+  const TRAIL_WIDTH = 0.6;
+  const trailFeatures = TRUNK_PATH_SEGMENTS.map(seg=>{
+    const centreline = curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed);
+    return {
+      type: "Feature", properties: {},
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(ribbonFromPath(centreline, TRAIL_WIDTH)) ] }
+    };
+  });
 
   // Hill-shading contour rings — every district's own info text is
   // explicitly tagged "Downtown." or "Hilltop." (Thrutopia/Oldtown are
@@ -8479,8 +8543,14 @@ function loadMap(){
       // "nearest point" lines with no footage evidence behind them) were
       // removed; see the comment above TRUNK_PATH_EDGES's own removal
       // block in buildMapGeoJSON for why.
-      mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(55,42,28,0.7)", "line-width": 5.5 } });
-      mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(232,208,168,0.95)", "line-width": 2.6 } });
+      //
+      // Rendered as a filled ribbon AREA (geo.trail is now Polygon
+      // geometry, see ribbonFromPath/TRAIL_WIDTH above), not a stroked
+      // line — a real ground colour difference at the path's actual
+      // width/footprint, not a fixed-pixel line that doesn't represent
+      // real width or scale with zoom.
+      mapGL.addLayer({ id: "trail-fill", type: "fill", source: "mapTrail", paint: { "fill-color": "rgba(224,200,160,0.95)" } });
+      mapGL.addLayer({ id: "trail-outline", type: "line", source: "mapTrail", paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
 
       // Main-stage glow — three stacked circle layers per stage, widest/
       // faintest first so the smaller/brighter ones layer on top and it
