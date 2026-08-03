@@ -225,8 +225,10 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   polygons (including protected exclusions for non-camping places).
 - `map-system/data/evidenced-paths.json` â€” only reference-supported routes.
 - `map-system/data/district-footprints.json` â€” reviewed illustrated areas.
-- `map-system/data/site-layout.json` â€” reviewed arrival and parking
-  footprints around the festival perimeter.
+- `map-system/data/site-layout.json` â€” reviewed arrival, parking and
+  gate-forecourt footprints around the festival perimeter. Every canonical
+  gate must have exactly one forecourt entry; never fall back to a generic
+  rectangle when its footprint is unknown.
 - `map-system/data/reference-layout.json` â€” cluster anchors. This moves a
   district, its dependent venues and its evidence-based routes together.
 

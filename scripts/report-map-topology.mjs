@@ -15,5 +15,5 @@ for(const observation of references.observations || []) console.log(`- ${observa
 console.log(`\nDistricts: ${districts.footprints.length} reviewed footprints`);
 console.log(`Camping: ${camps.zones.length} fields; ${camps.groundUseFields.length} ground-use polygons`);
 console.log(`Woodland: ${natural.footprints.length} reviewed silhouettes`);
-console.log(`Arrival: ${site.parkingAreas.length} reviewed parking footprints`);
+console.log(`Arrival: ${site.parkingAreas.length} reviewed parking footprints; ${(site.gateForecourts || []).length} reviewed gate forecourts`);
 console.log("\nUse this report before a visual pass: change the specialised data source named above, then run map-preflight.");

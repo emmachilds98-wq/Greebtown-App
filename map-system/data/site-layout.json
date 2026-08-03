@@ -30,5 +30,31 @@
       "evidence": "official-detail",
       "notes": "Wide southern arrival field beside the road and Camp Skylark Sunset approach."
     }
+  ],
+  "gateForecourts": [
+    {
+      "sourceName": "West Gate",
+      "footprint": { "width": 2.4, "height": 1.35, "sides": 4, "rotation": -18 },
+      "evidence": "official-overview",
+      "notes": "Small west-edge threshold at the Downtown / west-camping approach; deliberately compact so it does not become a new district."
+    },
+    {
+      "sourceName": "East Gate",
+      "footprint": { "width": 1.45, "height": 2.35, "sides": 4, "rotation": 2 },
+      "evidence": "official-detail",
+      "notes": "Narrow north-east arrival threshold, aligned vertically with the reviewed east car-park edge."
+    },
+    {
+      "sourceName": "South Gate",
+      "footprint": { "width": 2.55, "height": 1.35, "sides": 4, "rotation": -10 },
+      "evidence": "official-detail",
+      "notes": "Broad south-road threshold at the Camp Skylark approach."
+    },
+    {
+      "sourceName": "Campervan Gate",
+      "footprint": { "width": 1.45, "height": 1.05, "sides": 4, "rotation": -10 },
+      "evidence": "official-detail",
+      "notes": "Compact hardstanding beside, but distinct from, South Gate and the southern car-park field."
+    }
   ]
 }

@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v368";
-const APP_BUILD_TIME = "2026-08-03T07:30:59Z";
+const APP_CACHE_VERSION = "v369";
+const APP_BUILD_TIME = "2026-08-03T08:14:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6651,7 +6651,7 @@ const gates = (()=>{
 // East Gate and South Gate already name in their own info text above.
 // Positioned near those two gates rather than guessed elsewhere on site.
 const siteLayout = window.GREEBTOWN_SITE_LAYOUT;
-if(!Array.isArray(siteLayout?.parkingAreas) || !siteLayout.parkingAreas.length) throw new Error("Greebtown site-layout authoring data failed to load");
+if(!Array.isArray(siteLayout?.parkingAreas) || !siteLayout.parkingAreas.length || !Array.isArray(siteLayout.gateForecourts)) throw new Error("Greebtown site-layout authoring data failed to load");
 const parkingAreas = siteLayout.parkingAreas.map(area => ({
   x: `${area.position.x}%`, y: `${area.position.y}%`, r: area.desiredRadius,
   text: area.name, footprint: area.footprint, evidence: area.evidence
@@ -8611,15 +8611,18 @@ function buildMapGeoJSON(){
   };
   const roadFeatures = [alresfordRdFeature, petersfieldRdFeature, a272Feature];
 
-  // Arrival forecourts give the confirmed gates a small, recognisable
-  // hardstanding at the perimeter. They are not new routes or inferred
-  // venue positions: each is centred exactly on its canonical gate marker.
+  // Arrival forecourts are reviewed site-layout data, centred exactly on a
+  // canonical gate. This avoids the old one-size-fits-all rectangles making
+  // the East Gate and road-edge approaches read as the wrong kind of space.
+  const gateForecourtByName = new Map(siteLayout.gateForecourts.map(forecourt => [forecourt.sourceName, forecourt]));
   const gateForecourtFeatures = gates.map((gate, i)=>{
     const x = parseFloat(gate.x), y = parseFloat(gate.y);
-    const compact = /Campervan/.test(gate.name);
+    const forecourt = gateForecourtByName.get(gate.name);
+    if(!forecourt) throw new Error(`Missing reviewed forecourt for ${gate.name}`);
+    const { width, height, sides, rotation } = forecourt.footprint;
     return {
-      type:"Feature", properties:{ fill: compact ? "rgba(205,194,165,0.62)" : "rgba(222,205,169,0.7)" },
-      geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(fieldRing(x, y, compact ? 1.5 : 2.25, compact ? 1.05 : 1.35, 9400 + i * 29, 4))] }
+      type:"Feature", properties:{ fill: gate.name === "Campervan Gate" ? "rgba(205,194,165,0.62)" : "rgba(222,205,169,0.7)" },
+      geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(fieldRing(x, y, width, height, 9400 + i * 29, sides, rotation))] }
     };
   });
 
