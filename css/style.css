@@ -357,6 +357,12 @@
      across the district name rather than one flat colour. A CSS
      gradient clipped to the text achieves that without an image. */
   .map-label.district.shimmer{background:linear-gradient(90deg, rgba(120,220,190,1), rgba(150,200,255,1), rgba(235,150,220,1), rgba(120,220,190,1)); background-clip:text; -webkit-background-clip:text; color:transparent; -webkit-text-fill-color:transparent; text-shadow:none; filter:drop-shadow(0 1px 3px rgba(0,0,0,.85));}
+  /* Oldtown — reads as a dark red gothic-script label on camera, not a
+     bright flat colour like every other district. No gothic webfont is
+     loaded (no build step to add one), so this leans on a deep blood-red
+     tone, a serif font stack (the closest system-font approximation of
+     a carved/engraved look) and a heavier double-shadow outline instead. */
+  .map-label.district.gothic{font-family:Georgia, "Times New Roman", serif; color:rgba(150,20,20,.95); text-shadow:0 1px 0 rgba(0,0,0,.9), 0 2px 4px rgba(0,0,0,.85), 0 0 8px rgba(150,20,20,.4);}
   /* Main stages previously rendered with no label class at all — same
      plain pill as every other marker on the map, despite the marker dot
      itself already being the biggest/only-pulsing one. Bigger, bolder,
