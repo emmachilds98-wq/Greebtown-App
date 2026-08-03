@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v382";
-const APP_BUILD_TIME = "2026-08-03T09:33:32Z";
+const APP_CACHE_VERSION = "v383";
+const APP_BUILD_TIME = "2026-08-03T09:40:27Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7634,7 +7634,7 @@ function buildMapGeoJSON(){
       // distinctly-tinted patch against the surrounding open ground, not
       // a subtle wash; line stays at its existing 0.55 so the boundary
       // doesn't get louder than the markers plotted inside it.
-      properties: { name: d.name, fill: `rgba(${rgb},0.22)`, line: `rgba(${rgb},0.55)`, casing: `rgba(${rgb},0.28)` },
+      properties: { name: d.name, fill: `rgba(${rgb},0.52)`, line: `rgba(${rgb},0.68)`, casing: `rgba(${rgb},0.34)` },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(ring) ] }
     };
   });
@@ -9096,7 +9096,7 @@ function loadMap(){
       // A muted estate-green base lets the bright camp fields, woodland
       // and town clearings carry the hierarchy, matching the official
       // map's light aerial-plan feel rather than a dark game-map look.
-      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#b8cbaa" } }] },
+      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#cbdcc4" } }] },
       center: [-1.2394, 51.0534],
       // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
       // 14.4 view (previous pass) showed a lot of surrounding blank
@@ -9180,12 +9180,12 @@ function loadMap(){
       // illustrated map uses so everything reads at a glance instead of
       // competing on one flat plane.
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
-      mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", minzoom: 16.3, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapFieldsFine", { type: "geojson", data: geo.fieldsFine });
-      mapGL.addLayer({ id: "fields-fine-fill", type: "fill", source: "mapFieldsFine", minzoom: 15.4, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "fields-fine-fill", type: "fill", source: "mapFieldsFine", minzoom: 17.1, paint: { "fill-color": ["get", "fill"] } });
 
       mapGL.addSource("mapHedges", { type: "geojson", data: geo.hedges });
-      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", minzoom: 14.2, paint: { "line-color": "rgba(31,72,45,0.14)", "line-width": 0.8 } });
+      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", minzoom: 16.0, paint: { "line-color": "rgba(31,72,45,0.12)", "line-width": 0.75 } });
 
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
       mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.1)", "line-width": 1.2 } });
@@ -9209,8 +9209,8 @@ function loadMap(){
       // paler centre line, same two-layer treatment as the trunk paths
       // inside the site.
       mapGL.addSource("mapRoads", { type: "geojson", data: geo.roads });
-      mapGL.addLayer({ id: "roads-casing", type: "line", source: "mapRoads", paint: { "line-color": "rgba(90,80,70,0.55)", "line-width": 5 } });
-      mapGL.addLayer({ id: "roads-line", type: "line", source: "mapRoads", paint: { "line-color": "rgba(235,210,160,0.75)", "line-width": 2.4 } });
+      mapGL.addLayer({ id: "roads-casing", type: "line", source: "mapRoads", paint: { "line-color": "rgba(104,107,104,0.7)", "line-width": 5.4 } });
+      mapGL.addLayer({ id: "roads-line", type: "line", source: "mapRoads", paint: { "line-color": "rgba(239,241,237,0.94)", "line-width": 2.5 } });
 
       mapGL.addSource("mapGateForecourts", { type: "geojson", data: geo.gateForecourts });
       mapGL.addLayer({ id: "gate-forecourts-fill", type: "fill", source: "mapGateForecourts", paint: { "fill-color": ["get", "fill"] } });
@@ -9238,9 +9238,9 @@ function loadMap(){
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
       mapGL.addSource("mapForestFringe", { type: "geojson", data: geo.forestFringe });
-      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": "rgba(64,145,82,0.24)" } });
-      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(47,139,75,0.78)" } });
-      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(35,112,61,0.62)", "line-width": 1.4 } });
+      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": "rgba(82,163,93,0.22)" } });
+      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(52,136,75,0.88)" } });
+      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(35,105,59,0.7)", "line-width": 1.5 } });
 
       // Parking — flat grey fields with a few straight "row" lines, kept
       // visually distinct from both camping (green/yellow, textured) and
