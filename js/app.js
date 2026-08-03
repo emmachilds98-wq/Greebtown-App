@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v313";
-const APP_BUILD_TIME = "2026-08-03T01:06:54Z";
+const APP_CACHE_VERSION = "v314";
+const APP_BUILD_TIME = "2026-08-03T01:15:39Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7010,28 +7010,52 @@ function buildingFootprint(cx, cy, seed){
   return pts;
 }
 
-// A few named venues have a distinctly different real silhouette from
-// the generic rotated-rectangle every other venue gets, confirmed
-// repeatedly in this session's reference footage — Full Moon Ballroom
-// is its own white dome/marquee tent, Spectrum 360 is a circular
-// container-ring arena (not a rectangular building), NEXUS sits on a
-// dark triangular mound. Every other named venue still uses the plain
-// rectangle, since that's genuinely what most of them look like and
-// inventing a distinctive shape without evidence would be a guess, not
-// an accuracy improvement.
-function venueFootprint(name, cx, cy, seed){
-  if(name === "Full Moon Ballroom" || name === "Spectrum 360"){
-    return blobRing(cx, cy, name === "Full Moon Ballroom" ? 1.7 : 1.5, seed, 14);
-  }
-  if(name === "NEXUS"){
-    const rand = seededRand(seed);
-    const size = 1.7, angle = rand() * Math.PI;
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    const corners = [[0,-size],[size * 0.87, size * 0.5],[-size * 0.87, size * 0.5]];
+// Structured per-building layer — explicit width/height/rotation/
+// category per venue, evidence-cited from reference screenshots,
+// instead of a purely procedural seeded-random shape. w/h in schematic
+// units, rotation in degrees (clockwise, 0 = long axis east-west).
+// category is a shape hint consulted by buildingLayerFootprint() below:
+// "rect" (rotated rectangle, the default), "kite" (NEXUS's dark
+// diamond-shaped mound), "dome" (Full Moon Ballroom's white marquee/
+// tent), "ring" (Spectrum 360's circular container arena). There is no
+// real image/sprite asset pipeline (this map is 100% vector shapes, no
+// sprite sheet, to stay a zero-network offline PWA) — category is both
+// the shape hint AND the closest thing to an "asset" identifier here.
+// Anything NOT listed falls through to the old procedural
+// buildingFootprint() — additive, only added where a screenshot gives
+// real shape/orientation evidence, not invented for its own sake.
+const BUILDING_LAYER = {
+  "NEXUS": { w: 3.4, h: 3.0, rotation: 20, category: "kite" },
+  "Full Moon Ballroom": { w: 3.4, h: 3.4, rotation: 0, category: "dome" },
+  "Spectrum 360": { w: 3.0, h: 3.0, rotation: 0, category: "ring" },
+  // Grand Central's own reference screenshot (findings this session)
+  // shows its building rotated diagonally NW-SE relative to the
+  // surrounding path network, not axis-aligned like a generic infill
+  // building — the old procedural footprint had no fixed orientation
+  // at all (a new random angle every reload).
+  "Grand Central": { w: 3.2, h: 1.6, rotation: 35, category: "rect" }
+};
+function buildingLayerFootprint(cx, cy, seed, layer){
+  const angle = (layer.rotation || 0) * Math.PI / 180;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  if(layer.category === "kite"){
+    const size = layer.w / 2;
+    const corners = [[0, -size], [size * 0.87, size * 0.5], [-size * 0.87, size * 0.5]];
     const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
     pts.push(pts[0]);
     return pts;
   }
+  if(layer.category === "dome" || layer.category === "ring"){
+    return blobRing(cx, cy, layer.w / 2, seed, 14);
+  }
+  const corners = [[-layer.w/2,-layer.h/2],[layer.w/2,-layer.h/2],[layer.w/2,layer.h/2],[-layer.w/2,layer.h/2]];
+  const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
+  pts.push(pts[0]);
+  return pts;
+}
+function venueFootprint(name, cx, cy, seed){
+  const layer = BUILDING_LAYER[name];
+  if(layer) return buildingLayerFootprint(cx, cy, seed, layer);
   return buildingFootprint(cx, cy, seed);
 }
 
