@@ -231,7 +231,10 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
 - `map-system/data/site-layout.json` â€” reviewed arrival, parking and
   gate-forecourt footprints around the festival perimeter. Every canonical
   gate must have exactly one forecourt entry; never fall back to a generic
-  rectangle when its footprint is unknown.
+  rectangle when its footprint is unknown. Its reviewed site boundary is also
+  the single source for the broad festival-ground silhouette: keep that fill
+  calm and continuous, then layer woodland, camps and districts above it
+  rather than using scattered background polygons to approximate the site.
 - `map-system/data/stage-precinct-layout.json` â€” reviewed stage forecourts,
   shared venue courts and street spines. Use it for a named central-space
   silhouette; never stretch a district boundary or invent marker positions

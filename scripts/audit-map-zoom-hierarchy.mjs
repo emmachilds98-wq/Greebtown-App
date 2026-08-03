@@ -16,6 +16,7 @@ const fineFieldZoom = matchNumber(/id: "fields-fine-fill"[^\n]*minzoom: (\d+(?:\
 const hedgeZoom = matchNumber(/id: "hedges-line"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 const broadFieldZoom = matchNumber(/id: "fields-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 
+if(!app.includes('data: geo.siteGround') || !app.includes('id: "site-ground-fill"')) errors.push("the reviewed site boundary must render as the primary festival-ground silhouette");
 if(!Number.isFinite(labelThreshold) || labelThreshold < 16) errors.push("label thinning must remain active through normal close zoom");
 if(!Number.isFinite(passageZoom) || passageZoom > 15) errors.push("district passages must appear before dense foreground detail");
 if(!Number.isFinite(massingZoom) || massingZoom > 15) errors.push("authored massing must appear before dense foreground detail");
@@ -26,4 +27,4 @@ if(!Number.isFinite(fineFieldZoom) || fineFieldZoom < 17) errors.push("fine fiel
 if(!Number.isFinite(hedgeZoom) || hedgeZoom < 16) errors.push("outer hedgerows must remain secondary to the site silhouette");
 if(!css.includes("#map.map-labels-thin .map-label:not(.district){display:none;}")) errors.push("thin mode must leave only district labels visible");
 if(errors.length){ console.error(errors.join("\n")); process.exit(1); }
-console.log(`Map zoom hierarchy passed: labels < ${labelThreshold}; passages ${passageZoom}; massing ${massingZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}.`);
+console.log(`Map zoom hierarchy passed: coherent site ground; labels < ${labelThreshold}; passages ${passageZoom}; massing ${massingZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}.`);

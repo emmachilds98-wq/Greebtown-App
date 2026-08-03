@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v383";
-const APP_BUILD_TIME = "2026-08-03T09:40:27Z";
+const APP_CACHE_VERSION = "v384";
+const APP_BUILD_TIME = "2026-08-03T09:51:06Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8721,6 +8721,11 @@ function buildMapGeoJSON(){
   const siteBoundaryOutline = siteLayout.siteBoundary.points;
   const boundaryRing = schematicRingToLngLat(siteBoundaryOutline);
   boundaryRing.push(boundaryRing[0]);
+  // The official map reads as one continuous, bright festival site laid over
+  // a pale surrounding landscape. Keep that primary silhouette in the source
+  // data rather than trying to imply it with an accumulation of local fields.
+  // Woodland, camps, districts and venues are deliberately layered above it.
+  const siteGroundFeature = { type:"Feature", properties:{ fill:"rgba(73,184,108,0.9)" }, geometry:{ type:"Polygon", coordinates:[boundaryRing] } };
   const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: boundaryRing } };
 
   // A dark, thin north–south divider is visible immediately west of the
@@ -8846,6 +8851,7 @@ function buildMapGeoJSON(){
     contours: { type:"FeatureCollection", features: contourFeatures },
     hillContours: { type:"FeatureCollection", features: hillContourFeatures },
     hillBands: { type:"FeatureCollection", features: hillBandFeatures },
+    siteGround: { type:"FeatureCollection", features: [siteGroundFeature] },
     boundary: { type:"FeatureCollection", features: [boundaryFeature] },
     hilltopDivider: { type:"FeatureCollection", features: [hilltopDividerFeature] },
     roads: { type:"FeatureCollection", features: roadFeatures },
@@ -9179,6 +9185,8 @@ function loadMap(){
       // paths, then icon-like points on top — the same layering a real
       // illustrated map uses so everything reads at a glance instead of
       // competing on one flat plane.
+      mapGL.addSource("mapSiteGround", { type: "geojson", data: geo.siteGround });
+      mapGL.addLayer({ id: "site-ground-fill", type: "fill", source: "mapSiteGround", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
       mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", minzoom: 16.3, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapFieldsFine", { type: "geojson", data: geo.fieldsFine });
@@ -9200,7 +9208,7 @@ function loadMap(){
       mapGL.addLayer({ id: "hill-contours-line", type: "line", source: "mapHillContours", paint: { "line-color": "rgba(90,70,40,0.12)", "line-width": 1.5 } });
 
       mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
-      mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
+      mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", minzoom: 16.2, paint: { "line-color": "rgba(52,117,69,0.28)", "line-width": 1, "line-dasharray": [2, 2] } });
       mapGL.addSource("mapHilltopDivider", { type: "geojson", data: geo.hilltopDivider });
       mapGL.addLayer({ id: "hilltop-divider-line", type: "line", source: "mapHilltopDivider", paint: { "line-color": "rgba(42,76,52,0.72)", "line-width": 1.5, "line-dasharray": [2, 1.5] } });
 
