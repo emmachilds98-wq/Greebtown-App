@@ -6999,7 +6999,11 @@ function confettiClusterPoints(cx, cy, count, spread, seed){
 // fields), no grey (parking), no tan/brown (paths, buildings) — so a
 // district's own fill/outline colour is never confusable with the
 // zone type around it.
-const DISTRICT_PALETTE = ["242,140,60", "70,170,235", "175,120,235", "235,100,150", "225,80,80", "60,200,190", "210,90,200"];
+// The official map keeps the built festival footprint in a family of
+// greens; camping, parking and venue artwork provide the stronger colour
+// accents. Keeping district ground in that family makes the map read as
+// one site rather than a patchwork of unrelated rainbow blobs.
+const DISTRICT_PALETTE = ["49,157,83", "60,177,96", "67,169,91", "54,145,76", "80,184,103", "57,162,91", "65,151,81"];
 
 // ===============================
 // TRUNK PATH NETWORK — the real footpath topology this session's four
@@ -8526,7 +8530,10 @@ function loadMap(){
       // ground, with woods/forest fill reading as a clearly darker patch
       // on top of it (see forests-fill below) rather than the two being
       // close in tone.
-      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#4fa35c" } }] },
+      // A muted estate-green base lets the bright camp fields, woodland
+      // and town clearings carry the hierarchy, matching the official
+      // map's light aerial-plan feel rather than a dark game-map look.
+      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#b8cbaa" } }] },
       center: [-1.2394, 51.0534],
       // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
       // 14.4 view (previous pass) showed a lot of surrounding blank
@@ -8644,9 +8651,9 @@ function loadMap(){
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
       mapGL.addSource("mapForestFringe", { type: "geojson", data: geo.forestFringe });
-      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": "rgba(55,95,55,0.22)" } });
-      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(15,45,28,0.68)" } });
-      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(10,30,18,0.6)", "line-width": 1.4 } });
+      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": "rgba(64,145,82,0.24)" } });
+      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(47,139,75,0.78)" } });
+      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(35,112,61,0.62)", "line-width": 1.4 } });
 
       // Parking — flat grey fields with a few straight "row" lines, kept
       // visually distinct from both camping (green/yellow, textured) and
@@ -8731,7 +8738,7 @@ function loadMap(){
       // warm brown so the field boundary itself is legible, not just
       // implied by the confetti dots scattered inside it.
       mapGL.addSource("mapCampFields", { type: "geojson", data: geo.campFields });
-      mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(224,200,90,0.55)" } });
+      mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(250,211,37,0.80)" } });
       mapGL.addLayer({ id: "camp-fields-casing", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.28)", "line-width": 4.5 } });
       // Width bumped 1.8 -> 2.4, same "clear border" reasoning as
       // districts-line above — camp fields are the biggest ground use on

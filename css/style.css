@@ -285,12 +285,12 @@
      touch-action is deliberately NOT overridden here, unlike the old
      schematic version; MapLibre sets its own internally and needs full
      control of the gesture for pinch/pan/double-tap-zoom to work right. */
-  #map{height:460px; position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#1a2f29;}
-  .maplibregl-map{background:#1a2f29; font:inherit;}
-  .maplibregl-ctrl-group{background:rgba(11,21,18,.82) !important; border:1px solid rgba(255,255,255,.2) !important;}
+  #map{height:460px; position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#b8cbaa;}
+  .maplibregl-map{background:#b8cbaa; font:inherit;}
+  .maplibregl-ctrl-group{background:rgba(255,252,238,.92) !important; border:1px solid rgba(72,83,58,.35) !important; box-shadow:0 2px 8px rgba(34,54,36,.18) !important;}
   .maplibregl-ctrl-group button{background-color:transparent !important;}
-  .maplibregl-ctrl-group button + button{border-top:1px solid rgba(255,255,255,.15) !important;}
-  .maplibregl-ctrl-icon{filter:invert(1) brightness(1.6);}
+  .maplibregl-ctrl-group button + button{border-top:1px solid rgba(72,83,58,.22) !important;}
+  .maplibregl-ctrl-icon{filter:none;}
   .marker{position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; border-radius:50%; background:transparent; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center;}
   .marker::before{content:""; width:13px; height:13px; border-radius:50%; background:var(--accent-amber); box-shadow:0 0 0 4px rgba(242,168,60,.25); border:1.5px solid rgba(11,21,18,.6);}
   .marker.stage::before{width:16px; height:13px; border-radius:2px 2px 0 0; clip-path:polygon(50% 0%, 100% 100%, 0% 100%); background:var(--accent-teal); box-shadow:0 0 0 4px rgba(75,227,172,.22); border:none;}
@@ -323,7 +323,7 @@
   .dot.outline{background:transparent; border:1.5px dashed rgba(238,246,241,.6);}
   .line-swatch{width:16px; height:0; border-top:2px dashed var(--text-muted); display:inline-block;}
   .map-bg{position:absolute; inset:0; width:100%; height:100%; z-index:0;}
-  .map-label{position:absolute; left:0; top:0; z-index:1; font-size:10px; color:var(--text-primary); background:rgba(11,21,18,.65); padding:2px 7px; border-radius:8px; white-space:nowrap; pointer-events:none; transform:translate(-50%, 8px); border:1px solid rgba(255,255,255,.08);}
+  .map-label{position:absolute; left:0; top:0; z-index:1; font-size:10px; color:#342d1e; background:rgba(255,248,220,.94); padding:2px 7px; border-radius:3px; white-space:nowrap; pointer-events:none; transform:translate(-50%, 8px); border:1px solid rgba(93,70,34,.58); box-shadow:0 1px 2px rgba(35,53,35,.22);}
   /* Zoomed-out label thinning (see loadMap()'s updateLabelDensity) — the
      default view has 20+ names (stages, camps, gates, hidden venues)
      packed into one small cluster with no collision detection (these are
@@ -369,9 +369,9 @@
      teal-tinted (matching .marker.stage's own colour) so the 15-ish main
      stage names read as the clear anchor points of the map, with minor
      stages (below) visibly the smaller, secondary tier. */
-  .map-label.stage{font-size:12px; font-weight:800; color:var(--accent-teal); background:rgba(11,21,18,.8); border-color:rgba(75,227,172,.45); padding:3px 9px; letter-spacing:.02em;}
-  .map-label.minor{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55); color:rgba(238,246,241,.65);}
-  .map-label.secret{font-size:8px; padding:1px 5px; background:rgba(11,21,18,.55); color:rgba(238,246,241,.75); font-style:italic;}
+  .map-label.stage{font-size:12px; font-weight:800; color:#392b19; background:rgba(255,192,76,.97); border-color:rgba(115,70,17,.8); padding:3px 9px; letter-spacing:.02em;}
+  .map-label.minor{font-size:8px; padding:1px 5px; color:#342d1e;}
+  .map-label.secret{font-size:8px; padding:1px 5px; color:#342d1e; font-style:italic;}
   /* Was plain floating text with no background — reference screenshots
      show every camping-field name as a solid orange/tan banner-style
      tag ("WEST", "EAST CAMPING", "VALLEY CAMPING"), not bare text
@@ -650,7 +650,7 @@
      flat neutral border for every category — matching the official
      app's own colour-coded category icons (its Bar/Food/Toilet/Medical
      pill buttons each use a distinct hue too). */
-  .marker.poi{width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:rgba(11,21,18,.75); border:1.5px solid rgba(var(--poi-rgb, 255,255,255),.75); box-shadow:0 0 0 1px rgba(var(--poi-rgb, 255,255,255),.25); font-size:11px;}
+  .marker.poi{width:18px; height:18px; margin:-9px 0 0 -9px; border-radius:50%; background:rgba(255,253,240,.94); border:1.5px solid rgba(var(--poi-rgb, 255,255,255),.92); box-shadow:0 1px 2px rgba(36,54,37,.32); font-size:10px;}
   .marker.poi::before, .marker.poi::after{content:none;}
 
   /* ===== "Add a place" markers — friend-created pins from the ＋ button,
