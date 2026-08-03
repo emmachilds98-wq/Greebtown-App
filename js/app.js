@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v316";
-const APP_BUILD_TIME = "2026-08-03T01:26:31Z";
+const APP_CACHE_VERSION = "v317";
+const APP_BUILD_TIME = "2026-08-03T01:31:25Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6492,6 +6492,9 @@ const campLabels = [
   { x:"14%", y:"7%", text:"West Camping" },
   { x:"5%", y:"35%", text:"Downtown Camping" },
   { x:"7%", y:"58%", text:"Meadow Camping (Accessible)" },
+  // Seen labelled separately from "Meadow Accessible Camp" in a whole-
+  // map reference screenshot — two distinct adjacent fields, not one.
+  { x:"10%", y:"58%", text:"Meadow Living" },
   { x:"48%", y:"4%", text:"Valley Camping" },
   { x:"70%", y:"6%", text:"Tangerine Fields" },
   { x:"86%", y:"14%", text:"Campervan Field" },
@@ -8376,6 +8379,42 @@ function buildMapGeoJSON(){
   boundaryRing.push(boundaryRing[0]);
   const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: boundaryRing } };
 
+  // Real named roads bordering the site — Alresford Rd (diagonal, NW
+  // corner), Petersfield Rd (west edge continuing along the south) and
+  // the A272 (same road, signed differently further along) — visible in
+  // every whole-map reference screenshot but never rendered before.
+  // Purely environmental context outside the site boundary, anchored in
+  // real lat/lon like the boundary above rather than schematic space.
+  // Hand-approximated bends (no real road-network data source) — treat
+  // as "a road runs roughly here", not a surveyed centreline.
+  const roadPad = 0.22;
+  const rLatPad = (SITE_NE.lat - SITE_SW.lat) * roadPad;
+  const rLonPad = (SITE_NE.lon - SITE_SW.lon) * roadPad;
+  const alresfordRdFeature = {
+    type: "Feature", properties: { name: "Alresford Rd" },
+    geometry: { type: "LineString", coordinates: [
+      [bW - rLonPad, bN + rLatPad * 0.6],
+      [bW + (bE - bW) * 0.3, bN + rLatPad * 0.15],
+      [bW + (bE - bW) * 0.55, bN - rLatPad * 0.1]
+    ] }
+  };
+  const petersfieldRdFeature = {
+    type: "Feature", properties: { name: "Petersfield Rd" },
+    geometry: { type: "LineString", coordinates: [
+      [bW - rLonPad * 0.3, bS + (bN - bS) * 0.5],
+      [bW - rLonPad * 0.1, bS - rLatPad * 0.2],
+      [bW + (bE - bW) * 0.25, bS - rLatPad * 0.5]
+    ] }
+  };
+  const a272Feature = {
+    type: "Feature", properties: { name: "A272" },
+    geometry: { type: "LineString", coordinates: [
+      [bW + (bE - bW) * 0.2, bS - rLatPad * 0.45],
+      [bW + (bE - bW) * 0.6, bS - rLatPad * 0.6]
+    ] }
+  };
+  const roadFeatures = [alresfordRdFeature, petersfieldRdFeature, a272Feature];
+
   // Perimeter fence posts — small evenly-spaced dots walking the
   // boundary ring, so the site edge reads as an actual (illustrated)
   // fence line instead of just a dashed sketch with nothing on it.
@@ -8427,6 +8466,7 @@ function buildMapGeoJSON(){
     hillContours: { type:"FeatureCollection", features: hillContourFeatures },
     hillBands: { type:"FeatureCollection", features: hillBandFeatures },
     boundary: { type:"FeatureCollection", features: [boundaryFeature] },
+    roads: { type:"FeatureCollection", features: roadFeatures },
     fencePosts: { type:"FeatureCollection", features: fencePostFeatures }
   };
 }
@@ -8435,7 +8475,7 @@ function buildMapGeoJSON(){
 // adding a hidden venue, etc. all refresh the map's markers). Off by
 // default for the busier layers so the map isn't crowded on first arrival —
 // "Other stages" and "Amenities" stay on since those are core wayfinding info.
-let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false, poi: true, friend: true, sssi: true };
+let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false, poi: true, friend: true, sssi: true, road: true };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -8741,6 +8781,14 @@ function loadMap(){
 
       mapGL.addSource("mapBoundary", { type: "geojson", data: geo.boundary });
       mapGL.addLayer({ id: "boundary-line", type: "line", source: "mapBoundary", paint: { "line-color": "rgba(143,168,156,0.35)", "line-width": 1, "line-dasharray": [3, 3] } });
+
+      // Real named roads outside the site (see roadFeatures comment in
+      // buildMapGeoJSON) — casing first for a proper road look, then a
+      // paler centre line, same two-layer treatment as the trunk paths
+      // inside the site.
+      mapGL.addSource("mapRoads", { type: "geojson", data: geo.roads });
+      mapGL.addLayer({ id: "roads-casing", type: "line", source: "mapRoads", paint: { "line-color": "rgba(90,80,70,0.55)", "line-width": 5 } });
+      mapGL.addLayer({ id: "roads-line", type: "line", source: "mapRoads", paint: { "line-color": "rgba(235,210,160,0.75)", "line-width": 2.4 } });
 
       // Perimeter fence posts — small dots walking the boundary so the
       // site edge reads as an actual illustrated fence line, not just an
@@ -9213,6 +9261,16 @@ function loadMap(){
   SSSI_SPOTS.forEach(s=>{
     const coord = schematicToLatLon(parseFloat(s.x), parseFloat(s.y));
     addMapMarker("sssi", coord.lat, coord.lon, `<div class="map-label sssi">${escapeHtml(s.name)}</div>`, {});
+  });
+
+  // Road name labels — geo.roads' coordinates are already real [lon,lat]
+  // pairs (see roadFeatures in buildMapGeoJSON, anchored the same way as
+  // the site boundary), not schematic x/y, so these skip
+  // schematicToLatLon and use the LineString's own midpoint directly.
+  geo.roads.features.forEach(f=>{
+    const coords = f.geometry.coordinates;
+    const mid = coords[Math.floor(coords.length / 2)];
+    addMapMarker("road", mid[1], mid[0], `<div class="map-label road">${escapeHtml(f.properties.name)}</div>`, {});
   });
 
   gates.forEach(place=>{
