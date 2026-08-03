@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v374";
-const APP_BUILD_TIME = "2026-08-03T08:26:06Z";
+const APP_CACHE_VERSION = "v375";
+const APP_BUILD_TIME = "2026-08-03T08:33:50Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6221,6 +6221,10 @@ minorStages.forEach(place => {
   const authored = authoredMinorStagesByName.get(place.name);
   place.x = `${authored.position.x}%`;
   place.y = `${authored.position.y}%`;
+  // Carry the editor footprint into the renderer. This stops a compact
+  // venue inheriting the same surrounding mass as a full-size minor stage.
+  const areaRatio = (authored.dimensions.width * authored.dimensions.height) / 9;
+  place.visualScale = Math.max(0.52, Math.min(1, Math.sqrt(areaRatio)));
 });
 
 const thingsToFind = [
@@ -7883,7 +7887,8 @@ function buildMapGeoJSON(){
   });
   minorStages.forEach((s,i)=>{
     const rand = seededRand(4600 + i * 13);
-    for(let k=0;k<5;k++){
+    const count = Math.max(2, Math.round(5 * (s.visualScale || 1)));
+    for(let k=0;k<count;k++){
       const a = rand() * Math.PI * 2, r = 1.2 + rand() * 1.7;
       const x = parseFloat(s.x) + Math.cos(a) * r, y = parseFloat(s.y) + Math.sin(a) * r * 0.85;
       buntingPts.push({ x, y, color: BUNTING_COLORS[Math.floor(rand() * BUNTING_COLORS.length)] });
@@ -8128,9 +8133,10 @@ function buildMapGeoJSON(){
     // above), a minor stage's own little cluster reads as roughly the
     // "5-6 real buildings" a small venue area should show, not padded
     // out by boxes that used to represent hidden venues nearby.
-    const count = 5;
+    const scale = s.visualScale || 1;
+    const count = Math.max(2, Math.round(5 * scale));
     for(let k=0;k<count;k++){
-      const [x, y] = pickClearBuildingSpot(cx, cy, 2.6, 4.2, rand);
+      const [x, y] = pickClearBuildingSpot(cx, cy, 2.6 * scale, 4.2 * scale, rand);
       infillBuildingFeatures.push({
         type: "Feature", properties: { fill: BUILDING_PALETTE[(mi * 2 + k + 2) % BUILDING_PALETTE.length] },
         geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, mi * 149 + 6000 + k * 7)) ] }
@@ -8175,7 +8181,7 @@ function buildMapGeoJSON(){
     const rgb = MINOR_GLOW_COLORS[i % MINOR_GLOW_COLORS.length];
     return {
       type:"Feature",
-      properties:{ colorOuter: `rgba(${rgb},0.06)`, colorMid: `rgba(${rgb},0.11)`, colorCore: `rgba(${rgb},0.2)` },
+      properties:{ colorOuter: `rgba(${rgb},0.06)`, colorMid: `rgba(${rgb},0.11)`, colorCore: `rgba(${rgb},0.2)`, scale: s.visualScale || 1 },
       geometry:{ type:"Point", coordinates:[c.lon, c.lat] }
     };
   });
@@ -8706,9 +8712,11 @@ function buildMapGeoJSON(){
 
 // Layer visibility persists across loadMap() re-renders (tab switches, syncs,
 // adding a hidden venue, etc. all refresh the map's markers). Off by
-// default for the busier layers so the map isn't crowded on first arrival —
-// "Other stages" and "Amenities" stay on since those are core wayfinding info.
-let mapLayerVisible = { minor: true, detail: true, secret: false, camp: false, landmark: false, poi: true, friend: true, sssi: true, road: true };
+// default for the busier layers so the map first reads as a composed site,
+// not a catalogue of pins. Secondary venues, named stalls and amenities stay
+// one deliberate tap away (or are discoverable through search), while the
+// primary districts, headline stages and ground shapes establish orientation.
+let mapLayerVisible = { minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: true, sssi: true, road: true };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -9269,7 +9277,7 @@ function loadMap(){
       mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
 
       mapGL.addSource("mapBunting", { type: "geojson", data: geo.bunting });
-      mapGL.addLayer({ id: "bunting-circle", type: "circle", source: "mapBunting", paint: {
+      mapGL.addLayer({ id: "bunting-circle", type: "circle", source: "mapBunting", minzoom: 15.2, paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1, 19, 3],
         "circle-color": ["get", "color"]
       } });
@@ -9286,17 +9294,19 @@ function loadMap(){
       // line — a real ground colour difference at the path's actual
       // width/footprint, not a fixed-pixel line that doesn't represent
       // real width or scale with zoom.
-      // Per-tier fill (["get","fill"], set in JS from TRAIL_FILL above)
-      // and a matching per-tier outline width/opacity — main routes get
-      // a clear, continuous casing; minor ones fade to almost none, so
-      // they read as "worth wandering down" rather than a signed route.
-      mapGL.addLayer({ id: "trail-fill", type: "fill", source: "mapTrail", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "trail-outline", type: "line", source: "mapTrail", paint: {
-        "line-color": ["match", ["get", "tier"], "main", "rgba(100,75,45,0.6)", "minor", "rgba(140,120,90,0.25)", "rgba(120,95,60,0.55)"],
-        "line-width": ["match", ["get", "tier"], "main", 1.6, "minor", 0.6, 1]
+      // The overview carries only the primary route structure. Secondary
+      // explorative paths progressively appear as someone zooms in, so a
+      // whole-site view reads as districts and destinations first rather
+      // than a thicket of equally important lines.
+      mapGL.addLayer({ id: "trail-main-fill", type: "fill", source: "mapTrail", filter: ["==", ["get", "tier"], "main"], paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "trail-main-outline", type: "line", source: "mapTrail", filter: ["==", ["get", "tier"], "main"], paint: { "line-color": "rgba(100,75,45,0.6)", "line-width": 1.6 } });
+      mapGL.addLayer({ id: "trail-detail-fill", type: "fill", source: "mapTrail", minzoom: 15.2, filter: ["!=", ["get", "tier"], "main"], paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "trail-detail-outline", type: "line", source: "mapTrail", minzoom: 15.2, filter: ["!=", ["get", "tier"], "main"], paint: {
+        "line-color": ["match", ["get", "tier"], "minor", "rgba(140,120,90,0.25)", "rgba(120,95,60,0.55)"],
+        "line-width": ["match", ["get", "tier"], "minor", 0.6, 1]
       } });
       mapGL.addSource("mapPathScrub", { type: "geojson", data: geo.pathScrub });
-      mapGL.addLayer({ id: "path-scrub-circle", type: "circle", source: "mapPathScrub", paint: {
+      mapGL.addLayer({ id: "path-scrub-circle", type: "circle", source: "mapPathScrub", minzoom: 15.2, paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 0.5, 19, 2.2],
         "circle-color": ["get", "color"]
       } });
@@ -9326,16 +9336,16 @@ function loadMap(){
       // radius so the size difference itself keeps the visual hierarchy
       // (main stage = bigger, brighter glow) even though both now have one.
       mapGL.addSource("mapMinorStageGlow", { type: "geojson", data: geo.minorStageGlow });
-      mapGL.addLayer({ id: "minor-stage-glow-outer", type: "circle", source: "mapMinorStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3.5, 19, 14],
+      mapGL.addLayer({ id: "minor-stage-glow-outer", type: "circle", source: "mapMinorStageGlow", minzoom: 15.2, paint: {
+        "circle-radius": ["*", ["interpolate", ["linear"], ["zoom"], 14, 3.5, 19, 14], ["get", "scale"]],
         "circle-color": ["get", "colorOuter"]
       } });
-      mapGL.addLayer({ id: "minor-stage-glow-mid", type: "circle", source: "mapMinorStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.2, 19, 8.5],
+      mapGL.addLayer({ id: "minor-stage-glow-mid", type: "circle", source: "mapMinorStageGlow", minzoom: 15.2, paint: {
+        "circle-radius": ["*", ["interpolate", ["linear"], ["zoom"], 14, 2.2, 19, 8.5], ["get", "scale"]],
         "circle-color": ["get", "colorMid"]
       } });
-      mapGL.addLayer({ id: "minor-stage-glow-core", type: "circle", source: "mapMinorStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.2, 19, 4.2],
+      mapGL.addLayer({ id: "minor-stage-glow-core", type: "circle", source: "mapMinorStageGlow", minzoom: 15.2, paint: {
+        "circle-radius": ["*", ["interpolate", ["linear"], ["zoom"], 14, 1.2, 19, 4.2], ["get", "scale"]],
         "circle-color": ["get", "colorCore"]
       } });
 
@@ -9351,30 +9361,30 @@ function loadMap(){
       // that was missing to make flat building fills read as raised
       // structures sitting ON the ground rather than a coloured patch
       // painted flush with it.
-      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": "rgba(10,15,10,0.18)", "fill-translate": [1, 1.4] } });
-      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.48 } });
-      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", paint: { "line-color": "rgba(120,80,50,0.35)", "line-width": 0.8 } });
+      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 15.2, paint: { "fill-color": "rgba(10,15,10,0.18)", "fill-translate": [1, 1.4] } });
+      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 15.2, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.48 } });
+      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 15.2, paint: { "line-color": "rgba(120,80,50,0.35)", "line-width": 0.8 } });
 
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
-      mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
-      mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
+      mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", minzoom: 14.7, paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
+      mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", minzoom: 14.7, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", minzoom: 14.7, paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
       mapGL.addSource("mapVenueAccents", { type: "geojson", data: geo.venueAccents });
-      mapGL.addLayer({ id: "venue-accents-line", type: "line", source: "mapVenueAccents", paint: { "line-color": ["get", "tone"], "line-width": 1.15 } });
+      mapGL.addLayer({ id: "venue-accents-line", type: "line", source: "mapVenueAccents", minzoom: 14.7, paint: { "line-color": ["get", "tone"], "line-width": 1.15 } });
 
       // Hollow fenced enclosures — outline only, no fill, so the ground
       // colour shows through (a beer-garden/yard, not a roofed building).
       mapGL.addSource("mapFencedEnclosures", { type: "geojson", data: geo.fencedEnclosures });
-      mapGL.addLayer({ id: "fenced-enclosures-line", type: "line", source: "mapFencedEnclosures", paint: { "line-color": "rgba(120,80,50,0.8)", "line-width": 1.3, "line-dasharray": [2, 1] } });
+      mapGL.addLayer({ id: "fenced-enclosures-line", type: "line", source: "mapFencedEnclosures", minzoom: 15.2, paint: { "line-color": "rgba(120,80,50,0.8)", "line-width": 1.3, "line-dasharray": [2, 1] } });
 
       // Small named venue structures sit above general buildings so their
       // coherent street-side clusters remain readable at close zoom.
       mapGL.addSource("mapSmallVenues", { type: "geojson", data: geo.smallVenues });
-      mapGL.addLayer({ id: "small-venues-shadow", type: "fill", source: "mapSmallVenues", paint: { "fill-color": "rgba(44,30,17,0.25)", "fill-translate": [1.1, 1.4] } });
-      mapGL.addLayer({ id: "small-venues-fill", type: "fill", source: "mapSmallVenues", paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "small-venues-outline", type: "line", source: "mapSmallVenues", paint: { "line-color": "rgba(104,65,30,0.78)", "line-width": 1 } });
+      mapGL.addLayer({ id: "small-venues-shadow", type: "fill", source: "mapSmallVenues", minzoom: 15.2, paint: { "fill-color": "rgba(44,30,17,0.25)", "fill-translate": [1.1, 1.4] } });
+      mapGL.addLayer({ id: "small-venues-fill", type: "fill", source: "mapSmallVenues", minzoom: 15.2, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "small-venues-outline", type: "line", source: "mapSmallVenues", minzoom: 15.2, paint: { "line-color": "rgba(104,65,30,0.78)", "line-width": 1 } });
       mapGL.addSource("mapSmallVenueYards", { type: "geojson", data: geo.smallVenueYards });
-      mapGL.addLayer({ id: "small-venue-yards-line", type: "line", source: "mapSmallVenueYards", paint: { "line-color": "rgba(121,77,35,0.9)", "line-width": 1.25, "line-dasharray": [2, 1] } });
+      mapGL.addLayer({ id: "small-venue-yards-line", type: "line", source: "mapSmallVenueYards", minzoom: 15.2, paint: { "line-color": "rgba(121,77,35,0.9)", "line-width": 1.25, "line-dasharray": [2, 1] } });
 
       // Diamond polygons now (was a circle layer) — the reference
       // video's own camp confetti reads as small tent-shaped diamonds,
