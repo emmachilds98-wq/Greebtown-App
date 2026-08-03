@@ -62,36 +62,11 @@ window.GREEBTOWN_MAP_DOCUMENT = {
   ],
   "objects": [
     {
-      "id": "district-grand-central",
-      "type": "district",
-      "name": "Grand Central",
-      "position": {
-        "x": 66,
-        "y": 30
-      },
-      "dimensions": {
-        "width": 18,
-        "height": 15
-      },
-      "transform": {
-        "rotation": 0,
-        "scale": 1
-      },
-      "layer": "districts",
-      "asset": null,
-      "metadata": {
-        "description": "Seed record for the authoring-system migration.",
-        "category": "district",
-        "accessibility": "",
-        "notes": "Verify against map evidence before changing."
-      }
-    },
-    {
       "id": "stage-grand-central",
       "type": "stage",
       "name": "Grand Central",
       "position": {
-        "x": 66,
+        "x": 72,
         "y": 30
       },
       "dimensions": {
@@ -105,10 +80,167 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "layer": "structures",
       "asset": null,
       "metadata": {
-        "description": "Main stage building footprint.",
+        "description": "Boomtown's original main stage, at the north-east end of the Oldtown run.",
         "category": "stage",
+        "mapRole": "main-stage",
         "accessibility": "",
-        "notes": "Rotation is based on current renderer evidence."
+        "notes": "Verified against the official-map evidence; renderer source of truth."
+      }
+    },
+    {
+      "id": "stage-lions-den",
+      "type": "stage",
+      "name": "The Lion's Den",
+      "position": {
+        "x": 83,
+        "y": 55
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Temple Valley main stage, south of Helix.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
+    },
+    {
+      "id": "stage-hydro-xl",
+      "type": "stage",
+      "name": "Hydro XL",
+      "position": {
+        "x": 11,
+        "y": 46
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Downtown stage south-west of Metropolis.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
+    },
+    {
+      "id": "stage-anara-forest",
+      "type": "stage",
+      "name": "Anara Forest",
+      "position": {
+        "x": 85,
+        "y": 22
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Woodland stage toward Temple Valley Camping.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
+    },
+    {
+      "id": "stage-hidden-woods",
+      "type": "stage",
+      "name": "Hidden Woods",
+      "position": {
+        "x": 18,
+        "y": 2
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Woodland stage north of Letsbe Avenue and Botanica.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
+    },
+    {
+      "id": "stage-nexus",
+      "type": "stage",
+      "name": "NEXUS",
+      "position": {
+        "x": 23,
+        "y": 22
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 20,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Botanica main stage, west and slightly south of the district label.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
+    },
+    {
+      "id": "stage-helix",
+      "type": "stage",
+      "name": "Helix",
+      "position": {
+        "x": 78,
+        "y": 52
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Open-grass stage on the Quantum to Lion's Den corridor.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
       }
     },
     {

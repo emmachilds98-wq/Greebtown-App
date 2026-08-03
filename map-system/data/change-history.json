@@ -617,6 +617,21 @@
           "next": "created from legacy amenities collection"
         }
       ]
+    },
+    {
+      "id": "migrate-main-stages-2026-08-03T041100Z",
+      "timestamp": "2026-08-03T04:11:00Z",
+      "actor": "codex",
+      "summary": "Migrated all seven audited main-stage positions into the canonical map document.",
+      "changes": [
+        { "objectId": "stage-grand-central", "field": "position", "previous": { "x": 66, "y": 30 }, "next": { "x": 72, "y": 30 } },
+        { "objectId": "stage-lions-den", "field": "object", "previous": null, "next": "created from audited main-stage collection" },
+        { "objectId": "stage-hydro-xl", "field": "object", "previous": null, "next": "created from audited main-stage collection" },
+        { "objectId": "stage-anara-forest", "field": "object", "previous": null, "next": "created from audited main-stage collection" },
+        { "objectId": "stage-hidden-woods", "field": "object", "previous": null, "next": "created from audited main-stage collection" },
+        { "objectId": "stage-nexus", "field": "object", "previous": null, "next": "created from audited main-stage collection" },
+        { "objectId": "stage-helix", "field": "object", "previous": null, "next": "created from audited main-stage collection" }
+      ]
     }
   ]
 }

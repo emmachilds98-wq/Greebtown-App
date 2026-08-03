@@ -9,4 +9,4 @@ For each batch:
 3. Compare the old and new rendered positions visually and run the map validator.
 4. Record the migration in the change history and remove only the equivalent legacy data.
 
-Gates and amenities are now migrated. Next, move the remaining small point features as complete collections, then structures, then paths/boundaries once the schema supports point sequences. Districts and generated terrain require a separate proposed schema revision because their current renderer geometry is procedural.
+Gates, amenities and the complete audited main-stage position collection are now migrated. Next, move the remaining small point features, then minor stages and structures, followed by paths/boundaries once the schema supports point sequences. Districts and generated terrain require a separate proposed schema revision because their current renderer geometry is procedural.

@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v331";
-const APP_BUILD_TIME = "2026-08-03T04:10:36Z";
+const APP_CACHE_VERSION = "v332";
+const APP_BUILD_TIME = "2026-08-03T04:12:30Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6075,6 +6075,21 @@ const locations = [
 // venueDirectory's Main stage entries): "confirmed" found real
 // 2026-specific evidence, "rumoured" found only past-chapter evidence
 // or nothing — rendered with a dashed/dimmed marker on the map.
+// Main-stage coordinates are now authored in map-system/data/map-document.json.
+// Keep venue copy here, but never let a second set of hard-coded coordinates
+// silently win over the audited editor data.
+const authoredMainStages = currentMapSystemObjects(object => object.type === "stage" && object.metadata.mapRole === "main-stage");
+const authoredMainStagesByName = new Map(authoredMainStages.map(stage => [stage.name, stage]));
+const mainLocationStages = locations.filter(place => place.kind === "stage");
+if(authoredMainStages.length !== mainLocationStages.length || mainLocationStages.some(place => !authoredMainStagesByName.has(place.name))){
+  throw new Error("Greebtown map authoring data is missing a main-stage position");
+}
+mainLocationStages.forEach(place => {
+  const authored = authoredMainStagesByName.get(place.name);
+  place.x = `${authored.position.x}%`;
+  place.y = `${authored.position.y}%`;
+});
+
 const otherStages = [
   { name:"Spectrum 360", status:"confirmed", info:"A circular arena entirely enclosed in shipping containers, running 360° visuals with a broad electronic bill spanning UK garage through to gabber." },
   { name:"Tangled Roots", status:"confirmed", info:"A laid-back dub and roots stage with its own cocktail bar — confirmed for 2026 with a full Wed-Fri dub/roots programme (Lionpulse x Sinai, Roots Ginjah, DubTastic Music, Jam Jah Sound, An Dannsa Dub, Rompa's Reggae Shack) plus a Friday dubstep takeover." },
