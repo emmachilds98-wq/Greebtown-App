@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v338";
-const APP_BUILD_TIME = "2026-08-03T04:35:40Z";
+const APP_CACHE_VERSION = "v339";
+const APP_BUILD_TIME = "2026-08-03T04:41:24Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8148,10 +8148,12 @@ function buildMapGeoJSON(){
   ];
   const pondOutlineFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(pondRing) } };
 
-  // Ordinary camping fields — a soft sandy-yellow ground fill (the
-  // reference video's own plain camping fields read as a warm
-  // yellow-green, clearly lighter/warmer than both the dark stippled
-  // woods and the bright open district grass), crossed by a couple of
+  // Ordinary camping fields — a pale camp-green ground fill. The official
+  // overview keeps the regular fields (West, Valley, Temple Valley and
+  // Campervan) in the same green family as open land, with a distinct
+  // boundary and tent texture; bright yellow is instead the wayfinding
+  // colour for the separate Hilltop/Sunset-style fields. Cross each camp
+  // with a couple of
   // straight real-farmland field-division lines the same way the video's
   // fields show, THEN the confetti tent dots scattered on top — before
   // this pass ordinary camping fields had no ground fill of their own at
@@ -8170,16 +8172,16 @@ function buildMapGeoJSON(){
     // fields don't all read as the same stretched rectangle.
     const seed = 600 + i * 43;
     const aspect = 0.75 + seededRand(seed + 1)() * 0.5;
-    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, 6)) ] } };
+    return { type: "Feature", properties: { fill: "rgba(84,202,123,0.72)", line: "rgba(40,125,69,0.72)" }, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, 6)) ] } };
   });
-  // The official overview has a large, elongated yellow camping field on
-  // Hilltop's east side, running alongside the Oldtown/Quantum corridor.
-  // It is a single ground-use area rather than a collection of tiny camp
-  // dots, so give it a long, clearly bounded illustrated field of its own.
+  // The official overview has a large, elongated yellow Hilltop field on
+  // the east side, running alongside the Oldtown/Quantum corridor. It is
+  // a wayfinding/ground-use field, not another generic campsite, so it
+  // remains yellow while the actual camp plots retain their green ground.
   // This is deliberately placed beside — not over — the Oldtown spine.
   const hilltopCampingRing = fieldRing(84, 35, 7.5, 18, 9820, 6);
   campFieldFeatures.push({
-    type: "Feature", properties: { name: "Hilltop Camping Field" },
+    type: "Feature", properties: { name: "Hilltop Field", fill: "rgba(250,211,37,0.84)", line: "rgba(140,112,25,0.78)" },
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(hilltopCampingRing) ] }
   });
   let campFieldLineFeatures = [];
@@ -8251,19 +8253,31 @@ function buildMapGeoJSON(){
     const safeMax = Math.max(4, (minDist / 2 - 0.4) / BLOB_MAX_OVERSIZE);
     return Math.min(Math.max(6, Math.min(15, minDist * 0.46 / BLOB_MAX_OVERSIZE)), safeMax);
   }
-  const forestFeatures = forestSpots.map((f,i)=>({
+  // Botanica, Metropolis and Area 404 sit within one continuous wooded
+  // Downtown enclosure in the official overview. It must read as shared
+  // terrain underneath the individual district clearings, rather than
+  // three isolated coloured islands on open grass.
+  const downtownWoodlandRing = [[2,9], [19,1], [39,3], [48,13], [49,30], [45,46], [34,53], [15,51], [3,42], [-2,25], [2,9]];
+  const downtownWoodlandFringeRing = [[-1,6], [18,-3], [43,0], [53,10], [54,31], [49,50], [36,58], [12,56], [-3,46], [-8,24], [-1,6]];
+  const forestFeatures = [{
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(downtownWoodlandRing) ] }
+  }].concat(forestSpots.map((f,i)=>({
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)), 400 + i * 53, 16)) ] }
-  }));
+  })));
   // A wider, paler fringe ring under the forest's own dark fill —
   // without one, woods met open grass as one hard-edged colour change;
   // a real tree line thins out gradually. Drawn first (below the main
   // forests-fill layer) so it only shows as a soft halo around the
   // forest's true edge, not a second solid colour.
-  const forestFringeFeatures = forestSpots.map((f,i)=>({
+  const forestFringeFeatures = [{
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(downtownWoodlandFringeRing) ] }
+  }].concat(forestSpots.map((f,i)=>({
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)) * 1.4, 450 + i * 53, 16)) ] }
-  }));
+  })));
 
   // Density bumped 22 -> 30 per named forest spot — the reference
   // video's woods read as densely stippled throughout, not sparse dots
@@ -8885,21 +8899,22 @@ function loadMap(){
       mapGL.addLayer({ id: "camp-areas-fill", type: "fill", source: "mapCampAreas", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "camp-areas-line", type: "line", source: "mapCampAreas", paint: { "line-color": "rgba(255,255,255,0.55)", "line-width": 1.6, "line-dasharray": [1, 1.5] } });
 
-      // Ordinary (non-premium) camping fields — a soft sandy-yellow fill
-      // plus a couple of straight field-division lines, so plain camping
+      // Ordinary camps are green bounded fields; only the separate
+      // Hilltop ground-use field carries the official map's yellow.
+      // Field-division lines keep plain camping
       // reads as its own kind of ground rather than tent dots floating
       // on bare district/forest colour. Outline strengthened to a solid
       // warm brown so the field boundary itself is legible, not just
       // implied by the confetti dots scattered inside it.
       mapGL.addSource("mapCampFields", { type: "geojson", data: geo.campFields });
-      mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": "rgba(250,211,37,0.80)" } });
-      mapGL.addLayer({ id: "camp-fields-casing", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.28)", "line-width": 4.5 } });
+      mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "camp-fields-casing", type: "line", source: "mapCampFields", paint: { "line-color": ["get", "line"], "line-opacity": 0.28, "line-width": 4.5 } });
       // Width bumped 1.8 -> 2.4, same "clear border" reasoning as
       // districts-line above — camp fields are the biggest ground use on
       // site and should read as clearly-bounded areas at a glance.
-      mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": "rgba(120,100,40,0.75)", "line-width": 2.4 } });
+      mapGL.addLayer({ id: "camp-fields-outline", type: "line", source: "mapCampFields", paint: { "line-color": ["get", "line"], "line-width": 2.4 } });
       mapGL.addSource("mapCampFieldLines", { type: "geojson", data: geo.campFieldLines });
-      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(120,100,40,0.5)", "line-width": 1.2 } });
+      mapGL.addLayer({ id: "camp-field-lines-line", type: "line", source: "mapCampFieldLines", paint: { "line-color": "rgba(48,128,73,0.48)", "line-width": 1.2 } });
 
       // The triangular tree-ring/hedge feature inside Camp Orchid
       // Downtown — seen clearly, twice, across both reference videos.
