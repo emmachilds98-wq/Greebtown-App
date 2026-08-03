@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v307";
-const APP_BUILD_TIME = "2026-08-03T00:23:32Z";
+const APP_CACHE_VERSION = "v308";
+const APP_BUILD_TIME = "2026-08-03T00:26:57Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7824,6 +7824,12 @@ function buildMapGeoJSON(){
   // point per stage, three stacked circle layers (see loadMap) fake a
   // blur by shrinking radius/raising opacity toward the centre — real
   // radial-gradient blur isn't expressible in a MapLibre circle paint.
+  // Opacities nudged back up a little (0.05/0.09/0.18 -> 0.08/0.14/0.26)
+  // — with the map's other layers (overlaps, path shapes, borders) much
+  // cleaner now than when this was first tuned down for "overpowering
+  // everything else", the glow was reading as too subtle for the vivid,
+  // clearly-visible halos reference screenshots actually show around
+  // every stage marker.
   const STAGE_GLOW_COLORS = ["255,140,60", "190,110,255", "90,200,255", "255,90,150", "255,210,80", "120,255,170"];
   const glowStages = locations.filter(p=>p.kind === "stage");
   const stageGlowFeatures = glowStages.map((s,i)=>{
@@ -7831,7 +7837,24 @@ function buildMapGeoJSON(){
     const rgb = STAGE_GLOW_COLORS[i % STAGE_GLOW_COLORS.length];
     return {
       type:"Feature",
-      properties:{ colorOuter: `rgba(${rgb},0.05)`, colorMid: `rgba(${rgb},0.09)`, colorCore: `rgba(${rgb},0.18)` },
+      properties:{ colorOuter: `rgba(${rgb},0.08)`, colorMid: `rgba(${rgb},0.14)`, colorCore: `rgba(${rgb},0.26)` },
+      geometry:{ type:"Point", coordinates:[c.lon, c.lat] }
+    };
+  });
+
+  // Minor stages previously had NO glow at all — reference footage shows
+  // one just as clearly around smaller stages (Tribe of Frog's own
+  // purple/orange glow marker, Helix's salmon circle, etc), just smaller
+  // than a main stage's. Same three-layer technique, own colour cycle
+  // (offset from the main-stage one so a minor stage next to a main one
+  // doesn't accidentally share its exact hue) and roughly half the size.
+  const MINOR_GLOW_COLORS = ["230,140,150", "150,190,230", "230,190,110", "170,150,230"];
+  const minorStageGlowFeatures = minorStages.map((s,i)=>{
+    const c = schematicToLatLon(parseFloat(s.x), parseFloat(s.y));
+    const rgb = MINOR_GLOW_COLORS[i % MINOR_GLOW_COLORS.length];
+    return {
+      type:"Feature",
+      properties:{ colorOuter: `rgba(${rgb},0.06)`, colorMid: `rgba(${rgb},0.11)`, colorCore: `rgba(${rgb},0.2)` },
       geometry:{ type:"Point", coordinates:[c.lon, c.lat] }
     };
   });
@@ -8147,6 +8170,7 @@ function buildMapGeoJSON(){
     fencedEnclosures: { type:"FeatureCollection", features: fencedEnclosureFeatures },
     infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
     stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
+    minorStageGlow: { type:"FeatureCollection", features: minorStageGlowFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
@@ -8634,6 +8658,23 @@ function loadMap(){
       } });
       mapGL.addLayer({ id: "stage-glow-core", type: "circle", source: "mapStageGlow", paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 19, 11],
+        "circle-color": ["get", "colorCore"]
+      } });
+
+      // Minor-stage glow — same technique, roughly half the main-stage
+      // radius so the size difference itself keeps the visual hierarchy
+      // (main stage = bigger, brighter glow) even though both now have one.
+      mapGL.addSource("mapMinorStageGlow", { type: "geojson", data: geo.minorStageGlow });
+      mapGL.addLayer({ id: "minor-stage-glow-outer", type: "circle", source: "mapMinorStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 5, 19, 20],
+        "circle-color": ["get", "colorOuter"]
+      } });
+      mapGL.addLayer({ id: "minor-stage-glow-mid", type: "circle", source: "mapMinorStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 19, 12],
+        "circle-color": ["get", "colorMid"]
+      } });
+      mapGL.addLayer({ id: "minor-stage-glow-core", type: "circle", source: "mapMinorStageGlow", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.5, 19, 6],
         "circle-color": ["get", "colorCore"]
       } });
 
