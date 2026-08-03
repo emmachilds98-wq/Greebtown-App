@@ -5649,6 +5649,42 @@ window.GREEBTOWN_DISTRICT_MASSING_LAYOUT = {
           "rotation": -30,
           "tone": "terracotta",
           "kind": "stall"
+        },
+        {
+          "id": "gc-north-east-canopy",
+          "offset": {
+            "x": 2.45,
+            "y": -2.55
+          },
+          "width": 1.55,
+          "height": 1.3,
+          "rotation": 22,
+          "tone": "canvas",
+          "kind": "tent"
+        },
+        {
+          "id": "gc-east-stall-three",
+          "offset": {
+            "x": 3.75,
+            "y": 1.75
+          },
+          "width": 1.65,
+          "height": 1,
+          "rotation": 72,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "gc-south-west-kiosk",
+          "offset": {
+            "x": -3.3,
+            "y": 2.55
+          },
+          "width": 1.55,
+          "height": 0.95,
+          "rotation": -18,
+          "tone": "ochre",
+          "kind": "stall"
         }
       ]
     },
@@ -5753,6 +5789,30 @@ window.GREEBTOWN_DISTRICT_MASSING_LAYOUT = {
           "rotation": -12,
           "tone": "dark",
           "kind": "yard"
+        },
+        {
+          "id": "old-west-south-kiosk",
+          "offset": {
+            "x": -2.7,
+            "y": 4.15
+          },
+          "width": 1.65,
+          "height": 1,
+          "rotation": -20,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "old-east-south-kiosk",
+          "offset": {
+            "x": 2.8,
+            "y": 4
+          },
+          "width": 1.75,
+          "height": 1.05,
+          "rotation": -14,
+          "tone": "terracotta",
+          "kind": "stall"
         }
       ]
     },
@@ -5845,6 +5905,42 @@ window.GREEBTOWN_DISTRICT_MASSING_LAYOUT = {
           "rotation": -26,
           "tone": "dark",
           "kind": "yard"
+        },
+        {
+          "id": "bot-north-west-canopy",
+          "offset": {
+            "x": -2.7,
+            "y": -2
+          },
+          "width": 1.55,
+          "height": 1.25,
+          "rotation": -18,
+          "tone": "canvas",
+          "kind": "tent"
+        },
+        {
+          "id": "bot-east-three",
+          "offset": {
+            "x": 3.8,
+            "y": 1.35
+          },
+          "width": 1.6,
+          "height": 1,
+          "rotation": 48,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "bot-south-east-kiosk",
+          "offset": {
+            "x": 2.75,
+            "y": 2.75
+          },
+          "width": 1.6,
+          "height": 0.95,
+          "rotation": -20,
+          "tone": "ochre",
+          "kind": "stall"
         }
       ]
     },
@@ -5937,6 +6033,42 @@ window.GREEBTOWN_DISTRICT_MASSING_LAYOUT = {
           "rotation": -28,
           "tone": "canvas",
           "kind": "tent"
+        },
+        {
+          "id": "metro-west-entry-kiosk",
+          "offset": {
+            "x": -4.15,
+            "y": -0.1
+          },
+          "width": 1.55,
+          "height": 0.95,
+          "rotation": 20,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "metro-east-mid-stall",
+          "offset": {
+            "x": 3.4,
+            "y": 1.2
+          },
+          "width": 1.8,
+          "height": 1,
+          "rotation": 70,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "metro-south-yard",
+          "offset": {
+            "x": 0.2,
+            "y": 3.55
+          },
+          "width": 2.15,
+          "height": 1.25,
+          "rotation": -12,
+          "tone": "dark",
+          "kind": "yard"
         }
       ]
     },
@@ -6017,6 +6149,54 @@ window.GREEBTOWN_DISTRICT_MASSING_LAYOUT = {
           "rotation": 20,
           "tone": "canvas",
           "kind": "tent"
+        },
+        {
+          "id": "area-west-entry-stall",
+          "offset": {
+            "x": -4.25,
+            "y": 0.3
+          },
+          "width": 1.8,
+          "height": 1,
+          "rotation": 16,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "area-north-east-tent",
+          "offset": {
+            "x": 1.7,
+            "y": -2.65
+          },
+          "width": 1.65,
+          "height": 1.3,
+          "rotation": -10,
+          "tone": "canvas",
+          "kind": "tent"
+        },
+        {
+          "id": "area-east-late-stall",
+          "offset": {
+            "x": 4.05,
+            "y": 2.8
+          },
+          "width": 1.75,
+          "height": 1,
+          "rotation": 58,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "area-south-west-yard",
+          "offset": {
+            "x": -3.15,
+            "y": 3.2
+          },
+          "width": 2.15,
+          "height": 1.35,
+          "rotation": 22,
+          "tone": "dark",
+          "kind": "yard"
         }
       ]
     },

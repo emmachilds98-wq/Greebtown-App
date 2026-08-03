@@ -248,7 +248,9 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   close-zoom compounds for the main town districts. It owns only anonymous
   structural art (stalls, tents and yards), never a new named venue, amenity,
   path or zone. Keep it anchor-relative and use it instead of scattering
-  hard-coded decorative rectangles through the renderer.
+  hard-coded decorative rectangles through the renderer. Add massing as a
+  connected street edge or a purposeful court boundary; never as detached
+  decorative scatter in open grass.
 - `map-system/data/district-passage-layout.json` â€” reviewed, original
   close-zoom walking surfaces within those same compounds. These are short
   interior approaches and lanes, not evidence for a new public trunk route;
