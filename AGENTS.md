@@ -215,3 +215,38 @@ six numbered rules written in response. Read it. In short:
 - Always check for other open PRs touching the map before starting new map
   work — this area has had multiple concurrent contributors/sessions and
   conflicting position edits have happened before.
+
+## Map layout sources and required checks
+
+The map has several generated authoring sources. Keep evidence, geometry and
+runtime rendering reviewable rather than reintroducing hard-coded overrides:
+
+- `map-system/data/camp-zones.json` â€” camps, surface and evidence level.
+- `map-system/data/evidenced-paths.json` â€” only reference-supported routes.
+- `map-system/data/district-footprints.json` â€” reviewed illustrated areas.
+- `map-system/data/reference-layout.json` â€” cluster anchors. This moves a
+  district, its dependent venues and its evidence-based routes together.
+
+When any map authoring source changes, run this sequence before committing:
+
+```text
+node scripts/build-map-data.mjs
+node scripts/validate-map-document.mjs
+node scripts/validate-camp-zones.mjs
+node scripts/validate-evidenced-paths.mjs
+node scripts/validate-district-footprints.mjs
+node scripts/validate-reference-layout.mjs
+node scripts/audit-map-positions.mjs
+node --check js/app.js
+```
+
+`map-system/data/map-data.js` is generated and must be regenerated in the
+same commit; never hand-edit it. Run `node scripts/report-reference-layout.mjs`
+before changing anchors to review the affected cluster and attached stages.
+
+Change an area through `reference-layout.json`, then review its district
+footprint and entering/leaving paths in the same patch. Keep
+`official-detail`, `official-overview`, and schematic estimates distinct:
+visual plausibility is not surveyed evidence. `referenceLayoutConfig` is
+consumed after the map data collections are declared in `app.js`; moving it
+into an earlier load-time path can reintroduce a TDZ `ReferenceError`.
