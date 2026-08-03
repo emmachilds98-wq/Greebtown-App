@@ -651,6 +651,18 @@
         { "objectId": "stage-acid-leak", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" },
         { "objectId": "stage-infinity", "field": "object", "previous": null, "next": "created from audited smaller-stage collection" }
       ]
+    },
+    {
+      "id": "review-hilltop-sequence-2026-08-03T101552Z",
+      "timestamp": "2026-08-03T10:15:52Z",
+      "actor": "codex",
+      "summary": "Recomposed the reviewed Hilltop sequence from official map screenshots, separating its long yellow corridor from the Grand Central/Oldtown street run and Lion's Den woodland.",
+      "changes": [
+        { "objectId": "district-oldtown", "field": "footprint", "previous": "overlapped the Hilltop corridor", "next": "relocated west of Hilltop around its reviewed anchor" },
+        { "objectId": "stage-grand-central", "field": "reference anchor", "previous": [61, 40], "next": [47, 35] },
+        { "objectId": "hilltop-field", "field": "footprint", "previous": "short northern patch", "next": "long tapered corridor ending west of Lion's Den woodland" },
+        { "objectId": "stage-helix", "field": "reference anchor", "previous": [73, 64], "next": [61, 64] }
+      ]
     }
   ]
 }

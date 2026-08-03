@@ -8,8 +8,8 @@
   },
   "hilltopDivider": {
     "evidence": "official-detail",
-    "points": [[59,17],[58,26],[59,34],[62,43]],
-    "notes": "Non-walkable dark divider immediately west of the reviewed Hilltop ground-use corridor."
+    "points": [[59,17],[58,28],[58.5,40],[58,52],[60,64]],
+    "notes": "Non-walkable dark divider running down the western edge of the reviewed Hilltop ground-use corridor."
   },
   "parkingAreas": [
     {

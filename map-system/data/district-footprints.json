@@ -6,6 +6,6 @@
     { "id": "district-botanica", "name": "Botanica", "evidence": "official-overview", "points": [[20,34],[31,31],[40,34],[44,42],[39,51],[31,55],[22,52],[17,44]] },
     { "id": "district-area-404", "name": "Area 404", "evidence": "official-overview", "points": [[30,53],[43,52],[52,58],[55,67],[50,75],[39,78],[29,73],[26,63]] },
     { "id": "district-letsbe-avenue", "name": "Letsbe Avenue", "evidence": "official-detail", "points": [[28,25],[41,24],[49,29],[50,35],[45,40],[35,40],[27,36]] },
-    { "id": "district-oldtown", "name": "Oldtown", "evidence": "official-detail", "points": [[55,42],[64,40],[71,46],[73,54],[69,61],[62,64],[54,59],[51,50]] }
+    { "id": "district-oldtown", "name": "Oldtown", "evidence": "official-detail", "points": [[41,40],[50,38],[57,44],[59,52],[55,59],[48,62],[40,57],[37,48]] }
   ]
 }

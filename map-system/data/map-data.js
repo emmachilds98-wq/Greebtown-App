@@ -3201,12 +3201,28 @@ window.GREEBTOWN_CAMP_ZONES = {
           31
         ],
         [
-          69,
-          42
+          70,
+          41
         ],
         [
-          64,
-          38
+          62,
+          51
+        ],
+        [
+          56,
+          62
+        ],
+        [
+          52,
+          60
+        ],
+        [
+          52,
+          52
+        ],
+        [
+          56,
+          40
         ],
         [
           60,
@@ -3221,11 +3237,15 @@ window.GREEBTOWN_CAMP_ZONES = {
           ],
           [
             65,
-            25
+            29
           ],
           [
-            66,
-            36
+            65,
+            40
+          ],
+          [
+            59,
+            52
           ]
         ],
         [
@@ -3235,18 +3255,22 @@ window.GREEBTOWN_CAMP_ZONES = {
           ],
           [
             69,
-            24
+            29
           ],
           [
-            69,
-            38
+            68,
+            39
+          ],
+          [
+            61,
+            50
           ]
         ]
       ],
       "excludes": [
         "Anara Forest"
       ],
-      "notes": "Reviewed Hilltop field footprint. It sits alongside the Oldtown corridor and must remain distinct from the Anara Forest woodland stage."
+      "notes": "Reviewed long Hilltop field corridor. It runs south beside the Grand Central and Oldtown sequence toward Quantum, while remaining distinct from the Anara Forest woodland stage."
     }
   ],
   "zones": [
@@ -4124,36 +4148,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-detail",
       "points": [
         [
-          55,
-          42
-        ],
-        [
-          64,
+          41,
           40
         ],
         [
-          71,
-          46
+          50,
+          38
         ],
         [
-          73,
-          54
+          57,
+          44
         ],
         [
-          69,
-          61
+          59,
+          52
         ],
         [
-          62,
-          64
-        ],
-        [
-          54,
+          55,
           59
         ],
         [
-          51,
-          50
+          48,
+          62
+        ],
+        [
+          40,
+          57
+        ],
+        [
+          37,
+          48
         ]
       ]
     }
@@ -4254,8 +4278,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         30
       ],
       "to": [
-        61,
-        40
+        47,
+        35
       ]
     },
     "Oldtown": {
@@ -4264,8 +4288,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         40
       ],
       "to": [
-        62,
-        54
+        48,
+        50
       ]
     },
     "Hydro XL": {
@@ -4304,7 +4328,7 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         52
       ],
       "to": [
-        73,
+        61,
         64
       ]
     },
@@ -5216,18 +5240,22 @@ window.GREEBTOWN_SITE_LAYOUT = {
       ],
       [
         58,
-        26
+        28
       ],
       [
-        59,
-        34
+        58.5,
+        40
       ],
       [
-        62,
-        43
+        58,
+        52
+      ],
+      [
+        60,
+        64
       ]
     ],
-    "notes": "Non-walkable dark divider immediately west of the reviewed Hilltop ground-use corridor."
+    "notes": "Non-walkable dark divider running down the western edge of the reviewed Hilltop ground-use corridor."
   },
   "parkingAreas": [
     {

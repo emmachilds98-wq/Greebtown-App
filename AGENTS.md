@@ -243,7 +243,9 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   just to make a court appear larger. Check rendered-layout alignment before
   release: district-footprint centroids must remain near their reviewed
   reference anchors, and the Grand Central → Oldtown sequence must keep its
-  broad-forecourt / long-street scale and southward order.
+  broad-forecourt / long-street scale and southward order. The long Hilltop
+  corridor belongs east of that sequence and runs down toward Quantum; never
+  shorten it into a small patch or let a town district overlap it.
 - `map-system/data/district-massing-layout.json` â€” reviewed, original
   close-zoom compounds for the main town districts. It owns only anonymous
   structural art (stalls, tents and yards), never a new named venue, amenity,

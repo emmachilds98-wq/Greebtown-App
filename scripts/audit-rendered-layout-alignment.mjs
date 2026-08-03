@@ -26,6 +26,11 @@ if(!oldtown || oldtown.footprint.width < 11 || oldtown.footprint.height < 4.5) e
 const gcAnchor = references.anchors?.["Grand Central"]?.to;
 const oldtownAnchor = references.anchors?.Oldtown?.to;
 if(!gcAnchor || !oldtownAnchor || oldtownAnchor[1] - gcAnchor[1] < 8 || Math.abs(oldtownAnchor[0] - gcAnchor[0]) > 5) errors.push("Oldtown must remain directly south of the Grand Central Hilltop sequence");
+const helixAnchor = references.anchors?.Helix?.to;
+const hilltop = read("camp-zones.json").groundUseFields?.find(field => field.id === "hilltop-field");
+if(!hilltop || Math.max(...hilltop.points.map(point => point[1])) < 62) errors.push("Hilltop must remain a long corridor reaching the Quantum junction");
+if(!helixAnchor || helixAnchor[1] < 60 || helixAnchor[0] > 63) errors.push("Helix must remain beside the lower Hilltop / Quantum junction");
+if(!gcAnchor || !hilltop || gcAnchor[0] >= Math.min(...hilltop.points.map(point => point[0]))) errors.push("Grand Central must remain west of the Hilltop corridor");
 
 if(errors.length){ console.error(`Rendered layout alignment failed:\n- ${errors.join("\n- ")}`); process.exit(1); }
-console.log("Rendered layout alignment passed: district footprints track their reviewed anchors; Grand Central and Oldtown retain the reviewed Hilltop scale and order.");
+console.log("Rendered layout alignment passed: district footprints track reviewed anchors; the Grand Central / Oldtown / Hilltop / Helix sequence retains its reviewed scale and order.");
