@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v302";
-const APP_BUILD_TIME = "2026-08-02T23:59:35Z";
+const APP_CACHE_VERSION = "v303";
+const APP_BUILD_TIME = "2026-08-03T00:04:18Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7228,26 +7228,6 @@ const TRUNK_PATH_SEGMENTS = TRUNK_PATH_EDGES.map(([a, b], i)=>{
   return { a: pa, b: pb, seed: i * 31 + 7 };
 }).filter(Boolean);
 
-// Closest point on any trunk-path segment to (x,y), clamped to each
-// segment's own extent — used so a stage/venue/gate/camp spoke visibly
-// joins the real path network at a sensible spot along it, instead of
-// every spoke converging on one exact district dot the way
-// nearestDistrict() alone used to draw them.
-function nearestPointOnTrunk(x, y){
-  let best = null, bestDist = Infinity;
-  TRUNK_PATH_SEGMENTS.forEach(seg=>{
-    const { a, b } = seg;
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const lenSq = dx * dx + dy * dy || 1;
-    let t = ((x - a.x) * dx + (y - a.y) * dy) / lenSq;
-    t = Math.max(0, Math.min(1, t));
-    const px = a.x + dx * t, py = a.y + dy * t;
-    const dist = (px - x) ** 2 + (py - y) ** 2;
-    if(dist < bestDist){ bestDist = dist; best = { x: px, y: py }; }
-  });
-  return best;
-}
-
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
 
@@ -7589,96 +7569,19 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{ color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
   });
 
-  // Spokes from every stage (major + minor) to the nearest point on the
-  // real trunk path (TRUNK_PATH_SEGMENTS above) — previously drew
-  // straight to the nearest district's centre point regardless of
-  // whether that's actually where the path runs; joining the trunk
-  // itself reads as "this stage branches off the real route" instead.
-  const spokeTargets = locations.filter(p=>p.kind === "stage").concat(minorStages);
-  const spokeFeatures = spokeTargets.map((s,i)=>{
-    const sx = parseFloat(s.x), sy = parseFloat(s.y);
-    const nd = nearestDistrict(sx, sy, districts);
-    const target = nearestPointOnTrunk(sx, sy) || { x: parseFloat(nd.x), y: parseFloat(nd.y) };
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([sx,sy], [target.x, target.y], i * 17 + 3)) } };
-  });
-
-  // Thinner "capillary" paths from every smaller point (hidden venues)
-  // to the nearest point on the real trunk path — without these, only
-  // the dozen main/minor stages had any path at all, so every hidden
-  // venue looked like a marker dropped on plain grass with no way to
-  // reach it. Drawing a path to each one, thinner and fainter than the
-  // main stage spokes, makes the whole map read as one connected network
-  // instead of isolated pins — same layering idea real illustrated maps
-  // use (thick main routes, thin capillary paths to individual stalls/
-  // venues). Gates dropped from this list — they already get their own
-  // road-styled connection via gateSpokeFeatures below, and now also sit
-  // directly on the trunk path itself, so a third generic line out of
-  // each gate was pure redundant clutter. `landmarks` (lockers, charge
-  // points, welfare tents etc.) is deliberately left out here too —
-  // those are scattered utility markers, off by default via the
-  // "Landmarks" chip, and drawing paths out to them made the woods/open
-  // ground look like it had real infrastructure wherever one happened to
-  // be plotted, which is the exact "icons outside the real camping/
-  // parking/music zones" clutter the reference video's own map doesn't
-  // show.
-  const capillaryFeatures = thingsToFind.map((p,i)=>{
-    const px = parseFloat(p.x), py = parseFloat(p.y);
-    const nd = nearestDistrict(px, py, districts);
-    const target = nearestPointOnTrunk(px, py) || { x: parseFloat(nd.x), y: parseFloat(nd.y) };
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [target.x, target.y], i * 23 + 11)) } };
-  });
-
-  // Camp access paths — every named camping field (campLabels) to
-  // whichever is closer, its nearest district OR its nearest gate, same
-  // medium-weight spoke treatment stages get. Originally always routed
-  // to the nearest district regardless of distance, which reads fine for
-  // camps that actually sit near the town centre but produced absurdly
-  // long diagonal routes for camps that are genuinely closer to a gate —
-  // Camp Skylark Sunset down by South Gate routing all the way to
-  // Oldtown (3x further than South Gate) chief among them, plus Meadow
-  // Camping/West Gate and Campervan Field/East Gate (that field's own
-  // gate info text already names it as East Gate's nearest camp — the
-  // route just never matched). Real campers walk to whichever's actually
-  // closer, so the path should too.
-  const campSpokeFeatures = campLabels.map((c,i)=>{
-    const cx = parseFloat(c.x), cy = parseFloat(c.y);
-    const nd = nearestDistrict(cx, cy, districts);
-    const ndDist = Math.hypot(parseFloat(nd.x) - cx, parseFloat(nd.y) - cy);
-    let target = nd, targetDist = ndDist;
-    gates.forEach(g=>{
-      const gd = Math.hypot(parseFloat(g.x) - cx, parseFloat(g.y) - cy);
-      if(gd < targetDist){ target = g; targetDist = gd; }
-    });
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([cx,cy], [parseFloat(target.x), parseFloat(target.y)], i * 19 + 5)) } };
-  });
-
-  // Parking access roads — each parking area to its nearest GATE (real
-  // car parks connect to a gate/road, not the town centre) rather than
-  // reusing nearestDistrict. Short, thick, deliberately road-like.
-  const parkingSpokeFeatures = parkingAreas.map((p,i)=>{
-    const px = parseFloat(p.x), py = parseFloat(p.y);
-    let nearestG = gates[0], bestD = Infinity;
-    gates.forEach(g=>{
-      const dd = (parseFloat(g.x) - px) ** 2 + (parseFloat(g.y) - py) ** 2;
-      if(dd < bestD){ bestD = dd; nearestG = g; }
-    });
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([px,py], [parseFloat(nearestG.x), parseFloat(nearestG.y)], i * 29 + 13)) } };
-  });
-
-  // Gate access roads — every camp/parking spoke above terminates AT a
-  // gate, but nothing ever connected a gate onward into the main
-  // district loop, so South Gate in particular (whose only spoke is
-  // Camp Skylark Sunset, itself stranded in the map's near-empty south
-  // end) had no path at all running back up to the rest of the site —
-  // a real, visible gap, not just a sparse-icon one. Same road-like
-  // casing/line pairing as parkingSpokeFeatures (gates are real vehicle
-  // access points too, matching Alresford Rd/Petersfield Rd running past
-  // them in the reference video), gate to its nearest district.
-  const gateSpokeFeatures = gates.map((g,i)=>{
-    const gx = parseFloat(g.x), gy = parseFloat(g.y);
-    const nd = nearestDistrict(gx, gy, districts);
-    return { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(curvedLine([gx,gy], [parseFloat(nd.x), parseFloat(nd.y)], i * 37 + 11)) } };
-  });
+  // Spokes/capillaries/camp-spokes/parking-spokes/gate-spokes REMOVED
+  // this pass — all five were auto-generated "nearest point" straight-
+  // ish lines with NO footage evidence behind them (every stage/hidden-
+  // venue/camp/parking-area/gate not already in TRUNK_PATH_EDGES just
+  // got a line drawn to whatever was geometrically closest). Reported
+  // directly: "don't use any path lines that are not true footpaths
+  // shown in the real boomtown map." TRUNK_PATH_EDGES above is the only
+  // path data this map draws now — every edge in it is backed by a
+  // specific reference frame (see its own inline comments); a stage or
+  // venue with no confirmed path just shows its marker with no line, which
+  // is more honest than inventing one. Spacing/separation between zones
+  // now comes from the field/plaza shapes (fieldRing) and district/camp
+  // borders from recent passes, not from filling every gap with a path.
 
   // Building footprints — a small tan/orange rotated-rectangle under
   // every CONFIRMED stage marker (main or minor) so district interiors
@@ -8129,11 +8032,6 @@ function buildMapGeoJSON(){
     trail: { type:"FeatureCollection", features: trailFeatures },
     stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
     bunting: { type:"FeatureCollection", features: buntingFeatures },
-    spokes: { type:"FeatureCollection", features: spokeFeatures },
-    capillaries: { type:"FeatureCollection", features: capillaryFeatures },
-    campSpokes: { type:"FeatureCollection", features: campSpokeFeatures },
-    parkingSpokes: { type:"FeatureCollection", features: parkingSpokeFeatures },
-    gateSpokes: { type:"FeatureCollection", features: gateSpokeFeatures },
     buildings: { type:"FeatureCollection", features: solidBuildingFeatures },
     fencedEnclosures: { type:"FeatureCollection", features: fencedEnclosureFeatures },
     infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
@@ -8585,37 +8483,14 @@ function loadMap(){
         "circle-color": ["get", "color"]
       } });
 
+      // TRUNK_PATH_EDGES (mapTrail) is now the ONLY path layer this map
+      // draws — the spokes/capillaries/camp-spokes/parking-spokes/gate-
+      // spokes layers that used to fan out from here (auto-generated
+      // "nearest point" lines with no footage evidence behind them) were
+      // removed; see the comment above TRUNK_PATH_EDGES's own removal
+      // block in buildMapGeoJSON for why.
       mapGL.addLayer({ id: "trail-casing", type: "line", source: "mapTrail", paint: { "line-color": "rgba(55,42,28,0.7)", "line-width": 5.5 } });
       mapGL.addLayer({ id: "trail-line", type: "line", source: "mapTrail", paint: { "line-color": "rgba(232,208,168,0.95)", "line-width": 2.6 } });
-
-      mapGL.addSource("mapSpokes", { type: "geojson", data: geo.spokes });
-      mapGL.addLayer({ id: "spokes-casing", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(55,42,28,0.65)", "line-width": 3.2 } });
-      mapGL.addLayer({ id: "spokes-line", type: "line", source: "mapSpokes", paint: { "line-color": "rgba(232,208,168,0.9)", "line-width": 1.5 } });
-
-      mapGL.addSource("mapCapillaries", { type: "geojson", data: geo.capillaries });
-      mapGL.addLayer({ id: "capillaries-line", type: "line", source: "mapCapillaries", paint: { "line-color": "rgba(196,158,110,0.5)", "line-width": 1, "line-dasharray": [0.2, 1.6] } });
-
-      // Camp access paths — same casing/line pairing as the main spokes
-      // (medium weight, since a camp field is a real walked-to
-      // destination, not a minor capillary stop) so every named camping
-      // field connects visibly into the path network instead of its
-      // label just sitting on a field with no way drawn to reach it.
-      mapGL.addSource("mapCampSpokes", { type: "geojson", data: geo.campSpokes });
-      mapGL.addLayer({ id: "camp-spokes-casing", type: "line", source: "mapCampSpokes", paint: { "line-color": "rgba(55,42,28,0.55)", "line-width": 2.8 } });
-      mapGL.addLayer({ id: "camp-spokes-line", type: "line", source: "mapCampSpokes", paint: { "line-color": "rgba(232,208,168,0.8)", "line-width": 1.3 } });
-
-      // Parking access roads — thicker/flatter grey (a real access road,
-      // not a walking path) from each parking area to its nearest gate.
-      mapGL.addSource("mapParkingSpokes", { type: "geojson", data: geo.parkingSpokes });
-      mapGL.addLayer({ id: "parking-spokes-casing", type: "line", source: "mapParkingSpokes", paint: { "line-color": "rgba(40,40,38,0.55)", "line-width": 3.6 } });
-      mapGL.addLayer({ id: "parking-spokes-line", type: "line", source: "mapParkingSpokes", paint: { "line-color": "rgba(190,190,185,0.85)", "line-width": 1.8 } });
-
-      // Gate access roads — see gateSpokeFeatures' own comment above for
-      // why this exists: without it, gates (South Gate especially) had no
-      // path connecting them back to the district loop at all.
-      mapGL.addSource("mapGateSpokes", { type: "geojson", data: geo.gateSpokes });
-      mapGL.addLayer({ id: "gate-spokes-casing", type: "line", source: "mapGateSpokes", paint: { "line-color": "rgba(40,40,38,0.55)", "line-width": 3.6 } });
-      mapGL.addLayer({ id: "gate-spokes-line", type: "line", source: "mapGateSpokes", paint: { "line-color": "rgba(190,190,185,0.85)", "line-width": 1.8 } });
 
       // Main-stage glow — three stacked circle layers per stage, widest/
       // faintest first so the smaller/brighter ones layer on top and it
