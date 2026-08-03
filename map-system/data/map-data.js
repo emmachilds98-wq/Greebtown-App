@@ -4748,6 +4748,7 @@ window.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = {
       "sourceName": "Anara Forest",
       "kind": "woodland",
       "evidence": "official-detail",
+      "notes": "Compact wooded clearing, kept separate from the Hilltop ground-use corridor.",
       "points": [
         [
           -7.2,
@@ -4869,6 +4870,7 @@ window.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = {
       "sourceName": "Hidden Woods",
       "kind": "woodland",
       "evidence": "official-detail",
+      "notes": "Small irregular woodland pocket at the north-west edge of the city cluster.",
       "points": [
         [
           -6,
@@ -4990,124 +4992,167 @@ window.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = {
       "sourceName": "The Lion's Den",
       "kind": "woodland",
       "evidence": "official-detail",
+      "notes": "Broad asymmetric eastern woodland mass beside, not inside, the Hilltop corridor; its long north/south edge keeps the amphitheatre clearing legible without reading as a circular camp zone.",
       "points": [
         [
-          -10,
-          -4.4
+          -13,
+          -13
         ],
         [
-          -5.5,
-          -7.3
+          -5,
+          -17
         ],
         [
-          2.8,
-          -6.8
+          6,
+          -16
         ],
         [
-          10.2,
-          -3.2
+          14,
+          -12
         ],
         [
-          11.5,
-          1.7
+          18,
+          -5
         ],
         [
-          7.4,
-          6.1
+          19,
+          4
         ],
         [
-          0.2,
-          7.8
+          15,
+          13
         ],
         [
-          -7.4,
-          5.4
+          7,
+          17
         ],
         [
-          -11.2,
-          1
+          -4,
+          16
+        ],
+        [
+          -13,
+          11
+        ],
+        [
+          -17,
+          4
+        ],
+        [
+          -18,
+          -5
         ]
       ],
       "fringePoints": [
         [
-          -12.3,
-          -5.4
+          -15,
+          -15
         ],
         [
-          -6.8,
-          -9.2
+          -6,
+          -19
         ],
         [
-          3.6,
-          -8.7
+          7,
+          -18
         ],
         [
-          12.6,
-          -4
+          16,
+          -14
         ],
         [
-          14.1,
-          2.1
+          21,
+          -6
         ],
         [
-          9,
-          7.7
+          22,
+          5
         ],
         [
-          0.3,
-          9.9
+          18,
+          16
         ],
         [
-          -9,
-          6.8
+          8,
+          20
         ],
         [
-          -13.7,
-          1.2
+          -5,
+          19
+        ],
+        [
+          -16,
+          13
+        ],
+        [
+          -20,
+          5
+        ],
+        [
+          -21,
+          -6
         ]
       ],
       "treeClusters": [
         [
-          -7,
-          -2.7,
+          -11,
+          -8,
           8,
-          2.45
+          2.65
         ],
         [
-          -2.2,
-          -5.3,
+          -5,
+          -13,
           8,
-          2.35
+          2.7
         ],
         [
-          4.1,
-          -4.2,
+          3,
+          -13,
           8,
-          2.35
+          2.65
         ],
         [
-          8.2,
-          -0.9,
+          10,
+          -9,
           8,
-          2.3
+          2.55
         ],
         [
-          5.3,
-          4.1,
+          14,
+          -2,
           8,
-          2.35
+          2.5
         ],
         [
-          -1.2,
-          5.5,
+          12,
+          7,
           8,
-          2.45
+          2.55
         ],
         [
-          -7.2,
-          2.8,
+          5,
+          13,
           8,
-          2.35
+          2.65
+        ],
+        [
+          -4,
+          12,
+          8,
+          2.7
+        ],
+        [
+          -11,
+          8,
+          8,
+          2.6
+        ],
+        [
+          -14,
+          1,
+          8,
+          2.55
         ]
       ]
     }

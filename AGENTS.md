@@ -225,6 +225,9 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   polygons (including protected exclusions for non-camping places).
 - `map-system/data/evidenced-paths.json` â€” only reference-supported routes.
 - `map-system/data/district-footprints.json` â€” reviewed illustrated areas.
+- `map-system/data/natural-area-footprints.json` â€” reviewed woodland
+  silhouettes. Each must be anchored to one unique named place and carry a
+  visual-review note; never model woodland as a camp or a generic circle.
 - `map-system/data/site-layout.json` â€” reviewed arrival, parking and
   gate-forecourt footprints around the festival perimeter. Every canonical
   gate must have exactly one forecourt entry; never fall back to a generic
