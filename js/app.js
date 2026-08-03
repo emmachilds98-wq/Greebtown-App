@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v311";
-const APP_BUILD_TIME = "2026-08-03T00:44:02Z";
+const APP_CACHE_VERSION = "v312";
+const APP_BUILD_TIME = "2026-08-03T00:55:23Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -8246,7 +8246,7 @@ function buildMapGeoJSON(){
 // adding a hidden venue, etc. all refresh the map's markers). Off by
 // default for the busier layers so the map isn't crowded on first arrival —
 // "Other stages" and "Amenities" stay on since those are core wayfinding info.
-let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false, poi: true };
+let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false, poi: true, friend: true };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -8421,6 +8421,20 @@ const POI_RING_COLORS = {
   "Fire Pit":"242,120,60", "Skylark Entry":"242,168,60", "The Hideout Hilltop":"196,140,90"
 };
 
+// venueDirectory already carries genre/status/music for every stage and
+// most hidden venues (built for the Map tab's own filterable directory
+// table) but none of it reached the map's own tap-to-open info cards,
+// which only ever showed a name + one info paragraph. Looked up by exact
+// name match — same matching venueDirectory's own table already relies on.
+function venueMetaHtml(name){
+  const v = venueDirectory.find(v=> v.name === name);
+  if(!v) return "";
+  const bits = [];
+  if(v.genre && v.genre !== "—") bits.push(escapeHtml(v.genre));
+  if(v.status && v.status !== "confirmed") bits.push(`<strong>${escapeHtml(v.status)}</strong>`);
+  return bits.length ? `<p class="empty-note">${bits.join(" · ")}</p>` : "";
+}
+
 function loadMap(){
   if(!mapGL){
     // Centered on the real site (schematic (0,0) run through the same
@@ -8592,6 +8606,27 @@ function loadMap(){
       // faint line competing with the fill; borders should read at a
       // glance, matching the ask for "clear square/outlines" for zones.
       mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 2.2 } });
+
+      // Tapping anywhere inside a district's own drawn shape opens the
+      // same info card its small name-label marker does — previously the
+      // fill/casing/line layers had no click handler at all, so only the
+      // tiny text-label marker at the district's centre was tappable,
+      // reported as districts not feeling like real "interactive areas."
+      mapGL.on("click", "districts-fill", (e)=>{
+        if(!e.features || !e.features.length) return;
+        const name = e.features[0].properties.name;
+        const place = locations.find(p=> p.kind === "district" && p.name === name);
+        if(!place) return;
+        showMapInfoCard(`
+          <div class="card">
+            <span class="tag">district — approximate area</span>
+            <h3>${escapeHtml(place.name)}</h3>
+            <p>${place.info}</p>
+          </div>
+        `);
+      });
+      mapGL.on("mouseenter", "districts-fill", ()=>{ mapGL.getCanvas().style.cursor = "pointer"; });
+      mapGL.on("mouseleave", "districts-fill", ()=>{ mapGL.getCanvas().style.cursor = ""; });
 
       // Pepperpot Market's clearing — same casing/fill/line trio as a
       // district, drawn right after them, so the real (GPS, not
@@ -8855,6 +8890,7 @@ function loadMap(){
           <div class="card">
             <span class="tag">${place.kind}</span>
             <h3>${place.name}</h3>
+            ${venueMetaHtml(place.name)}
             <p>${place.info}</p>
             <button class="action" id="saveMeetingBtn">Save as meeting point</button>
           </div>
@@ -8875,6 +8911,7 @@ function loadMap(){
         <div class="card">
           <span class="tag">stage${isRumoured ? " — rumoured" : ""}</span>
           <h3>${place.name}</h3>
+          ${venueMetaHtml(place.name)}
           <p>${place.info}</p>
         </div>
       `) }
@@ -8905,6 +8942,7 @@ function loadMap(){
         <div class="card">
           <span class="tag">hidden venue — unlisted</span>
           <h3>${spot.name}</h3>
+          ${venueMetaHtml(spot.name)}
           <p>${spot.info}</p>
           <p class="empty-note" style="margin-top:6px;">Nearest theme: ${spot.near}. Boomtown never publishes exact hidden-venue locations, so this pin is a "go exploring here" nudge, not a surveyed spot — log what you actually find in Map's hidden-venue log.</p>
         </div>
@@ -8997,6 +9035,37 @@ function loadMap(){
       { name: place.name, title: place.name, onClick: ()=> { if(typeof showPlaceInfo === "function") showPlaceInfo(place); } }
     );
   });
+
+  // Friend location markers — plots each other device's last-known GPS
+  // fix (peopleStatus[id].gps, now carried through mergeSyncPayload
+  // instead of being dropped) as its own marker group. A text-only
+  // "place" guess with no real coordinate has nowhere accurate to plot,
+  // and a stale fix (>30 min, STATUS_STALE_MS) is skipped rather than
+  // shown in a possibly-wrong spot.
+  const peopleStatusForMap = Store.get("peopleStatus") || {};
+  Object.entries(peopleStatusForMap).forEach(([id, entry])=>{
+    if(!entry || !entry.gps || entry.gps.lat == null || entry.gps.lon == null) return;
+    if(entry.updatedAt && (Date.now() - entry.updatedAt) > STATUS_STALE_MS) return;
+    const name = personDisplayName(entry, id);
+    addMapMarker("friend", entry.gps.lat, entry.gps.lon,
+      `<div class="marker friend">🧑</div><div class="map-label friend">${escapeHtml(name)}</div>`,
+      { name: "Friend: " + name, title: name, onClick: ()=> showMapInfoCard(`
+        <div class="card">
+          <span class="tag">friend location</span>
+          <h3>🧑 ${escapeHtml(name)}</h3>
+          <p class="empty-note">${escapeHtml(entry.place || "")} · Location set ${escapeHtml(formatLastSeen(entry.updatedAt))}</p>
+          ${mapsLinkHtml(entry.gps.lat, entry.gps.lon)}
+        </div>
+      `) }
+    );
+  });
+
+  // Search box's autocomplete list — every name that actually got a pin
+  // above (mapMarkersByName is rebuilt from scratch each loadMap() call,
+  // same as mapMarkerGroups) so it never suggests a stale or non-existent
+  // name.
+  const searchNames = document.getElementById("mapSearchNames");
+  if(searchNames) searchNames.innerHTML = Object.keys(mapMarkersByName).sort((a,b)=> a.localeCompare(b)).map(n=> `<option value="${escapeHtml(n)}"></option>`).join("");
 }
 
 function saveMeeting(name){
@@ -9378,6 +9447,44 @@ function mapQuickAction(kind){
 document.querySelectorAll("#mapQuickActions button").forEach(btn=>{
   btn.onclick = ()=> mapQuickAction(btn.dataset.quick);
 });
+
+// Map name search — jumps the map itself to a stage/venue/district by
+// name, the one thing the existing chip filters and the separate
+// Discover global search couldn't do (that search only scrolls a table
+// row into view, never touches the MapLibre canvas). Exact match wins;
+// otherwise first case-insensitive substring match, so "spectrum" finds
+// "Spectrum 360" without needing the exact name.
+function mapSearchGo(){
+  const input = document.getElementById("mapSearchInput");
+  if(!input) return;
+  const term = input.value.trim();
+  if(!term) return;
+  const names = Object.keys(mapMarkersByName);
+  const lower = term.toLowerCase();
+  const match = names.find(n=> n.toLowerCase() === lower) || names.find(n=> n.toLowerCase().includes(lower));
+  if(!match){
+    if(mapInfo) mapInfo.innerHTML = `<div class="card"><p class="empty-note">No stage, venue or district matches "${escapeHtml(term)}" — check the spelling or try a shorter word.</p></div>`;
+    return;
+  }
+  const entry = mapMarkersByName[match];
+  if(entry && mapGL){
+    mapGL.jumpTo({ center: entry.marker.getLngLat(), zoom: Math.max(mapGL.getZoom(), 17) });
+    if(entry.onClick) entry.onClick();
+    const el = entry.marker.getElement();
+    const dot = el && el.querySelector(".marker");
+    if(dot){
+      dot.classList.add("jump-highlight");
+      setTimeout(()=> dot.classList.remove("jump-highlight"), 2400);
+    }
+    document.getElementById("map").scrollIntoView({ behavior:"smooth", block:"center" });
+  }
+}
+{
+  const searchInput = document.getElementById("mapSearchInput");
+  const searchGoBtn = document.getElementById("mapSearchGoBtn");
+  if(searchGoBtn) searchGoBtn.onclick = mapSearchGo;
+  if(searchInput) searchInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter") mapSearchGo(); });
+}
 
 // ===============================
 // VENUE DIRECTORY — filterable card list, merges the researched
@@ -10338,7 +10445,11 @@ function mergeSyncPayload(payload){
   // own myStatus.
   if(payload.status && payload.status.place){
     const peopleStatus = Store.get("peopleStatus") || {};
-    peopleStatus[personId] = { displayName: from, place: payload.status.place, updatedAt: payload.status.updatedAt || payload.updatedAt || Date.now() };
+    // gps carried through alongside place so the map can plot friends —
+    // previously dropped here, which meant mapsLinkHtml() could only ever
+    // build a maps deep-link for your OWN entry, never a friend's, and no
+    // friend location could ever reach the map itself.
+    peopleStatus[personId] = { displayName: from, place: payload.status.place, gps: payload.status.gps || null, updatedAt: payload.status.updatedAt || payload.updatedAt || Date.now() };
     Store.set("peopleStatus", peopleStatus);
   }
 

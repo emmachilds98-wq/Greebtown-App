@@ -425,6 +425,11 @@ Meet at the clock tower if separated"></textarea>
       <button data-quick="camp">🏕 Camp</button>
     </div>
 
+    <div style="display:flex; gap:6px; margin-bottom:14px;">
+      <input type="text" id="mapSearchInput" list="mapSearchNames" placeholder="Search stages, venues, districts…" style="flex:1; min-width:0;">
+      <datalist id="mapSearchNames"></datalist>
+      <button class="action" id="mapSearchGoBtn" style="flex:0 0 auto;">Go</button>
+    </div>
     <p style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:4px;">Jump to</p>
     <div class="venue-filters" id="mapNav" style="margin-bottom:14px;">
       <button data-jump="jumpDirectory">📋 Directory</button>
@@ -439,6 +444,7 @@ Meet at the clock tower if separated"></textarea>
       <span class="chip" data-layer="camp">Camping labels</span>
       <span class="chip" data-layer="landmark">Landmarks</span>
       <span class="chip active" data-layer="poi">Amenities</span>
+      <span class="chip active" data-layer="friend">Friends</span>
     </div>
     <div id="map"></div>
 
