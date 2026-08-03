@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v361";
-const APP_BUILD_TIME = "2026-08-03T06:54:53Z";
+const APP_CACHE_VERSION = "v362";
+const APP_BUILD_TIME = "2026-08-03T06:57:05Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7968,8 +7968,12 @@ function buildMapGeoJSON(){
   const smallVenueFeatures = [];
   const smallVenueYardFeatures = [];
   const SMALL_VENUE_FILLS = [
-    "rgba(229,151,93,0.92)", "rgba(212,139,75,0.9)",
-    "rgba(192,143,68,0.88)", "rgba(238,166,108,0.9)"
+    // The official close-up references use a small warm family: coral
+    // shopfronts, peach tents and ochre workshops. Keeping the variation
+    // within that family gives each venue a readable mass without turning
+    // a dense street into a multicolour pinboard.
+    "rgba(235,151,105,0.94)", "rgba(221,136,83,0.92)",
+    "rgba(191,146,61,0.9)", "rgba(242,173,132,0.92)"
   ];
   reviewedSmallVenueLayout.forEach((venue, index)=>{
     const sourcePlace = thingsToFind.find(place=> place.name === venue.sourceName);
