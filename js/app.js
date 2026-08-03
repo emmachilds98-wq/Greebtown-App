@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v351";
-const APP_BUILD_TIME = "2026-08-03T06:03:42Z";
+const APP_CACHE_VERSION = "v352";
+const APP_BUILD_TIME = "2026-08-03T06:06:53Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9105,15 +9105,15 @@ function loadMap(){
       // stages should still stand out, just not dominate.
       mapGL.addSource("mapStageGlow", { type: "geojson", data: geo.stageGlow });
       mapGL.addLayer({ id: "stage-glow-outer", type: "circle", source: "mapStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 9, 19, 38],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 6.5, 19, 27],
         "circle-color": ["get", "colorOuter"]
       } });
       mapGL.addLayer({ id: "stage-glow-mid", type: "circle", source: "mapStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 5.5, 19, 22],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 4, 19, 16],
         "circle-color": ["get", "colorMid"]
       } });
       mapGL.addLayer({ id: "stage-glow-core", type: "circle", source: "mapStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 19, 11],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.2, 19, 8],
         "circle-color": ["get", "colorCore"]
       } });
 
@@ -9122,15 +9122,15 @@ function loadMap(){
       // (main stage = bigger, brighter glow) even though both now have one.
       mapGL.addSource("mapMinorStageGlow", { type: "geojson", data: geo.minorStageGlow });
       mapGL.addLayer({ id: "minor-stage-glow-outer", type: "circle", source: "mapMinorStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 5, 19, 20],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3.5, 19, 14],
         "circle-color": ["get", "colorOuter"]
       } });
       mapGL.addLayer({ id: "minor-stage-glow-mid", type: "circle", source: "mapMinorStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 19, 12],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.2, 19, 8.5],
         "circle-color": ["get", "colorMid"]
       } });
       mapGL.addLayer({ id: "minor-stage-glow-core", type: "circle", source: "mapMinorStageGlow", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.5, 19, 6],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 1.2, 19, 4.2],
         "circle-color": ["get", "colorCore"]
       } });
 
