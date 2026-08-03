@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v303";
-const APP_BUILD_TIME = "2026-08-03T00:04:18Z";
+const APP_CACHE_VERSION = "v304";
+const APP_BUILD_TIME = "2026-08-03T00:09:19Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7473,15 +7473,6 @@ function buildMapGeoJSON(){
     });
   });
 
-  // A small "plaza" dot at each district's exact centre — every stage/
-  // venue path converges there, and without something to converge ON it
-  // just looked like every path faded out into empty grass at the
-  // middle of each blob. Gives the hub-and-spoke network an actual hub.
-  const plazaFeatures = districts.map(d=>{
-    const c = schematicToLatLon(parseFloat(d.x), parseFloat(d.y));
-    return { type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
-  });
-
   // OPEN CONCOURSES — a visibly wider, paler paved patch at the handful
   // of spots reference footage actually shows opening up into a real
   // town square/concourse, rather than staying a narrow path: Oldtown
@@ -8018,7 +8009,6 @@ function buildMapGeoJSON(){
     stream: { type:"FeatureCollection", features: [streamFeature] },
     districts: { type:"FeatureCollection", features: districtFeatures },
     marketHub: { type:"FeatureCollection", features: marketHubFeatures },
-    plazas: { type:"FeatureCollection", features: plazaFeatures },
     openConcourses: { type:"FeatureCollection", features: openConcourseFeatures },
     parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
     parkingRows: { type:"FeatureCollection", features: parkingRowFeatures },
@@ -8531,16 +8521,6 @@ function loadMap(){
       mapGL.addSource("mapFencedEnclosures", { type: "geojson", data: geo.fencedEnclosures });
       mapGL.addLayer({ id: "fenced-enclosures-line", type: "line", source: "mapFencedEnclosures", paint: { "line-color": "rgba(120,80,50,0.8)", "line-width": 1.3, "line-dasharray": [2, 1] } });
 
-      // A small packed-earth "plaza" where every path actually converges
-      // at each district's centre, instead of every spoke fading out
-      // into empty grass at the middle of the blob.
-      mapGL.addSource("mapPlazas", { type: "geojson", data: geo.plazas });
-      mapGL.addLayer({ id: "plazas-circle", type: "circle", source: "mapPlazas", paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 19, 11],
-        "circle-color": "rgba(196,158,110,0.5)",
-        "circle-stroke-width": 1, "circle-stroke-color": "rgba(70,54,38,0.6)"
-      } });
-
       // Diamond polygons now (was a circle layer) — the reference
       // video's own camp confetti reads as small tent-shaped diamonds,
       // not round dots.
@@ -8602,7 +8582,7 @@ function loadMap(){
   // flat colour. Everything else keeps the plain --district-rgb colour
   // treatment above — inventing a special look for a district with no
   // specific evidence for one would be a guess, not an accuracy fix.
-  const DISTRICT_TEXT_STYLE = { "Area 404": "glitch", "Botanica": "shimmer", "Metropolis": "shimmer" };
+  const DISTRICT_TEXT_STYLE = { "Area 404": "glitch", "Botanica": "shimmer", "Metropolis": "shimmer", "Oldtown": "gothic" };
   const districtList = locations.filter(p=> p.kind === "district");
   districtList.forEach(place=>{
     const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
