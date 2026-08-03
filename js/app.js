@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v378";
-const APP_BUILD_TIME = "2026-08-03T08:58:36Z";
+const APP_CACHE_VERSION = "v379";
+const APP_BUILD_TIME = "2026-08-03T09:05:07Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6608,6 +6608,9 @@ const reviewedStagePrecinctLayout = Array.isArray(window.GREEBTOWN_STAGE_PRECINC
 const reviewedDistrictMassingLayout = Array.isArray(window.GREEBTOWN_DISTRICT_MASSING_LAYOUT?.clusters)
   ? window.GREEBTOWN_DISTRICT_MASSING_LAYOUT.clusters
   : [];
+const reviewedDistrictPassageLayout = Array.isArray(window.GREEBTOWN_DISTRICT_PASSAGE_LAYOUT?.clusters)
+  ? window.GREEBTOWN_DISTRICT_PASSAGE_LAYOUT.clusters
+  : [];
 // Natural areas use their own anchor-relative footprints for the same
 // reason: woodland must never inherit a generic circular zone or a camp
 // surface just because it happens to be near a venue.
@@ -7718,6 +7721,29 @@ function buildMapGeoJSON(){
     geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(ribbonFromPath(points, 1.1))] }
   }));
 
+  // Author-owned close-zoom passages give the six main districts their
+  // own interior circulation. Unlike the evidence-backed trunk paths,
+  // these short ribbons are deliberately bounded inside an already
+  // reviewed district compound: visual paving and movement cues, not a
+  // claim about a new site-wide route or a new location.
+  const DISTRICT_PASSAGE_FILL = {
+    street: "rgba(224,197,151,0.88)",
+    lane: "rgba(213,188,146,0.72)",
+    service: "rgba(175,157,119,0.58)"
+  };
+  const districtPassageFeatures = reviewedDistrictPassageLayout.flatMap(cluster=>{
+    const source = findNamedNode(cluster.sourceName);
+    if(!source) return [];
+    return cluster.passages.map(passage=>{
+      const points = passage.points.map(([x, y])=> [source.x + x, source.y + y]);
+      return {
+        type: "Feature",
+        properties: { fill: DISTRICT_PASSAGE_FILL[passage.kind], kind: passage.kind },
+        geometry: { type: "Polygon", coordinates: [schematicRingToLngLat(ribbonFromPath(points, passage.width))] }
+      };
+    });
+  });
+
   // Low scrub/bush dots lining main & secondary paths — a real
   // countryside footpath usually has some low hedge/scrub growth along
   // its edges, not a bare strip of colour running through flat grass.
@@ -8742,6 +8768,7 @@ function buildMapGeoJSON(){
     districts: { type:"FeatureCollection", features: districtFeatures },
     marketHub: { type:"FeatureCollection", features: marketHubFeatures },
     openConcourses: { type:"FeatureCollection", features: openConcourseFeatures },
+    districtPassages: { type:"FeatureCollection", features: districtPassageFeatures },
     precinctInlays: { type:"FeatureCollection", features: precinctInlayFeatures },
     precinctLights: { type:"FeatureCollection", features: precinctLightFeatures },
     parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
@@ -9361,6 +9388,17 @@ function loadMap(){
       mapGL.addSource("mapDistrictStreets", { type: "geojson", data: geo.districtStreets });
       mapGL.addLayer({ id: "district-streets-fill", type: "fill", source: "mapDistrictStreets", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "district-streets-outline", type: "line", source: "mapDistrictStreets", paint: { "line-color": "rgba(125,94,53,0.5)", "line-width": 1.1 } });
+
+      // Local district passages are deliberately more modest than the
+      // primary site routes. At close zoom they reveal a walkable interior
+      // for each compound; at the overview they stay out of the way of the
+      // larger silhouette, camp fields and official trunk-path network.
+      mapGL.addSource("mapDistrictPassages", { type: "geojson", data: geo.districtPassages });
+      mapGL.addLayer({ id: "district-passages-fill", type: "fill", source: "mapDistrictPassages", minzoom: 14.3, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-passages-outline", type: "line", source: "mapDistrictPassages", minzoom: 14.3, paint: {
+        "line-color": ["match", ["get", "kind"], "street", "rgba(119,89,53,.48)", "lane", "rgba(121,97,62,.34)", "rgba(91,78,56,.3)"],
+        "line-width": 0.75
+      } });
 
       // Stage plazas — drawn before the path lines so the paths visibly
       // run INTO the clearing rather than sitting on top of a flat edge.

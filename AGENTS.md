@@ -241,6 +241,10 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   structural art (stalls, tents and yards), never a new named venue, amenity,
   path or zone. Keep it anchor-relative and use it instead of scattering
   hard-coded decorative rectangles through the renderer.
+- `map-system/data/district-passage-layout.json` â€” reviewed, original
+  close-zoom walking surfaces within those same compounds. These are short
+  interior approaches and lanes, not evidence for a new public trunk route;
+  keep them anchor-relative and never let them cross into camps or woodland.
 - Stage hierarchy is authoritative in `map-document.json`: use `main-stage`
   only for headline footprints and `minor-stage` for compact venues. The
   document validator rejects a role/footprint mismatch, so preserve that
@@ -262,6 +266,7 @@ node scripts/validate-natural-area-footprints.mjs
 node scripts/validate-site-layout.mjs
 node scripts/validate-stage-precinct-layout.mjs
 node scripts/validate-district-massing-layout.mjs
+node scripts/validate-district-passage-layout.mjs
 node scripts/audit-ground-use-overlaps.mjs
 node scripts/audit-map-positions.mjs
 node --check js/app.js
@@ -310,6 +315,13 @@ map document; change an anonymous close-zoom roof, tent or yard here. The
 validator checks bounded anchor-relative geometry, evidence, unique IDs and
 runtime source names. Run `node scripts/report-map-topology.mjs` before a
 large visual pass to see the total authored massing under review.
+
+`map-system/data/district-passage-layout.json` is the matching canonical
+source for the close-zoom circulation between that massing. It deliberately
+does not replace `evidenced-paths.json`: modify the latter only for an
+officially supported site-wide path. The passage validator bounds every point
+to its source district and limits widths, so a visual paving change cannot
+silently create an oversized zone or an accidental route through woodland.
 
 Record every new official-map reading in `reference-layout.json`'s
 `observations` collection before using it to alter a footprint, path, field

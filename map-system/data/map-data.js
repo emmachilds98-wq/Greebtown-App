@@ -6066,3 +6066,360 @@ window.GREEBTOWN_DISTRICT_MASSING_LAYOUT = {
     }
   ]
 };
+window.GREEBTOWN_DISTRICT_PASSAGE_LAYOUT = {
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "anchor-relative-schematic-percent-v1",
+  "purpose": "Reviewed original close-zoom passages inside the core festival districts. These are illustrated walking surfaces that connect their authored massing; they do not assert new public routes or named locations.",
+  "clusters": [
+    {
+      "id": "grand-central-approaches",
+      "sourceName": "Grand Central",
+      "evidence": "official-detail",
+      "notes": "The stage keeps a broad clear face while a shallow fork reaches the northern structures and a quieter eastern service edge, rather than a circular plaza of paths.",
+      "passages": [
+        {
+          "id": "gc-stage-approach",
+          "kind": "street",
+          "width": 0.72,
+          "points": [
+            [
+              -0.4,
+              4.1
+            ],
+            [
+              -0.15,
+              1.7
+            ],
+            [
+              0.2,
+              -0.55
+            ]
+          ]
+        },
+        {
+          "id": "gc-north-fork",
+          "kind": "lane",
+          "width": 0.42,
+          "points": [
+            [
+              0.1,
+              -0.45
+            ],
+            [
+              -1.8,
+              -1.4
+            ],
+            [
+              -3.65,
+              -1.9
+            ]
+          ]
+        },
+        {
+          "id": "gc-east-edge",
+          "kind": "service",
+          "width": 0.35,
+          "points": [
+            [
+              0.2,
+              -0.4
+            ],
+            [
+              2.25,
+              -0.7
+            ],
+            [
+              3.3,
+              0.9
+            ],
+            [
+              2.55,
+              2.35
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "oldtown-street-spine",
+      "sourceName": "Oldtown",
+      "evidence": "official-detail",
+      "notes": "Oldtown is a long narrow street with broken side entries; its circulation must remain a central run between the two close-set building edges, never a round central court.",
+      "passages": [
+        {
+          "id": "oldtown-main-run",
+          "kind": "street",
+          "width": 0.66,
+          "points": [
+            [
+              0.1,
+              -4.4
+            ],
+            [
+              -0.15,
+              -2
+            ],
+            [
+              0.05,
+              0.1
+            ],
+            [
+              0.25,
+              2.4
+            ],
+            [
+              -0.25,
+              4.45
+            ]
+          ]
+        },
+        {
+          "id": "oldtown-west-entry",
+          "kind": "lane",
+          "width": 0.38,
+          "points": [
+            [
+              -0.15,
+              -0.25
+            ],
+            [
+              -1.5,
+              -0.6
+            ],
+            [
+              -2.95,
+              -0.25
+            ]
+          ]
+        },
+        {
+          "id": "oldtown-east-entry",
+          "kind": "lane",
+          "width": 0.38,
+          "points": [
+            [
+              0.1,
+              1.5
+            ],
+            [
+              1.55,
+              1.75
+            ],
+            [
+              3,
+              1.15
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "botanica-garden-walks",
+      "sourceName": "Botanica",
+      "evidence": "official-detail",
+      "notes": "Botanica reads as a loose garden market with walking arcs around an open middle and a defined eastern vendor edge, rather than an orthogonal town grid.",
+      "passages": [
+        {
+          "id": "botanica-garden-arc",
+          "kind": "street",
+          "width": 0.55,
+          "points": [
+            [
+              -3.65,
+              0.8
+            ],
+            [
+              -2.1,
+              -1.8
+            ],
+            [
+              0.2,
+              -2.75
+            ],
+            [
+              2.45,
+              -1.65
+            ],
+            [
+              3.55,
+              0.35
+            ]
+          ]
+        },
+        {
+          "id": "botanica-market-arc",
+          "kind": "lane",
+          "width": 0.42,
+          "points": [
+            [
+              3.55,
+              0.35
+            ],
+            [
+              2.75,
+              1.75
+            ],
+            [
+              1.1,
+              2.8
+            ],
+            [
+              -1.15,
+              2.75
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "metropolis-built-run",
+      "sourceName": "Metropolis",
+      "evidence": "official-detail",
+      "notes": "Metropolis has a compact diagonal built run with a small turn at the south, so the passage follows the low roof blocks rather than cutting across the district as a broad square.",
+      "passages": [
+        {
+          "id": "metropolis-main-run",
+          "kind": "street",
+          "width": 0.58,
+          "points": [
+            [
+              -4,
+              -1.8
+            ],
+            [
+              -1.8,
+              -1.25
+            ],
+            [
+              0.45,
+              -0.65
+            ],
+            [
+              2.55,
+              0.45
+            ],
+            [
+              2.2,
+              2.25
+            ]
+          ]
+        },
+        {
+          "id": "metropolis-south-turn",
+          "kind": "lane",
+          "width": 0.4,
+          "points": [
+            [
+              2.25,
+              2.2
+            ],
+            [
+              0.1,
+              2.75
+            ],
+            [
+              -2.3,
+              2.1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "area-404-industrial-lanes",
+      "sourceName": "Area 404",
+      "evidence": "official-detail",
+      "notes": "Area 404 remains open and industrial: a broken hardstanding approach follows its long blocks with a short cross-lane, preserving the large clear spaces around the compact venues.",
+      "passages": [
+        {
+          "id": "area-404-primary-lane",
+          "kind": "street",
+          "width": 0.62,
+          "points": [
+            [
+              -4.25,
+              -1.6
+            ],
+            [
+              -1.65,
+              -1.1
+            ],
+            [
+              0.8,
+              -0.35
+            ],
+            [
+              3.6,
+              0.8
+            ]
+          ]
+        },
+        {
+          "id": "area-404-yard-turn",
+          "kind": "service",
+          "width": 0.36,
+          "points": [
+            [
+              0.8,
+              -0.35
+            ],
+            [
+              0.6,
+              1.55
+            ],
+            [
+              1.8,
+              2.75
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quantum-junction-ways",
+      "sourceName": "Quantum",
+      "evidence": "official-detail",
+      "notes": "Quantum is a small, sparse turning point beside Hilltop and Helix, so two narrow crossing paths are sufficient and must not grow into a district-sized paved surface.",
+      "passages": [
+        {
+          "id": "quantum-crossing",
+          "kind": "street",
+          "width": 0.46,
+          "points": [
+            [
+              -3,
+              -0.85
+            ],
+            [
+              -0.35,
+              -0.05
+            ],
+            [
+              2.85,
+              0.85
+            ]
+          ]
+        },
+        {
+          "id": "quantum-helix-turn",
+          "kind": "lane",
+          "width": 0.34,
+          "points": [
+            [
+              -0.35,
+              -0.05
+            ],
+            [
+              0.25,
+              1.35
+            ],
+            [
+              0.65,
+              2.55
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+};

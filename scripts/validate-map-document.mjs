@@ -13,6 +13,7 @@ const naturalAreaFootprintsFile = path.join(root, "map-system", "data", "natural
 const siteLayoutFile = path.join(root, "map-system", "data", "site-layout.json");
 const stagePrecinctLayoutFile = path.join(root, "map-system", "data", "stage-precinct-layout.json");
 const districtMassingLayoutFile = path.join(root, "map-system", "data", "district-massing-layout.json");
+const districtPassageLayoutFile = path.join(root, "map-system", "data", "district-passage-layout.json");
 const generatedFile = path.join(root, "map-system", "data", "map-data.js");
 const document = JSON.parse(fs.readFileSync(file, "utf8"));
 const campZones = JSON.parse(fs.readFileSync(campFile, "utf8"));
@@ -24,6 +25,7 @@ const naturalAreaFootprints = JSON.parse(fs.readFileSync(naturalAreaFootprintsFi
 const siteLayout = JSON.parse(fs.readFileSync(siteLayoutFile, "utf8"));
 const stagePrecinctLayout = JSON.parse(fs.readFileSync(stagePrecinctLayoutFile, "utf8"));
 const districtMassingLayout = JSON.parse(fs.readFileSync(districtMassingLayoutFile, "utf8"));
+const districtPassageLayout = JSON.parse(fs.readFileSync(districtPassageLayoutFile, "utf8"));
 const objectTypes = new Set(["terrain", "district", "building", "stage", "vendor", "toilet", "medical", "camping", "entrance", "exit", "path", "boundary", "decoration", "hidden-location"]);
 const errors = [];
 const fail = (message) => errors.push(message);
@@ -73,7 +75,7 @@ for (const object of document.objects ?? []) {
 }
 for (const replacedId of supersededIds) if (!ids.has(replacedId)) fail(`Superseded object does not exist: ${replacedId}`);
 const generatedBanner = "// Generated from map-system/data/map-document.json by scripts/build-map-data.mjs. Do not edit directly.\n";
-const expectedGenerated = `${generatedBanner}window.GREEBTOWN_MAP_DOCUMENT = ${JSON.stringify(document, null, 2)};\nwindow.GREEBTOWN_CAMP_ZONES = ${JSON.stringify(campZones, null, 2)};\nwindow.GREEBTOWN_EVIDENCED_PATHS = ${JSON.stringify(evidencedPaths, null, 2)};\nwindow.GREEBTOWN_DISTRICT_FOOTPRINTS = ${JSON.stringify(districtFootprints, null, 2)};\nwindow.GREEBTOWN_REFERENCE_LAYOUT = ${JSON.stringify(referenceLayout, null, 2)};\nwindow.GREEBTOWN_SMALL_VENUE_LAYOUT = ${JSON.stringify(smallVenueLayout, null, 2)};\nwindow.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = ${JSON.stringify(naturalAreaFootprints, null, 2)};\nwindow.GREEBTOWN_SITE_LAYOUT = ${JSON.stringify(siteLayout, null, 2)};\nwindow.GREEBTOWN_STAGE_PRECINCT_LAYOUT = ${JSON.stringify(stagePrecinctLayout, null, 2)};\nwindow.GREEBTOWN_DISTRICT_MASSING_LAYOUT = ${JSON.stringify(districtMassingLayout, null, 2)};\n`;
+const expectedGenerated = `${generatedBanner}window.GREEBTOWN_MAP_DOCUMENT = ${JSON.stringify(document, null, 2)};\nwindow.GREEBTOWN_CAMP_ZONES = ${JSON.stringify(campZones, null, 2)};\nwindow.GREEBTOWN_EVIDENCED_PATHS = ${JSON.stringify(evidencedPaths, null, 2)};\nwindow.GREEBTOWN_DISTRICT_FOOTPRINTS = ${JSON.stringify(districtFootprints, null, 2)};\nwindow.GREEBTOWN_REFERENCE_LAYOUT = ${JSON.stringify(referenceLayout, null, 2)};\nwindow.GREEBTOWN_SMALL_VENUE_LAYOUT = ${JSON.stringify(smallVenueLayout, null, 2)};\nwindow.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = ${JSON.stringify(naturalAreaFootprints, null, 2)};\nwindow.GREEBTOWN_SITE_LAYOUT = ${JSON.stringify(siteLayout, null, 2)};\nwindow.GREEBTOWN_STAGE_PRECINCT_LAYOUT = ${JSON.stringify(stagePrecinctLayout, null, 2)};\nwindow.GREEBTOWN_DISTRICT_MASSING_LAYOUT = ${JSON.stringify(districtMassingLayout, null, 2)};\nwindow.GREEBTOWN_DISTRICT_PASSAGE_LAYOUT = ${JSON.stringify(districtPassageLayout, null, 2)};\n`;
 if (!fs.existsSync(generatedFile) || fs.readFileSync(generatedFile, "utf8") !== expectedGenerated) {
   fail("map-system/data/map-data.js is stale; run node scripts/build-map-data.mjs");
 }
