@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v400";
-const APP_BUILD_TIME = "2026-08-03T11:09:05Z";
+const APP_CACHE_VERSION = "v401";
+const APP_BUILD_TIME = "2026-08-03T11:12:15Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9483,13 +9483,13 @@ function loadMap(){
       // Quiet surface structure at close zoom: a court reads as paving,
       // lights and a lived-in interior, not a flat shape underneath pins.
       mapGL.addSource("mapPrecinctInlays", { type: "geojson", data: geo.precinctInlays });
-      mapGL.addLayer({ id: "precinct-inlays-line", type: "line", source: "mapPrecinctInlays", minzoom: 15.2, paint: {
+      mapGL.addLayer({ id: "precinct-inlays-line", type: "line", source: "mapPrecinctInlays", minzoom: 14.0, paint: {
         "line-color": ["match", ["get", "surface"], "stage-forecourt", "rgba(129,93,47,.48)", "venue-court", "rgba(112,86,56,.35)", "rgba(118,93,61,.3)"],
         "line-width": 0.8,
         "line-dasharray": [1.2, 1.4]
       } });
       mapGL.addSource("mapPrecinctLights", { type: "geojson", data: geo.precinctLights });
-      mapGL.addLayer({ id: "precinct-lights-circle", type: "circle", source: "mapPrecinctLights", minzoom: 15.2, paint: {
+      mapGL.addLayer({ id: "precinct-lights-circle", type: "circle", source: "mapPrecinctLights", minzoom: 14.0, paint: {
         "circle-radius": ["*", ["get", "radius"], ["interpolate", ["linear"], ["zoom"], 15, 1, 19, 2.1]],
         "circle-color": ["get", "tone"],
         "circle-stroke-width": 0.5,
@@ -9520,12 +9520,12 @@ function loadMap(){
       // to make a district feel inhabited, but withheld from overview zoom
       // so the site still reads as a clear set of larger territories.
       mapGL.addSource("mapDistrictAtmosphere", { type: "geojson", data: geo.districtAtmosphere });
-      mapGL.addLayer({ id: "district-atmosphere-shadow", type: "fill", source: "mapDistrictAtmosphere", minzoom: 16.0, paint: { "fill-color": "rgba(24,35,24,.2)", "fill-translate": [0.8, 1.1] } });
-      mapGL.addLayer({ id: "district-atmosphere-fill", type: "fill", source: "mapDistrictAtmosphere", minzoom: 16.0, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "district-atmosphere-outline", type: "line", source: "mapDistrictAtmosphere", minzoom: 16.0, paint: { "line-color": "rgba(76,63,39,.58)", "line-width": 0.65 } });
+      mapGL.addLayer({ id: "district-atmosphere-shadow", type: "fill", source: "mapDistrictAtmosphere", minzoom: 13.8, paint: { "fill-color": "rgba(24,35,24,.2)", "fill-translate": [0.8, 1.1] } });
+      mapGL.addLayer({ id: "district-atmosphere-fill", type: "fill", source: "mapDistrictAtmosphere", minzoom: 13.8, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-atmosphere-outline", type: "line", source: "mapDistrictAtmosphere", minzoom: 13.8, paint: { "line-color": "rgba(76,63,39,.58)", "line-width": 0.65 } });
       mapGL.addSource("mapDistrictAtmosphereLights", { type: "geojson", data: geo.districtAtmosphereLights });
-      mapGL.addLayer({ id: "district-atmosphere-lights-glow", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 16.0, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 15, 5.5, 19, 13]], "circle-color": ["get", "tone"], "circle-opacity": .18 } });
-      mapGL.addLayer({ id: "district-atmosphere-lights-core", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 16.0, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 15, 1.4, 19, 3.2]], "circle-color": ["get", "tone"], "circle-stroke-width": .45, "circle-stroke-color": "rgba(68,58,38,.55)" } });
+      mapGL.addLayer({ id: "district-atmosphere-lights-glow", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 13.8, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 13.8, 2.8, 15, 5.5, 19, 13]], "circle-color": ["get", "tone"], "circle-opacity": .13 } });
+      mapGL.addLayer({ id: "district-atmosphere-lights-core", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 13.8, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 13.8, .8, 15, 1.4, 19, 3.2]], "circle-color": ["get", "tone"], "circle-stroke-width": .45, "circle-stroke-color": "rgba(68,58,38,.55)" } });
 
       mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
       mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", minzoom: 13.5, paint: { "fill-color": "rgba(224,200,160,0.95)" } });
@@ -9616,9 +9616,9 @@ function loadMap(){
       // that was missing to make flat building fills read as raised
       // structures sitting ON the ground rather than a coloured patch
       // painted flush with it.
-      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 16.1, paint: { "fill-color": "rgba(10,15,10,0.16)", "fill-translate": [1, 1.4] } });
-      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 16.1, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.32 } });
-      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 16.1, paint: { "line-color": "rgba(120,80,50,0.24)", "line-width": 0.65 } });
+      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 14.2, paint: { "fill-color": "rgba(10,15,10,0.16)", "fill-translate": [1, 1.4] } });
+      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 14.2, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.32 } });
+      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 14.2, paint: { "line-color": "rgba(120,80,50,0.24)", "line-width": 0.65 } });
 
       // Deliberate district compounds sit above low-contrast infill: their
       // varied roof tones and fenced yards make a close-up feel authored,
@@ -9650,7 +9650,7 @@ function loadMap(){
       mapGL.addLayer({ id: "small-venues-fill", type: "fill", source: "mapSmallVenues", minzoom: 14.0, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "small-venues-outline", type: "line", source: "mapSmallVenues", minzoom: 14.0, paint: { "line-color": "rgba(104,65,30,0.78)", "line-width": 1 } });
       mapGL.addSource("mapSmallVenueYards", { type: "geojson", data: geo.smallVenueYards });
-      mapGL.addLayer({ id: "small-venue-yards-line", type: "line", source: "mapSmallVenueYards", minzoom: 15.2, paint: { "line-color": "rgba(121,77,35,0.9)", "line-width": 1.25, "line-dasharray": [2, 1] } });
+      mapGL.addLayer({ id: "small-venue-yards-line", type: "line", source: "mapSmallVenueYards", minzoom: 14.0, paint: { "line-color": "rgba(121,77,35,0.9)", "line-width": 1.25, "line-dasharray": [2, 1] } });
 
       // Diamond polygons now (was a circle layer) — the reference
       // video's own camp confetti reads as small tent-shaped diamonds,

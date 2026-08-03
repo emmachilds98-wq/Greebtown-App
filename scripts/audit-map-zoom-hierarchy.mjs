@@ -26,8 +26,8 @@ if(!Number.isFinite(labelThreshold) || labelThreshold < 15.7 || labelThreshold >
 if(!Number.isFinite(labelDetailThreshold) || labelDetailThreshold < labelThreshold + .5 || labelDetailThreshold > 17) errors.push("fine labels must have a distinct later reveal threshold");
 if(!Number.isFinite(passageZoom) || passageZoom < 13.5 || passageZoom > 14.2) errors.push("district passages must establish walking structure on initial arrival");
 if(!Number.isFinite(massingZoom) || massingZoom < 13.5 || massingZoom > 14) errors.push("authored massing must give the initial overview its built character");
-if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 16) errors.push("foreground atmosphere must remain deep-zoom only");
-if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom) errors.push("generic infill must not appear before authored foreground detail");
+if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 13.5 || atmosphereZoom > 14.2) errors.push("authored district atmosphere must support initial overview character");
+if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom || infillZoom > 14.5) errors.push("generic infill must support, not precede or outlast, the authored overview detail");
 if(!Number.isFinite(broadFieldZoom) || broadFieldZoom > 14) errors.push("broad farmland texture must establish the site overview");
 if(!Number.isFinite(fineFieldZoom) || fineFieldZoom < 17) errors.push("fine field mottling must remain deep-zoom only");
 if(!Number.isFinite(hedgeZoom) || hedgeZoom > 14) errors.push("outer hedgerows must provide light structure in the site overview");
