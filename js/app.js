@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v353";
-const APP_BUILD_TIME = "2026-08-03T06:11:48Z";
+const APP_CACHE_VERSION = "v354";
+const APP_BUILD_TIME = "2026-08-03T06:18:11Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6603,15 +6603,11 @@ applyReferenceLayout();
 // Kept js/boomtown-locations-2026.js itself untouched as reference data
 // (no longer used to place anything — see the note above SITE_SW/SITE_NE —
 // just stopped rendering its POI list directly).
-// Amenity markers now come only from the canonical authoring document. Their
-// category and note retain the existing marker icon, ring colour and card text.
-const amenities = (()=> currentMapSystemObjects(object=> object.metadata.mapRole === "amenity")
-  .map(object=> ({
-    category: object.metadata.category,
-    x: `${object.position.x}%`,
-    y: `${object.position.y}%`,
-    note: object.metadata.description
-  })))();
+// Facility positions inherited from the older schematic have no individual
+// position evidence. Keep that source for later review, but do not render
+// unverified toilets, vendors, medical points or water markers on the live
+// illustrated map: a clear map is safer than a plausible-looking wrong one.
+const amenities = [];
 
 // The first live renderer migration: gates now come only from the canonical
 // authoring document. Keep this adapter deliberately small; it preserves the
@@ -7449,11 +7445,12 @@ function buildMapGeoJSON(){
   // GPS, not schematic guesswork). Giving the hub its own clearing (same
   // sizing/overlap-safe machinery as a district) grounds them the same
   // way districts ground stages.
-  const marketHubRef = landmarks.find(l=> l.name === "Pepperpot Market");
+  // The inferred market hub remains disabled until it has a reviewed
+  // footprint; it previously produced a misplaced circular area overlay.
+  const marketHubRef = null;
   const zoneCenters = districts.map(d=>({ x: parseFloat(d.x), y: parseFloat(d.y), ref: d }))
     .concat(campLabels.map(c=>({ x: parseFloat(c.x), y: parseFloat(c.y), ref: c })))
-    .concat(parkingAreas.map(p=>({ x: parseFloat(p.x), y: parseFloat(p.y), ref: p })))
-    .concat(marketHubRef ? [{ x: parseFloat(marketHubRef.x), y: parseFloat(marketHubRef.y), ref: marketHubRef }] : []);
+    .concat(parkingAreas.map(p=>({ x: parseFloat(p.x), y: parseFloat(p.y), ref: p })));
   // Every zone shape drawn from a "radius" below is actually blobRing()'s
   // irregular polygon, which reaches up to 1.22x its nominal radius at
   // its widest bulge (see blobRing: r = baseR * (0.72 + rand()*0.5)).
@@ -7705,7 +7702,8 @@ function buildMapGeoJSON(){
   // rather than white so they read as ground shading, not path) hint at
   // raised terrain without needing real elevation data.
   const hillContourFeatures = [];
-  districts.filter(d=> /^Hilltop/.test(d.info)).forEach((d,di)=>{
+  const SHOW_INFERRED_HILL_CONTOURS = false;
+  (SHOW_INFERRED_HILL_CONTOURS ? districts : []).filter(d=> /^Hilltop/.test(d.info)).forEach((d,di)=>{
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const baseR = (districtRadii.get(d) || 6) * 1.6;
     [1, 1.6, 2.2].forEach((mult,ri)=>{
@@ -7722,7 +7720,7 @@ function buildMapGeoJSON(){
   // layered-terrain look built from fills, since there's no real DEM/
   // hillshade data to draw from.
   const hillBandFeatures = [];
-  districts.filter(d=> /^Hilltop/.test(d.info)).forEach((d,di)=>{
+  (SHOW_INFERRED_HILL_CONTOURS ? districts : []).filter(d=> /^Hilltop/.test(d.info)).forEach((d,di)=>{
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const baseR = (districtRadii.get(d) || 6) * 1.9;
     [[2.6, "rgba(115,98,52,0.09)"], [1.9, "rgba(140,115,58,0.12)"], [1.3, "rgba(168,138,68,0.15)"]].forEach(([mult, tint], ri)=>{
