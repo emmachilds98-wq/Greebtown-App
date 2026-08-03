@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v349";
-const APP_BUILD_TIME = "2026-08-03T05:52:25Z";
+const APP_CACHE_VERSION = "v350";
+const APP_BUILD_TIME = "2026-08-03T05:55:41Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7019,7 +7019,10 @@ function confettiClusterPoints(cx, cy, count, spread, seed){
   const pts = [];
   for(let i=0;i<count;i++){
     const a = rand() * Math.PI * 2;
-    const r = rand() * spread;
+    // Square-root distribution spreads pitches across the whole field;
+    // a simple linear radius makes every field visibly bunch at its label
+    // in the middle and leaves the real usable edges oddly empty.
+    const r = Math.sqrt(rand()) * spread;
     const x = cx + Math.cos(a) * r;
     const y = cy + Math.sin(a) * r * 0.7;
     // Schematic-unit size (tent-scale, well under a building footprint's
@@ -8200,6 +8203,12 @@ function buildMapGeoJSON(){
   // plain open ground at a glance.
   const ordinaryCamps = campLabels.filter(c=> !/premium/i.test(c.text));
   const campFieldRadii = new Map();
+  const CAMP_FIELD_STYLES = [
+    { fill: "rgba(87,196,124,0.72)", line: "rgba(35,119,64,0.76)" },
+    { fill: "rgba(101,207,133,0.70)", line: "rgba(42,128,71,0.74)" },
+    { fill: "rgba(74,183,116,0.72)", line: "rgba(31,108,59,0.76)" },
+    { fill: "rgba(113,214,137,0.70)", line: "rgba(52,134,75,0.72)" }
+  ];
   const campFieldFeatures = ordinaryCamps.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const r = campClearanceRadius(cx, cy, c, 18);
@@ -8210,7 +8219,10 @@ function buildMapGeoJSON(){
     // fields don't all read as the same stretched rectangle.
     const seed = 600 + i * 43;
     const aspect = 0.75 + seededRand(seed + 1)() * 0.5;
-    return { type: "Feature", properties: { fill: "rgba(84,202,123,0.72)", line: "rgba(40,125,69,0.72)" }, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, 6)) ] } };
+    const style = /campervan/i.test(c.text)
+      ? { fill: "rgba(104,183,122,0.70)", line: "rgba(51,104,65,0.78)" }
+      : CAMP_FIELD_STYLES[i % CAMP_FIELD_STYLES.length];
+    return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, 6)) ] } };
   });
   // The official overview has a large, elongated yellow Hilltop field on
   // the east side, running alongside the Oldtown/Quantum corridor. It is
@@ -8272,7 +8284,8 @@ function buildMapGeoJSON(){
         campervanFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Polygon", coordinates:[ schematicRingToLngLat(buildingFootprint(x, y, 1900 + i * 31 + k * 7)) ] } });
       }
     } else {
-      confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), 20, campFieldRadii.get(c) * 0.85, 800 + i * 47));
+      const pitchCount = Math.round(Math.min(42, 20 + campFieldRadii.get(c) * 1.5));
+      confettiPts = confettiPts.concat(confettiClusterPoints(parseFloat(c.x), parseFloat(c.y), pitchCount, campFieldRadii.get(c) * 0.85, 800 + i * 47));
     }
   });
   const confettiFeatures = confettiPts.map((t,i)=>({
