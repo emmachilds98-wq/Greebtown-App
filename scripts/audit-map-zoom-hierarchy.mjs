@@ -27,10 +27,10 @@ if(!Number.isFinite(passageZoom) || passageZoom < 15.7 || passageZoom > 16) erro
 if(!Number.isFinite(massingZoom) || massingZoom < 15.7 || massingZoom > 16) errors.push("authored massing must emerge only after the overview, before close foreground detail");
 if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 16) errors.push("foreground atmosphere must remain deep-zoom only");
 if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom) errors.push("generic infill must not appear before authored foreground detail");
-if(!Number.isFinite(broadFieldZoom) || broadFieldZoom < 16) errors.push("broad farmland texture must remain out of the silhouette-first overview");
+if(!Number.isFinite(broadFieldZoom) || broadFieldZoom > 14) errors.push("broad farmland texture must establish the site overview");
 if(!Number.isFinite(fineFieldZoom) || fineFieldZoom < 17) errors.push("fine field mottling must remain deep-zoom only");
-if(!Number.isFinite(hedgeZoom) || hedgeZoom < 16) errors.push("outer hedgerows must remain secondary to the site silhouette");
-if(!Number.isFinite(treeZoom) || treeZoom < 15.5) errors.push("individual trees must not obscure the overview silhouette");
+if(!Number.isFinite(hedgeZoom) || hedgeZoom > 14) errors.push("outer hedgerows must provide light structure in the site overview");
+if(!Number.isFinite(treeZoom) || treeZoom > 14) errors.push("woodland texture must support the site overview without venue clutter");
 if(!Number.isFinite(tentZoom) || tentZoom < 16) errors.push("individual tents must remain close-zoom texture");
 if(!Number.isFinite(trunkPathZoom) || trunkPathZoom < 15.7) errors.push("trunk paths must not dominate the whole-site overview");
 if(!css.includes("#map.map-labels-thin .map-label:not(.district){display:none;}")) errors.push("thin mode must leave only district labels visible");

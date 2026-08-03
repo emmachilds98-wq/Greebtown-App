@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v396";
-const APP_BUILD_TIME = "2026-08-03T10:56:00Z";
+const APP_CACHE_VERSION = "v397";
+const APP_BUILD_TIME = "2026-08-03T11:01:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7419,7 +7419,10 @@ function buildMapGeoJSON(){
     const rand = seededRand(3000 + i * 13);
     const hue = 95 + rand() * 35;
     const light = 30 + rand() * 16;
-    const alpha = 0.025 + rand() * 0.04;
+    // The first map frame needs quiet field structure too. These remain
+    // intentionally translucent, but are now strong enough to stop the
+    // whole-site view reading as one undifferentiated patch of grass.
+    const alpha = 0.075 + rand() * 0.06;
     return {
       type: "Feature",
       properties: { fill: `hsla(${hue.toFixed(0)},40%,${light.toFixed(0)}%,${alpha.toFixed(2)})` },
@@ -9187,12 +9190,15 @@ function loadMap(){
       mapGL.addSource("mapSiteGround", { type: "geojson", data: geo.siteGround });
       mapGL.addLayer({ id: "site-ground-fill", type: "fill", source: "mapSiteGround", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
-      mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", minzoom: 16.3, paint: { "fill-color": ["get", "fill"] } });
+      // Broad land parcels establish the arrival view. Fine mottling still
+      // waits for deep zoom, so the landscape feels composed rather than
+      // noisy before a visitor begins exploring.
+      mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", minzoom: 13.5, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapFieldsFine", { type: "geojson", data: geo.fieldsFine });
       mapGL.addLayer({ id: "fields-fine-fill", type: "fill", source: "mapFieldsFine", minzoom: 17.1, paint: { "fill-color": ["get", "fill"] } });
 
       mapGL.addSource("mapHedges", { type: "geojson", data: geo.hedges });
-      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", minzoom: 16.0, paint: { "line-color": "rgba(31,72,45,0.12)", "line-width": 0.75 } });
+      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", minzoom: 13.5, paint: { "line-color": "rgba(31,72,45,0.2)", "line-width": ["interpolate", ["linear"], ["zoom"], 13.5, 0.55, 16, 0.95] } });
 
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
       mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.1)", "line-width": 1.2 } });
@@ -9609,8 +9615,8 @@ function loadMap(){
       mapGL.addLayer({ id: "campervans-outline", type: "line", source: "mapCampervans", minzoom: 15.8, paint: { "line-color": "rgba(90,90,95,0.7)", "line-width": 0.6 } });
 
       mapGL.addSource("mapTrees", { type: "geojson", data: geo.trees });
-      mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", minzoom: 15.5, paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, ["*", ["get", "size"], 0.6], 19, ["*", ["get", "size"], 2.6]],
+      mapGL.addLayer({ id: "trees-circle", type: "circle", source: "mapTrees", minzoom: 13.5, paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 13.5, ["*", ["get", "size"], 0.55], 16, ["*", ["get", "size"], 1.15], 19, ["*", ["get", "size"], 2.6]],
         "circle-color": ["get", "color"],
         "circle-stroke-width": 0.6, "circle-stroke-color": "rgba(20,40,28,0.5)"
       } });
