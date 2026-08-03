@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "schematic-percent-v1",
+  "siteBoundary": {
+    "evidence": "official-overview",
+    "points": [[-8,16],[14,-8],[73,-8],[102,7],[104,48],[96,79],[78,103],[28,106],[-8,82],[-12,47]],
+    "notes": "Illustrated full-site perimeter aligned to the west Downtown lobe, eastern Hilltop lobe and southern road edge."
+  },
+  "hilltopDivider": {
+    "evidence": "official-detail",
+    "points": [[59,17],[58,26],[59,34],[62,43]],
+    "notes": "Non-walkable dark divider immediately west of the reviewed Hilltop ground-use corridor."
+  },
+  "parkingAreas": [
+    {
+      "id": "parking-east-gate",
+      "name": "White Carparks (East Gate)",
+      "position": { "x": 97, "y": 38 },
+      "desiredRadius": 10,
+      "footprint": { "aspect": 0.52, "sides": 4, "rotation": 2 },
+      "evidence": "official-detail",
+      "notes": "Long vertical grey arrival/parking field east of Temple Valley Camping."
+    },
+    {
+      "id": "parking-south-gate",
+      "name": "White Carpark 4 (South Gate)",
+      "position": { "x": 80, "y": 71 },
+      "desiredRadius": 8,
+      "footprint": { "aspect": 1.45, "sides": 5, "rotation": -10 },
+      "evidence": "official-detail",
+      "notes": "Wide southern arrival field beside the road and Camp Skylark Sunset approach."
+    }
+  ]
+}

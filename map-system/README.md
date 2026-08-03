@@ -34,6 +34,11 @@ polygon that covers an excluded reviewed anchor.
 `node scripts/audit-ground-use-overlaps.mjs` additionally performs full
 polygon intersection checks against every reviewed woodland fringe.
 
+`site-layout.json` owns parking and arrival-field geometry around the site
+perimeter. Validate it with `node scripts/validate-site-layout.mjs`.
+Run `node scripts/report-map-topology.mjs` before a broad map pass for a
+read-only evidence/ownership briefing tailored to AI code agents.
+
 Before committing a map pass, use `node scripts/map-preflight.mjs`. It rebuilds
 browser data and runs every cross-layer validation in the required order,
 including the safeguard against woodland/camping confusion.

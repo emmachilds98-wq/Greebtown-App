@@ -12,6 +12,7 @@ const steps = [
   ["scripts/validate-reference-layout.mjs"],
   ["scripts/validate-small-venue-layout.mjs"],
   ["scripts/validate-natural-area-footprints.mjs"],
+  ["scripts/validate-site-layout.mjs"],
   ["scripts/audit-ground-use-overlaps.mjs"],
   ["scripts/audit-map-positions.mjs"],
   ["--check", "js/app.js"],

@@ -1,0 +1,19 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const read = name => JSON.parse(fs.readFileSync(path.join(root, "map-system", "data", name), "utf8"));
+const references = read("reference-layout.json");
+const camps = read("camp-zones.json");
+const natural = read("natural-area-footprints.json");
+const districts = read("district-footprints.json");
+const site = read("site-layout.json");
+console.log("# Greebtown map topology review");
+console.log(`\nEvidence: ${(references.observations || []).length} official observations`);
+for(const observation of references.observations || []) console.log(`- ${observation.id}: ${observation.regions.join(", ")}`);
+console.log(`\nDistricts: ${districts.footprints.length} reviewed footprints`);
+console.log(`Camping: ${camps.zones.length} fields; ${camps.groundUseFields.length} ground-use polygons`);
+console.log(`Woodland: ${natural.footprints.length} reviewed silhouettes`);
+console.log(`Arrival: ${site.parkingAreas.length} reviewed parking footprints`);
+console.log("\nUse this report before a visual pass: change the specialised data source named above, then run map-preflight.");

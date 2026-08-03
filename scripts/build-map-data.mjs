@@ -10,6 +10,7 @@ const districtSource = path.join(root, "map-system", "data", "district-footprint
 const referenceLayoutSource = path.join(root, "map-system", "data", "reference-layout.json");
 const smallVenueLayoutSource = path.join(root, "map-system", "data", "small-venue-layout.json");
 const naturalAreaFootprintsSource = path.join(root, "map-system", "data", "natural-area-footprints.json");
+const siteLayoutSource = path.join(root, "map-system", "data", "site-layout.json");
 const output = path.join(root, "map-system", "data", "map-data.js");
 const document = JSON.parse(fs.readFileSync(source, "utf8"));
 const campZones = JSON.parse(fs.readFileSync(campSource, "utf8"));
@@ -18,6 +19,7 @@ const districtFootprints = JSON.parse(fs.readFileSync(districtSource, "utf8"));
 const referenceLayout = JSON.parse(fs.readFileSync(referenceLayoutSource, "utf8"));
 const smallVenueLayout = JSON.parse(fs.readFileSync(smallVenueLayoutSource, "utf8"));
 const naturalAreaFootprints = JSON.parse(fs.readFileSync(naturalAreaFootprintsSource, "utf8"));
+const siteLayout = JSON.parse(fs.readFileSync(siteLayoutSource, "utf8"));
 const banner = "// Generated from map-system/data/map-document.json by scripts/build-map-data.mjs. Do not edit directly.\n";
-fs.writeFileSync(output, `${banner}window.GREEBTOWN_MAP_DOCUMENT = ${JSON.stringify(document, null, 2)};\nwindow.GREEBTOWN_CAMP_ZONES = ${JSON.stringify(campZones, null, 2)};\nwindow.GREEBTOWN_EVIDENCED_PATHS = ${JSON.stringify(evidencedPaths, null, 2)};\nwindow.GREEBTOWN_DISTRICT_FOOTPRINTS = ${JSON.stringify(districtFootprints, null, 2)};\nwindow.GREEBTOWN_REFERENCE_LAYOUT = ${JSON.stringify(referenceLayout, null, 2)};\nwindow.GREEBTOWN_SMALL_VENUE_LAYOUT = ${JSON.stringify(smallVenueLayout, null, 2)};\nwindow.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = ${JSON.stringify(naturalAreaFootprints, null, 2)};\n`);
+fs.writeFileSync(output, `${banner}window.GREEBTOWN_MAP_DOCUMENT = ${JSON.stringify(document, null, 2)};\nwindow.GREEBTOWN_CAMP_ZONES = ${JSON.stringify(campZones, null, 2)};\nwindow.GREEBTOWN_EVIDENCED_PATHS = ${JSON.stringify(evidencedPaths, null, 2)};\nwindow.GREEBTOWN_DISTRICT_FOOTPRINTS = ${JSON.stringify(districtFootprints, null, 2)};\nwindow.GREEBTOWN_REFERENCE_LAYOUT = ${JSON.stringify(referenceLayout, null, 2)};\nwindow.GREEBTOWN_SMALL_VENUE_LAYOUT = ${JSON.stringify(smallVenueLayout, null, 2)};\nwindow.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = ${JSON.stringify(naturalAreaFootprints, null, 2)};\nwindow.GREEBTOWN_SITE_LAYOUT = ${JSON.stringify(siteLayout, null, 2)};\n`);
 console.log(`Built ${path.relative(root, output)} from ${path.relative(root, source)}.`);

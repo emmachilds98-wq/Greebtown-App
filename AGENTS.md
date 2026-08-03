@@ -225,6 +225,8 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   polygons (including protected exclusions for non-camping places).
 - `map-system/data/evidenced-paths.json` â€” only reference-supported routes.
 - `map-system/data/district-footprints.json` â€” reviewed illustrated areas.
+- `map-system/data/site-layout.json` â€” reviewed arrival and parking
+  footprints around the festival perimeter.
 - `map-system/data/reference-layout.json` â€” cluster anchors. This moves a
   district, its dependent venues and its evidence-based routes together.
 
@@ -239,6 +241,7 @@ node scripts/validate-district-footprints.mjs
 node scripts/validate-reference-layout.mjs
 node scripts/validate-small-venue-layout.mjs
 node scripts/validate-natural-area-footprints.mjs
+node scripts/validate-site-layout.mjs
 node scripts/audit-ground-use-overlaps.mjs
 node scripts/audit-map-positions.mjs
 node --check js/app.js
@@ -249,6 +252,10 @@ It rebuilds generated data and runs the full evidence, footprint, camping,
 position and runtime-syntax checks in the required order. Run `git diff --check`
 afterwards. The expanded sequence above remains the reference list when a
 specific failure needs investigation.
+
+Before a broad visual pass, run `node scripts/report-map-topology.mjs` to see
+the current official-reference regions and the specialised sources that own
+their geometry. It is a read-only briefing for Codex/Claude, not a renderer.
 
 `map-system/data/map-data.js` is generated and must be regenerated in the
 same commit; never hand-edit it. Run `node scripts/report-reference-layout.mjs`

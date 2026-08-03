@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v367";
-const APP_BUILD_TIME = "2026-08-03T07:24:51Z";
+const APP_CACHE_VERSION = "v368";
+const APP_BUILD_TIME = "2026-08-03T07:30:59Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6650,11 +6650,12 @@ const gates = (()=>{
 // of) the camping fields, matching the "White Carparks"/"White Carpark 4"
 // East Gate and South Gate already name in their own info text above.
 // Positioned near those two gates rather than guessed elsewhere on site.
-const parkingAreas = [
-  { x:"97%", y:"38%", r:10, text:"White Carparks (East Gate)" },
-  // Pulled up from y:86 to y:71 alongside South Gate/Camp Skylark Sunset.
-  { x:"80%", y:"71%", r:8, text:"White Carpark 4 (South Gate)" }
-];
+const siteLayout = window.GREEBTOWN_SITE_LAYOUT;
+if(!Array.isArray(siteLayout?.parkingAreas) || !siteLayout.parkingAreas.length) throw new Error("Greebtown site-layout authoring data failed to load");
+const parkingAreas = siteLayout.parkingAreas.map(area => ({
+  x: `${area.position.x}%`, y: `${area.position.y}%`, r: area.desiredRadius,
+  text: area.name, footprint: area.footprint, evidence: area.evidence
+}));
 
 // ===============================
 // FULL VENUE DIRECTORY — every named stage, hidden venue, shop, workshop
@@ -8172,17 +8173,21 @@ function buildMapGeoJSON(){
   // than just another grey blob.
   const parkingFeatures = parkingAreas.map((p,i)=>{
     const cx = parseFloat(p.x), cy = parseFloat(p.y);
-    const r = clearanceRadius(cx, cy, p, p.r);
+    const footprint = p.footprint || { aspect: 1, sides: 4, rotation: 0 };
+    const reach = Math.max(footprint.aspect, 1 / footprint.aspect);
+    const r = clearanceRadius(cx, cy, p, p.r) / reach;
     // fieldRing, not blobRing — a real car park is a rectangle with rows
     // in it (see the row lines just below), not a circular blob; a
     // slight rectangle (4 sides, low jitter) reads far closer to that.
-    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * 1.15, r * 0.75, 1200 + i * 37, 4)) ] } };
+    return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * footprint.aspect, r / footprint.aspect, 1200 + i * 37, footprint.sides, footprint.rotation)) ] } };
   });
   let parkingRowFeatures = [];
   let parkingCarFeatures = [];
   parkingAreas.forEach((p,i)=>{
     const cx = parseFloat(p.x), cy = parseFloat(p.y);
-    const r = clearanceRadius(cx, cy, p, p.r);
+    const footprint = p.footprint || { aspect: 1 };
+    const reach = Math.max(footprint.aspect, 1 / footprint.aspect);
+    const r = clearanceRadius(cx, cy, p, p.r) / reach;
     const rand = seededRand(1300 + i * 53);
     for(let row=-2;row<=2;row++){
       const y = cy + row * (r / 3);
@@ -8556,10 +8561,7 @@ function buildMapGeoJSON(){
   // Fence-post density follows the real longitude span, independently of
   // the perimeter's illustrated silhouette.
   const fencePostSpacing = (SITE_NE.lon - SITE_SW.lon) * 0.04;
-  const siteBoundaryOutline = [
-    [-8, 18], [18, -7], [72, -8], [101, 8], [104, 48],
-    [95, 78], [78, 103], [28, 106], [-8, 81], [-12, 48]
-  ];
+  const siteBoundaryOutline = siteLayout.siteBoundary.points;
   const boundaryRing = schematicRingToLngLat(siteBoundaryOutline);
   boundaryRing.push(boundaryRing[0]);
   const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: boundaryRing } };
@@ -8570,7 +8572,7 @@ function buildMapGeoJSON(){
   // layer and is never added to the path network.
   const hilltopDividerFeature = {
     type:"Feature", properties:{},
-    geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[75, 35], [72, 46], [72, 57], [75, 68]]) }
+    geometry:{ type:"LineString", coordinates: schematicRingToLngLat(siteLayout.hilltopDivider.points) }
   };
 
   // Real named roads bordering the site — Alresford Rd (diagonal, NW
