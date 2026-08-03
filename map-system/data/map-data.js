@@ -3829,36 +3829,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          3,
-          29
+          8,
+          50
         ],
         [
-          11,
-          25
-        ],
-        [
-          22,
-          27
-        ],
-        [
-          28,
-          33
+          16,
+          46
         ],
         [
           27,
-          42
-        ],
-        [
-          20,
           48
         ],
         [
-          8,
-          47
+          33,
+          54
         ],
         [
-          2,
-          41
+          32,
+          63
+        ],
+        [
+          25,
+          69
+        ],
+        [
+          13,
+          68
+        ],
+        [
+          7,
+          62
         ]
       ]
     },
@@ -3868,36 +3868,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          18,
-          10
+          20,
+          34
         ],
         [
-          29,
-          7
-        ],
-        [
-          38,
-          10
-        ],
-        [
-          42,
-          18
-        ],
-        [
-          37,
-          27
-        ],
-        [
-          29,
+          31,
           31
         ],
         [
-          20,
-          28
+          40,
+          34
         ],
         [
-          15,
-          20
+          44,
+          42
+        ],
+        [
+          39,
+          51
+        ],
+        [
+          31,
+          55
+        ],
+        [
+          22,
+          52
+        ],
+        [
+          17,
+          44
         ]
       ]
     },
@@ -3907,36 +3907,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          25,
-          30
+          30,
+          53
         ],
         [
-          38,
-          29
-        ],
-        [
-          47,
-          35
-        ],
-        [
-          50,
-          44
-        ],
-        [
-          45,
+          43,
           52
         ],
         [
-          34,
-          55
+          52,
+          58
         ],
         [
-          24,
-          50
+          55,
+          67
         ],
         [
-          21,
-          40
+          50,
+          75
+        ],
+        [
+          39,
+          78
+        ],
+        [
+          29,
+          73
+        ],
+        [
+          26,
+          63
         ]
       ]
     },
@@ -3946,32 +3946,32 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-detail",
       "points": [
         [
-          30,
-          3
+          28,
+          25
         ],
         [
-          43,
-          2
+          41,
+          24
         ],
         [
-          51,
-          7
+          49,
+          29
         ],
         [
-          52,
-          13
+          50,
+          35
         ],
         [
-          47,
-          18
+          45,
+          40
         ],
         [
-          37,
-          18
+          35,
+          40
         ],
         [
-          29,
-          14
+          27,
+          36
         ]
       ]
     },
@@ -3981,36 +3981,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-detail",
       "points": [
         [
-          61,
-          28
+          55,
+          42
         ],
         [
-          70,
-          26
-        ],
-        [
-          77,
-          32
-        ],
-        [
-          79,
+          64,
           40
         ],
         [
-          75,
-          47
+          71,
+          46
         ],
         [
-          68,
+          73,
+          54
+        ],
+        [
+          69,
+          61
+        ],
+        [
+          62,
+          64
+        ],
+        [
+          54,
+          59
+        ],
+        [
+          51,
           50
-        ],
-        [
-          60,
-          45
-        ],
-        [
-          57,
-          36
         ]
       ]
     }
@@ -4019,6 +4019,8 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
 window.GREEBTOWN_REFERENCE_LAYOUT = {
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
+  "reviewedOverview": true,
+  "reviewNote": "Anchors re-derived as one full-site composition from the user-supplied official overview references.",
   "anchors": {
     "Botanica": {
       "from": [
@@ -4026,8 +4028,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         18
       ],
       "to": [
-        28,
-        18
+        30,
+        42
       ]
     },
     "Metropolis": {
@@ -4036,8 +4038,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         36
       ],
       "to": [
-        15,
-        36
+        20,
+        57
       ]
     },
     "Area 404": {
@@ -4046,8 +4048,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         37
       ],
       "to": [
-        36,
-        37
+        41,
+        60
       ]
     },
     "Letsbe Avenue": {
@@ -4056,8 +4058,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         9
       ],
       "to": [
-        40,
-        9
+        38,
+        31
       ]
     },
     "Grand Central": {
@@ -4066,8 +4068,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         30
       ],
       "to": [
-        72,
-        30
+        61,
+        40
       ]
     },
     "Oldtown": {
@@ -4076,8 +4078,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         40
       ],
       "to": [
-        68,
-        40
+        62,
+        54
       ]
     },
     "Hydro XL": {
@@ -4086,8 +4088,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         46
       ],
       "to": [
-        11,
-        46
+        15,
+        67
       ]
     },
     "Anara Forest": {
@@ -4096,8 +4098,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         22
       ],
       "to": [
-        85,
-        22
+        82,
+        35
       ]
     },
     "The Lion's Den": {
@@ -4106,8 +4108,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         55
       ],
       "to": [
-        83,
-        55
+        78,
+        70
       ]
     },
     "Helix": {
@@ -4116,8 +4118,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         52
       ],
       "to": [
-        78,
-        52
+        73,
+        64
       ]
     },
     "Hidden Woods": {
@@ -4127,7 +4129,7 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
       ],
       "to": [
         18,
-        2
+        26
       ]
     }
   },

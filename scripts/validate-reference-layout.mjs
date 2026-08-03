@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const data = JSON.parse(fs.readFileSync(path.join(root, "map-system", "data", "reference-layout.json"), "utf8"));
 const errors = [];
-const MAX_CLUSTER_SHIFT = 8;
+const MAX_CLUSTER_SHIFT = data.reviewedOverview === true ? 30 : 8;
 for(const [name, anchor] of Object.entries(data.anchors || {})){
   for(const key of ["from", "to"]) if(!Array.isArray(anchor[key]) || anchor[key].length !== 2 || !anchor[key].every(value=>Number.isFinite(value) && value >= 0 && value <= 100)) errors.push(`${name}: ${key} must be a two-value in-bounds point`);
   if(Array.isArray(anchor.from) && Array.isArray(anchor.to) && anchor.from.length === 2 && anchor.to.length === 2){

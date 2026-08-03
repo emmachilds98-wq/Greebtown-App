@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v354";
-const APP_BUILD_TIME = "2026-08-03T06:18:11Z";
+const APP_CACHE_VERSION = "v355";
+const APP_BUILD_TIME = "2026-08-03T06:23:26Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7658,9 +7658,9 @@ function buildMapGeoJSON(){
   // Draw a restrained, paved ground ribbon beneath their individual route
   // segments so people can read where the walk actually continues.
   const districtStreetFeatures = [
-    [[58,29], [60,32], [61,36], [62,40], [60,42]],
-    [[68,30], [66,33], [64,36], [68,38], [72,41], [74,43]],
-    [[40,9], [37,12], [30,15], [28,18], [35,20]]
+    [[52,43], [54,46], [55,50], [56,54], [54,56]],
+    [[62,44], [60,47], [58,50], [62,52], [66,55], [68,57]],
+    [[38,31], [35,34], [31,38], [30,42], [37,44]]
   ].map((points, index)=>({
     type:"Feature", properties:{ fill:index === 2 ? "rgba(226,201,158,0.72)" : "rgba(218,189,143,0.78)" },
     geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(ribbonFromPath(points, 1.1))] }
@@ -8322,8 +8322,8 @@ function buildMapGeoJSON(){
   // Downtown enclosure in the official overview. It must read as shared
   // terrain underneath the individual district clearings, rather than
   // three isolated coloured islands on open grass.
-  const downtownWoodlandRing = [[2,9], [19,1], [39,3], [48,13], [49,30], [45,46], [34,53], [15,51], [3,42], [-2,25], [2,9]];
-  const downtownWoodlandFringeRing = [[-1,6], [18,-3], [43,0], [53,10], [54,31], [49,50], [36,58], [12,56], [-3,46], [-8,24], [-1,6]];
+  const downtownWoodlandRing = [[5,31], [22,25], [40,27], [51,38], [55,54], [52,73], [44,81], [25,80], [8,70], [1,50], [5,31]];
+  const downtownWoodlandFringeRing = [[1,28], [21,22], [45,24], [56,35], [60,55], [56,77], [46,85], [23,84], [5,74], [-4,50], [1,28]];
   const forestFeatures = [{
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(downtownWoodlandRing) ] }
@@ -8359,7 +8359,7 @@ function buildMapGeoJSON(){
   // A light irregular tree line follows the Downtown enclosure itself.
   // This avoids a flat empty buffer between the dense district clusters
   // and the shared woodland, especially at the new overview layout.
-  [[5,12], [16,4], [28,3], [42,8], [48,20], [47,34], [40,48], [28,52], [15,49], [5,40], [0,27]].forEach(([x,y], i)=>{
+  [[8,35], [16,29], [27,28], [39,31], [49,41], [53,52], [50,66], [42,77], [30,79], [17,75], [7,65], [3,51]].forEach(([x,y], i)=>{
     treePts = treePts.concat(treeClusterPoints(x, y, 9, 3.2, 1780 + i * 37));
   });
   // Widened from 6 fixed corner clusters to a fuller ring running the
@@ -8432,7 +8432,7 @@ function buildMapGeoJSON(){
   // layer and is never added to the path network.
   const hilltopDividerFeature = {
     type:"Feature", properties:{},
-    geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[73, 28], [71, 39], [72, 52], [74, 64]]) }
+    geometry:{ type:"LineString", coordinates: schematicRingToLngLat([[75, 35], [72, 46], [72, 57], [75, 68]]) }
   };
 
   // Real named roads bordering the site — Alresford Rd (diagonal, NW
