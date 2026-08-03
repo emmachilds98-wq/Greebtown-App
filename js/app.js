@@ -11,13 +11,22 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v322";
-const APP_BUILD_TIME = "2026-08-03T03:05:08Z";
+const APP_CACHE_VERSION = "v323";
+const APP_BUILD_TIME = "2026-08-03T03:09:22Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
 // browser-safe global; do not recreate a second source in this file.
 const MAP_SYSTEM_DOCUMENT = window.GREEBTOWN_MAP_DOCUMENT;
+const MAP_SYSTEM_SUPERSEDED_IDS = new Set(
+  (MAP_SYSTEM_DOCUMENT?.objects || []).flatMap(object => object.metadata?.supersedes || [])
+);
+function currentMapSystemObjects(predicate){
+  if(!MAP_SYSTEM_DOCUMENT || !Array.isArray(MAP_SYSTEM_DOCUMENT.objects)){
+    throw new Error("Greebtown map authoring data failed to load");
+  }
+  return MAP_SYSTEM_DOCUMENT.objects.filter(object => !MAP_SYSTEM_SUPERSEDED_IDS.has(object.id) && predicate(object));
+}
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6566,8 +6575,7 @@ const campLabels = [
 // just stopped rendering its POI list directly).
 // Amenity markers now come only from the canonical authoring document. Their
 // category and note retain the existing marker icon, ring colour and card text.
-const amenities = (()=> MAP_SYSTEM_DOCUMENT.objects
-  .filter(object=> object.metadata.mapRole === "amenity")
+const amenities = (()=> currentMapSystemObjects(object=> object.metadata.mapRole === "amenity")
   .map(object=> ({
     category: object.metadata.category,
     x: `${object.position.x}%`,
@@ -6582,8 +6590,7 @@ const gates = (()=>{
   if(!MAP_SYSTEM_DOCUMENT || !Array.isArray(MAP_SYSTEM_DOCUMENT.objects)){
     throw new Error("Greebtown map authoring data failed to load");
   }
-  return MAP_SYSTEM_DOCUMENT.objects
-    .filter(object=> object.type === "entrance" || object.type === "exit")
+  return currentMapSystemObjects(object=> object.type === "entrance" || object.type === "exit")
     .map(object=> ({
       name: object.name,
       x: `${object.position.x}%`,

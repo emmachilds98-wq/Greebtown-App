@@ -19,6 +19,7 @@ for (const layer of document.layers ?? []) {
   layers.add(layer.id);
 }
 const ids = new Set();
+const supersededIds = new Set();
 for (const object of document.objects ?? []) {
   if (!/^[a-z0-9-]+$/.test(object.id ?? "")) fail(`Invalid object ID: ${object.id}`);
   if (ids.has(object.id)) fail(`Duplicate object ID: ${object.id}`);
@@ -30,7 +31,9 @@ for (const object of document.objects ?? []) {
   if (!(object.transform?.scale > 0) || !Number.isFinite(object.transform?.rotation)) fail(`${object.id}: invalid transform`);
   if (object.asset !== null && typeof object.asset !== "string") fail(`${object.id}: asset must be a string or null`);
   if (typeof object.asset === "string" && !object.asset.startsWith("assets/")) fail(`${object.id}: asset must be relative to map-system/assets`);
+  for (const replacedId of object.metadata?.supersedes || []) supersededIds.add(replacedId);
 }
+for (const replacedId of supersededIds) if (!ids.has(replacedId)) fail(`Superseded object does not exist: ${replacedId}`);
 const generatedBanner = "// Generated from map-system/data/map-document.json by scripts/build-map-data.mjs. Do not edit directly.\n";
 const expectedGenerated = `${generatedBanner}window.GREEBTOWN_MAP_DOCUMENT = ${JSON.stringify(document, null, 2)};\n`;
 if (!fs.existsSync(generatedFile) || fs.readFileSync(generatedFile, "utf8") !== expectedGenerated) {

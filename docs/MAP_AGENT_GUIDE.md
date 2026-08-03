@@ -71,6 +71,10 @@ Translate a request such as “move the medical tent 50 pixels east” into the 
 
 For reference-image reconstruction, work in evidence-backed clusters. Identify anchors first, then record each inferred relationship and uncertainty. A screenshot is not automatically surveyed geometry.
 
+## Replacing old amenity information
+
+Never leave an old amenity marker live beside a newer replacement just because they overlap. Add the new record, then set its `metadata.supersedes` array to the exact stable IDs it replaces. The live app automatically excludes superseded records, so only the newer information renders. Do not use proximity alone to infer replacement: two nearby toilet blocks or vendors may both be real. Record the evidence and the replacement relationship explicitly.
+
 ## Validation and review
 
 The validator rejects duplicate IDs, missing layers, invalid object types, out-of-bounds coordinates, invalid dimensions/transforms, and bad asset paths. The editor additionally surfaces same-layer bounding-box overlaps as review warnings. An overlap is not always an error—stages can live inside districts—but it always deserves a human decision.
