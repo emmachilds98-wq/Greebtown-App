@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v314";
-const APP_BUILD_TIME = "2026-08-03T01:15:39Z";
+const APP_CACHE_VERSION = "v315";
+const APP_BUILD_TIME = "2026-08-03T01:23:53Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7390,6 +7390,19 @@ function nearestTrunkPoint(x, y){
   return best;
 }
 
+// A genuinely separate wooded patch between The Hide Out Hilltop (66,21)
+// and Grand Central (66,30) — a Grand Central/Oldtown reference
+// screenshot shows it explicitly labelled "SITE OF SPECIAL SCIENTIFIC
+// INTEREST" in pale italic map text over dark tree-covered ground,
+// distinct from every named forest/woods stage (it has no stage/venue
+// of its own — it's a real ecological designation, not a Forest-named
+// district). Previously unrepresented: that whole area rendered as
+// plain open ground, when the reference clearly shows dark wooded
+// terrain. Module-level (not inside buildMapGeoJSON) so both that
+// function (forest fill/tree texture) and loadMap()'s plain-text label
+// marker can both reach it.
+const SSSI_SPOTS = [{ name: "Site of Special Scientific Interest", x: "63", y: "25" }];
+
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
 
@@ -8256,7 +8269,8 @@ function buildMapGeoJSON(){
   // safe way (accounting for blobRing's own up-to-1.22x bulge) against
   // every district/camp/parking/market-hub zone, same as camp fields.
   const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name))
-    .concat(minorStages.filter(p=> p.name === "Tribe of Frog"));
+    .concat(minorStages.filter(p=> p.name === "Tribe of Frog"))
+    .concat(SSSI_SPOTS);
   function forestClearanceRadius(cx, cy){
     let minDist = Infinity;
     zoneCenters.forEach(z=>{ minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy)); });
@@ -8416,7 +8430,7 @@ function buildMapGeoJSON(){
 // adding a hidden venue, etc. all refresh the map's markers). Off by
 // default for the busier layers so the map isn't crowded on first arrival —
 // "Other stages" and "Amenities" stay on since those are core wayfinding info.
-let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false, poi: true, friend: true };
+let mapLayerVisible = { minor: true, secret: false, camp: false, landmark: false, poi: true, friend: true, sssi: true };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -9184,6 +9198,16 @@ function loadMap(){
   campLabels.forEach(c=>{
     const coord = schematicToLatLon(parseFloat(c.x), parseFloat(c.y));
     addMapMarker("camp", coord.lat, coord.lon, `<div class="map-label camp">⛺ ${escapeHtml(c.text)}</div>`, {});
+  });
+
+  // Plain, non-interactive text over the SSSI woodland patch (see the
+  // module-level SSSI_SPOTS above buildMapGeoJSON) — the reference screenshot shows this
+  // as pale italic map text with no icon or coloured pill, unlike every
+  // named camp/venue label, so it gets its own bare style rather than
+  // reusing mapMarkerHtml/showMapInfoCard.
+  SSSI_SPOTS.forEach(s=>{
+    const coord = schematicToLatLon(parseFloat(s.x), parseFloat(s.y));
+    addMapMarker("sssi", coord.lat, coord.lon, `<div class="map-label sssi">${escapeHtml(s.name)}</div>`, {});
   });
 
   gates.forEach(place=>{
