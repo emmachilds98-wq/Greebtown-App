@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v393";
-const APP_BUILD_TIME = "2026-08-03T10:45:00Z";
+const APP_CACHE_VERSION = "v394";
+const APP_BUILD_TIME = "2026-08-03T10:48:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8619,10 +8619,10 @@ function buildMapGeoJSON(){
     return { type:"Feature", properties:{}, geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(ring)] } };
   });
   const forestFeatures = [{
-    type: "Feature", properties: {},
+    type: "Feature", properties: { role:"downtown-enclosure" },
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(downtownWoodlandRing) ] }
   }].concat(reviewedWoodlandFeatures).concat(forestSpots.map((f,i)=>({
-    type: "Feature", properties: {},
+    type: "Feature", properties: { role:"woodland" },
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)), 400 + i * 53, 16)) ] }
   })));
   // A wider, paler fringe ring under the forest's own dark fill —
@@ -9249,9 +9249,13 @@ function loadMap(){
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
       mapGL.addSource("mapForestFringe", { type: "geojson", data: geo.forestFringe });
-      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": "rgba(82,163,93,0.22)" } });
-      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(52,136,75,0.88)" } });
-      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(35,105,59,0.7)", "line-width": 1.5 } });
+      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": "rgba(82,163,93,0.18)" } });
+      // The Downtown bowl is a shared background landscape, not a single
+      // enormous dark zone. Its softer value lets Botanica, Metropolis and
+      // Area 404 read as distinct places inside one wooded setting, while
+      // reviewed woodland stages keep their denser, separate silhouette.
+      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(52,136,75,0.62)", "rgba(52,136,75,0.82)"] } });
+      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(35,105,59,0.4)", "rgba(35,105,59,0.65)"], "line-width": 1.15 } });
 
       // Parking — flat grey fields with a few straight "row" lines, kept
       // visually distinct from both camping (green/yellow, textured) and
