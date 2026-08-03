@@ -4350,6 +4350,204 @@ window.GREEBTOWN_SMALL_VENUE_LAYOUT = {
       "rotation": 30,
       "label": true,
       "positionEvidence": "official-detail"
+    },
+    {
+      "name": "The Boomtown Bobbies",
+      "sourceName": "The Boomtown Bobbies",
+      "district": "Botanica",
+      "shape": "stall",
+      "width": 2.2,
+      "height": 1.15,
+      "rotation": -12,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Luck Exchange Casino",
+      "sourceName": "Luck Exchange Casino",
+      "district": "Botanica",
+      "shape": "round",
+      "width": 2.35,
+      "height": 1.95,
+      "rotation": 0,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Hotel Paradiso",
+      "sourceName": "Hotel Paradiso",
+      "district": "Botanica",
+      "shape": "stall",
+      "width": 2.35,
+      "height": 1.25,
+      "rotation": 18,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Soapranos Laundrette",
+      "sourceName": "Soapranos Laundrette",
+      "district": "Botanica",
+      "shape": "stall",
+      "width": 2.2,
+      "height": 1.1,
+      "rotation": -22,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Botanica Zoo",
+      "sourceName": "Botanica Zoo",
+      "district": "Botanica",
+      "shape": "yard",
+      "width": 2.6,
+      "height": 1.8,
+      "rotation": 8,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "The Garden Centre",
+      "sourceName": "The Garden Centre",
+      "district": "Botanica",
+      "shape": "stall",
+      "width": 2.15,
+      "height": 1.15,
+      "rotation": 26,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Mango",
+      "sourceName": "Mango",
+      "district": "Botanica",
+      "shape": "round",
+      "width": 2.1,
+      "height": 1.75,
+      "rotation": 0,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Karma Ceuticals",
+      "sourceName": "Karma Ceuticals",
+      "district": "Botanica",
+      "shape": "stall",
+      "width": 2,
+      "height": 1.05,
+      "rotation": -18,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Sub Lab",
+      "sourceName": "Sub Lab",
+      "district": "Metropolis",
+      "shape": "round",
+      "width": 2.35,
+      "height": 1.95,
+      "rotation": 0,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Memory Mart",
+      "sourceName": "Memory Mart",
+      "district": "Metropolis",
+      "shape": "stall",
+      "width": 1.95,
+      "height": 1.05,
+      "rotation": 10,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Better You",
+      "sourceName": "Better You",
+      "district": "Metropolis",
+      "shape": "stall",
+      "width": 1.95,
+      "height": 1.05,
+      "rotation": -12,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "BBXL Info",
+      "sourceName": "BBXL Info",
+      "district": "Metropolis",
+      "shape": "stall",
+      "width": 1.65,
+      "height": 0.95,
+      "rotation": 18,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "E Numbers",
+      "sourceName": "E Numbers",
+      "district": "Metropolis",
+      "shape": "stall",
+      "width": 2.05,
+      "height": 1.1,
+      "rotation": -18,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Gabber Kebabber",
+      "sourceName": "Gabber Kebabber",
+      "district": "Metropolis",
+      "shape": "stall",
+      "width": 2.2,
+      "height": 1.15,
+      "rotation": 16,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Loconnection",
+      "sourceName": "Loconnection",
+      "district": "Metropolis",
+      "shape": "stall",
+      "width": 1.85,
+      "height": 1,
+      "rotation": -20,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Nachtlicker",
+      "sourceName": "Nachtlicker",
+      "district": "Metropolis",
+      "shape": "stall",
+      "width": 1.95,
+      "height": 1.05,
+      "rotation": 22,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "Deviant Lounge",
+      "sourceName": "Deviant Lounge",
+      "district": "Area 404",
+      "shape": "round",
+      "width": 2.35,
+      "height": 1.95,
+      "rotation": 0,
+      "label": true,
+      "positionEvidence": "official-detail"
+    },
+    {
+      "name": "BBXL",
+      "sourceName": "BBXL",
+      "district": "Area 404",
+      "shape": "stall",
+      "width": 2,
+      "height": 1.05,
+      "rotation": -16,
+      "label": true,
+      "positionEvidence": "official-detail"
     }
   ]
 };
