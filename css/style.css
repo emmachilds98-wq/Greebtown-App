@@ -378,6 +378,11 @@
      sitting directly on the field colour. Matches the same tan family
      already used for buildings/paths on this map. */
   .map-label.camp{background:rgba(196,150,80,.9); border:1px solid rgba(120,85,35,.6); padding:1px 6px; border-radius:3px; font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:rgba(30,20,10,.95); text-shadow:none; transform:translate(-50%, -50%);}
+  /* Plain informational map text (no pill/icon) — the reference
+     screenshot shows "SITE OF SPECIAL SCIENTIFIC INTEREST" as bare pale
+     italic text sitting directly on the woodland fill, unlike every
+     named camp/venue label on this map. */
+  .map-label.sssi{background:none; border:none; padding:0; font-size:8px; font-style:italic; font-weight:500; text-transform:uppercase; letter-spacing:.04em; color:rgba(210,225,215,.55); text-shadow:0 1px 2px rgba(0,0,0,.4); transform:translate(-50%, -50%); pointer-events:none; white-space:nowrap;}
   .stagelist{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
   .stagelist span{font-size:12px; background:var(--bg-panel-2); border:1px solid var(--line); padding:4px 10px; border-radius:20px; color:var(--text-muted);}
   .stagelist button{font-size:12px; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text-muted); padding:6px 12px; border-radius:20px; cursor:pointer; white-space:nowrap;}
