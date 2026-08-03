@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v343";
-const APP_BUILD_TIME = "2026-08-03T04:58:30Z";
+const APP_CACHE_VERSION = "v344";
+const APP_BUILD_TIME = "2026-08-03T05:07:21Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7604,7 +7604,7 @@ function buildMapGeoJSON(){
   // instead of one fixed 0.6 for every segment — main routes read as the
   // wide, obvious way between big landmarks; minor ones stay narrow and
   // subtle, an "exploratory" hint rather than a signed route.
-  const TRAIL_WIDTH = { main: 0.95, secondary: 0.6, minor: 0.32 }; // schematic units
+  const TRAIL_WIDTH = { main: 0.74, secondary: 0.46, minor: 0.28 }; // schematic units
   const TRAIL_FILL = {
     main: "rgba(214,182,122,0.97)",
     secondary: "rgba(224,200,160,0.92)",
@@ -8697,7 +8697,10 @@ function loadMap(){
       // with a little padding on a typical phone screen. minZoom dropped
       // back down so pinch/tap "-" can actually zoom out from there
       // instead of being capped right at the opening view.
-      zoom: 15.6, minZoom: 13.5, maxZoom: 19,
+      // A width-led opening frame keeps Downtown and Grand Central inside
+      // a typical phone viewport, matching the official overview's full
+      // site orientation instead of starting on a clipped middle slice.
+      zoom: 14.9, minZoom: 13.5, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
@@ -8730,7 +8733,7 @@ function loadMap(){
     // minor label back once there's actually room for them. Runs on
     // every "zoom" tick (cheap — it's one class toggle, not a re-render)
     // plus once on load so the very first frame is already correct.
-    const LABEL_ZOOM_THRESHOLD = 16.4;
+    const LABEL_ZOOM_THRESHOLD = 15.8;
     const updateLabelDensity = ()=> map.classList.toggle("map-labels-thin", mapGL.getZoom() < LABEL_ZOOM_THRESHOLD);
     mapGL.on("zoom", updateLabelDensity);
     mapGL.on("load", updateLabelDensity);
