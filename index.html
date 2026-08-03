@@ -410,7 +410,7 @@ Meet at the clock tower if separated"></textarea>
       <h2 style="margin-bottom:14px;">Map</h2>
       <button type="button" class="fab-add-btn" id="mapAddPlaceBtn" aria-label="Add a place" title="Add a place">+</button>
     </div>
-    <p class="empty-note" style="margin-bottom:10px;">An original illustrated map of the site (our own artwork, not Boomtown's official map, rendered on the GPU for smooth zooming) — stages and amenities plotted at real GPS positions where we have them, other markers (districts, hidden venues, gates) stay approximate rather than surveyed. Pinch or use the +/− buttons to zoom in, drag to pan around. Grab a printed map or use the official app on-site for real navigation.</p>
+    <p class="empty-note map-intro">An original illustrated companion map for planning and exploring. Zoom into each district for venues, facilities and paths; use the official app on-site for surveyed, live navigation.</p>
 
     <div id="jumpMapView">
     <p style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:4px;">On-the-spot lookups</p>
@@ -438,6 +438,7 @@ Meet at the clock tower if separated"></textarea>
       <button data-jump="jumpSiteInfo">🕐 Gate &amp; hours</button>
       <button data-jump="jumpFoodBars">🍺 Food &amp; bars</button>
     </div>
+    <p class="map-control-heading">Show on map</p>
     <div class="stagelist" id="mapLayerToggles" style="margin-bottom:8px;">
       <span class="chip" data-layer="minor">Other stages</span>
       <span class="chip" data-layer="detail">Venue labels</span>

@@ -288,7 +288,8 @@
   /* The map is the task, not a small card in a long settings screen.
      Give it enough vertical room for the site's major terrain bands to
      read at once, while retaining a sensible cap on taller desktops. */
-  #map{height:clamp(500px, 68vh, 680px); position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#b8cbaa; box-shadow:0 12px 28px rgba(18,45,29,.16);}
+  #map{height:clamp(500px, 68vh, 680px); position:relative; border-radius:20px; overflow:hidden; border:1px solid rgba(188,212,184,.28); outline:1px solid rgba(26,68,47,.42); outline-offset:3px; background:#b8cbaa; box-shadow:0 18px 38px rgba(5,18,12,.3),inset 0 0 0 5px rgba(240,225,175,.08);}
+  #map::after{content:""; position:absolute; inset:0; z-index:3; pointer-events:none; border:7px solid rgba(13,43,29,.1); border-radius:20px; box-shadow:inset 0 0 28px rgba(12,36,24,.12);}
   .maplibregl-map{background:#b8cbaa; font:inherit;}
   .maplibregl-ctrl-group{background:rgba(255,252,238,.92) !important; border:1px solid rgba(72,83,58,.35) !important; box-shadow:0 2px 8px rgba(34,54,36,.18) !important;}
   .maplibregl-ctrl-group button{background-color:transparent !important;}
@@ -325,17 +326,27 @@
   @keyframes markerJumpPop{0%{transform:scale(1);} 30%{transform:scale(1.7);} 60%{transform:scale(1);} 100%{transform:scale(1);}}
   #mapInfo{margin-top:14px;}
   #mapInfo:empty::before{content:"Tap a marker to see details. Drag to pan, pinch or use +/− to zoom.";}
-  .map-quick-actions{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 8px; color:var(--text-muted); font-size:11px;}
-  .map-quick-actions .ghost{padding:6px 10px; flex-shrink:0;}
+  .map-intro{max-width:630px; line-height:1.5;}
+  .map-control-heading{font-size:10px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 5px;}
+  .map-quick-actions{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px; padding:7px 9px; border:1px solid rgba(134,179,148,.16); border-radius:12px; background:rgba(35,78,54,.16); color:var(--text-muted); font-size:11px;}
+  .map-quick-actions .ghost{padding:6px 10px; flex-shrink:0; border-color:rgba(135,205,158,.34);}
   .map-quick-actions span{line-height:1.3; text-align:right;}
-  .legend{display:flex; gap:16px; font-size:12px; color:var(--text-muted); margin-top:10px; flex-wrap:wrap;}
+  .legend{display:flex; gap:8px 14px; font-size:11px; color:var(--text-muted); margin-top:14px; padding:10px 12px; border:1px solid rgba(134,179,148,.16); border-radius:14px; background:rgba(35,78,54,.14); flex-wrap:wrap;}
   .legend span{display:inline-flex; align-items:center; gap:6px;}
   .dot{width:10px; height:10px; border-radius:50%; background:var(--accent-amber); display:inline-block;}
   .dot.teal{background:var(--accent-teal);}
   .dot.outline{background:transparent; border:1.5px dashed rgba(238,246,241,.6);}
   .line-swatch{width:16px; height:0; border-top:2px dashed var(--text-muted); display:inline-block;}
   .map-bg{position:absolute; inset:0; width:100%; height:100%; z-index:0;}
-  .map-label{position:absolute; left:0; top:0; z-index:1; font-size:10px; color:#342d1e; background:rgba(255,248,220,.94); padding:2px 7px; border-radius:1px; white-space:nowrap; pointer-events:none; transform:translate(-50%, 8px); border:1px solid rgba(93,70,34,.58); box-shadow:1px 1px 0 rgba(64,47,28,.42),0 1px 2px rgba(35,53,35,.22);}
+  /* Map labels are deliberately a small family of physical wayfinding
+     plaques, rather than one repeated orange rectangle. Their shared
+     notched corner, paper grain and dark edge keep the map coherent;
+     the stage/district/camp variants below then carry hierarchy without
+     looking copied from any other app's sign system. */
+  .map-label{--label-paper:rgba(255,247,222,.97); --label-ink:#273629; --label-edge:rgba(35,51,37,.88); position:absolute; left:0; top:0; z-index:1; display:inline-flex; align-items:center; min-height:15px; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; font-size:9px; font-weight:780; line-height:1.05; color:var(--label-ink); background:linear-gradient(135deg,rgba(255,255,255,.42),transparent 37%),var(--label-paper); padding:3px 8px 3px 10px; border:1px solid var(--label-edge); border-radius:3px 8px 3px 3px; white-space:nowrap; pointer-events:none; transform:translate(-50%, 9px); box-shadow:2px 2px 0 rgba(25,38,28,.45),0 2px 4px rgba(21,38,25,.2); letter-spacing:.025em; isolation:isolate;}
+  .map-label::before{content:""; position:absolute; left:0; top:2px; bottom:2px; width:3px; border-radius:2px; background:rgba(73,164,121,.95);}
+  .map-label::after{content:""; position:absolute; width:5px; height:5px; right:3px; top:3px; border:1px solid rgba(35,51,37,.3); border-left:0; border-bottom:0; opacity:.45;}
+  .map-label-text{position:relative; z-index:1; display:block;}
   /* Zoomed-out label thinning (see loadMap()'s updateLabelDensity) — the
      default view has 20+ names (stages, camps, gates, hidden venues)
      packed into one small cluster with no collision detection (these are
@@ -362,7 +373,8 @@
      each district name in its own distinct, poster-bold treatment, not
      a uniform colour. Falls back to the old amber if --district-rgb is
      ever unset (shouldn't happen, but keeps this rule safe on its own). */
-  .map-label.district{background:none; border:none; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:rgba(var(--district-rgb, 242,168,60),1); text-shadow:0 1px 3px rgba(0,0,0,.85), 0 0 10px rgba(var(--district-rgb, 242,168,60),.55); transform:translate(-50%, -24px); padding:0;}
+  .map-label.district{display:block; min-height:0; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; background:none; border:none; box-shadow:none; border-radius:0; font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; color:rgba(var(--district-rgb, 242,168,60),1); text-shadow:0 1px 3px rgba(0,0,0,.85), 0 0 10px rgba(var(--district-rgb, 242,168,60),.55); transform:translate(-50%, -24px); padding:0;}
+  .map-label.district::before,.map-label.district::after{content:none;}
   /* Area 404 — repeatedly confirmed on camera as a bold red/green
      "glitch" double-exposure, not a flat colour. Two extra offset
      text-shadow layers (one red, one green, either side of the base
@@ -385,19 +397,28 @@
      teal-tinted (matching .marker.stage's own colour) so the 15-ish main
      stage names read as the clear anchor points of the map, with minor
      stages (below) visibly the smaller, secondary tier. */
-  .map-label.stage{font-size:11px; font-weight:850; color:#312315; background:rgba(247,168,72,.98); border-color:rgba(101,58,15,.9); padding:2px 7px; letter-spacing:.035em; text-transform:uppercase; box-shadow:2px 2px 0 rgba(80,48,17,.56),0 1px 2px rgba(35,53,35,.2);}
-  .map-label.minor{font-size:7px; padding:1px 4px; color:#342d1e; background:rgba(255,238,193,.96); border-color:rgba(108,76,37,.68); box-shadow:1px 1px 0 rgba(64,47,28,.32);}
+  .map-label.stage{--label-paper:rgba(236,211,132,.98); --label-ink:#182b25; --label-edge:rgba(25,65,50,.94); min-height:18px; font-size:10px; font-weight:900; padding:3px 10px 3px 12px; letter-spacing:.055em; text-transform:uppercase; border-radius:3px 10px 3px 3px; box-shadow:3px 3px 0 rgba(22,61,47,.55),0 2px 4px rgba(35,53,35,.22);}
+  .map-label.stage::before{width:4px; background:rgba(47,155,111,.98);}
+  .map-label.stage::after{width:6px; height:6px; right:4px; top:4px; border-color:rgba(20,65,49,.45);}
+  .map-label.minor{--label-paper:rgba(242,239,211,.96); --label-ink:#473724; --label-edge:rgba(89,66,39,.72); min-height:12px; font-family:system-ui,sans-serif; font-size:7px; font-weight:800; padding:2px 5px 2px 7px; border-radius:2px 5px 2px 2px; box-shadow:1px 1px 0 rgba(64,47,28,.32); letter-spacing:.02em;}
+  .map-label.minor::before{width:2px; background:rgba(178,116,67,.9);}
+  .map-label.minor::after{display:none;}
   /* Official-detail small venues use the same compact paper-sign language
      as the reference map, but sit centred over their own illustrated
      footprint rather than being offset from a marker dot. */
-  .map-label.small-venue-label{transform:translate(-50%, -50%); font-size:6px; font-weight:850; text-transform:uppercase; letter-spacing:.025em; color:#312315; background:rgba(247,168,72,.98); border-color:rgba(101,58,15,.9); box-shadow:1px 1px 0 rgba(80,48,17,.52),0 1px 1px rgba(35,53,35,.18); z-index:2;}
-  .map-label.secret{font-size:8px; padding:1px 5px; color:#342d1e; font-style:italic;}
+  .map-label.small-venue-label{--label-paper:rgba(255,229,164,.98); --label-edge:rgba(109,67,27,.88); min-height:10px; transform:translate(-50%, -50%); font-size:6px; font-weight:850; text-transform:uppercase; letter-spacing:.025em; color:#312315; padding:1px 4px 1px 6px; border-radius:1px 4px 1px 1px; box-shadow:1px 1px 0 rgba(80,48,17,.52),0 1px 1px rgba(35,53,35,.18); z-index:2;}
+  .map-label.small-venue-label::before{width:2px; background:rgba(218,113,59,.92);}
+  .map-label.small-venue-label::after{display:none;}
+  .map-label.secret{--label-paper:rgba(237,232,205,.94); font-size:8px; padding:2px 6px 2px 8px; color:#463827; font-style:italic;}
+  .map-label.secret::before{background:rgba(111,95,165,.8);}
   /* Was plain floating text with no background — reference screenshots
      show every camping-field name as a solid orange/tan banner-style
      tag ("WEST", "EAST CAMPING", "VALLEY CAMPING"), not bare text
      sitting directly on the field colour. Matches the same tan family
      already used for buildings/paths on this map. */
-  .map-label.camp{background:rgba(211,159,73,.92); border:1px solid rgba(112,76,28,.72); padding:1px 5px; border-radius:1px; font-size:7px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:rgba(30,20,10,.95); text-shadow:none; box-shadow:1px 1px 0 rgba(63,44,20,.38); transform:translate(-50%, -50%);}
+  .map-label.camp{--label-paper:rgba(208,169,87,.95); --label-edge:rgba(100,75,34,.78); min-height:11px; padding:2px 6px 2px 8px; border-radius:2px 5px 2px 2px; font-size:7px; font-weight:850; text-transform:uppercase; letter-spacing:.07em; color:rgba(30,20,10,.95); text-shadow:none; box-shadow:1px 1px 0 rgba(63,44,20,.38); transform:translate(-50%, -50%);}
+  .map-label.camp::before{width:2px; background:rgba(69,121,79,.94);}
+  .map-label.camp::after{display:none;}
   /* Plain informational map text (no pill/icon) — the reference
      screenshot shows "SITE OF SPECIAL SCIENTIFIC INTEREST" as bare pale
      italic text sitting directly on the woodland fill, unlike every
@@ -659,8 +680,10 @@
   .stat{background:var(--bg-panel-2); border:1px solid var(--line); border-radius:12px; padding:10px 14px; font-size:12px; color:var(--text-muted); text-align:center; flex:1; min-width:90px;}
   .stat b{display:block; font-size:20px; color:var(--accent-amber); font-family:inherit;}
   .chip{display:inline-block; cursor:pointer;}
-  #mapLayerToggles .chip{opacity:.45;}
-  #mapLayerToggles .chip.active{opacity:1; border-color:var(--accent-amber); color:var(--accent-amber);}
+  #mapLayerToggles{gap:5px;}
+  #mapLayerToggles .chip{opacity:.58; cursor:pointer; padding:5px 9px; border-radius:9px; border-color:rgba(134,179,148,.2); background:rgba(35,78,54,.13); transition:background .16s ease,border-color .16s ease,opacity .16s ease;}
+  #mapLayerToggles .chip:hover{opacity:.9; border-color:rgba(135,205,158,.46);}
+  #mapLayerToggles .chip.active{opacity:1; border-color:var(--accent-amber); color:var(--accent-amber); background:rgba(242,168,60,.1);}
   .marker.landmark::before{width:14px; height:10px; border-radius:3px 3px 0 0; background:rgba(45,168,242,.75); box-shadow:none; border:1.5px solid rgba(11,21,18,.6);}
   .marker.landmark::after{content:none;}
   .map-label.landmark{color:rgba(150,200,242,.95); font-weight:700; font-size:9px; background:rgba(11,21,18,.6); border:1px solid rgba(45,168,242,.3);}

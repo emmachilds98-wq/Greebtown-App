@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v375";
-const APP_BUILD_TIME = "2026-08-03T08:33:50Z";
+const APP_CACHE_VERSION = "v376";
+const APP_BUILD_TIME = "2026-08-03T08:44:03Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8834,7 +8834,7 @@ let mapMarkersByName = {};
 function mapMarkerHtml(dotClass, labelClass, name, icon){
   return `
     <div class="marker ${dotClass}">${icon || ""}</div>
-    ${name ? `<div class="map-label ${labelClass || ""}">${escapeHtml(name)}</div>` : ""}
+    ${name ? `<div class="map-label ${labelClass || ""}"><span class="map-label-text">${escapeHtml(name)}</span></div>` : ""}
   `;
 }
 // groupName is a plain string key into mapMarkerGroups/mapLayerVisible
