@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v342";
-const APP_BUILD_TIME = "2026-08-03T04:53:35Z";
+const APP_CACHE_VERSION = "v343";
+const APP_BUILD_TIME = "2026-08-03T04:58:30Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7518,6 +7518,7 @@ function buildMapGeoJSON(){
     return clearanceRadius(cx, cy, d, districtDesiredRaw.get(d));
   }
   const districtRadii = new Map();
+  const authoredDistrictFootprints = new Map((window.GREEBTOWN_DISTRICT_FOOTPRINTS?.footprints || []).map(footprint=> [footprint.name, footprint.points]));
   // The built districts in the references have readable edges — plazas,
   // street blocks and clearings — while Botanica remains a softer wooded
   // enclosure. Give the built areas faceted field outlines so the ground
@@ -7528,7 +7529,9 @@ function buildMapGeoJSON(){
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const r = districtSpreadR(d);
     districtRadii.set(d, r);
-    const ring = BUILT_DISTRICTS.has(d.name)
+    const ring = authoredDistrictFootprints.has(d.name)
+      ? authoredDistrictFootprints.get(d.name)
+      : BUILT_DISTRICTS.has(d.name)
       ? fieldRing(cx, cy, r * 1.08, r * 0.84, i * 31 + 7, 7)
       : blobRing(cx, cy, r, i * 31 + 7, 18);
     return {

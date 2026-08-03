@@ -3819,3 +3819,200 @@ window.GREEBTOWN_EVIDENCED_PATHS = {
     }
   ]
 };
+window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "schematic-percent-v1",
+  "footprints": [
+    {
+      "id": "district-metropolis",
+      "name": "Metropolis",
+      "evidence": "official-overview",
+      "points": [
+        [
+          3,
+          29
+        ],
+        [
+          11,
+          25
+        ],
+        [
+          22,
+          27
+        ],
+        [
+          28,
+          33
+        ],
+        [
+          27,
+          42
+        ],
+        [
+          20,
+          48
+        ],
+        [
+          8,
+          47
+        ],
+        [
+          2,
+          41
+        ]
+      ]
+    },
+    {
+      "id": "district-botanica",
+      "name": "Botanica",
+      "evidence": "official-overview",
+      "points": [
+        [
+          18,
+          10
+        ],
+        [
+          29,
+          7
+        ],
+        [
+          38,
+          10
+        ],
+        [
+          42,
+          18
+        ],
+        [
+          37,
+          27
+        ],
+        [
+          29,
+          31
+        ],
+        [
+          20,
+          28
+        ],
+        [
+          15,
+          20
+        ]
+      ]
+    },
+    {
+      "id": "district-area-404",
+      "name": "Area 404",
+      "evidence": "official-overview",
+      "points": [
+        [
+          25,
+          30
+        ],
+        [
+          38,
+          29
+        ],
+        [
+          47,
+          35
+        ],
+        [
+          50,
+          44
+        ],
+        [
+          45,
+          52
+        ],
+        [
+          34,
+          55
+        ],
+        [
+          24,
+          50
+        ],
+        [
+          21,
+          40
+        ]
+      ]
+    },
+    {
+      "id": "district-letsbe-avenue",
+      "name": "Letsbe Avenue",
+      "evidence": "official-detail",
+      "points": [
+        [
+          30,
+          3
+        ],
+        [
+          43,
+          2
+        ],
+        [
+          51,
+          7
+        ],
+        [
+          52,
+          13
+        ],
+        [
+          47,
+          18
+        ],
+        [
+          37,
+          18
+        ],
+        [
+          29,
+          14
+        ]
+      ]
+    },
+    {
+      "id": "district-oldtown",
+      "name": "Oldtown",
+      "evidence": "official-detail",
+      "points": [
+        [
+          61,
+          28
+        ],
+        [
+          70,
+          26
+        ],
+        [
+          77,
+          32
+        ],
+        [
+          79,
+          40
+        ],
+        [
+          75,
+          47
+        ],
+        [
+          68,
+          50
+        ],
+        [
+          60,
+          45
+        ],
+        [
+          57,
+          36
+        ]
+      ]
+    }
+  ]
+};
