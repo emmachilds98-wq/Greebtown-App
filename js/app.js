@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v365";
-const APP_BUILD_TIME = "2026-08-03T07:17:43Z";
+const APP_CACHE_VERSION = "v366";
+const APP_BUILD_TIME = "2026-08-03T07:19:25Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6916,7 +6916,10 @@ const BUILDING_LAYER = {
   "Grand Central": { w: 4.8, h: 1.9, rotation: 35, category: "rect" },
   "The Lion's Den": { w: 5.2, h: 1.8, rotation: 8, category: "rect" },
   "Hydro XL": { w: 4.4, h: 2.8, rotation: 20, category: "kite" },
-  "Anara Forest": { w: 3.8, h: 3.8, rotation: 0, category: "ring" },
+  // Anara is an irregular wooded stage clearing, not a circular camping
+  // or zoning mark. A compact canopy keeps it visibly distinct at close
+  // zoom while its reviewed woodland silhouette supplies the wider area.
+  "Anara Forest": { w: 3.6, h: 2.5, rotation: -18, category: "canopy" },
   "Hidden Woods": { w: 3.2, h: 2.2, rotation: 28, category: "rect" },
   "Helix": { w: 3.2, h: 3.2, rotation: 0, category: "dome" },
   "Tribe of Frog": { w: 3.4, h: 2.0, rotation: 18, category: "rect" },
@@ -8423,7 +8426,8 @@ function buildMapGeoJSON(){
   // radial zone. The validator requires every one to have a reviewed
   // footprint, while this runtime filter remains fail-closed even if a
   // future agent forgets to run it.
-  const forestSpots = locations.filter(p=> p.name === "The Lion's Den")
+  const naturalAreaSourceNames = new Set(reviewedNaturalAreas.map(({area})=> area.sourceName));
+  const forestSpots = locations.filter(p=> p.name === "The Lion's Den" && !naturalAreaSourceNames.has(p.name))
     .concat(minorStages.filter(p=> p.name === "Tribe of Frog"))
     .concat(SSSI_SPOTS);
   function forestClearanceRadius(cx, cy){
