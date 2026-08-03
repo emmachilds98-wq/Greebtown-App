@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v336";
-const APP_BUILD_TIME = "2026-08-03T04:31:52Z";
+const APP_CACHE_VERSION = "v337";
+const APP_BUILD_TIME = "2026-08-03T04:34:25Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8228,7 +8228,7 @@ function buildMapGeoJSON(){
   // overlaps" reported alongside the camp-field one. Now capped the same
   // safe way (accounting for blobRing's own up-to-1.22x bulge) against
   // every district/camp/parking/market-hub zone, same as camp fields.
-  const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name))
+  const forestSpots = locations.filter(p=> /Forest|Woods/.test(p.name) || p.name === "The Lion's Den")
     .concat(minorStages.filter(p=> p.name === "Tribe of Frog"))
     .concat(SSSI_SPOTS);
   function forestClearanceRadius(cx, cy){
