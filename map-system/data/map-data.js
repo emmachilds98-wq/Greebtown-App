@@ -5365,6 +5365,108 @@ window.GREEBTOWN_STAGE_PRECINCT_LAYOUT = {
       },
       "evidence": "official-detail",
       "notes": "Small shared workshop court for the Ancient Futures, Circus, Crafts and Games cluster above the main Oldtown run."
+    },
+    {
+      "id": "botanica-garden-court",
+      "sourceName": "Botanica",
+      "kind": "district-concourse",
+      "offset": {
+        "x": -0.6,
+        "y": 0.5
+      },
+      "footprint": {
+        "width": 8.2,
+        "height": 5.1,
+        "sides": 8,
+        "rotation": -14
+      },
+      "evidence": "official-detail",
+      "notes": "Wide softened garden court around Botanica's clustered venues, avoiding a uniform round plaza while preserving its wooded edge."
+    },
+    {
+      "id": "metropolis-street-court",
+      "sourceName": "Metropolis",
+      "kind": "district-concourse",
+      "offset": {
+        "x": 0.5,
+        "y": -0.3
+      },
+      "footprint": {
+        "width": 8.6,
+        "height": 4.1,
+        "sides": 6,
+        "rotation": 26
+      },
+      "evidence": "official-detail",
+      "notes": "Oblong built street court for the Metropolis venue run, so its stalls and stages read as an urban cluster rather than a round island."
+    },
+    {
+      "id": "area-404-civic-court",
+      "sourceName": "Area 404",
+      "kind": "district-concourse",
+      "offset": {
+        "x": 0.3,
+        "y": 0.8
+      },
+      "footprint": {
+        "width": 7.8,
+        "height": 5,
+        "sides": 7,
+        "rotation": 18
+      },
+      "evidence": "official-detail",
+      "notes": "Faceted civic court for the denser Area 404 complex, keeping its hard-edged built mass distinct from Botanica and Metropolis."
+    },
+    {
+      "id": "letsbe-avenue-street-court",
+      "sourceName": "Letsbe Avenue",
+      "kind": "district-concourse",
+      "offset": {
+        "x": 0.1,
+        "y": 0.3
+      },
+      "footprint": {
+        "width": 9.2,
+        "height": 3.3,
+        "sides": 6,
+        "rotation": -18
+      },
+      "evidence": "official-detail",
+      "notes": "Long narrow high-street court beneath the Letsbe Avenue venue loop, matching its continuous street character instead of a bulbous clearing."
+    },
+    {
+      "id": "hydro-xl-forecourt",
+      "sourceName": "Hydro XL",
+      "kind": "stage-forecourt",
+      "offset": {
+        "x": 0.8,
+        "y": -0.2
+      },
+      "footprint": {
+        "width": 7.7,
+        "height": 4.4,
+        "sides": 6,
+        "rotation": 22
+      },
+      "evidence": "official-detail",
+      "notes": "A broad angled stage front for Hydro XL that makes the Downtown flagship read as a deliberate destination rather than a lone marker."
+    },
+    {
+      "id": "quantum-junction-court",
+      "sourceName": "Quantum",
+      "kind": "venue-court",
+      "offset": {
+        "x": 0,
+        "y": 0.2
+      },
+      "footprint": {
+        "width": 5.2,
+        "height": 3.4,
+        "sides": 6,
+        "rotation": 8
+      },
+      "evidence": "official-detail",
+      "notes": "Compact faceted junction court at Quantum, preserving the legible branch between Oldtown, Helix and the Lion's Den without inventing paths."
     }
   ]
 };
