@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greebtown map editor</title>
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <header>
+    <div><strong>Greebtown map editor</strong><span id="documentStatus">Loading map data…</span></div>
+    <div class="toolbar">
+      <label>Snap <select id="snap"><option value="0">Off</option><option value="0.25">0.25</option><option value="0.5">0.5</option><option value="1" selected>1</option></select></label>
+      <button id="toggleGrid" aria-pressed="true">Grid</button>
+      <button id="addObject">Add object</button>
+      <button id="duplicateObject">Duplicate</button>
+      <button id="deleteObject">Delete</button>
+      <button id="undo">Undo</button>
+      <button id="redo">Redo</button>
+      <button id="validate">Validate</button>
+      <button id="exportHistory">Export history</button>
+      <button id="export" class="primary">Export data</button>
+    </div>
+  </header>
+  <main>
+    <aside id="objectPanel"><h2>Objects</h2><input id="objectSearch" type="search" placeholder="Find by name or ID"><div id="objectList"></div></aside>
+    <section id="workspace">
+      <div id="rulerX" class="ruler ruler-x"></div><div id="rulerY" class="ruler ruler-y"></div>
+      <div id="canvasWrap"><svg id="mapCanvas" viewBox="0 0 100 100" aria-label="Editable Greebtown schematic map"></svg></div>
+      <div id="validationResult" aria-live="polite"></div>
+    </section>
+    <aside id="inspector"><h2>Inspector</h2><div id="emptyInspector">Select an object to edit its data.</div><form id="objectForm" hidden>
+      <label>ID <input name="id" required pattern="[a-z0-9-]+"></label>
+      <label>Name <input name="name" required></label>
+      <label>Type <select name="type"></select></label>
+      <label>Layer <select name="layer"></select></label>
+      <fieldset><legend>Position</legend><label>X <input name="x" type="number" step="0.25"></label><label>Y <input name="y" type="number" step="0.25"></label></fieldset>
+      <fieldset><legend>Dimensions</legend><label>Width <input name="width" type="number" min="0.1" step="0.25"></label><label>Height <input name="height" type="number" min="0.1" step="0.25"></label></fieldset>
+      <fieldset><legend>Transform</legend><label>Rotation <input name="rotation" type="number" step="1"></label><label>Scale <input name="scale" type="number" min="0.1" step="0.1"></label></fieldset>
+      <label>Asset <input name="asset" placeholder="assets/example.png"></label>
+      <label>Replaces IDs <input name="supersedes" placeholder="old-amenity-id, another-old-id"></label>
+      <label>Notes <textarea name="notes" rows="5"></textarea></label>
+      <button class="primary" type="submit">Apply properties</button>
+    </form><h2>Layers</h2><div id="layerList"></div></aside>
+  </main>
+  <template id="objectRow"><button class="object-row"><span class="object-name"></span><small class="object-meta"></small></button></template>
+  <script src="editor.js"></script>
+</body>
+</html>
