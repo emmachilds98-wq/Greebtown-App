@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v309";
-const APP_BUILD_TIME = "2026-08-03T00:28:37Z";
+const APP_CACHE_VERSION = "v310";
+const APP_BUILD_TIME = "2026-08-03T00:36:54Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7414,24 +7414,46 @@ function buildMapGeoJSON(){
   // Dividing by BLOB_MAX_OVERSIZE below makes the guarantee hold even at
   // that worst-case bulge alignment, not just for the idealized average.
   const BLOB_MAX_OVERSIZE = 1.22;
+  // Every neighbour's own "desired" size, when known ahead of time (see
+  // districtDesiredRaw below, filled in before this is ever called) —
+  // used so a district with a genuinely large member spread (Oldtown's
+  // own venue chains reach 11+ schematic units out) isn't capped down to
+  // a flat, equal-seeming fraction of the gap to its nearest neighbour
+  // regardless of whether that neighbour actually needs the same share.
+  // Districts default to this only once districtDesiredRaw has their
+  // real value; camps/parking/the market hub (no equivalent pre-pass)
+  // fall back to a flat estimate (6) since their own actual "desired"
+  // isn't computed until their own clearance call runs later.
+  const districtDesiredRaw = new Map();
+  function neighbourDesired(ref){
+    return districtDesiredRaw.has(ref) ? districtDesiredRaw.get(ref) : 6;
+  }
   function clearanceRadius(cx, cy, selfRef, desired){
-    let minDist = Infinity;
+    // Reported as "Oldtown dimensions are a bit squashed" — the old
+    // version capped every district to a flat ~38% of the gap to its
+    // NEAREST neighbour regardless of how much space that neighbour
+    // itself actually needed, so a district with a genuinely large
+    // member spread (Oldtown's own venue chains reach 11+ units out) got
+    // squashed down to ~6 units even when its nearest neighbour was 20
+    // units away and didn't need anywhere near that much room itself.
+    // Now: for each neighbour, only shrink if the two would ACTUALLY
+    // overlap (own desired + neighbour's own desired, at worst-case
+    // bulge, exceeds the real distance between them) — and even then,
+    // split the gap proportionally to each side's own real need, not an
+    // even/flat ratio, so a small neighbour doesn't force a big district
+    // down to its own small scale.
+    let safe = desired;
     zoneCenters.forEach(z=>{
       if(z.ref === selfRef) return;
-      minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy));
+      const dist = Math.hypot(z.x - cx, z.y - cy);
+      const otherDesired = neighbourDesired(z.ref);
+      const combined = (desired + otherDesired) * BLOB_MAX_OVERSIZE;
+      if(combined > dist){
+        const share = dist / BLOB_MAX_OVERSIZE * (desired / (desired + otherDesired));
+        safe = Math.min(safe, share);
+      }
     });
-    // The floor below (2) exists so a zone tucked close to a neighbour
-    // doesn't shrink away to nothing — but a floor alone can't be
-    // allowed to win: if BOTH of a close pair hit the same floor, their
-    // radii can sum to MORE than the distance between them (this
-    // actually happened for Oldtown/East Camping, ~5 units apart — a
-    // floor of 3 each summed to 6). minDist/2 is a hard ceiling no floor
-    // is allowed to cross, since two neighbours each capped at half the
-    // distance between them can never sum past that distance in the
-    // idealized-circle case — divided by BLOB_MAX_OVERSIZE so that still
-    // holds once blobRing's own irregularity is accounted for.
-    const safeMax = Math.max(1.5, (minDist / 2 - 0.4) / BLOB_MAX_OVERSIZE);
-    return Math.min(Math.max(2, Math.min(desired, minDist * 0.38 / BLOB_MAX_OVERSIZE)), safeMax);
+    return Math.max(2, safe);
   }
 
   // Camping fields off the official app read as by far the biggest
@@ -7460,7 +7482,7 @@ function buildMapGeoJSON(){
     return Math.min(Math.max(3, Math.min(desired, minDist * 0.44 / BLOB_MAX_OVERSIZE)), safeMax);
   }
 
-  function districtSpreadR(d){
+  function districtDesired(d){
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     let maxDist = 0;
     districtMemberPoints.forEach(p=>{
@@ -7469,8 +7491,16 @@ function buildMapGeoJSON(){
       const dx = parseFloat(p.x) - cx, dy = parseFloat(p.y) - cy;
       maxDist = Math.max(maxDist, Math.sqrt(dx * dx + dy * dy));
     });
-    const desired = Math.min(13, Math.max(6, maxDist + 3));
-    return clearanceRadius(cx, cy, d, desired);
+    return Math.min(16, Math.max(6, maxDist + 3));
+  }
+  // Pre-pass: every district's own real "desired" size, computed BEFORE
+  // any clearance shrinking — clearanceRadius (above) needs every
+  // neighbour's real desired size up front to split space fairly between
+  // two districts, not a flat ratio of the gap between them.
+  districts.forEach(d=> districtDesiredRaw.set(d, districtDesired(d)));
+  function districtSpreadR(d){
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    return clearanceRadius(cx, cy, d, districtDesiredRaw.get(d));
   }
   const districtRadii = new Map();
   const districtFeatures = districts.map((d,i)=>{
@@ -7778,13 +7808,18 @@ function buildMapGeoJSON(){
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const r = districtRadii.get(d);
     const rand = seededRand(di * 137 + 19);
-    // Bumped 5 -> 11 — reference-image comparisons (the official app's
-    // own screenshots) show districts reading as genuinely built-up,
-    // dense clusters of small buildings even at a fairly zoomed-out
-    // view; 5 generic infill buildings per district plus whatever named
-    // venues happen to sit there left large stretches of bare clearing
-    // that don't match that density.
-    const count = 11;
+    // Scales with the district's own radius now (was a flat 11 for
+    // every district regardless of size) — since clearanceRadius above
+    // was rebalanced to stop squashing districts with a genuinely large
+    // member spread (Oldtown especially) down to the same small size as
+    // a tighter one, a flat building count would leave a bigger district
+    // reading noticeably SPARSER than before purely because the same 11
+    // buildings now spread over more ground. 11 stays the reference
+    // count at radius 7 (roughly this map's median district size before
+    // the rebalance), scaled by area (radius²) so density stays
+    // consistent district to district, clamped so a very small or very
+    // large district doesn't go absurdly sparse/dense.
+    const count = Math.round(Math.min(20, Math.max(6, 11 * (r / 7) ** 2)));
     for(let k=0;k<count;k++){
       const [x, y] = pickClearBuildingSpot(cx, cy, r * 0.35, r * 0.85, rand);
       infillBuildingFeatures.push({
