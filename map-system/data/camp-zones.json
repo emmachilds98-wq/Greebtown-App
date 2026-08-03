@@ -3,7 +3,7 @@
   "coordinateSystem": "schematic-percent-v1",
   "zones": [
     { "id": "camp-west", "name": "West Camping", "position": { "x": 14, "y": 7 }, "surface": "camp-green", "evidence": "official-overview", "notes": "North-west field beside West Gate." },
-    { "id": "camp-downtown", "name": "Downtown Camping", "position": { "x": 5, "y": 35 }, "surface": "camp-green", "evidence": "official-overview", "notes": "West-side camping, separate from Camp Orchid." },
+    { "id": "camp-downtown", "name": "Downtown Camping", "position": { "x": 7, "y": 43 }, "surface": "camp-green", "evidence": "official-overview", "notes": "West-side camping in the reviewed gap between Meadow fields and the Downtown cluster, separate from Camp Orchid." },
     { "id": "camp-meadow-accessible", "name": "Meadow Camping (Accessible)", "position": { "x": 7, "y": 58 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Accessible meadow field." },
     { "id": "camp-meadow-living", "name": "Meadow Living", "position": { "x": 10, "y": 58 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Adjacent field, deliberately distinct from accessible camping." },
     { "id": "camp-valley", "name": "Valley Camping", "position": { "x": 48, "y": 4 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Northern valley field." },
@@ -12,9 +12,9 @@
     { "id": "camp-temple-valley", "name": "Temple Valley Camping", "position": { "x": 95, "y": 18 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Long east-side camping field near East Gate." },
     { "id": "camp-east", "name": "East Camping", "position": { "x": 91, "y": 48 }, "surface": "camp-green", "evidence": "official-overview", "notes": "East-side field south of Temple Valley." },
     { "id": "camp-quiet", "name": "Quiet Camping", "position": { "x": 95, "y": 64 }, "surface": "camp-green", "evidence": "official-overview", "notes": "South-east quieter field." },
-    { "id": "camp-orchid-downtown", "name": "Camp Orchid Downtown", "position": { "x": 9, "y": 39 }, "surface": "camp-premium", "evidence": "official-overview", "notes": "Premium public-transport camp; distinct pink field." },
+    { "id": "camp-orchid-downtown", "name": "Camp Orchid Downtown", "position": { "x": 10, "y": 46 }, "surface": "camp-premium", "evidence": "official-overview", "notes": "Premium public-transport camp; distinct pink field on the west side of the reviewed Downtown cluster." },
     { "id": "camp-skylark-hilltop", "name": "Camp Skylark Hilltop", "position": { "x": 75, "y": 22 }, "surface": "camp-premium", "evidence": "official-overview", "notes": "Premium Hilltop camp." },
     { "id": "camp-skylark-sunset", "name": "Camp Skylark Sunset", "position": { "x": 74, "y": 72 }, "surface": "camp-premium", "evidence": "official-overview", "notes": "Premium south-side camp near Sunset Hill." },
-    { "id": "camp-camplight", "name": "Camplight", "position": { "x": 4, "y": 37 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Separate labelled field next to Downtown Camping and Orchid." }
+    { "id": "camp-camplight", "name": "Camplight", "position": { "x": 5, "y": 45 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Separate labelled field next to Downtown Camping and Orchid in the reviewed west-side cluster." }
   ]
 }

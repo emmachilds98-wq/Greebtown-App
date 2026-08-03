@@ -3192,12 +3192,12 @@ window.GREEBTOWN_CAMP_ZONES = {
       "id": "camp-downtown",
       "name": "Downtown Camping",
       "position": {
-        "x": 5,
-        "y": 35
+        "x": 7,
+        "y": 43
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "West-side camping, separate from Camp Orchid."
+      "notes": "West-side camping in the reviewed gap between Meadow fields and the Downtown cluster, separate from Camp Orchid."
     },
     {
       "id": "camp-meadow-accessible",
@@ -3291,12 +3291,12 @@ window.GREEBTOWN_CAMP_ZONES = {
       "id": "camp-orchid-downtown",
       "name": "Camp Orchid Downtown",
       "position": {
-        "x": 9,
-        "y": 39
+        "x": 10,
+        "y": 46
       },
       "surface": "camp-premium",
       "evidence": "official-overview",
-      "notes": "Premium public-transport camp; distinct pink field."
+      "notes": "Premium public-transport camp; distinct pink field on the west side of the reviewed Downtown cluster."
     },
     {
       "id": "camp-skylark-hilltop",
@@ -3324,12 +3324,12 @@ window.GREEBTOWN_CAMP_ZONES = {
       "id": "camp-camplight",
       "name": "Camplight",
       "position": {
-        "x": 4,
-        "y": 37
+        "x": 5,
+        "y": 45
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "Separate labelled field next to Downtown Camping and Orchid."
+      "notes": "Separate labelled field next to Downtown Camping and Orchid in the reviewed west-side cluster."
     }
   ]
 };
@@ -3349,15 +3349,15 @@ window.GREEBTOWN_EVIDENCED_PATHS = {
         ],
         [
           4,
-          42
+          45
         ],
         [
-          5,
-          38
+          6,
+          44
         ],
         [
-          5,
-          35
+          7,
+          43
         ]
       ]
     },

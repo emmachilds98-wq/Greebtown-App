@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
   "paths": [
-    { "id": "path-west-gate-downtown", "from": "West Gate", "to": "Downtown Camping", "evidence": "official-overview", "points": [[3,46],[4,42],[5,38],[5,35]] },
+    { "id": "path-west-gate-downtown", "from": "West Gate", "to": "Downtown Camping", "evidence": "official-overview", "points": [[3,46],[4,45],[6,44],[7,43]] },
     { "id": "path-downtown-metropolis", "from": "Downtown Camping", "to": "Metropolis", "evidence": "official-overview", "points": [[5,35],[8,34],[11,35],[15,36]] },
     { "id": "path-grand-central-oldtown", "from": "Grand Central", "to": "Oldtown", "evidence": "official-detail", "points": [[72,30],[71,34],[69,37],[68,40]] },
     { "id": "path-oldtown-quantum", "from": "Oldtown", "to": "Quantum", "evidence": "official-detail", "points": [[68,40],[69,44],[71,47],[73,50]] },
