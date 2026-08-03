@@ -7,19 +7,19 @@
       "id": "grand-central-forecourt",
       "sourceName": "Grand Central",
       "kind": "stage-forecourt",
-      "offset": { "x": -1.1, "y": 1.25 },
-      "footprint": { "width": 8.8, "height": 4.6, "sides": 7, "rotation": -12 },
+      "offset": { "x": -1.55, "y": 1.9 },
+      "footprint": { "width": 11.4, "height": 5.2, "sides": 7, "rotation": -16 },
       "evidence": "official-detail",
-      "notes": "A broad, slightly south-west-facing main-stage forecourt, rather than a small circular plaza in the middle of the Hilltop sequence."
+      "notes": "A broad, slightly south-west-facing main-stage forecourt, scaled from the official Hilltop sequence so Grand Central reads as an open destination rather than a small circular plaza."
     },
     {
       "id": "oldtown-street-spine",
       "sourceName": "Oldtown",
       "kind": "district-concourse",
-      "offset": { "x": -0.8, "y": 0.9 },
-      "footprint": { "width": 9.4, "height": 4.2, "sides": 6, "rotation": 72 },
+      "offset": { "x": -0.45, "y": 0.85 },
+      "footprint": { "width": 12.2, "height": 4.7, "sides": 6, "rotation": 76 },
       "evidence": "official-detail",
-      "notes": "Long, tapering Oldtown civic spine that reads as a connected street and venue run below Grand Central, not an isolated round clearing."
+      "notes": "Long, tapering Oldtown civic spine sized from the official detail view: a connected street and venue run below Grand Central, never an isolated round clearing."
     },
     {
       "id": "ancient-futures-court",

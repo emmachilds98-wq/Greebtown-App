@@ -240,7 +240,10 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
 - `map-system/data/stage-precinct-layout.json` â€” reviewed stage forecourts,
   shared venue courts and street spines. Use it for a named central-space
   silhouette; never stretch a district boundary or invent marker positions
-  just to make a court appear larger.
+  just to make a court appear larger. Check rendered-layout alignment before
+  release: district-footprint centroids must remain near their reviewed
+  reference anchors, and the Grand Central → Oldtown sequence must keep its
+  broad-forecourt / long-street scale and southward order.
 - `map-system/data/district-massing-layout.json` â€” reviewed, original
   close-zoom compounds for the main town districts. It owns only anonymous
   structural art (stalls, tents and yards), never a new named venue, amenity,

@@ -14,6 +14,7 @@ const steps = [
   ["scripts/validate-natural-area-footprints.mjs"],
   ["scripts/validate-site-layout.mjs"],
   ["scripts/validate-stage-precinct-layout.mjs"],
+  ["scripts/audit-rendered-layout-alignment.mjs"],
   ["scripts/validate-district-massing-layout.mjs"],
   ["scripts/validate-district-passage-layout.mjs"],
   ["scripts/validate-district-atmosphere-layout.mjs"],
