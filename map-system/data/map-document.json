@@ -146,11 +146,11 @@
       "type": "stage",
       "name": "Helix",
       "position": { "x": 78, "y": 52 },
-      "dimensions": { "width": 6, "height": 4 },
+      "dimensions": { "width": 2.4, "height": 1.7 },
       "transform": { "rotation": 0, "scale": 1 },
       "layer": "structures",
       "asset": null,
-      "metadata": { "description": "Open-grass stage on the Quantum to Lion's Den corridor.", "category": "stage", "mapRole": "main-stage", "accessibility": "", "notes": "Verified official-map relationship." }
+      "metadata": { "description": "Compact venue immediately east of Quantum, before the Lion's Den corridor.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map detail review: a small venue beside Quantum, not a headline-stage footprint." }
     },
     {
       "id": "stage-spectrum-360", "type": "stage", "name": "Spectrum 360", "position": { "x": 37, "y": 32 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,

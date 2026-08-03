@@ -52,6 +52,18 @@ for (const object of document.objects ?? []) {
     if (object.geometry.kind === 'polygon' && object.geometry.points.length < 3) fail(`${object.id}: polygon geometry needs at least three points`);
   }
   for (const field of ["width", "height"]) if (!(object.dimensions?.[field] > 0)) fail(`${object.id}: ${field} must be greater than zero`);
+  // Stage hierarchy is visual data, not merely an icon choice. A main
+  // stage accidentally assigned a minor footprint (or the reverse) is
+  // especially hard to notice in JSON but immediately distorts the map.
+  // Keep a generous range for original illustrated shapes while catching
+  // the role/scale mix-up that previously made compact venues read as
+  // headline fields.
+  if (object.type === "stage") {
+    const role = object.metadata?.mapRole;
+    if (!['main-stage', 'minor-stage'].includes(role)) fail(`${object.id}: stage metadata.mapRole must be main-stage or minor-stage`);
+    if (role === 'main-stage' && (object.dimensions.width < 4 || object.dimensions.height < 2)) fail(`${object.id}: main-stage footprint is too small for its visual hierarchy`);
+    if (role === 'minor-stage' && (object.dimensions.width > 4 || object.dimensions.height > 4)) fail(`${object.id}: minor-stage footprint is too large for its visual hierarchy`);
+  }
   if (!(object.transform?.scale > 0) || !Number.isFinite(object.transform?.rotation)) fail(`${object.id}: invalid transform`);
   if (object.asset !== null && typeof object.asset !== "string") fail(`${object.id}: asset must be a string or null`);
   if (typeof object.asset === "string" && !object.asset.startsWith("assets/")) fail(`${object.id}: asset must be relative to map-system/assets`);

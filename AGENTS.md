@@ -236,6 +236,10 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   shared venue courts and street spines. Use it for a named central-space
   silhouette; never stretch a district boundary or invent marker positions
   just to make a court appear larger.
+- Stage hierarchy is authoritative in `map-document.json`: use `main-stage`
+  only for headline footprints and `minor-stage` for compact venues. The
+  document validator rejects a role/footprint mismatch, so preserve that
+  distinction instead of compensating with an oversized plaza or marker.
 - `map-system/data/reference-layout.json` â€” cluster anchors. This moves a
   district, its dependent venues and its evidence-based routes together.
 

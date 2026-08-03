@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v373";
-const APP_BUILD_TIME = "2026-08-03T08:14:29Z";
+const APP_CACHE_VERSION = "v374";
+const APP_BUILD_TIME = "2026-08-03T08:26:06Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6063,13 +6063,10 @@ const locations = [
   // so it had never been checked against real footage. Genuine official-
   // app frames this session (a video pan showing "QUANTUM" then, moving
   // south, a salmon/orange "HELIX" stage circle, then open field/services,
-  // then THE LION'S DEN) place Helix clearly between Quantum and The
-  // Lion's Den, not anywhere near Metropolis.
-  { name:"Helix", kind:"stage", x:"78%", y:"52%", info:"Between Quantum and The Lion's Den, on the Hilltop side of the site. Breaks, big beat and bass-heavy line-up." },
   { name:"Meeting Point", kind:"meeting", x:"48%", y:"58%", info:"Your chosen meetup spot — set this with your group before you split up." }
 ];
 
-// The other 11 official stages, plotted small — real names, illustrative
+// The other 12 official stages/venues, plotted small — real names, illustrative
 // positions (no verified coordinates for these, unlike the 15 pinned
 // above). status matches the venueDirectory verification pass (see
 // venueDirectory's Main stage entries): "confirmed" found real
@@ -6091,6 +6088,7 @@ mainLocationStages.forEach(place => {
 });
 
 const otherStages = [
+  { name:"Helix", status:"confirmed", info:"A compact breaks and big-beat venue immediately east of Quantum, before the Lion's Den corridor — not a headline-stage field." },
   { name:"Spectrum 360", status:"confirmed", info:"A circular arena entirely enclosed in shipping containers, running 360° visuals with a broad electronic bill spanning UK garage through to gabber." },
   { name:"Tangled Roots", status:"confirmed", info:"A laid-back dub and roots stage with its own cocktail bar — confirmed for 2026 with a full Wed-Fri dub/roots programme (Lionpulse x Sinai, Roots Ginjah, DubTastic Music, Jam Jah Sound, An Dannsa Dub, Rompa's Reggae Shack) plus a Friday dubstep takeover." },
   { name:"Full Moon Ballroom", status:"confirmed", info:"A ballroom-themed stage — confirmed for 2026 running Wed-Sun (Mad Apple Circus, She's Got Brass, Girl in the Year Above, Grooveline, CLADA, Agbeko, Franz Von, PCHA); expect a mixed, dressed-up crowd and a more theatrical vibe than the bass-heavy stages." },
@@ -6197,7 +6195,7 @@ const otherStages = [
 // Beag belongs east/south-east of the district label, with Feckless
 // Wrecked below it. Infinity is east of the Area 404/Hangar row, not
 // folded back into the Metropolis-side cluster.
-const minorStagePositions = [[37,32],[51,14],[62,26],[35,20],[58,29],[68,25],[30,43],[64,44],[72,41],[34,44],[41,42]];
+const minorStagePositions = [[78,52],[37,32],[51,14],[62,26],[35,20],[58,29],[68,25],[30,43],[64,44],[72,41],[34,44],[41,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6674,7 +6672,7 @@ const venueDirectory = [
   { name:"Anara Forest", type:"Main stage", status:"confirmed", music:true, genre:"Jungle, reggae, bassline, UK garage, DnB, grime", near:"Hilltop edge", info:"Formerly Psyforest; 360° sound-and-visual stage on the Hilltop edge with a sand floor." },
   { name:"Hidden Woods", type:"Main stage", status:"confirmed", music:true, genre:"Eclectic bass, reggae, dub", near:"Woodland edge", info:"Woodland stage with its own beach bar and treetop walks." },
   { name:"NEXUS", type:"Main stage", status:"confirmed", music:true, genre:"Live music, hip hop, grime, garage", near:"Botanica", info:"Botanica's main stage — 'where nature connects'; past bills included Bashy, MJ Cole, Lady Leshurr." },
-  { name:"Helix", type:"Main stage", status:"confirmed", music:true, genre:"Breaks, big beat, bass", near:"Quantum / Lion's Den corridor", info:"A bass-heavy stage on the open route south-east of Quantum, before The Lion's Den." },
+  { name:"Helix", type:"Venue", status:"confirmed", music:true, genre:"Breaks, big beat, bass", near:"Quantum / Lion's Den corridor", info:"A compact bass-heavy venue immediately east of Quantum, before The Lion's Den." },
   { name:"Spectrum 360", type:"Main stage", status:"confirmed", music:true, genre:"UK garage through to gabber, 360° visuals", near:"Area 404", info:"A circular arena entirely enclosed in shipping containers — Boomtown's main queer stage. Its 2026 DJ competition (for trans/non-binary/GNC DJs playing 13 Aug) confirms it for Chapter Five." },
   { name:"Tangled Roots", type:"Main stage", status:"confirmed", music:true, genre:"Dub, roots", near:"Unclear", info:"Laid-back stage with its own cocktail bar — confirmed for 2026 with a full Wed-Fri dub/roots programme (Lionpulse x Sinai, Roots Ginjah, DubTastic Music, Jam Jah Sound, Rompa's Reggae Shack) and a Friday dubstep takeover." },
   { name:"Full Moon Ballroom", type:"Main stage", status:"confirmed", music:true, genre:"Ballroom, eclectic", near:"Unclear", info:"A dressed-up, theatrical crowd rather than a straight dancefloor — confirmed for 2026 running Wed-Sun (Mad Apple Circus, She's Got Brass, Girl in the Year Above, Grooveline, CLADA, Agbeko)." },
@@ -6925,7 +6923,7 @@ const BUILDING_LAYER = {
   // zoom while its reviewed woodland silhouette supplies the wider area.
   "Anara Forest": { w: 3.6, h: 2.5, rotation: -18, category: "canopy" },
   "Hidden Woods": { w: 3.2, h: 2.2, rotation: 28, category: "rect" },
-  "Helix": { w: 3.2, h: 3.2, rotation: 0, category: "dome" },
+  "Helix": { w: 1.75, h: 1.3, rotation: -14, category: "rect" },
   "Tribe of Frog": { w: 3.4, h: 2.0, rotation: 18, category: "rect" },
   "Infinity": { w: 3.4, h: 3.4, rotation: 0, category: "ring" },
   // Grand Central's own reference screenshot (findings this session)
@@ -7812,7 +7810,7 @@ function buildMapGeoJSON(){
     // 7 sides keeps it clearly a bounded shape without reading as a
     // stiff geometric rectangle either.
     return {
-      type: "Feature", properties: {},
+      type: "Feature", properties: { surface: "district-concourse" },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r, r * 0.85, i * 43 + 19, 7)) ] }
     };
   }).filter(Boolean).concat(reviewedStagePrecinctLayout.map((precinct, i)=>{
@@ -7821,7 +7819,10 @@ function buildMapGeoJSON(){
     const { width, height, sides, rotation } = precinct.footprint;
     const cx = node.x + precinct.offset.x, cy = node.y + precinct.offset.y;
     return {
-      type: "Feature", properties: { reviewed: precinct.id },
+      // Keep the functional character with the geometry: a long town
+      // street, a compact venue court and a main-stage forecourt should
+      // not all look like the same pasted beige blob at close zoom.
+      type: "Feature", properties: { reviewed: precinct.id, surface: precinct.kind },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, width / 2, height / 2, 6400 + i * 53, sides, rotation)) ] }
     };
   }).filter(Boolean));
@@ -7846,7 +7847,7 @@ function buildMapGeoJSON(){
   const STAGE_PLAZA_LAYOUT = {
     "Grand Central": [4.3, 2.5, 7], "The Lion's Den": [4.5, 2.3, 6],
     "Hydro XL": [3.6, 2.7, 5], "Anara Forest": [3.3, 3.0, 8],
-    "NEXUS": [3.0, 2.6, 5], "Helix": [2.9, 2.6, 7],
+    "NEXUS": [3.0, 2.6, 5], "Helix": [1.5, 1.2, 6],
     "Spectrum 360": [2.8, 2.8, 10], "Hangar 161": [3.5, 1.9, 5],
     "Full Moon Ballroom": [3.0, 2.7, 8], "Infinity": [3.0, 3.0, 9],
     "Tribe of Frog": [2.9, 2.2, 6]
@@ -9232,16 +9233,27 @@ function loadMap(){
       // patch. Lighter and larger than a single stage's own plaza (below)
       // so the size difference itself reads as "this is the big open
       // space, that's a stage forecourt."
-      // Open concourses, stage plazas and the trail ribbon (below) now
-      // all share ONE consistent "hardstanding" fill tone/opacity
-      // (rgba(224,200,160,0.95)) instead of three different translucent
-      // shades — they used to visibly seam where a path ran into a
-      // plaza or concourse, when they're meant to read as one continuous
-      // non-grass surface: "the areas we can be in and travel through",
-      // not three separately-tinted zone types that happen to touch.
+      // Every concourse still uses the same warm hardstanding family as
+      // its connecting paths, but with a restrained tonal hierarchy:
+      // street spines are a little weathered, stage forecourts brighter,
+      // and small venue courts quieter. This gives the dense town areas
+      // legible structure without pretending they are separate zones.
       mapGL.addSource("mapOpenConcourses", { type: "geojson", data: geo.openConcourses });
-      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", paint: { "fill-color": "rgba(224,200,160,0.95)" } });
-      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
+      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", paint: {
+        "fill-color": ["match", ["get", "surface"],
+          "stage-forecourt", "rgba(232,207,163,0.96)",
+          "venue-court", "rgba(214,191,151,0.92)",
+          "rgba(224,200,160,0.95)"
+        ]
+      } });
+      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", paint: {
+        "line-color": ["match", ["get", "surface"],
+          "stage-forecourt", "rgba(137,98,46,0.66)",
+          "venue-court", "rgba(111,87,59,0.48)",
+          "rgba(120,95,60,0.55)"
+        ],
+        "line-width": ["match", ["get", "surface"], "stage-forecourt", 1.2, 1]
+      } });
 
       // Continuous town streets sit under their individual route segments:
       // these are walkable surfaces through the confirmed Oldtown and

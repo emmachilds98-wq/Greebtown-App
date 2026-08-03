@@ -226,8 +226,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
         "y": 52
       },
       "dimensions": {
-        "width": 6,
-        "height": 4
+        "width": 2.4,
+        "height": 1.7
       },
       "transform": {
         "rotation": 0,
@@ -236,11 +236,11 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "layer": "structures",
       "asset": null,
       "metadata": {
-        "description": "Open-grass stage on the Quantum to Lion's Den corridor.",
+        "description": "Compact venue immediately east of Quantum, before the Lion's Den corridor.",
         "category": "stage",
-        "mapRole": "main-stage",
+        "mapRole": "minor-stage",
         "accessibility": "",
-        "notes": "Verified official-map relationship."
+        "notes": "Official-map detail review: a small venue beside Quantum, not a headline-stage footprint."
       }
     },
     {
@@ -5467,6 +5467,91 @@ window.GREEBTOWN_STAGE_PRECINCT_LAYOUT = {
       },
       "evidence": "official-detail",
       "notes": "Compact faceted junction court at Quantum, preserving the legible branch between Oldtown, Helix and the Lion's Den without inventing paths."
+    },
+    {
+      "id": "helix-pocket-venue",
+      "sourceName": "Helix",
+      "kind": "venue-court",
+      "offset": {
+        "x": 0.3,
+        "y": 0
+      },
+      "footprint": {
+        "width": 3.2,
+        "height": 2,
+        "sides": 6,
+        "rotation": -14
+      },
+      "evidence": "official-detail",
+      "notes": "A deliberately compact pocket venue immediately east of Quantum, keeping Helix legible without giving it a headline-stage field."
+    },
+    {
+      "id": "spectrum-360-arena-court",
+      "sourceName": "Spectrum 360",
+      "kind": "venue-court",
+      "offset": {
+        "x": 0.2,
+        "y": 0.25
+      },
+      "footprint": {
+        "width": 5.4,
+        "height": 4.3,
+        "sides": 9,
+        "rotation": -10
+      },
+      "evidence": "official-detail",
+      "notes": "A compact rounded court around the container arena so the Area 404 landmark reads as a destination, not an oversized isolated marker."
+    },
+    {
+      "id": "full-moon-ballroom-court",
+      "sourceName": "Full Moon Ballroom",
+      "kind": "venue-court",
+      "offset": {
+        "x": -0.15,
+        "y": 0.35
+      },
+      "footprint": {
+        "width": 4.8,
+        "height": 3.6,
+        "sides": 8,
+        "rotation": 6
+      },
+      "evidence": "official-detail",
+      "notes": "A small rounded hilltop court for the marquee, preserving the Ballroom's distinct venue scale beside the Grand Central sequence."
+    },
+    {
+      "id": "hangar-161-yard",
+      "sourceName": "Hangar 161",
+      "kind": "stage-forecourt",
+      "offset": {
+        "x": 0.1,
+        "y": -0.25
+      },
+      "footprint": {
+        "width": 5.8,
+        "height": 3,
+        "sides": 5,
+        "rotation": 12
+      },
+      "evidence": "official-detail",
+      "notes": "A narrow hard-edged yard for Hangar 161, echoing its industrial character while keeping the Area 404 cluster compact."
+    },
+    {
+      "id": "tribe-of-frog-clearing",
+      "sourceName": "Tribe of Frog",
+      "kind": "venue-court",
+      "offset": {
+        "x": -0.25,
+        "y": 0.15
+      },
+      "footprint": {
+        "width": 4.4,
+        "height": 3.1,
+        "sides": 7,
+        "rotation": 20
+      },
+      "evidence": "official-detail",
+      "notes": "A modest wooded-edge clearing for Tribe of Frog, visually connected to Oldtown without adding a false camp or zoning boundary."
     }
   ]
 };
