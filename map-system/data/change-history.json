@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "entries": [
+    {
+      "id": "seed-2026-08-03T022500Z",
+      "timestamp": "2026-08-03T02:25:00Z",
+      "actor": "system",
+      "summary": "Created the map authoring-system seed document.",
+      "changes": []
+    }
+  ]
+}
