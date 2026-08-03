@@ -12,6 +12,7 @@ const site = read("site-layout.json");
 const precincts = read("stage-precinct-layout.json");
 const massing = read("district-massing-layout.json");
 const passages = read("district-passage-layout.json");
+const atmosphere = read("district-atmosphere-layout.json");
 console.log("# Greebtown map topology review");
 console.log(`\nEvidence: ${(references.observations || []).length} official observations`);
 for(const observation of references.observations || []) console.log(`- ${observation.id}: ${observation.regions.join(", ")}`);
@@ -22,4 +23,5 @@ console.log(`Arrival: ${site.parkingAreas.length} reviewed parking footprints; $
 console.log(`Central courts: ${(precincts.precincts || []).length} reviewed stage/venue precincts`);
 console.log(`District massing: ${(massing.clusters || []).length} reviewed compounds; ${(massing.clusters || []).reduce((total, cluster) => total + (cluster.masses || []).length, 0)} authored structures/yards`);
 console.log(`District passages: ${(passages.clusters || []).length} reviewed compounds; ${(passages.clusters || []).reduce((total, cluster) => total + (cluster.passages || []).length, 0)} interior walking surfaces`);
+console.log(`District atmosphere: ${(atmosphere.clusters || []).length} reviewed compounds; ${(atmosphere.clusters || []).reduce((total, cluster) => total + (cluster.features || []).length, 0)} restrained close-zoom details`);
 console.log("\nUse this report before a visual pass: change the specialised data source named above, then run map-preflight.");

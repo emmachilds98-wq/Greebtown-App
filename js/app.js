@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v379";
-const APP_BUILD_TIME = "2026-08-03T09:05:07Z";
+const APP_CACHE_VERSION = "v380";
+const APP_BUILD_TIME = "2026-08-03T09:14:22Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6611,6 +6611,9 @@ const reviewedDistrictMassingLayout = Array.isArray(window.GREEBTOWN_DISTRICT_MA
 const reviewedDistrictPassageLayout = Array.isArray(window.GREEBTOWN_DISTRICT_PASSAGE_LAYOUT?.clusters)
   ? window.GREEBTOWN_DISTRICT_PASSAGE_LAYOUT.clusters
   : [];
+const reviewedDistrictAtmosphereLayout = Array.isArray(window.GREEBTOWN_DISTRICT_ATMOSPHERE_LAYOUT?.clusters)
+  ? window.GREEBTOWN_DISTRICT_ATMOSPHERE_LAYOUT.clusters
+  : [];
 // Natural areas use their own anchor-relative footprints for the same
 // reason: woodland must never inherit a generic circular zone or a camp
 // surface just because it happens to be near a venue.
@@ -7744,6 +7747,42 @@ function buildMapGeoJSON(){
     });
   });
 
+  // A restrained foreground layer finishes each reviewed district compound
+  // with original, non-interactive planters, canopies, low seating and art
+  // moments. Keeping this data source separate makes it impossible for a
+  // future texture pass to silently add false venues or amenities.
+  const DISTRICT_ATMOSPHERE_TONES = {
+    canvas: "rgba(239,227,192,.94)", leaf: "rgba(91,145,77,.9)",
+    ember: "rgba(204,89,55,.92)", wood: "rgba(151,105,47,.9)",
+    violet: "rgba(126,83,164,.9)"
+  };
+  const DISTRICT_LIGHT_TONES = { warm: "rgba(252,207,105,.96)", cool: "rgba(151,218,228,.94)" };
+  const districtAtmosphereFeatures = [];
+  const districtAtmosphereLights = [];
+  reviewedDistrictAtmosphereLayout.forEach((cluster, clusterIndex)=>{
+    const source = findNamedNode(cluster.sourceName);
+    if(!source) return;
+    cluster.features.forEach((feature, featureIndex)=>{
+      const x = source.x + feature.offset.x, y = source.y + feature.offset.y;
+      if(feature.kind === "light"){
+        const c = schematicToLatLon(x, y);
+        districtAtmosphereLights.push({ type: "Feature", properties: { tone: DISTRICT_LIGHT_TONES[feature.tone], size: feature.size }, geometry: { type: "Point", coordinates: [c.lon, c.lat] } });
+        return;
+      }
+      const seed = 10800 + clusterIndex * 79 + featureIndex * 11;
+      let ring;
+      if(feature.kind === "seating") ring = buildingLayerFootprint(x, y, seed, { w: feature.size * 1.7, h: Math.max(0.25, feature.size * 0.46), rotation: feature.rotation, category: "rect" });
+      else if(feature.kind === "canopy") ring = fieldRing(x, y, feature.size, feature.size * 0.84, seed, 6, feature.rotation);
+      else if(feature.kind === "art") ring = fieldRing(x, y, feature.size * 0.82, feature.size * 0.82, seed, 5, feature.rotation);
+      else ring = fieldRing(x, y, feature.size * 0.92, feature.size * 0.78, seed, 7, feature.rotation);
+      districtAtmosphereFeatures.push({
+        type: "Feature",
+        properties: { fill: DISTRICT_ATMOSPHERE_TONES[feature.tone], kind: feature.kind },
+        geometry: { type: "Polygon", coordinates: [schematicRingToLngLat(ring)] }
+      });
+    });
+  });
+
   // Low scrub/bush dots lining main & secondary paths — a real
   // countryside footpath usually has some low hedge/scrub growth along
   // its edges, not a bare strip of colour running through flat grass.
@@ -8769,6 +8808,8 @@ function buildMapGeoJSON(){
     marketHub: { type:"FeatureCollection", features: marketHubFeatures },
     openConcourses: { type:"FeatureCollection", features: openConcourseFeatures },
     districtPassages: { type:"FeatureCollection", features: districtPassageFeatures },
+    districtAtmosphere: { type:"FeatureCollection", features: districtAtmosphereFeatures },
+    districtAtmosphereLights: { type:"FeatureCollection", features: districtAtmosphereLights },
     precinctInlays: { type:"FeatureCollection", features: precinctInlayFeatures },
     precinctLights: { type:"FeatureCollection", features: precinctLightFeatures },
     parkingAreas: { type:"FeatureCollection", features: parkingFeatures },
@@ -9402,6 +9443,17 @@ function loadMap(){
 
       // Stage plazas — drawn before the path lines so the paths visibly
       // run INTO the clearing rather than sitting on top of a flat edge.
+      // Close-zoom foreground: enough shape, colour and tiny light points
+      // to make a district feel inhabited, but withheld from overview zoom
+      // so the site still reads as a clear set of larger territories.
+      mapGL.addSource("mapDistrictAtmosphere", { type: "geojson", data: geo.districtAtmosphere });
+      mapGL.addLayer({ id: "district-atmosphere-shadow", type: "fill", source: "mapDistrictAtmosphere", minzoom: 16.0, paint: { "fill-color": "rgba(24,35,24,.2)", "fill-translate": [0.8, 1.1] } });
+      mapGL.addLayer({ id: "district-atmosphere-fill", type: "fill", source: "mapDistrictAtmosphere", minzoom: 16.0, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-atmosphere-outline", type: "line", source: "mapDistrictAtmosphere", minzoom: 16.0, paint: { "line-color": "rgba(76,63,39,.58)", "line-width": 0.65 } });
+      mapGL.addSource("mapDistrictAtmosphereLights", { type: "geojson", data: geo.districtAtmosphereLights });
+      mapGL.addLayer({ id: "district-atmosphere-lights-glow", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 16.0, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 15, 5.5, 19, 13]], "circle-color": ["get", "tone"], "circle-opacity": .18 } });
+      mapGL.addLayer({ id: "district-atmosphere-lights-core", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 16.0, paint: { "circle-radius": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 15, 1.4, 19, 3.2]], "circle-color": ["get", "tone"], "circle-stroke-width": .45, "circle-stroke-color": "rgba(68,58,38,.55)" } });
+
       mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
       mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", paint: { "fill-color": "rgba(224,200,160,0.95)" } });
       mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
@@ -9491,9 +9543,9 @@ function loadMap(){
       // that was missing to make flat building fills read as raised
       // structures sitting ON the ground rather than a coloured patch
       // painted flush with it.
-      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 15.2, paint: { "fill-color": "rgba(10,15,10,0.18)", "fill-translate": [1, 1.4] } });
-      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 15.2, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.48 } });
-      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 15.2, paint: { "line-color": "rgba(120,80,50,0.35)", "line-width": 0.8 } });
+      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 16.1, paint: { "fill-color": "rgba(10,15,10,0.16)", "fill-translate": [1, 1.4] } });
+      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 16.1, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.32 } });
+      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 16.1, paint: { "line-color": "rgba(120,80,50,0.24)", "line-width": 0.65 } });
 
       // Deliberate district compounds sit above low-contrast infill: their
       // varied roof tones and fenced yards make a close-up feel authored,

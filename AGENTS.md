@@ -245,6 +245,10 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   close-zoom walking surfaces within those same compounds. These are short
   interior approaches and lanes, not evidence for a new public trunk route;
   keep them anchor-relative and never let them cross into camps or woodland.
+- `map-system/data/district-atmosphere-layout.json` â€” reviewed, original
+  foreground detail for core districts. It owns only non-interactive
+  planters, canopies, seating, art and light points. Keep it sparse; these
+  shapes appear only at deep zoom and must not become a surrogate POI layer.
 - Stage hierarchy is authoritative in `map-document.json`: use `main-stage`
   only for headline footprints and `minor-stage` for compact venues. The
   document validator rejects a role/footprint mismatch, so preserve that
@@ -267,6 +271,8 @@ node scripts/validate-site-layout.mjs
 node scripts/validate-stage-precinct-layout.mjs
 node scripts/validate-district-massing-layout.mjs
 node scripts/validate-district-passage-layout.mjs
+node scripts/validate-district-atmosphere-layout.mjs
+node scripts/audit-district-composition.mjs
 node scripts/audit-ground-use-overlaps.mjs
 node scripts/audit-map-positions.mjs
 node --check js/app.js
@@ -322,6 +328,13 @@ does not replace `evidenced-paths.json`: modify the latter only for an
 officially supported site-wide path. The passage validator bounds every point
 to its source district and limits widths, so a visual paving change cannot
 silently create an oversized zone or an accidental route through woodland.
+
+`map-system/data/district-atmosphere-layout.json` completes a core district
+only after its massing and passages are settled. It is deliberately withheld
+until deeper zoom so visual hierarchy remains route-and-space first. Always
+run `node scripts/audit-district-composition.mjs` after changing any of the
+three district sources: it verifies coverage, caps detail density and
+requires a varied foreground instead of a cluster of same-looking shapes.
 
 Record every new official-map reading in `reference-layout.json`'s
 `observations` collection before using it to alter a footprint, path, field

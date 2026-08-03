@@ -16,6 +16,8 @@ const steps = [
   ["scripts/validate-stage-precinct-layout.mjs"],
   ["scripts/validate-district-massing-layout.mjs"],
   ["scripts/validate-district-passage-layout.mjs"],
+  ["scripts/validate-district-atmosphere-layout.mjs"],
+  ["scripts/audit-district-composition.mjs"],
   ["scripts/audit-ground-use-overlaps.mjs"],
   ["scripts/audit-map-positions.mjs"],
   ["--check", "js/app.js"],

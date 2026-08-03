@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "anchor-relative-schematic-percent-v1",
+  "purpose": "Reviewed, original close-zoom atmosphere details for the six dense districts. They are non-interactive illustrated planters, canopies, seating, art pieces and light points, never new venues, amenities, camps or directions.",
+  "clusters": [
+    {
+      "id": "grand-central-foreground",
+      "sourceName": "Grand Central",
+      "evidence": "official-detail",
+      "notes": "Grand Central retains a broad clear stage face, with a handful of warm gathering objects on the quieter outer edges to make the forecourt feel occupied without blocking its open lawn.",
+      "features": [
+        { "id": "gc-west-canopy", "kind": "canopy", "tone": "canvas", "offset": { "x": -3.0, "y": 1.3 }, "size": 0.78, "rotation": -20 },
+        { "id": "gc-east-planter", "kind": "planter", "tone": "leaf", "offset": { "x": 2.3, "y": 1.25 }, "size": 0.55, "rotation": 0 },
+        { "id": "gc-north-art", "kind": "art", "tone": "ember", "offset": { "x": 0.75, "y": -1.8 }, "size": 0.52, "rotation": 12 },
+        { "id": "gc-south-seating", "kind": "seating", "tone": "wood", "offset": { "x": -1.7, "y": 2.8 }, "size": 0.68, "rotation": 22 },
+        { "id": "gc-light-one", "kind": "light", "tone": "warm", "offset": { "x": -1.0, "y": 0.75 }, "size": 0.24, "rotation": 0 },
+        { "id": "gc-light-two", "kind": "light", "tone": "warm", "offset": { "x": 1.15, "y": 1.45 }, "size": 0.24, "rotation": 0 }
+      ]
+    },
+    {
+      "id": "oldtown-street-atmosphere",
+      "sourceName": "Oldtown",
+      "evidence": "official-detail",
+      "notes": "Oldtown is a tight vertical street, so its details stay narrow and edge-bound: warm lamps, small planted corners and low seating rather than a freestanding central object or plaza ring.",
+      "features": [
+        { "id": "oldtown-north-planter", "kind": "planter", "tone": "leaf", "offset": { "x": -1.25, "y": -2.6 }, "size": 0.48, "rotation": 0 },
+        { "id": "oldtown-east-seating", "kind": "seating", "tone": "wood", "offset": { "x": 1.4, "y": -0.9 }, "size": 0.6, "rotation": -18 },
+        { "id": "oldtown-west-seating", "kind": "seating", "tone": "wood", "offset": { "x": -1.55, "y": 1.25 }, "size": 0.58, "rotation": 16 },
+        { "id": "oldtown-south-art", "kind": "art", "tone": "ember", "offset": { "x": 0.95, "y": 2.65 }, "size": 0.45, "rotation": 42 },
+        { "id": "oldtown-light-one", "kind": "light", "tone": "warm", "offset": { "x": 0.3, "y": -1.85 }, "size": 0.22, "rotation": 0 },
+        { "id": "oldtown-light-two", "kind": "light", "tone": "warm", "offset": { "x": -0.2, "y": 0.55 }, "size": 0.22, "rotation": 0 },
+        { "id": "oldtown-light-three", "kind": "light", "tone": "warm", "offset": { "x": 0.15, "y": 2.1 }, "size": 0.22, "rotation": 0 }
+      ]
+    },
+    {
+      "id": "botanica-garden-atmosphere",
+      "sourceName": "Botanica",
+      "evidence": "official-detail",
+      "notes": "Botanica is the greenest town compound, with a loose garden middle, a few shade canopies and circular planted moments around the market edge instead of closely packed industrial furniture.",
+      "features": [
+        { "id": "botanica-west-planter", "kind": "planter", "tone": "leaf", "offset": { "x": -2.35, "y": 0.35 }, "size": 0.68, "rotation": 0 },
+        { "id": "botanica-north-canopy", "kind": "canopy", "tone": "canvas", "offset": { "x": -0.2, "y": -2.0 }, "size": 0.76, "rotation": 18 },
+        { "id": "botanica-east-planter", "kind": "planter", "tone": "leaf", "offset": { "x": 2.6, "y": -0.15 }, "size": 0.55, "rotation": 0 },
+        { "id": "botanica-south-seating", "kind": "seating", "tone": "wood", "offset": { "x": 0.3, "y": 2.35 }, "size": 0.7, "rotation": -8 },
+        { "id": "botanica-art", "kind": "art", "tone": "violet", "offset": { "x": -0.7, "y": 0.3 }, "size": 0.46, "rotation": 10 },
+        { "id": "botanica-light-one", "kind": "light", "tone": "cool", "offset": { "x": 1.35, "y": 1.5 }, "size": 0.23, "rotation": 0 },
+        { "id": "botanica-light-two", "kind": "light", "tone": "cool", "offset": { "x": -1.45, "y": 1.65 }, "size": 0.23, "rotation": 0 }
+      ]
+    },
+    {
+      "id": "metropolis-street-atmosphere",
+      "sourceName": "Metropolis",
+      "evidence": "official-detail",
+      "notes": "Metropolis is a compact, built street; its foreground detail uses small hard-edged seating, art and lights placed along the run rather than turning the middle into another landscaped garden.",
+      "features": [
+        { "id": "metropolis-north-seating", "kind": "seating", "tone": "wood", "offset": { "x": -1.8, "y": -0.8 }, "size": 0.62, "rotation": 14 },
+        { "id": "metropolis-west-art", "kind": "art", "tone": "ember", "offset": { "x": -3.0, "y": 0.65 }, "size": 0.5, "rotation": 26 },
+        { "id": "metropolis-east-planter", "kind": "planter", "tone": "leaf", "offset": { "x": 2.35, "y": 0.25 }, "size": 0.45, "rotation": 0 },
+        { "id": "metropolis-south-canopy", "kind": "canopy", "tone": "canvas", "offset": { "x": -0.35, "y": 2.25 }, "size": 0.7, "rotation": -12 },
+        { "id": "metropolis-light-one", "kind": "light", "tone": "warm", "offset": { "x": -0.3, "y": -0.55 }, "size": 0.22, "rotation": 0 },
+        { "id": "metropolis-light-two", "kind": "light", "tone": "warm", "offset": { "x": 1.25, "y": 0.55 }, "size": 0.22, "rotation": 0 }
+      ]
+    },
+    {
+      "id": "area-404-yard-atmosphere",
+      "sourceName": "Area 404",
+      "evidence": "official-detail",
+      "notes": "Area 404 stays sparse and industrial, so its details are isolated hard-edged art, utility seating and low light points with plenty of exposed ground remaining between the venue compounds.",
+      "features": [
+        { "id": "area-404-west-art", "kind": "art", "tone": "violet", "offset": { "x": -2.85, "y": -0.55 }, "size": 0.62, "rotation": -16 },
+        { "id": "area-404-north-seating", "kind": "seating", "tone": "wood", "offset": { "x": -0.2, "y": -2.15 }, "size": 0.62, "rotation": -8 },
+        { "id": "area-404-east-art", "kind": "art", "tone": "ember", "offset": { "x": 2.85, "y": 0.1 }, "size": 0.54, "rotation": 32 },
+        { "id": "area-404-south-canopy", "kind": "canopy", "tone": "canvas", "offset": { "x": 0.25, "y": 2.4 }, "size": 0.72, "rotation": 28 },
+        { "id": "area-404-light-one", "kind": "light", "tone": "cool", "offset": { "x": -1.2, "y": 0.95 }, "size": 0.24, "rotation": 0 },
+        { "id": "area-404-light-two", "kind": "light", "tone": "cool", "offset": { "x": 1.4, "y": 1.3 }, "size": 0.24, "rotation": 0 }
+      ]
+    },
+    {
+      "id": "quantum-junction-atmosphere",
+      "sourceName": "Quantum",
+      "evidence": "official-detail",
+      "notes": "Quantum remains a small junction beside Hilltop and Helix, with only a few compact recognisable details marking its turn and no dense furniture that would make it read as a separate district.",
+      "features": [
+        { "id": "quantum-west-planter", "kind": "planter", "tone": "leaf", "offset": { "x": -1.35, "y": 0.35 }, "size": 0.43, "rotation": 0 },
+        { "id": "quantum-east-canopy", "kind": "canopy", "tone": "canvas", "offset": { "x": 1.4, "y": -0.45 }, "size": 0.58, "rotation": -22 },
+        { "id": "quantum-turn-art", "kind": "art", "tone": "violet", "offset": { "x": 0.1, "y": 1.2 }, "size": 0.42, "rotation": 18 },
+        { "id": "quantum-light", "kind": "light", "tone": "warm", "offset": { "x": 0.55, "y": 0.2 }, "size": 0.21, "rotation": 0 }
+      ]
+    }
+  ]
+}
