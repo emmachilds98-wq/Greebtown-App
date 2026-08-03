@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v392";
-const APP_BUILD_TIME = "2026-08-03T10:42:00Z";
+const APP_CACHE_VERSION = "v393";
+const APP_BUILD_TIME = "2026-08-03T10:45:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9495,8 +9495,8 @@ function loadMap(){
       // explorative paths progressively appear as someone zooms in, so a
       // whole-site view reads as districts and destinations first rather
       // than a thicket of equally important lines.
-      mapGL.addLayer({ id: "trail-main-fill", type: "fill", source: "mapTrail", minzoom: 15.3, filter: ["==", ["get", "tier"], "main"], paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.84 } });
-      mapGL.addLayer({ id: "trail-main-outline", type: "line", source: "mapTrail", minzoom: 15.3, filter: ["==", ["get", "tier"], "main"], paint: { "line-color": "rgba(100,75,45,0.46)", "line-width": 1.1 } });
+      mapGL.addLayer({ id: "trail-main-fill", type: "fill", source: "mapTrail", minzoom: 15.8, filter: ["==", ["get", "tier"], "main"], paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.84 } });
+      mapGL.addLayer({ id: "trail-main-outline", type: "line", source: "mapTrail", minzoom: 15.8, filter: ["==", ["get", "tier"], "main"], paint: { "line-color": "rgba(100,75,45,0.46)", "line-width": 1.1 } });
       mapGL.addLayer({ id: "trail-detail-fill", type: "fill", source: "mapTrail", minzoom: 15.8, filter: ["!=", ["get", "tier"], "main"], paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "trail-detail-outline", type: "line", source: "mapTrail", minzoom: 15.8, filter: ["!=", ["get", "tier"], "main"], paint: {
         "line-color": ["match", ["get", "tier"], "minor", "rgba(140,120,90,0.25)", "rgba(120,95,60,0.55)"],
