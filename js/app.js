@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v318";
-const APP_BUILD_TIME = "2026-08-03T01:43:21Z";
+const APP_CACHE_VERSION = "v320";
+const APP_BUILD_TIME = "2026-08-03T02:25:00Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -8777,8 +8777,8 @@ function loadMap(){
     // the rest of this one-time init block. Fill/line/circle layers are
     // triangulated into a GPU mesh by MapLibre right here, then just
     // drawn every frame from then on.
+    const geo = buildMapGeoJSON();
     mapGL.on("load", ()=>{
-      const geo = buildMapGeoJSON();
 
       // Bottom-to-top: faint ground texture first, then area fills, then
       // paths, then icon-like points on top — the same layering a real
