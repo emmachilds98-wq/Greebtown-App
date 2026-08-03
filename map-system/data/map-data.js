@@ -3173,3 +3173,163 @@ window.GREEBTOWN_MAP_DOCUMENT = {
     }
   ]
 };
+window.GREEBTOWN_CAMP_ZONES = {
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "schematic-percent-v1",
+  "zones": [
+    {
+      "id": "camp-west",
+      "name": "West Camping",
+      "position": {
+        "x": 14,
+        "y": 7
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "North-west field beside West Gate."
+    },
+    {
+      "id": "camp-downtown",
+      "name": "Downtown Camping",
+      "position": {
+        "x": 5,
+        "y": 35
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "West-side camping, separate from Camp Orchid."
+    },
+    {
+      "id": "camp-meadow-accessible",
+      "name": "Meadow Camping (Accessible)",
+      "position": {
+        "x": 7,
+        "y": 58
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Accessible meadow field."
+    },
+    {
+      "id": "camp-meadow-living",
+      "name": "Meadow Living",
+      "position": {
+        "x": 10,
+        "y": 58
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Adjacent field, deliberately distinct from accessible camping."
+    },
+    {
+      "id": "camp-valley",
+      "name": "Valley Camping",
+      "position": {
+        "x": 48,
+        "y": 4
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Northern valley field."
+    },
+    {
+      "id": "camp-tangerine",
+      "name": "Tangerine Fields",
+      "position": {
+        "x": 70,
+        "y": 6
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Northern field east of Valley Camping."
+    },
+    {
+      "id": "camp-campervan",
+      "name": "Campervan Field",
+      "position": {
+        "x": 86,
+        "y": 14
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "East-side vehicle field."
+    },
+    {
+      "id": "camp-temple-valley",
+      "name": "Temple Valley Camping",
+      "position": {
+        "x": 95,
+        "y": 18
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Long east-side camping field near East Gate."
+    },
+    {
+      "id": "camp-east",
+      "name": "East Camping",
+      "position": {
+        "x": 91,
+        "y": 48
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "East-side field south of Temple Valley."
+    },
+    {
+      "id": "camp-quiet",
+      "name": "Quiet Camping",
+      "position": {
+        "x": 95,
+        "y": 64
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "South-east quieter field."
+    },
+    {
+      "id": "camp-orchid-downtown",
+      "name": "Camp Orchid Downtown",
+      "position": {
+        "x": 9,
+        "y": 39
+      },
+      "surface": "camp-premium",
+      "evidence": "official-overview",
+      "notes": "Premium public-transport camp; distinct pink field."
+    },
+    {
+      "id": "camp-skylark-hilltop",
+      "name": "Camp Skylark Hilltop",
+      "position": {
+        "x": 75,
+        "y": 22
+      },
+      "surface": "camp-premium",
+      "evidence": "official-overview",
+      "notes": "Premium Hilltop camp."
+    },
+    {
+      "id": "camp-skylark-sunset",
+      "name": "Camp Skylark Sunset",
+      "position": {
+        "x": 74,
+        "y": 72
+      },
+      "surface": "camp-premium",
+      "evidence": "official-overview",
+      "notes": "Premium south-side camp near Sunset Hill."
+    },
+    {
+      "id": "camp-camplight",
+      "name": "Camplight",
+      "position": {
+        "x": 4,
+        "y": 37
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Separate labelled field next to Downtown Camping and Orchid."
+    }
+  ]
+};

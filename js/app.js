@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v340";
-const APP_BUILD_TIME = "2026-08-03T04:43:58Z";
+const APP_CACHE_VERSION = "v341";
+const APP_BUILD_TIME = "2026-08-03T04:50:13Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6549,46 +6549,18 @@ const landmarks = [
   { name:"Sunset Hill", x:"68%", y:"58%", info:"Seen labelled on the official app's own map at the south end of the Hilltop zone, right by Quantum and The Lion's Den — no further details sourced yet." }
 ];
 
-// Named camping fields & gates, positioned from a real (previous-year)
-// site map you shared — general site geography like this tends to carry
-// over year to year even when the in-city venues get redesigned.
-const campLabels = [
-  { x:"14%", y:"7%", text:"West Camping" },
-  { x:"5%", y:"35%", text:"Downtown Camping" },
-  { x:"7%", y:"58%", text:"Meadow Camping (Accessible)" },
-  // Seen labelled separately from "Meadow Accessible Camp" in a whole-
-  // map reference screenshot — two distinct adjacent fields, not one.
-  { x:"10%", y:"58%", text:"Meadow Living" },
-  { x:"48%", y:"4%", text:"Valley Camping" },
-  { x:"70%", y:"6%", text:"Tangerine Fields" },
-  { x:"86%", y:"14%", text:"Campervan Field" },
-  // Pulled from (85,32) to (85,18), then to (95,18) this session — the
-  // y already checked out well against three frames; re-measuring x
-  // against the same Grand-Central-anchored frames puts it further east,
-  // closer to East Gate (96,32), consistent with sitting right at the
-  // site's eastern edge alongside Campervan Field.
-  { x:"95%", y:"18%", text:"Temple Valley Camping" },
-  { x:"91%", y:"48%", text:"East Camping" },
-  { x:"95%", y:"64%", text:"Quiet Camping" },
-  { x:"9%", y:"39%", text:"Camp Orchid Downtown (premium, public transport)" },
-  { x:"75%", y:"22%", text:"Camp Skylark Hilltop (premium)" },
-  // Pulled up from (74,87) — that put a 25+ schematic-unit gap between
-  // Sunset Hill (75,62, the nearest already-plotted feature to the
-  // north) and this field, reading as a stranded outpost even after the
-  // gate spoke path was added to connect it. Compressed the whole south
-  // end (Camp Skylark Sunset/South Gate/White Carpark 4) into roughly
-  // half that gap instead, keeping the same north-south order.
-  { x:"74%", y:"72%", text:"Camp Skylark Sunset (premium)" },
-  // Newly spotted in this session's own reference video, clearly legible
-  // right beside Camp Orchid Downtown's own label, just south of the
-  // Downtown district triangle near West Gate — placed adjacent to
-  // Downtown Camping/Camp Orchid Downtown since that's where it appeared
-  // on camera. Unclear whether it's a genuinely distinct field or the
-  // real name behind the existing "Downtown Camping" guess — kept as its
-  // own entry rather than overwriting that one, since both labels were
-  // visible on screen at once.
-  { x:"4%", y:"37%", text:"Camplight" }
-];
+// Camping is authored separately from individual points, rather than as a
+// loose render-time list. Every zone carries its own visual surface and
+// evidence level in map-system/data/camp-zones.json.
+const campLabels = (()=>{
+  const zones = window.GREEBTOWN_CAMP_ZONES?.zones;
+  if(!Array.isArray(zones) || !zones.length) throw new Error("Greebtown camping-zone authoring data failed to load");
+  return zones.map(zone=> ({
+    id: zone.id,
+    x: `${zone.position.x}%`, y: `${zone.position.y}%`, text: `${zone.name}${zone.surface === "camp-premium" ? " (premium)" : ""}`,
+    surface: zone.surface, evidence: zone.evidence
+  }));
+})();
 
 // Amenity markers (toilets, food, bars, water, welfare, etc.) — replaced
 // a straight dump of js/boomtown-locations-2026.js's 53 real-GPS POI
