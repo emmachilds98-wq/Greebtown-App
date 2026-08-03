@@ -44,12 +44,21 @@
         "position": { "$ref": "#/$defs/point" },
         "dimensions": { "$ref": "#/$defs/dimensions" },
         "transform": { "$ref": "#/$defs/transform" },
+        "geometry": { "$ref": "#/$defs/geometry" },
         "layer": { "type": "string" },
         "asset": { "type": ["string", "null"] },
         "metadata": { "type": "object" }
       }
     },
     "point": { "type": "object", "required": ["x", "y"], "properties": { "x": { "type": "number" }, "y": { "type": "number" } } },
+    "geometry": {
+      "type": ["object", "null"],
+      "properties": {
+        "kind": { "enum": ["polyline", "polygon"] },
+        "points": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/point" } }
+      },
+      "required": ["kind", "points"]
+    },
     "dimensions": { "type": "object", "required": ["width", "height"], "properties": { "width": { "type": "number", "exclusiveMinimum": 0 }, "height": { "type": "number", "exclusiveMinimum": 0 } } },
     "transform": { "type": "object", "required": ["rotation", "scale"], "properties": { "rotation": { "type": "number" }, "scale": { "type": "number", "exclusiveMinimum": 0 } } }
   }

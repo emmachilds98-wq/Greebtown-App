@@ -27,6 +27,14 @@ for (const object of document.objects ?? []) {
   if (!objectTypes.has(object.type)) fail(`${object.id}: invalid object type ${object.type}`);
   if (!layers.has(object.layer)) fail(`${object.id}: missing layer ${object.layer}`);
   for (const axis of ["x", "y"]) if (!Number.isFinite(object.position?.[axis]) || object.position[axis] < 0 || object.position[axis] > 100) fail(`${object.id}: ${axis} must be between 0 and 100`);
+  if (object.geometry != null) {
+    if (!['polyline', 'polygon'].includes(object.geometry.kind)) fail(`${object.id}: geometry.kind must be polyline or polygon`);
+    if (!Array.isArray(object.geometry.points) || object.geometry.points.length < 2) fail(`${object.id}: geometry needs at least two points`);
+    for (const [index, point] of (object.geometry.points || []).entries()) {
+      for (const axis of ['x', 'y']) if (!Number.isFinite(point?.[axis]) || point[axis] < 0 || point[axis] > 100) fail(`${object.id}: geometry point ${index} ${axis} must be between 0 and 100`);
+    }
+    if (object.geometry.kind === 'polygon' && object.geometry.points.length < 3) fail(`${object.id}: polygon geometry needs at least three points`);
+  }
   for (const field of ["width", "height"]) if (!(object.dimensions?.[field] > 0)) fail(`${object.id}: ${field} must be greater than zero`);
   if (!(object.transform?.scale > 0) || !Number.isFinite(object.transform?.rotation)) fail(`${object.id}: invalid transform`);
   if (object.asset !== null && typeof object.asset !== "string") fail(`${object.id}: asset must be a string or null`);
