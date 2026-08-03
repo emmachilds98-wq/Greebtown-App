@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v394";
-const APP_BUILD_TIME = "2026-08-03T10:48:00Z";
+const APP_CACHE_VERSION = "v395";
+const APP_BUILD_TIME = "2026-08-03T10:52:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8388,7 +8388,7 @@ function buildMapGeoJSON(){
     // gentler 8-sided field shape, still faceted rather than smooth-round.
     return {
       type: "Feature",
-      properties: { fill: isDowntown ? "rgba(235,120,120,0.55)" : "rgba(235,196,90,0.6)" },
+      properties: { fill: isDowntown ? "rgba(235,132,126,0.76)" : "rgba(239,199,86,0.78)" },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * footprint.aspect, r / footprint.aspect, 700 + i * 61, footprint.sides, footprint.rotation)) ] }
     };
   });
@@ -8466,10 +8466,10 @@ function buildMapGeoJSON(){
   const ordinaryCamps = campLabels.filter(c=> !/premium/i.test(c.text));
   const campFieldRadii = new Map();
   const CAMP_FIELD_STYLES = [
-    { fill: "rgba(87,196,124,0.72)", line: "rgba(35,119,64,0.76)" },
-    { fill: "rgba(101,207,133,0.70)", line: "rgba(42,128,71,0.74)" },
-    { fill: "rgba(74,183,116,0.72)", line: "rgba(31,108,59,0.76)" },
-    { fill: "rgba(113,214,137,0.70)", line: "rgba(52,134,75,0.72)" }
+    { fill: "rgba(92,204,132,0.88)", line: "rgba(31,112,60,0.84)" },
+    { fill: "rgba(110,215,143,0.86)", line: "rgba(36,122,67,0.82)" },
+    { fill: "rgba(79,192,121,0.88)", line: "rgba(27,101,55,0.84)" },
+    { fill: "rgba(122,221,148,0.86)", line: "rgba(45,128,71,0.80)" }
   ];
   const campFieldFeatures = ordinaryCamps.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
@@ -8484,7 +8484,7 @@ function buildMapGeoJSON(){
     const seed = 600 + i * 43;
     const aspect = footprint.aspect;
     const style = /campervan/i.test(c.text)
-      ? { fill: "rgba(104,183,122,0.70)", line: "rgba(51,104,65,0.78)" }
+      ? { fill: "rgba(106,190,125,0.84)", line: "rgba(46,99,61,0.82)" }
       : CAMP_FIELD_STYLES[i % CAMP_FIELD_STYLES.length];
     return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, footprint.sides, footprint.rotation)) ] } };
   });
