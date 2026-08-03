@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v341";
-const APP_BUILD_TIME = "2026-08-03T04:50:13Z";
+const APP_CACHE_VERSION = "v342";
+const APP_BUILD_TIME = "2026-08-03T04:53:35Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7220,7 +7220,7 @@ function edgeTier(a, b){
 // generic random bow. These are centreline waypoints in schematic space;
 // all other verified connections still use curvedLine() because their
 // detailed curvature was not visible reliably enough to claim precision.
-const EVIDENCED_PATH_SHAPES = {
+const LEGACY_EVIDENCED_PATH_SHAPES = {
   "West Gate|Downtown Camping": [[3,46], [4,42], [5,38], [5,35]],
   "Downtown Camping|Metropolis": [[5,35], [8,34], [11,35], [15,36]],
   "Grand Central|Oldtown": [[72,30], [71,34], [69,37], [68,40]],
@@ -7245,6 +7245,11 @@ const EVIDENCED_PATH_SHAPES = {
   "Mining for (g)Old Town|Síbín Beag": [[64,36], [68,38], [72,41]],
   "Síbín Beag|The Feckless Wrecked": [[72,41], [73,42], [74,43]]
 };
+const EVIDENCED_PATH_SHAPES = (()=>{
+  const paths = window.GREEBTOWN_EVIDENCED_PATHS?.paths;
+  if(!Array.isArray(paths) || !paths.length) throw new Error("Greebtown evidenced-path authoring data failed to load");
+  return Object.fromEntries(paths.map(path=> [`${path.from}|${path.to}`, path.points]));
+})();
 function evidencedPathShape(a, b){
   return EVIDENCED_PATH_SHAPES[`${a}|${b}`] || EVIDENCED_PATH_SHAPES[`${b}|${a}`] || null;
 }

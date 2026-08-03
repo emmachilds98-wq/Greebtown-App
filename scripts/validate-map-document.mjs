@@ -5,9 +5,11 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const file = path.join(root, "map-system", "data", "map-document.json");
 const campFile = path.join(root, "map-system", "data", "camp-zones.json");
+const pathFile = path.join(root, "map-system", "data", "evidenced-paths.json");
 const generatedFile = path.join(root, "map-system", "data", "map-data.js");
 const document = JSON.parse(fs.readFileSync(file, "utf8"));
 const campZones = JSON.parse(fs.readFileSync(campFile, "utf8"));
+const evidencedPaths = JSON.parse(fs.readFileSync(pathFile, "utf8"));
 const objectTypes = new Set(["terrain", "district", "building", "stage", "vendor", "toilet", "medical", "camping", "entrance", "exit", "path", "boundary", "decoration", "hidden-location"]);
 const errors = [];
 const fail = (message) => errors.push(message);
@@ -45,7 +47,7 @@ for (const object of document.objects ?? []) {
 }
 for (const replacedId of supersededIds) if (!ids.has(replacedId)) fail(`Superseded object does not exist: ${replacedId}`);
 const generatedBanner = "// Generated from map-system/data/map-document.json by scripts/build-map-data.mjs. Do not edit directly.\n";
-const expectedGenerated = `${generatedBanner}window.GREEBTOWN_MAP_DOCUMENT = ${JSON.stringify(document, null, 2)};\nwindow.GREEBTOWN_CAMP_ZONES = ${JSON.stringify(campZones, null, 2)};\n`;
+const expectedGenerated = `${generatedBanner}window.GREEBTOWN_MAP_DOCUMENT = ${JSON.stringify(document, null, 2)};\nwindow.GREEBTOWN_CAMP_ZONES = ${JSON.stringify(campZones, null, 2)};\nwindow.GREEBTOWN_EVIDENCED_PATHS = ${JSON.stringify(evidencedPaths, null, 2)};\n`;
 if (!fs.existsSync(generatedFile) || fs.readFileSync(generatedFile, "utf8") !== expectedGenerated) {
   fail("map-system/data/map-data.js is stale; run node scripts/build-map-data.mjs");
 }

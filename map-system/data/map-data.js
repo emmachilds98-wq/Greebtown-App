@@ -3333,3 +3333,489 @@ window.GREEBTOWN_CAMP_ZONES = {
     }
   ]
 };
+window.GREEBTOWN_EVIDENCED_PATHS = {
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "schematic-percent-v1",
+  "paths": [
+    {
+      "id": "path-west-gate-downtown",
+      "from": "West Gate",
+      "to": "Downtown Camping",
+      "evidence": "official-overview",
+      "points": [
+        [
+          3,
+          46
+        ],
+        [
+          4,
+          42
+        ],
+        [
+          5,
+          38
+        ],
+        [
+          5,
+          35
+        ]
+      ]
+    },
+    {
+      "id": "path-downtown-metropolis",
+      "from": "Downtown Camping",
+      "to": "Metropolis",
+      "evidence": "official-overview",
+      "points": [
+        [
+          5,
+          35
+        ],
+        [
+          8,
+          34
+        ],
+        [
+          11,
+          35
+        ],
+        [
+          15,
+          36
+        ]
+      ]
+    },
+    {
+      "id": "path-grand-central-oldtown",
+      "from": "Grand Central",
+      "to": "Oldtown",
+      "evidence": "official-detail",
+      "points": [
+        [
+          72,
+          30
+        ],
+        [
+          71,
+          34
+        ],
+        [
+          69,
+          37
+        ],
+        [
+          68,
+          40
+        ]
+      ]
+    },
+    {
+      "id": "path-oldtown-quantum",
+      "from": "Oldtown",
+      "to": "Quantum",
+      "evidence": "official-detail",
+      "points": [
+        [
+          68,
+          40
+        ],
+        [
+          69,
+          44
+        ],
+        [
+          71,
+          47
+        ],
+        [
+          73,
+          50
+        ]
+      ]
+    },
+    {
+      "id": "path-quantum-helix",
+      "from": "Quantum",
+      "to": "Helix",
+      "evidence": "official-detail",
+      "points": [
+        [
+          73,
+          50
+        ],
+        [
+          75,
+          51
+        ],
+        [
+          78,
+          52
+        ]
+      ]
+    },
+    {
+      "id": "path-helix-lion",
+      "from": "Helix",
+      "to": "The Lion's Den",
+      "evidence": "official-detail",
+      "points": [
+        [
+          78,
+          52
+        ],
+        [
+          80,
+          55
+        ],
+        [
+          83,
+          55
+        ]
+      ]
+    },
+    {
+      "id": "path-botanica-metropolis",
+      "from": "Botanica",
+      "to": "Metropolis",
+      "evidence": "official-overview",
+      "points": [
+        [
+          28,
+          18
+        ],
+        [
+          23,
+          22
+        ],
+        [
+          18,
+          29
+        ],
+        [
+          15,
+          36
+        ]
+      ]
+    },
+    {
+      "id": "path-botanica-letsbe",
+      "from": "Botanica",
+      "to": "Letsbe Avenue",
+      "evidence": "official-detail",
+      "points": [
+        [
+          28,
+          18
+        ],
+        [
+          31,
+          16
+        ],
+        [
+          35,
+          13
+        ],
+        [
+          40,
+          9
+        ]
+      ]
+    },
+    {
+      "id": "path-letsbe-luck",
+      "from": "Letsbe Avenue",
+      "to": "Luck Exchange Casino",
+      "evidence": "official-detail",
+      "points": [
+        [
+          40,
+          9
+        ],
+        [
+          39,
+          10
+        ],
+        [
+          37,
+          12
+        ]
+      ]
+    },
+    {
+      "id": "path-luck-hotel",
+      "from": "Luck Exchange Casino",
+      "to": "Hotel Paradiso",
+      "evidence": "official-detail",
+      "points": [
+        [
+          37,
+          12
+        ],
+        [
+          34,
+          13
+        ],
+        [
+          30,
+          15
+        ]
+      ]
+    },
+    {
+      "id": "path-hotel-postal",
+      "from": "Hotel Paradiso",
+      "to": "Postal Posse",
+      "evidence": "official-detail",
+      "points": [
+        [
+          30,
+          15
+        ],
+        [
+          31,
+          17
+        ],
+        [
+          32,
+          19
+        ]
+      ]
+    },
+    {
+      "id": "path-postal-botanica",
+      "from": "Postal Posse",
+      "to": "Botanica",
+      "evidence": "official-detail",
+      "points": [
+        [
+          32,
+          19
+        ],
+        [
+          30,
+          19
+        ],
+        [
+          28,
+          18
+        ]
+      ]
+    },
+    {
+      "id": "path-metropolis-enumbers",
+      "from": "Metropolis",
+      "to": "E Numbers",
+      "evidence": "official-detail",
+      "points": [
+        [
+          15,
+          36
+        ],
+        [
+          17,
+          37
+        ],
+        [
+          19,
+          38
+        ]
+      ]
+    },
+    {
+      "id": "path-enumbers-gabber",
+      "from": "E Numbers",
+      "to": "Gabber Kebabber",
+      "evidence": "official-detail",
+      "points": [
+        [
+          19,
+          38
+        ],
+        [
+          21,
+          39
+        ],
+        [
+          22,
+          40
+        ]
+      ]
+    },
+    {
+      "id": "path-gabber-infinity",
+      "from": "Gabber Kebabber",
+      "to": "Infinity",
+      "evidence": "official-detail",
+      "points": [
+        [
+          22,
+          40
+        ],
+        [
+          31,
+          41
+        ],
+        [
+          41,
+          42
+        ]
+      ]
+    },
+    {
+      "id": "path-area-spectrum",
+      "from": "Area 404",
+      "to": "Spectrum 360",
+      "evidence": "official-detail",
+      "points": [
+        [
+          36,
+          37
+        ],
+        [
+          36,
+          35
+        ],
+        [
+          37,
+          32
+        ]
+      ]
+    },
+    {
+      "id": "path-spectrum-hangar",
+      "from": "Spectrum 360",
+      "to": "Hangar 161",
+      "evidence": "official-detail",
+      "points": [
+        [
+          37,
+          32
+        ],
+        [
+          34,
+          36
+        ],
+        [
+          30,
+          43
+        ]
+      ]
+    },
+    {
+      "id": "path-hangar-deviant",
+      "from": "Hangar 161",
+      "to": "Deviant Lounge",
+      "evidence": "official-detail",
+      "points": [
+        [
+          30,
+          43
+        ],
+        [
+          32,
+          44
+        ],
+        [
+          34,
+          45
+        ]
+      ]
+    },
+    {
+      "id": "path-oldtown-pomegranate",
+      "from": "Oldtown",
+      "to": "The Pomegranate Parlour",
+      "evidence": "official-detail",
+      "points": [
+        [
+          68,
+          40
+        ],
+        [
+          67,
+          36
+        ],
+        [
+          66,
+          33
+        ]
+      ]
+    },
+    {
+      "id": "path-pomegranate-den",
+      "from": "The Pomegranate Parlour",
+      "to": "Den of Dis Order",
+      "evidence": "official-detail",
+      "points": [
+        [
+          66,
+          33
+        ],
+        [
+          65,
+          34
+        ],
+        [
+          64,
+          35
+        ]
+      ]
+    },
+    {
+      "id": "path-den-mining",
+      "from": "Den of Dis Order",
+      "to": "Mining for (g)Old Town",
+      "evidence": "official-detail",
+      "points": [
+        [
+          64,
+          35
+        ],
+        [
+          64,
+          36
+        ]
+      ]
+    },
+    {
+      "id": "path-mining-sibin",
+      "from": "Mining for (g)Old Town",
+      "to": "Síbín Beag",
+      "evidence": "official-detail",
+      "points": [
+        [
+          64,
+          36
+        ],
+        [
+          68,
+          38
+        ],
+        [
+          72,
+          41
+        ]
+      ]
+    },
+    {
+      "id": "path-sibin-feckless",
+      "from": "Síbín Beag",
+      "to": "The Feckless Wrecked",
+      "evidence": "official-detail",
+      "points": [
+        [
+          72,
+          41
+        ],
+        [
+          73,
+          42
+        ],
+        [
+          74,
+          43
+        ]
+      ]
+    }
+  ]
+};
