@@ -1,0 +1,23 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const app = fs.readFileSync(path.join(root, "js", "app.js"), "utf8");
+const css = fs.readFileSync(path.join(root, "css", "style.css"), "utf8");
+const errors = [];
+const matchNumber = pattern => Number(app.match(pattern)?.[1]);
+const labelThreshold = matchNumber(/const LABEL_ZOOM_THRESHOLD = (\d+(?:\.\d+)?)/);
+const passageZoom = matchNumber(/id: "district-passages-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
+const massingZoom = matchNumber(/id: "authored-massing-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
+const atmosphereZoom = matchNumber(/id: "district-atmosphere-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
+const infillZoom = matchNumber(/id: "infill-buildings-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
+
+if(!Number.isFinite(labelThreshold) || labelThreshold < 16) errors.push("label thinning must remain active through normal close zoom");
+if(!Number.isFinite(passageZoom) || passageZoom > 15) errors.push("district passages must appear before dense foreground detail");
+if(!Number.isFinite(massingZoom) || massingZoom > 15) errors.push("authored massing must appear before dense foreground detail");
+if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 16) errors.push("foreground atmosphere must remain deep-zoom only");
+if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom) errors.push("generic infill must not appear before authored foreground detail");
+if(!css.includes("#map.map-labels-thin .map-label:not(.district){display:none;}")) errors.push("thin mode must leave only district labels visible");
+if(errors.length){ console.error(errors.join("\n")); process.exit(1); }
+console.log(`Map zoom hierarchy passed: labels < ${labelThreshold}; passages ${passageZoom}; massing ${massingZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}.`);

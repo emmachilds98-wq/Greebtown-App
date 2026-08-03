@@ -273,6 +273,7 @@ node scripts/validate-district-massing-layout.mjs
 node scripts/validate-district-passage-layout.mjs
 node scripts/validate-district-atmosphere-layout.mjs
 node scripts/audit-district-composition.mjs
+node scripts/audit-map-zoom-hierarchy.mjs
 node scripts/audit-ground-use-overlaps.mjs
 node scripts/audit-map-positions.mjs
 node --check js/app.js
@@ -335,6 +336,13 @@ until deeper zoom so visual hierarchy remains route-and-space first. Always
 run `node scripts/audit-district-composition.mjs` after changing any of the
 three district sources: it verifies coverage, caps detail density and
 requires a varied foreground instead of a cluster of same-looking shapes.
+
+`scripts/audit-map-zoom-hierarchy.mjs` protects the visual order of the map:
+district names stay readable before venue labels, authored paths and massing
+arrive before decorative foreground detail, and generic infill is last. Run
+it after any map-layer minzoom or label-density change. Do not make a new
+layer visible earlier merely because it is available—the audit exists to stop
+the common “cluster of shapes” regression at ordinary close zoom.
 
 Record every new official-map reading in `reference-layout.json`'s
 `observations` collection before using it to alter a footprint, path, field

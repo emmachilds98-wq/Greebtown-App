@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v380";
-const APP_BUILD_TIME = "2026-08-03T09:14:22Z";
+const APP_CACHE_VERSION = "v381";
+const APP_BUILD_TIME = "2026-08-03T09:30:26Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9162,7 +9162,7 @@ function loadMap(){
     // minor label back once there's actually room for them. Runs on
     // every "zoom" tick (cheap — it's one class toggle, not a re-render)
     // plus once on load so the very first frame is already correct.
-    const LABEL_ZOOM_THRESHOLD = 15.8;
+    const LABEL_ZOOM_THRESHOLD = 16.1;
     const updateLabelDensity = ()=> map.classList.toggle("map-labels-thin", mapGL.getZoom() < LABEL_ZOOM_THRESHOLD);
     mapGL.on("zoom", updateLabelDensity);
     mapGL.on("load", updateLabelDensity);
