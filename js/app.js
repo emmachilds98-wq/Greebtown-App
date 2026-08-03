@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v391";
-const APP_BUILD_TIME = "2026-08-03T10:38:00Z";
+const APP_CACHE_VERSION = "v392";
+const APP_BUILD_TIME = "2026-08-03T10:42:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9656,13 +9656,24 @@ function loadMap(){
   // treatment above — inventing a special look for a district with no
   // specific evidence for one would be a guess, not an accuracy fix.
   const DISTRICT_TEXT_STYLE = { "Area 404": "glitch", "Botanica": "shimmer", "Metropolis": "shimmer", "Oldtown": "gothic" };
+  // Label anchors are display-only nudges, never a substitute for moving
+  // reviewed geometry. The central areas really are compact; shifting only
+  // their names keeps the overview legible without inventing more distance.
+  const DISTRICT_LABEL_OFFSETS = {
+    "Letsbe Avenue": [-15, -6],
+    "Botanica": [-9, 6],
+    "Metropolis": [-12, 1],
+    "Area 404": [12, 4],
+    "Oldtown": [12, -10]
+  };
   const districtList = locations.filter(p=> p.kind === "district");
   districtList.forEach(place=>{
     const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
     const rgb = DISTRICT_PALETTE[districtList.indexOf(place) % DISTRICT_PALETTE.length];
     const styleClass = DISTRICT_TEXT_STYLE[place.name] ? ` ${DISTRICT_TEXT_STYLE[place.name]}` : "";
+    const [labelDx, labelDy] = DISTRICT_LABEL_OFFSETS[place.name] || [0, 0];
     addMapMarker("main", coord.lat, coord.lon,
-      `<div class="map-label district${styleClass}" style="--district-rgb:${rgb}">${escapeHtml(place.name)}</div>`,
+      `<div class="map-label district${styleClass}" style="--district-rgb:${rgb};--label-dx:${labelDx}px;--label-dy:${labelDy}px">${escapeHtml(place.name)}</div>`,
       { name: place.name, title: place.name, onClick: ()=> showMapInfoCard(`
         <div class="card">
           <span class="tag">district — approximate area</span>
