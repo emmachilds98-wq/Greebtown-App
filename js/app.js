@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v337";
-const APP_BUILD_TIME = "2026-08-03T04:34:25Z";
+const APP_CACHE_VERSION = "v338";
+const APP_BUILD_TIME = "2026-08-03T04:35:40Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7638,6 +7638,20 @@ function buildMapGeoJSON(){
     };
   });
 
+  // Three proven venue runs read as continuous streets in the official
+  // references, not a loose set of tiny side paths: Oldtown's western
+  // chain, Oldtown's eastern chain, and the Letsbe/Botanica high street.
+  // Draw a restrained, paved ground ribbon beneath their individual route
+  // segments so people can read where the walk actually continues.
+  const districtStreetFeatures = [
+    [[58,29], [60,32], [61,36], [62,40], [60,42]],
+    [[68,30], [66,33], [64,36], [68,38], [72,41], [74,43]],
+    [[40,9], [37,12], [30,15], [28,18], [35,20]]
+  ].map((points, index)=>({
+    type:"Feature", properties:{ fill:index === 2 ? "rgba(226,201,158,0.72)" : "rgba(218,189,143,0.78)" },
+    geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(ribbonFromPath(points, 1.1))] }
+  }));
+
   // Low scrub/bush dots lining main & secondary paths — a real
   // countryside footpath usually has some low hedge/scrub growth along
   // its edges, not a bare strip of colour running through flat grass.
@@ -8407,6 +8421,7 @@ function buildMapGeoJSON(){
     forests: { type:"FeatureCollection", features: forestFeatures },
     forestFringe: { type:"FeatureCollection", features: forestFringeFeatures },
     trail: { type:"FeatureCollection", features: trailFeatures },
+    districtStreets: { type:"FeatureCollection", features: districtStreetFeatures },
     stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
     bunting: { type:"FeatureCollection", features: buntingFeatures },
     buildings: { type:"FeatureCollection", features: solidBuildingFeatures },
@@ -8932,6 +8947,13 @@ function loadMap(){
       mapGL.addSource("mapOpenConcourses", { type: "geojson", data: geo.openConcourses });
       mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", paint: { "fill-color": "rgba(224,200,160,0.95)" } });
       mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
+
+      // Continuous town streets sit under their individual route segments:
+      // these are walkable surfaces through the confirmed Oldtown and
+      // Letsbe/Botanica venue runs, not extra invented connections.
+      mapGL.addSource("mapDistrictStreets", { type: "geojson", data: geo.districtStreets });
+      mapGL.addLayer({ id: "district-streets-fill", type: "fill", source: "mapDistrictStreets", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-streets-outline", type: "line", source: "mapDistrictStreets", paint: { "line-color": "rgba(125,94,53,0.5)", "line-width": 1.1 } });
 
       // Stage plazas — drawn before the path lines so the paths visibly
       // run INTO the clearing rather than sitting on top of a flat edge.
