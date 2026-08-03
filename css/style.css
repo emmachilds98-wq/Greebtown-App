@@ -653,6 +653,16 @@
   .marker.place.official::before{border-radius:50%; transform:none; background:rgba(242,168,60,.9);}
   .map-label.place{color:rgba(210,180,255,.95); font-weight:700; font-size:9px; background:rgba(11,21,18,.6); border:1px solid rgba(196,150,255,.3);}
 
+  /* Friend location markers — plots another synced device's last-known
+     GPS fix (peopleStatus[id].gps). Green ring to read clearly as "a
+     person", distinct from every stage/venue/amenity colour already in
+     use, with its own pulse so a moving friend's dot draws the eye same
+     as a stage marker does. */
+  .marker.friend{width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:rgba(11,21,18,.75); border:1.5px solid rgba(80,220,140,.85); box-shadow:0 0 0 4px rgba(80,220,140,.2); font-size:12px;}
+  .marker.friend::before{content:none;}
+  .marker.friend::after{content:""; position:absolute; inset:-5px; border-radius:50%; border:2px solid rgba(80,220,140,.5); animation:pulse 2.2s infinite;}
+  .map-label.friend{color:rgba(150,240,190,.95); font-weight:700; font-size:9px; background:rgba(11,21,18,.6); border:1px solid rgba(80,220,140,.3);}
+
   /* Temporary pin shown while picking a place's spot — pointer-events
      none so it never steals the tap that's meant to move the map's own
      pan/zoom-aware pointer handling below it. */
