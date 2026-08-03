@@ -14,10 +14,608 @@
       "actor": "codex",
       "summary": "Migrated the complete gate collection into the canonical map document.",
       "changes": [
-        { "objectId": "entrance-west-gate", "field": "object", "previous": null, "next": "created from legacy gates collection" },
-        { "objectId": "entrance-east-gate", "field": "object", "previous": null, "next": "created from legacy gates collection" },
-        { "objectId": "entrance-south-gate", "field": "position", "previous": { "x": 52, "y": 89 }, "next": { "x": 78, "y": 79 } },
-        { "objectId": "entrance-campervan-gate", "field": "object", "previous": null, "next": "created from legacy gates collection" }
+        {
+          "objectId": "entrance-west-gate",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy gates collection"
+        },
+        {
+          "objectId": "entrance-east-gate",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy gates collection"
+        },
+        {
+          "objectId": "entrance-south-gate",
+          "field": "position",
+          "previous": {
+            "x": 52,
+            "y": 89
+          },
+          "next": {
+            "x": 78,
+            "y": 79
+          }
+        },
+        {
+          "objectId": "entrance-campervan-gate",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy gates collection"
+        }
+      ]
+    },
+    {
+      "id": "migrate-amenities-2026-08-03T030508Z",
+      "timestamp": "2026-08-03T03:05:08Z",
+      "actor": "codex",
+      "summary": "Migrated all 94 legacy amenity markers into the canonical map document.",
+      "changes": [
+        {
+          "objectId": "amenity-toilets-west-gate-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-west-gate-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-metropolis-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-metropolis-path-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-metropolis-path-3",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-metropolis-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-welfare-metropolis-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-metropolis-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-metropolis-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-top-up-point-ancient-futures-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-photobooth-ancient-futures-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-ancient-futures-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-ancient-futures-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-welfare-ancient-futures-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-first-aid-ancient-futures-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-oldtown-the-fools-leap-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-accessible-facilities-oldtown-the-fools-leap-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-oldtown-the-fools-leap-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-market-pepperpot-market-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-pepperpot-market-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-pepperpot-market-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-pepperpot-market-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-reception-pepperpot-market-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-first-aid-pepperpot-market-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-welfare-pepperpot-market-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-cash-point-pepperpot-market-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-grand-central-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-grand-central-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-grand-central-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-welfare-grand-central-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-grand-central-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-west-camping-alresford-rd-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-accessible-facilities-west-camping-alresford-rd-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-skylark-entry-camp-skylark-hilltop-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-skylark-entry-camp-skylark-sunset-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-south-gate-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-south-gate-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-accessible-facilities-south-gate-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-south-gate-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-welfare-camp-skylark-sunset-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-quiet-camping-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-quiet-camping-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-quiet-camping-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-tangerine-fields-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-tangerine-fields-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-accessible-facilities-downtown-camping-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-photobooth-downtown-camping-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-downtown-camping-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-downtown-camping-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-hidden-woods-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-hidden-woods-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-hidden-woods-3",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-letsbe-avenue-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-letsbe-avenue-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-botanica-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-nexus-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-accessible-facilities-nexus-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-nexus-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-nexus-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-botanica-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-botanica-area-404-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-botanica-area-404-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-botanica-area-404-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-botanica-area-404-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-tangled-roots-path-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-tangled-roots-path-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-grand-central-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-grand-central-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-grand-central-2",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-cash-point-grand-central-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-oldtown-north-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-photobooth-oldtown-north-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-oldtown-north-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-first-aid-oldtown-north-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-quantum-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-photobooth-the-lion-s-den-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-the-lion-s-den-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-the-lion-s-den-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-the-lion-s-den-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-anara-forest-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-accessible-facilities-anara-forest-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-anara-forest-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-temple-valley-camping-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-temple-valley-camping-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-east-camping-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-east-camping-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-sunset-hill-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-sunset-hill-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-sunset-hill-camp-skylark-sunset-approach-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-food-camp-skylark-sunset-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-camp-skylark-sunset-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-toilets-hydro-xl-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-water-point-hydro-xl-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        },
+        {
+          "objectId": "amenity-bar-hydro-xl-1",
+          "field": "object",
+          "previous": null,
+          "next": "created from legacy amenities collection"
+        }
       ]
     }
   ]

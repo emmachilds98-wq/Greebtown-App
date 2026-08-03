@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v321";
-const APP_BUILD_TIME = "2026-08-03T03:00:54Z";
+const APP_CACHE_VERSION = "v322";
+const APP_BUILD_TIME = "2026-08-03T03:05:08Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6564,228 +6564,16 @@ const campLabels = [
 // Kept js/boomtown-locations-2026.js itself untouched as reference data
 // (no longer used to place anything — see the note above SITE_SW/SITE_NE —
 // just stopped rendering its POI list directly).
-const amenities = [
-  // West Gate — two toilet blocks right beside the gate itself.
-  { category:"Toilets", x:"4%", y:"44%", note:"West Gate" },
-  { category:"Toilets", x:"5%", y:"48%", note:"West Gate" },
-  // Path south of Sub Lab/Loconnection/Nachtlicker (Metropolis) — a row
-  // of toilets plus a water point along the footpath.
-  { category:"Toilets", x:"9%", y:"35%", note:"Metropolis path" },
-  { category:"Toilets", x:"11%", y:"38%", note:"Metropolis path" },
-  { category:"Toilets", x:"13%", y:"41%", note:"Metropolis path" },
-  { category:"Water Point", x:"12%", y:"39%", note:"Metropolis path" },
-  // Metropolis district centre — a welfare/food/bar cluster right by the
-  // district's own label.
-  { category:"Welfare", x:"16%", y:"31%", note:"Metropolis" },
-  { category:"Food", x:"18%", y:"33%", note:"Metropolis" },
-  { category:"Bar", x:"19%", y:"30%", note:"Metropolis" },
-  // Ancient Futures cluster — wooded venue cluster with a top-up point,
-  // photobooth, two food stalls, welfare and first aid. Shifted this
-  // session (+6.8,+17.7) to stay with Ancient Futures' own big move from
-  // a guessed Thrutopia-hilltop position to (59,40) near Grand Central —
-  // this whole amenity cluster was still sitting at the OLD position,
-  // 19 schematic units from where Ancient Futures actually is now, the
-  // biggest single drift found in a post-session audit of every amenity
-  // cluster's distance from its own named landmark.
-  { category:"Top-Up Point", x:"58%", y:"36%", note:"Ancient Futures" },
-  { category:"Photobooth", x:"57%", y:"38%", note:"Ancient Futures" },
-  { category:"Food", x:"60%", y:"39%", note:"Ancient Futures" },
-  { category:"Food", x:"61%", y:"41%", note:"Ancient Futures" },
-  { category:"Welfare", x:"59%", y:"43%", note:"Ancient Futures" },
-  { category:"First Aid", x:"60%", y:"45%", note:"Ancient Futures" },
-  // Oldtown cluster — toilets, an accessible-facilities marker and a
-  // water point. Shifted (-12,-6) to stay with Oldtown now that The
-  // Fools Leap (this cluster's original anchor) moved to the north end
-  // of Oldtown's western venue chain (58,29) rather than out at (80,46).
-  { category:"Toilets", x:"67%", y:"39%", note:"Oldtown / The Fools Leap" },
-  { category:"Accessible Facilities", x:"68%", y:"40%", note:"Oldtown / The Fools Leap" },
-  { category:"Water Point", x:"69%", y:"41%", note:"Oldtown / The Fools Leap" },
-  // Pepperpot Market — the site's main food/drink/medical/welfare hub
-  // (see its own landmark entry); a representative spread rather than
-  // exact individual spots, same "clustered, not surveyed one-by-one"
-  // honesty as everywhere else Boomtown doesn't publish exact positions.
-  { category:"Market", x:"45%", y:"49%", note:"Pepperpot Market" },
-  { category:"Food", x:"47%", y:"51%", note:"Pepperpot Market" },
-  { category:"Food", x:"44%", y:"52%", note:"Pepperpot Market" },
-  { category:"Bar", x:"48%", y:"48%", note:"Pepperpot Market" },
-  { category:"Reception", x:"46%", y:"52%", note:"Pepperpot Market" },
-  { category:"First Aid", x:"49%", y:"50%", note:"Pepperpot Market" },
-  { category:"Welfare", x:"43%", y:"50%", note:"Pepperpot Market" },
-  { category:"Cash Point", x:"46%", y:"47%", note:"Pepperpot Market" },
-  // Grand Central's north side — a dense scatter of toilets/food/
-  // welfare icons along this cluster's own paths, seen clearly in the
-  // same wide shot as the GRAND CENTRAL/HILLTOP/OLDTOWN/QUANTUM labels.
-  // Notes updated from "Copperwood" to "Grand Central" — Copperwood's
-  // own map pin was removed (see its comment in the locations array;
-  // fresh screenshots of this exact area show no "Copperwood" label at
-  // all), and these positions themselves weren't affected.
-  { category:"Toilets", x:"58%", y:"20%", note:"Grand Central" },
-  { category:"Toilets", x:"62%", y:"23%", note:"Grand Central" },
-  { category:"Food", x:"59%", y:"25%", note:"Grand Central" },
-  { category:"Welfare", x:"56%", y:"26%", note:"Grand Central" },
-  { category:"Water Point", x:"63%", y:"21%", note:"Grand Central" },
-  // West Camping, right where its access track meets Alresford Rd — a
-  // toilet pair and an accessible-facilities marker on the dashed
-  // accessible path leading in from the road.
-  { category:"Toilets", x:"13%", y:"5%", note:"West Camping / Alresford Rd" },
-  { category:"Accessible Facilities", x:"14%", y:"6%", note:"West Camping / Alresford Rd" },
-  // POI_ICONS has carried a "Skylark Entry":"🚪" icon for a while with
-  // nothing in this array ever using it — the dedicated check-in point
-  // for Boomtown's premium Camp Skylark sites (see the campLabels/gate
-  // info text), one per site since Hilltop and Sunset are on opposite
-  // sides of the whole map.
-  { category:"Skylark Entry", x:"76%", y:"21%", note:"Camp Skylark Hilltop" },
-  // Camp Skylark Sunset's own cluster (Skylark Entry/Welfare) and South
-  // Gate's own baseline provisions below — all pulled up in y to match
-  // Camp Skylark Sunset's own campLabels entry moving from (74,87) to
-  // (74,72), see that entry's own comment for why.
-  { category:"Skylark Entry", x:"75%", y:"70%", note:"Camp Skylark Sunset" },
-  // South Gate never got any amenity markers at all, unlike the other
-  // two gates (West Gate has its own toilet pair above; East Gate's own
-  // cluster is with Temple Valley Camping/Copperwood). Not from a
-  // specific reference-video frame the way most of this array is — every
-  // gate needs the same baseline provisions, so this mirrors West Gate's
-  // own toilet-pair-plus-accessible density rather than leaving South
-  // Gate as the one gate on the whole map with nothing around it.
-  { category:"Toilets", x:"77%", y:"76%", note:"South Gate" },
-  { category:"Toilets", x:"79%", y:"77%", note:"South Gate" },
-  { category:"Accessible Facilities", x:"78%", y:"78%", note:"South Gate" },
-  { category:"Water Point", x:"76%", y:"75%", note:"South Gate" },
-  { category:"Welfare", x:"73%", y:"71%", note:"Camp Skylark Sunset" },
-  // Measured nearest-amenity distance for every campLabels field (schematic
-  // units): Quiet Camping was the clear outlier at 22 — more than double
-  // the next-worst field (Tangerine Fields, 16) and over 4x a typical
-  // camp's 5-10 — because it sits alone in the map's sparse southeast
-  // corner, far past East Camping/Oldtown where the nearest real cluster
-  // is. Same "every camp field needs baseline provisions" reasoning as
-  // South Gate above, not a specific reference-video frame.
-  { category:"Toilets", x:"93%", y:"61%", note:"Quiet Camping" },
-  { category:"Toilets", x:"96%", y:"62%", note:"Quiet Camping" },
-  { category:"Water Point", x:"94%", y:"66%", note:"Quiet Camping" },
-  // Tangerine Fields was the next-worst at 16 — same reasoning.
-  { category:"Toilets", x:"68%", y:"4%", note:"Tangerine Fields" },
-  { category:"Water Point", x:"72%", y:"8%", note:"Tangerine Fields" },
-  // Density pass from this session's own reference video — the original
-  // ~40-marker set above only covered the handful of clusters that came
-  // up while cross-checking specific names/positions; a slower pass
-  // through the same footage shows dense icon rows along literally every
-  // footpath on the map. Extending coverage to the districts/stages that
-  // had zero amenity markers at all, same "representative spread, not
-  // surveyed one-by-one" honesty as the rest of this array.
-  //
-  // Downtown Camping's own east edge, the footpath spur leading out
-  // toward Metropolis — a toilet/photobooth/food cluster cascading down
-  // the path in the same opening shot the West Gate/Downtown Camping/
-  // Camplight labels came from.
-  { category:"Accessible Facilities", x:"11%", y:"24%", note:"Downtown Camping path" },
-  { category:"Photobooth", x:"11%", y:"26%", note:"Downtown Camping path" },
-  { category:"Food", x:"12%", y:"30%", note:"Downtown Camping path" },
-  { category:"Toilets", x:"13%", y:"32%", note:"Downtown Camping path" },
-  // Hidden Woods — a row of food stalls along its western tree line.
-  // Shifted north with Hidden Woods' own move from y=8 to y=2 this
-  // session (see its own comment on the `locations` entry) — this
-  // cluster had been left at its pre-move position, 11.7 units off.
-  { category:"Food", x:"16%", y:"3%", note:"Hidden Woods" },
-  { category:"Food", x:"17%", y:"6%", note:"Hidden Woods" },
-  { category:"Food", x:"18%", y:"10%", note:"Hidden Woods" },
-  // Letsbe Avenue — a bar pair right by its own label. Shifted north to
-  // match Letsbe Avenue's own move up to (40,9) during this session's
-  // Downtown-cluster re-derivation — left behind at the old position
-  // before that, 8.1 units off.
-  { category:"Bar", x:"39%", y:"8%", note:"Letsbe Avenue" },
-  { category:"Bar", x:"40%", y:"10%", note:"Letsbe Avenue" },
-  // Botanica itself (its own food-stall paths, not just the district
-  // label).
-  { category:"Food", x:"30%", y:"18%", note:"Botanica" },
-  // NEXUS itself, now at (23,24) after this session's position fix — a
-  // toilet pair (one accessible), a water point and a bar all sit right
-  // by the stage's own glow in the reference video, closer than the
-  // wider Botanica scatter above.
-  { category:"Toilets", x:"21%", y:"24%", note:"NEXUS" },
-  { category:"Accessible Facilities", x:"22%", y:"25%", note:"NEXUS" },
-  { category:"Water Point", x:"21%", y:"25%", note:"NEXUS" },
-  { category:"Bar", x:"25%", y:"21%", note:"NEXUS" },
-  { category:"Food", x:"34%", y:"30%", note:"Botanica" },
-  // The open path between Botanica and Area 404 — toilets, food, a water
-  // point and a bar strung along it.
-  { category:"Toilets", x:"40%", y:"23%", note:"Botanica / Area 404 path" },
-  { category:"Water Point", x:"41%", y:"24%", note:"Botanica / Area 404 path" },
-  { category:"Food", x:"42%", y:"25%", note:"Botanica / Area 404 path" },
-  { category:"Bar", x:"37%", y:"28%", note:"Botanica / Area 404 path" },
-  // Tangled Roots' own path, between Letsbe Avenue and Copperwood — a bar
-  // pair (it's a cocktail-bar stage, per its own venueDirectory entry).
-  { category:"Bar", x:"57%", y:"19%", note:"Tangled Roots path" },
-  { category:"Bar", x:"58%", y:"21%", note:"Tangled Roots path" },
-  // Grand Central itself — bars, food and a cash point right by the
-  // stage, seen in the same close-up shot as its own reception/daily-bar
-  // labels.
-  { category:"Bar", x:"63%", y:"31%", note:"Grand Central" },
-  { category:"Bar", x:"67%", y:"32%", note:"Grand Central" },
-  { category:"Food", x:"65%", y:"33%", note:"Grand Central" },
-  { category:"Cash Point", x:"64%", y:"29%", note:"Grand Central" },
-  // Oldtown's own northern edge, coming down from Copperwood — a bar,
-  // photobooth, water point and first-aid marker, distinct from the
-  // Fools Leap cluster already plotted further south. Shifted by the
-  // same (-20,-12) delta as Oldtown's own re-derivation this session.
-  { category:"Bar", x:"60%", y:"31%", note:"Oldtown (north)" },
-  { category:"Photobooth", x:"61%", y:"32%", note:"Oldtown (north)" },
-  { category:"Water Point", x:"62%", y:"33%", note:"Oldtown (north)" },
-  { category:"First Aid", x:"72%", y:"30%", note:"Oldtown (north)" },
-  // Quantum — a single toilet marker on its own path.
-  { category:"Toilets", x:"74%", y:"51%", note:"Quantum" },
-  // The Lion's Den — photobooth, bar, toilets and a water point right by
-  // the stage's own glow in the reference video. Shifted by the same
-  // (-7,-3) delta as The Lion's Den's own nudge this session.
-  { category:"Photobooth", x:"82%", y:"54%", note:"The Lion's Den" },
-  { category:"Bar", x:"82%", y:"55%", note:"The Lion's Den" },
-  { category:"Toilets", x:"85%", y:"56%", note:"The Lion's Den" },
-  { category:"Water Point", x:"86%", y:"57%", note:"The Lion's Den" },
-  // Anara Forest's own western edge, between it and Temple Valley
-  // Camping — toilets, an accessible marker and a water point. Repinned
-  // this session — these had never been updated when Anara Forest's own
-  // position moved earlier this session (were still sitting at its old
-  // pre-session (72,44) spot).
-  { category:"Toilets", x:"84%", y:"23%", note:"Anara Forest" },
-  { category:"Accessible Facilities", x:"86%", y:"21%", note:"Anara Forest" },
-  { category:"Water Point", x:"87%", y:"23%", note:"Anara Forest" },
-  // The whole south end of the map (Sunset Hill down through Camp
-  // Skylark Sunset to South Gate) reads as a near-blank gap on the
-  // rendered map — Temple Valley Camping and East Camping had zero
-  // amenity markers of their own despite being full named camp fields,
-  // same gap Quiet Camping/Tangerine Fields had before an earlier pass
-  // fixed those two. Same "every camp field needs baseline provisions"
-  // reasoning, not a specific reference-video frame — nothing in this
-  // session's footage lingered on the deep south long enough to read
-  // exact icon positions here.
-  { category:"Toilets", x:"84%", y:"30%", note:"Temple Valley Camping" },
-  { category:"Water Point", x:"87%", y:"33%", note:"Temple Valley Camping" },
-  { category:"Toilets", x:"90%", y:"46%", note:"East Camping" },
-  { category:"Water Point", x:"93%", y:"49%", note:"East Camping" },
-  // Sunset Hill itself sits roughly midway on the walk from Quantum/The
-  // Lion's Den down to Camp Skylark Sunset/South Gate, with nothing
-  // marked anywhere along that stretch — same baseline reasoning. y
-  // values tightened to match the whole south end's compressed range
-  // (62-79 now, was 62-93 — see Camp Skylark Sunset's own campLabels
-  // entry for why).
-  { category:"Toilets", x:"78%", y:"63%", note:"Sunset Hill" },
-  { category:"Water Point", x:"76%", y:"65%", note:"Sunset Hill" },
-  { category:"Toilets", x:"74%", y:"68%", note:"Sunset Hill / Camp Skylark Sunset approach" },
-  // Camp Skylark Sunset already had a Welfare/Skylark-Entry pair; adding
-  // a food stall and toilet block, the same density its Hilltop sibling
-  // site gets.
-  { category:"Food", x:"72%", y:"73%", note:"Camp Skylark Sunset" },
-  { category:"Toilets", x:"77%", y:"73%", note:"Camp Skylark Sunset" },
-  // Hydro XL — a flagship main stage (20,000 capacity) had no amenity
-  // markers at all even after this session's position fix moved it to
-  // its real spot southwest of Metropolis; the reference video panned
-  // past too quickly to read exact icon positions right at the stage
-  // itself, unlike NEXUS/Grand Central/The Lion's Den above. Same
-  // baseline reasoning as Sunset Hill/the camp fields above, not a
-  // specific frame — every main stage needs basic provisions.
-  { category:"Toilets", x:"7%", y:"48%", note:"Hydro XL" },
-  { category:"Water Point", x:"11%", y:"49%", note:"Hydro XL" },
-  { category:"Bar", x:"9%", y:"43%", note:"Hydro XL" }
-];
+// Amenity markers now come only from the canonical authoring document. Their
+// category and note retain the existing marker icon, ring colour and card text.
+const amenities = (()=> MAP_SYSTEM_DOCUMENT.objects
+  .filter(object=> object.metadata.mapRole === "amenity")
+  .map(object=> ({
+    category: object.metadata.category,
+    x: `${object.position.x}%`,
+    y: `${object.position.y}%`,
+    note: object.metadata.description
+  })))();
 
 // The first live renderer migration: gates now come only from the canonical
 // authoring document. Keep this adapter deliberately small; it preserves the

@@ -15,7 +15,7 @@
   function snap(value) { const step = Number($("#snap").value); return step ? Math.round(value / step) * step : value; }
   function objectInBounds(object) { return object.position.x >= 0 && object.position.x <= 100 && object.position.y >= 0 && object.position.y <= 100; }
   function validate() {
-    const errors = [], ids = new Set(), layers = new Set(state.document.layers.map(l => l.id));
+    const errors = [], warnings = [], ids = new Set(), layers = new Set(state.document.layers.map(l => l.id));
     for (const object of state.document.objects) {
       if (ids.has(object.id)) errors.push(`Duplicate object ID: ${object.id}`); ids.add(object.id);
       if (!layers.has(object.layer)) errors.push(`${object.id} uses missing layer ${object.layer}`);
@@ -28,9 +28,11 @@
       const a = state.document.objects[i], b = state.document.objects[j];
       if (a.layer !== b.layer) continue;
       const overlaps = Math.abs(a.position.x - b.position.x) < (a.dimensions.width + b.dimensions.width) / 2 && Math.abs(a.position.y - b.position.y) < (a.dimensions.height + b.dimensions.height) / 2;
-      if (overlaps) errors.push(`${a.id} overlaps ${b.id} on ${a.layer}`);
+      if (overlaps) warnings.push(`${a.id} overlaps ${b.id} on ${a.layer}`);
     }
-    const result = $("#validationResult"); result.className = errors.length ? "error" : "ok"; result.textContent = errors.length ? `Validation: ${errors.join("; ")}` : "Validation passed — document is safe to export.";
+    const result = $("#validationResult");
+    result.className = errors.length ? "error" : "ok";
+    result.textContent = errors.length ? `Validation: ${errors.join("; ")}` : warnings.length ? `Validation passed with ${warnings.length} overlap warning${warnings.length === 1 ? "" : "s"}. Review nearby markers before exporting.` : "Validation passed — document is safe to export.";
     return errors;
   }
   function renderRulers() { const x = $("#rulerX"), y = $("#rulerY"); x.replaceChildren(); y.replaceChildren(); for (let n = 0; n <= 100; n += 10) { const a = document.createElement("span"); a.textContent = n; a.style.left = `${n}%`; x.append(a); const b = document.createElement("span"); b.textContent = n; b.style.top = `${n}%`; y.append(b); } }
