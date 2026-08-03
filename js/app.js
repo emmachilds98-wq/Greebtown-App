@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v335";
-const APP_BUILD_TIME = "2026-08-03T04:27:45Z";
+const APP_CACHE_VERSION = "v336";
+const APP_BUILD_TIME = "2026-08-03T04:31:52Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8158,7 +8158,23 @@ function buildMapGeoJSON(){
     const aspect = 0.75 + seededRand(seed + 1)() * 0.5;
     return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, 6)) ] } };
   });
+  // The official overview has a large, elongated yellow camping field on
+  // Hilltop's east side, running alongside the Oldtown/Quantum corridor.
+  // It is a single ground-use area rather than a collection of tiny camp
+  // dots, so give it a long, clearly bounded illustrated field of its own.
+  // This is deliberately placed beside — not over — the Oldtown spine.
+  const hilltopCampingRing = fieldRing(84, 35, 7.5, 18, 9820, 6);
+  campFieldFeatures.push({
+    type: "Feature", properties: { name: "Hilltop Camping Field" },
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(hilltopCampingRing) ] }
+  });
   let campFieldLineFeatures = [];
+  // A central field division reinforces the long north–south shape from
+  // the reference map without turning it into a navigable path.
+  campFieldLineFeatures.push({
+    type: "Feature", properties: {},
+    geometry: { type:"LineString", coordinates: schematicRingToLngLat([[84,18], [83,32], [84,48], [85,53]]) }
+  });
   ordinaryCamps.forEach((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const r = campFieldRadii.get(c) * 0.85;
