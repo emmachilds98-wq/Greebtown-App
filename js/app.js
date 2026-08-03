@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v312";
-const APP_BUILD_TIME = "2026-08-03T00:55:23Z";
+const APP_CACHE_VERSION = "v313";
+const APP_BUILD_TIME = "2026-08-03T01:06:54Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -7097,8 +7097,15 @@ function treeClusterPoints(cx, cy, count, spread, seed){
     const r = rand() * spread;
     const x = cx + Math.cos(a) * r;
     const y = cy + Math.sin(a) * r * 0.7;
-    const hue = 100 + Math.floor(rand() * 20);
-    pts.push({ x, y, size: 2.6 + rand() * 2.0, color: `hsla(${hue},48%,38%,0.75)` });
+    // Wider hue/lightness/saturation spread than before (was a flat
+    // 100-120°/48%/38%) — a real woodland canopy shows real colour and
+    // shade variation tree-to-tree, not one repeated green dot; the
+    // widened range gives a mix of sunlit yellow-green, mid-green and
+    // deep shaded-green foliage in the same cluster.
+    const hue = 82 + Math.floor(rand() * 55);
+    const sat = 38 + Math.floor(rand() * 22);
+    const light = 26 + Math.floor(rand() * 20);
+    pts.push({ x, y, size: 2.4 + rand() * 2.4, color: `hsla(${hue},${sat}%,${light}%,0.78)` });
   }
   return pts;
 }
@@ -7308,10 +7315,31 @@ function findNamedNode(name){
   return null;
 }
 
+// Visual path hierarchy — every trunk segment used to render at the
+// same fixed width/colour regardless of what it actually connects,
+// reported as paths not feeling like real main/secondary/exploratory
+// routes. Tiered by what a segment's two endpoints actually ARE, not
+// hand-picked per edge: an edge between two "main" nodes (a district or
+// a named stage or a gate — the big, signed, wayfinding-critical
+// points) is a main route; an edge touching a hidden/unlisted venue
+// (thingsToFind) is the subtle, exploratory kind; everything else
+// (minor stages, landmarks, camp labels) is secondary.
+function nodeTierOf(name){
+  const loc = locations.find(l=> l.name === name);
+  if(loc && (loc.kind === "district" || loc.kind === "stage")) return "main";
+  if(gates.find(g=> g.name === name)) return "main";
+  if(thingsToFind.find(t=> t.name === name)) return "minor";
+  return "secondary";
+}
+const PATH_TIER_RANK = { main: 3, secondary: 2, minor: 1 };
+function edgeTier(a, b){
+  const rank = Math.min(PATH_TIER_RANK[nodeTierOf(a)] || 2, PATH_TIER_RANK[nodeTierOf(b)] || 2);
+  return rank === 3 ? "main" : rank === 2 ? "secondary" : "minor";
+}
 const TRUNK_PATH_SEGMENTS = TRUNK_PATH_EDGES.map(([a, b], i)=>{
   const pa = findNamedNode(a), pb = findNamedNode(b);
   if(!pa || !pb) return null;
-  return { a: pa, b: pb, seed: i * 31 + 7 };
+  return { a: pa, b: pb, seed: i * 31 + 7, tier: edgeTier(a, b) };
 }).filter(Boolean);
 
 // Closest point on any real trunk-path segment to (x,y), plus which
@@ -7363,11 +7391,43 @@ function buildMapGeoJSON(){
       }
     }
   }
-  const fieldFeatures = FIELD_SPOTS.map(([cx,cy],i)=>({
-    type: "Feature",
-    properties: { fill: i % 2 === 0 ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)" },
-    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, 13, 1000 + i * 71, 12)) ] }
-  }));
+  // Hue-varied (not just light/dark tint) so open ground reads as real
+  // grass with natural colour drift — cooler blue-greens through warmer
+  // yellow-greens — instead of one flat hue with a brightness checker.
+  const fieldFeatures = FIELD_SPOTS.map(([cx,cy],i)=>{
+    const rand = seededRand(3000 + i * 13);
+    const hue = 95 + rand() * 35;
+    const light = 30 + rand() * 16;
+    const alpha = 0.05 + rand() * 0.08;
+    return {
+      type: "Feature",
+      properties: { fill: `hsla(${hue.toFixed(0)},40%,${light.toFixed(0)}%,${alpha.toFixed(2)})` },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, 13, 1000 + i * 71, 12)) ] }
+    };
+  });
+  // A second, finer-grained pass of smaller mottling blobs on top of the
+  // broad one above — real grass has texture at more than one scale;
+  // one size of blob alone still reads as a smooth gradient at typical
+  // zoom, not the mixed short/long grass patchiness of a real field.
+  const FIELD_SPOTS_FINE = [];
+  { const fineRand = seededRand(3400);
+    for(let gx=-6; gx<=106; gx+=9){
+      for(let gy=-6; gy<=106; gy+=9){
+        FIELD_SPOTS_FINE.push([gx + (fineRand() - 0.5) * 6, gy + (fineRand() - 0.5) * 6]);
+      }
+    }
+  }
+  const fieldFeaturesFine = FIELD_SPOTS_FINE.map(([cx,cy],i)=>{
+    const rand = seededRand(4200 + i * 17);
+    const hue = 90 + rand() * 40;
+    const light = 28 + rand() * 18;
+    const alpha = 0.04 + rand() * 0.06;
+    return {
+      type: "Feature",
+      properties: { fill: `hsla(${hue.toFixed(0)},38%,${light.toFixed(0)}%,${alpha.toFixed(2)})` },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(cx, cy, 5, 4200 + i * 53, 8)) ] }
+    };
+  });
 
   // Straight hedgerow lines scattered across the outer open ground —
   // real farmland (Matterley Estate) shows field-division hedges well
@@ -7599,13 +7659,48 @@ function buildMapGeoJSON(){
   // cover the real width and coverage of the real floor." 0.6 schematic
   // units (~5m at this site's real ~890x735m span) approximates a real
   // festival trunk path's width.
-  const TRAIL_WIDTH = 0.6;
+  // Width now varies by tier (main/secondary/minor, see edgeTier above)
+  // instead of one fixed 0.6 for every segment — main routes read as the
+  // wide, obvious way between big landmarks; minor ones stay narrow and
+  // subtle, an "exploratory" hint rather than a signed route.
+  const TRAIL_WIDTH = { main: 0.95, secondary: 0.6, minor: 0.32 }; // schematic units
+  const TRAIL_FILL = {
+    main: "rgba(214,182,122,0.97)",
+    secondary: "rgba(224,200,160,0.92)",
+    minor: "rgba(200,185,150,0.55)"
+  };
   const trailFeatures = TRUNK_PATH_SEGMENTS.map(seg=>{
     const centreline = curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed);
     return {
-      type: "Feature", properties: {},
-      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(ribbonFromPath(centreline, TRAIL_WIDTH)) ] }
+      type: "Feature", properties: { tier: seg.tier, fill: TRAIL_FILL[seg.tier] },
+      geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(ribbonFromPath(centreline, TRAIL_WIDTH[seg.tier])) ] }
     };
+  });
+
+  // Low scrub/bush dots lining main & secondary paths — a real
+  // countryside footpath usually has some low hedge/scrub growth along
+  // its edges, not a bare strip of colour running through flat grass.
+  // Skipped for "minor" tier paths so those keep reading as bare,
+  // exploratory ground rather than a maintained route.
+  const pathScrubPoints = [];
+  TRUNK_PATH_SEGMENTS.filter(seg=> seg.tier !== "minor").forEach((seg,i)=>{
+    const centreline = curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed);
+    const rand = seededRand(6000 + i * 19);
+    const halfWidth = TRAIL_WIDTH[seg.tier] / 2 + 0.15;
+    for(let j=1;j<centreline.length-1;j++){
+      if(rand() > 0.55) continue;
+      const [x,y] = centreline[j];
+      const side = rand() < 0.5 ? -1 : 1;
+      const dx = centreline[j+1][0] - centreline[j-1][0], dy = centreline[j+1][1] - centreline[j-1][1];
+      const len = Math.hypot(dx, dy) || 1;
+      const nx = -dy / len, ny = dx / len;
+      const off = halfWidth + rand() * 0.3;
+      pathScrubPoints.push({
+        x: x + nx * off * side, y: y + ny * off * side,
+        size: 1.1 + rand() * 1.1,
+        color: `hsla(${(95 + rand() * 20).toFixed(0)},35%,${(26 + rand() * 12).toFixed(0)}%,0.5)`
+      });
+    }
   });
 
   // Hill-shading contour rings — every district's own info text is
@@ -7624,6 +7719,23 @@ function buildMapGeoJSON(){
     [1, 1.6, 2.2].forEach((mult,ri)=>{
       const ring = blobRing(cx, cy, baseR * mult, di * 61 + ri * 13 + 4000, 14);
       hillContourFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(ring) } });
+    });
+  });
+  // Filled elevation bands underneath the contour lines above — the
+  // lines alone were the map's only elevation cue and read as a couple
+  // of faint decorative rings on flat colour, not raised ground. Three
+  // concentric filled rings per Hilltop district, largest/coolest at
+  // the bottom (added first, so later/smaller ones paint over it) up to
+  // smallest/warmest right at the district's own centre — an actual
+  // layered-terrain look built from fills, since there's no real DEM/
+  // hillshade data to draw from.
+  const hillBandFeatures = [];
+  districts.filter(d=> /^Hilltop/.test(d.info)).forEach((d,di)=>{
+    const cx = parseFloat(d.x), cy = parseFloat(d.y);
+    const baseR = (districtRadii.get(d) || 6) * 1.9;
+    [[2.6, "rgba(115,98,52,0.09)"], [1.9, "rgba(140,115,58,0.12)"], [1.3, "rgba(168,138,68,0.15)"]].forEach(([mult, tint], ri)=>{
+      const ring = blobRing(cx, cy, baseR * mult, di * 61 + ri * 17 + 5000, 16);
+      hillBandFeatures.push({ type:"Feature", properties:{ fill: tint }, geometry:{ type:"Polygon", coordinates: [ schematicRingToLngLat(ring) ] } });
     });
   });
 
@@ -8026,6 +8138,21 @@ function buildMapGeoJSON(){
   }
   const streamFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(streamRing) } };
 
+  // A small pond just south of Hydro XL — findings_screenshots.md notes
+  // "what looks like a small pond immediately south of it," never
+  // rendered before now (the stream above was the map's only water).
+  // Fringe ring first (wider, paler, blends the water's edge into the
+  // surrounding grass rather than a hard graphic circle), then the open
+  // water on top, then a thin pale "shimmer" outline for definition.
+  const pondCenter = [11, 50];
+  const pondFringeRing = blobRing(pondCenter[0], pondCenter[1], 3.1, 8150, 12);
+  const pondRing = blobRing(pondCenter[0], pondCenter[1], 2.1, 8100, 12);
+  const pondFeatures = [
+    { type:"Feature", properties:{ fill:"rgba(80,140,150,0.22)" }, geometry:{ type:"Polygon", coordinates:[ schematicRingToLngLat(pondFringeRing) ] } },
+    { type:"Feature", properties:{ fill:"rgba(50,115,160,0.8)" }, geometry:{ type:"Polygon", coordinates:[ schematicRingToLngLat(pondRing) ] } }
+  ];
+  const pondOutlineFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: schematicRingToLngLat(pondRing) } };
+
   // Ordinary camping fields — a soft sandy-yellow ground fill (the
   // reference video's own plain camping fields read as a warm
   // yellow-green, clearly lighter/warmer than both the dark stippled
@@ -8116,6 +8243,15 @@ function buildMapGeoJSON(){
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)), 400 + i * 53, 16)) ] }
   }));
+  // A wider, paler fringe ring under the forest's own dark fill —
+  // without one, woods met open grass as one hard-edged colour change;
+  // a real tree line thins out gradually. Drawn first (below the main
+  // forests-fill layer) so it only shows as a soft halo around the
+  // forest's true edge, not a second solid colour.
+  const forestFringeFeatures = forestSpots.map((f,i)=>({
+    type: "Feature", properties: {},
+    geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)) * 1.4, 450 + i * 53, 16)) ] }
+  }));
 
   // Density bumped 22 -> 30 per named forest spot — the reference
   // video's woods read as densely stippled throughout, not sparse dots
@@ -8144,6 +8280,10 @@ function buildMapGeoJSON(){
     });
   }
   const treeFeatures = treePts.map(t=>{
+    const c = schematicToLatLon(t.x, t.y);
+    return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
+  });
+  const pathScrubFeatures = pathScrubPoints.map(t=>{
     const c = schematicToLatLon(t.x, t.y);
     return { type:"Feature", properties:{ size: t.size, color: t.color }, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } };
   });
@@ -8209,8 +8349,11 @@ function buildMapGeoJSON(){
 
   return {
     fields: { type:"FeatureCollection", features: fieldFeatures },
+    fieldsFine: { type:"FeatureCollection", features: fieldFeaturesFine },
     hedges: { type:"FeatureCollection", features: hedgeFeatures },
     stream: { type:"FeatureCollection", features: [streamFeature] },
+    pond: { type:"FeatureCollection", features: pondFeatures },
+    pondOutline: { type:"FeatureCollection", features: [pondOutlineFeature] },
     districts: { type:"FeatureCollection", features: districtFeatures },
     marketHub: { type:"FeatureCollection", features: marketHubFeatures },
     openConcourses: { type:"FeatureCollection", features: openConcourseFeatures },
@@ -8223,6 +8366,7 @@ function buildMapGeoJSON(){
     campTriangle: { type:"FeatureCollection", features: triangleFeature ? [triangleFeature] : [] },
     skylarkRings: { type:"FeatureCollection", features: skylarkRingFeatures },
     forests: { type:"FeatureCollection", features: forestFeatures },
+    forestFringe: { type:"FeatureCollection", features: forestFringeFeatures },
     trail: { type:"FeatureCollection", features: trailFeatures },
     stagePlazas: { type:"FeatureCollection", features: stagePlazaFeatures },
     bunting: { type:"FeatureCollection", features: buntingFeatures },
@@ -8232,11 +8376,13 @@ function buildMapGeoJSON(){
     stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
     minorStageGlow: { type:"FeatureCollection", features: minorStageGlowFeatures },
     trees: { type:"FeatureCollection", features: treeFeatures },
+    pathScrub: { type:"FeatureCollection", features: pathScrubFeatures },
     tents: { type:"FeatureCollection", features: tentFeatures },
     confetti: { type:"FeatureCollection", features: confettiFeatures },
     campervans: { type:"FeatureCollection", features: campervanFeatures },
     contours: { type:"FeatureCollection", features: contourFeatures },
     hillContours: { type:"FeatureCollection", features: hillContourFeatures },
+    hillBands: { type:"FeatureCollection", features: hillBandFeatures },
     boundary: { type:"FeatureCollection", features: [boundaryFeature] },
     fencePosts: { type:"FeatureCollection", features: fencePostFeatures }
   };
@@ -8532,6 +8678,8 @@ function loadMap(){
       // competing on one flat plane.
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
       mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addSource("mapFieldsFine", { type: "geojson", data: geo.fieldsFine });
+      mapGL.addLayer({ id: "fields-fine-fill", type: "fill", source: "mapFieldsFine", paint: { "fill-color": ["get", "fill"] } });
 
       mapGL.addSource("mapHedges", { type: "geojson", data: geo.hedges });
       mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", paint: { "line-color": "rgba(0,0,0,0.06)", "line-width": 1 } });
@@ -8543,6 +8691,8 @@ function loadMap(){
       // Oldtown) — tan/brown so they read as raised-ground shading, not
       // another path. Drawn early/underneath so district fills and
       // buildings sit on top where they overlap.
+      mapGL.addSource("mapHillBands", { type: "geojson", data: geo.hillBands });
+      mapGL.addLayer({ id: "hill-bands-fill", type: "fill", source: "mapHillBands", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapHillContours", { type: "geojson", data: geo.hillContours });
       mapGL.addLayer({ id: "hill-contours-line", type: "line", source: "mapHillContours", paint: { "line-color": "rgba(90,70,40,0.12)", "line-width": 1.5 } });
 
@@ -8564,8 +8714,14 @@ function loadMap(){
       mapGL.addSource("mapStream", { type: "geojson", data: geo.stream });
       mapGL.addLayer({ id: "stream-casing", type: "line", source: "mapStream", paint: { "line-color": "rgba(20,40,50,0.4)", "line-width": 4 } });
       mapGL.addLayer({ id: "stream-line", type: "line", source: "mapStream", paint: { "line-color": "rgba(90,150,190,0.65)", "line-width": 2 } });
+      mapGL.addSource("mapPond", { type: "geojson", data: geo.pond });
+      mapGL.addLayer({ id: "pond-fill", type: "fill", source: "mapPond", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addSource("mapPondOutline", { type: "geojson", data: geo.pondOutline });
+      mapGL.addLayer({ id: "pond-outline-line", type: "line", source: "mapPondOutline", paint: { "line-color": "rgba(190,225,235,0.5)", "line-width": 1 } });
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
+      mapGL.addSource("mapForestFringe", { type: "geojson", data: geo.forestFringe });
+      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": "rgba(55,95,55,0.22)" } });
       mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": "rgba(15,45,28,0.68)" } });
       mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": "rgba(10,30,18,0.6)", "line-width": 1.4 } });
 
@@ -8732,8 +8888,20 @@ function loadMap(){
       // line — a real ground colour difference at the path's actual
       // width/footprint, not a fixed-pixel line that doesn't represent
       // real width or scale with zoom.
-      mapGL.addLayer({ id: "trail-fill", type: "fill", source: "mapTrail", paint: { "fill-color": "rgba(224,200,160,0.95)" } });
-      mapGL.addLayer({ id: "trail-outline", type: "line", source: "mapTrail", paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
+      // Per-tier fill (["get","fill"], set in JS from TRAIL_FILL above)
+      // and a matching per-tier outline width/opacity — main routes get
+      // a clear, continuous casing; minor ones fade to almost none, so
+      // they read as "worth wandering down" rather than a signed route.
+      mapGL.addLayer({ id: "trail-fill", type: "fill", source: "mapTrail", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "trail-outline", type: "line", source: "mapTrail", paint: {
+        "line-color": ["match", ["get", "tier"], "main", "rgba(100,75,45,0.6)", "minor", "rgba(140,120,90,0.25)", "rgba(120,95,60,0.55)"],
+        "line-width": ["match", ["get", "tier"], "main", 1.6, "minor", 0.6, 1]
+      } });
+      mapGL.addSource("mapPathScrub", { type: "geojson", data: geo.pathScrub });
+      mapGL.addLayer({ id: "path-scrub-circle", type: "circle", source: "mapPathScrub", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 0.5, 19, 2.2],
+        "circle-color": ["get", "color"]
+      } });
 
       // Main-stage glow — three stacked circle layers per stage, widest/
       // faintest first so the smaller/brighter ones layer on top and it
@@ -8779,10 +8947,18 @@ function loadMap(){
       // the path network so they sit on top of it (a path running
       // "under" a building reads wrong) but before the marker icons.
       mapGL.addSource("mapInfillBuildings", { type: "geojson", data: geo.infillBuildings });
+      // A soft dark shadow of each footprint, offset a couple of screen
+      // pixels (fill-translate — a fixed screen-space nudge, same trick
+      // as a CSS box-shadow) and drawn first/underneath — the one cue
+      // that was missing to make flat building fills read as raised
+      // structures sitting ON the ground rather than a coloured patch
+      // painted flush with it.
+      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": "rgba(10,15,10,0.18)", "fill-translate": [1, 1.4] } });
       mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": "rgba(196,140,90,0.32)" } });
       mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", paint: { "line-color": "rgba(120,80,50,0.35)", "line-width": 0.8 } });
 
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
+      mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
       mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(196,140,90,0.65)" } });
       mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
 
