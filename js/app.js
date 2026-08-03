@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v356";
-const APP_BUILD_TIME = "2026-08-03T06:25:58Z";
+const APP_CACHE_VERSION = "v357";
+const APP_BUILD_TIME = "2026-08-03T06:27:45Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7947,11 +7947,20 @@ function buildMapGeoJSON(){
   // "the path it fronts onto" (most minor stages/small clusters still
   // won't have one nearby, which is fine — not every building needs to
   // be path-adjacent, just biased toward it where a real path exists).
-  function pickClearBuildingSpot(cx, cy, minDist, maxDist, rand){
+  function pointInSchematicPolygon(x, y, ring){
+    let inside = false;
+    for(let i=0, j=ring.length - 1; i<ring.length; j=i++){
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      const crosses = (yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-9) + xi;
+      if(crosses) inside = !inside;
+    }
+    return inside;
+  }
+  function pickClearBuildingSpot(cx, cy, minDist, maxDist, rand, allowedRing=null){
     const trunk = nearestTrunkPoint(cx, cy);
     const usePath = trunk && trunk.dist <= maxDist * 1.3;
     let best = null, bestNearest = -Infinity;
-    for(let attempt=0; attempt<6; attempt++){
+    for(let attempt=0; attempt<14; attempt++){
       let x, y;
       if(usePath){
         const dlen = Math.sqrt(trunk.dx * trunk.dx + trunk.dy * trunk.dy) || 1;
@@ -7966,18 +7975,21 @@ function buildMapGeoJSON(){
         const dist = minDist + rand() * (maxDist - minDist);
         x = cx + Math.cos(a) * dist; y = cy + Math.sin(a) * dist * 0.85;
       }
+      if(allowedRing && !pointInSchematicPolygon(x, y, allowedRing)) continue;
       let nearest = Infinity;
       placedBuildingCenters.forEach(p=>{ nearest = Math.min(nearest, Math.hypot(p[0] - x, p[1] - y)); });
       if(nearest >= MIN_BUILDING_SEP){ placedBuildingCenters.push([x, y]); return [x, y]; }
       if(nearest > bestNearest){ bestNearest = nearest; best = [x, y]; }
     }
-    placedBuildingCenters.push(best);
-    return best;
+    const fallback = best || [cx, cy];
+    placedBuildingCenters.push(fallback);
+    return fallback;
   }
   const infillBuildingFeatures = [];
   districts.forEach((d,di)=>{
     const cx = parseFloat(d.x), cy = parseFloat(d.y);
     const r = districtRadii.get(d);
+    const allowedRing = authoredDistrictFootprints.get(d.name) || null;
     const rand = seededRand(di * 137 + 19);
     // Scales with the district's own radius now (was a flat 11 for
     // every district regardless of size) — since clearanceRadius above
@@ -7992,7 +8004,7 @@ function buildMapGeoJSON(){
     // large district doesn't go absurdly sparse/dense.
     const count = Math.round(Math.min(20, Math.max(6, 11 * (r / 7) ** 2)));
     for(let k=0;k<count;k++){
-      const [x, y] = pickClearBuildingSpot(cx, cy, r * 0.35, r * 0.85, rand);
+      const [x, y] = pickClearBuildingSpot(cx, cy, r * 0.35, r * 0.85, rand, allowedRing);
       infillBuildingFeatures.push({
         type: "Feature", properties: { fill: BUILDING_PALETTE[(di * 3 + k + 1) % BUILDING_PALETTE.length] },
         geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, di * 137 + 19 + k * 7)) ] }
