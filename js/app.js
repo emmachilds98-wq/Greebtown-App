@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v310";
-const APP_BUILD_TIME = "2026-08-03T00:36:54Z";
+const APP_CACHE_VERSION = "v311";
+const APP_BUILD_TIME = "2026-08-03T00:44:02Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -5942,7 +5942,18 @@ const locations = [
   // overlapping/illegible text on the live map (this map's markers are
   // plain DOM elements with no built-in collision avoidance, so crowded
   // coordinates show up directly as garbled overlapping labels).
-  { name:"Area 404", kind:"district", x:"50%", y:"37%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
+  // Pulled in from (50,37) to (36,37) — reported (repeatedly) as "the area
+  // between metropolis and area 404 seems extremely large." Reference
+  // footage (findings_vidAB/vidCD/vidE1/vidE2) is unanimous that Botanica,
+  // Metropolis and Area 404 "sit in the same wooded bowl/enclosure" as one
+  // continuous loop, not three separate clearings 30+ schematic units
+  // apart. Applied a uniform x-scale (factor 0.6, pivoted on Metropolis's
+  // own position) to every point in the Metropolis/Area-404 corridor
+  // (Area 404 itself, Spectrum 360, Hangar 161, Deviant Lounge, BBXL,
+  // Acid Leak below) rather than nudging individual points — scaling
+  // preserves each point's relative position to its neighbours exactly,
+  // so it closes the gap without introducing new overlaps in the corridor.
+  { name:"Area 404", kind:"district", x:"36%", y:"37%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
   { name:"Botanica", kind:"district", x:"28%", y:"18%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
   // Thrutopia's map pin removed entirely (not just repositioned) — still
   // unconfirmed by any real footage after two separate sessions' worth of
@@ -5995,7 +6006,9 @@ const locations = [
   // This session's reference video shows Hydro XL's own glowing stage
   // marker and label sitting clearly south-WEST of METROPOLIS's own
   // label, not east of it/toward Area 404 as the old position implied.
-  { name:"Hydro XL", kind:"stage", x:"9%", y:"46%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
+  // Nudged from (9,46) to (11,46) as part of the Metropolis/Area-404
+  // corridor compression below (same 0.6 x-scale pivoted on Metropolis).
+  { name:"Hydro XL", kind:"stage", x:"11%", y:"46%", info:"Downtown, alongside Area 404 and Botanica. New hydrogen-powered flagship stage for Chapter Five — one of the UK's first hydrogen-powered festival stages, built around house, techno and dance music." },
   // Pulled from (72,44) — south of Grand Central — to (75,22), then to
   // (85,22) this session. The y=22 already checked out well against two
   // frames; re-measuring x carefully against three Grand-Central-anchored
@@ -6130,7 +6143,13 @@ const otherStages = [
 // reference footage (vidCD) actually shows: Rose and Clown on
 // Botanica's own east arc, in the same loop as Sub Lab/Nachtlicker, not
 // out near Copperwood/Grand Central. Moved to sit in that loop.
-const minorStagePositions = [[52,32],[51,14],[62,26],[35,20],[58,29],[68,25],[40,43],[64,44],[67,39],[46,44],[32,42]];
+// Spectrum 360 (index 0), Hangar 161 (index 6), Acid Leak (index 9) and
+// Infinity (index 10) all nudged inward with the same 0.6 x-scale
+// (pivoted on Metropolis at x=15) used for Area 404 and the Metropolis
+// chain above — closing the "extremely large" reported gap between
+// Metropolis and Area 404 without changing any venue's position
+// relative to its own district cluster.
+const minorStagePositions = [[37,32],[51,14],[62,26],[35,20],[58,29],[68,25],[30,43],[64,44],[67,39],[34,44],[25,42]];
 const minorStages = otherStages.map((s, i)=>({
   name: s.name,
   info: s.info,
@@ -6184,23 +6203,27 @@ const thingsToFind = [
   // between Metropolis and Area 404 was reported as looking "extremely
   // large" with nothing in it; these were seen but not yet tracked,
   // exactly the detail needed to fill that space in.
-  { name:"Memory Mart", near:"Metropolis", x:"18%", y:"32%", info:"Seen labelled on the official app's own map east of Metropolis, north end of the E Numbers/Gabber Kebabber chain — no lineup or theme details sourced yet." },
-  { name:"Better You", near:"Metropolis", x:"19%", y:"34%", info:"Seen labelled on the official app's own map east of Metropolis, in the same chain as Memory Mart — no lineup or theme details sourced yet." },
-  { name:"BBXL Info", near:"Metropolis", x:"20%", y:"35%", info:"An info kiosk seen labelled on the official app's own map east of Metropolis — no further details sourced yet." },
-  { name:"Distractoverse", near:"Metropolis", x:"21%", y:"36%", info:"Seen labelled on the official app's own map as a speckled ground zone east of Metropolis, tying into Metropolis's Bettercorp/Betterverse storyline — no lineup or theme details sourced yet." },
-  { name:"E Numbers", near:"Metropolis", x:"22%", y:"38%", info:"A sweet-shop/E-numbers-themed party spot east of Metropolis, in a chain with Gabber Kebabber and Infinity." },
-  { name:"Gabber Kebabber", near:"Metropolis", x:"26%", y:"40%", info:"Kebab-shop chaos paired with gabber and hardcore, east of Metropolis in the same chain as E Numbers." },
-  { name:"Sub Lab", near:"Metropolis", x:"11%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
+  // This whole chain (through Sub Lab below) nudged inward with the same
+  // 0.6 x-scale, pivoted on Metropolis's own (15,36), used for Area 404
+  // and its cluster above — keeps every venue's position relative to
+  // Metropolis and to each other exactly proportional, just compressed.
+  { name:"Memory Mart", near:"Metropolis", x:"17%", y:"32%", info:"Seen labelled on the official app's own map east of Metropolis, north end of the E Numbers/Gabber Kebabber chain — no lineup or theme details sourced yet." },
+  { name:"Better You", near:"Metropolis", x:"17%", y:"34%", info:"Seen labelled on the official app's own map east of Metropolis, in the same chain as Memory Mart — no lineup or theme details sourced yet." },
+  { name:"BBXL Info", near:"Metropolis", x:"18%", y:"35%", info:"An info kiosk seen labelled on the official app's own map east of Metropolis — no further details sourced yet." },
+  { name:"Distractoverse", near:"Metropolis", x:"19%", y:"36%", info:"Seen labelled on the official app's own map as a speckled ground zone east of Metropolis, tying into Metropolis's Bettercorp/Betterverse storyline — no lineup or theme details sourced yet." },
+  { name:"E Numbers", near:"Metropolis", x:"19%", y:"38%", info:"A sweet-shop/E-numbers-themed party spot east of Metropolis, in a chain with Gabber Kebabber and Infinity." },
+  { name:"Gabber Kebabber", near:"Metropolis", x:"22%", y:"40%", info:"Kebab-shop chaos paired with gabber and hardcore, east of Metropolis in the same chain as E Numbers." },
+  { name:"Sub Lab", near:"Metropolis", x:"13%", y:"30%", info:"A laboratory-themed bass venue fitting Metropolis's tech aesthetic — expect a heavier, sub-driven sound than the district's main stage." },
   // Corrected this session from "near Metropolis" (19,38) — a frame
   // showing SPECTRUM 360/HANGAR 161/ACID LEAK/DEVIANT LOUNGE/BBXL all
   // together places Deviant Lounge clearly in the Area 404 cluster, not
   // over by Metropolis at all. The old "near Metropolis" guess predates
   // any video evidence for this one.
-  { name:"Deviant Lounge", near:"Area 404", x:"44%", y:"48%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
+  { name:"Deviant Lounge", near:"Area 404", x:"32%", y:"48%", info:"A late-night lounge venue with an eclectic, after-hours bill — good for when the bigger stages start winding down." },
   // Newly spotted this session in the same frame as Spectrum 360/Hangar
   // 161/Acid Leak/Deviant Lounge — no other source found for what BBXL
   // stands for or what it programmes, so kept to what's visible.
-  { name:"BBXL", near:"Area 404", x:"50%", y:"46%", info:"Seen labelled on the official app's own map in the Area 404 cluster, alongside Hangar 161/Acid Leak/Deviant Lounge — no lineup or theme details sourced yet." },
+  { name:"BBXL", near:"Area 404", x:"36%", y:"46%", info:"Seen labelled on the official app's own map in the Area 404 cluster, alongside Hangar 161/Acid Leak/Deviant Lounge — no lineup or theme details sourced yet." },
   // Moved from (86%,20%)/"Site-wide" — a user-supplied screenshot of the
   // official app's own map shows this labelled right inside the Oldtown
   // cluster, next to Mining for (g)Old Town and Den of Dis Order (both
@@ -6230,10 +6253,12 @@ const thingsToFind = [
   // anchored frames, since Quantum reads as its own separate area south
   // of Oldtown rather than a venue tucked inside Oldtown's own cluster.
   { name:"Quantum", near:"Oldtown", x:"73%", y:"50%", info:"Seen labelled on the official app's own map, near Oldtown/Temple Valley — no lineup or theme details sourced yet." },
-  // Pulled from (20,30) — northeast of Metropolis — to (22,42). A third
-  // reference video this session shows THE HIDE OUT DOWNTOWN's own label
-  // sitting clearly southEAST of METROPOLIS, not north of it.
-  { name:"The Hide Out Downtown", near:"Metropolis", x:"22%", y:"44%", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
+  // Pulled from (20,30) — northeast of Metropolis — to (22,42), then to
+  // (28,46) this session: findings_vidCD/vidE1/vidE2 all describe it as
+  // sitting IN THE GAP BETWEEN Metropolis and Area 404 (south of both),
+  // not tucked in next to Metropolis's own E Numbers/Gabber Kebabber
+  // chain — moved to the midpoint of the now-compressed corridor.
+  { name:"The Hide Out Downtown", near:"Metropolis", x:"28%", y:"46%", info:"Seen labelled on the official app's own map near Metropolis — also referenced in Boomtown's 2026 essential guide alongside the Chair-o-Plane ride." },
   { name:"Endor", near:"Metropolis", x:"14%", y:"38%", info:"Seen labelled (with its own coloured glow) on the official app's own map near Metropolis — no lineup or theme details sourced yet." },
   { name:"Mango", near:"Botanica", x:"24%", y:"20%", info:"Seen labelled on the official app's own map inside Botanica — no lineup or theme details sourced yet." },
   { name:"Karma Ceuticals", near:"Botanica", x:"30%", y:"24%", info:"Seen labelled on the official app's own map inside Botanica, near Botanica Zoo — no lineup or theme details sourced yet." },
