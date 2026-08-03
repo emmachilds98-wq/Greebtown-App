@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v347";
-const APP_BUILD_TIME = "2026-08-03T05:35:25Z";
+const APP_CACHE_VERSION = "v348";
+const APP_BUILD_TIME = "2026-08-03T05:49:24Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7879,9 +7879,17 @@ function buildMapGeoJSON(){
   const solidBuildingFeatures = [];
   const fencedEnclosureFeatures = [];
   const SPECIAL_SHAPE_VENUES = new Set(["Full Moon Ballroom", "Spectrum 360", "NEXUS"]);
+  // A compact roof palette gives the built districts the varied, hand-drawn
+  // settlement texture of an illustrated festival map. Colours stay muted
+  // enough that venue markers and paths remain the actual wayfinding cues.
+  const BUILDING_PALETTE = [
+    "rgba(202,131,77,0.78)", "rgba(222,151,91,0.76)",
+    "rgba(180,109,74,0.76)", "rgba(199,151,91,0.75)",
+    "rgba(164,112,86,0.74)"
+  ];
   namedBuildingPoints.forEach((p,i)=>{
     const ring = schematicRingToLngLat(venueFootprint(p.name, parseFloat(p.x), parseFloat(p.y), i * 29 + 5));
-    const feature = { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } };
+    const feature = { type: "Feature", properties: { fill: BUILDING_PALETTE[i % BUILDING_PALETTE.length] }, geometry: { type: "Polygon", coordinates: [ring] } };
     // Special-shape venues are solid, confirmed structures, never the
     // hollow "fenced enclosure" treatment below — that's for the
     // otherwise-random 1-in-4 open-yard look, not these.
@@ -7969,7 +7977,7 @@ function buildMapGeoJSON(){
     for(let k=0;k<count;k++){
       const [x, y] = pickClearBuildingSpot(cx, cy, r * 0.35, r * 0.85, rand);
       infillBuildingFeatures.push({
-        type: "Feature", properties: {},
+        type: "Feature", properties: { fill: BUILDING_PALETTE[(di * 3 + k + 1) % BUILDING_PALETTE.length] },
         geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, di * 137 + 19 + k * 7)) ] }
       });
     }
@@ -7992,7 +8000,7 @@ function buildMapGeoJSON(){
     for(let k=0;k<count;k++){
       const [x, y] = pickClearBuildingSpot(cx, cy, 2.6, 4.2, rand);
       infillBuildingFeatures.push({
-        type: "Feature", properties: {},
+        type: "Feature", properties: { fill: BUILDING_PALETTE[(mi * 2 + k + 2) % BUILDING_PALETTE.length] },
         geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(buildingFootprint(x, y, mi * 149 + 6000 + k * 7)) ] }
       });
     }
@@ -9109,12 +9117,12 @@ function loadMap(){
       // structures sitting ON the ground rather than a coloured patch
       // painted flush with it.
       mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": "rgba(10,15,10,0.18)", "fill-translate": [1, 1.4] } });
-      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": "rgba(196,140,90,0.32)" } });
+      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.48 } });
       mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", paint: { "line-color": "rgba(120,80,50,0.35)", "line-width": 0.8 } });
 
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
       mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
-      mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": "rgba(196,140,90,0.65)" } });
+      mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
 
       // Hollow fenced enclosures — outline only, no fill, so the ground
