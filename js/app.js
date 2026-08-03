@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v352";
-const APP_BUILD_TIME = "2026-08-03T06:06:53Z";
+const APP_CACHE_VERSION = "v353";
+const APP_BUILD_TIME = "2026-08-03T06:11:48Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8473,6 +8473,18 @@ function buildMapGeoJSON(){
   };
   const roadFeatures = [alresfordRdFeature, petersfieldRdFeature, a272Feature];
 
+  // Arrival forecourts give the confirmed gates a small, recognisable
+  // hardstanding at the perimeter. They are not new routes or inferred
+  // venue positions: each is centred exactly on its canonical gate marker.
+  const gateForecourtFeatures = gates.map((gate, i)=>{
+    const x = parseFloat(gate.x), y = parseFloat(gate.y);
+    const compact = /Campervan/.test(gate.name);
+    return {
+      type:"Feature", properties:{ fill: compact ? "rgba(205,194,165,0.62)" : "rgba(222,205,169,0.7)" },
+      geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(fieldRing(x, y, compact ? 1.5 : 2.25, compact ? 1.05 : 1.35, 9400 + i * 29, 4))] }
+    };
+  });
+
   // Perimeter fence posts — small evenly-spaced dots walking the
   // boundary ring, so the site edge reads as an actual (illustrated)
   // fence line instead of just a dashed sketch with nothing on it.
@@ -8529,6 +8541,7 @@ function buildMapGeoJSON(){
     boundary: { type:"FeatureCollection", features: [boundaryFeature] },
     hilltopDivider: { type:"FeatureCollection", features: [hilltopDividerFeature] },
     roads: { type:"FeatureCollection", features: roadFeatures },
+    gateForecourts: { type:"FeatureCollection", features: gateForecourtFeatures },
     fencePosts: { type:"FeatureCollection", features: fencePostFeatures }
   };
 }
@@ -8877,6 +8890,10 @@ function loadMap(){
       mapGL.addSource("mapRoads", { type: "geojson", data: geo.roads });
       mapGL.addLayer({ id: "roads-casing", type: "line", source: "mapRoads", paint: { "line-color": "rgba(90,80,70,0.55)", "line-width": 5 } });
       mapGL.addLayer({ id: "roads-line", type: "line", source: "mapRoads", paint: { "line-color": "rgba(235,210,160,0.75)", "line-width": 2.4 } });
+
+      mapGL.addSource("mapGateForecourts", { type: "geojson", data: geo.gateForecourts });
+      mapGL.addLayer({ id: "gate-forecourts-fill", type: "fill", source: "mapGateForecourts", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "gate-forecourts-line", type: "line", source: "mapGateForecourts", paint: { "line-color": "rgba(112,93,60,0.58)", "line-width": 1.1 } });
 
       // Perimeter fence posts — small dots walking the boundary so the
       // site edge reads as an actual illustrated fence line, not just an
