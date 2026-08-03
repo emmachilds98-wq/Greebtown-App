@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v301";
-const APP_BUILD_TIME = "2026-08-02T23:52:45Z";
+const APP_CACHE_VERSION = "v302";
+const APP_BUILD_TIME = "2026-08-02T23:59:35Z";
 
 // Used by renderGroupInvites (defined much further down) — declared up
 // here since updateNextEvent() (called at load time) reaches it via a
@@ -6139,7 +6139,10 @@ const minorStages = otherStages.map((s, i)=>({
 // locations for these, so treat every pin here as "go looking round here",
 // not a surveyed spot — the same caveat as the plain "?" markers below.
 const thingsToFind = [
-  { name:"The Boomtown Bobbies", near:"Area 404", x:"46%", y:"26%", info:"A mock police station hidden venue playing on Area 404's Guardians — expect in-character 'officers', a booking-desk bar and a wink at the district's own policing storyline." },
+  // Moved from a guessed "near Area 404" (46,26) — a genuine official-
+  // app frame this session shows "BOOMTOWN BOBBIES" on Botanica's Letsbe
+  // Avenue loop path, near Soapranos and Rose and Clown, not Area 404.
+  { name:"The Boomtown Bobbies", near:"Botanica", x:"36%", y:"14%", info:"A mock police station hidden venue — seen on the official app's own map on Botanica's Letsbe Avenue loop path, near Soapranos and Rose and Clown, not Area 404 as an earlier guess assumed." },
   // Moved from a guessed "near Area 404" (54,34) — a clearer reference
   // video this session shows LUCK EXCHANGE labelled at the top of
   // Botanica's Letsbe Avenue loop path, right below Letsbe Avenue
@@ -6152,7 +6155,12 @@ const thingsToFind = [
   // Letsbe Avenue loop path, right by Postal Posse/Network Comms
   // Station, not near Copperwood at all.
   { name:"Hotel Paradiso", near:"Botanica", x:"30%", y:"15%", info:"A faded-glamour hotel-themed micro venue on Botanica's Letsbe Avenue loop path. Check in at the 'front desk'." },
-  { name:"Reel News", near:"Copperwood", x:"62%", y:"27%", info:"A newsreel/cinema-themed hidden spot tying into Von Vanderhaus's film empire — expect projected clips and in-character 'reporters'." },
+  // Moved from a guessed "near Copperwood" (62,27) — a genuine official-
+  // app frame this session shows "REELNEWS" at the east edge of the
+  // Ancient Futures/Grand Central hub cluster, directly beside Sharing
+  // Circles, near Spinney Hollow/The Giant Tree Circle/Twisted Time
+  // Machine, not near Copperwood at all.
+  { name:"Reel News", near:"Ancient Futures", x:"64%", y:"43%", info:"A newsreel/cinema-themed hidden spot, seen on the official app's own map at the east edge of the Ancient Futures/Grand Central cluster, beside Sharing Circles — not near Copperwood as an earlier guess assumed." },
   // Shifted by the same (-20,-12) delta as Oldtown's own re-derivation
   // this session, to stay clustered with it.
   { name:"Mining for (g)Old Town", near:"Oldtown", x:"64%", y:"36%", info:"An Oldtown hidden venue playing on the district's rebuild uphill and its separatist storyline — look for a mining/prospecting theme." },
@@ -6344,7 +6352,11 @@ const thingsToFind = [
   // confidence tier as everything else moved this pass), so trusted over
   // the thematic guess rather than discarded — Boomtown's own venue
   // theming doesn't always match its physical district.
-  { name:"Topsy Turvy Trims", near:"Botanica", x:"29%", y:"32%", info:"Barbershop/salon-themed spot. Real surveyed GPS puts it by Botanica/Metropolis, not Oldtown as its 'topsy-turvy rebuild' theming would suggest." },
+  // Moved from a guessed "near Botanica" (29,32) — a genuine official-
+  // app frame this session shows it in the wooded Hilltop camping area
+  // northeast of Grand Central, west/southwest of The Hide Out Hilltop,
+  // beside a "Wet Factory" label — not near Botanica/Metropolis at all.
+  { name:"Topsy Turvy Trims", near:"Copperwood", x:"63%", y:"24%", info:"Barbershop/salon-themed spot, seen on the official app's own map in the wooded Hilltop camping area northeast of Grand Central, near The Hide Out Hilltop — not Botanica/Metropolis as an earlier guess assumed." },
   // Postal Posse — real match is the one lower-confidence "camelcase-
   // split" source in this batch (same tier as The Retreat's own match
   // above) and sits well isolated from every other plotted point (21+
@@ -6502,19 +6514,27 @@ const amenities = [
   { category:"Welfare", x:"16%", y:"31%", note:"Metropolis" },
   { category:"Food", x:"18%", y:"33%", note:"Metropolis" },
   { category:"Bar", x:"19%", y:"30%", note:"Metropolis" },
-  // Ancient Futures (near Thrutopia) — wooded venue cluster with a
-  // top-up point, photobooth, two food stalls, welfare and first aid.
-  { category:"Top-Up Point", x:"51%", y:"18%", note:"Ancient Futures" },
-  { category:"Photobooth", x:"50%", y:"20%", note:"Ancient Futures" },
-  { category:"Food", x:"53%", y:"21%", note:"Ancient Futures" },
-  { category:"Food", x:"54%", y:"23%", note:"Ancient Futures" },
-  { category:"Welfare", x:"52%", y:"25%", note:"Ancient Futures" },
-  { category:"First Aid", x:"53%", y:"27%", note:"Ancient Futures" },
-  // Oldtown, by The Fools Leap — toilets, an accessible-facilities
-  // marker and a water point on the accessible dashed path.
-  { category:"Toilets", x:"79%", y:"45%", note:"Oldtown / The Fools Leap" },
-  { category:"Accessible Facilities", x:"80%", y:"46%", note:"Oldtown / The Fools Leap" },
-  { category:"Water Point", x:"81%", y:"47%", note:"Oldtown / The Fools Leap" },
+  // Ancient Futures cluster — wooded venue cluster with a top-up point,
+  // photobooth, two food stalls, welfare and first aid. Shifted this
+  // session (+6.8,+17.7) to stay with Ancient Futures' own big move from
+  // a guessed Thrutopia-hilltop position to (59,40) near Grand Central —
+  // this whole amenity cluster was still sitting at the OLD position,
+  // 19 schematic units from where Ancient Futures actually is now, the
+  // biggest single drift found in a post-session audit of every amenity
+  // cluster's distance from its own named landmark.
+  { category:"Top-Up Point", x:"58%", y:"36%", note:"Ancient Futures" },
+  { category:"Photobooth", x:"57%", y:"38%", note:"Ancient Futures" },
+  { category:"Food", x:"60%", y:"39%", note:"Ancient Futures" },
+  { category:"Food", x:"61%", y:"41%", note:"Ancient Futures" },
+  { category:"Welfare", x:"59%", y:"43%", note:"Ancient Futures" },
+  { category:"First Aid", x:"60%", y:"45%", note:"Ancient Futures" },
+  // Oldtown cluster — toilets, an accessible-facilities marker and a
+  // water point. Shifted (-12,-6) to stay with Oldtown now that The
+  // Fools Leap (this cluster's original anchor) moved to the north end
+  // of Oldtown's western venue chain (58,29) rather than out at (80,46).
+  { category:"Toilets", x:"67%", y:"39%", note:"Oldtown / The Fools Leap" },
+  { category:"Accessible Facilities", x:"68%", y:"40%", note:"Oldtown / The Fools Leap" },
+  { category:"Water Point", x:"69%", y:"41%", note:"Oldtown / The Fools Leap" },
   // Pepperpot Market — the site's main food/drink/medical/welfare hub
   // (see its own landmark entry); a representative spread rather than
   // exact individual spots, same "clustered, not surveyed one-by-one"
@@ -6529,12 +6549,14 @@ const amenities = [
   { category:"Cash Point", x:"46%", y:"47%", note:"Pepperpot Market" },
   // Copperwood — a dense scatter of toilets/food/welfare icons along the
   // district's own paths, seen clearly in the same wide shot as the
-  // GRAND CENTRAL/HILLTOP/OLDTOWN/QUANTUM labels.
-  { category:"Toilets", x:"64%", y:"22%", note:"Copperwood" },
-  { category:"Toilets", x:"69%", y:"25%", note:"Copperwood" },
-  { category:"Food", x:"66%", y:"27%", note:"Copperwood" },
-  { category:"Welfare", x:"63%", y:"28%", note:"Copperwood" },
-  { category:"Water Point", x:"70%", y:"23%", note:"Copperwood" },
+  // GRAND CENTRAL/HILLTOP/OLDTOWN/QUANTUM labels. Nudged closer to
+  // Copperwood's own (58,23) this session — a post-session audit found
+  // this cluster's centroid had drifted 8.6 units from the district.
+  { category:"Toilets", x:"58%", y:"20%", note:"Copperwood" },
+  { category:"Toilets", x:"62%", y:"23%", note:"Copperwood" },
+  { category:"Food", x:"59%", y:"25%", note:"Copperwood" },
+  { category:"Welfare", x:"56%", y:"26%", note:"Copperwood" },
+  { category:"Water Point", x:"63%", y:"21%", note:"Copperwood" },
   // West Camping, right where its access track meets Alresford Rd — a
   // toilet pair and an accessible-facilities marker on the dashed
   // accessible path leading in from the road.
@@ -6593,12 +6615,18 @@ const amenities = [
   { category:"Food", x:"12%", y:"30%", note:"Downtown Camping path" },
   { category:"Toilets", x:"13%", y:"32%", note:"Downtown Camping path" },
   // Hidden Woods — a row of food stalls along its western tree line.
-  { category:"Food", x:"14%", y:"10%", note:"Hidden Woods" },
-  { category:"Food", x:"15%", y:"13%", note:"Hidden Woods" },
-  { category:"Food", x:"16%", y:"17%", note:"Hidden Woods" },
-  // Letsbe Avenue — a bar pair right by its own label.
-  { category:"Bar", x:"38%", y:"16%", note:"Letsbe Avenue" },
-  { category:"Bar", x:"39%", y:"18%", note:"Letsbe Avenue" },
+  // Shifted north with Hidden Woods' own move from y=8 to y=2 this
+  // session (see its own comment on the `locations` entry) — this
+  // cluster had been left at its pre-move position, 11.7 units off.
+  { category:"Food", x:"16%", y:"3%", note:"Hidden Woods" },
+  { category:"Food", x:"17%", y:"6%", note:"Hidden Woods" },
+  { category:"Food", x:"18%", y:"10%", note:"Hidden Woods" },
+  // Letsbe Avenue — a bar pair right by its own label. Shifted north to
+  // match Letsbe Avenue's own move up to (40,9) during this session's
+  // Downtown-cluster re-derivation — left behind at the old position
+  // before that, 8.1 units off.
+  { category:"Bar", x:"39%", y:"8%", note:"Letsbe Avenue" },
+  { category:"Bar", x:"40%", y:"10%", note:"Letsbe Avenue" },
   // Botanica itself (its own food-stall paths, not just the district
   // label).
   { category:"Food", x:"30%", y:"18%", note:"Botanica" },
@@ -6739,14 +6767,14 @@ const venueDirectory = [
   { name:"Acid Leak", type:"Main stage", status:"confirmed", music:true, genre:"Acid techno, hard techno", near:"Area 404", info:"Area 404's darker, sweatier 4/4 stage." },
   { name:"Infinity", type:"Main stage", status:"confirmed", music:true, genre:"House, UK garage, queer club", near:"Unclear", info:"Confirmed for 2026 with a ~25-artist bill on Boomtown's own lineup page (Desiato DJs, Rose Gray, I. JORDAN, Queer House Party, Dykes on Decks) plus a Paradisco-branded Queer House Party takeover." },
   { name:"The Observatory", type:"Research hub", status:"confirmed", music:false, genre:"—", near:"Thrutopia (likely)", info:"Genuine 2026 academic study led by Dr Martha Newson, 10+ UK universities — real research, not story canon." },
-  { name:"The Boomtown Bobbies", type:"Hidden venue", status:"confirmed", music:true, genre:"DJs, live takeovers", near:"Area 404 / Oldtown", info:"Long-running mock police station tied to the storyline's rising Area 404 crackdown — confirmed for 2026 with a full Thu-Sun DJ programme." },
+  { name:"The Boomtown Bobbies", type:"Hidden venue", status:"confirmed", music:true, genre:"DJs, live takeovers", near:"Botanica", info:"Long-running mock police station — confirmed for 2026 with a full Thu-Sun DJ programme. Seen on the official app's own map on Botanica's Letsbe Avenue loop path." },
   { name:"Soapranos Laundrette", type:"Hidden venue", status:"confirmed", music:true, genre:"Dance/house DJs", near:"Letsbe Avenue", info:"Laundrette-fronted micro venue on Letsbe Avenue's high street — confirmed for 2026 with a full Thu–Sun DJ programme including Laundry Night Live and Soapranos: Hotwash!" },
   { name:"Hotel Paradiso", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, lounge", near:"Botanica", info:"Faded-glamour hotel-themed micro venue on Botanica's Letsbe Avenue loop path — confirmed returning for 2026 ('Hotel on Wheels') with a full Thu–Sat lounge/DJ programme; check in at the 'front desk'." },
   { name:"Luck Exchange Casino", type:"Hidden venue", status:"confirmed", music:false, genre:"Game-show / comedy", near:"Botanica", info:"Casino-themed venue on Botanica's Letsbe Avenue loop path — confirmed for 2026, but it's a game-show format rather than DJ sets: short comedy/game segments (Chattering Teeth Races, Play Your Cards Shite, Beyblade Tournament, Is It Piss?, TOYBOX)." },
   { name:"The Garden Centre", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Chill, eclectic", near:"Botanica", info:"Garden-centre-fronted spot fitting Botanica's plant-temple theme — confirmed for 2026 (Funkmaster General, Redpeppa, Rodderz, Dovetail, plus a Diversion Audio takeover)." },
   { name:"Botanica Zoo", type:"Hidden venue", status:"confirmed", music:true, genre:"Jungle, hardcore, breaks, UK garage, bass", near:"Botanica", info:"Feral, animal-led 'anarcho-squat zoo' venue — 2026 event listings (Killa P, DJ Hybrid, 14 Aug) and its own 'just over 2 weeks til Boomtown' July 2026 post confirm it's back for Chapter Five." },
   { name:"The Immortal Children of the Eternal Seed", type:"Hidden venue", status:"confirmed", music:true, genre:"Ritual, ambient/eclectic", near:"Botanica", info:"Botanica-flavoured cult/ritual-themed micro venue — confirmed for 2026, running Thu-Sat (Loose Forms takeover, Kritical Mass, Safe N Sound)." },
-  { name:"Topsy Turvy Trims", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Barbershop novelty, party", near:"Botanica", info:"Barbershop/salon-themed spot — fits Oldtown's topsy-turvy rebuild theming, but real surveyed GPS puts it by Botanica/Metropolis instead." },
+  { name:"Topsy Turvy Trims", type:"Shop / hidden venue", status:"confirmed", music:true, genre:"Barbershop novelty, party", near:"Copperwood", info:"Barbershop/salon-themed spot — seen on the official app's own map in the wooded Hilltop camping area northeast of Grand Central, near The Hide Out Hilltop." },
   { name:"PFP Robot", type:"Hidden venue", status:"confirmed", music:true, genre:"Electro, makina, trance, acid, techno", near:"Area 404", info:"PFP's robotic soundsystem — confirmed back for 2026 (Tripl3 B, Audio Gutter, Agent Scully, TEOTEK)." },
   { name:"Sub Lab", type:"Hidden venue", status:"confirmed", music:true, genre:"Bass, dubstep", near:"Metropolis", info:"Laboratory-themed bass venue — confirmed for 2026 (Bennett ft. Sylla/Limmz, Stasis, Nio B, Ruggz b2b Sonia Sol)." },
   { name:"Nachtlicker", type:"Hidden venue", status:"confirmed", music:true, genre:"Punk theatre, hard house, techno, speed garage, DnB", near:"Metropolis", info:"Curated nocturnal-rave/punk-theatre night — confirmed back for 2026 (Shaggy FX, SIÂNAGEDDON, THEO SHELDRAKE, Militant Music, GOFF ft BABY SOL). Corrected from an earlier 'near Area 404' guess — the official app's own map shows it on the same footpath as Sub Lab and Loconnection, just south of Metropolis." },
@@ -6780,7 +6808,7 @@ const venueDirectory = [
   { name:"Cocaine Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Ancient Futures", info:"On-site 12-step support meeting — explicitly named as a 2026 welfare partner on Boomtown's own Chapter Five safety page. Real surveyed GPS puts it right by Craft Tent/Ancient Futures, not Pepperpot Market/Thrutopia." },
   { name:"Narcotics Anonymous", type:"Welfare / support", status:"confirmed", music:false, genre:"—", near:"Pepperpot Market", info:"On-site 12-step support meeting — confirmed for 2026 with a recurring daily meeting slot (08:00-09:00 and others), despite not being named on Boomtown's own welfare-partner list alongside Blink Mental Health/Cocaine Anonymous." },
   { name:"Ancient Futures", type:"Talks / installation", status:"confirmed", music:false, genre:"—", near:"Grand Central", info:"Future-facing talks — confirmed for 2026 with a full dated workshop programme Wed-Fri. Seen on the official app's own map near Grand Central/Hilltop, not Thrutopia." },
-  { name:"Reel News", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, spoken-word", near:"Copperwood", info:"Newsreel/cinema-themed spot tying into Copperwood's film-district story." },
+  { name:"Reel News", type:"Hidden venue", status:"confirmed", music:true, genre:"Eclectic, spoken-word", near:"Ancient Futures", info:"Newsreel/cinema-themed spot — seen on the official app's own map at the east edge of the Ancient Futures/Grand Central cluster, beside Sharing Circles." },
   { name:"The Chair-o-Plane", type:"Leisure / ride", status:"confirmed", music:false, genre:"—", near:"Area 404 / Downtown", info:"A classic swing-carousel fairground ride, named in Boomtown's own 2026 essential guide near the Hide Out Downtown venue." },
   { name:"The Boomtown Bank", type:"Leisure / ride", status:"rumoured", music:false, genre:"Games, novelty", near:"Unclear", info:"A recurring past-chapter attraction offering fun-and-nonsense games rather than real banking; not explicitly reconfirmed for 2026 yet." },
   { name:"Retro Amusements Arcade", type:"Leisure / ride", status:"rumoured", music:false, genre:"—", near:"Unclear", info:"Past chapters have run a retro amusements arcade among the site's entertainment; not explicitly reconfirmed for 2026 yet." },
@@ -7078,6 +7106,7 @@ const TRUNK_PATH_EDGES = [
   ["Luck Exchange Casino", "Hotel Paradiso"],
   ["Hotel Paradiso", "Postal Posse"],
   ["Postal Posse", "Botanica"],
+  ["Letsbe Avenue", "The Boomtown Bobbies"],
   ["Letsbe Avenue", "Copperwood"],
   ["Copperwood", "Grand Central"],
   ["Copperwood", "Temple Valley Camping"],
@@ -7119,6 +7148,7 @@ const TRUNK_PATH_EDGES = [
   ["The Hide Out Hilltop", "Full Moon Ballroom"],
   ["Full Moon Ballroom", "Foggers Mill"],
   ["Copperwood", "Tangled Roots"],
+  ["The Hide Out Hilltop", "Topsy Turvy Trims"],
 
   // Botanica's wider venue cluster, added this pass — previously only
   // reachable via generic auto-generated capillary spokes; these are
@@ -7160,6 +7190,7 @@ const TRUNK_PATH_EDGES = [
   ["Rebel Girls Club", "Tinker Station"],
   ["Ancient Futures", "The Retreat"],
   ["Ancient Futures", "Twisted Time Machine (Bad Apple Bar)"],
+  ["Ancient Futures", "Reel News"],
   ["Ancient Futures", "Energy Garden"],
   ["Energy Garden", "Climate Live"],
   ["Climate Live", "The Magic Teapot"],
