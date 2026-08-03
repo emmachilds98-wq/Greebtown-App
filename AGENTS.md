@@ -236,6 +236,11 @@ runtime rendering reviewable rather than reintroducing hard-coded overrides:
   shared venue courts and street spines. Use it for a named central-space
   silhouette; never stretch a district boundary or invent marker positions
   just to make a court appear larger.
+- `map-system/data/district-massing-layout.json` â€” reviewed, original
+  close-zoom compounds for the main town districts. It owns only anonymous
+  structural art (stalls, tents and yards), never a new named venue, amenity,
+  path or zone. Keep it anchor-relative and use it instead of scattering
+  hard-coded decorative rectangles through the renderer.
 - Stage hierarchy is authoritative in `map-document.json`: use `main-stage`
   only for headline footprints and `minor-stage` for compact venues. The
   document validator rejects a role/footprint mismatch, so preserve that
@@ -256,6 +261,7 @@ node scripts/validate-small-venue-layout.mjs
 node scripts/validate-natural-area-footprints.mjs
 node scripts/validate-site-layout.mjs
 node scripts/validate-stage-precinct-layout.mjs
+node scripts/validate-district-massing-layout.mjs
 node scripts/audit-ground-use-overlaps.mjs
 node scripts/audit-map-positions.mjs
 node --check js/app.js
@@ -295,6 +301,15 @@ source for woodland and other non-camping natural areas. It stores a
 source-relative outline, fringe and tree clusters, and validates both the
 source name and relative geometry. Never use a generic radial zone as a
 fallback for a reviewed natural area; add a footprint here instead.
+
+`map-system/data/district-massing-layout.json` is the canonical source for
+the dense, non-interactive illustrated compounds in Grand Central, Oldtown,
+Botanica, Metropolis, Area 404 and Quantum. It is deliberately separate from
+small venues: change a named real place in `small-venue-layout.json` or the
+map document; change an anonymous close-zoom roof, tent or yard here. The
+validator checks bounded anchor-relative geometry, evidence, unique IDs and
+runtime source names. Run `node scripts/report-map-topology.mjs` before a
+large visual pass to see the total authored massing under review.
 
 Record every new official-map reading in `reference-layout.json`'s
 `observations` collection before using it to alter a footprint, path, field

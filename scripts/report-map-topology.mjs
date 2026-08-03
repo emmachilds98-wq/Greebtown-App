@@ -10,6 +10,7 @@ const natural = read("natural-area-footprints.json");
 const districts = read("district-footprints.json");
 const site = read("site-layout.json");
 const precincts = read("stage-precinct-layout.json");
+const massing = read("district-massing-layout.json");
 console.log("# Greebtown map topology review");
 console.log(`\nEvidence: ${(references.observations || []).length} official observations`);
 for(const observation of references.observations || []) console.log(`- ${observation.id}: ${observation.regions.join(", ")}`);
@@ -18,4 +19,5 @@ console.log(`Camping: ${camps.zones.length} fields; ${camps.groundUseFields.leng
 console.log(`Woodland: ${natural.footprints.length} reviewed silhouettes`);
 console.log(`Arrival: ${site.parkingAreas.length} reviewed parking footprints; ${(site.gateForecourts || []).length} reviewed gate forecourts`);
 console.log(`Central courts: ${(precincts.precincts || []).length} reviewed stage/venue precincts`);
+console.log(`District massing: ${(massing.clusters || []).length} reviewed compounds; ${(massing.clusters || []).reduce((total, cluster) => total + (cluster.masses || []).length, 0)} authored structures/yards`);
 console.log("\nUse this report before a visual pass: change the specialised data source named above, then run map-preflight.");

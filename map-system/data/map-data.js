@@ -5555,3 +5555,514 @@ window.GREEBTOWN_STAGE_PRECINCT_LAYOUT = {
     }
   ]
 };
+window.GREEBTOWN_DISTRICT_MASSING_LAYOUT = {
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "anchor-relative-schematic-percent-v1",
+  "purpose": "Reviewed, original illustrated building massing for the map's dense districts. These are non-interactive structures and yards, not new named venues, amenities or paths.",
+  "clusters": [
+    {
+      "id": "grand-central-hilltop-compound",
+      "sourceName": "Grand Central",
+      "evidence": "official-detail",
+      "notes": "Grand Central has a wide open stage face, with the smaller structures gathered in a broken northern and eastern edge rather than filling its central grass.",
+      "masses": [
+        {
+          "id": "gc-north-workshop",
+          "offset": {
+            "x": -3.7,
+            "y": -2.3
+          },
+          "width": 2.1,
+          "height": 1.1,
+          "rotation": -18,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "gc-north-tent",
+          "offset": {
+            "x": -1.4,
+            "y": -2.6
+          },
+          "width": 1.7,
+          "height": 1.5,
+          "rotation": 8,
+          "tone": "canvas",
+          "kind": "tent"
+        },
+        {
+          "id": "gc-north-yard",
+          "offset": {
+            "x": 1,
+            "y": -2.45
+          },
+          "width": 2.2,
+          "height": 1,
+          "rotation": 18,
+          "tone": "ochre",
+          "kind": "yard"
+        },
+        {
+          "id": "gc-east-stall-one",
+          "offset": {
+            "x": 3.25,
+            "y": -1.35
+          },
+          "width": 1.55,
+          "height": 1,
+          "rotation": 78,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "gc-east-stall-two",
+          "offset": {
+            "x": 3.55,
+            "y": 0.45
+          },
+          "width": 1.8,
+          "height": 1.05,
+          "rotation": 76,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "gc-south-east-yard",
+          "offset": {
+            "x": 2.65,
+            "y": 2
+          },
+          "width": 2.35,
+          "height": 1.35,
+          "rotation": 28,
+          "tone": "dark",
+          "kind": "yard"
+        },
+        {
+          "id": "gc-west-kiosk",
+          "offset": {
+            "x": -3.5,
+            "y": 1.55
+          },
+          "width": 1.45,
+          "height": 1,
+          "rotation": -30,
+          "tone": "terracotta",
+          "kind": "stall"
+        }
+      ]
+    },
+    {
+      "id": "oldtown-street-rooms",
+      "sourceName": "Oldtown",
+      "evidence": "official-detail",
+      "notes": "Oldtown reads as two irregular, close-set street edges around a long open spine, with small courtyards and no broad circular plaza.",
+      "masses": [
+        {
+          "id": "old-west-one",
+          "offset": {
+            "x": -3.25,
+            "y": -2.45
+          },
+          "width": 1.8,
+          "height": 1,
+          "rotation": 16,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "old-west-two",
+          "offset": {
+            "x": -3.75,
+            "y": -0.8
+          },
+          "width": 2.15,
+          "height": 1.1,
+          "rotation": 20,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "old-west-yard",
+          "offset": {
+            "x": -3.35,
+            "y": 1.05
+          },
+          "width": 2.5,
+          "height": 1.5,
+          "rotation": 10,
+          "tone": "dark",
+          "kind": "yard"
+        },
+        {
+          "id": "old-west-three",
+          "offset": {
+            "x": -2.8,
+            "y": 2.75
+          },
+          "width": 1.85,
+          "height": 1,
+          "rotation": -16,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "old-east-one",
+          "offset": {
+            "x": 3.2,
+            "y": -2.2
+          },
+          "width": 1.75,
+          "height": 1.05,
+          "rotation": -14,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "old-east-two",
+          "offset": {
+            "x": 3.75,
+            "y": -0.45
+          },
+          "width": 2.1,
+          "height": 1.1,
+          "rotation": -18,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "old-east-three",
+          "offset": {
+            "x": 3.35,
+            "y": 1.35
+          },
+          "width": 1.7,
+          "height": 1.05,
+          "rotation": -22,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "old-east-yard",
+          "offset": {
+            "x": 3,
+            "y": 2.95
+          },
+          "width": 2.25,
+          "height": 1.4,
+          "rotation": -12,
+          "tone": "dark",
+          "kind": "yard"
+        }
+      ]
+    },
+    {
+      "id": "botanica-garden-market",
+      "sourceName": "Botanica",
+      "evidence": "official-detail",
+      "notes": "Botanica keeps a looser garden court, with an uneven eastern market arc and compact low structures leading toward NEXUS rather than a rigid grid.",
+      "masses": [
+        {
+          "id": "bot-north-kiosk",
+          "offset": {
+            "x": -0.6,
+            "y": -3.15
+          },
+          "width": 1.65,
+          "height": 1,
+          "rotation": 8,
+          "tone": "canvas",
+          "kind": "tent"
+        },
+        {
+          "id": "bot-east-one",
+          "offset": {
+            "x": 3.3,
+            "y": -1.9
+          },
+          "width": 1.7,
+          "height": 1,
+          "rotation": 55,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "bot-east-two",
+          "offset": {
+            "x": 4,
+            "y": -0.1
+          },
+          "width": 2.2,
+          "height": 1.15,
+          "rotation": 58,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "bot-east-yard",
+          "offset": {
+            "x": 3.35,
+            "y": 1.8
+          },
+          "width": 2.35,
+          "height": 1.45,
+          "rotation": 42,
+          "tone": "dark",
+          "kind": "yard"
+        },
+        {
+          "id": "bot-south-one",
+          "offset": {
+            "x": 1.3,
+            "y": 3
+          },
+          "width": 1.7,
+          "height": 1.15,
+          "rotation": -12,
+          "tone": "canvas",
+          "kind": "tent"
+        },
+        {
+          "id": "bot-south-two",
+          "offset": {
+            "x": -1.35,
+            "y": 2.85
+          },
+          "width": 1.85,
+          "height": 1.05,
+          "rotation": 24,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "bot-west-yard",
+          "offset": {
+            "x": -3.25,
+            "y": 0.9
+          },
+          "width": 2.3,
+          "height": 1.55,
+          "rotation": -26,
+          "tone": "dark",
+          "kind": "yard"
+        }
+      ]
+    },
+    {
+      "id": "metropolis-block-run",
+      "sourceName": "Metropolis",
+      "evidence": "official-detail",
+      "notes": "Metropolis is a compact built street: aligned but varied blocks along its central run, leaving a clear route through the district rather than a scatter of isolated huts.",
+      "masses": [
+        {
+          "id": "metro-north-one",
+          "offset": {
+            "x": -3.55,
+            "y": -1.55
+          },
+          "width": 2,
+          "height": 1.05,
+          "rotation": 18,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "metro-north-two",
+          "offset": {
+            "x": -1.2,
+            "y": -2.1
+          },
+          "width": 1.75,
+          "height": 1,
+          "rotation": 12,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "metro-north-three",
+          "offset": {
+            "x": 1.1,
+            "y": -1.9
+          },
+          "width": 1.8,
+          "height": 1.1,
+          "rotation": 8,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "metro-east-yard",
+          "offset": {
+            "x": 3.25,
+            "y": -0.55
+          },
+          "width": 2.45,
+          "height": 1.5,
+          "rotation": 76,
+          "tone": "dark",
+          "kind": "yard"
+        },
+        {
+          "id": "metro-south-one",
+          "offset": {
+            "x": 1.95,
+            "y": 2
+          },
+          "width": 1.75,
+          "height": 1,
+          "rotation": -20,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "metro-south-two",
+          "offset": {
+            "x": -0.25,
+            "y": 2.4
+          },
+          "width": 2.05,
+          "height": 1.05,
+          "rotation": -14,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "metro-south-three",
+          "offset": {
+            "x": -2.5,
+            "y": 1.75
+          },
+          "width": 1.65,
+          "height": 1,
+          "rotation": -28,
+          "tone": "canvas",
+          "kind": "tent"
+        }
+      ]
+    },
+    {
+      "id": "area-404-industrial-yard",
+      "sourceName": "Area 404",
+      "evidence": "official-detail",
+      "notes": "Area 404 stays more open and industrial than the town districts, using scattered long blocks, a hard-edged yard and deliberate space around Spectrum and Hangar 161.",
+      "masses": [
+        {
+          "id": "area-west-hangar-row",
+          "offset": {
+            "x": -3.7,
+            "y": -1.45
+          },
+          "width": 2.9,
+          "height": 1.15,
+          "rotation": 14,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "area-north-unit",
+          "offset": {
+            "x": -0.8,
+            "y": -2.75
+          },
+          "width": 2.2,
+          "height": 1.15,
+          "rotation": -12,
+          "tone": "dark",
+          "kind": "yard"
+        },
+        {
+          "id": "area-east-unit",
+          "offset": {
+            "x": 3.55,
+            "y": -1
+          },
+          "width": 2.45,
+          "height": 1.2,
+          "rotation": 70,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "area-east-yard",
+          "offset": {
+            "x": 3.75,
+            "y": 1.1
+          },
+          "width": 2.65,
+          "height": 1.55,
+          "rotation": 64,
+          "tone": "dark",
+          "kind": "yard"
+        },
+        {
+          "id": "area-south-one",
+          "offset": {
+            "x": 1.55,
+            "y": 2.9
+          },
+          "width": 2.25,
+          "height": 1.05,
+          "rotation": -22,
+          "tone": "terracotta",
+          "kind": "stall"
+        },
+        {
+          "id": "area-south-two",
+          "offset": {
+            "x": -1.45,
+            "y": 2.65
+          },
+          "width": 1.85,
+          "height": 1.1,
+          "rotation": 20,
+          "tone": "canvas",
+          "kind": "tent"
+        }
+      ]
+    },
+    {
+      "id": "quantum-pocket-venues",
+      "sourceName": "Quantum",
+      "evidence": "official-detail",
+      "notes": "Quantum is a sparse junction beside Hilltop: a few compact structures guide the turn toward Helix, without becoming another district or field-sized venue compound.",
+      "masses": [
+        {
+          "id": "quantum-west-kiosk",
+          "offset": {
+            "x": -2.2,
+            "y": -0.9
+          },
+          "width": 1.45,
+          "height": 0.9,
+          "rotation": 18,
+          "tone": "ochre",
+          "kind": "stall"
+        },
+        {
+          "id": "quantum-east-tent",
+          "offset": {
+            "x": 2.1,
+            "y": -0.65
+          },
+          "width": 1.35,
+          "height": 1.2,
+          "rotation": -18,
+          "tone": "canvas",
+          "kind": "tent"
+        },
+        {
+          "id": "quantum-south-kiosk",
+          "offset": {
+            "x": 0.4,
+            "y": 1.85
+          },
+          "width": 1.55,
+          "height": 0.95,
+          "rotation": 8,
+          "tone": "terracotta",
+          "kind": "stall"
+        }
+      ]
+    }
+  ]
+};

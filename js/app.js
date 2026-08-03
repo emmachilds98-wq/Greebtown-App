@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v377";
-const APP_BUILD_TIME = "2026-08-03T08:51:53Z";
+const APP_CACHE_VERSION = "v378";
+const APP_BUILD_TIME = "2026-08-03T08:58:36Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6605,6 +6605,9 @@ const reviewedSmallVenueLayout = Array.isArray(window.GREEBTOWN_SMALL_VENUE_LAYO
 const reviewedStagePrecinctLayout = Array.isArray(window.GREEBTOWN_STAGE_PRECINCT_LAYOUT?.precincts)
   ? window.GREEBTOWN_STAGE_PRECINCT_LAYOUT.precincts
   : [];
+const reviewedDistrictMassingLayout = Array.isArray(window.GREEBTOWN_DISTRICT_MASSING_LAYOUT?.clusters)
+  ? window.GREEBTOWN_DISTRICT_MASSING_LAYOUT.clusters
+  : [];
 // Natural areas use their own anchor-relative footprints for the same
 // reason: woodland must never inherit a generic circular zone or a camp
 // surface just because it happens to be near a venue.
@@ -8054,6 +8057,38 @@ function buildMapGeoJSON(){
     else smallVenueFeatures.push(feature);
   });
 
+  // Authored district massing is the high-detail companion to the named
+  // venue layer: it supplies original, non-interactive structure and
+  // negative space seen in the references, without inventing extra POIs.
+  // Every mass remains anchor-relative, so a future positional correction
+  // carries the whole compound with its district rather than leaving a
+  // trail of stale rectangles behind.
+  const DISTRICT_MASSING_TONES = {
+    terracotta: "rgba(221,132,78,0.88)",
+    ochre: "rgba(180,139,56,0.86)",
+    dark: "rgba(77,101,72,0.86)",
+    canvas: "rgba(239,227,192,0.92)"
+  };
+  const authoredMassingFeatures = [];
+  const authoredMassingYardFeatures = [];
+  const authoredMassingCenters = [];
+  reviewedDistrictMassingLayout.forEach((cluster, clusterIndex)=>{
+    const source = findNamedNode(cluster.sourceName);
+    if(!source) return;
+    cluster.masses.forEach((mass, massIndex)=>{
+      const x = source.x + mass.offset.x, y = source.y + mass.offset.y;
+      const layer = { w: mass.width, h: mass.height, rotation: mass.rotation, category: mass.kind === "tent" ? "dome" : "rect" };
+      const feature = {
+        type: "Feature",
+        properties: { fill: DISTRICT_MASSING_TONES[mass.tone], kind: mass.kind },
+        geometry: { type: "Polygon", coordinates: [schematicRingToLngLat(buildingLayerFootprint(x, y, 9800 + clusterIndex * 101 + massIndex * 7, layer))] }
+      };
+      authoredMassingCenters.push([x, y]);
+      if(mass.kind === "yard") authoredMassingYardFeatures.push(feature);
+      else authoredMassingFeatures.push(feature);
+    });
+  });
+
   // Decorative infill buildings — a wide reference-video frame showing
   // several districts at once (Botanica/Metropolis together) has
   // noticeably MORE small building blocks scattered through each
@@ -8078,7 +8113,8 @@ function buildMapGeoJSON(){
   // bounded, so this can never loop forever.
   const placedBuildingCenters = districtMemberPoints
     .concat(reviewedSmallVenueLayout.map(venue=> thingsToFind.find(place=> place.name === venue.sourceName)).filter(Boolean))
-    .map(p=> [parseFloat(p.x), parseFloat(p.y)]);
+    .map(p=> [parseFloat(p.x), parseFloat(p.y)])
+    .concat(authoredMassingCenters);
   const MIN_BUILDING_SEP = 1.5;
   // Decorative infill buildings now bias toward sitting along a real
   // trunk-path edge when one actually passes near this cluster, instead
@@ -8144,7 +8180,9 @@ function buildMapGeoJSON(){
     // the rebalance), scaled by area (radius²) so density stays
     // consistent district to district, clamped so a very small or very
     // large district doesn't go absurdly sparse/dense.
-    const count = Math.round(Math.min(20, Math.max(6, 11 * (r / 7) ** 2)));
+    const hasAuthoredMassing = reviewedDistrictMassingLayout.some(cluster=> cluster.sourceName === d.name);
+    const densityBase = hasAuthoredMassing ? 5 : 11;
+    const count = Math.round(Math.min(20, Math.max(hasAuthoredMassing ? 3 : 6, densityBase * (r / 7) ** 2)));
     for(let k=0;k<count;k++){
       const [x, y] = pickClearBuildingSpot(cx, cy, r * 0.35, r * 0.85, rand, allowedRing);
       infillBuildingFeatures.push({
@@ -8727,6 +8765,8 @@ function buildMapGeoJSON(){
     fencedEnclosures: { type:"FeatureCollection", features: fencedEnclosureFeatures },
     smallVenues: { type:"FeatureCollection", features: smallVenueFeatures },
     smallVenueYards: { type:"FeatureCollection", features: smallVenueYardFeatures },
+    authoredMassing: { type:"FeatureCollection", features: authoredMassingFeatures },
+    authoredMassingYards: { type:"FeatureCollection", features: authoredMassingYardFeatures },
     infillBuildings: { type:"FeatureCollection", features: infillBuildingFeatures },
     stageGlow: { type:"FeatureCollection", features: stageGlowFeatures },
     minorStageGlow: { type:"FeatureCollection", features: minorStageGlowFeatures },
@@ -9416,6 +9456,17 @@ function loadMap(){
       mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 15.2, paint: { "fill-color": "rgba(10,15,10,0.18)", "fill-translate": [1, 1.4] } });
       mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 15.2, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.48 } });
       mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 15.2, paint: { "line-color": "rgba(120,80,50,0.35)", "line-width": 0.8 } });
+
+      // Deliberate district compounds sit above low-contrast infill: their
+      // varied roof tones and fenced yards make a close-up feel authored,
+      // while their zoom threshold keeps the overview shape-led.
+      mapGL.addSource("mapAuthoredMassing", { type: "geojson", data: geo.authoredMassing });
+      mapGL.addLayer({ id: "authored-massing-shadow", type: "fill", source: "mapAuthoredMassing", minzoom: 14.5, paint: { "fill-color": "rgba(18,28,20,.24)", "fill-translate": [1.2, 1.7] } });
+      mapGL.addLayer({ id: "authored-massing-fill", type: "fill", source: "mapAuthoredMassing", minzoom: 14.5, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "authored-massing-outline", type: "line", source: "mapAuthoredMassing", minzoom: 14.5, paint: { "line-color": "rgba(91,62,36,.68)", "line-width": 1 } });
+      mapGL.addSource("mapAuthoredMassingYards", { type: "geojson", data: geo.authoredMassingYards });
+      mapGL.addLayer({ id: "authored-massing-yards-fill", type: "fill", source: "mapAuthoredMassingYards", minzoom: 14.5, paint: { "fill-color": "rgba(57,72,52,.32)" } });
+      mapGL.addLayer({ id: "authored-massing-yards", type: "line", source: "mapAuthoredMassingYards", minzoom: 14.5, paint: { "line-color": "rgba(79,64,42,.78)", "line-width": 1.35, "line-dasharray": [2, 1] } });
 
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
       mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", minzoom: 14.7, paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
