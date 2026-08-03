@@ -239,6 +239,7 @@ node scripts/validate-district-footprints.mjs
 node scripts/validate-reference-layout.mjs
 node scripts/validate-small-venue-layout.mjs
 node scripts/validate-natural-area-footprints.mjs
+node scripts/audit-ground-use-overlaps.mjs
 node scripts/audit-map-positions.mjs
 node --check js/app.js
 ```

@@ -31,6 +31,8 @@ readings. Record the source, region and non-geometric observation there first;
 then make the matching change in the specialised geometry source. Ground-use
 polygons in `camp-zones.json` can name exclusions, and validation rejects any
 polygon that covers an excluded reviewed anchor.
+`node scripts/audit-ground-use-overlaps.mjs` additionally performs full
+polygon intersection checks against every reviewed woodland fringe.
 
 Before committing a map pass, use `node scripts/map-preflight.mjs`. It rebuilds
 browser data and runs every cross-layer validation in the required order,
