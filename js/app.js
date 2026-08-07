@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v407";
-const APP_BUILD_TIME = "2026-08-03T12:24:41Z";
+const APP_CACHE_VERSION = "v408";
+const APP_BUILD_TIME = "2026-08-07T13:44:44Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -5969,43 +5969,67 @@ const locations = [
   // so it closes the gap without introducing new overlaps in the corridor.
   { name:"Area 404", kind:"district", x:"36%", y:"37%", info:"Downtown. Once the district for outsiders and squatters, 404 now runs Boomtown after winning last year's election, policed by Chief Guardian Mr Biga's own Guardians — whose boot camp, 'official fines' and work-permit machinery are worth questioning if you find them." },
   { name:"Botanica", kind:"district", x:"28%", y:"18%", info:"Downtown. A plant-covered temple district. Its leader, the Great Mother, is plotting an ascension ritual after her election defeat, centred on the transformed Temple of Zero — home to The Network and its sentient mycelium AI, IONA." },
-  // Thrutopia's map pin removed entirely (not just repositioned) — still
-  // unconfirmed by any real footage after two separate sessions' worth of
-  // reference video, including one clip of someone typing "thrutopia"
-  // into the official app's own search bar and manually panning almost
-  // the entire site: no pin, label, or highlighted result for it ever
-  // appeared anywhere. The one "sighting" found earlier was a screen
-  // recording of THIS APP'S OWN in-progress map (caught mid-pan by its
-  // "Greebtown!" app-switcher label), not the official app — using that
-  // would have been circularly confirming our own guess. Thrutopia is
-  // still a real district narratively (schedule, GUIDE_DISTRICT_NAMES,
-  // Discover cards below all keep it — it clearly exists, e.g. the
-  // opening ceremony is held there) but showing a guessed pin on a map
-  // people navigate by risks sending someone to the wrong place, which
-  // is worse than showing nothing. Re-add a pin only once a genuine
-  // official-app sighting turns up.
-  // Copperwood's map pin removed entirely — same treatment as Thrutopia
-  // above. Earlier sessions' video-review notes (docs/map-evidence)
-  // repeatedly claimed a "COPPERWOOD HEIGHTS" label in this area across
-  // several independent frames, but two fresh screenshots of exactly
-  // this area (Grand Central close-up, and The Hide Out Hilltop/Full
-  // Moon Ballroom close-up — both covering precisely where Copperwood
-  // was placed) show every other venue label in the cluster (Tangled
-  // Roots, The Hide Out Hilltop, Silver Swan Talent Agency, Full Moon
-  // Ballroom, Foggers Mill, Boomtown Hall, Daily Rag, Ancient Futures,
-  // Elemental, Rebel Girls Club, Circus, etc.) clearly legible, with no
-  // "Copperwood"/"Copperwood Heights" text anywhere. Direct, current,
-  // targeted evidence beats the older secondhand video notes here.
-  // Copperwood still clearly exists NARRATIVELY (GUIDE_DISTRICT_NAMES,
-  // Discover card, Edna Von Vanderhaus/VVH/Von Vanderland character
-  // entries all keep it — same as Thrutopia) but showing a district pin
-  // with no confirmed on-map label risks sending someone to a place
-  // that isn't actually marked. The venues that were "near Copperwood"
-  // (The Hide Out Hilltop, Topsy Turvy Trims) keep their own confirmed
-  // positions and are now described relative to Grand Central instead,
-  // and the trunk-path edges that used Copperwood as a junction now
-  // connect directly to Grand Central, which both screenshots confirm
-  // as the real hub for this whole cluster.
+  // Thrutopia's map pin was removed entirely (not just repositioned) in an
+  // earlier session — still unconfirmed by any real footage after two
+  // separate sessions' worth of reference video, including one clip of
+  // someone typing "thrutopia" into the official app's own search bar and
+  // manually panning almost the entire site: no pin, label, or
+  // highlighted result for it ever appeared anywhere. The one "sighting"
+  // found earlier was a screen recording of THIS APP'S OWN in-progress
+  // map (caught mid-pan by its "Greebtown!" app-switcher label), not the
+  // official app — using that would have been circularly confirming our
+  // own guess.
+  //
+  // Re-added — a user-supplied screenshot now shows a legible glowing
+  // "THRUTOPIA" label, north of Grand Central and near Ancient Futures,
+  // with the yellow Hilltop ground zone to its south-east and Oldtown far
+  // to the south-west, all in one frame. Checked this wasn't the same
+  // "our own app" mistake documented above: the screenshot shows a
+  // floating "explore / me / event" button stack, which this app's own UI
+  // does not have anywhere (ours uses the chip/tab bar seen in every
+  // Playwright render of this file, never a floating action-button
+  // stack) — genuinely the official app. That said, this directly
+  // contradicts the earlier session's own targeted in-app search, which
+  // was a considerably more thorough negative test than a single
+  // screenshot is a positive one; if a future pass finds contradicting
+  // evidence again, the in-app search result should probably win.
+  // Positioned by eye relative to Grand Central's own live position
+  // (see its reference-layout anchor below) and Ancient Futures, not
+  // precisely measured — no second confirmed point in this specific
+  // screenshot to calibrate scale against.
+  { name:"Thrutopia", kind:"district", x:"40%", y:"40%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
+  // Copperwood's map pin was removed entirely in an earlier session —
+  // same treatment as Thrutopia above. Earlier sessions' video-review
+  // notes (docs/map-evidence) repeatedly claimed a "COPPERWOOD HEIGHTS"
+  // label in this area across several independent frames, but two fresh
+  // screenshots of exactly this area (Grand Central close-up, and The
+  // Hide Out Hilltop/Full Moon Ballroom close-up — both covering
+  // precisely where Copperwood was placed) showed every other venue
+  // label in the cluster (Tangled Roots, The Hide Out Hilltop, Silver
+  // Swan Talent Agency, Full Moon Ballroom, Foggers Mill, Boomtown Hall,
+  // Daily Rag, Ancient Futures, Elemental, Rebel Girls Club, Circus,
+  // etc.) clearly legible, with no "Copperwood"/"Copperwood Heights" text
+  // anywhere, so the pin was removed.
+  //
+  // Re-added — a user-supplied screenshot of, specifically, the same
+  // "The Hide Out Hilltop/Full Moon Ballroom close-up" area described
+  // above shows a legible "COPPERWOOD HEIGHTS" label between The Hide
+  // Out Hilltop and Full Moon Ballroom/Foggers Mill, directly
+  // contradicting the earlier pass's read of what should be the same
+  // view. Checked this screenshot isn't the "our own app" false positive
+  // documented on Thrutopia's entry above (same floating "explore / me /
+  // event" button stack this app's UI doesn't have — genuinely the
+  // official app). Given two independent close-up looks at the same spot
+  // now disagree, treat this as reopened rather than settled either way;
+  // a third look would be worth getting before relying on this for
+  // wayfinding. Positioned by eye near The Hide Out Hilltop, matching
+  // where the screenshot shows it, not precisely measured.
+  //
+  // The venues that were "near Copperwood" (The Hide Out Hilltop, Topsy
+  // Turvy Trims) keep their own confirmed positions and stayed described
+  // relative to Grand Central rather than reverting — those are
+  // independently sourced and don't need Copperwood to anchor them.
+  { name:"Copperwood", kind:"district", x:"37%", y:"29%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
   // Pulled from (88,52) to (68,40) — three independent reference frames
   // this session (all showing Copperwood/Grand Central/Oldtown together,
   // at three different zoom levels across two videos) consistently place
