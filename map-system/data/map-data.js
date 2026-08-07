@@ -4229,6 +4229,18 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         "south-gate"
       ],
       "notes": "Hilltop reads as a long faceted yellow ground-use corridor. The Lion's Den sits in its own green clearing/woodland mass to the east, while the east-side campsite is a separate vertical green field."
+    },
+    {
+      "id": "official-video-fullsite-2026-08-07",
+      "source": "Frame extracted from a user-supplied official-app screen recording, full-site pan with Alresford Rd visible along the north edge (confirms true north-up, not rotated)",
+      "evidence": "official-overview",
+      "regions": [
+        "copperwood",
+        "grand-central",
+        "lion-den",
+        "quantum"
+      ],
+      "notes": "Two-point calibration (Botanica at its own reviewed anchor, Grand Central at its own reviewed anchor) landed Copperwood within ~3 units of its already-reviewed position - cross-check passed, left unchanged. The same calibration put a raw estimate for The Lion's Den around (60,54), but that pixel reading isn't trustworthy on its own (the source app supports rotation/tilt during a pan, so a single frame's absolute direction can't be taken at face value the way an adjacency/order reading can) - treated as a directional signal only ('somewhat closer to Grand Central/Oldtown than the previous (78,70) anchor'), not a coordinate to copy. Nudged to (81,65): the closest point to that raw estimate that still clears the already-reviewed hilltop-field ground-use polygon (checked programmatically against camp-zones.json/natural-area-footprints.json, not by eye). Quantum (a thingsToFind entry, not its own anchor) came out close enough to its current derived position (via the Oldtown anchor) to leave alone."
     }
   ],
   "anchors": {
@@ -4318,8 +4330,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         55
       ],
       "to": [
-        78,
-        70
+        81,
+        65
       ]
     },
     "Helix": {
