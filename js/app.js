@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v408";
-const APP_BUILD_TIME = "2026-08-07T13:44:44Z";
+const APP_CACHE_VERSION = "v409";
+const APP_BUILD_TIME = "2026-08-07T13:53:28Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -5996,8 +5996,14 @@ const locations = [
   // Positioned by eye relative to Grand Central's own live position
   // (see its reference-layout anchor below) and Ancient Futures, not
   // precisely measured — no second confirmed point in this specific
-  // screenshot to calibrate scale against.
-  { name:"Thrutopia", kind:"district", x:"40%", y:"40%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
+  // screenshot to calibrate scale against. Nudged from an initial
+  // (40,40) to (44,36) — this map's district labels are plain DOM
+  // elements with no built-in collision avoidance (see the Downtown-
+  // cluster comment above), and (40,40) was close enough to Botanica
+  // (30,42) to render its label directly overlapping Botanica's own at
+  // normal zoom. (44,36) keeps it just as close to Grand Central while
+  // clearing that collision.
+  { name:"Thrutopia", kind:"district", x:"44%", y:"36%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
   // Copperwood's map pin was removed entirely in an earlier session —
   // same treatment as Thrutopia above. Earlier sessions' video-review
   // notes (docs/map-evidence) repeatedly claimed a "COPPERWOOD HEIGHTS"
