@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v411";
-const APP_BUILD_TIME = "2026-08-07T15:03:22Z";
+const APP_CACHE_VERSION = "v412";
+const APP_BUILD_TIME = "2026-08-07T15:35:02Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7738,11 +7738,22 @@ function buildMapGeoJSON(){
   // instead of one fixed 0.6 for every segment — main routes read as the
   // wide, obvious way between big landmarks; minor ones stay narrow and
   // subtle, an "exploratory" hint rather than a signed route.
-  const TRAIL_WIDTH = { main: 0.74, secondary: 0.46, minor: 0.28 }; // schematic units
+  // Widths/opacity nudged down (main 0.74->0.6, minor opacity 0.55->0.38)
+  // — reported as paths reading like a "starburst"/"spider web" specifically
+  // where several main routes now converge close together (Grand Central,
+  // after this session's own position fixes brought Copperwood/Thrutopia/
+  // Oldtown all near it). A single wide, fully-opaque main route reads
+  // fine in isolation; three or four of them meeting at nearly the same
+  // point, each independently bow-curved, is what was actually reading as
+  // "weird rectangles"/"shapes not an image" — this doesn't touch the
+  // route data (still real evidenced connections), only how much visual
+  // weight each one carries so a real hub reads as a busy junction, not a
+  // solid orange starburst.
+  const TRAIL_WIDTH = { main: 0.6, secondary: 0.4, minor: 0.24 }; // schematic units
   const TRAIL_FILL = {
-    main: "rgba(214,182,122,0.97)",
-    secondary: "rgba(224,200,160,0.92)",
-    minor: "rgba(200,185,150,0.55)"
+    main: "rgba(214,182,122,0.9)",
+    secondary: "rgba(224,200,160,0.75)",
+    minor: "rgba(200,185,150,0.38)"
   };
   const trailFeatures = TRUNK_PATH_SEGMENTS.map(seg=>{
     const centreline = seg.points || curvedLine([seg.a.x, seg.a.y], [seg.b.x, seg.b.y], seg.seed);
@@ -8293,7 +8304,19 @@ function buildMapGeoJSON(){
     // large district doesn't go absurdly sparse/dense.
     const hasAuthoredMassing = reviewedDistrictMassingLayout.some(cluster=> cluster.sourceName === d.name);
     const densityBase = hasAuthoredMassing ? 5 : 11;
-    const count = Math.round(Math.min(20, Math.max(hasAuthoredMassing ? 3 : 6, densityBase * (r / 7) ** 2)));
+    // Floor lowered from a flat 6 (unauthored) / 3 (authored) to scale
+    // down for genuinely small districts too — Copperwood and Thrutopia
+    // (restored this session, no authored massing yet, and packed close
+    // together near Grand Central after their own position fix) have a
+    // clearance radius under 4, but the old flat floor still forced 6
+    // buildings into that tiny area regardless, on top of Grand Central's
+    // own already-dense authored massing right next door — reported as
+    // "weird pictures of rectangles" rather than a real illustrated
+    // place. Floor now itself scales with radius (never below 2, capped
+    // at the old flat value) so a small district gets proportionally
+    // fewer, not the same fixed minimum as a normal-sized one.
+    const floor = Math.max(2, Math.round((hasAuthoredMassing ? 3 : 6) * Math.min(1, r / 7)));
+    const count = Math.round(Math.min(20, Math.max(floor, densityBase * (r / 7) ** 2)));
     for(let k=0;k<count;k++){
       const [x, y] = pickClearBuildingSpot(cx, cy, r * 0.35, r * 0.85, rand, allowedRing);
       infillBuildingFeatures.push({
@@ -8518,6 +8541,15 @@ function buildMapGeoJSON(){
     { fill: "rgba(228,142,126,0.87)", line: "rgba(193,96,80,0.83)" },
     { fill: "rgba(244,172,156,0.85)", line: "rgba(210,118,100,0.80)" }
   ];
+  // Wider, paler fringe under each field's own solid fill — same trick
+  // already used for the forest/pond edges above. Without one, camping
+  // fields met open grass as a hard graphic cutout ("floating islands"
+  // reported directly); a real pitched field's edge is worn/uneven, not
+  // a clean vector line. Kept as its own feature array/layer (drawn
+  // first, below camp-fields-fill) rather than widening the field ring
+  // itself, so the actual field boundary/area used by the overlap audits
+  // is untouched.
+  const campFieldFringeFeatures = [];
   const campFieldFeatures = ordinaryCamps.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
     const footprint = c.footprint || { aspect: 1, sides: 6 };
@@ -8541,6 +8573,7 @@ function buildMapGeoJSON(){
     const style = /campervan/i.test(c.text)
       ? { fill: "rgba(238,182,150,0.83)", line: "rgba(200,128,92,0.80)" }
       : CAMP_FIELD_STYLES[i % CAMP_FIELD_STYLES.length];
+    campFieldFringeFeatures.push({ type: "Feature", properties: { fill: "rgba(226,146,128,0.16)" }, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect * 1.3, r / aspect * 1.3, seed, footprint.sides, footprint.rotation)) ] } });
     return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, footprint.sides, footprint.rotation)) ] } };
   });
   // Ground-use fields are reviewed geometry, not an inferred ellipse.
@@ -8918,6 +8951,7 @@ function buildMapGeoJSON(){
     parkingCars: { type:"FeatureCollection", features: parkingCarFeatures },
     campAreas: { type:"FeatureCollection", features: campFeatures },
     campFields: { type:"FeatureCollection", features: campFieldFeatures },
+    campFieldsFringe: { type:"FeatureCollection", features: campFieldFringeFeatures },
     hilltopFieldDots: { type:"FeatureCollection", features: hilltopFieldDotFeatures },
     campFieldLines: { type:"FeatureCollection", features: campFieldLineFeatures },
     campTriangle: { type:"FeatureCollection", features: triangleFeature ? [triangleFeature] : [] },
@@ -9487,6 +9521,8 @@ function loadMap(){
       // on bare district/forest colour. Outline strengthened to a solid
       // warm brown so the field boundary itself is legible, not just
       // implied by the confetti dots scattered inside it.
+      mapGL.addSource("mapCampFieldsFringe", { type: "geojson", data: geo.campFieldsFringe });
+      mapGL.addLayer({ id: "camp-fields-fringe", type: "fill", source: "mapCampFieldsFringe", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapCampFields", { type: "geojson", data: geo.campFields });
       mapGL.addLayer({ id: "camp-fields-fill", type: "fill", source: "mapCampFields", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapHilltopFieldDots", { type: "geojson", data: geo.hilltopFieldDots });
@@ -9648,10 +9684,25 @@ function loadMap(){
       // than a thicket of equally important lines.
       mapGL.addLayer({ id: "trail-main-fill", type: "fill", source: "mapTrail", minzoom: 15.8, filter: ["==", ["get", "tier"], "main"], paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.84 } });
       mapGL.addLayer({ id: "trail-main-outline", type: "line", source: "mapTrail", minzoom: 15.8, filter: ["==", ["get", "tier"], "main"], paint: { "line-color": "rgba(100,75,45,0.46)", "line-width": 1.1 } });
-      mapGL.addLayer({ id: "trail-detail-fill", type: "fill", source: "mapTrail", minzoom: 15.8, filter: ["!=", ["get", "tier"], "main"], paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "trail-detail-outline", type: "line", source: "mapTrail", minzoom: 15.8, filter: ["!=", ["get", "tier"], "main"], paint: {
-        "line-color": ["match", ["get", "tier"], "minor", "rgba(140,120,90,0.25)", "rgba(120,95,60,0.55)"],
-        "line-width": ["match", ["get", "tier"], "minor", 0.6, 1]
+      mapGL.addLayer({ id: "trail-detail-fill", type: "fill", source: "mapTrail", minzoom: 15.8, filter: ["==", ["get", "tier"], "secondary"], paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "trail-detail-outline", type: "line", source: "mapTrail", minzoom: 15.8, filter: ["==", ["get", "tier"], "secondary"], paint: {
+        "line-color": "rgba(120,95,60,0.55)", "line-width": 1
+      } });
+      // Minor-tier paths (the dense internal chains inside a single small
+      // cluster, e.g. Oldtown's own venue-to-venue links) held back to a
+      // noticeably closer zoom than main/secondary routes, not the same
+      // 15.8 as everything else — reported as several districts' worth of
+      // main+secondary+minor paths all converging and rendering at once
+      // reading as a "starburst"/tangle of lines rather than a real place,
+      // worst right where this session's own position fixes brought
+      // several clusters close together (Grand Central/Copperwood/
+      // Thrutopia/Oldtown). Minor paths are real evidenced connections,
+      // not removed — they now just wait for the zoom level where you're
+      // actually looking at that one small cluster, the same progressive-
+      // detail idea the rest of this map's zoom hierarchy already uses.
+      mapGL.addLayer({ id: "trail-minor-fill", type: "fill", source: "mapTrail", minzoom: 16.6, filter: ["==", ["get", "tier"], "minor"], paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "trail-minor-outline", type: "line", source: "mapTrail", minzoom: 16.6, filter: ["==", ["get", "tier"], "minor"], paint: {
+        "line-color": "rgba(140,120,90,0.25)", "line-width": 0.6
       } });
       mapGL.addSource("mapPathScrub", { type: "geojson", data: geo.pathScrub });
       mapGL.addLayer({ id: "path-scrub-circle", type: "circle", source: "mapPathScrub", minzoom: 15.8, paint: {
@@ -9719,7 +9770,15 @@ function loadMap(){
       mapGL.addSource("mapAuthoredMassing", { type: "geojson", data: geo.authoredMassing });
       mapGL.addLayer({ id: "authored-massing-shadow", type: "fill", source: "mapAuthoredMassing", minzoom: 13.5, paint: { "fill-color": "rgba(18,28,20,.24)", "fill-translate": [1.2, 1.7] } });
       mapGL.addLayer({ id: "authored-massing-fill", type: "fill", source: "mapAuthoredMassing", minzoom: 13.5, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "authored-massing-outline", type: "line", source: "mapAuthoredMassing", minzoom: 13.5, paint: { "line-color": "rgba(91,62,36,.68)", "line-width": 1 } });
+      // Softened from rgba(91,62,36,.68)/width 1 — a hard, near-opaque
+      // outline on every single small building, on top of its own drop
+      // shadow, is what was making each structure read as a distinct
+      // "sticker" cut out and placed on the ground rather than a real
+      // part of a built-up cluster (reported as "clunky ugly shapes").
+      // The shadow layer already carries the depth cue; the outline only
+      // needs to keep buildings from visually fusing into their
+      // neighbours at close zoom, not compete with the shadow for it.
+      mapGL.addLayer({ id: "authored-massing-outline", type: "line", source: "mapAuthoredMassing", minzoom: 13.5, paint: { "line-color": "rgba(91,62,36,.32)", "line-width": 0.6 } });
       mapGL.addSource("mapAuthoredMassingYards", { type: "geojson", data: geo.authoredMassingYards });
       mapGL.addLayer({ id: "authored-massing-yards-fill", type: "fill", source: "mapAuthoredMassingYards", minzoom: 13.5, paint: { "fill-color": "rgba(57,72,52,.32)" } });
       mapGL.addLayer({ id: "authored-massing-yards", type: "line", source: "mapAuthoredMassingYards", minzoom: 13.5, paint: { "line-color": "rgba(79,64,42,.78)", "line-width": 1.35, "line-dasharray": [2, 1] } });
