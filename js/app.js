@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v409";
-const APP_BUILD_TIME = "2026-08-07T13:53:28Z";
+const APP_CACHE_VERSION = "v410";
+const APP_BUILD_TIME = "2026-08-07T14:06:09Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6001,9 +6001,15 @@ const locations = [
   // elements with no built-in collision avoidance (see the Downtown-
   // cluster comment above), and (40,40) was close enough to Botanica
   // (30,42) to render its label directly overlapping Botanica's own at
-  // normal zoom. (44,36) keeps it just as close to Grand Central while
-  // clearing that collision.
-  { name:"Thrutopia", kind:"district", x:"44%", y:"36%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
+  // normal zoom.
+  // Nudged again, from (44,36) to (43,24) — this repo's own earlier
+  // evidence pass (docs/map-evidence/findings_screenshots.md, from the
+  // official app's schematic/legend overview screens, its highest-value
+  // evidence) already recorded "THRUTOPIA district label sits directly
+  // north of COPPERWOOD"; (44,36) put it south of Copperwood (37,29)
+  // instead, backwards from that finding. This keeps the same distance
+  // from Grand Central while putting it north of Copperwood as recorded.
+  { name:"Thrutopia", kind:"district", x:"43%", y:"24%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
   // Copperwood's map pin was removed entirely in an earlier session —
   // same treatment as Thrutopia above. Earlier sessions' video-review
   // notes (docs/map-evidence) repeatedly claimed a "COPPERWOOD HEIGHTS"

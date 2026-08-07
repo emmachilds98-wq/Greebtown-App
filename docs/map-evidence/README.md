@@ -51,9 +51,24 @@ find" filter chip row instead.
 
 ## Known gaps as of this pass
 
-- **Thrutopia** has no map pin — confirmed absent from the map itself after
-  two sessions' footage (including a search for it), so it's tracked as a
-  narrative district only until a genuine sighting turns up.
+- **Update, 7 Aug 2026:** Thrutopia and Copperwood both have map pins again.
+  User-supplied screenshots showed legible "THRUTOPIA" and "COPPERWOOD
+  HEIGHTS" labels — the Copperwood one re-showing the same Hide Out
+  Hilltop/Full Moon Ballroom close-up area this session's own screenshots
+  had found no label in, so that finding is reopened rather than settled.
+  Checked the new screenshots weren't the same "our own app" false
+  positive documented above (same UI markers: Mapbox logo, search bar with
+  profile picture, Bar/Food/Toilet/Medical buttons — confirmed present).
+  Both positions are placed by eye near Grand Central, not precisely
+  measured; see their comments on the `locations` entries in `js/app.js`.
+  If a future pass finds contradicting evidence again — a third
+  independent check disagreeing with this one — the original in-app
+  search result (findings_vidF.md) is the more thorough test and should
+  probably win.
+- (Superseded by the update above.) Thrutopia previously had no map pin —
+  confirmed absent from the map itself after two sessions' footage
+  (including a search for it), so it was tracked as a narrative district
+  only until a genuine sighting turned up.
 - Several `thingsToFind` entries still carry positions originally derived
   from scraped GPS lat/lon (converted to schematic x/y) rather than footage
   — flagged in their own comments with "Real surveyed GPS puts it..." — and
