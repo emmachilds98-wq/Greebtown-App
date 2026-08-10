@@ -17,10 +17,16 @@ whole-site composition reference is `IMG_3670.png`; official close-ups and
 video findings may refine a connected area after they agree with that view.
 Never use a Greebtown screenshot to validate Greebtown.
 
+Before a new region is drawn, log the supporting official material using
+`REBUILD_INTAKE.md`. That record must describe visible relationships and
+silhouettes, not a derived coordinate set.
+
 ## Required refresh workflow
 
-The active map was reset to a blank baseline on 10 Aug 2026. No previous
-territory, label, route, or marker is approved for carry-over.
+The active map was reset to a blank baseline on 10 Aug 2026. Its only retained
+visual is the neutral road/background canvas. No previous territory, label,
+route, marker, MapLibre control, or attribution element is approved for
+carry-over.
 
 1. Trace the full-site territory order and large silhouettes from the official
    overview before placing labels or venue detail.

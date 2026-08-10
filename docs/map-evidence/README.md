@@ -44,6 +44,10 @@ find" filter chip row instead.
 
 ## Files
 
+- `REBUILD_INTAKE.md` — the required evidence-entry template and acceptance
+  threshold for the clean-slate rebuild. Add new official material using this
+  workflow before any map implementation work begins.
+
 - `screenshots/` — 58 screenshots of the official app's map (deduplicated,
   genuinely-official-app only).
 - `findings_screenshots.md` — written findings from reviewing all screenshots.

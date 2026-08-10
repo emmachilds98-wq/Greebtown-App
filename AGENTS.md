@@ -170,6 +170,14 @@ supports each region and produce a rendered before/after review. A green data
 validator is necessary but is not proof that the map visually matches the
 official app.
 
+The active map is deliberately a clean baseline: retain only its neutral
+road/background canvas while evidence is gathered. No legacy marker, label,
+territory, route, control, attribution element, or generated geometry is
+approved for carry-over. Before drawing any new region, follow
+`docs/map-evidence/REBUILD_INTAKE.md`; it records the official source,
+visible spatial relationships, silhouette observations, and uncertainty without
+creating another coordinate source.
+
 This has been the highest-effort, highest-error area of the app. Key things
 to know before touching any map code or data:
 
