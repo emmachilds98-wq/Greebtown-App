@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v436";
-const APP_BUILD_TIME = "2026-08-10T22:21:13Z";
+const APP_CACHE_VERSION = "v438";
+const APP_BUILD_TIME = "2026-08-10T22:31:08Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7468,13 +7468,13 @@ function evidenceRebuildDetailLabels(){
 
 function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
-  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths"];
+  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
   const polygon = (name, fill, points)=>({
     type:"Feature", properties:{ name, fill },
     geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(points)] }
   });
-  const route = points=>({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates:schematicRingToLngLat(points) } });
+  const route = (points, properties={})=>({ type:"Feature", properties, geometry:{ type:"LineString", coordinates:schematicRingToLngLat(points) } });
   const building = (fill, points)=> polygon("illustrated structure", fill, points);
 
   // New scene, traced only from IMG_3721–IMG_3734: wooded west, a compact
@@ -7536,13 +7536,34 @@ function buildEvidenceOnlyMapGeoJSON(){
     [73,58],[77,58],[80,60],[72,62],[76,63],[81,64],[73,66],[78,68],[80,71],[74,70]
   ].map(([x,y])=>treeDot(x,y,1)) };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
-    route([[39,46],[42,44],[45,44],[47,47]]),         // Botanica loop
-    route([[35,68],[35,72],[41,73],[42,76]]),         // Area 404 venue column
-    route([[51,61],[51,64],[52,66],[51,68]]),         // Oldtown west column
-    route([[60,57],[62,61],[62,64]]),                 // Oldtown east column
-    route([[59,20],[64,22],[69,25]]),                 // Valley Camping lanes
-    route([[74,59],[78,62],[81,66],[79,71]])          // Hilltop camping route
+    route([[39,46],[42,44],[45,44],[47,47]], { kind:"street" }), // Botanica loop
+    route([[35,68],[35,72],[41,73],[42,76]], { kind:"street" }), // Area 404 venue column
+    route([[51,61],[51,64],[52,66],[51,68]], { kind:"street" }), // Oldtown west column
+    route([[60,57],[62,61],[62,64]], { kind:"street" }),         // Oldtown east column
+    route([[59,20],[64,22],[69,25]], { kind:"camp" }),           // Valley Camping lanes
+    route([[74,59],[78,62],[81,66],[79,71]], { kind:"camp" }),   // Hilltop camping route
+    route([[71,58],[76,60],[80,63]], { kind:"camp" }),
+    route([[72,64],[76,66],[80,69]], { kind:"camp" })
   ] };
+  // Recognisable, evidence-backed landmarks and stage forms. These are
+  // purposefully few: each is visible in the official close-up material.
+  geo.evidenceLandmarks = { type:"FeatureCollection", features:[
+    polygon("Spectrum 360 container ring", "rgba(91,73,119,.96)", [[37,65],[40,64],[43,66],[44,69],[42,71],[38,71],[36,69]]),
+    polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
+    polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
+    polygon("Lion's Den amphitheatre", "rgba(117,78,43,.98)", [[72,85],[80,84],[83,87],[80,89],[72,89],[70,87]])
+  ] };
+  geo.evidenceStageTiers = { type:"FeatureCollection", features:[
+    route([[72,86],[80,86]], { kind:"tier" }), route([[72,87.3],[81,87.3]], { kind:"tier" }), route([[73,88.5],[80,88.5]], { kind:"tier" }),
+    route([[38,67],[42,67]], { kind:"tier" }), route([[38,68.5],[42.5,68.5]], { kind:"tier" })
+  ] };
+  geo.evidenceCourtDots = { type:"FeatureCollection", features:[
+    [40,43],[43,42],[45,45],[40,46],                   // NEXUS/Botanica court vegetation
+    [55,46],[59,45],[61,48],                           // Grand Central hardstanding details
+    [53,59],[56,58],[59,60],[54,63],[58,64],           // Oldtown court details
+    [44,73],[47,74],[46,76],                           // Tribe of Frog compound
+    [72,85],[75,85],[78,86],[80,88]                    // Lion's Den forecourt
+  ].map(([x,y])=>treeDot(x,y,.72)) };
   return geo;
 }
 
@@ -9229,7 +9250,10 @@ function buildMapGeoJSON(){
 // primary districts, headline stages and ground shapes establish orientation.
 // This is an intentionally blank evidence-only baseline. Every legacy DOM
 // marker group must be explicitly disabled: an omitted key defaults visible.
-let mapLayerVisible = { main: false, manual: false, overview: false, minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: false, sssi: false, road: false, gate: false, place: false, refresh: true, "refresh-detail": true };
+// The rebuilt map creates only these two evidence-scene groups. Legacy
+// content groups are deliberately absent rather than hidden: absence keeps a
+// future visibility toggle from accidentally restoring old stage placements.
+let mapLayerVisible = { refresh: true, "refresh-detail": true };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -9266,8 +9290,11 @@ let mapLayerVisible = { main: false, manual: false, overview: false, minor: fals
 // site-boundary shape), AND schematicToLatLon() below, so every
 // approximate position in this file is anchored to the same one real
 // box instead of disagreeing calibrations.
-const SITE_SW = { lat: 51.0495, lon: -1.2445 };
-const SITE_NE = { lat: 51.0575, lon: -1.2340 };
+// Neutral internal render plane. These are not a real-world site bound or
+// imported GPS fit; every visible placement starts in the evidence-reviewed
+// 0-100 scene plane below.
+const SITE_SW = { lat: 0.0000, lon: 0.0000 };
+const SITE_NE = { lat: 0.0100, lon: 0.0140 };
 function schematicToLatLon(xPercent, yPercent){
   const latSpan = SITE_NE.lat - SITE_SW.lat, lonSpan = SITE_NE.lon - SITE_SW.lon;
   return {
@@ -9472,7 +9499,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v4";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v6-no-legacy-markers";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -9501,7 +9528,8 @@ function loadMap(){
     // not a fixed zoom tuned for one screen size. This keeps the west
     // fields, Hilltop corridor, Lion's Den woodland and road edge in one
     // coherent first view on both a phone and a wider desktop card.
-    const overviewCorners = siteLayout.siteBoundary.points.map(([x,y])=> schematicToLatLon(x, y));
+    const overviewCorners = [[10,14], [90,14], [90,94], [10,94]]
+      .map(([x,y])=> schematicToLatLon(x, y));
     const SITE_OVERVIEW_BOUNDS = [
       [Math.min(...overviewCorners.map(point=> point.lon)), Math.min(...overviewCorners.map(point=> point.lat))],
       [Math.max(...overviewCorners.map(point=> point.lon)), Math.max(...overviewCorners.map(point=> point.lat))]
@@ -10188,11 +10216,20 @@ function loadMap(){
       mapGL.addSource("mapEvidenceCampTents", { type: "geojson", data: geo.evidenceCampTents });
       mapGL.addLayer({ id: "evidence-camp-tents", type: "circle", source: "mapEvidenceCampTents", minzoom: 15.55, paint: { "circle-radius": 2.1, "circle-color": "rgba(245,238,194,.9)", "circle-stroke-width": .35, "circle-stroke-color": "rgba(72,92,54,.72)" } });
       mapGL.addSource("mapEvidenceDetailPaths", { type: "geojson", data: geo.evidenceDetailPaths });
-      mapGL.addLayer({ id: "evidence-detail-paths", type: "line", source: "mapEvidenceDetailPaths", minzoom: 15.55, paint: { "line-color": "rgba(252,241,202,.9)", "line-width": 1.35, "line-dasharray": [1.5, .8] } });
+      mapGL.addLayer({ id: "evidence-detail-paths-casing", type: "line", source: "mapEvidenceDetailPaths", minzoom: 15.55, paint: { "line-color": "rgba(44,49,34,.42)", "line-width": 3.2 } });
+      mapGL.addLayer({ id: "evidence-detail-paths", type: "line", source: "mapEvidenceDetailPaths", minzoom: 15.55, paint: { "line-color": ["match", ["get", "kind"], "camp", "rgba(218,231,173,.92)", "rgba(252,241,202,.94)"], "line-width": ["match", ["get", "kind"], "camp", 1.05, 1.45], "line-dasharray": [1.5, .8] } });
       mapGL.addSource("mapEvidenceStageCourts", { type: "geojson", data: geo.evidenceStageCourts });
       mapGL.addLayer({ id: "evidence-stage-courts-shadow", type: "fill", source: "mapEvidenceStageCourts", paint: { "fill-color": "rgba(22,26,18,.4)", "fill-translate": [1, 1.5] } });
       mapGL.addLayer({ id: "evidence-stage-courts", type: "fill", source: "mapEvidenceStageCourts", paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "evidence-stage-courts-outline", type: "line", source: "mapEvidenceStageCourts", paint: { "line-color": "rgba(47,43,28,.8)", "line-width": 1.1 } });
+      mapGL.addSource("mapEvidenceLandmarks", { type: "geojson", data: geo.evidenceLandmarks });
+      mapGL.addLayer({ id: "evidence-landmarks-shadow", type: "fill", source: "mapEvidenceLandmarks", minzoom: 15.55, paint: { "fill-color": "rgba(16,21,15,.34)", "fill-translate": [1.1, 1.4] } });
+      mapGL.addLayer({ id: "evidence-landmarks", type: "fill", source: "mapEvidenceLandmarks", minzoom: 15.55, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "evidence-landmarks-outline", type: "line", source: "mapEvidenceLandmarks", minzoom: 15.55, paint: { "line-color": "rgba(37,39,27,.88)", "line-width": 1.1 } });
+      mapGL.addSource("mapEvidenceStageTiers", { type: "geojson", data: geo.evidenceStageTiers });
+      mapGL.addLayer({ id: "evidence-stage-tiers", type: "line", source: "mapEvidenceStageTiers", minzoom: 15.85, paint: { "line-color": "rgba(244,205,129,.84)", "line-width": 1.05 } });
+      mapGL.addSource("mapEvidenceCourtDots", { type: "geojson", data: geo.evidenceCourtDots });
+      mapGL.addLayer({ id: "evidence-court-dots", type: "circle", source: "mapEvidenceCourtDots", minzoom: 15.85, paint: { "circle-radius": 1.35, "circle-color": "rgba(255,234,150,.82)", "circle-stroke-width": .3, "circle-stroke-color": "rgba(53,64,37,.82)" } });
     });
     document.querySelectorAll("#mapLayerToggles .chip").forEach(chip=>{
       const layer = chip.dataset.layer;
@@ -10211,6 +10248,33 @@ function loadMap(){
   Object.values(mapMarkerGroups).forEach(arr=> arr.forEach(m=> m.remove()));
   mapMarkerGroups = {};
   mapMarkersByName = {};
+
+  // Active construction boundary: create exactly the labels authored from
+  // official screenshots/video evidence. The legacy arrays below remain in
+  // this file for non-map app content (for example schedules and discovery),
+  // but must never be iterated while building the map.
+  evidenceRebuildLabels().forEach(([name, x, y, styleClass])=>{
+    const coord = schematicToLatLon(x, y);
+    addMapMarker("refresh", coord.lat, coord.lon,
+      `<div class="map-label manual-territory evidence-territory ${styleClass}">${name}</div>`,
+      { name, title:name }
+    );
+  });
+  evidenceRebuildDetailLabels().forEach(([name, x, y, kind])=>{
+    const coord = schematicToLatLon(x, y);
+    addMapMarker("refresh-detail", coord.lat, coord.lon,
+      `<div class="map-label evidence-detail evidence-${kind}">${name}</div>`,
+      { name, title:name }
+    );
+  });
+  const evidenceSearchNames = document.getElementById("mapSearchNames");
+  if(evidenceSearchNames){
+    evidenceSearchNames.innerHTML = Object.keys(mapMarkersByName)
+      .sort((a,b)=> a.localeCompare(b))
+      .map(name=> `<option value="${escapeHtml(name)}"></option>`).join("");
+  }
+  queueMapLabelCollisionPass();
+  return;
 
   // Districts — broad narrative areas, not single points, so these get
   // a label only here (the actual "area" is the illustrated basemap's
