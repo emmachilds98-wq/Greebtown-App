@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v433";
-const APP_BUILD_TIME = "2026-08-10T21:32:00Z";
+const APP_CACHE_VERSION = "v434";
+const APP_BUILD_TIME = "2026-08-10T21:58:35Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7435,14 +7435,78 @@ function nearestTrunkPoint(x, y){
 // marker can both reach it.
 const SSSI_SPOTS = [{ name: "Site of Special Scientific Interest", x: "63", y: "25" }];
 
+function evidenceRebuildLabels(){
+  // Fresh visual anchors traced from IMG_3721–IMG_3734. These intentionally
+  // do not reuse the quarantined map-system or app coordinate collections.
+  return [
+    ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
+    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"],
+    ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
+    ["HILLTOP", 74, 68, "evidence-gold"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"]
+  ];
+}
+
 function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
-  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts"];
+  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
-  // Deliberately blank baseline. The replacement map must be traced from the
-  // official evidence tree, not improvised from previous map values.
-  geo.evidenceTerritories = empty();
-  geo.evidenceSpine = empty();
+  const polygon = (name, fill, points)=>({
+    type:"Feature", properties:{ name, fill },
+    geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(points)] }
+  });
+  const route = points=>({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates:schematicRingToLngLat(points) } });
+  const building = (fill, points)=> polygon("illustrated structure", fill, points);
+
+  // New scene, traced only from IMG_3721–IMG_3734: wooded west, a compact
+  // north-east Copperwood/Thrutopia pair, the Grand Central-to-Oldtown spine,
+  // long east Hilltop, then Quantum and Lion's Den below. It is deliberately
+  // separate from every historic map-system collection.
+  geo.evidenceTerritories = {
+    type:"FeatureCollection", features:[
+      polygon("Woodland west", "rgba(42,83,52,.90)", [[14,28],[38,23],[52,30],[50,82],[38,91],[16,81],[10,58]]),
+      polygon("Botanica", "rgba(62,143,94,.95)", [[34,39],[46,38],[51,45],[46,52],[35,51],[30,46]]),
+      polygon("Metropolis", "rgba(57,126,105,.95)", [[28,55],[39,53],[45,60],[41,67],[29,66],[24,61]]),
+      polygon("Area 404", "rgba(150,123,54,.95)", [[28,67],[41,65],[46,72],[41,79],[29,78],[24,73]]),
+      polygon("Copperwood Heights", "rgba(193,166,48,.97)", [[53,29],[65,27],[71,32],[68,38],[58,40],[50,36]]),
+      polygon("Thrutopia", "rgba(76,78,174,.97)", [[69,34],[82,34],[88,40],[84,47],[73,46],[68,41]]),
+      polygon("Grand Central", "rgba(176,97,55,.96)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
+      polygon("Oldtown", "rgba(117,58,54,.96)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
+      polygon("Hilltop", "rgba(161,144,43,.94)", [[67,50],[82,49],[86,60],[83,78],[70,79],[66,66]]),
+      polygon("Quantum", "rgba(174,69,188,.95)", [[48,76],[60,75],[64,85],[59,91],[50,90],[45,83]]),
+      polygon("The Lion's Den", "rgba(87,62,42,.96)", [[67,80],[82,80],[88,86],[82,92],[69,92],[64,87]])
+    ]
+  };
+  geo.evidenceSpine = { type:"FeatureCollection", features:[
+    route([[40,46],[48,46],[58,48],[58,57],[56,62],[56,70],[56,82]]),
+    route([[58,48],[61,36],[75,40]]),
+    route([[60,58],[69,59],[74,68],[73,78],[74,86]]),
+    route([[41,61],[36,69],[42,74],[52,82]]),
+    route([[56,82],[67,86]])
+  ] };
+  // Original, non-interactive massing: enough close-view texture for a place
+  // to feel inhabited, without inventing venue or amenity locations.
+  geo.evidenceStructures = { type:"FeatureCollection", features:[
+    building("#d5b27a", [[36,42],[39,42],[39,44],[36,44]]), building("#ad7a49", [[41,40],[44,40],[45,42],[42,43]]),
+    building("#f2dfb5", [[44,46],[47,45],[48,48],[45,49]]), building("#c79358", [[34,47],[37,47],[37,49],[34,49]]),
+    building("#b68156", [[30,57],[33,56],[34,59],[31,60]]), building("#eadcc0", [[36,56],[39,56],[40,59],[37,60]]),
+    building("#d19b62", [[40,61],[43,60],[44,63],[41,64]]), building("#a86f49", [[29,63],[31,62],[33,65],[30,66]]),
+    building("#d3a55e", [[29,70],[33,69],[34,72],[30,73]]), building("#f0d5a2", [[37,68],[41,68],[42,71],[39,72]]),
+    building("#a9744f", [[34,75],[38,74],[40,77],[36,78]]), building("#c28d55", [[25,72],[28,72],[28,75],[25,75]]),
+    building("#e2c587", [[56,31],[60,30],[61,33],[57,34]]), building("#c09154", [[63,31],[66,31],[67,34],[64,35]]),
+    building("#f3e7c6", [[57,35],[60,34],[62,37],[59,38]]), building("#b77e50", [[52,34],[55,33],[56,36],[53,37]]),
+    building("#6d568f", [[73,37],[77,36],[79,39],[75,40]]), building("#9b744e", [[80,39],[84,39],[85,42],[81,43]]),
+    building("#cf8b59", [[55,45],[58,44],[59,47],[56,48]]), building("#f0d5ab", [[60,46],[63,45],[64,48],[61,50]]),
+    building("#b37352", [[52,56],[55,55],[56,58],[53,59]]), building("#dfb77e", [[58,58],[61,57],[62,60],[59,61]]),
+    building("#9d6c4d", [[51,63],[54,62],[55,65],[52,66]]), building("#d9ae72", [[57,66],[60,65],[61,68],[58,69]]),
+    building("#a058ad", [[50,79],[54,78],[55,81],[51,82]]), building("#d27bb7", [[56,83],[60,82],[61,85],[57,86]]),
+    building("#b77a43", [[70,84],[74,83],[76,86],[71,87]]), building("#d69a51", [[78,85],[82,84],[84,87],[79,88]])
+  ] };
+  const treeDot = (x,y,size)=>({ type:"Feature", properties:{ size }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } });
+  geo.evidenceForestDots = { type:"FeatureCollection", features:[
+    [18,35,1.2],[23,39,.9],[28,32,1.1],[18,49,.8],[23,52,1.15],[17,62,1],[21,67,.9],[18,75,1.25],[23,80,.85],
+    [31,27,1],[38,29,.85],[45,30,1.15],[42,34,.8],[17,86,1],[27,84,.9],[35,86,1.1],[40,89,.85],
+    [68,25,1.1],[75,27,.9],[84,29,1],[87,52,1],[90,61,.85],[89,72,1.15],[87,83,.85],[65,94,1],[76,95,1.1]
+  ].map(([x,y,size])=>treeDot(x,y,size)) };
   return geo;
 }
 
@@ -9129,7 +9193,7 @@ function buildMapGeoJSON(){
 // primary districts, headline stages and ground shapes establish orientation.
 // This is an intentionally blank evidence-only baseline. Every legacy DOM
 // marker group must be explicitly disabled: an omitted key defaults visible.
-let mapLayerVisible = { main: false, manual: false, overview: false, minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: false, sssi: false, road: false, gate: false, place: false };
+let mapLayerVisible = { main: false, manual: false, overview: false, minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: false, sssi: false, road: false, gate: false, place: false, refresh: true };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -9372,7 +9436,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-baseline-v3";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v2";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -9493,8 +9557,8 @@ function loadMap(){
     // Open on the central, walkable part of the site instead of fitting the
     // entire perimeter into a small phone card. The Site overview control
     // remains the intentional way back to the full festival extent.
-    const entryFocus = schematicToLatLon(46, 53);
-    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.65 }));
+    const entryFocus = schematicToLatLon(59, 61);
+    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.35 }));
 
     // Label density is deliberately a three-step reveal rather than one
     // hard switch. DOM markers do not have MapLibre collision handling,
@@ -10070,11 +10134,18 @@ function loadMap(){
       // Evidence-traced refresh layer. Added last so the old generated
       // decoration cannot visually reassert its skewed composition.
       mapGL.addSource("mapEvidenceTerritories", { type: "geojson", data: geo.evidenceTerritories });
+      mapGL.addLayer({ id: "evidence-territories-shadow", type: "fill", source: "mapEvidenceTerritories", paint: { "fill-color": "rgba(11,22,15,.4)", "fill-translate": [2, 3] } });
       mapGL.addLayer({ id: "evidence-territories-fill", type: "fill", source: "mapEvidenceTerritories", paint: { "fill-color": ["get", "fill"], "fill-opacity": .94 } });
       mapGL.addLayer({ id: "evidence-territories-outline", type: "line", source: "mapEvidenceTerritories", paint: { "line-color": "rgba(37,91,50,.72)", "line-width": 1.35 } });
       mapGL.addSource("mapEvidenceSpine", { type: "geojson", data: geo.evidenceSpine });
       mapGL.addLayer({ id: "evidence-spine-casing", type: "line", source: "mapEvidenceSpine", paint: { "line-color": "rgba(67,67,46,.38)", "line-width": 4.4 } });
       mapGL.addLayer({ id: "evidence-spine", type: "line", source: "mapEvidenceSpine", paint: { "line-color": "rgba(239,225,177,.98)", "line-width": 2.2 } });
+      mapGL.addSource("mapEvidenceStructures", { type: "geojson", data: geo.evidenceStructures });
+      mapGL.addLayer({ id: "evidence-structures-shadow", type: "fill", source: "mapEvidenceStructures", paint: { "fill-color": "rgba(22,27,19,.34)", "fill-translate": [1.2, 1.5] } });
+      mapGL.addLayer({ id: "evidence-structures", type: "fill", source: "mapEvidenceStructures", paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "evidence-structures-outline", type: "line", source: "mapEvidenceStructures", paint: { "line-color": "rgba(60,48,30,.76)", "line-width": 1 } });
+      mapGL.addSource("mapEvidenceForestDots", { type: "geojson", data: geo.evidenceForestDots });
+      mapGL.addLayer({ id: "evidence-forest-dots", type: "circle", source: "mapEvidenceForestDots", paint: { "circle-radius": ["*", ["get", "size"], 2.1], "circle-color": "rgba(133,187,118,.88)", "circle-stroke-width": .4, "circle-stroke-color": "rgba(27,57,35,.7)" } });
     });
     document.querySelectorAll("#mapLayerToggles .chip").forEach(chip=>{
       const layer = chip.dataset.layer;
@@ -10142,16 +10213,11 @@ function loadMap(){
       { title: place.name }
     );
   });
-  // Primary labels for the evidence-traced refresh. They remain visible at
-  // entry zoom independently of the quarantined legacy marker groups.
-  [
-    ["METROPOLIS", 26, 43], ["BOTANICA", 42, 41], ["AREA 404", 31, 48],
-    ["LETSBE AVENUE", 45, 43], ["COPPERWOOD", 64, 44], ["GRAND CENTRAL", 53, 51],
-    ["OLDTOWN", 45, 57], ["THRUTOPIA", 65, 57], ["HILLTOP", 60, 67],
-    ["THE LION'S DEN", 35, 72], ["ANARA", 82, 73]
-  ].forEach(([name, x, y])=>{
+  // The only visible labels belong to the clean-slate scene above. Legacy
+  // markers remain disabled, preventing old icon data from leaking back in.
+  evidenceRebuildLabels().forEach(([name, x, y, styleClass])=>{
     const coord = schematicToLatLon(x, y);
-    addMapMarker("manual", coord.lat, coord.lon, `<div class="map-label manual-territory">${name}</div>`, { title:name });
+    addMapMarker("refresh", coord.lat, coord.lon, `<div class="map-label manual-territory evidence-territory ${styleClass}">${name}</div>`, { title:name });
   });
   districtList.forEach(place=>{
     const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));
