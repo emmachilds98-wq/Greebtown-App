@@ -1,361 +1,355 @@
 {
- "schemaVersion": "1.0.0",
- "coordinateSystem": "schematic-percent-v1",
- "groundUseFields": [
-  {
-   "id": "hilltop-field",
-   "name": "Hilltop Field",
-   "kind": "ground-use",
-   "surface": "hilltop-yellow",
-   "evidence": "official-overview",
-   "points": [
-    [
-     62,
-     28.5
-    ],
-    [
-     68,
-     27
-    ],
-    [
-     71,
-     30.7
-    ],
-    [
-     70,
-     37.4
-    ],
-    [
-     62,
-     44.8
-    ],
-    [
-     57,
-     53
-    ],
-    [
-     54,
-     51.5
-    ],
-    [
-     54,
-     45.6
-    ],
-    [
-     57,
-     36.7
-    ],
-    [
-     60,
-     31.5
-    ]
-   ],
-   "detailLines": [
-    [
-     [
-      64,
-      30
-     ],
-     [
-      65,
-      36.7
-     ],
-     [
-      63,
-      43.3
-     ],
-     [
-      58,
-      50
-     ]
-    ],
-    [
-     [
-      68,
-      28.5
-     ],
-     [
-      68,
-      35.9
-     ],
-     [
-      65,
-      41.9
-     ],
-     [
-      60,
-      47.8
-     ]
-    ]
-   ],
-   "excludes": [
-    "Anara Forest"
-   ],
-   "notes": "Reviewed Hilltop field. User supplied a clean, high-resolution official-app close-up of exactly this area (Grand Central/Oldtown/Quantum/Hilltop/Lion's Den) this session \u2014 measuring it directly gives a height:width ratio of roughly 1.4:1, not the ~1.8:1 elongated corridor an earlier pass drew. South end pulled up from y~62 to y~53 to match (see the matching change to scripts/audit-rendered-layout-alignment.mjs's threshold); the field's real south tip sits north of Quantum's own position, not reaching down to it \u2014 the earlier 'must reach the Quantum junction' assumption was a looser inference from indirect video-frame evidence that this clearer reference now supersedes. North end unchanged from the previous pass (already matched to Grand Central's own latitude)."
-  },
-  {
-   "id": "sunset-field",
-   "name": "Sunset Field",
-   "kind": "ground-use",
-   "surface": "hilltop-yellow",
-   "evidence": "official-overview",
-   "points": [
-    [
-     2,
-     58
-    ],
-    [
-     9,
-     57
-    ],
-    [
-     13,
-     61
-    ],
-    [
-     12,
-     68
-    ],
-    [
-     7,
-     71
-    ],
-    [
-     2,
-     68
-    ],
-    [
-     1,
-     63
-    ]
-   ],
-   "notes": "Far-left yellow field (labelled SUNSET) on the west edge above Petersfield Rd, distinct from the central Hilltop field; from IMG_3670."
-  }
- ],
- "zones": [
-  {
-   "id": "camp-west",
-   "name": "West Camping",
-   "position": {
-    "x": 69,
-    "y": 16
-   },
-   "footprint": {
-    "aspect": 1.55,
-    "sides": 6,
-    "rotation": -18
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "North-west field beside West Gate; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-downtown",
-   "name": "Downtown Camping",
-   "position": {
-    "x": 38,
-    "y": 25
-   },
-   "footprint": {
-    "aspect": 1.35,
-    "sides": 6,
-    "rotation": 20
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "West-side camping in the reviewed gap between Meadow fields and the Downtown cluster, separate from Camp Orchid.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-meadow-accessible",
-   "name": "Meadow Camping (Accessible)",
-   "position": {
-    "x": 28,
-    "y": 16
-   },
-   "footprint": {
-    "aspect": 1.45,
-    "sides": 5,
-    "rotation": -8
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "Accessible meadow field.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-meadow-living",
-   "name": "Meadow Living",
-   "position": {
-    "x": 31,
-    "y": 18
-   },
-   "footprint": {
-    "aspect": 1.35,
-    "sides": 5,
-    "rotation": 12
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "Adjacent field, deliberately distinct from accessible camping.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-valley",
-   "name": "Valley Camping",
-   "position": {
-    "x": 89,
-    "y": 44
-   },
-   "footprint": {
-    "aspect": 1.7,
-    "sides": 6,
-    "rotation": -12
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "Northern valley field, wide and diagonally divided.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-tangerine",
-   "name": "Tangerine Fields",
-   "position": {
-    "x": 95,
-    "y": 49
-   },
-   "footprint": {
-    "aspect": 1.45,
-    "sides": 6,
-    "rotation": 10
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "Northern field east of Valley Camping.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-campervan",
-   "name": "Campervan Field",
-   "position": {
-    "x": 28,
-    "y": 91
-   },
-   "footprint": {
-    "aspect": 0.68,
-    "sides": 6,
-    "rotation": -6
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "East-side vertical vehicle field. Moved south from (86,14) \u2014 that position sat north of Anara Forest, contradicting findings_screenshots.md's own note that East Camping/East Gate/Campervan Field appear together 'moving further east/south-east from Anara... along the perimeter road'. Repositioned near East Gate (site-layout.json parking-east-gate, 97,38) and East Camping (91,48), matching that progression.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-temple-valley",
-   "name": "Temple Valley Camping",
-   "position": {
-    "x": 82,
-    "y": 73
-   },
-   "footprint": {
-    "aspect": 0.58,
-    "sides": 6,
-    "rotation": 4
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "Long east-side camping field near East Gate.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-east",
-   "name": "East Camping",
-   "position": {
-    "x": 88,
-    "y": 86
-   },
-   "footprint": {
-    "aspect": 0.72,
-    "sides": 6,
-    "rotation": -4
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "East-side field south of Temple Valley.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-quiet",
-   "name": "Quiet Camping",
-   "position": {
-    "x": 91,
-    "y": 79
-   },
-   "footprint": {
-    "aspect": 0.78,
-    "sides": 6,
-    "rotation": 8
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "South-east quieter field.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-orchid-downtown",
-   "name": "Camp Orchid Downtown",
-   "position": {
-    "x": 42,
-    "y": 24
-   },
-   "footprint": {
-    "aspect": 1.25,
-    "sides": 4,
-    "rotation": 25
-   },
-   "surface": "camp-premium",
-   "evidence": "official-overview",
-   "notes": "Premium public-transport camp; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-skylark-hilltop",
-   "name": "Camp Skylark Hilltop",
-   "position": {
-    "x": 52,
-    "y": 60
-   },
-   "footprint": {
-    "aspect": 0.72,
-    "sides": 7,
-    "rotation": -8
-   },
-   "surface": "camp-premium",
-   "evidence": "official-overview",
-   "notes": "Premium Hilltop camp.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-skylark-sunset",
-   "name": "Camp Skylark Sunset",
-   "position": {
-    "x": 9,
-    "y": 62
-   },
-   "footprint": {
-    "aspect": 1.28,
-    "sides": 7,
-    "rotation": 8
-   },
-   "surface": "camp-premium",
-   "evidence": "official-overview",
-   "notes": "Premium south-side camp near Sunset Hill.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  },
-  {
-   "id": "camp-camplight",
-   "name": "Camplight",
-   "position": {
-    "x": 34,
-    "y": 20
-   },
-   "footprint": {
-    "aspect": 1.15,
-    "sides": 5,
-    "rotation": -12
-   },
-   "surface": "camp-green",
-   "evidence": "official-overview",
-   "notes": "Separate labelled field next to Downtown Camping and Orchid in the reviewed west-side cluster.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
-  }
- ]
+  "schemaVersion": "1.0.0",
+  "coordinateSystem": "schematic-percent-v1",
+  "groundUseFields": [
+    {
+      "id": "hilltop-field",
+      "name": "Hilltop Field",
+      "kind": "ground-use",
+      "surface": "hilltop-yellow",
+      "evidence": "official-overview",
+      "points": [
+        [
+          50,
+          57
+        ],
+        [
+          55,
+          55
+        ],
+        [
+          61,
+          57
+        ],
+        [
+          66,
+          61
+        ],
+        [
+          65,
+          67
+        ],
+        [
+          54,
+          69
+        ],
+        [
+          50,
+          68
+        ],
+        [
+          50,
+          64
+        ]
+      ],
+      "detailLines": [
+        [
+          [
+            43,
+            58
+          ],
+          [
+            48,
+            62
+          ],
+          [
+            46,
+            67
+          ]
+        ],
+        [
+          [
+            54,
+            57
+          ],
+          [
+            58,
+            62
+          ],
+          [
+            57,
+            68
+          ]
+        ],
+        [
+          [
+            62,
+            60
+          ],
+          [
+            62,
+            66
+          ]
+        ]
+      ],
+      "excludes": [
+        "Anara Forest"
+      ],
+      "notes": "Rebuilt from the full-site official overview (IMG_3670): a broad, faceted field east of Oldtown and north-east of The Lion's Den. Its outline uses the same overview coordinate plane as the city anchors and camp labels."
+    },
+    {
+      "id": "sunset-field",
+      "name": "Sunset Field",
+      "kind": "ground-use",
+      "surface": "hilltop-yellow",
+      "evidence": "official-overview",
+      "points": [
+        [
+          0,
+          58
+        ],
+        [
+          10,
+          56
+        ],
+        [
+          16,
+          61
+        ],
+        [
+          15,
+          74
+        ],
+        [
+          11,
+          79
+        ],
+        [
+          3,
+          75
+        ],
+        [
+          0,
+          67
+        ]
+      ],
+      "notes": "Rebuilt from IMG_3670: the separate large yellow Sunset field along Petersfield Road, west of the Lion's Den/Hilltop sequence."
+    }
+  ],
+  "zones": [
+    {
+      "id": "camp-west",
+      "name": "West Camping",
+      "position": {
+        "x": 69,
+        "y": 16
+      },
+      "footprint": {
+        "aspect": 1.55,
+        "sides": 6,
+        "rotation": -18
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "North-west field beside West Gate; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-downtown",
+      "name": "Downtown Camping",
+      "position": {
+        "x": 38,
+        "y": 25
+      },
+      "footprint": {
+        "aspect": 1.35,
+        "sides": 6,
+        "rotation": 20
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "West-side camping in the reviewed gap between Meadow fields and the Downtown cluster, separate from Camp Orchid.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-meadow-accessible",
+      "name": "Meadow Camping (Accessible)",
+      "position": {
+        "x": 28,
+        "y": 16
+      },
+      "footprint": {
+        "aspect": 1.45,
+        "sides": 5,
+        "rotation": -8
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Accessible meadow field.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-meadow-living",
+      "name": "Meadow Living",
+      "position": {
+        "x": 31,
+        "y": 18
+      },
+      "footprint": {
+        "aspect": 1.35,
+        "sides": 5,
+        "rotation": 12
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Adjacent field, deliberately distinct from accessible camping.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-valley",
+      "name": "Valley Camping",
+      "position": {
+        "x": 71,
+        "y": 40
+      },
+      "footprint": {
+        "aspect": 1.7,
+        "sides": 6,
+        "rotation": -12
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Northern valley field, wide and diagonally divided.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-tangerine",
+      "name": "Tangerine Fields",
+      "position": {
+        "x": 95,
+        "y": 49
+      },
+      "footprint": {
+        "aspect": 1.45,
+        "sides": 6,
+        "rotation": 10
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Northern field east of Valley Camping.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-campervan",
+      "name": "Campervan Field",
+      "position": {
+        "x": 42,
+        "y": 95
+      },
+      "footprint": {
+        "aspect": 0.68,
+        "sides": 6,
+        "rotation": -6
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "East-side vertical vehicle field. Moved south from (86,14) — that position sat north of Anara Forest, contradicting findings_screenshots.md's own note that East Camping/East Gate/Campervan Field appear together 'moving further east/south-east from Anara... along the perimeter road'. Repositioned near East Gate (site-layout.json parking-east-gate, 97,38) and East Camping (91,48), matching that progression.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-temple-valley",
+      "name": "Temple Valley Camping",
+      "position": {
+        "x": 82,
+        "y": 73
+      },
+      "footprint": {
+        "aspect": 0.58,
+        "sides": 6,
+        "rotation": 4
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Long east-side camping field near East Gate.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-east",
+      "name": "East Camping",
+      "position": {
+        "x": 88,
+        "y": 86
+      },
+      "footprint": {
+        "aspect": 0.72,
+        "sides": 6,
+        "rotation": -4
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "East-side field south of Temple Valley.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-quiet",
+      "name": "Quiet Camping",
+      "position": {
+        "x": 91,
+        "y": 79
+      },
+      "footprint": {
+        "aspect": 0.78,
+        "sides": 6,
+        "rotation": 8
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "South-east quieter field.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-orchid-downtown",
+      "name": "Camp Orchid Downtown",
+      "position": {
+        "x": 42,
+        "y": 24
+      },
+      "footprint": {
+        "aspect": 1.25,
+        "sides": 4,
+        "rotation": 25
+      },
+      "surface": "camp-premium",
+      "evidence": "official-overview",
+      "notes": "Premium public-transport camp; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-skylark-hilltop",
+      "name": "Camp Skylark Hilltop",
+      "position": {
+        "x": 52,
+        "y": 60
+      },
+      "footprint": {
+        "aspect": 0.72,
+        "sides": 7,
+        "rotation": -8
+      },
+      "surface": "camp-premium",
+      "evidence": "official-overview",
+      "notes": "Premium Hilltop camp.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-skylark-sunset",
+      "name": "Camp Skylark Sunset",
+      "position": {
+        "x": 9,
+        "y": 62
+      },
+      "footprint": {
+        "aspect": 1.28,
+        "sides": 7,
+        "rotation": 8
+      },
+      "surface": "camp-premium",
+      "evidence": "official-overview",
+      "notes": "Premium south-side camp near Sunset Hill.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    },
+    {
+      "id": "camp-camplight",
+      "name": "Camplight",
+      "position": {
+        "x": 34,
+        "y": 20
+      },
+      "footprint": {
+        "aspect": 1.15,
+        "sides": 5,
+        "rotation": -12
+      },
+      "surface": "camp-green",
+      "evidence": "official-overview",
+      "notes": "Separate labelled field next to Downtown Camping and Orchid in the reviewed west-side cluster.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
+    }
+  ]
 }

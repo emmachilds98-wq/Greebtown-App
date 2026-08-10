@@ -65,8 +65,8 @@
       "type": "stage",
       "name": "Grand Central",
       "position": {
-        "x": 72,
-        "y": 30
+        "x": 50,
+        "y": 51
       },
       "dimensions": {
         "width": 6,
@@ -90,111 +90,443 @@
       "id": "stage-lions-den",
       "type": "stage",
       "name": "The Lion's Den",
-      "position": { "x": 83, "y": 55 },
-      "dimensions": { "width": 6, "height": 4 },
-      "transform": { "rotation": 0, "scale": 1 },
+      "position": {
+        "x": 35,
+        "y": 67
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
       "layer": "structures",
       "asset": null,
-      "metadata": { "description": "Temple Valley main stage, south of Helix.", "category": "stage", "mapRole": "main-stage", "accessibility": "", "notes": "Verified official-map relationship." }
+      "metadata": {
+        "description": "Temple Valley main stage, south of Helix.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
     },
     {
       "id": "stage-hydro-xl",
       "type": "stage",
       "name": "Hydro XL",
-      "position": { "x": 11, "y": 46 },
-      "dimensions": { "width": 6, "height": 4 },
-      "transform": { "rotation": 0, "scale": 1 },
+      "position": {
+        "x": 15,
+        "y": 67
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
       "layer": "structures",
       "asset": null,
-      "metadata": { "description": "Downtown stage south-west of Metropolis.", "category": "stage", "mapRole": "main-stage", "accessibility": "", "notes": "Verified official-map relationship." }
+      "metadata": {
+        "description": "Downtown stage south-west of Metropolis.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
     },
     {
       "id": "stage-anara-forest",
       "type": "stage",
       "name": "Anara Forest",
-      "position": { "x": 85, "y": 22 },
-      "dimensions": { "width": 6, "height": 4 },
-      "transform": { "rotation": 0, "scale": 1 },
+      "position": {
+        "x": 82,
+        "y": 35
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
       "layer": "structures",
       "asset": null,
-      "metadata": { "description": "Woodland stage toward Temple Valley Camping.", "category": "stage", "mapRole": "main-stage", "accessibility": "", "notes": "Verified official-map relationship." }
+      "metadata": {
+        "description": "Woodland stage toward Temple Valley Camping.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
     },
     {
       "id": "stage-hidden-woods",
       "type": "stage",
       "name": "Hidden Woods",
-      "position": { "x": 18, "y": 2 },
-      "dimensions": { "width": 6, "height": 4 },
-      "transform": { "rotation": 0, "scale": 1 },
+      "position": {
+        "x": 18,
+        "y": 26
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
       "layer": "structures",
       "asset": null,
-      "metadata": { "description": "Woodland stage north of Letsbe Avenue and Botanica.", "category": "stage", "mapRole": "main-stage", "accessibility": "", "notes": "Verified official-map relationship." }
+      "metadata": {
+        "description": "Woodland stage north of Letsbe Avenue and Botanica.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
     },
     {
       "id": "stage-nexus",
       "type": "stage",
       "name": "NEXUS",
-      "position": { "x": 23, "y": 22 },
-      "dimensions": { "width": 6, "height": 4 },
-      "transform": { "rotation": 20, "scale": 1 },
+      "position": {
+        "x": 37,
+        "y": 45
+      },
+      "dimensions": {
+        "width": 6,
+        "height": 4
+      },
+      "transform": {
+        "rotation": 20,
+        "scale": 1
+      },
       "layer": "structures",
       "asset": null,
-      "metadata": { "description": "Botanica main stage, west and slightly south of the district label.", "category": "stage", "mapRole": "main-stage", "accessibility": "", "notes": "Verified official-map relationship." }
+      "metadata": {
+        "description": "Botanica main stage, west and slightly south of the district label.",
+        "category": "stage",
+        "mapRole": "main-stage",
+        "accessibility": "",
+        "notes": "Verified official-map relationship."
+      }
     },
     {
       "id": "stage-helix",
       "type": "stage",
       "name": "Helix",
-      "position": { "x": 78, "y": 52 },
-      "dimensions": { "width": 2.4, "height": 1.7 },
-      "transform": { "rotation": 0, "scale": 1 },
+      "position": {
+        "x": 37,
+        "y": 63
+      },
+      "dimensions": {
+        "width": 2.4,
+        "height": 1.7
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
       "layer": "structures",
       "asset": null,
-      "metadata": { "description": "Compact venue immediately east of Quantum, before the Lion's Den corridor.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map detail review: a small venue beside Quantum, not a headline-stage footprint." }
+      "metadata": {
+        "description": "Compact venue immediately east of Quantum, before the Lion's Den corridor.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map detail review: a small venue beside Quantum, not a headline-stage footprint."
+      }
     },
     {
-      "id": "stage-spectrum-360", "type": "stage", "name": "Spectrum 360", "position": { "x": 37, "y": 32 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Area 404 container arena.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-spectrum-360",
+      "type": "stage",
+      "name": "Spectrum 360",
+      "position": {
+        "x": 32,
+        "y": 43
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Area 404 container arena.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-tangled-roots", "type": "stage", "name": "Tangled Roots", "position": { "x": 51, "y": 14 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Northern woodland-stage cluster.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-tangled-roots",
+      "type": "stage",
+      "name": "Tangled Roots",
+      "position": {
+        "x": 29,
+        "y": 35
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Northern woodland-stage cluster.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-full-moon-ballroom", "type": "stage", "name": "Full Moon Ballroom", "position": { "x": 62, "y": 26 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Hilltop clearing beside the Hide Out route.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-full-moon-ballroom",
+      "type": "stage",
+      "name": "Full Moon Ballroom",
+      "position": {
+        "x": 42,
+        "y": 50
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Hilltop clearing beside the Hide Out route.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-rose-and-clown", "type": "stage", "name": "Rose and Clown", "position": { "x": 35, "y": 20 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Botanica east-arc stage.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-rose-and-clown",
+      "type": "stage",
+      "name": "Rose and Clown",
+      "position": {
+        "x": 44,
+        "y": 39
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Botanica east-arc stage.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-fools-leap", "type": "stage", "name": "The Fools Leap", "position": { "x": 58, "y": 29 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "North end of Oldtown's western venue chain.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-fools-leap",
+      "type": "stage",
+      "name": "The Fools Leap",
+      "position": {
+        "x": 43,
+        "y": 55
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "North end of Oldtown's western venue chain.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-foggers-mill", "type": "stage", "name": "Foggers Mill", "position": { "x": 68, "y": 25 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Hilltop clearing route east of Full Moon Ballroom.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-foggers-mill",
+      "type": "stage",
+      "name": "Foggers Mill",
+      "position": {
+        "x": 53,
+        "y": 47
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Hilltop clearing route east of Full Moon Ballroom.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-hangar-161", "type": "stage", "name": "Hangar 161", "position": { "x": 30, "y": 43 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Area 404 stage west of the eastbound venue chain.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-hangar-161",
+      "type": "stage",
+      "name": "Hangar 161",
+      "position": {
+        "x": 25,
+        "y": 54
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Area 404 stage west of the eastbound venue chain.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-tribe-of-frog", "type": "stage", "name": "Tribe of Frog", "position": { "x": 64, "y": 44 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Wooded clearing south of Oldtown.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-tribe-of-frog",
+      "type": "stage",
+      "name": "Tribe of Frog",
+      "position": {
+        "x": 45,
+        "y": 60
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Wooded clearing south of Oldtown.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-sibin-beag", "type": "stage", "name": "Síbín Beag", "position": { "x": 72, "y": 41 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Eastern Oldtown venue chain, above The Feckless Wrecked.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-sibin-beag",
+      "type": "stage",
+      "name": "Síbín Beag",
+      "position": {
+        "x": 53,
+        "y": 57
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Eastern Oldtown venue chain, above The Feckless Wrecked.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-acid-leak", "type": "stage", "name": "Acid Leak", "position": { "x": 34, "y": 44 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "Area 404 acid-techno cluster.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-acid-leak",
+      "type": "stage",
+      "name": "Acid Leak",
+      "position": {
+        "x": 29,
+        "y": 55
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "Area 404 acid-techno cluster.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
-      "id": "stage-infinity", "type": "stage", "name": "Infinity", "position": { "x": 41, "y": 42 }, "dimensions": { "width": 3, "height": 3 }, "transform": { "rotation": 0, "scale": 1 }, "layer": "structures", "asset": null,
-      "metadata": { "description": "East of the Metropolis venue chain.", "category": "stage", "mapRole": "minor-stage", "accessibility": "", "notes": "Official-map relationship audited." }
+      "id": "stage-infinity",
+      "type": "stage",
+      "name": "Infinity",
+      "position": {
+        "x": 36,
+        "y": 53
+      },
+      "dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "transform": {
+        "rotation": 0,
+        "scale": 1
+      },
+      "layer": "structures",
+      "asset": null,
+      "metadata": {
+        "description": "East of the Metropolis venue chain.",
+        "category": "stage",
+        "mapRole": "minor-stage",
+        "accessibility": "",
+        "notes": "Official-map relationship audited."
+      }
     },
     {
       "id": "entrance-west-gate",

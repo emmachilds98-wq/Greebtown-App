@@ -2,54 +2,200 @@
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
   "reviewedOverview": true,
-  "reviewNote": "Anchors re-derived as one full-site composition from the user-supplied official overview references.",
+  "reviewNote": "Canonical coordinates calibrated as one full-site composition from IMG_3670; no runtime anchor transform is applied.",
   "observations": [
     {
       "id": "official-overview-2026-08-03",
       "source": "User-provided official map overview screenshots",
       "evidence": "official-overview",
-      "regions": ["site-perimeter", "arrival-roads", "west-camping", "downtown-camping", "hilltop-field", "lion-den-woodland", "east-camping"],
+      "regions": [
+        "site-perimeter",
+        "arrival-roads",
+        "west-camping",
+        "downtown-camping",
+        "hilltop-field",
+        "lion-den-woodland",
+        "east-camping"
+      ],
       "notes": "The western camping and Downtown cluster are distinct field systems; the yellow Hilltop corridor sits west of the Lion's Den woodland mass and must not subsume Anara Forest. Alresford Road and Petersfield Road remain outside the festival interior."
     },
     {
       "id": "official-west-detail-2026-08-03",
       "source": "User-provided official map west/detail screenshots",
       "evidence": "official-detail",
-      "regions": ["west-camping", "meadow-fields", "camp-orchid", "hidden-woods", "botanica"],
+      "regions": [
+        "west-camping",
+        "meadow-fields",
+        "camp-orchid",
+        "hidden-woods",
+        "botanica"
+      ],
       "notes": "West Camping is a large faceted field with internal divisions; Downtown Camping, Camplight and Meadow fields are separate labelled areas. Woodland runs continuously between the western fields and the Botanica/Letsbe edge."
     },
     {
       "id": "official-east-detail-2026-08-03",
       "source": "User-provided official map east/detail screenshots",
       "evidence": "official-detail",
-      "regions": ["hilltop-field", "lion-den-woodland", "temple-valley-camping", "east-camping", "south-gate"],
+      "regions": [
+        "hilltop-field",
+        "lion-den-woodland",
+        "temple-valley-camping",
+        "east-camping",
+        "south-gate"
+      ],
       "notes": "Hilltop reads as a long faceted yellow ground-use corridor. The Lion's Den sits in its own green clearing/woodland mass to the east, while the east-side campsite is a separate vertical green field."
     },
     {
       "id": "official-video-fullsite-2026-08-07",
       "source": "Frame extracted from a user-supplied official-app screen recording, full-site pan with Alresford Rd visible along the north edge (confirms true north-up, not rotated)",
       "evidence": "official-overview",
-      "regions": ["copperwood", "grand-central", "lion-den", "quantum"],
+      "regions": [
+        "copperwood",
+        "grand-central",
+        "lion-den",
+        "quantum"
+      ],
       "notes": "Two-point calibration (Botanica at its own reviewed anchor, Grand Central at its own reviewed anchor) landed Copperwood within ~3 units of its already-reviewed position - cross-check passed, left unchanged. The same calibration put a raw estimate for The Lion's Den around (60,54), but that pixel reading isn't trustworthy on its own (the source app supports rotation/tilt during a pan, so a single frame's absolute direction can't be taken at face value the way an adjacency/order reading can) - treated as a directional signal only ('somewhat closer to Grand Central/Oldtown than the previous (78,70) anchor'), not a coordinate to copy. Nudged to (81,65): the closest point to that raw estimate that still clears the already-reviewed hilltop-field ground-use polygon (checked programmatically against camp-zones.json/natural-area-footprints.json, not by eye). Quantum (a thingsToFind entry, not its own anchor) came out close enough to its current derived position (via the Oldtown anchor) to leave alone."
+    },
+    {
+      "id": "official-fullsite-calibration-2026-08-10",
+      "source": "IMG_3670, user-supplied official-app full-site overview",
+      "evidence": "official-overview",
+      "regions": [
+        "downtown",
+        "grand-central",
+        "oldtown",
+        "hilltop-field",
+        "lion-den-woodland",
+        "east-camping"
+      ],
+      "notes": "This is the shared calibration datum for the overview. It places Botanica/Metropolis/Area 404 as one compact west-city group; Grand Central directly north of Oldtown; the Hilltop field to Oldtown's east; and The Lion's Den south-west of that field. Earlier single-frame estimates that placed Lion's Den on the far east side or put Helix below it are superseded."
     }
   ],
   "anchors": {
-    "Botanica": { "from": [28,18], "to": [30,42] },
-    "Metropolis": { "from": [15,36], "to": [20,57] },
-    "Area 404": { "from": [36,37], "to": [41,60] },
-    "Letsbe Avenue": { "from": [40,9], "to": [34,30] },
-    "Grand Central": { "from": [72,30], "to": [47,35] },
-    "Oldtown": { "from": [68,40], "to": [48,50] },
-    "Hydro XL": { "from": [11,46], "to": [15,67] },
-    "Anara Forest": { "from": [85,22], "to": [82,35] },
-    "The Lion's Den": { "from": [83,55], "to": [71,59] },
-    "Helix": { "from": [78,52], "to": [61,64] },
-    "Hidden Woods": { "from": [18,2], "to": [18,26] }
+    "Botanica": {
+      "from": [
+        42,
+        41
+      ],
+      "to": [
+        42,
+        41
+      ]
+    },
+    "Metropolis": {
+      "from": [
+        26,
+        43
+      ],
+      "to": [
+        26,
+        43
+      ]
+    },
+    "Area 404": {
+      "from": [
+        31,
+        48
+      ],
+      "to": [
+        31,
+        48
+      ]
+    },
+    "Letsbe Avenue": {
+      "from": [
+        45,
+        43
+      ],
+      "to": [
+        45,
+        43
+      ]
+    },
+    "Grand Central": {
+      "from": [
+        50,
+        51
+      ],
+      "to": [
+        50,
+        51
+      ]
+    },
+    "Oldtown": {
+      "from": [
+        49,
+        56
+      ],
+      "to": [
+        49,
+        56
+      ]
+    },
+    "Hydro XL": {
+      "from": [
+        15,
+        67
+      ],
+      "to": [
+        15,
+        67
+      ]
+    },
+    "Anara Forest": {
+      "from": [
+        82,
+        35
+      ],
+      "to": [
+        82,
+        35
+      ]
+    },
+    "The Lion's Den": {
+      "from": [
+        35,
+        67
+      ],
+      "to": [
+        35,
+        67
+      ]
+    },
+    "Helix": {
+      "from": [
+        37,
+        63
+      ],
+      "to": [
+        37,
+        63
+      ]
+    },
+    "Hidden Woods": {
+      "from": [
+        18,
+        26
+      ],
+      "to": [
+        18,
+        26
+      ]
+    }
   },
   "members": {
-    "NEXUS": "Botanica", "Rose and Clown": "Botanica",
-    "Spectrum 360": "Area 404", "Hangar 161": "Area 404", "Acid Leak": "Area 404", "Infinity": "Area 404",
-    "The Fools Leap": "Oldtown", "Tribe of Frog": "Oldtown", "Síbín Beag": "Oldtown",
-    "Tangled Roots": "Grand Central", "Full Moon Ballroom": "Grand Central", "Foggers Mill": "Grand Central"
+    "NEXUS": "Botanica",
+    "Rose and Clown": "Botanica",
+    "Spectrum 360": "Area 404",
+    "Hangar 161": "Area 404",
+    "Acid Leak": "Area 404",
+    "Infinity": "Area 404",
+    "The Fools Leap": "Oldtown",
+    "Tribe of Frog": "Oldtown",
+    "Síbín Beag": "Oldtown",
+    "Tangled Roots": "Grand Central",
+    "Full Moon Ballroom": "Grand Central",
+    "Foggers Mill": "Grand Central"
   }
 }

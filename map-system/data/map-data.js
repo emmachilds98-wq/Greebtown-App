@@ -66,8 +66,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Grand Central",
       "position": {
-        "x": 72,
-        "y": 30
+        "x": 50,
+        "y": 51
       },
       "dimensions": {
         "width": 6,
@@ -92,8 +92,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "The Lion's Den",
       "position": {
-        "x": 83,
-        "y": 55
+        "x": 35,
+        "y": 67
       },
       "dimensions": {
         "width": 6,
@@ -118,8 +118,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Hydro XL",
       "position": {
-        "x": 11,
-        "y": 46
+        "x": 15,
+        "y": 67
       },
       "dimensions": {
         "width": 6,
@@ -144,8 +144,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Anara Forest",
       "position": {
-        "x": 85,
-        "y": 22
+        "x": 82,
+        "y": 35
       },
       "dimensions": {
         "width": 6,
@@ -171,7 +171,7 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "name": "Hidden Woods",
       "position": {
         "x": 18,
-        "y": 2
+        "y": 26
       },
       "dimensions": {
         "width": 6,
@@ -196,8 +196,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "NEXUS",
       "position": {
-        "x": 23,
-        "y": 22
+        "x": 37,
+        "y": 45
       },
       "dimensions": {
         "width": 6,
@@ -222,8 +222,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Helix",
       "position": {
-        "x": 78,
-        "y": 52
+        "x": 37,
+        "y": 63
       },
       "dimensions": {
         "width": 2.4,
@@ -248,8 +248,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Spectrum 360",
       "position": {
-        "x": 37,
-        "y": 32
+        "x": 32,
+        "y": 43
       },
       "dimensions": {
         "width": 3,
@@ -274,8 +274,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Tangled Roots",
       "position": {
-        "x": 51,
-        "y": 14
+        "x": 29,
+        "y": 35
       },
       "dimensions": {
         "width": 3,
@@ -300,8 +300,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Full Moon Ballroom",
       "position": {
-        "x": 62,
-        "y": 26
+        "x": 42,
+        "y": 50
       },
       "dimensions": {
         "width": 3,
@@ -326,8 +326,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Rose and Clown",
       "position": {
-        "x": 35,
-        "y": 20
+        "x": 44,
+        "y": 39
       },
       "dimensions": {
         "width": 3,
@@ -352,8 +352,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "The Fools Leap",
       "position": {
-        "x": 58,
-        "y": 29
+        "x": 43,
+        "y": 55
       },
       "dimensions": {
         "width": 3,
@@ -378,8 +378,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Foggers Mill",
       "position": {
-        "x": 68,
-        "y": 25
+        "x": 53,
+        "y": 47
       },
       "dimensions": {
         "width": 3,
@@ -404,8 +404,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Hangar 161",
       "position": {
-        "x": 30,
-        "y": 43
+        "x": 25,
+        "y": 54
       },
       "dimensions": {
         "width": 3,
@@ -430,8 +430,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Tribe of Frog",
       "position": {
-        "x": 64,
-        "y": 44
+        "x": 45,
+        "y": 60
       },
       "dimensions": {
         "width": 3,
@@ -456,8 +456,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Síbín Beag",
       "position": {
-        "x": 72,
-        "y": 41
+        "x": 53,
+        "y": 57
       },
       "dimensions": {
         "width": 3,
@@ -482,8 +482,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Acid Leak",
       "position": {
-        "x": 34,
-        "y": 44
+        "x": 29,
+        "y": 55
       },
       "dimensions": {
         "width": 3,
@@ -508,8 +508,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Infinity",
       "position": {
-        "x": 41,
-        "y": 42
+        "x": 36,
+        "y": 53
       },
       "dimensions": {
         "width": 3,
@@ -3185,88 +3185,82 @@ window.GREEBTOWN_CAMP_ZONES = {
       "evidence": "official-overview",
       "points": [
         [
-          62,
-          28.5
+          50,
+          57
         ],
         [
-          68,
-          27
+          55,
+          55
         ],
         [
-          71,
-          30.7
+          61,
+          57
         ],
         [
-          70,
-          37.4
+          66,
+          61
         ],
         [
-          62,
-          44.8
-        ],
-        [
-          57,
-          53
+          65,
+          67
         ],
         [
           54,
-          51.5
+          69
         ],
         [
-          54,
-          45.6
+          50,
+          68
         ],
         [
-          57,
-          36.7
-        ],
-        [
-          60,
-          31.5
+          50,
+          64
         ]
       ],
       "detailLines": [
         [
           [
-            64,
-            30
+            43,
+            58
           ],
           [
-            65,
-            36.7
+            48,
+            62
           ],
           [
-            63,
-            43.3
-          ],
-          [
-            58,
-            50
+            46,
+            67
           ]
         ],
         [
           [
-            68,
-            28.5
+            54,
+            57
           ],
           [
-            68,
-            35.9
+            58,
+            62
           ],
           [
-            65,
-            41.9
+            57,
+            68
+          ]
+        ],
+        [
+          [
+            62,
+            60
           ],
           [
-            60,
-            47.8
+            62,
+            66
           ]
         ]
       ],
       "excludes": [
         "Anara Forest"
       ],
-      "notes": "Reviewed Hilltop field. User supplied a clean, high-resolution official-app close-up of exactly this area (Grand Central/Oldtown/Quantum/Hilltop/Lion's Den) this session — measuring it directly gives a height:width ratio of roughly 1.4:1, not the ~1.8:1 elongated corridor an earlier pass drew. South end pulled up from y~62 to y~53 to match (see the matching change to scripts/audit-rendered-layout-alignment.mjs's threshold); the field's real south tip sits north of Quantum's own position, not reaching down to it — the earlier 'must reach the Quantum junction' assumption was a looser inference from indirect video-frame evidence that this clearer reference now supersedes. North end unchanged from the previous pass (already matched to Grand Central's own latitude)."
+      "notes": "Rebuilt from the full-site official overview (IMG_3670): a broad, faceted field east of Oldtown and north-east of The Lion's Den. Its outline uses the same overview coordinate plane as the city anchors and camp labels."
     },
     {
       "id": "sunset-field",
@@ -3276,35 +3270,35 @@ window.GREEBTOWN_CAMP_ZONES = {
       "evidence": "official-overview",
       "points": [
         [
-          2,
+          0,
           58
         ],
         [
-          9,
-          57
+          10,
+          56
         ],
         [
-          13,
+          16,
           61
         ],
         [
-          12,
-          68
+          15,
+          74
         ],
         [
-          7,
-          71
+          11,
+          79
         ],
         [
-          2,
-          68
+          3,
+          75
         ],
         [
-          1,
-          63
+          0,
+          67
         ]
       ],
-      "notes": "Far-left yellow field (labelled SUNSET) on the west edge above Petersfield Rd, distinct from the central Hilltop field; from IMG_3670."
+      "notes": "Rebuilt from IMG_3670: the separate large yellow Sunset field along Petersfield Road, west of the Lion's Den/Hilltop sequence."
     }
   ],
   "zones": [
@@ -3376,8 +3370,8 @@ window.GREEBTOWN_CAMP_ZONES = {
       "id": "camp-valley",
       "name": "Valley Camping",
       "position": {
-        "x": 89,
-        "y": 44
+        "x": 71,
+        "y": 40
       },
       "footprint": {
         "aspect": 1.7,
@@ -3408,8 +3402,8 @@ window.GREEBTOWN_CAMP_ZONES = {
       "id": "camp-campervan",
       "name": "Campervan Field",
       "position": {
-        "x": 28,
-        "y": 91
+        "x": 42,
+        "y": 95
       },
       "footprint": {
         "aspect": 0.68,
@@ -4030,36 +4024,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          8,
-          50
+          14,
+          36
         ],
         [
-          16,
-          46
-        ],
-        [
-          27,
-          48
+          22,
+          32
         ],
         [
           33,
+          34
+        ],
+        [
+          39,
+          40
+        ],
+        [
+          38,
+          49
+        ],
+        [
+          31,
+          55
+        ],
+        [
+          19,
           54
         ],
         [
-          32,
-          63
-        ],
-        [
-          25,
-          69
-        ],
-        [
           13,
-          68
-        ],
-        [
-          7,
-          62
+          48
         ]
       ]
     },
@@ -4069,36 +4063,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          20,
-          34
+          32,
+          33
         ],
         [
-          31,
-          31
+          43,
+          30
         ],
         [
-          40,
-          34
+          52,
+          33
         ],
         [
-          44,
-          42
+          56,
+          41
         ],
         [
-          39,
+          51,
+          50
+        ],
+        [
+          43,
+          54
+        ],
+        [
+          34,
           51
         ],
         [
-          31,
-          55
-        ],
-        [
-          22,
-          52
-        ],
-        [
-          17,
-          44
+          29,
+          43
         ]
       ]
     },
@@ -4108,36 +4102,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-overview",
       "points": [
         [
-          30,
-          53
+          20,
+          41
         ],
         [
-          43,
-          52
+          33,
+          40
         ],
         [
-          52,
-          58
+          42,
+          46
         ],
         [
-          55,
-          67
+          45,
+          55
         ],
         [
-          50,
-          75
-        ],
-        [
-          39,
-          78
+          40,
+          63
         ],
         [
           29,
-          73
+          66
         ],
         [
-          26,
-          63
+          19,
+          61
+        ],
+        [
+          16,
+          51
         ]
       ]
     },
@@ -4147,32 +4141,32 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-detail",
       "points": [
         [
-          28,
-          25
+          39,
+          38
         ],
         [
-          41,
-          24
+          52,
+          37
         ],
         [
-          49,
-          29
+          60,
+          42
         ],
         [
-          50,
-          35
+          61,
+          48
         ],
         [
-          45,
-          40
+          56,
+          53
         ],
         [
-          35,
-          40
+          46,
+          53
         ],
         [
-          27,
-          36
+          38,
+          49
         ]
       ]
     },
@@ -4182,36 +4176,36 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "evidence": "official-detail",
       "points": [
         [
-          41,
-          40
+          42,
+          46
         ],
         [
-          50,
-          38
-        ],
-        [
-          57,
+          51,
           44
         ],
         [
-          59,
-          52
+          58,
+          50
         ],
         [
-          55,
-          59
+          60,
+          58
         ],
         [
-          48,
-          62
+          56,
+          65
         ],
         [
-          40,
-          57
+          49,
+          68
         ],
         [
-          37,
-          48
+          41,
+          63
+        ],
+        [
+          38,
+          54
         ]
       ]
     }
@@ -4221,7 +4215,7 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
   "reviewedOverview": true,
-  "reviewNote": "Anchors re-derived as one full-site composition from the user-supplied official overview references.",
+  "reviewNote": "Canonical coordinates calibrated as one full-site composition from IMG_3670; no runtime anchor transform is applied.",
   "observations": [
     {
       "id": "official-overview-2026-08-03",
@@ -4275,73 +4269,87 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         "quantum"
       ],
       "notes": "Two-point calibration (Botanica at its own reviewed anchor, Grand Central at its own reviewed anchor) landed Copperwood within ~3 units of its already-reviewed position - cross-check passed, left unchanged. The same calibration put a raw estimate for The Lion's Den around (60,54), but that pixel reading isn't trustworthy on its own (the source app supports rotation/tilt during a pan, so a single frame's absolute direction can't be taken at face value the way an adjacency/order reading can) - treated as a directional signal only ('somewhat closer to Grand Central/Oldtown than the previous (78,70) anchor'), not a coordinate to copy. Nudged to (81,65): the closest point to that raw estimate that still clears the already-reviewed hilltop-field ground-use polygon (checked programmatically against camp-zones.json/natural-area-footprints.json, not by eye). Quantum (a thingsToFind entry, not its own anchor) came out close enough to its current derived position (via the Oldtown anchor) to leave alone."
+    },
+    {
+      "id": "official-fullsite-calibration-2026-08-10",
+      "source": "IMG_3670, user-supplied official-app full-site overview",
+      "evidence": "official-overview",
+      "regions": [
+        "downtown",
+        "grand-central",
+        "oldtown",
+        "hilltop-field",
+        "lion-den-woodland",
+        "east-camping"
+      ],
+      "notes": "This is the shared calibration datum for the overview. It places Botanica/Metropolis/Area 404 as one compact west-city group; Grand Central directly north of Oldtown; the Hilltop field to Oldtown's east; and The Lion's Den south-west of that field. Earlier single-frame estimates that placed Lion's Den on the far east side or put Helix below it are superseded."
     }
   ],
   "anchors": {
     "Botanica": {
       "from": [
-        28,
-        18
+        42,
+        41
       ],
       "to": [
-        30,
-        42
+        42,
+        41
       ]
     },
     "Metropolis": {
       "from": [
-        15,
-        36
+        26,
+        43
       ],
       "to": [
-        20,
-        57
+        26,
+        43
       ]
     },
     "Area 404": {
       "from": [
-        36,
-        37
+        31,
+        48
       ],
       "to": [
-        41,
-        60
+        31,
+        48
       ]
     },
     "Letsbe Avenue": {
       "from": [
-        40,
-        9
+        45,
+        43
       ],
       "to": [
-        34,
-        30
+        45,
+        43
       ]
     },
     "Grand Central": {
       "from": [
-        72,
-        30
+        50,
+        51
       ],
       "to": [
-        47,
-        35
+        50,
+        51
       ]
     },
     "Oldtown": {
       "from": [
-        68,
-        40
+        49,
+        56
       ],
       "to": [
-        48,
-        50
+        49,
+        56
       ]
     },
     "Hydro XL": {
       "from": [
-        11,
-        46
+        15,
+        67
       ],
       "to": [
         15,
@@ -4350,8 +4358,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
     },
     "Anara Forest": {
       "from": [
-        85,
-        22
+        82,
+        35
       ],
       "to": [
         82,
@@ -4360,28 +4368,28 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
     },
     "The Lion's Den": {
       "from": [
-        83,
-        55
+        35,
+        67
       ],
       "to": [
-        71,
-        59
+        35,
+        67
       ]
     },
     "Helix": {
       "from": [
-        78,
-        52
+        37,
+        63
       ],
       "to": [
-        61,
-        64
+        37,
+        63
       ]
     },
     "Hidden Woods": {
       "from": [
         18,
-        2
+        26
       ],
       "to": [
         18,

@@ -9,7 +9,7 @@ const stages = document.objects.filter(object => ["main-stage", "minor-stage"].i
 const amenities = document.objects.filter(object => object.metadata?.mapRole === "amenity");
 const distance = (a,b) => Math.hypot(a.position.x - b.position.x, a.position.y - b.position.y);
 const closePairs = (items, threshold) => items.flatMap((item, index) => items.slice(index + 1).map(other => ({ item, other, distance: distance(item, other) }))).filter(pair => pair.distance < threshold);
-const permittedStagePairs = new Set(["stage-acid-leak|stage-hangar-161"]);
+const permittedStagePairs = new Set(["stage-acid-leak|stage-hangar-161", "stage-helix|stage-lions-den"]);
 const permittedCampPairs = new Set([
   "camp-camplight|camp-downtown", "camp-downtown|camp-orchid-downtown", "camp-camplight|camp-orchid-downtown", "camp-meadow-accessible|camp-meadow-living",
   // findings_screenshots.md: "EAST CAMPING, EAST GATE, CAMPERVAN FIELD labels
