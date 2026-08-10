@@ -458,6 +458,8 @@
   .map-label.evidence-detail{font-size:7px; font-weight:900; letter-spacing:.08em; color:#fff6ce; background:rgba(23,38,27,.86); border:1px solid rgba(244,226,166,.68); border-radius:2px 6px 2px 2px; padding:2px 5px 2px 7px; transform:translate(-50%,8px); box-shadow:1px 1px 0 rgba(8,17,10,.7);}
   .map-label.evidence-detail::before{width:2px; background:#e5bc58;}
   .map-label.evidence-detail.evidence-stage{color:#fff0a9;}
+  .map-label.evidence-detail.evidence-stage{background:rgba(49,45,29,.92); border-color:rgba(255,213,113,.82); box-shadow:1px 1px 0 rgba(8,17,10,.82),0 0 8px rgba(249,181,67,.18);}
+  .map-label.evidence-detail.evidence-venue{color:#f0e2bd;}
   .map-label.evidence-detail.evidence-camp{color:#d8efbd; border-color:rgba(163,214,143,.78);}
   .map-label.evidence-detail.evidence-utility{font-size:6px; color:#d7f5ff; border-color:rgba(118,203,219,.8);}
   /* Area 404 — repeatedly confirmed on camera as a bold red/green

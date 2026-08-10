@@ -26,6 +26,17 @@ does not render venue pins, amenities, gates, parking, camps, old paths, or
 old generated art. A later close-up pass may add a connected district only when
 additional official evidence supports its internal shape and routes.
 
+## Active renderer boundary (correction)
+
+The active map construction path builds only `buildEvidenceOnlyMapGeoJSON()`,
+`evidenceRebuildLabels()`, and `evidenceRebuildDetailLabels()`. Legacy stage,
+district, amenity, gate, campsite, and point-of-interest arrays are not
+iterated or made searchable while loading the map; they remain only for
+unrelated app content. This is deliberate: hiding legacy markers is not enough
+to prevent their old placements returning through a later layer toggle.
+The MapLibre coordinate frame is now a neutral internal render plane as well;
+it has no physical-site or legacy-GPS meaning.
+
 ## Detail-pass status
 
 The close-detail layer is a review draft, not settled map data. It keeps only
@@ -52,3 +63,14 @@ location.
   a town, woodland, or stage court.
 - Utilities require a readable official label plus neighbouring landmarks;
   an icon alone is not sufficient placement evidence.
+
+## Evidence-led design additions
+
+- `findings_screenshots.md` identifies Spectrum 360 as a container-enclosed
+  circular arena, Hydro XL as a purple/magenta halo at Area 404's south-west
+  edge, a white chevron clearing near the Grand Central/Oldtown junction, and
+  the Lion's Den as an amphitheatre. The renderer uses only these observed
+  forms, with no generic building scatter.
+- The screenshots show distinct campsite circulation and grid-like lanes in
+  Valley Camping and the Hilltop field. Those lanes are rendered separately
+  from town streets and remain inside their respective camp field.

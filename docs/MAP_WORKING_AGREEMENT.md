@@ -14,6 +14,15 @@ Historic coordinates, generated map-system geometry, scraped GPS, and prior
 Greebtown screenshots are quarantine material. They may explain an old bug;
 they must not place, size, align, or validate new map content.
 
+## Active construction boundary
+
+The map renderer must construct markers, labels, and geometry only from the
+evidence-scene functions and the official sources cited beside them. Legacy
+arrays may remain for non-map features such as schedule or discovery content,
+but they must not be iterated, searched, or merely hidden during map setup.
+Removing their producer path is required; a visibility flag is not a safe
+substitute because it can be switched back on by later work.
+
 ## Evidence threshold
 
 Classify every proposed addition before drawing it:
