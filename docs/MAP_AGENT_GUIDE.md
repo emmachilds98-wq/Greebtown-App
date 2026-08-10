@@ -4,7 +4,22 @@ Read this before editing the festival map. Map accuracy is user-trust and safety
 
 ## Source of truth and migration status
 
-`map-system/data/map-document.json` is the canonical authoring document for the new map system. Its objects are the only map geometry an agent should add or edit for the new system.
+`map-system/data/map-document.json` is the canonical authoring document for the
+retired map-system migration. It is not a placement source for the active
+evidence-led rebuild; see the exception below before changing any geometry.
+
+### Evidence-led rebuild exception — current active map
+
+The active map is currently the clean-slate evidence-led renderer in
+`js/app.js`. Its historic map-system coordinates and generated geometry are
+**quarantined**: they are not a placement source, a calibration target, or a
+visual acceptance test for this rebuild. Do not reactivate them, add a runtime
+override, or use them to fill in a missing area.
+
+For this rebuild, follow [`MAP_WORKING_AGREEMENT.md`](MAP_WORKING_AGREEMENT.md)
+before adding any geometry. A new evidence-authoring source must be introduced
+as a focused, documented replacement with matching validation and renderer
+support—not by quietly reusing the retired source below.
 
 The legacy renderer in `js/app.js` is still being migrated in verified batches. Until a legacy object has a corresponding `map-document.json` record and a renderer migration entry, do not make a second competing copy or use a runtime override. The initial document is a seed, not a claim that all legacy geometry has already migrated.
 
@@ -76,6 +91,11 @@ For reference-image reconstruction, work in evidence-backed clusters. Identify a
 Never leave an old amenity marker live beside a newer replacement just because they overlap. Add the new record, then set its `metadata.supersedes` array to the exact stable IDs it replaces. The live app automatically excludes superseded records, so only the newer information renders. Do not use proximity alone to infer replacement: two nearby toilet blocks or vendors may both be real. Record the evidence and the replacement relationship explicitly.
 
 ## Validation and review
+
+For the active evidence-led renderer, run `node scripts/map-preflight.mjs`,
+`node --check js/app.js`, and `git diff --check`, then inspect a fresh entry
+view and close view against the cited official source. A legacy-data validator
+passing on its own is not acceptance for a visual rebuild.
 
 The validator rejects duplicate IDs, missing layers, invalid object types, out-of-bounds coordinates, invalid dimensions/transforms, and bad asset paths. The editor additionally surfaces same-layer bounding-box overlaps as review warnings. An overlap is not always an error—stages can live inside districts—but it always deserves a human decision.
 

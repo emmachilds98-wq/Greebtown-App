@@ -170,6 +170,12 @@ supports each region and produce a rendered before/after review. A green data
 validator is necessary but is not proof that the map visually matches the
 official app.
 
+`docs/MAP_WORKING_AGREEMENT.md` is mandatory for all active map-rebuild work.
+It defines the evidence threshold, permitted geometry, route/camp constraints,
+visual anti-patterns, and the draft-review process. Do not add visual filler,
+generic utility points, individual coordinate nudges, or a second source of
+truth when a cited official source is incomplete: leave the area blank.
+
 This has been the highest-effort, highest-error area of the app. Key things
 to know before touching any map code or data:
 
