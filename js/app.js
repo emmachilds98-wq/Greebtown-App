@@ -7388,13 +7388,9 @@ function evidencedPathShape(a, b){
   const isForward = Boolean(EVIDENCED_PATH_SHAPES[`${a}|${b}`]);
   const original = EVIDENCED_PATH_SHAPES[`${a}|${b}`] || EVIDENCED_PATH_SHAPES[`${b}|${a}`];
   if(!original) return null;
-  const [startDx,startDy] = referenceLayoutDelta(isForward ? a : b);
-  const [endDx,endDy] = referenceLayoutDelta(isForward ? b : a);
-  const shifted = original.map((point,index)=>{
-    const t = original.length === 1 ? 0 : index / (original.length - 1);
-    return [point[0] + startDx + (endDx - startDx) * t, point[1] + startDy + (endDy - startDy) * t];
-  });
-  return isForward ? shifted : shifted.reverse();
+  // Paths now share the canonical coordinate plane with their endpoints;
+  // do not apply the retired reference-layout transform here.
+  return isForward ? original : [...original].reverse();
 }
 const TRUNK_PATH_SEGMENTS = TRUNK_PATH_EDGES.map(([a, b], i)=>{
   const pa = findNamedNode(a), pb = findNamedNode(b);
