@@ -104,3 +104,9 @@ location.
   Copperwood/Grand Central, and Oldtown courts. Hilltop receives additional
   internal camping lanes. These are review-draft massing groups, not a claim
   of exact individual building footprints.
+- Camping/woodland transition pass: `IMG_3729.webp` and the wider official
+  views distinguish Hilltop's grid-like yellow field from the separate pink
+  camping field east/south-east of The Lion's Den. The renderer now keeps
+  these as two isolated camp grounds, adds ordered pitch marks and field lanes
+  only inside their boundaries, and leaves gates, parking and unnamed utility
+  icons out.
