@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v432";
-const APP_BUILD_TIME = "2026-08-10T21:20:23Z";
+const APP_CACHE_VERSION = "v433";
+const APP_BUILD_TIME = "2026-08-10T21:32:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9127,7 +9127,9 @@ function buildMapGeoJSON(){
 // not a catalogue of pins. Secondary venues, named stalls and amenities stay
 // one deliberate tap away (or are discoverable through search), while the
 // primary districts, headline stages and ground shapes establish orientation.
-let mapLayerVisible = { main: false, manual: false, overview: false, minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: true, sssi: false, road: false };
+// This is an intentionally blank evidence-only baseline. Every legacy DOM
+// marker group must be explicitly disabled: an omitted key defaults visible.
+let mapLayerVisible = { main: false, manual: false, overview: false, minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: false, sssi: false, road: false, gate: false, place: false };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -9370,7 +9372,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-baseline-v2";
+  const MAP_RENDER_REVISION = "evidence-baseline-v3";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;

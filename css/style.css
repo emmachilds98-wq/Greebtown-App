@@ -334,6 +334,13 @@
      the artwork rather than chrome the first thing the eye sees. */
   .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group{border-radius:14px !important; overflow:hidden;}
   .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button{width:42px !important; height:42px !important;}
+  /* The map reset starts from a clean canvas: no MapLibre chrome, credits,
+     or controls may sit above it while the evidence-led replacement is built. */
+  #map .maplibregl-ctrl-top-left,
+  #map .maplibregl-ctrl-top-right,
+  #map .maplibregl-ctrl-bottom-left,
+  #map .maplibregl-ctrl-bottom-right,
+  #map .maplibregl-ctrl-attrib{display:none !important;}
   @media(max-width:460px){#map{height:clamp(480px, 70vh, 600px);}}
   .marker{position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; border-radius:50%; background:transparent; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center;}
   .marker::before{content:""; width:13px; height:13px; border-radius:50%; background:var(--accent-amber); box-shadow:0 0 0 4px rgba(242,168,60,.25); border:1.5px solid rgba(11,21,18,.6);}
