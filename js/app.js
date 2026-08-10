@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v418";
-const APP_BUILD_TIME = "2026-08-10T15:18:57Z";
+const APP_CACHE_VERSION = "v419";
+const APP_BUILD_TIME = "2026-08-10T15:51:40Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9394,6 +9394,18 @@ function loadMap(){
       // A muted estate-green base lets the bright camp fields, woodland
       // and town clearings carry the hierarchy, matching the official
       // map's light aerial-plan feel rather than a dark game-map look.
+      // A fully local style at init (solid bg colour, no tile/sprite/glyph
+      // URLs) so the map's first render and the vector-layer setup in the
+      // "load" handler below never wait on the network — critical, because
+      // MapLibre only fires "load" once every source in the INITIAL style
+      // has loaded, so putting a network raster source here would block the
+      // whole illustrated map from rendering with weak/no signal. The real
+      // basemap (Carto Voyager raster) is instead added UNDERNEATH the
+      // illustration AFTER load, once the vector map is already on screen —
+      // see addBasemapUnderlay() in the load handler. That gives the "real
+      // map with the festival painted on top" look (real A31/Alresford Rd,
+      // field parcels, countryside, georeferenced to Matterley Estate) when
+      // online, and degrades to exactly this local look with zero signal.
       style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#cbdcc4" } }] },
       center: [-1.2394, 51.0534],
       // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
@@ -9428,7 +9440,9 @@ function loadMap(){
       // below. This zoom is only the brief pre-style fallback frame.
       zoom: 14.3, minZoom: 13.5, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
-      attributionControl: false
+      // Compact attribution is required by the OSM/CARTO tile terms now that
+      // a real basemap is used; it collapses to a small "i" on mobile.
+      attributionControl: { compact: true }
     });
     // Place the compact map utility rail away from the dense northern
     // labels. This mirrors a familiar mobile-map ergonomics pattern
@@ -9481,6 +9495,37 @@ function loadMap(){
       // competing on one flat plane.
       mapGL.addSource("mapSiteGround", { type: "geojson", data: geo.siteGround });
       mapGL.addLayer({ id: "site-ground-fill", type: "fill", source: "mapSiteGround", paint: { "fill-color": ["get", "fill"] } });
+
+      // Real map underlay, added HERE (after the vector map is already on
+      // screen) rather than in the init style, so a slow or unreachable
+      // tile server can never block the illustration from rendering — see
+      // the style comment above. Inserted just below site-ground-fill so it
+      // sits UNDER the whole festival illustration: with signal you see the
+      // real roads (A31, Alresford/Petersfield Rd), field parcels and
+      // countryside around and through the site (site-ground is drawn semi-
+      // transparent below so the base reads through the open arena, like the
+      // official app); with no signal the tiles simply don't paint and the
+      // map looks exactly as it did before. Wrapped in try/catch and only
+      // attempted when online, and self-removes if the source errors, so it
+      // is purely additive and can never break the working map.
+      try {
+        if(navigator.onLine !== false && !mapGL.getSource("basemap")){
+          mapGL.addSource("basemap", {
+            type: "raster",
+            tiles: [
+              "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+              "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+              "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+            ],
+            tileSize: 256,
+            maxzoom: 20,
+            attribution: "© OpenStreetMap contributors © CARTO"
+          });
+          mapGL.addLayer({ id: "basemap", type: "raster", source: "basemap", paint: { "raster-opacity": 1 } }, "site-ground-fill");
+          // Let the open ground read the real base through it.
+          mapGL.setPaintProperty("site-ground-fill", "fill-opacity", 0.5);
+        }
+      } catch(e){ /* basemap is a non-critical enhancement; never let it break the map */ }
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
       // Broad land parcels establish the arrival view. Fine mottling still
       // waits for deep zoom, so the landscape feels composed rather than
