@@ -19,6 +19,9 @@ Never use a Greebtown screenshot to validate Greebtown.
 
 ## Required refresh workflow
 
+Follow [`../MAP_WORKING_AGREEMENT.md`](../MAP_WORKING_AGREEMENT.md) for the
+evidence threshold, geometry restrictions, and visual review gate.
+
 The active map was reset to a blank baseline on 10 Aug 2026. No previous
 territory, label, route, or marker is approved for carry-over.
 

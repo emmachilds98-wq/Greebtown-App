@@ -14,6 +14,11 @@ to trace each connected cluster. Record the image/frame that supports a new
 silhouette or placement and review a rendered before/after image before
 shipping. Do not use screenshots of Greebtown itself as corroboration.
 
+The binding rules for using this evidence are in
+[`../MAP_WORKING_AGREEMENT.md`](../MAP_WORKING_AGREEMENT.md). In particular,
+the evidence hierarchy, area-by-area workflow, geometry constraints, and
+visual review gate apply before any new map feature is added.
+
 Screenshots of the official Boomtown Fair 2026 app's own map, plus written
 findings from reviewing them and ~490 frames extracted from 5 screen
 recordings of the same official app. This is the evidence behind the
