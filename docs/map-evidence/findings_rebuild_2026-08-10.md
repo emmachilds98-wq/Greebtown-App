@@ -95,3 +95,12 @@ location.
   canopy with an amber edge, and places an unlabeled blue water form directly
   south of Hydro XL. These are drawn only at close zoom and are intentionally
   not treated as additional venues or service icons.
+- Connected-cluster pass: `IMG_3722.webp`, `IMG_3724.webp`, and
+  `IMG_3729.webp` show brightly bounded, internally connected compound
+  shapes—not isolated territory fills. The renderer now gives Botanica,
+  Metropolis, Area 404, Copperwood, Grand Central, Oldtown, and Hilltop their
+  observed contour treatment, joins only their documented local routes, and
+  adds restrained grouped massing inside the pictured Botanica, Area 404,
+  Copperwood/Grand Central, and Oldtown courts. Hilltop receives additional
+  internal camping lanes. These are review-draft massing groups, not a claim
+  of exact individual building footprints.
