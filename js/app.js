@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v435";
-const APP_BUILD_TIME = "2026-08-10T22:07:32Z";
+const APP_CACHE_VERSION = "v436";
+const APP_BUILD_TIME = "2026-08-10T22:21:13Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7452,8 +7452,17 @@ function evidenceRebuildDetailLabels(){
   return [
     ["NEXUS", 42, 44, "stage"], ["HIDDEN WOODS", 22, 42, "stage"],
     ["TANGLED ROOTS", 54, 31, "stage"], ["TRIBE OF FROG", 46, 75, "stage"],
-    ["THE HIDE OUT", 42, 66, "venue"], ["VALLEY CAMPING", 66, 22, "camp"],
-    ["CAMP AT HILLTOP", 75, 63, "camp"]
+    ["SPECTRUM 360", 39, 67, "stage"], ["HANGAR 161", 35, 69, "venue"],
+    ["DEVIANT LOUNGE", 35, 72, "venue"], ["BBXL", 41, 73, "venue"],
+    ["ACID LEAK", 42, 76, "stage"], ["HYDRO XL", 26, 72, "stage"],
+    ["BOTANICA ZOO", 39, 46, "venue"], ["KARMA CEUTICALS", 44, 47, "venue"],
+    ["MANGO", 35, 47, "venue"], ["THE NETWORK", 45, 44, "venue"],
+    ["ROSE AND CLOWN", 47, 47, "stage"], ["THE HIDE OUT", 42, 66, "venue"],
+    ["THE FOOLS LEAP", 51, 61, "stage"], ["DEN OF DIS ORDER", 60, 57, "venue"],
+    ["POSTAL POSSE", 51, 64, "venue"], ["TROUGH LOVE", 52, 66, "venue"],
+    ["DA GRAAFF'S REFORMATORY", 51, 68, "venue"], ["SÍBÍN BEAG", 62, 61, "stage"],
+    ["THE FECKLESS WRECKED", 62, 64, "venue"], ["HELIX", 63, 83, "stage"],
+    ["VALLEY CAMPING", 66, 22, "camp"], ["CAMP AT HILLTOP", 75, 63, "camp"]
   ];
 }
 
@@ -7487,31 +7496,20 @@ function buildEvidenceOnlyMapGeoJSON(){
       polygon("The Lion's Den", "rgba(87,62,42,.96)", [[67,80],[82,80],[88,86],[82,92],[69,92],[64,87]])
     ]
   };
+  // Each main corridor below corresponds to a direct relation recorded in
+  // findings_screenshots.md. No loose decorative line is allowed here.
   geo.evidenceSpine = { type:"FeatureCollection", features:[
-    route([[40,46],[48,46],[58,48],[58,57],[56,62],[56,70],[56,82]]),
-    route([[58,48],[61,36],[75,40]]),
-    route([[60,58],[69,59],[74,68],[73,78],[74,86]]),
-    route([[41,61],[36,69],[42,74],[52,82]]),
-    route([[56,82],[67,86]])
+    route([[35,59],[39,52],[42,44]]),                 // Metropolis -> Nexus
+    route([[42,44],[47,46],[58,48]]),                 // Nexus/Botanica -> Grand Central
+    route([[58,48],[58,55],[56,61]]),                 // Grand Central -> Oldtown
+    route([[58,48],[61,36],[75,40]]),                 // Grand Central -> Copperwood -> Thrutopia
+    route([[56,61],[56,70],[56,82]]),                 // Oldtown -> Quantum
+    route([[56,61],[66,65],[74,86]]),                 // Oldtown -> Lion's Den corridor
+    route([[42,44],[30,47],[26,72]]),                 // Nexus -> Metropolis / Hydro XL branch
+    route([[56,61],[46,75]])                          // Oldtown -> Tribe of Frog
   ] };
-  // Original, non-interactive massing: enough close-view texture for a place
-  // to feel inhabited, without inventing venue or amenity locations.
-  geo.evidenceStructures = { type:"FeatureCollection", features:[
-    building("#d5b27a", [[36,42],[39,42],[39,44],[36,44]]), building("#ad7a49", [[41,40],[44,40],[45,42],[42,43]]),
-    building("#f2dfb5", [[44,46],[47,45],[48,48],[45,49]]), building("#c79358", [[34,47],[37,47],[37,49],[34,49]]),
-    building("#b68156", [[30,57],[33,56],[34,59],[31,60]]), building("#eadcc0", [[36,56],[39,56],[40,59],[37,60]]),
-    building("#d19b62", [[40,61],[43,60],[44,63],[41,64]]), building("#a86f49", [[29,63],[31,62],[33,65],[30,66]]),
-    building("#d3a55e", [[29,70],[33,69],[34,72],[30,73]]), building("#f0d5a2", [[37,68],[41,68],[42,71],[39,72]]),
-    building("#a9744f", [[34,75],[38,74],[40,77],[36,78]]), building("#c28d55", [[25,72],[28,72],[28,75],[25,75]]),
-    building("#e2c587", [[56,31],[60,30],[61,33],[57,34]]), building("#c09154", [[63,31],[66,31],[67,34],[64,35]]),
-    building("#f3e7c6", [[57,35],[60,34],[62,37],[59,38]]), building("#b77e50", [[52,34],[55,33],[56,36],[53,37]]),
-    building("#6d568f", [[73,37],[77,36],[79,39],[75,40]]), building("#9b744e", [[80,39],[84,39],[85,42],[81,43]]),
-    building("#cf8b59", [[55,45],[58,44],[59,47],[56,48]]), building("#f0d5ab", [[60,46],[63,45],[64,48],[61,50]]),
-    building("#b37352", [[52,56],[55,55],[56,58],[53,59]]), building("#dfb77e", [[58,58],[61,57],[62,60],[59,61]]),
-    building("#9d6c4d", [[51,63],[54,62],[55,65],[52,66]]), building("#d9ae72", [[57,66],[60,65],[61,68],[58,69]]),
-    building("#a058ad", [[50,79],[54,78],[55,81],[51,82]]), building("#d27bb7", [[56,83],[60,82],[61,85],[57,86]]),
-    building("#b77a43", [[70,84],[74,83],[76,86],[71,87]]), building("#d69a51", [[78,85],[82,84],[84,87],[79,88]])
-  ] };
+  // Anonymous building scatter was removed: a close detail must be a
+  // source-supported named court or a readable route, never texture filler.
   const treeDot = (x,y,size)=>({ type:"Feature", properties:{ size }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } });
   geo.evidenceForestDots = { type:"FeatureCollection", features:[
     [18,35,1.2],[23,39,.9],[28,32,1.1],[18,49,.8],[23,52,1.15],[17,62,1],[21,67,.9],[18,75,1.25],[23,80,.85],
@@ -7538,9 +7536,12 @@ function buildEvidenceOnlyMapGeoJSON(){
     [73,58],[77,58],[80,60],[72,62],[76,63],[81,64],[73,66],[78,68],[80,71],[74,70]
   ].map(([x,y])=>treeDot(x,y,1)) };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
-    route([[39,44],[42,44],[45,46]]), route([[52,31],[55,31],[56,34]]), route([[53,59],[57,60],[60,62]]),
-    route([[57,48],[60,49],[62,47]]), route([[72,85],[77,86],[80,88]]), route([[59,20],[64,22],[69,25]]),
-    route([[74,59],[78,62],[81,66],[79,71]])
+    route([[39,46],[42,44],[45,44],[47,47]]),         // Botanica loop
+    route([[35,68],[35,72],[41,73],[42,76]]),         // Area 404 venue column
+    route([[51,61],[51,64],[52,66],[51,68]]),         // Oldtown west column
+    route([[60,57],[62,61],[62,64]]),                 // Oldtown east column
+    route([[59,20],[64,22],[69,25]]),                 // Valley Camping lanes
+    route([[74,59],[78,62],[81,66],[79,71]])          // Hilltop camping route
   ] };
   return geo;
 }
@@ -9471,7 +9472,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v3";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v4";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
