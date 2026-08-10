@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v443";
-const APP_BUILD_TIME = "2026-08-10T23:10:08Z";
+const APP_CACHE_VERSION = "v444";
+const APP_BUILD_TIME = "2026-08-10T23:13:43Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7440,7 +7440,7 @@ function evidenceRebuildLabels(){
   // do not reuse the quarantined map-system or app coordinate collections.
   return [
     ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
-    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"],
+    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 86, 27, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
     ["HILLTOP", 74, 68, "evidence-gold"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"]
   ];
@@ -7466,7 +7466,7 @@ function evidenceRebuildDetailLabels(){
     ["THE FECKLESS WRECKED", 62, 64, "venue"], ["HELIX", 63, 83, "stage"],
     ["ANCIENT FUTURES", 63, 47, "venue"], ["DAILY RAG", 57, 53, "venue"],
     ["THE HIDE OUT HILLTOP", 68, 36, "venue"],
-    ["VALLEY CAMPING", 66, 22, "camp"], ["CAMP AT HILLTOP", 75, 63, "camp"]
+    ["VALLEY CAMPING", 66, 22, "camp"], ["CAMP AT HILLTOP", 75, 63, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
   ];
 }
 
@@ -7493,6 +7493,7 @@ function buildEvidenceOnlyMapGeoJSON(){
       polygon("Area 404", "rgba(150,123,54,.95)", [[28,67],[41,65],[46,72],[41,79],[29,78],[24,73]]),
       polygon("Copperwood Heights", "rgba(193,166,48,.97)", [[53,29],[65,27],[71,32],[68,38],[58,40],[50,36]]),
       polygon("Thrutopia", "rgba(76,78,174,.97)", [[69,34],[82,34],[88,40],[84,47],[73,46],[68,41]]),
+      polygon("Anara Forest", "rgba(43,121,79,.96)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
       polygon("Grand Central", "rgba(176,97,55,.96)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
       polygon("Oldtown", "rgba(117,58,54,.96)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
       polygon("Hilltop", "rgba(161,144,43,.94)", [[67,50],[82,49],[86,60],[83,78],[70,79],[66,66]]),
@@ -7507,6 +7508,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[42,44],[47,46],[58,48]]),                 // Nexus/Botanica -> Grand Central
     route([[58,48],[58,55],[56,61]]),                 // Grand Central -> Oldtown
     route([[58,48],[61,36],[75,40]]),                 // Grand Central -> Copperwood -> Thrutopia
+    route([[75,40],[84,34],[86,27]]),                 // Thrutopia / Copperwood -> Anara Forest
     route([[56,61],[56,70],[56,82]]),                 // Oldtown -> Quantum
     route([[56,61],[66,65],[74,86]]),                 // Oldtown -> Lion's Den corridor
     route([[42,44],[30,47],[26,72]]),                 // Nexus -> Metropolis / Hydro XL branch
@@ -7518,7 +7520,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceForestDots = { type:"FeatureCollection", features:[
     [18,35,1.2],[23,39,.9],[28,32,1.1],[18,49,.8],[23,52,1.15],[17,62,1],[21,67,.9],[18,75,1.25],[23,80,.85],
     [31,27,1],[38,29,.85],[45,30,1.15],[42,34,.8],[17,86,1],[27,84,.9],[35,86,1.1],[40,89,.85],
-    [68,25,1.1],[75,27,.9],[84,29,1],[87,52,1],[90,61,.85],[89,72,1.15],[87,83,.85],[65,94,1],[76,95,1.1]
+    [68,25,1.1],[75,27,.9],[82,22,1],[86,25,.9],[90,28,1.1],[84,29,1],[87,52,1],[90,61,.85],[89,72,1.15],[87,83,.85],[65,94,1],[76,95,1.1]
   ].map(([x,y,size])=>treeDot(x,y,size)) };
   // Close-view areas remain abstract and unbranded: they describe the
   // observed footprint and circulation, never a guessed business location.
@@ -7558,7 +7560,8 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceCampFields = { type:"FeatureCollection", features:[
     polygon("Valley Camping", "rgba(75,139,84,.92)", [[58,16],[70,15],[74,22],[69,28],[60,27],[55,22]]),
     polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[71,56],[81,55],[83,66],[79,74],[72,73],[69,65]]),
-    polygon("Lion's Den eastern camp", "rgba(187,105,122,.84)", [[84,82],[91,81],[94,87],[91,95],[84,94],[81,89]])
+    polygon("Lion's Den eastern camp", "rgba(187,105,122,.84)", [[84,82],[91,81],[94,87],[91,95],[84,94],[81,89]]),
+    polygon("Temple Valley Camping", "rgba(92,155,102,.88)", [[88,30],[96,30],[98,35],[94,40],[87,38],[85,34]])
   ] };
   geo.evidenceCampTents = { type:"FeatureCollection", features:[
     [61,19],[64,18],[67,20],[70,22],[59,23],[63,25],[68,24],
@@ -7571,7 +7574,9 @@ function buildEvidenceOnlyMapGeoJSON(){
     [73,57],[77,58],[80,59],[74,61],[78,62],[81,64],[72,65],[76,66],[80,68],[73,69],[77,71],[81,72]
       .map(([x,y])=> pitch(x,y,"rgba(248,241,203,.92)")),
     [85,84],[88,84],[90,86],[86,87],[89,88],[92,89],[85,90],[88,92],[91,93]
-      .map(([x,y], index)=> pitch(x,y, index % 3 === 0 ? "rgba(236,143,116,.9)" : index % 3 === 1 ? "rgba(132,176,222,.9)" : "rgba(248,212,111,.9)"))
+      .map(([x,y], index)=> pitch(x,y, index % 3 === 0 ? "rgba(236,143,116,.9)" : index % 3 === 1 ? "rgba(132,176,222,.9)" : "rgba(248,212,111,.9)")),
+    [89,32],[92,32],[94,34],[88,35],[91,36],[95,37],[89,37]
+      .map(([x,y], index)=> pitch(x,y, index % 3 === 0 ? "rgba(237,141,112,.88)" : index % 3 === 1 ? "rgba(121,172,220,.88)" : "rgba(246,207,106,.88)"))
   ].flat() };
   geo.evidenceFieldLanes = { type:"FeatureCollection", features:[
     route([[71,57],[76,61],[81,65]]), route([[70,61],[75,65],[80,70]]), route([[70,66],[74,70],[79,74]]),
@@ -7591,7 +7596,9 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[71,58],[76,60],[80,63]], { kind:"camp" }),
     route([[72,64],[76,66],[80,69]], { kind:"camp" }),
     route([[73,55],[77,58],[81,61]], { kind:"camp" }),
-    route([[71,68],[75,70],[80,73]], { kind:"camp" })
+    route([[71,68],[75,70],[80,73]], { kind:"camp" }),
+    route([[87,34],[90,32],[94,34],[95,37]], { kind:"camp" }),
+    route([[88,37],[91,35],[94,37]], { kind:"camp" })
   ] };
   // Recognisable, evidence-backed landmarks and stage forms. These are
   // purposefully few: each is visible in the official close-up material.
@@ -9630,7 +9637,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v11-camp-fields";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v12-anara-outer-region";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -9659,7 +9666,7 @@ function loadMap(){
     // not a fixed zoom tuned for one screen size. This keeps the west
     // fields, Hilltop corridor, Lion's Den woodland and road edge in one
     // coherent first view on both a phone and a wider desktop card.
-    const overviewCorners = [[10,14], [90,14], [90,94], [10,94]]
+    const overviewCorners = [[10,14], [98,14], [98,94], [10,94]]
       .map(([x,y])=> schematicToLatLon(x, y));
     const SITE_OVERVIEW_BOUNDS = [
       [Math.min(...overviewCorners.map(point=> point.lon)), Math.min(...overviewCorners.map(point=> point.lat))],
