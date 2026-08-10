@@ -110,3 +110,9 @@ location.
   these as two isolated camp grounds, adds ordered pitch marks and field lanes
   only inside their boundaries, and leaves gates, parking and unnamed utility
   icons out.
+- Outer-region pass: the full-site evidence and `findings_screenshots.md`
+  place Anara Forest east/north-east of Copperwood, with Thrutopia between the
+  central cluster and that woodland. Temple Valley Camping is a separate
+  coloured camping field on Anara's edge, with only its own internal lanes and
+  coloured pitch marks. The new field is not connected to or merged with
+  Hilltop, Valley Camping, or the Lion's Den camp field.
