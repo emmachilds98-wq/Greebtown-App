@@ -121,3 +121,15 @@ location.
   immediately north of Copperwood. Letsbe Avenue is its own narrow, labelled
   approach into the Botanica loop. Its three grouped blocks and single route
   are review-draft circulation/massing only, not asserted stall footprints.
+- Full evidence pass: the current active scene now covers the documented
+  Downtown Camping/Meadow/Campflight west field, Letsbe/Botanica service loop,
+  the Grand Central-to-Oldtown route, Oldtown's two named chains, the Full Moon
+  Ballroom cluster beside The Hide Out Hilltop, and Camp Skylark/Reception in
+  Hilltop. All new camp pitch marks and lanes remain inside their own field.
+  Findings vidF strongly corrects Postal Posse into the Botanica/Letsbe loop,
+  so it is not included in the Oldtown sequence.
+- The latest official-app review did not find a Thrutopia map label or pin.
+  Its visible evidence-rendered territory and label are therefore removed from
+  this draft instead of preserving a previously inferred location. The
+  Copperwood-to-Anara route is rendered directly, which is the only documented
+  corridor relation retained in the active map.

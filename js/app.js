@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v445";
-const APP_BUILD_TIME = "2026-08-10T23:18:30Z";
+const APP_CACHE_VERSION = "v447";
+const APP_BUILD_TIME = "2026-08-10T23:26:37Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7439,10 +7439,10 @@ function evidenceRebuildLabels(){
   // Fresh visual anchors traced from IMG_3721–IMG_3734. These intentionally
   // do not reuse the quarantined map-system or app coordinate collections.
   return [
-    ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
-    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 86, 27, "evidence-anara"],
+    ["DOWNTOWN CAMPING", 17, 48, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
+    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["ANARA FOREST", 86, 27, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
-    ["HILLTOP", 74, 68, "evidence-gold"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"]
+    ["HILLTOP", 74, 68, "evidence-gold"], ["CAMP SKYLARK", 78, 72, "evidence-campground"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"]
   ];
 }
 
@@ -7458,15 +7458,21 @@ function evidenceRebuildDetailLabels(){
     ["BOTANICA ZOO", 39, 46, "venue"], ["KARMA CEUTICALS", 44, 47, "venue"],
     ["MANGO", 35, 47, "venue"], ["THE NETWORK", 45, 44, "venue"],
     ["SUB LAB", 46, 49, "venue"], ["NACHTLICKER", 47, 45, "venue"],
-    ["SOAPRANOS LAUNDRETTE", 40, 49, "venue"],
+    ["SOAPRANOS LAUNDRETTE", 40, 49, "venue"], ["POSTAL POSSE", 40, 35, "venue"],
+    ["LUCK EXCHANGE CASINO", 43, 33, "venue"], ["HOTEL PARADISO", 45, 36, "venue"],
+    ["NETWORK COMMS STATION", 42, 38, "venue"], ["INCONVENIENCE STORE", 38, 39, "venue"],
     ["ROSE AND CLOWN", 47, 47, "stage"], ["THE HIDE OUT", 42, 66, "venue"],
-    ["THE FOOLS LEAP", 51, 61, "stage"], ["DEN OF DIS ORDER", 60, 57, "venue"],
-    ["POSTAL POSSE", 51, 64, "venue"], ["TROUGH LOVE", 52, 66, "venue"],
-    ["DA GRAAFF'S REFORMATORY", 51, 68, "venue"], ["SÍBÍN BEAG", 62, 61, "stage"],
-    ["THE FECKLESS WRECKED", 62, 64, "venue"], ["HELIX", 63, 83, "stage"],
-    ["ANCIENT FUTURES", 63, 47, "venue"], ["DAILY RAG", 57, 53, "venue"],
-    ["THE HIDE OUT HILLTOP", 68, 36, "venue"],
-    ["VALLEY CAMPING", 66, 22, "camp"], ["CAMP AT HILLTOP", 75, 63, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
+    ["THE FOOLS LEAP", 51, 59, "stage"], ["DA GRAAFF'S REFORMATORY", 51, 62, "venue"],
+    ["LA LUNA COVEN", 51, 65, "venue"], ["BUSKERS WHARF", 51, 68, "venue"],
+    ["TROUGH LOVE", 55, 63, "venue"], ["THE COMMON GROUND", 56, 62, "venue"],
+    ["THE POMEGRANATE PARLOUR", 62, 56, "venue"], ["DEN OF DIS ORDER", 62, 58, "venue"],
+    ["MINING FOR (G)OLD TOWN", 62, 60, "venue"], ["SÍBÍN BEAG", 62, 62, "stage"],
+    ["THE FECKLESS WRECKED", 62, 65, "venue"], ["HELIX", 63, 83, "stage"],
+    ["ANCIENT FUTURES", 63, 47, "venue"], ["BOOMTOWN HALL", 58, 51, "venue"], ["DAILY RAG", 57, 53, "venue"],
+    ["THE HIDE OUT HILLTOP", 68, 36, "venue"], ["FULL MOON BALLROOM", 65, 33, "venue"],
+    ["SILVER SWAN TALENT AGENCY", 63, 30, "venue"], ["VELVET ROPE", 65, 38, "venue"],
+    ["VALLEY CAMPING", 66, 22, "camp"], ["MEADOW", 16, 57, "camp"], ["CAMPFLIGHT", 18, 63, "camp"],
+    ["CAMP AT HILLTOP", 75, 63, "camp"], ["RECEPTION", 80, 75, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
   ];
 }
 
@@ -7492,7 +7498,6 @@ function buildEvidenceOnlyMapGeoJSON(){
       polygon("Metropolis", "rgba(57,126,105,.95)", [[28,55],[39,53],[45,60],[41,67],[29,66],[24,61]]),
       polygon("Area 404", "rgba(150,123,54,.95)", [[28,67],[41,65],[46,72],[41,79],[29,78],[24,73]]),
       polygon("Copperwood Heights", "rgba(193,166,48,.97)", [[53,29],[65,27],[71,32],[68,38],[58,40],[50,36]]),
-      polygon("Thrutopia", "rgba(76,78,174,.97)", [[69,34],[82,34],[88,40],[84,47],[73,46],[68,41]]),
       polygon("Anara Forest", "rgba(43,121,79,.96)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
       polygon("Grand Central", "rgba(176,97,55,.96)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
       polygon("Oldtown", "rgba(117,58,54,.96)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
@@ -7507,8 +7512,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[35,59],[39,52],[42,44]]),                 // Metropolis -> Nexus
     route([[42,44],[47,46],[58,48]]),                 // Nexus/Botanica -> Grand Central
     route([[58,48],[58,55],[56,61]]),                 // Grand Central -> Oldtown
-    route([[58,48],[61,36],[75,40]]),                 // Grand Central -> Copperwood -> Thrutopia
-    route([[75,40],[84,34],[86,27]]),                 // Thrutopia / Copperwood -> Anara Forest
+    route([[58,48],[61,36],[68,33]]),                 // Grand Central -> Copperwood
+    route([[68,33],[79,34],[86,27]]),                 // Copperwood corridor -> Anara Forest
     route([[56,61],[56,70],[56,82]]),                 // Oldtown -> Quantum
     route([[56,61],[66,65],[74,86]]),                 // Oldtown -> Lion's Den corridor
     route([[42,44],[30,47],[26,72]]),                 // Nexus -> Metropolis / Hydro XL branch
@@ -7561,12 +7566,14 @@ function buildEvidenceOnlyMapGeoJSON(){
     building("rgba(210,151,94,.96)", [[60,61],[62,61],[62,63],[60,63]]), building("rgba(153,94,77,.96)", [[60,64],[62,64],[62,66],[60,66]])
   ] };
   geo.evidenceCampFields = { type:"FeatureCollection", features:[
+    polygon("Downtown Camping", "rgba(204,122,125,.84)", [[10,40],[20,39],[26,45],[24,53],[16,56],[9,50]]),
     polygon("Valley Camping", "rgba(75,139,84,.92)", [[58,16],[70,15],[74,22],[69,28],[60,27],[55,22]]),
     polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[71,56],[81,55],[83,66],[79,74],[72,73],[69,65]]),
     polygon("Lion's Den eastern camp", "rgba(187,105,122,.84)", [[84,82],[91,81],[94,87],[91,95],[84,94],[81,89]]),
     polygon("Temple Valley Camping", "rgba(92,155,102,.88)", [[88,30],[96,30],[98,35],[94,40],[87,38],[85,34]])
   ] };
   geo.evidenceCampTents = { type:"FeatureCollection", features:[
+    [13,43],[17,42],[21,44],[24,47],[13,48],[17,50],[21,52],
     [61,19],[64,18],[67,20],[70,22],[59,23],[63,25],[68,24],
     [73,58],[77,58],[80,60],[72,62],[76,63],[81,64],[73,66],[78,68],[80,71],[74,70]
   ].map(([x,y])=>treeDot(x,y,1)) };
@@ -7574,6 +7581,8 @@ function buildEvidenceOnlyMapGeoJSON(){
   // the documented fields and field lanes never cross into town or forest.
   const pitch = (x,y,fill)=> polygon("camp pitch", fill, [[x,y-1],[x+1,y],[x,y+1],[x-1,y]]);
   geo.evidenceCampPitches = { type:"FeatureCollection", features:[
+    [[13,44],[17,43],[21,45],[12,47],[16,48],[20,49],[14,51],[18,52]]
+      .map(([x,y], index)=> pitch(x,y, index % 3 === 0 ? "rgba(236,143,116,.9)" : index % 3 === 1 ? "rgba(132,176,222,.9)" : "rgba(248,212,111,.9)")),
     [[73,57],[77,58],[80,59],[74,61],[78,62],[81,64],[72,65],[76,66],[80,68],[73,69],[77,71],[81,72]]
       .map(([x,y])=> pitch(x,y,"rgba(248,241,203,.92)")),
     [[85,84],[88,84],[90,86],[86,87],[89,88],[92,89],[85,90],[88,92],[91,93]]
@@ -7582,19 +7591,23 @@ function buildEvidenceOnlyMapGeoJSON(){
       .map(([x,y], index)=> pitch(x,y, index % 3 === 0 ? "rgba(237,141,112,.88)" : index % 3 === 1 ? "rgba(121,172,220,.88)" : "rgba(246,207,106,.88)"))
   ].flat() };
   geo.evidenceFieldLanes = { type:"FeatureCollection", features:[
+    route([[12,43],[17,46],[22,49]]), route([[13,49],[18,52],[22,52]]),
     route([[71,57],[76,61],[81,65]]), route([[70,61],[75,65],[80,70]]), route([[70,66],[74,70],[79,74]]),
     route([[75,56],[78,61],[80,66],[80,72]]), route([[71,59],[72,65],[72,72]])
   ] };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
     route([[42,31],[40,35],[42,39],[42,44]], { kind:"street" }), // Letsbe Avenue -> Botanica
+    route([[40,32],[43,32],[45,35],[45,38],[42,40],[40,38],[40,35],[40,32]], { kind:"street" }), // Letsbe Avenue loop
     route([[37,48],[39,46],[42,44],[45,44],[47,47],[45,50],[40,50],[37,48]], { kind:"street" }), // Botanica loop
     route([[31,60],[35,59],[39,62],[41,66]], { kind:"street" }), // Metropolis -> Area 404 edge
     route([[35,68],[35,72],[41,73],[42,76]], { kind:"street" }), // Area 404 venue column
     route([[32,70],[36,71],[40,73],[42,76]], { kind:"street" }), // Area 404 inner branch
     route([[54,35],[58,36],[62,35],[66,36]], { kind:"street" }), // Copperwood courtyard
+    route([[58,48],[59,52],[57,55]], { kind:"street" }),         // Grand Central -> Oldtown south exit
     route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
-    route([[51,61],[51,64],[52,66],[51,68]], { kind:"street" }), // Oldtown west column
-    route([[60,57],[62,61],[62,64],[60,66]], { kind:"street" }), // Oldtown east column
+    route([[51,59],[51,62],[51,65],[51,68]], { kind:"street" }), // Oldtown west chain
+    route([[62,56],[62,58],[62,60],[62,62],[62,65]], { kind:"street" }), // Oldtown east chain
+    route([[53,61],[55,63],[57,62],[58,64],[56,66],[53,65],[53,61]], { kind:"street" }), // Oldtown inner loop
     route([[59,20],[64,22],[69,25]], { kind:"camp" }),           // Valley Camping lanes
     route([[74,59],[78,62],[81,66],[79,71]], { kind:"camp" }),   // Hilltop camping route
     route([[71,58],[76,60],[80,63]], { kind:"camp" }),
@@ -7632,7 +7645,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceCourtDots = { type:"FeatureCollection", features:[
     [40,43],[43,42],[45,45],[40,46],                   // NEXUS/Botanica court vegetation
     [55,46],[59,45],[61,48],                           // Grand Central hardstanding details
-    [53,59],[56,58],[59,60],[54,63],[58,64],           // Oldtown court details
+    [51,59],[51,62],[51,65],[51,68], [55,63],[57,62],[56,66], [62,56],[62,58],[62,60],[62,62],[62,65], // Oldtown chains
     [44,73],[47,74],[46,76],                           // Tribe of Frog compound
     [72,85],[75,85],[78,86],[80,88]                    // Lion's Den forecourt
   ].map(([x,y])=>treeDot(x,y,.72)) };
@@ -9641,7 +9654,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v13-north-transition";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v15-full-evidence-pass";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
