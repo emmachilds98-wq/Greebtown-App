@@ -37,3 +37,18 @@ readable official source confirms both its identity and its neighbouring
 features. Every detailed path and compound is a low-confidence visual shape
 that must be rechecked against future close-ups before it becomes a named
 location.
+
+## Topology constraints for the next detail pass
+
+- Each visible pathway must join two named, documented areas. Do not add
+  standalone strokes, loops, or ornamental “roads”.
+- A detailed court must sit wholly inside its documented parent area; it may
+  not cover a territory boundary or another court.
+- Area 404 detail follows its north-to-south observed column: Spectrum 360,
+  Hangar 161, Deviant Lounge, BBXL, Acid Leak. Oldtown remains two columns:
+  Fools Leap/Postal Posse/Trough Love/Da Graaff's Reformatory to the west;
+  Den of Dis Order, SÃ­bÃ­n Beag, and The Feckless Wrecked to the east.
+- Camp routes remain inside their own field. Do not extend campsite lanes into
+  a town, woodland, or stage court.
+- Utilities require a readable official label plus neighbouring landmarks;
+  an icon alone is not sufficient placement evidence.
