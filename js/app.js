@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v430";
-const APP_BUILD_TIME = "2026-08-10T21:10:42Z";
+const APP_CACHE_VERSION = "v431";
+const APP_BUILD_TIME = "2026-08-10T21:15:49Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7439,21 +7439,10 @@ function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
   const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
-  const territory = (name, fill, points)=>({ type:"Feature", properties:{name,fill}, geometry:{type:"Polygon",coordinates:[schematicRingToLngLat(points)]} });
-  geo.siteGround = { type:"FeatureCollection", features:[territory("Festival site", "rgba(204,225,191,.98)", [[5,8],[61,6],[91,16],[96,53],[89,96],[28,98],[4,78],[-2,43]])] };
-  geo.evidenceTerritories = { type:"FeatureCollection", features:[
-    territory("West Camping", "rgba(104,187,121,.98)", [[37,11],[63,11],[75,22],[73,35],[58,40],[43,34]]),
-    territory("Downtown", "rgba(80,161,94,.99)", [[15,36],[29,32],[45,36],[51,48],[44,59],[26,60],[14,51]]),
-    territory("Sunset", "rgba(244,211,84,.99)", [[0,59],[13,57],[20,65],[18,79],[4,77],[0,69]]),
-    territory("Hilltop", "rgba(245,211,79,.99)", [[48,62],[56,60],[66,61],[72,65],[71,71],[63,74],[53,73],[48,69]]),
-    territory("Lion's Den", "rgba(45,120,68,.99)", [[20,65],[35,62],[46,68],[45,82],[31,85],[18,76]]),
-    territory("Anara", "rgba(64,143,79,.99)", [[72,63],[86,65],[91,73],[86,82],[74,80],[69,71]]),
-    territory("East Camping", "rgba(105,188,120,.98)", [[86,76],[98,74],[101,94],[88,98],[82,88]])
-  ] };
-  geo.evidenceSpine = { type:"FeatureCollection", features:[
-    [[26,47],[37,45],[49,47],[54,51],[45,57],[52,65],[62,67]],
-    [[54,51],[62,45],[65,57]], [[45,57],[37,64],[35,72]], [[71,69],[78,72],[85,76]]
-  ].map(points=>({type:"Feature",properties:{},geometry:{type:"LineString",coordinates:schematicRingToLngLat(points)}})) };
+  // Deliberately blank baseline. The replacement map must be traced from the
+  // official evidence tree, not improvised from previous map values.
+  geo.evidenceTerritories = empty();
+  geo.evidenceSpine = empty();
   return geo;
 }
 
@@ -9138,7 +9127,7 @@ function buildMapGeoJSON(){
 // not a catalogue of pins. Secondary venues, named stalls and amenities stay
 // one deliberate tap away (or are discoverable through search), while the
 // primary districts, headline stages and ground shapes establish orientation.
-let mapLayerVisible = { main: false, minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: true, sssi: false, road: false };
+let mapLayerVisible = { main: false, manual: false, overview: false, minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: true, sssi: false, road: false };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
