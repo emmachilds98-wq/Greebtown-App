@@ -678,6 +678,17 @@
         { "objectId": "camp-campervan", "field": "position", "previous": [86, 14], "next": [93, 41], "note": "moved south of Anara Forest to sit with East Camping/East Gate, per findings_screenshots.md" },
         { "objectId": "TRUNK_PATH_EDGES", "field": "js/app.js", "previous": "West Camping, Valley Camping, Tangerine Fields, Campervan Field, East Camping, Meadow Camping (Accessible), Meadow Living, Camplight, Quiet Camping had no path edge at all", "next": "each connected to its nearest evidenced gate/junction" }
       ]
+    },
+    {
+      "id": "hilltop-ratio-correction-2026-08-10T144500Z",
+      "timestamp": "2026-08-10T14:45:00Z",
+      "actor": "claude",
+      "summary": "User supplied a clean, high-resolution official-app close-up of the Grand Central/Oldtown/Quantum/Hilltop/Lion's Den area — measuring it directly showed Hilltop's real height:width ratio is ~1.4:1, not the ~1.8:1 elongated corridor left by the previous pass, and that its south tip sits north of Quantum rather than reaching it.",
+      "changes": [
+        { "objectId": "hilltop-field", "field": "points", "previous": "y-span 27-62 (35 units)", "next": "y-span 27-53 (26 units), matching the reference's measured ratio" },
+        { "objectId": "audit-rendered-layout-alignment.mjs", "field": "hilltop south-reach threshold", "previous": 62, "next": 50, "note": "the original 62 encoded a 'must reach Quantum' inference from indirect video evidence that this clearer reference supersedes" },
+        { "objectId": "stage-lions-den", "field": "reference anchor", "previous": [75, 61], "next": [71, 59], "note": "Hilltop shrinking further freed up room to move Lion's Den closer to Oldtown/Quantum without overlapping it" }
+      ]
     }
   ]
 }

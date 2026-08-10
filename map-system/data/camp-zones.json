@@ -8,10 +8,10 @@
       "kind": "ground-use",
       "surface": "hilltop-yellow",
       "evidence": "official-overview",
-      "points": [[62,29],[68,27],[71,32],[70,41],[62,51],[57,62],[54,60],[54,52],[57,40],[60,33]],
-      "detailLines": [[[64,31],[65,40],[63,49],[58,58]],[[68,29],[68,39],[65,47],[60,55]]],
+      "points": [[62,28.5],[68,27],[71,30.7],[70,37.4],[62,44.8],[57,53],[54,51.5],[54,45.6],[57,36.7],[60,31.5]],
+      "detailLines": [[[64,30],[65,36.7],[63,43.3],[58,50]],[[68,28.5],[68,35.9],[65,41.9],[60,47.8]]],
       "excludes": ["Anara Forest"],
-      "notes": "Reviewed long Hilltop field corridor. It runs south beside the Grand Central and Oldtown sequence toward Quantum, while remaining distinct from the Anara Forest woodland stage. North end trimmed (was y:14-27ish, reaching well north of Grand Central itself, a 48-unit total span) after direct user feedback that the field was rendering way too big/long on the top side; findings_screenshots.md's own note is the field's \"north tip near Grand Central\" (y~35), not far above it. South end kept at y~62 (audit-enforced — scripts/audit-rendered-layout-alignment.mjs requires the corridor to still reach the Quantum junction), since the \"too big\" complaint was specifically about the top side, not the south taper toward Quantum."
+      "notes": "Reviewed Hilltop field. User supplied a clean, high-resolution official-app close-up of exactly this area (Grand Central/Oldtown/Quantum/Hilltop/Lion's Den) this session — measuring it directly gives a height:width ratio of roughly 1.4:1, not the ~1.8:1 elongated corridor an earlier pass drew. South end pulled up from y~62 to y~53 to match (see the matching change to scripts/audit-rendered-layout-alignment.mjs's threshold); the field's real south tip sits north of Quantum's own position, not reaching down to it — the earlier 'must reach the Quantum junction' assumption was a looser inference from indirect video-frame evidence that this clearer reference now supersedes. North end unchanged from the previous pass (already matched to Grand Central's own latitude)."
     }
   ],
   "zones": [
