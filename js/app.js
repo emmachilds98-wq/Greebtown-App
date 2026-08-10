@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v423";
-const APP_BUILD_TIME = "2026-08-10T17:29:00Z";
+const APP_CACHE_VERSION = "v424";
+const APP_BUILD_TIME = "2026-08-10T17:40:02Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9446,8 +9446,8 @@ function loadMap(){
     // wall of tiny chips the instant a visitor started to zoom. The map
     // now reads as territory first, then names its primary stages/camps,
     // and only then reveals hidden venues and fine-grain wayfinding.
-    const LABEL_ZOOM_THRESHOLD = 16.15;
-    const LABEL_DETAIL_ZOOM_THRESHOLD = 16.7;
+    const LABEL_ZOOM_THRESHOLD = 15.3;
+    const LABEL_DETAIL_ZOOM_THRESHOLD = 15.9;
     const updateLabelDensity = ()=>{
       const zoom = mapGL.getZoom();
       map.classList.toggle("map-labels-thin", zoom < LABEL_ZOOM_THRESHOLD);
@@ -9742,14 +9742,14 @@ function loadMap(){
       // aid. At site scale the landmark silhouettes and ground-use areas
       // must lead; exposing all of this paving at once made the map read as
       // a tangle of disconnected tan shapes.
-      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", minzoom: 16.15, paint: {
+      mapGL.addLayer({ id: "open-concourses-fill", type: "fill", source: "mapOpenConcourses", minzoom: 15.3, paint: {
         "fill-color": ["match", ["get", "surface"],
           "stage-forecourt", "rgba(232,207,163,0.96)",
           "venue-court", "rgba(214,191,151,0.92)",
           "rgba(224,200,160,0.95)"
         ]
       } });
-      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", minzoom: 16.15, paint: {
+      mapGL.addLayer({ id: "open-concourses-outline", type: "line", source: "mapOpenConcourses", minzoom: 15.3, paint: {
         "line-color": ["match", ["get", "surface"],
           "stage-forecourt", "rgba(137,98,46,0.66)",
           "venue-court", "rgba(111,87,59,0.48)",
@@ -9778,16 +9778,16 @@ function loadMap(){
       // these are walkable surfaces through the confirmed Oldtown and
       // Letsbe/Botanica venue runs, not extra invented connections.
       mapGL.addSource("mapDistrictStreets", { type: "geojson", data: geo.districtStreets });
-      mapGL.addLayer({ id: "district-streets-fill", type: "fill", source: "mapDistrictStreets", minzoom: 16.15, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "district-streets-outline", type: "line", source: "mapDistrictStreets", minzoom: 16.15, paint: { "line-color": "rgba(125,94,53,0.5)", "line-width": 1.1 } });
+      mapGL.addLayer({ id: "district-streets-fill", type: "fill", source: "mapDistrictStreets", minzoom: 15.3, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-streets-outline", type: "line", source: "mapDistrictStreets", minzoom: 15.3, paint: { "line-color": "rgba(125,94,53,0.5)", "line-width": 1.1 } });
 
       // Local district passages are deliberately more modest than the
       // primary site routes. At close zoom they reveal a walkable interior
       // for each compound; at the overview they stay out of the way of the
       // larger silhouette, camp fields and official trunk-path network.
       mapGL.addSource("mapDistrictPassages", { type: "geojson", data: geo.districtPassages });
-      mapGL.addLayer({ id: "district-passages-fill", type: "fill", source: "mapDistrictPassages", minzoom: 16.35, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "district-passages-outline", type: "line", source: "mapDistrictPassages", minzoom: 16.35, paint: {
+      mapGL.addLayer({ id: "district-passages-fill", type: "fill", source: "mapDistrictPassages", minzoom: 15.45, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-passages-outline", type: "line", source: "mapDistrictPassages", minzoom: 15.45, paint: {
         "line-color": ["match", ["get", "kind"], "street", "rgba(119,89,53,.48)", "lane", "rgba(121,97,62,.34)", "rgba(91,78,56,.3)"],
         "line-width": 0.75
       } });
@@ -9807,16 +9807,16 @@ function loadMap(){
       // district fill colour, which it is not). Only start drawing
       // shadows once features are large enough on screen for a shadow to
       // read as "under this one shape" rather than a smear.
-      mapGL.addLayer({ id: "district-atmosphere-shadow", type: "fill", source: "mapDistrictAtmosphere", minzoom: 16.15, paint: { "fill-color": "rgba(24,35,24,.2)", "fill-translate": [0.8, 1.1] } });
-      mapGL.addLayer({ id: "district-atmosphere-fill", type: "fill", source: "mapDistrictAtmosphere", minzoom: 16.15, paint: { "fill-color": ["get", "fill"] } });
-      mapGL.addLayer({ id: "district-atmosphere-outline", type: "line", source: "mapDistrictAtmosphere", minzoom: 16.15, paint: { "line-color": "rgba(76,63,39,.58)", "line-width": 0.65 } });
+      mapGL.addLayer({ id: "district-atmosphere-shadow", type: "fill", source: "mapDistrictAtmosphere", minzoom: 15.85, paint: { "fill-color": "rgba(24,35,24,.2)", "fill-translate": [0.8, 1.1] } });
+      mapGL.addLayer({ id: "district-atmosphere-fill", type: "fill", source: "mapDistrictAtmosphere", minzoom: 15.85, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "district-atmosphere-outline", type: "line", source: "mapDistrictAtmosphere", minzoom: 15.85, paint: { "line-color": "rgba(76,63,39,.58)", "line-width": 0.65 } });
       mapGL.addSource("mapDistrictAtmosphereLights", { type: "geojson", data: geo.districtAtmosphereLights });
       mapGL.addLayer({ id: "district-atmosphere-lights-glow", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 16.15, paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 13.8, ["*", ["get", "size"], 2.8], 15, ["*", ["get", "size"], 5.5], 19, ["*", ["get", "size"], 13]], "circle-color": ["get", "tone"], "circle-opacity": .13 } });
       mapGL.addLayer({ id: "district-atmosphere-lights-core", type: "circle", source: "mapDistrictAtmosphereLights", minzoom: 16.15, paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 13.8, ["*", ["get", "size"], .8], 15, ["*", ["get", "size"], 1.4], 19, ["*", ["get", "size"], 3.2]], "circle-color": ["get", "tone"], "circle-stroke-width": .45, "circle-stroke-color": "rgba(68,58,38,.55)" } });
 
       mapGL.addSource("mapStagePlazas", { type: "geojson", data: geo.stagePlazas });
-      mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", minzoom: 16.35, paint: { "fill-color": "rgba(224,200,160,0.95)" } });
-      mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", minzoom: 16.35, paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
+      mapGL.addLayer({ id: "stage-plazas-fill", type: "fill", source: "mapStagePlazas", minzoom: 15.85, paint: { "fill-color": "rgba(224,200,160,0.95)" } });
+      mapGL.addLayer({ id: "stage-plazas-outline", type: "line", source: "mapStagePlazas", minzoom: 15.85, paint: { "line-color": "rgba(120,95,60,0.55)", "line-width": 1 } });
 
       mapGL.addSource("mapBunting", { type: "geojson", data: geo.bunting });
       mapGL.addLayer({ id: "bunting-circle", type: "circle", source: "mapBunting", minzoom: 15.2, paint: {
@@ -9922,7 +9922,7 @@ function loadMap(){
       // minzoom sits well above the fill layer's own 14.2 — same
       // overlapping-shadow-smear issue, worse here since infill is the
       // densest building layer on the map.
-      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 16.15, paint: { "fill-color": "rgba(10,15,10,0.16)", "fill-translate": [1, 1.4] } });
+      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 16.1, paint: { "fill-color": "rgba(10,15,10,0.16)", "fill-translate": [1, 1.4] } });
       // Was 0.32 opacity — with 11-20 of these packed into one small
       // district clearing, dozens of translucent rectangles stacking on
       // top of each other (and of the ground/district tint under them)
@@ -9933,8 +9933,8 @@ function loadMap(){
       // screenshots show these as small but genuinely SOLID, opaque
       // blocks (roadmap item: "crisper, warmer building massing... less
       // translucent-brown overlap").
-      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 16.15, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.88 } });
-      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 16.15, paint: { "line-color": "rgba(120,80,50,0.24)", "line-width": 0.65 } });
+      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 16.1, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.88 } });
+      mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 16.1, paint: { "line-color": "rgba(120,80,50,0.24)", "line-width": 0.65 } });
 
       // Deliberate district compounds sit above low-contrast infill: their
       // varied roof tones and fenced yards make a close-up feel authored,
@@ -9942,8 +9942,8 @@ function loadMap(){
       mapGL.addSource("mapAuthoredMassing", { type: "geojson", data: geo.authoredMassing });
       // See the district-atmosphere-shadow comment above for the
       // overlapping-shadow-smear reasoning behind this minzoom.
-      mapGL.addLayer({ id: "authored-massing-shadow", type: "fill", source: "mapAuthoredMassing", minzoom: 16.15, paint: { "fill-color": "rgba(18,28,20,.24)", "fill-translate": [1.2, 1.7] } });
-      mapGL.addLayer({ id: "authored-massing-fill", type: "fill", source: "mapAuthoredMassing", minzoom: 16.15, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "authored-massing-shadow", type: "fill", source: "mapAuthoredMassing", minzoom: 15.55, paint: { "fill-color": "rgba(18,28,20,.24)", "fill-translate": [1.2, 1.7] } });
+      mapGL.addLayer({ id: "authored-massing-fill", type: "fill", source: "mapAuthoredMassing", minzoom: 15.55, paint: { "fill-color": ["get", "fill"] } });
       // Softened from rgba(91,62,36,.68)/width 1 — a hard, near-opaque
       // outline on every single small building, on top of its own drop
       // shadow, is what was making each structure read as a distinct
@@ -9952,14 +9952,14 @@ function loadMap(){
       // The shadow layer already carries the depth cue; the outline only
       // needs to keep buildings from visually fusing into their
       // neighbours at close zoom, not compete with the shadow for it.
-      mapGL.addLayer({ id: "authored-massing-outline", type: "line", source: "mapAuthoredMassing", minzoom: 16.15, paint: { "line-color": "rgba(91,62,36,.32)", "line-width": 0.6 } });
+      mapGL.addLayer({ id: "authored-massing-outline", type: "line", source: "mapAuthoredMassing", minzoom: 15.55, paint: { "line-color": "rgba(91,62,36,.32)", "line-width": 0.6 } });
       mapGL.addSource("mapAuthoredMassingYards", { type: "geojson", data: geo.authoredMassingYards });
       // Was a dark olive-green (rgba(57,72,52,.32)) — over the map's own
       // bright green ground that read as a muddy dark smudge, not a fenced
       // yard. Reference close-ups show these as pale cream/white enclosed
       // ground, the same family as the dome/tent "canvas" tone elsewhere.
-      mapGL.addLayer({ id: "authored-massing-yards-fill", type: "fill", source: "mapAuthoredMassingYards", minzoom: 16.15, paint: { "fill-color": "rgba(232,220,188,.4)" } });
-      mapGL.addLayer({ id: "authored-massing-yards", type: "line", source: "mapAuthoredMassingYards", minzoom: 16.15, paint: { "line-color": "rgba(79,64,42,.78)", "line-width": 1.35, "line-dasharray": [2, 1] } });
+      mapGL.addLayer({ id: "authored-massing-yards-fill", type: "fill", source: "mapAuthoredMassingYards", minzoom: 15.55, paint: { "fill-color": "rgba(232,220,188,.4)" } });
+      mapGL.addLayer({ id: "authored-massing-yards", type: "line", source: "mapAuthoredMassingYards", minzoom: 15.55, paint: { "line-color": "rgba(79,64,42,.78)", "line-width": 1.35, "line-dasharray": [2, 1] } });
 
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
       // See the district-atmosphere-shadow comment above for the
@@ -10065,7 +10065,7 @@ function loadMap(){
   // detailed district names take over after the visitor zooms in.
   [
     { name: "Downtown", x: 36, y: 47, className: "" },
-    { name: "Hilltop", x: 58, y: 62, className: " overview-hilltop" },
+    { name: "Hilltop", x: 64, y: 62, className: " overview-hilltop" },
     { name: "Lion’s Den", x: 35, y: 67, className: " overview-lions-den" },
     { name: "West Camping", x: 68, y: 17, className: "" },
     { name: "East Camping", x: 85, y: 82, className: "" },

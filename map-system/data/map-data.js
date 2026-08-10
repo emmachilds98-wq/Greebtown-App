@@ -3185,82 +3185,82 @@ window.GREEBTOWN_CAMP_ZONES = {
       "evidence": "official-overview",
       "points": [
         [
-          50,
-          57
+          55,
+          53
         ],
         [
-          55,
+          63,
+          52
+        ],
+        [
+          70,
           55
         ],
         [
-          61,
-          57
+          73,
+          59
         ],
         [
-          66,
-          61
-        ],
-        [
-          65,
-          67
-        ],
-        [
-          54,
-          69
-        ],
-        [
-          50,
+          72,
           68
         ],
         [
-          50,
-          64
+          67,
+          76
+        ],
+        [
+          59,
+          77
+        ],
+        [
+          54,
+          70
         ]
       ],
       "detailLines": [
         [
           [
-            43,
-            58
+            57,
+            55
           ],
           [
-            48,
-            62
+            64,
+            57
           ],
           [
-            46,
+            61,
             67
           ]
         ],
         [
           [
-            54,
-            57
+            62,
+            54
           ],
           [
-            58,
-            62
+            68,
+            60
           ],
           [
-            57,
-            68
+            65,
+            72
           ]
         ],
         [
           [
-            62,
-            60
+            70,
+            58
           ],
           [
-            62,
-            66
+            68,
+            69
           ]
         ]
       ],
       "excludes": [
         "Anara Forest"
       ],
-      "notes": "Rebuilt from the full-site official overview (IMG_3670): a broad, faceted field east of Oldtown and north-east of The Lion's Den. Its outline uses the same overview coordinate plane as the city anchors and camp labels."
+      "notes": "Rebuilt from the full-site official overview (IMG_3670): a long, faceted eastern corridor running from east of Oldtown down toward Quantum, and north-east of The Lion's Den. Its outline uses the same overview coordinate plane as the city anchors and camp labels."
     },
     {
       "id": "sunset-field",
@@ -3482,8 +3482,8 @@ window.GREEBTOWN_CAMP_ZONES = {
       "id": "camp-skylark-hilltop",
       "name": "Camp Skylark Hilltop",
       "position": {
-        "x": 52,
-        "y": 60
+        "x": 62,
+        "y": 61
       },
       "footprint": {
         "aspect": 0.72,

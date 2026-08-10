@@ -22,11 +22,11 @@ const trunkPathZoom = matchNumber(/id: "trail-main-fill"[^\n]*minzoom: (\d+(?:\.
 const smallVenueZoom = matchNumber(/id: "small-venues-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 
 if(!app.includes('data: geo.siteGround') || !app.includes('id: "site-ground-fill"')) errors.push("the reviewed site boundary must render as the primary festival-ground silhouette");
-if(!Number.isFinite(labelThreshold) || labelThreshold < 16 || labelThreshold > 16.3) errors.push("overview anchors must hold through the whole-site view");
+if(!Number.isFinite(labelThreshold) || labelThreshold < 15.2 || labelThreshold > 15.5) errors.push("overview anchors must hold through the initial whole-site view");
 if(!Number.isFinite(labelDetailThreshold) || labelDetailThreshold < labelThreshold + .5 || labelDetailThreshold > 17) errors.push("fine labels must have a distinct later reveal threshold");
-if(!Number.isFinite(passageZoom) || passageZoom < 16.2 || passageZoom > 16.5) errors.push("district passages must wait until the visitor enters a district");
-if(!Number.isFinite(massingZoom) || massingZoom < 16 || massingZoom > 16.3) errors.push("authored massing must wait until the visitor enters a district");
-if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 16 || atmosphereZoom > 16.3) errors.push("district atmosphere must not break the overview silhouette");
+if(!Number.isFinite(passageZoom) || passageZoom < 15.3 || passageZoom > 15.7) errors.push("district passages must appear at a normal district-reading zoom");
+if(!Number.isFinite(massingZoom) || massingZoom < 15.4 || massingZoom > 15.8) errors.push("authored massing must appear at a normal district-reading zoom");
+if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 15.7 || atmosphereZoom > 16) errors.push("district atmosphere must remain after usable district detail");
 if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom || infillZoom > 16.3) errors.push("generic infill must support district detail without breaking the overview silhouette");
 if(!Number.isFinite(broadFieldZoom) || broadFieldZoom > 14) errors.push("broad farmland texture must establish the site overview");
 if(!Number.isFinite(fineFieldZoom) || fineFieldZoom < 17) errors.push("fine field mottling must remain deep-zoom only");
