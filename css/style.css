@@ -458,11 +458,12 @@
   .map-label.evidence-territory.evidence-central{color:#ffe0bb; font-size:10.5px;}
   .map-label.evidence-territory.evidence-oldtown{font-family:Georgia,"Times New Roman",serif; color:#ffd4cb; font-size:11px; letter-spacing:.1em;}
   .map-label.evidence-territory.evidence-den{color:#ffe2b4; font-size:11px;}
-  .map-label.evidence-detail{font-size:7px; font-weight:900; letter-spacing:.08em; color:#fff6ce; background:rgba(23,38,27,.86); border:1px solid rgba(244,226,166,.68); border-radius:2px 6px 2px 2px; padding:2px 5px 2px 7px; transform:translate(-50%,8px); box-shadow:1px 1px 0 rgba(8,17,10,.7);}
+  .map-label.evidence-detail{font-size:7.3px; font-weight:900; letter-spacing:.07em; color:#fff6ce; background:rgba(23,38,27,.88); border:1px solid rgba(244,226,166,.72); border-radius:2px 6px 2px 2px; padding:2px 5px 2px 7px; transform:translate(-50%,8px); box-shadow:1px 1px 0 rgba(8,17,10,.72);}
   .map-label.evidence-detail::before{width:2px; background:#e5bc58;}
   .map-label.evidence-detail.evidence-stage{color:#fff0a9;}
   .map-label.evidence-detail.evidence-stage{background:rgba(49,45,29,.92); border-color:rgba(255,213,113,.82); box-shadow:1px 1px 0 rgba(8,17,10,.82),0 0 8px rgba(249,181,67,.18);}
   .map-label.evidence-detail.evidence-primary{font-size:7.5px; letter-spacing:.1em; box-shadow:1px 1px 0 rgba(8,17,10,.82),0 0 10px rgba(249,181,67,.28);}
+  .map-label.evidence-detail.evidence-primary.evidence-venue{border-color:rgba(238,198,135,.92); color:#fff0ca;}
   .map-label.evidence-detail.evidence-venue{color:#f0e2bd;}
   .map-label.evidence-detail.evidence-camp{color:#d8efbd; border-color:rgba(163,214,143,.78);}
   .map-label.evidence-detail.evidence-utility{font-size:6px; color:#d7f5ff; border-color:rgba(118,203,219,.8);}

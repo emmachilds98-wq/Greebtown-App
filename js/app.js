@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v451";
-const APP_BUILD_TIME = "2026-08-10T23:40:20Z";
+const APP_CACHE_VERSION = "v452";
+const APP_BUILD_TIME = "2026-08-10T23:43:18Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7451,7 +7451,7 @@ function evidenceRebuildDetailLabels(){
   // second, close-view tier so the entry view stays legible.
   return [
     ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 22, 34, "stage", "primary"],
-    ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 46, 75, "stage"],
+    ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 46, 75, "stage", "primary"],
     ["SPECTRUM 360", 39, 67, "stage", "primary"], ["HANGAR 161", 35, 69, "venue"],
     ["DEVIANT LOUNGE", 35, 72, "venue"], ["GAME OVER", 39, 71, "venue"],
     ["BBXL", 41, 73, "venue"], ["END OF THE LINE", 39, 74, "venue"],
@@ -7471,15 +7471,15 @@ function evidenceRebuildDetailLabels(){
     ["TROUGH LOVE", 55, 63, "venue"], ["THE COMMON GROUND", 56, 62, "venue"],
     ["THE POMEGRANATE PARLOUR", 62, 56, "venue"], ["DEN OF DIS ORDER", 62, 58, "venue"],
     ["MINING FOR (G)OLD TOWN", 62, 60, "venue"], ["SÍBÍN BEAG", 62, 62, "stage"],
-    ["THE FECKLESS WRECKED", 62, 65, "venue"], ["HELIX", 63, 83, "stage"],
+    ["THE FECKLESS WRECKED", 62, 65, "venue"], ["HELIX", 63, 83, "stage", "primary"],
     ["ANCIENT FUTURES", 63, 47, "venue"], ["BOOMTOWN HALL", 58, 51, "venue"], ["DAILY RAG", 57, 53, "venue"],
-    ["THE HIDE OUT HILLTOP", 68, 36, "venue"], ["FULL MOON BALLROOM", 65, 33, "venue"],
+    ["THE HIDE OUT HILLTOP", 68, 36, "venue"], ["FULL MOON BALLROOM", 65, 33, "venue", "primary"],
     ["SILVER SWAN TALENT AGENCY", 63, 30, "venue"], ["TOPSY TURVY TWINS", 66, 31, "venue"],
     ["FOGGERS MILL", 69, 33, "venue"], ["VELVET ROPE", 65, 38, "venue"],
     ["REBEL GIRLS CLUB", 67, 73, "venue"], ["CIRCUS", 70, 76, "venue"], ["THE RETREAT", 72, 72, "venue"],
     ["REEL NEWS", 78, 73, "venue"], ["THE ARC", 80, 71, "venue"], ["SHARING CIRCLES", 81, 73, "venue"], ["WELFARE", 81, 76, "venue"],
     ["VALLEY CAMPING", 66, 22, "camp"], ["MEADOW", 16, 57, "camp"], ["CAMPFLIGHT", 18, 63, "camp"],
-    ["CAMP AT HILLTOP", 75, 63, "camp"], ["RECEPTION", 80, 75, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
+    ["CAMP AT HILLTOP", 75, 63, "camp", "primary"], ["RECEPTION", 80, 75, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
   ];
 }
 
@@ -9679,7 +9679,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v19-granular-forms";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v20-readable-entry";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -9805,7 +9805,7 @@ function loadMap(){
     // entire perimeter into a small phone card. The Site overview control
     // remains the intentional way back to the full festival extent.
     const entryFocus = schematicToLatLon(59, 61);
-    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.35, bearing:0, pitch:0 }));
+    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.65, bearing:0, pitch:0 }));
 
     // Label density is deliberately a three-step reveal rather than one
     // hard switch. DOM markers do not have MapLibre collision handling,
@@ -9814,7 +9814,7 @@ function loadMap(){
     // now reads as territory first, then names its primary stages/camps,
     // and only then reveals hidden venues and fine-grain wayfinding.
     const LABEL_ZOOM_THRESHOLD = 15.3;
-    const LABEL_DETAIL_ZOOM_THRESHOLD = 15.9;
+    const LABEL_DETAIL_ZOOM_THRESHOLD = 15.65;
     const updateLabelDensity = ()=>{
       const zoom = mapGL.getZoom();
       map.classList.toggle("map-labels-thin", zoom < LABEL_ZOOM_THRESHOLD);
