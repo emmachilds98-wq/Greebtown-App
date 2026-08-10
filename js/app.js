@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v431";
-const APP_BUILD_TIME = "2026-08-10T21:15:49Z";
+const APP_CACHE_VERSION = "v432";
+const APP_BUILD_TIME = "2026-08-10T21:20:23Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9365,6 +9365,19 @@ function loadMap(){
   // Rebuild this map data on each call: later calls reuse the MapLibre
   // instance but still rebuild the road-name markers below.
   const geo = buildMapGeoJSON();
+  // MapLibre retains every source in an existing canvas. A PWA can keep
+  // that canvas alive across a script/cache update, which left retired
+  // parking and terrain sources visible after the evidence-only reset.
+  // Tear down only when the renderer revision changes; ordinary tab visits
+  // still reuse the clean canvas.
+  const MAP_RENDER_REVISION = "evidence-baseline-v2";
+  if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
+    mapGL.remove();
+    mapGL = null;
+    mapMarkerGroups = {};
+    mapMarkersByName = {};
+    if(map) map.replaceChildren();
+  }
 
   if(!mapGL){
     // Centered on the real site (schematic (0,0) run through the same
@@ -9456,6 +9469,7 @@ function loadMap(){
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
+    mapGL.__greebtownRenderRevision = MAP_RENDER_REVISION;
     // Place the compact map utility rail away from the dense northern
     // labels. This mirrors a familiar mobile-map ergonomics pattern
     // without reproducing another app's controls or artwork.
