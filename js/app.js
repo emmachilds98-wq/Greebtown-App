@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v440";
-const APP_BUILD_TIME = "2026-08-10T22:46:07Z";
+const APP_CACHE_VERSION = "v441";
+const APP_BUILD_TIME = "2026-08-10T22:51:43Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7472,7 +7472,7 @@ function evidenceRebuildDetailLabels(){
 
 function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
-  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos"];
+  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos","evidenceContainerEdges","evidenceCanopies","evidenceWaterLandmarks"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
   const polygon = (name, fill, points, properties={})=>({
     type:"Feature", properties:{ name, fill, outline:"rgba(47,43,28,.8)", ...properties },
@@ -7556,6 +7556,19 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
     polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
     polygon("Lion's Den amphitheatre", "rgba(117,78,43,.98)", [[72,85],[80,84],[83,87],[80,89],[72,89],[70,87]])
+  ] };
+  // The sources show Spectrum 360 enclosed by individual containers, NEXUS
+  // as a dark triangular canopy, and a small water feature immediately below
+  // Hydro XL. These are retained as separate forms, not generic decoration.
+  geo.evidenceContainerEdges = { type:"FeatureCollection", features:[
+    route([[37,65],[40,64]]), route([[40,64],[43,66]]), route([[43,66],[44,69]]),
+    route([[44,69],[42,71]]), route([[42,71],[38,71]]), route([[38,71],[36,69]]), route([[36,69],[37,65]])
+  ] };
+  geo.evidenceCanopies = { type:"FeatureCollection", features:[
+    polygon("NEXUS triangular canopy", "rgba(35,47,39,.96)", [[40,43],[44,41],[45,46]], { outline:"rgba(255,174,81,.88)" })
+  ] };
+  geo.evidenceWaterLandmarks = { type:"FeatureCollection", features:[
+    polygon("Hydro XL pond", "rgba(67,151,188,.90)", [[24,76],[27,76],[28,77.5],[25,78.5],[23.5,77]])
   ] };
   geo.evidenceStageTiers = { type:"FeatureCollection", features:[
     route([[72,86],[80,86]], { kind:"tier" }), route([[72,87.3],[81,87.3]], { kind:"tier" }), route([[73,88.5],[80,88.5]], { kind:"tier" }),
@@ -9536,6 +9549,15 @@ function installEvidenceSceneLayers(map, geo){
   map.addLayer({ id:"evidence-landmarks-shadow", type:"fill", source:"evidence-landmarks", minzoom:15.55, paint:{ "fill-color":"rgba(16,21,15,.34)", "fill-translate":[1.1,1.4] } });
   map.addLayer({ id:"evidence-landmarks", type:"fill", source:"evidence-landmarks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
   map.addLayer({ id:"evidence-landmarks-outline", type:"line", source:"evidence-landmarks", minzoom:15.55, paint:{ "line-color":"rgba(37,39,27,.88)", "line-width":1.1 } });
+  source("evidence-container-edges", geo.evidenceContainerEdges);
+  map.addLayer({ id:"evidence-container-edges", type:"line", source:"evidence-container-edges", minzoom:15.7, paint:{ "line-color":"rgba(241,186,117,.92)", "line-width":1.4 } });
+  source("evidence-canopies", geo.evidenceCanopies);
+  map.addLayer({ id:"evidence-canopies-shadow", type:"fill", source:"evidence-canopies", minzoom:15.55, paint:{ "fill-color":"rgba(12,19,13,.38)", "fill-translate":[.8,1] } });
+  map.addLayer({ id:"evidence-canopies", type:"fill", source:"evidence-canopies", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-canopies-outline", type:"line", source:"evidence-canopies", minzoom:15.55, paint:{ "line-color":["get","outline"], "line-width":1.05 } });
+  source("evidence-water-landmarks", geo.evidenceWaterLandmarks);
+  map.addLayer({ id:"evidence-water-landmarks", type:"fill", source:"evidence-water-landmarks", minzoom:15.7, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-water-landmarks-outline", type:"line", source:"evidence-water-landmarks", minzoom:15.7, paint:{ "line-color":"rgba(218,245,247,.75)", "line-width":.8 } });
   source("evidence-stage-tiers", geo.evidenceStageTiers);
   map.addLayer({ id:"evidence-stage-tiers", type:"line", source:"evidence-stage-tiers", minzoom:15.85, paint:{ "line-color":"rgba(244,205,129,.84)", "line-width":1.05 } });
   source("evidence-court-dots", geo.evidenceCourtDots);
@@ -9553,7 +9575,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v8-detail-pass";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v9-landmark-forms";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
