@@ -121,3 +121,10 @@ location.
   immediately north of Copperwood. Letsbe Avenue is its own narrow, labelled
   approach into the Botanica loop. Its three grouped blocks and single route
   are review-draft circulation/massing only, not asserted stall footprints.
+- Oldtown-chain pass: `findings_vidE2.md` identifies two parallel, continuous
+  named paths. The west chain is The Fools Leap -> Da Graaff's Reformatory
+  -> La Luna Coven -> Buskers Wharf; the east chain starts at The Pomegranate
+  Parlour and continues through Den of Dis Order, SIBIN BEAG, and The Feckless
+  Wrecked. Postal Posse, Trough Love, and The Common Ground remain inside the
+  connecting inner loop. Grand Central's single south exit meets this
+  arrangement without adding a new venue or asserted building footprint.

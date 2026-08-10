@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v445";
-const APP_BUILD_TIME = "2026-08-10T23:18:30Z";
+const APP_CACHE_VERSION = "v446";
+const APP_BUILD_TIME = "2026-08-10T23:21:41Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7460,10 +7460,10 @@ function evidenceRebuildDetailLabels(){
     ["SUB LAB", 46, 49, "venue"], ["NACHTLICKER", 47, 45, "venue"],
     ["SOAPRANOS LAUNDRETTE", 40, 49, "venue"],
     ["ROSE AND CLOWN", 47, 47, "stage"], ["THE HIDE OUT", 42, 66, "venue"],
-    ["THE FOOLS LEAP", 51, 61, "stage"], ["DEN OF DIS ORDER", 60, 57, "venue"],
-    ["POSTAL POSSE", 51, 64, "venue"], ["TROUGH LOVE", 52, 66, "venue"],
-    ["DA GRAAFF'S REFORMATORY", 51, 68, "venue"], ["SÍBÍN BEAG", 62, 61, "stage"],
-    ["THE FECKLESS WRECKED", 62, 64, "venue"], ["HELIX", 63, 83, "stage"],
+    ["THE FOOLS LEAP", 51, 59, "stage"], ["THE POMEGRANATE PARLOUR", 62, 56, "venue"], ["DEN OF DIS ORDER", 60, 57, "venue"],
+    ["POSTAL POSSE", 55, 63, "venue"], ["TROUGH LOVE", 56, 66, "venue"], ["THE COMMON GROUND", 56, 62, "venue"],
+    ["DA GRAAFF'S REFORMATORY", 51, 62, "venue"], ["SÍBÍN BEAG", 62, 61, "stage"],
+    ["THE FECKLESS WRECKED", 62, 65, "venue"], ["LA LUNA COVEN", 51, 65, "venue"], ["BUSKERS WHARF", 51, 68, "venue"], ["HELIX", 63, 83, "stage"],
     ["ANCIENT FUTURES", 63, 47, "venue"], ["DAILY RAG", 57, 53, "venue"],
     ["THE HIDE OUT HILLTOP", 68, 36, "venue"],
     ["VALLEY CAMPING", 66, 22, "camp"], ["CAMP AT HILLTOP", 75, 63, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
@@ -7592,9 +7592,11 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[35,68],[35,72],[41,73],[42,76]], { kind:"street" }), // Area 404 venue column
     route([[32,70],[36,71],[40,73],[42,76]], { kind:"street" }), // Area 404 inner branch
     route([[54,35],[58,36],[62,35],[66,36]], { kind:"street" }), // Copperwood courtyard
+    route([[58,48],[59,52],[57,55]], { kind:"street" }),         // Grand Central -> Oldtown south exit
     route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
-    route([[51,61],[51,64],[52,66],[51,68]], { kind:"street" }), // Oldtown west column
-    route([[60,57],[62,61],[62,64],[60,66]], { kind:"street" }), // Oldtown east column
+    route([[51,59],[51,62],[51,65],[51,68]], { kind:"street" }), // Oldtown west chain
+    route([[62,56],[60,57],[62,61],[62,65]], { kind:"street" }), // Oldtown east chain
+    route([[53,61],[55,63],[57,62],[58,64],[56,66],[53,65],[53,61]], { kind:"street" }), // Oldtown inner loop
     route([[59,20],[64,22],[69,25]], { kind:"camp" }),           // Valley Camping lanes
     route([[74,59],[78,62],[81,66],[79,71]], { kind:"camp" }),   // Hilltop camping route
     route([[71,58],[76,60],[80,63]], { kind:"camp" }),
@@ -7632,7 +7634,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceCourtDots = { type:"FeatureCollection", features:[
     [40,43],[43,42],[45,45],[40,46],                   // NEXUS/Botanica court vegetation
     [55,46],[59,45],[61,48],                           // Grand Central hardstanding details
-    [53,59],[56,58],[59,60],[54,63],[58,64],           // Oldtown court details
+    [51,59],[51,62],[51,65],[51,68], [55,63],[57,62],[56,66], [62,56],[60,57],[62,61],[62,65], // Oldtown chains
     [44,73],[47,74],[46,76],                           // Tribe of Frog compound
     [72,85],[75,85],[78,86],[80,88]                    // Lion's Den forecourt
   ].map(([x,y])=>treeDot(x,y,.72)) };
@@ -9641,7 +9643,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v13-north-transition";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v14-oldtown-chains";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
