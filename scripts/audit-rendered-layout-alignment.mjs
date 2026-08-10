@@ -40,7 +40,7 @@ const helix = references.anchors?.Helix?.to;
 const hilltop = read("camp-zones.json").groundUseFields?.find(field => field.id === "hilltop-field");
 const hilltopXs = hilltop?.points.map(point => point[0]) || [];
 const hilltopYs = hilltop?.points.map(point => point[1]) || [];
-if(!gc || !oldtownAnchor || oldtownAnchor[1] - gc[1] < 3 || Math.abs(oldtownAnchor[0] - gc[0]) > 5) errors.push("Oldtown must remain directly south of Grand Central");
+if(!gc || !oldtownAnchor || oldtownAnchor[1] - gc[1] < 3 || oldtownAnchor[0] - gc[0] < 3 || oldtownAnchor[0] - gc[0] > 10) errors.push("Grand Central must remain north-west of Oldtown");
 if(!hilltop || Math.max(...hilltopYs) < 67) errors.push("Hilltop must retain its full reviewed southern extent");
 if(!gc || !hilltop || gc[1] >= Math.min(...hilltopYs)) errors.push("Hilltop must remain south of Grand Central");
 if(!lion || !hilltop || lion[1] <= Math.min(...hilltopYs) || lion[0] >= Math.min(...hilltopXs)) errors.push("The Lion's Den must remain south-west of the Hilltop field");

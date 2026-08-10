@@ -69,7 +69,7 @@
         "lion-den-woodland",
         "east-camping"
       ],
-      "notes": "This is the shared calibration datum for the overview. It places Botanica/Metropolis/Area 404 as one compact west-city group; Grand Central directly north of Oldtown; the Hilltop field to Oldtown's east; and The Lion's Den south-west of that field. Earlier single-frame estimates that placed Lion's Den on the far east side or put Helix below it are superseded."
+      "notes": "This is the shared calibration datum for the overview. It places Botanica/Metropolis/Area 404 as one compact west-city group; Grand Central north-west of Oldtown; the Hilltop field to Oldtown's east; and The Lion's Den south-west of that field. Earlier single-frame estimates that placed Lion's Den on the far east side or put Helix below it are superseded."
     }
   ],
   "anchors": {
@@ -115,12 +115,12 @@
     },
     "Grand Central": {
       "from": [
-        50,
-        51
+        42,
+        49
       ],
       "to": [
-        50,
-        51
+        42,
+        49
       ]
     },
     "Oldtown": {

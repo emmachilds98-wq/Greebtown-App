@@ -65,8 +65,8 @@
       "type": "stage",
       "name": "Grand Central",
       "position": {
-        "x": 50,
-        "y": 51
+        "x": 42,
+        "y": 49
       },
       "dimensions": {
         "width": 6,
@@ -299,8 +299,8 @@
       "type": "stage",
       "name": "Full Moon Ballroom",
       "position": {
-        "x": 42,
-        "y": 50
+        "x": 47,
+        "y": 48
       },
       "dimensions": {
         "width": 3,

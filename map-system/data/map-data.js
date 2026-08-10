@@ -66,8 +66,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Grand Central",
       "position": {
-        "x": 50,
-        "y": 51
+        "x": 42,
+        "y": 49
       },
       "dimensions": {
         "width": 6,
@@ -300,8 +300,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "stage",
       "name": "Full Moon Ballroom",
       "position": {
-        "x": 42,
-        "y": 50
+        "x": 47,
+        "y": 48
       },
       "dimensions": {
         "width": 3,
@@ -4282,7 +4282,7 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         "lion-den-woodland",
         "east-camping"
       ],
-      "notes": "This is the shared calibration datum for the overview. It places Botanica/Metropolis/Area 404 as one compact west-city group; Grand Central directly north of Oldtown; the Hilltop field to Oldtown's east; and The Lion's Den south-west of that field. Earlier single-frame estimates that placed Lion's Den on the far east side or put Helix below it are superseded."
+      "notes": "This is the shared calibration datum for the overview. It places Botanica/Metropolis/Area 404 as one compact west-city group; Grand Central north-west of Oldtown; the Hilltop field to Oldtown's east; and The Lion's Den south-west of that field. Earlier single-frame estimates that placed Lion's Den on the far east side or put Helix below it are superseded."
     }
   ],
   "anchors": {
@@ -4328,12 +4328,12 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
     },
     "Grand Central": {
       "from": [
-        50,
-        51
+        42,
+        49
       ],
       "to": [
-        50,
-        51
+        42,
+        49
       ]
     },
     "Oldtown": {
