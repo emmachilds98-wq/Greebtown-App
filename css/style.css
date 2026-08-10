@@ -422,6 +422,7 @@
   #map.map-labels-mid .map-label.landmark,
   #map.map-labels-mid .map-label.gate,
   #map.map-labels-mid .map-label.small-venue-label,
+  #map.map-labels-mid .map-label.evidence-detail,
   #map.map-labels-mid .map-label.sssi,
   #map.map-labels-mid .map-label.road{display:none;}
   #map.map-labels-mid .marker.poi-secondary{display:none;}
@@ -454,6 +455,11 @@
   .map-label.evidence-territory.evidence-central{color:#ffe0bb; font-size:10.5px;}
   .map-label.evidence-territory.evidence-oldtown{font-family:Georgia,"Times New Roman",serif; color:#ffd4cb; font-size:11px; letter-spacing:.1em;}
   .map-label.evidence-territory.evidence-den{color:#ffe2b4; font-size:11px;}
+  .map-label.evidence-detail{font-size:7px; font-weight:900; letter-spacing:.08em; color:#fff6ce; background:rgba(23,38,27,.86); border:1px solid rgba(244,226,166,.68); border-radius:2px 6px 2px 2px; padding:2px 5px 2px 7px; transform:translate(-50%,8px); box-shadow:1px 1px 0 rgba(8,17,10,.7);}
+  .map-label.evidence-detail::before{width:2px; background:#e5bc58;}
+  .map-label.evidence-detail.evidence-stage{color:#fff0a9;}
+  .map-label.evidence-detail.evidence-camp{color:#d8efbd; border-color:rgba(163,214,143,.78);}
+  .map-label.evidence-detail.evidence-utility{font-size:6px; color:#d7f5ff; border-color:rgba(118,203,219,.8);}
   /* Area 404 — repeatedly confirmed on camera as a bold red/green
      "glitch" double-exposure, not a flat colour. Two extra offset
      text-shadow layers (one red, one green, either side of the base

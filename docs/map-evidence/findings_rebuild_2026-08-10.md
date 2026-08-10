@@ -25,3 +25,15 @@ silhouettes, their connective spine, and ten territory labels. It intentionally
 does not render venue pins, amenities, gates, parking, camps, old paths, or
 old generated art. A later close-up pass may add a connected district only when
 additional official evidence supports its internal shape and routes.
+
+## Detail-pass status
+
+The close-detail layer is a review draft, not settled map data. It keeps only
+names and broad forms that are legible in the current official screenshots:
+NEXUS, Hidden Woods, Tangled Roots, Tribe of Frog, The Hide Out, Valley
+Camping, and Camp at Hilltop. It does **not** place toilets, water, first aid,
+info points, stalls, gates, parking, or any ambiguous camp label until a
+readable official source confirms both its identity and its neighbouring
+features. Every detailed path and compound is a low-confidence visual shape
+that must be rechecked against future close-ups before it becomes a named
+location.
