@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v412";
-const APP_BUILD_TIME = "2026-08-07T15:35:02Z";
+const APP_CACHE_VERSION = "v413";
+const APP_BUILD_TIME = "2026-08-10T13:04:51Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6926,12 +6926,29 @@ function tentDiamond(cx, cy, size, seed){
   return pts;
 }
 
+// A chamfered (corner-cut) rectangle, not a sharp-cornered one — every
+// official-map reference screenshot shows buildings as soft rounded
+// blocks, and a plain 4-corner rectangle is the single biggest reason
+// this map's buildings read as "hard graphic shapes" rather than small
+// illustrated structures. Chamfering (cutting each corner at 45°) gives
+// that same soft-block silhouette without needing real curve math for
+// a polygon this small, and stays cheap to generate at scale.
+function chamferedRectCorners(w, h){
+  const chamfer = Math.min(w, h) * 0.32;
+  const hw = w / 2, hh = h / 2;
+  return [
+    [-hw + chamfer, -hh], [hw - chamfer, -hh],
+    [hw, -hh + chamfer], [hw, hh - chamfer],
+    [hw - chamfer, hh], [-hw + chamfer, hh],
+    [-hw, hh - chamfer], [-hw, -hh + chamfer]
+  ];
+}
 function buildingFootprint(cx, cy, seed){
   const rand = seededRand(seed);
   const w = 1.5 + rand() * 1.3, h = 1.0 + rand() * 0.9;
   const angle = rand() * Math.PI;
   const cos = Math.cos(angle), sin = Math.sin(angle);
-  const corners = [[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];
+  const corners = chamferedRectCorners(w, h);
   const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
   pts.push(pts[0]);
   return pts;
@@ -7011,7 +7028,7 @@ function buildingLayerFootprint(cx, cy, seed, layer){
     points.push(points[0]);
     return points;
   }
-  const corners = [[-layer.w/2,-layer.h/2],[layer.w/2,-layer.h/2],[layer.w/2,layer.h/2],[-layer.w/2,layer.h/2]];
+  const corners = chamferedRectCorners(layer.w, layer.h);
   const pts = corners.map(([x,y])=> [cx + x * cos - y * sin, cy + (x * sin + y * cos) * 0.85]);
   pts.push(pts[0]);
   return pts;
@@ -7670,13 +7687,20 @@ function buildMapGeoJSON(){
       : blobRing(cx, cy, r, i * 31 + 7, 18);
     return {
       type: "Feature",
-      // Fill/casing alpha nudged back up a little (0.16->0.22, 0.22->0.28)
-      // against this pass's brighter background green — reference
-      // screenshots show each district reading as a clearly brighter,
-      // distinctly-tinted patch against the surrounding open ground, not
-      // a subtle wash; line stays at its existing 0.55 so the boundary
-      // doesn't get louder than the markers plotted inside it.
-      properties: { name: d.name, fill: `rgba(${rgb},0.52)`, line: `rgba(${rgb},0.68)`, casing: `rgba(${rgb},0.34)` },
+      // Direct side-by-side comparison against docs/map-evidence/screenshots
+      // (shot_005, shot_012 — actual official-app captures of these same
+      // districts) shows NO individually-tinted district zone at all: the
+      // built-up ground is one continuous flat green from Botanica through
+      // Area 404, with only camping (salmon) and wayfinding fields (yellow)
+      // getting their own flat colour block. Six brightly-tinted hexagon
+      // blobs with hard outlines was original invention, not evidenced —
+      // and a direct source of the "stacked shapes on a background"
+      // complaint. Fill/line/casing alpha dropped to near-nothing (was
+      // 0.52/0.68/0.34) so the polygon stays for tap-target/info-card
+      // purposes but no longer reads as a coloured zone; districts are now
+      // conveyed the way the reference actually shows them — by building
+      // density and the name label alone.
+      properties: { name: d.name, fill: `rgba(${rgb},0.07)`, line: `rgba(${rgb},0.12)`, casing: `rgba(${rgb},0.05)` },
       geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(ring) ] }
     };
   });
@@ -8141,10 +8165,19 @@ function buildMapGeoJSON(){
   function reviewedVenueRing(cx, cy, venue){
     const angle = venue.rotation * Math.PI / 180;
     const cos = Math.cos(angle), sin = Math.sin(angle);
-    const sides = venue.shape === "round" ? 10 : 4;
+    if(venue.shape !== "round"){
+      // Same chamfered soft-block silhouette as every other building on
+      // the map (see chamferedRectCorners) — a plain sharp-cornered square
+      // was the odd one out among the small-venue shapes.
+      const ring = chamferedRectCorners(venue.width, venue.height).map(([localX, localY])=>
+        [cx + localX * cos - localY * sin, cy + (localX * sin + localY * cos) * 0.85]);
+      ring.push(ring[0]);
+      return ring;
+    }
+    const sides = 10;
     const ring = [];
     for(let step=0; step<sides; step++){
-      const theta = venue.shape === "round" ? (step / sides) * Math.PI * 2 : Math.PI / 4 + (step / sides) * Math.PI * 2;
+      const theta = (step / sides) * Math.PI * 2;
       const localX = Math.cos(theta) * venue.width / 2;
       const localY = Math.sin(theta) * venue.height / 2;
       ring.push([cx + localX * cos - localY * sin, cy + (localX * sin + localY * cos) * 0.85]);
@@ -8731,10 +8764,19 @@ function buildMapGeoJSON(){
     const safeMax = Math.max(4, (minDist / 2 - 0.4) / BLOB_MAX_OVERSIZE);
     return Math.min(Math.max(6, Math.min(15, minDist * 0.46 / BLOB_MAX_OVERSIZE)), safeMax);
   }
-  // Botanica, Metropolis and Area 404 sit within one continuous wooded
-  // Downtown enclosure in the official overview. It must read as shared
-  // terrain underneath the individual district clearings, rather than
-  // three isolated coloured islands on open grass.
+  // Was drawn as a dark, high-opacity "shared wooded Downtown enclosure"
+  // under Botanica/Metropolis/Area 404/Oldtown. Direct comparison against
+  // docs/map-evidence/screenshots/shot_005.jpg and shot_012.jpg — actual
+  // official-app captures of exactly this area — shows no such thing: the
+  // ground there is flat, uniform bright green throughout, the same as
+  // everywhere else that isn't camping/a wayfinding field/genuine named
+  // woodland. At full opacity this polygon was rendering as a large dark
+  // green blob covering most of four districts, easily mistaken for (and
+  // reported as) more "stacked shapes" — see forests-fill's fill-color
+  // below, now folded down to near-nothing for this specific role. Kept
+  // as a shape (not deleted) only because forestFringeFeatures below still
+  // references it; the real per-district built-up feel comes from
+  // building density and paths, not a background tint.
   const downtownWoodlandRing = [[5,31], [22,25], [40,27], [51,38], [55,54], [52,73], [44,81], [25,80], [8,70], [1,50], [5,31]];
   const downtownWoodlandFringeRing = [[1,28], [21,22], [45,24], [56,35], [60,55], [56,77], [46,85], [23,84], [5,74], [-4,50], [1,28]];
   const reviewedWoodlandFeatures = reviewedNaturalAreas.filter(({area})=> area.kind === "woodland").map(({area, anchor})=>{
@@ -8760,12 +8802,49 @@ function buildMapGeoJSON(){
   // forests-fill layer) so it only shows as a soft halo around the
   // forest's true edge, not a second solid colour.
   const forestFringeFeatures = [{
-    type: "Feature", properties: {},
+    // role tagged the same way forestFeatures is, so the render layer
+    // below can fold this one down the same way (see the note on
+    // downtownWoodlandRing above) without touching real woodland fringes.
+    type: "Feature", properties: { role: "downtown-enclosure" },
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(downtownWoodlandFringeRing) ] }
   }].concat(reviewedWoodlandFringeFeatures).concat(forestSpots.map((f,i)=>({
     type: "Feature", properties: {},
     geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)) * 1.4, 450 + i * 53, 16)) ] }
   })));
+
+  // Woodland stipple — the official map's forest/tree-line areas are
+  // filled with many small stippled dots, not a flat dark-green colour;
+  // that dot texture (reported as the "darker green... filled with tiny
+  // stippled tree dots" trait) is the biggest remaining visible gap
+  // between our forest fill and the reference. Reuses pointInReviewedRing
+  // (defined above for the Hilltop field dots) against each named
+  // woodland's own raw schematic ring. The shared downtown-enclosure bowl
+  // is deliberately skipped here — it sits underneath the built
+  // districts' own bright fill (drawn after it) so dots there would
+  // mostly be invisible, and it's large enough that stippling it too
+  // would add hundreds of points for no visible gain.
+  const forestRawRings = reviewedNaturalAreas.filter(({area})=> area.kind === "woodland").map(({area, anchor})=>{
+    const x = parseFloat(anchor.x), y = parseFloat(anchor.y);
+    return area.points.map(([dx,dy])=> [x + dx, y + dy]);
+  }).concat(forestSpots.map((f,i)=> blobRing(parseFloat(f.x), parseFloat(f.y), forestClearanceRadius(parseFloat(f.x), parseFloat(f.y)), 400 + i * 53, 16)));
+  const forestDotFeatures = [];
+  {
+    const dotRand = seededRand(8800);
+    forestRawRings.forEach(ring=>{
+      const xs = ring.map(p=> p[0]), ys = ring.map(p=> p[1]);
+      const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+      const spacing = Math.max(1.1, Math.min(1.8, (maxX - minX) / 10));
+      for(let y=minY + 0.6, row=0; y<maxY - 0.4; y+=spacing, row++){
+        for(let x=minX + 0.5 + (row % 2 ? spacing * 0.5 : 0); x<maxX - 0.4; x+=spacing){
+          if(dotRand() < 0.3) continue;
+          const jx = x + (dotRand() - 0.5) * spacing * 0.6, jy = y + (dotRand() - 0.5) * spacing * 0.6;
+          if(!pointInReviewedRing(jx, jy, ring)) continue;
+          const c = schematicToLatLon(jx, jy);
+          forestDotFeatures.push({ type:"Feature", properties:{}, geometry:{ type:"Point", coordinates:[c.lon, c.lat] } });
+        }
+      }
+    });
+  }
 
   // Density bumped 22 -> 30 per named forest spot — the reference
   // video's woods read as densely stippled throughout, not sparse dots
@@ -8958,6 +9037,7 @@ function buildMapGeoJSON(){
     skylarkRings: { type:"FeatureCollection", features: skylarkRingFeatures },
     forests: { type:"FeatureCollection", features: forestFeatures },
     forestFringe: { type:"FeatureCollection", features: forestFringeFeatures },
+    forestDots: { type:"FeatureCollection", features: forestDotFeatures },
     reviewedWoodlands: { type:"FeatureCollection", features: reviewedWoodlandFeatures },
     trail: { type:"FeatureCollection", features: trailFeatures },
     districtStreets: { type:"FeatureCollection", features: districtStreetFeatures },
@@ -9430,13 +9510,18 @@ function loadMap(){
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
       mapGL.addSource("mapForestFringe", { type: "geojson", data: geo.forestFringe });
-      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": "rgba(82,163,93,0.18)" } });
+      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(82,163,93,0.02)", "rgba(82,163,93,0.18)"] } });
       // The Downtown bowl is a shared background landscape, not a single
       // enormous dark zone. Its softer value lets Botanica, Metropolis and
       // Area 404 read as distinct places inside one wooded setting, while
       // reviewed woodland stages keep their denser, separate silhouette.
-      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(52,136,75,0.62)", "rgba(52,136,75,0.82)"] } });
-      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(35,105,59,0.4)", "rgba(35,105,59,0.65)"], "line-width": 1.15 } });
+      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(52,136,75,0.06)", "rgba(52,136,75,0.82)"] } });
+      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(35,105,59,0.04)", "rgba(35,105,59,0.65)"], "line-width": 1.15 } });
+      mapGL.addSource("mapForestDots", { type: "geojson", data: geo.forestDots });
+      mapGL.addLayer({ id: "forest-dots", type: "circle", source: "mapForestDots", minzoom: 13.8, paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 0.7, 19, 2.2],
+        "circle-color": "rgba(35,105,59,0.55)"
+      } });
 
       // Parking — flat grey fields with a few straight "row" lines, kept
       // visually distinct from both camping (green/yellow, textured) and
@@ -9468,13 +9553,14 @@ function loadMap(){
       // line/casing alpha values on districtFeatures above for the other
       // half of this same "district is context, not the main event" pass.
       mapGL.addSource("mapDistricts", { type: "geojson", data: geo.districts });
-      mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 3 } });
+      mapGL.addLayer({ id: "districts-casing", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "casing"], "line-width": 1.4 } });
       mapGL.addLayer({ id: "districts-fill", type: "fill", source: "mapDistricts", paint: { "fill-color": ["get", "fill"] } });
-      // Width bumped 1.8 -> 2.2 — reference screenshots show each
-      // district's own boundary as a clear, continuous outline, not a
-      // faint line competing with the fill; borders should read at a
-      // glance, matching the ask for "clear square/outlines" for zones.
-      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 2.2 } });
+      // Width trimmed 2.2 -> 1 alongside the fill/line alpha drop above —
+      // the official map draws no visible district boundary at all (see
+      // the comment on districtFeatures), so this is now just enough of a
+      // line to keep the shape legible in dev/debug tooling, not a border
+      // meant to be seen at a glance.
+      mapGL.addLayer({ id: "districts-line", type: "line", source: "mapDistricts", paint: { "line-color": ["get", "line"], "line-width": 1 } });
 
       // Tapping anywhere inside a district's own drawn shape opens the
       // same info card its small name-label marker does — previously the
@@ -9649,7 +9735,16 @@ function loadMap(){
       // to make a district feel inhabited, but withheld from overview zoom
       // so the site still reads as a clear set of larger territories.
       mapGL.addSource("mapDistrictAtmosphere", { type: "geojson", data: geo.districtAtmosphere });
-      mapGL.addLayer({ id: "district-atmosphere-shadow", type: "fill", source: "mapDistrictAtmosphere", minzoom: 13.8, paint: { "fill-color": "rgba(24,35,24,.2)", "fill-translate": [0.8, 1.1] } });
+      // Shadow minzoom held well above its own fill's minzoom (13.8) —
+      // fill-translate is a fixed SCREEN-pixel offset, so at overview
+      // zoom (where each of these features is only a few screen pixels
+      // wide) the offset is bigger than the shape itself; across a dense
+      // cluster, dozens of overlapping shadows merged into one solid dark
+      // blob roughly the size of the whole district (mistakable for a
+      // district fill colour, which it is not). Only start drawing
+      // shadows once features are large enough on screen for a shadow to
+      // read as "under this one shape" rather than a smear.
+      mapGL.addLayer({ id: "district-atmosphere-shadow", type: "fill", source: "mapDistrictAtmosphere", minzoom: 15.5, paint: { "fill-color": "rgba(24,35,24,.2)", "fill-translate": [0.8, 1.1] } });
       mapGL.addLayer({ id: "district-atmosphere-fill", type: "fill", source: "mapDistrictAtmosphere", minzoom: 13.8, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "district-atmosphere-outline", type: "line", source: "mapDistrictAtmosphere", minzoom: 13.8, paint: { "line-color": "rgba(76,63,39,.58)", "line-width": 0.65 } });
       mapGL.addSource("mapDistrictAtmosphereLights", { type: "geojson", data: geo.districtAtmosphereLights });
@@ -9760,15 +9855,31 @@ function loadMap(){
       // that was missing to make flat building fills read as raised
       // structures sitting ON the ground rather than a coloured patch
       // painted flush with it.
-      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 14.2, paint: { "fill-color": "rgba(10,15,10,0.16)", "fill-translate": [1, 1.4] } });
-      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 14.2, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.32 } });
+      // See the district-atmosphere-shadow comment above for why this
+      // minzoom sits well above the fill layer's own 14.2 — same
+      // overlapping-shadow-smear issue, worse here since infill is the
+      // densest building layer on the map.
+      mapGL.addLayer({ id: "infill-buildings-shadow", type: "fill", source: "mapInfillBuildings", minzoom: 15.5, paint: { "fill-color": "rgba(10,15,10,0.16)", "fill-translate": [1, 1.4] } });
+      // Was 0.32 opacity — with 11-20 of these packed into one small
+      // district clearing, dozens of translucent rectangles stacking on
+      // top of each other (and of the ground/district tint under them)
+      // didn't read as "soft buildings", it composited into a single
+      // muddy dark patch roughly the size and shape of the whole
+      // district — a real, measured cause of the "stacked shapes"/"dark
+      // blob" complaint, not just a colour-choice issue. Reference
+      // screenshots show these as small but genuinely SOLID, opaque
+      // blocks (roadmap item: "crisper, warmer building massing... less
+      // translucent-brown overlap").
+      mapGL.addLayer({ id: "infill-buildings-fill", type: "fill", source: "mapInfillBuildings", minzoom: 14.2, paint: { "fill-color": ["get", "fill"], "fill-opacity": 0.88 } });
       mapGL.addLayer({ id: "infill-buildings-outline", type: "line", source: "mapInfillBuildings", minzoom: 14.2, paint: { "line-color": "rgba(120,80,50,0.24)", "line-width": 0.65 } });
 
       // Deliberate district compounds sit above low-contrast infill: their
       // varied roof tones and fenced yards make a close-up feel authored,
       // while their zoom threshold keeps the overview shape-led.
       mapGL.addSource("mapAuthoredMassing", { type: "geojson", data: geo.authoredMassing });
-      mapGL.addLayer({ id: "authored-massing-shadow", type: "fill", source: "mapAuthoredMassing", minzoom: 13.5, paint: { "fill-color": "rgba(18,28,20,.24)", "fill-translate": [1.2, 1.7] } });
+      // See the district-atmosphere-shadow comment above for the
+      // overlapping-shadow-smear reasoning behind this minzoom.
+      mapGL.addLayer({ id: "authored-massing-shadow", type: "fill", source: "mapAuthoredMassing", minzoom: 15.5, paint: { "fill-color": "rgba(18,28,20,.24)", "fill-translate": [1.2, 1.7] } });
       mapGL.addLayer({ id: "authored-massing-fill", type: "fill", source: "mapAuthoredMassing", minzoom: 13.5, paint: { "fill-color": ["get", "fill"] } });
       // Softened from rgba(91,62,36,.68)/width 1 — a hard, near-opaque
       // outline on every single small building, on top of its own drop
@@ -9780,11 +9891,17 @@ function loadMap(){
       // neighbours at close zoom, not compete with the shadow for it.
       mapGL.addLayer({ id: "authored-massing-outline", type: "line", source: "mapAuthoredMassing", minzoom: 13.5, paint: { "line-color": "rgba(91,62,36,.32)", "line-width": 0.6 } });
       mapGL.addSource("mapAuthoredMassingYards", { type: "geojson", data: geo.authoredMassingYards });
-      mapGL.addLayer({ id: "authored-massing-yards-fill", type: "fill", source: "mapAuthoredMassingYards", minzoom: 13.5, paint: { "fill-color": "rgba(57,72,52,.32)" } });
+      // Was a dark olive-green (rgba(57,72,52,.32)) — over the map's own
+      // bright green ground that read as a muddy dark smudge, not a fenced
+      // yard. Reference close-ups show these as pale cream/white enclosed
+      // ground, the same family as the dome/tent "canvas" tone elsewhere.
+      mapGL.addLayer({ id: "authored-massing-yards-fill", type: "fill", source: "mapAuthoredMassingYards", minzoom: 13.5, paint: { "fill-color": "rgba(232,220,188,.4)" } });
       mapGL.addLayer({ id: "authored-massing-yards", type: "line", source: "mapAuthoredMassingYards", minzoom: 13.5, paint: { "line-color": "rgba(79,64,42,.78)", "line-width": 1.35, "line-dasharray": [2, 1] } });
 
       mapGL.addSource("mapBuildings", { type: "geojson", data: geo.buildings });
-      mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", minzoom: 13.8, paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
+      // See the district-atmosphere-shadow comment above for the
+      // overlapping-shadow-smear reasoning behind this minzoom.
+      mapGL.addLayer({ id: "buildings-shadow", type: "fill", source: "mapBuildings", minzoom: 15.5, paint: { "fill-color": "rgba(8,12,8,0.28)", "fill-translate": [1.5, 2.2] } });
       mapGL.addLayer({ id: "buildings-fill", type: "fill", source: "mapBuildings", minzoom: 13.8, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "buildings-outline", type: "line", source: "mapBuildings", minzoom: 13.8, paint: { "line-color": "rgba(120,80,50,0.7)", "line-width": 1 } });
       mapGL.addSource("mapVenueAccents", { type: "geojson", data: geo.venueAccents });
@@ -9798,7 +9915,9 @@ function loadMap(){
       // Small named venue structures sit above general buildings so their
       // coherent street-side clusters remain readable at close zoom.
       mapGL.addSource("mapSmallVenues", { type: "geojson", data: geo.smallVenues });
-      mapGL.addLayer({ id: "small-venues-shadow", type: "fill", source: "mapSmallVenues", minzoom: 14.0, paint: { "fill-color": "rgba(44,30,17,0.25)", "fill-translate": [1.1, 1.4] } });
+      // See the district-atmosphere-shadow comment above for the
+      // overlapping-shadow-smear reasoning behind this minzoom.
+      mapGL.addLayer({ id: "small-venues-shadow", type: "fill", source: "mapSmallVenues", minzoom: 15.5, paint: { "fill-color": "rgba(44,30,17,0.25)", "fill-translate": [1.1, 1.4] } });
       mapGL.addLayer({ id: "small-venues-fill", type: "fill", source: "mapSmallVenues", minzoom: 14.0, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addLayer({ id: "small-venues-outline", type: "line", source: "mapSmallVenues", minzoom: 14.0, paint: { "line-color": "rgba(104,65,30,0.78)", "line-width": 1 } });
       mapGL.addSource("mapSmallVenueYards", { type: "geojson", data: geo.smallVenueYards });

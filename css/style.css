@@ -316,11 +316,14 @@
      MapLibre WebGL canvas — .marker/.map-label text sit in DOM siblings
      on top of it (see z-index:2 above) and are deliberately NOT inside
      this selector, so this can soften every polygon edge on the map in
-     one place without blurring anything anyone needs to read. Saturate/
-     contrast/brightness nudged up alongside the blur so the softened
-     edges don't just look hazy — colours stay bold like the reference
-     screenshots instead of fading toward grey. */
-  .maplibregl-canvas{filter:blur(1.4px) saturate(1.18) contrast(1.06) brightness(1.02);}
+     one place without blurring anything anyone needs to read.
+     Blur trimmed back down from an earlier, heavier pass (1.4px): the
+     official app's own map (docs/map-evidence/screenshots) is actually a
+     CRISP flat-vector illustration — small sharp buildings, clean field
+     edges — not a soft painterly one, so a strong blur was pulling this
+     map away from that reference, not toward it. Keep just enough to
+     take the edge off the polygon seams. */
+  .maplibregl-canvas{filter:blur(0.6px) saturate(1.14) contrast(1.03);}
   .maplibregl-map{background:#cbdcc4; font:inherit;}
   .maplibregl-ctrl-group{background:rgba(255,252,238,.92) !important; border:1px solid rgba(72,83,58,.35) !important; box-shadow:0 2px 8px rgba(34,54,36,.18) !important;}
   .maplibregl-ctrl-group button{background-color:transparent !important;}
