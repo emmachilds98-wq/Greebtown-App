@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v450";
-const APP_BUILD_TIME = "2026-08-10T23:37:26Z";
+const APP_CACHE_VERSION = "v451";
+const APP_BUILD_TIME = "2026-08-10T23:40:20Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7474,7 +7474,8 @@ function evidenceRebuildDetailLabels(){
     ["THE FECKLESS WRECKED", 62, 65, "venue"], ["HELIX", 63, 83, "stage"],
     ["ANCIENT FUTURES", 63, 47, "venue"], ["BOOMTOWN HALL", 58, 51, "venue"], ["DAILY RAG", 57, 53, "venue"],
     ["THE HIDE OUT HILLTOP", 68, 36, "venue"], ["FULL MOON BALLROOM", 65, 33, "venue"],
-    ["SILVER SWAN TALENT AGENCY", 63, 30, "venue"], ["VELVET ROPE", 65, 38, "venue"],
+    ["SILVER SWAN TALENT AGENCY", 63, 30, "venue"], ["TOPSY TURVY TWINS", 66, 31, "venue"],
+    ["FOGGERS MILL", 69, 33, "venue"], ["VELVET ROPE", 65, 38, "venue"],
     ["REBEL GIRLS CLUB", 67, 73, "venue"], ["CIRCUS", 70, 76, "venue"], ["THE RETREAT", 72, 72, "venue"],
     ["REEL NEWS", 78, 73, "venue"], ["THE ARC", 80, 71, "venue"], ["SHARING CIRCLES", 81, 73, "venue"], ["WELFARE", 81, 76, "venue"],
     ["VALLEY CAMPING", 66, 22, "camp"], ["MEADOW", 16, 57, "camp"], ["CAMPFLIGHT", 18, 63, "camp"],
@@ -7618,7 +7619,6 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[31,60],[29,64],[27,68],[26,72]], { kind:"neon" }),  // Metropolis -> Hydro XL lit route
     route([[54,35],[58,36],[62,35],[66,36]], { kind:"street" }), // Copperwood courtyard
     route([[70,39],[75,38],[80,39],[83,42],[79,44],[74,43],[70,39]], { kind:"street" }), // Thrutopia boundary loop
-    route([[68,36],[66,34],[65,33],[65,38]], { kind:"street" }), // Hide Out Hilltop -> Full Moon cluster
     route([[58,48],[59,52],[57,55]], { kind:"street" }),         // Grand Central -> Oldtown south exit
     route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
     route([[51,59],[51,62],[51,65],[51,68]], { kind:"street" }), // Oldtown west chain
@@ -7641,6 +7641,9 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Spectrum 360 container ring", "rgba(91,73,119,.96)", [[37,65],[40,64],[43,66],[44,69],[42,71],[38,71],[36,69]]),
     polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
     polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
+    polygon("Full Moon Ballroom dome", "rgba(250,245,221,.98)", [[63,32],[64,30],[67,30],[68,32],[67,35],[64,35],[62,33]], { outline:"rgba(104,89,61,.9)" }),
+    polygon("The Retreat clearing", "rgba(208,174,124,.94)", [[70,70],[74,70],[76,72],[74,74],[70,73],[69,71]], { outline:"rgba(109,84,49,.9)" }),
+    polygon("Circus round tent", "rgba(219,122,86,.95)", [[68,75],[70,73],[72,74],[73,76],[71,78],[69,78],[67,76]], { outline:"rgba(124,57,43,.92)" }),
     polygon("Helix round court", "rgba(222,133,98,.95)", [[61,81],[64,80],[66,82],[65,85],[62,85],[60,83]]),
     polygon("Lion's Den amphitheatre", "rgba(117,78,43,.98)", [[72,85],[80,84],[83,87],[80,89],[72,89],[70,87]])
   ] };
@@ -7664,6 +7667,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceCourtDots = { type:"FeatureCollection", features:[
     [40,43],[43,42],[45,45],[40,46],                   // NEXUS/Botanica court vegetation
     [55,46],[59,45],[61,48],                           // Grand Central hardstanding details
+    [63,32],[67,32],[70,71],[74,72],[69,75],[72,76],  // Full Moon, Retreat, Circus forms
     [51,59],[51,62],[51,65],[51,68], [55,63],[57,62],[56,66], [62,56],[62,58],[62,60],[62,62],[62,65], // Oldtown chains
     [44,73],[47,74],[46,76],                           // Tribe of Frog compound
     [61,82],[64,81],[65,84],                           // Helix forecourt
@@ -9675,7 +9679,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v18-overhead-default";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v19-granular-forms";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;

@@ -150,4 +150,10 @@ location.
   and close-view loop. The remaining major terrain areas now also have their
   own reviewed contours: Anara Forest, Quantum, the Lion's Den, Hilltop, and
   Downtown Camping. The only new public route is the documented Hidden Woods
-  -> Letsbe connection; the map remains flat, north-up, and pitch-locked.
+  -> Letsbe connection; the map opens flat and north-up.
+- Granular-form pass: the Full Moon Ballroom is a confirmed white dome; The
+  Retreat is a separate tan clearing; and Circus is a separate round tent.
+  These forms are placed only at their already-established review-draft label
+  anchors. Topsy Turvy Twins and Foggers Mill are now named beside the Full
+  Moon cluster. The previous suggested Hide Out Hilltop -> Full Moon path is
+  removed because the footage does not actually show that connection.
