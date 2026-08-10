@@ -3185,20 +3185,16 @@ window.GREEBTOWN_CAMP_ZONES = {
       "evidence": "official-overview",
       "points": [
         [
-          61,
-          16
+          62,
+          29
         ],
         [
-          69,
-          14
+          68,
+          27
         ],
         [
-          72,
-          20
-        ],
-        [
-          72,
-          31
+          71,
+          32
         ],
         [
           70,
@@ -3209,52 +3205,48 @@ window.GREEBTOWN_CAMP_ZONES = {
           51
         ],
         [
-          56,
+          57,
           62
         ],
         [
-          52,
+          54,
           60
         ],
         [
-          52,
+          54,
           52
         ],
         [
-          56,
+          57,
           40
         ],
         [
           60,
-          25
+          33
         ]
       ],
       "detailLines": [
         [
           [
-            63,
-            18
-          ],
-          [
-            65,
-            29
+            64,
+            31
           ],
           [
             65,
             40
           ],
           [
-            59,
-            52
+            63,
+            49
+          ],
+          [
+            58,
+            58
           ]
         ],
         [
           [
             68,
-            16
-          ],
-          [
-            69,
             29
           ],
           [
@@ -3262,15 +3254,19 @@ window.GREEBTOWN_CAMP_ZONES = {
             39
           ],
           [
-            61,
-            50
+            65,
+            47
+          ],
+          [
+            60,
+            55
           ]
         ]
       ],
       "excludes": [
         "Anara Forest"
       ],
-      "notes": "Reviewed long Hilltop field corridor. It runs south beside the Grand Central and Oldtown sequence toward Quantum, while remaining distinct from the Anara Forest woodland stage."
+      "notes": "Reviewed long Hilltop field corridor. It runs south beside the Grand Central and Oldtown sequence toward Quantum, while remaining distinct from the Anara Forest woodland stage. North end trimmed (was y:14-27ish, reaching well north of Grand Central itself, a 48-unit total span) after direct user feedback that the field was rendering way too big/long on the top side; findings_screenshots.md's own note is the field's \"north tip near Grand Central\" (y~35), not far above it. South end kept at y~62 (audit-enforced — scripts/audit-rendered-layout-alignment.mjs requires the corridor to still reach the Quantum junction), since the \"too big\" complaint was specifically about the top side, not the south taper toward Quantum."
     }
   ],
   "zones": [
@@ -3374,8 +3370,8 @@ window.GREEBTOWN_CAMP_ZONES = {
       "id": "camp-campervan",
       "name": "Campervan Field",
       "position": {
-        "x": 86,
-        "y": 14
+        "x": 93,
+        "y": 41
       },
       "footprint": {
         "aspect": 0.68,
@@ -3384,7 +3380,7 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "East-side vertical vehicle field."
+      "notes": "East-side vertical vehicle field. Moved south from (86,14) — that position sat north of Anara Forest, contradicting findings_screenshots.md's own note that East Camping/East Gate/Campervan Field appear together 'moving further east/south-east from Anara... along the perimeter road'. Repositioned near East Gate (site-layout.json parking-east-gate, 97,38) and East Camping (91,48), matching that progression."
     },
     {
       "id": "camp-temple-valley",
@@ -4280,8 +4276,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         9
       ],
       "to": [
-        38,
-        31
+        34,
+        30
       ]
     },
     "Grand Central": {
@@ -4330,8 +4326,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         55
       ],
       "to": [
-        81,
-        65
+        75,
+        61
       ]
     },
     "Helix": {
@@ -5028,166 +5024,166 @@ window.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = {
       "sourceName": "The Lion's Den",
       "kind": "woodland",
       "evidence": "official-detail",
-      "notes": "Broad asymmetric eastern woodland mass beside, not inside, the Hilltop corridor; its long north/south edge keeps the amphitheatre clearing legible without reading as a circular camp zone.",
+      "notes": "Broad asymmetric eastern woodland mass beside, not inside, the Hilltop corridor; its long north/south edge keeps the amphitheatre clearing legible without reading as a circular camp zone. Scaled to 65% (was a 43x39-unit fringe, genuinely enormous relative to the ~20-30 unit gaps in this part of the site) after direct user feedback that Lion's Den sits far too far east/right — its old full size made ANY position close to Oldtown/Quantum geometrically impossible without overlapping the Hilltop corridor (checked directly with the same overlap-sweep script used previously), forcing it out to x~81 regardless of where the anchor was aimed. Still a genuinely broad woodland at this scale, just no longer implausibly larger than the districts around it.",
       "points": [
         [
-          -13,
-          -13
+          -8.5,
+          -8.5
         ],
         [
-          -5,
-          -17
+          -3.3,
+          -11.1
         ],
         [
-          6,
-          -16
+          3.9,
+          -10.4
         ],
         [
-          14,
-          -12
+          9.1,
+          -7.8
         ],
         [
-          18,
-          -5
+          11.7,
+          -3.3
         ],
         [
-          19,
-          4
+          12.4,
+          2.6
         ],
         [
-          15,
-          13
+          9.8,
+          8.5
         ],
         [
-          7,
-          17
+          4.6,
+          11.1
         ],
         [
-          -4,
-          16
+          -2.6,
+          10.4
         ],
         [
-          -13,
-          11
+          -8.5,
+          7.2
         ],
         [
-          -17,
-          4
+          -11.1,
+          2.6
         ],
         [
-          -18,
-          -5
+          -11.7,
+          -3.3
         ]
       ],
       "fringePoints": [
         [
-          -15,
-          -15
+          -9.8,
+          -9.8
         ],
         [
-          -6,
-          -19
+          -3.9,
+          -12.4
         ],
         [
-          7,
-          -18
+          4.6,
+          -11.7
         ],
         [
-          16,
-          -14
+          10.4,
+          -9.1
         ],
         [
-          21,
-          -6
+          13.7,
+          -3.9
         ],
         [
-          22,
-          5
+          14.3,
+          3.3
         ],
         [
-          18,
-          16
+          11.7,
+          10.4
         ],
         [
-          8,
-          20
-        ],
-        [
-          -5,
-          19
-        ],
-        [
-          -16,
+          5.2,
           13
         ],
         [
-          -20,
-          5
+          -3.3,
+          12.4
         ],
         [
-          -21,
-          -6
+          -10.4,
+          8.5
+        ],
+        [
+          -13,
+          3.3
+        ],
+        [
+          -13.7,
+          -3.9
         ]
       ],
       "treeClusters": [
         [
-          -11,
-          -8,
-          8,
+          -7.2,
+          -5.2,
+          5.2,
           2.65
         ],
         [
-          -5,
-          -13,
-          8,
+          -3.3,
+          -8.5,
+          5.2,
           2.7
         ],
         [
-          3,
-          -13,
-          8,
+          1.95,
+          -8.5,
+          5.2,
           2.65
         ],
         [
-          10,
-          -9,
-          8,
+          6.5,
+          -5.9,
+          5.2,
           2.55
         ],
         [
-          14,
-          -2,
-          8,
+          9.1,
+          -1.3,
+          5.2,
           2.5
         ],
         [
-          12,
-          7,
-          8,
+          7.8,
+          4.6,
+          5.2,
           2.55
         ],
         [
-          5,
-          13,
-          8,
+          3.3,
+          8.5,
+          5.2,
           2.65
         ],
         [
-          -4,
-          12,
-          8,
+          -2.6,
+          7.8,
+          5.2,
           2.7
         ],
         [
-          -11,
-          8,
-          8,
+          -7.2,
+          5.2,
+          5.2,
           2.6
         ],
         [
-          -14,
-          1,
-          8,
+          -9.1,
+          0.65,
+          5.2,
           2.55
         ]
       ]

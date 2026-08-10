@@ -664,6 +664,20 @@
         { "objectId": "stage-helix", "field": "reference anchor", "previous": [73, 64], "next": [61, 64] },
         { "objectId": "landmark-hilltop", "field": "position", "previous": [74, 30], "next": [64, 36] }
       ]
+    },
+    {
+      "id": "recalibrate-outer-zoning-2026-08-10T140000Z",
+      "timestamp": "2026-08-10T14:00:00Z",
+      "actor": "claude",
+      "summary": "Direct user feedback that Hilltop Field, Lion's Den, Letsbe Avenue and several perimeter camps were sized/positioned wrong, and that most camps had no path reaching them at all.",
+      "changes": [
+        { "objectId": "hilltop-field", "field": "points", "previous": "y-span 14-62 (48 units), reaching well north of Grand Central", "next": "y-span 27-62 (35 units), north tip trimmed back to Grand Central's own latitude" },
+        { "objectId": "woodland-lions-den", "field": "points/fringePoints", "previous": "43x39-unit fringe", "next": "scaled to 65% — the old size made any position near Oldtown/Quantum geometrically impossible without overlapping Hilltop" },
+        { "objectId": "stage-lions-den", "field": "reference anchor", "previous": [81, 65], "next": [75, 61] },
+        { "objectId": "district-letsbe-avenue", "field": "reference anchor", "previous": [38, 31], "next": [34, 30] },
+        { "objectId": "camp-campervan", "field": "position", "previous": [86, 14], "next": [93, 41], "note": "moved south of Anara Forest to sit with East Camping/East Gate, per findings_screenshots.md" },
+        { "objectId": "TRUNK_PATH_EDGES", "field": "js/app.js", "previous": "West Camping, Valley Camping, Tangerine Fields, Campervan Field, East Camping, Meadow Camping (Accessible), Meadow Living, Camplight, Quiet Camping had no path edge at all", "next": "each connected to its nearest evidenced gate/junction" }
+      ]
     }
   ]
 }

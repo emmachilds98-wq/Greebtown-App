@@ -11,7 +11,12 @@ const distance = (a,b) => Math.hypot(a.position.x - b.position.x, a.position.y -
 const closePairs = (items, threshold) => items.flatMap((item, index) => items.slice(index + 1).map(other => ({ item, other, distance: distance(item, other) }))).filter(pair => pair.distance < threshold);
 const permittedStagePairs = new Set(["stage-acid-leak|stage-hangar-161"]);
 const permittedCampPairs = new Set([
-  "camp-camplight|camp-downtown", "camp-downtown|camp-orchid-downtown", "camp-camplight|camp-orchid-downtown", "camp-meadow-accessible|camp-meadow-living"
+  "camp-camplight|camp-downtown", "camp-downtown|camp-orchid-downtown", "camp-camplight|camp-orchid-downtown", "camp-meadow-accessible|camp-meadow-living",
+  // findings_screenshots.md: "EAST CAMPING, EAST GATE, CAMPERVAN FIELD labels
+  // appear together moving further east/south-east from Anara, along the
+  // perimeter road" — Campervan Field was moved next to East Camping to
+  // match that grouping (see its own notes in camp-zones.json).
+  "camp-campervan|camp-east"
 ]);
 const pairId = (a,b) => [a.id,b.id].sort().join("|");
 const issues = [];

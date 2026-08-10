@@ -31,10 +31,10 @@
       "sourceName": "The Lion's Den",
       "kind": "woodland",
       "evidence": "official-detail",
-      "notes": "Broad asymmetric eastern woodland mass beside, not inside, the Hilltop corridor; its long north/south edge keeps the amphitheatre clearing legible without reading as a circular camp zone.",
-      "points": [[-13,-13],[-5,-17],[6,-16],[14,-12],[18,-5],[19,4],[15,13],[7,17],[-4,16],[-13,11],[-17,4],[-18,-5]],
-      "fringePoints": [[-15,-15],[-6,-19],[7,-18],[16,-14],[21,-6],[22,5],[18,16],[8,20],[-5,19],[-16,13],[-20,5],[-21,-6]],
-      "treeClusters": [[-11,-8,8,2.65],[-5,-13,8,2.7],[3,-13,8,2.65],[10,-9,8,2.55],[14,-2,8,2.5],[12,7,8,2.55],[5,13,8,2.65],[-4,12,8,2.7],[-11,8,8,2.6],[-14,1,8,2.55]]
+      "notes": "Broad asymmetric eastern woodland mass beside, not inside, the Hilltop corridor; its long north/south edge keeps the amphitheatre clearing legible without reading as a circular camp zone. Scaled to 65% (was a 43x39-unit fringe, genuinely enormous relative to the ~20-30 unit gaps in this part of the site) after direct user feedback that Lion's Den sits far too far east/right — its old full size made ANY position close to Oldtown/Quantum geometrically impossible without overlapping the Hilltop corridor (checked directly with the same overlap-sweep script used previously), forcing it out to x~81 regardless of where the anchor was aimed. Still a genuinely broad woodland at this scale, just no longer implausibly larger than the districts around it.",
+      "points": [[-8.5,-8.5],[-3.3,-11.1],[3.9,-10.4],[9.1,-7.8],[11.7,-3.3],[12.4,2.6],[9.8,8.5],[4.6,11.1],[-2.6,10.4],[-8.5,7.2],[-11.1,2.6],[-11.7,-3.3]],
+      "fringePoints": [[-9.8,-9.8],[-3.9,-12.4],[4.6,-11.7],[10.4,-9.1],[13.7,-3.9],[14.3,3.3],[11.7,10.4],[5.2,13],[-3.3,12.4],[-10.4,8.5],[-13,3.3],[-13.7,-3.9]],
+      "treeClusters": [[-7.2,-5.2,5.2,2.65],[-3.3,-8.5,5.2,2.7],[1.95,-8.5,5.2,2.65],[6.5,-5.9,5.2,2.55],[9.1,-1.3,5.2,2.5],[7.8,4.6,5.2,2.55],[3.3,8.5,5.2,2.65],[-2.6,7.8,5.2,2.7],[-7.2,5.2,5.2,2.6],[-9.1,0.65,5.2,2.55]]
     }
   ]
 }
