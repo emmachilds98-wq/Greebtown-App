@@ -22,12 +22,12 @@ const trunkPathZoom = matchNumber(/id: "trail-main-fill"[^\n]*minzoom: (\d+(?:\.
 const smallVenueZoom = matchNumber(/id: "small-venues-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
 
 if(!app.includes('data: geo.siteGround') || !app.includes('id: "site-ground-fill"')) errors.push("the reviewed site boundary must render as the primary festival-ground silhouette");
-if(!Number.isFinite(labelThreshold) || labelThreshold < 15.7 || labelThreshold > 16) errors.push("overview label thinning must cover the whole-site view");
+if(!Number.isFinite(labelThreshold) || labelThreshold < 16 || labelThreshold > 16.3) errors.push("overview anchors must hold through the whole-site view");
 if(!Number.isFinite(labelDetailThreshold) || labelDetailThreshold < labelThreshold + .5 || labelDetailThreshold > 17) errors.push("fine labels must have a distinct later reveal threshold");
-if(!Number.isFinite(passageZoom) || passageZoom < 13.5 || passageZoom > 14.2) errors.push("district passages must establish walking structure on initial arrival");
-if(!Number.isFinite(massingZoom) || massingZoom < 13.5 || massingZoom > 14) errors.push("authored massing must give the initial overview its built character");
-if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 13.5 || atmosphereZoom > 14.2) errors.push("authored district atmosphere must support initial overview character");
-if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom || infillZoom > 14.5) errors.push("generic infill must support, not precede or outlast, the authored overview detail");
+if(!Number.isFinite(passageZoom) || passageZoom < 16.2 || passageZoom > 16.5) errors.push("district passages must wait until the visitor enters a district");
+if(!Number.isFinite(massingZoom) || massingZoom < 16 || massingZoom > 16.3) errors.push("authored massing must wait until the visitor enters a district");
+if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 16 || atmosphereZoom > 16.3) errors.push("district atmosphere must not break the overview silhouette");
+if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom || infillZoom > 16.3) errors.push("generic infill must support district detail without breaking the overview silhouette");
 if(!Number.isFinite(broadFieldZoom) || broadFieldZoom > 14) errors.push("broad farmland texture must establish the site overview");
 if(!Number.isFinite(fineFieldZoom) || fineFieldZoom < 17) errors.push("fine field mottling must remain deep-zoom only");
 if(!Number.isFinite(hedgeZoom) || hedgeZoom > 14) errors.push("outer hedgerows must provide light structure in the site overview");
@@ -35,7 +35,7 @@ if(!Number.isFinite(treeZoom) || treeZoom > 14) errors.push("woodland texture mu
 if(!Number.isFinite(tentZoom) || tentZoom < 16) errors.push("individual tents must remain close-zoom texture");
 if(!Number.isFinite(trunkPathZoom) || trunkPathZoom < 15.7) errors.push("trunk paths must not dominate the whole-site overview");
 if(!Number.isFinite(smallVenueZoom) || smallVenueZoom > 14.2) errors.push("reviewed small venue footprints must appear in the initial overview before their dense text labels");
-if(!css.includes("#map.map-labels-thin .map-label:not(.district){display:none;}")) errors.push("thin mode must leave only district labels visible");
+if(!css.includes("#map.map-labels-thin .map-label:not(.overview){display:none;}")) errors.push("thin mode must leave only territorial overview labels visible");
 if(!css.includes("#map.map-labels-mid .map-label.minor")) errors.push("middle zoom must defer minor labels until detailed exploration");
 if(errors.length){ console.error(errors.join("\n")); process.exit(1); }
-console.log(`Map zoom hierarchy passed: coherent site ground; overview/mid/detail labels ${labelThreshold}/${labelDetailThreshold}; paths/passages ${trunkPathZoom}/${passageZoom}; massing/small venues ${massingZoom}/${smallVenueZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}; trees/tents ${treeZoom}/${tentZoom}.`);
+console.log(`Map zoom hierarchy passed: territorial overview/mid/detail labels ${labelThreshold}/${labelDetailThreshold}; paths/passages ${trunkPathZoom}/${passageZoom}; massing/small venues ${massingZoom}/${smallVenueZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}; trees/tents ${treeZoom}/${tentZoom}.`);
