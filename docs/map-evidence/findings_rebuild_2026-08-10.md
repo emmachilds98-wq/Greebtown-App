@@ -157,3 +157,8 @@ location.
   anchors. Topsy Turvy Twins and Foggers Mill are now named beside the Full
   Moon cluster. The previous suggested Hide Out Hilltop -> Full Moon path is
   removed because the footage does not actually show that connection.
+- Layout/legibility pass: the entry view now begins at the first detailed
+  geometry level instead of just below it. Full detail opens at the same
+  reviewed zoom, while Tribe of Frog, Helix, Full Moon Ballroom, and Camp at
+  Hilltop remain readable wayfinding anchors one step earlier. This changes
+  presentation only; it does not introduce any new map location or route.
