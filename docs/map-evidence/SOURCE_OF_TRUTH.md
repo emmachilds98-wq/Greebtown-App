@@ -17,8 +17,9 @@ They use a neutral internal MapLibre plane. No legacy stage collection,
 generated map-system layer, scraped GPS record, parking/gate collection, or
 external geographic basemap is allowed in the active map path.
 
-The active map is a fixed north-up, zero-pitch overhead plan. Do not re-enable
-rotation or pitch: the evidence-derived layout is reviewed as a flat diagram.
+The active map loads as a north-up, zero-pitch overhead plan. Rotation and
+pitch remain available after load; the Site overview action resets to the
+reviewed flat diagram.
 
 ## Evidence policy
 

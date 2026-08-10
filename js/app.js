@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v449";
-const APP_BUILD_TIME = "2026-08-10T23:35:14Z";
+const APP_CACHE_VERSION = "v450";
+const APP_BUILD_TIME = "2026-08-10T23:37:26Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9675,7 +9675,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v17-flat-overhead-boundaries";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v18-overhead-default";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -9776,14 +9776,10 @@ function loadMap(){
       // below. This zoom is only the brief pre-style fallback frame.
       zoom: 14.3, minZoom: 13.5, maxZoom: 19,
       bearing: 0, pitch: 0,
-      dragRotate: false, pitchWithRotate: false,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
     mapGL.__greebtownRenderRevision = MAP_RENDER_REVISION;
-    mapGL.dragRotate.disable();
-    mapGL.touchZoomRotate.disableRotation();
-    if(mapGL.touchPitch) mapGL.touchPitch.disable();
     // Place the compact map utility rail away from the dense northern
     // labels. This mirrors a familiar mobile-map ergonomics pattern
     // without reproducing another app's controls or artwork.
