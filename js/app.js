@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v441";
-const APP_BUILD_TIME = "2026-08-10T22:51:43Z";
+const APP_CACHE_VERSION = "v442";
+const APP_BUILD_TIME = "2026-08-10T23:02:18Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7472,7 +7472,7 @@ function evidenceRebuildDetailLabels(){
 
 function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
-  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos","evidenceContainerEdges","evidenceCanopies","evidenceWaterLandmarks"];
+  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos","evidenceContainerEdges","evidenceCanopies","evidenceWaterLandmarks","evidenceDistrictContours","evidenceCompoundBlocks"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
   const polygon = (name, fill, points, properties={})=>({
     type:"Feature", properties:{ name, fill, outline:"rgba(47,43,28,.8)", ...properties },
@@ -7531,6 +7531,30 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Tribe of Frog court", "rgba(173,108,184,.98)", [[43,72],[48,71],[50,75],[47,78],[42,76]]),
     polygon("Lion's Den court", "rgba(209,140,65,.98)", [[71,84],[80,83],[83,87],[79,90],[71,89]])
   ] };
+  // Connected court edges and massing groups observed in the official
+  // close-ups. These are limited to pictured districts and their documented
+  // venue chains; they are not generic building scatter.
+  geo.evidenceDistrictContours = { type:"FeatureCollection", features:[
+    polygon("Botanica loop", "transparent", [[35,43],[39,39],[46,39],[50,43],[48,49],[44,52],[37,51],[32,47]], { color:"rgba(246,232,180,.96)" }),
+    polygon("Metropolis outline", "transparent", [[27,58],[31,54],[38,54],[44,59],[41,66],[32,67],[25,62]], { color:"rgba(91,223,222,.94)" }),
+    polygon("Area 404 outline", "transparent", [[28,68],[40,66],[46,71],[42,78],[30,79],[24,74]], { color:"rgba(220,238,74,.96)" }),
+    polygon("Copperwood court outline", "transparent", [[52,30],[63,28],[70,33],[67,39],[58,40],[50,36]], { color:"rgba(250,214,83,.96)" }),
+    polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)" }),
+    polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)" }),
+    polygon("Hilltop field outline", "transparent", [[68,51],[82,50],[85,60],[82,77],[70,78],[67,66]], { color:"rgba(231,205,84,.9)" })
+  ] };
+  geo.evidenceCompoundBlocks = { type:"FeatureCollection", features:[
+    building("rgba(173,119,67,.96)", [[37,42],[40,42],[40,44],[37,44]]), building("rgba(211,159,86,.96)", [[43,41],[46,41],[46,43],[43,43]]),
+    building("rgba(181,106,77,.96)", [[39,47],[42,47],[42,49],[39,49]]), building("rgba(217,179,107,.96)", [[44,48],[47,48],[47,50],[44,50]]),
+    building("rgba(142,99,63,.96)", [[34,45],[36,45],[36,48],[34,48]]),
+    building("rgba(131,91,79,.96)", [[32,68],[35,68],[35,70],[32,70]]), building("rgba(203,122,70,.96)", [[36,71],[39,71],[39,73],[36,73]]),
+    building("rgba(146,95,129,.96)", [[40,73],[43,73],[43,75],[40,75]]), building("rgba(193,91,74,.96)", [[40,76],[43,76],[43,78],[40,78]]),
+    building("rgba(163,115,71,.96)", [[55,32],[58,32],[58,34],[55,34]]), building("rgba(202,147,80,.96)", [[61,33],[64,33],[64,35],[61,35]]),
+    building("rgba(147,99,68,.96)", [[56,46],[58,46],[58,48],[56,48]]), building("rgba(206,140,80,.96)", [[60,49],[63,49],[63,51],[60,51]]),
+    building("rgba(191,111,77,.96)", [[51,59],[53,59],[53,61],[51,61]]), building("rgba(154,91,72,.96)", [[51,63],[53,63],[53,65],[51,65]]),
+    building("rgba(207,142,87,.96)", [[51,66],[53,66],[53,68],[51,68]]), building("rgba(171,106,82,.96)", [[59,58],[61,58],[61,60],[59,60]]),
+    building("rgba(210,151,94,.96)", [[60,61],[62,61],[62,63],[60,63]]), building("rgba(153,94,77,.96)", [[60,64],[62,64],[62,66],[60,66]])
+  ] };
   geo.evidenceCampFields = { type:"FeatureCollection", features:[
     polygon("Valley Camping", "rgba(75,139,84,.92)", [[58,16],[70,15],[74,22],[69,28],[60,27],[55,22]]),
     polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[71,56],[81,55],[83,66],[79,74],[72,73],[69,65]])
@@ -7540,14 +7564,20 @@ function buildEvidenceOnlyMapGeoJSON(){
     [73,58],[77,58],[80,60],[72,62],[76,63],[81,64],[73,66],[78,68],[80,71],[74,70]
   ].map(([x,y])=>treeDot(x,y,1)) };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
-    route([[39,46],[42,44],[45,44],[47,47]], { kind:"street" }), // Botanica loop
+    route([[37,48],[39,46],[42,44],[45,44],[47,47],[45,50],[40,50],[37,48]], { kind:"street" }), // Botanica loop
+    route([[31,60],[35,59],[39,62],[41,66]], { kind:"street" }), // Metropolis -> Area 404 edge
     route([[35,68],[35,72],[41,73],[42,76]], { kind:"street" }), // Area 404 venue column
+    route([[32,70],[36,71],[40,73],[42,76]], { kind:"street" }), // Area 404 inner branch
+    route([[54,35],[58,36],[62,35],[66,36]], { kind:"street" }), // Copperwood courtyard
+    route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
     route([[51,61],[51,64],[52,66],[51,68]], { kind:"street" }), // Oldtown west column
-    route([[60,57],[62,61],[62,64]], { kind:"street" }),         // Oldtown east column
+    route([[60,57],[62,61],[62,64],[60,66]], { kind:"street" }), // Oldtown east column
     route([[59,20],[64,22],[69,25]], { kind:"camp" }),           // Valley Camping lanes
     route([[74,59],[78,62],[81,66],[79,71]], { kind:"camp" }),   // Hilltop camping route
     route([[71,58],[76,60],[80,63]], { kind:"camp" }),
-    route([[72,64],[76,66],[80,69]], { kind:"camp" })
+    route([[72,64],[76,66],[80,69]], { kind:"camp" }),
+    route([[73,55],[77,58],[81,61]], { kind:"camp" }),
+    route([[71,68],[75,70],[80,73]], { kind:"camp" })
   ] };
   // Recognisable, evidence-backed landmarks and stage forms. These are
   // purposefully few: each is visible in the official close-up material.
@@ -9525,6 +9555,8 @@ function installEvidenceSceneLayers(map, geo){
   map.addLayer({ id:"evidence-territories-shadow", type:"fill", source:"evidence-territories", paint:{ "fill-color":"rgba(11,22,15,.4)", "fill-translate":[2,3] } });
   map.addLayer({ id:"evidence-territories-fill", type:"fill", source:"evidence-territories", paint:{ "fill-color":["get","fill"], "fill-opacity":.94 } });
   map.addLayer({ id:"evidence-territories-outline", type:"line", source:"evidence-territories", paint:{ "line-color":"rgba(37,91,50,.72)", "line-width":1.35 } });
+  source("evidence-district-contours", geo.evidenceDistrictContours);
+  map.addLayer({ id:"evidence-district-contours", type:"line", source:"evidence-district-contours", minzoom:14.7, paint:{ "line-color":["get","color"], "line-width":1.55, "line-opacity":.88 } });
 
   source("evidence-forest-dots", geo.evidenceForestDots);
   map.addLayer({ id:"evidence-forest-dots", type:"circle", source:"evidence-forest-dots", paint:{ "circle-radius":["*",["get","size"],2.1], "circle-color":"rgba(133,187,118,.88)", "circle-stroke-width":.4, "circle-stroke-color":"rgba(27,57,35,.7)" } });
@@ -9540,6 +9572,10 @@ function installEvidenceSceneLayers(map, geo){
   source("evidence-detail-paths", geo.evidenceDetailPaths);
   map.addLayer({ id:"evidence-detail-paths-casing", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":"rgba(44,49,34,.42)", "line-width":3.2 } });
   map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":["match",["get","kind"],"camp","rgba(218,231,173,.92)","rgba(252,241,202,.94)"], "line-width":["match",["get","kind"],"camp",1.05,1.45], "line-dasharray":[1.5,.8] } });
+  source("evidence-compound-blocks", geo.evidenceCompoundBlocks);
+  map.addLayer({ id:"evidence-compound-blocks-shadow", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":"rgba(11,17,12,.35)", "fill-translate":[1,1.2] } });
+  map.addLayer({ id:"evidence-compound-blocks", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-compound-blocks-outline", type:"line", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "line-color":"rgba(65,46,29,.76)", "line-width":.75 } });
 
   source("evidence-stage-courts", geo.evidenceStageCourts);
   map.addLayer({ id:"evidence-stage-courts-shadow", type:"fill", source:"evidence-stage-courts", paint:{ "fill-color":"rgba(22,26,18,.4)", "fill-translate":[1,1.5] } });
@@ -9575,7 +9611,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v9-landmark-forms";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v10-connected-clusters";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
