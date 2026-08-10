@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v444";
-const APP_BUILD_TIME = "2026-08-10T23:13:43Z";
+const APP_CACHE_VERSION = "v445";
+const APP_BUILD_TIME = "2026-08-10T23:18:30Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7439,7 +7439,7 @@ function evidenceRebuildLabels(){
   // Fresh visual anchors traced from IMG_3721–IMG_3734. These intentionally
   // do not reuse the quarantined map-system or app coordinate collections.
   return [
-    ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
+    ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
     ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 86, 27, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
     ["HILLTOP", 74, 68, "evidence-gold"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"]
@@ -7450,8 +7450,8 @@ function evidenceRebuildDetailLabels(){
   // Named labels visible in IMG_3721–IMG_3734. These are intentionally a
   // second, close-view tier so the entry view stays legible.
   return [
-    ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 22, 42, "stage", "primary"],
-    ["TANGLED ROOTS", 54, 31, "stage"], ["TRIBE OF FROG", 46, 75, "stage"],
+    ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 22, 34, "stage", "primary"],
+    ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 46, 75, "stage"],
     ["SPECTRUM 360", 39, 67, "stage", "primary"], ["HANGAR 161", 35, 69, "venue"],
     ["DEVIANT LOUNGE", 35, 72, "venue"], ["BBXL", 41, 73, "venue"],
     ["ACID LEAK", 42, 76, "stage"], ["HYDRO XL", 26, 72, "stage", "primary"],
@@ -7518,16 +7518,16 @@ function buildEvidenceOnlyMapGeoJSON(){
   // source-supported named court or a readable route, never texture filler.
   const treeDot = (x,y,size, properties={})=>({ type:"Feature", properties:{ size, ...properties }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } });
   geo.evidenceForestDots = { type:"FeatureCollection", features:[
-    [18,35,1.2],[23,39,.9],[28,32,1.1],[18,49,.8],[23,52,1.15],[17,62,1],[21,67,.9],[18,75,1.25],[23,80,.85],
-    [31,27,1],[38,29,.85],[45,30,1.15],[42,34,.8],[17,86,1],[27,84,.9],[35,86,1.1],[40,89,.85],
+    [18,31,1.2],[23,30,.9],[28,33,1.1],[18,49,.8],[23,52,1.15],[17,62,1],[21,67,.9],[18,75,1.25],[23,80,.85],
+    [51,20,1],[56,19,.85],[58,23,1.15],[42,34,.8],[17,86,1],[27,84,.9],[35,86,1.1],[40,89,.85],
     [68,25,1.1],[75,27,.9],[82,22,1],[86,25,.9],[90,28,1.1],[84,29,1],[87,52,1],[90,61,.85],[89,72,1.15],[87,83,.85],[65,94,1],[76,95,1.1]
   ].map(([x,y,size])=>treeDot(x,y,size)) };
   // Close-view areas remain abstract and unbranded: they describe the
   // observed footprint and circulation, never a guessed business location.
   geo.evidenceStageCourts = { type:"FeatureCollection", features:[
     polygon("NEXUS court", "rgba(132,210,151,.98)", [[39,42],[44,40],[47,43],[45,47],[40,47]]),
-    polygon("Hidden Woods court", "rgba(72,121,82,.98)", [[19,39],[24,38],[27,42],[24,46],[19,45]], { outline:"rgba(232,157,61,.96)" }),
-    polygon("Tangled Roots court", "rgba(124,98,45,.98)", [[51,29],[56,28],[58,32],[54,34],[50,32]], { outline:"rgba(205,76,58,.96)" }),
+    polygon("Hidden Woods court", "rgba(72,121,82,.98)", [[19,31],[24,30],[27,34],[24,38],[19,37]], { outline:"rgba(232,157,61,.96)" }),
+    polygon("Tangled Roots court", "rgba(124,98,45,.98)", [[51,20],[56,19],[58,23],[54,26],[50,24]], { outline:"rgba(205,76,58,.96)" }),
     polygon("Grand Central court", "rgba(243,214,165,.98)", [[56,45],[61,44],[63,48],[60,51],[55,49]]),
     polygon("Oldtown court", "rgba(220,170,133,.98)", [[52,58],[58,57],[61,61],[58,65],[53,63]]),
     polygon("Tribe of Frog court", "rgba(173,108,184,.98)", [[43,72],[48,71],[50,75],[47,78],[42,76]]),
@@ -7537,6 +7537,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   // close-ups. These are limited to pictured districts and their documented
   // venue chains; they are not generic building scatter.
   geo.evidenceDistrictContours = { type:"FeatureCollection", features:[
+    polygon("Letsbe Avenue approach", "transparent", [[40,30],[45,30],[47,35],[45,40],[40,39],[38,35]], { color:"rgba(245,208,98,.94)" }),
     polygon("Botanica loop", "transparent", [[35,43],[39,39],[46,39],[50,43],[48,49],[44,52],[37,51],[32,47]], { color:"rgba(246,232,180,.96)" }),
     polygon("Metropolis outline", "transparent", [[27,58],[31,54],[38,54],[44,59],[41,66],[32,67],[25,62]], { color:"rgba(91,223,222,.94)" }),
     polygon("Area 404 outline", "transparent", [[28,68],[40,66],[46,71],[42,78],[30,79],[24,74]], { color:"rgba(220,238,74,.96)" }),
@@ -7547,6 +7548,8 @@ function buildEvidenceOnlyMapGeoJSON(){
   ] };
   geo.evidenceCompoundBlocks = { type:"FeatureCollection", features:[
     building("rgba(173,119,67,.96)", [[37,42],[40,42],[40,44],[37,44]]), building("rgba(211,159,86,.96)", [[43,41],[46,41],[46,43],[43,43]]),
+    building("rgba(169,122,77,.96)", [[40,31],[43,31],[43,33],[40,33]]), building("rgba(206,151,90,.96)", [[44,34],[46,34],[46,36],[44,36]]),
+    building("rgba(154,107,72,.96)", [[39,35],[41,35],[41,37],[39,37]]),
     building("rgba(181,106,77,.96)", [[39,47],[42,47],[42,49],[39,49]]), building("rgba(217,179,107,.96)", [[44,48],[47,48],[47,50],[44,50]]),
     building("rgba(142,99,63,.96)", [[34,45],[36,45],[36,48],[34,48]]),
     building("rgba(131,91,79,.96)", [[32,68],[35,68],[35,70],[32,70]]), building("rgba(203,122,70,.96)", [[36,71],[39,71],[39,73],[36,73]]),
@@ -7571,11 +7574,11 @@ function buildEvidenceOnlyMapGeoJSON(){
   // the documented fields and field lanes never cross into town or forest.
   const pitch = (x,y,fill)=> polygon("camp pitch", fill, [[x,y-1],[x+1,y],[x,y+1],[x-1,y]]);
   geo.evidenceCampPitches = { type:"FeatureCollection", features:[
-    [73,57],[77,58],[80,59],[74,61],[78,62],[81,64],[72,65],[76,66],[80,68],[73,69],[77,71],[81,72]
+    [[73,57],[77,58],[80,59],[74,61],[78,62],[81,64],[72,65],[76,66],[80,68],[73,69],[77,71],[81,72]]
       .map(([x,y])=> pitch(x,y,"rgba(248,241,203,.92)")),
-    [85,84],[88,84],[90,86],[86,87],[89,88],[92,89],[85,90],[88,92],[91,93]
+    [[85,84],[88,84],[90,86],[86,87],[89,88],[92,89],[85,90],[88,92],[91,93]]
       .map(([x,y], index)=> pitch(x,y, index % 3 === 0 ? "rgba(236,143,116,.9)" : index % 3 === 1 ? "rgba(132,176,222,.9)" : "rgba(248,212,111,.9)")),
-    [89,32],[92,32],[94,34],[88,35],[91,36],[95,37],[89,37]
+    [[89,32],[92,32],[94,34],[88,35],[91,36],[95,37],[89,37]]
       .map(([x,y], index)=> pitch(x,y, index % 3 === 0 ? "rgba(237,141,112,.88)" : index % 3 === 1 ? "rgba(121,172,220,.88)" : "rgba(246,207,106,.88)"))
   ].flat() };
   geo.evidenceFieldLanes = { type:"FeatureCollection", features:[
@@ -7583,6 +7586,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[75,56],[78,61],[80,66],[80,72]]), route([[71,59],[72,65],[72,72]])
   ] };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
+    route([[42,31],[40,35],[42,39],[42,44]], { kind:"street" }), // Letsbe Avenue -> Botanica
     route([[37,48],[39,46],[42,44],[45,44],[47,47],[45,50],[40,50],[37,48]], { kind:"street" }), // Botanica loop
     route([[31,60],[35,59],[39,62],[41,66]], { kind:"street" }), // Metropolis -> Area 404 edge
     route([[35,68],[35,72],[41,73],[42,76]], { kind:"street" }), // Area 404 venue column
@@ -9637,7 +9641,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v12-anara-outer-region";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v13-north-transition";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;

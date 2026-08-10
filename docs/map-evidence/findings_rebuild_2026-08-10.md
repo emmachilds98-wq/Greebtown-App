@@ -116,3 +116,8 @@ location.
   coloured camping field on Anara's edge, with only its own internal lanes and
   coloured pitch marks. The new field is not connected to or merged with
   Hilltop, Valley Camping, or the Lion's Den camp field.
+- North-transition correction: Hidden Woods is now separated north-west of
+  Botanica/Letsbe across open ground, and the Tangled Roots/Woods court is
+  immediately north of Copperwood. Letsbe Avenue is its own narrow, labelled
+  approach into the Botanica loop. Its three grouped blocks and single route
+  are review-draft circulation/massing only, not asserted stall footprints.
