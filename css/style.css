@@ -422,7 +422,7 @@
   #map.map-labels-mid .map-label.landmark,
   #map.map-labels-mid .map-label.gate,
   #map.map-labels-mid .map-label.small-venue-label,
-  #map.map-labels-mid .map-label.evidence-detail,
+  #map.map-labels-mid .map-label.evidence-detail:not(.evidence-primary),
   #map.map-labels-mid .map-label.sssi,
   #map.map-labels-mid .map-label.road{display:none;}
   #map.map-labels-mid .marker.poi-secondary{display:none;}
@@ -459,6 +459,7 @@
   .map-label.evidence-detail::before{width:2px; background:#e5bc58;}
   .map-label.evidence-detail.evidence-stage{color:#fff0a9;}
   .map-label.evidence-detail.evidence-stage{background:rgba(49,45,29,.92); border-color:rgba(255,213,113,.82); box-shadow:1px 1px 0 rgba(8,17,10,.82),0 0 8px rgba(249,181,67,.18);}
+  .map-label.evidence-detail.evidence-primary{font-size:7.5px; letter-spacing:.1em; box-shadow:1px 1px 0 rgba(8,17,10,.82),0 0 10px rgba(249,181,67,.28);}
   .map-label.evidence-detail.evidence-venue{color:#f0e2bd;}
   .map-label.evidence-detail.evidence-camp{color:#d8efbd; border-color:rgba(163,214,143,.78);}
   .map-label.evidence-detail.evidence-utility{font-size:6px; color:#d7f5ff; border-color:rgba(118,203,219,.8);}
