@@ -16,7 +16,14 @@ const permittedCampPairs = new Set([
   // appear together moving further east/south-east from Anara, along the
   // perimeter road" — Campervan Field was moved next to East Camping to
   // match that grouping (see its own notes in camp-zones.json).
-  "camp-campervan|camp-east"
+  "camp-campervan|camp-east",
+  // IMG_3670 full-site overview (10 Aug 2026): the top-centre camping
+  // cluster (Meadow Accessible / Meadow Living / Camplight / Downtown /
+  // Orchid) sits together by West Gate; Valley Camping and Tangerine Fields
+  // are adjacent on the east edge; East Camping and Quiet Camping share the
+  // south-east corner by East Gate. All re-derived from that overview.
+  "camp-camplight|camp-meadow-accessible", "camp-camplight|camp-meadow-living",
+  "camp-tangerine|camp-valley", "camp-east|camp-quiet"
 ]);
 const pairId = (a,b) => [a.id,b.id].sort().join("|");
 const issues = [];

@@ -3267,6 +3267,44 @@ window.GREEBTOWN_CAMP_ZONES = {
         "Anara Forest"
       ],
       "notes": "Reviewed Hilltop field. User supplied a clean, high-resolution official-app close-up of exactly this area (Grand Central/Oldtown/Quantum/Hilltop/Lion's Den) this session — measuring it directly gives a height:width ratio of roughly 1.4:1, not the ~1.8:1 elongated corridor an earlier pass drew. South end pulled up from y~62 to y~53 to match (see the matching change to scripts/audit-rendered-layout-alignment.mjs's threshold); the field's real south tip sits north of Quantum's own position, not reaching down to it — the earlier 'must reach the Quantum junction' assumption was a looser inference from indirect video-frame evidence that this clearer reference now supersedes. North end unchanged from the previous pass (already matched to Grand Central's own latitude)."
+    },
+    {
+      "id": "sunset-field",
+      "name": "Sunset Field",
+      "kind": "ground-use",
+      "surface": "hilltop-yellow",
+      "evidence": "official-overview",
+      "points": [
+        [
+          2,
+          58
+        ],
+        [
+          9,
+          57
+        ],
+        [
+          13,
+          61
+        ],
+        [
+          12,
+          68
+        ],
+        [
+          7,
+          71
+        ],
+        [
+          2,
+          68
+        ],
+        [
+          1,
+          63
+        ]
+      ],
+      "notes": "Far-left yellow field (labelled SUNSET) on the west edge above Petersfield Rd, distinct from the central Hilltop field; from IMG_3670."
     }
   ],
   "zones": [
@@ -3274,8 +3312,8 @@ window.GREEBTOWN_CAMP_ZONES = {
       "id": "camp-west",
       "name": "West Camping",
       "position": {
-        "x": 14,
-        "y": 7
+        "x": 69,
+        "y": 16
       },
       "footprint": {
         "aspect": 1.55,
@@ -3284,14 +3322,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "North-west field beside West Gate; broad, faceted field with diagonal internal divisions."
+      "notes": "North-west field beside West Gate; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-downtown",
       "name": "Downtown Camping",
       "position": {
-        "x": 7,
-        "y": 43
+        "x": 38,
+        "y": 25
       },
       "footprint": {
         "aspect": 1.35,
@@ -3300,14 +3338,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "West-side camping in the reviewed gap between Meadow fields and the Downtown cluster, separate from Camp Orchid."
+      "notes": "West-side camping in the reviewed gap between Meadow fields and the Downtown cluster, separate from Camp Orchid.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-meadow-accessible",
       "name": "Meadow Camping (Accessible)",
       "position": {
-        "x": 7,
-        "y": 58
+        "x": 28,
+        "y": 16
       },
       "footprint": {
         "aspect": 1.45,
@@ -3316,14 +3354,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "Accessible meadow field."
+      "notes": "Accessible meadow field.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-meadow-living",
       "name": "Meadow Living",
       "position": {
-        "x": 10,
-        "y": 58
+        "x": 31,
+        "y": 18
       },
       "footprint": {
         "aspect": 1.35,
@@ -3332,14 +3370,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "Adjacent field, deliberately distinct from accessible camping."
+      "notes": "Adjacent field, deliberately distinct from accessible camping.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-valley",
       "name": "Valley Camping",
       "position": {
-        "x": 48,
-        "y": 4
+        "x": 89,
+        "y": 44
       },
       "footprint": {
         "aspect": 1.7,
@@ -3348,14 +3386,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "Northern valley field, wide and diagonally divided."
+      "notes": "Northern valley field, wide and diagonally divided.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-tangerine",
       "name": "Tangerine Fields",
       "position": {
-        "x": 70,
-        "y": 6
+        "x": 95,
+        "y": 49
       },
       "footprint": {
         "aspect": 1.45,
@@ -3364,14 +3402,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "Northern field east of Valley Camping."
+      "notes": "Northern field east of Valley Camping.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-campervan",
       "name": "Campervan Field",
       "position": {
-        "x": 93,
-        "y": 41
+        "x": 28,
+        "y": 91
       },
       "footprint": {
         "aspect": 0.68,
@@ -3380,14 +3418,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "East-side vertical vehicle field. Moved south from (86,14) — that position sat north of Anara Forest, contradicting findings_screenshots.md's own note that East Camping/East Gate/Campervan Field appear together 'moving further east/south-east from Anara... along the perimeter road'. Repositioned near East Gate (site-layout.json parking-east-gate, 97,38) and East Camping (91,48), matching that progression."
+      "notes": "East-side vertical vehicle field. Moved south from (86,14) — that position sat north of Anara Forest, contradicting findings_screenshots.md's own note that East Camping/East Gate/Campervan Field appear together 'moving further east/south-east from Anara... along the perimeter road'. Repositioned near East Gate (site-layout.json parking-east-gate, 97,38) and East Camping (91,48), matching that progression.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-temple-valley",
       "name": "Temple Valley Camping",
       "position": {
-        "x": 95,
-        "y": 18
+        "x": 82,
+        "y": 73
       },
       "footprint": {
         "aspect": 0.58,
@@ -3396,14 +3434,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "Long east-side camping field near East Gate."
+      "notes": "Long east-side camping field near East Gate.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-east",
       "name": "East Camping",
       "position": {
-        "x": 91,
-        "y": 48
+        "x": 88,
+        "y": 86
       },
       "footprint": {
         "aspect": 0.72,
@@ -3412,14 +3450,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "East-side field south of Temple Valley."
+      "notes": "East-side field south of Temple Valley.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-quiet",
       "name": "Quiet Camping",
       "position": {
-        "x": 95,
-        "y": 64
+        "x": 91,
+        "y": 79
       },
       "footprint": {
         "aspect": 0.78,
@@ -3428,14 +3466,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "South-east quieter field."
+      "notes": "South-east quieter field.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-orchid-downtown",
       "name": "Camp Orchid Downtown",
       "position": {
-        "x": 10,
-        "y": 46
+        "x": 42,
+        "y": 24
       },
       "footprint": {
         "aspect": 1.25,
@@ -3444,14 +3482,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-premium",
       "evidence": "official-overview",
-      "notes": "Premium public-transport camp; distinct pink field on the west side of the reviewed Downtown cluster."
+      "notes": "Premium public-transport camp; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-skylark-hilltop",
       "name": "Camp Skylark Hilltop",
       "position": {
-        "x": 75,
-        "y": 22
+        "x": 52,
+        "y": 60
       },
       "footprint": {
         "aspect": 0.72,
@@ -3460,14 +3498,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-premium",
       "evidence": "official-overview",
-      "notes": "Premium Hilltop camp."
+      "notes": "Premium Hilltop camp.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-skylark-sunset",
       "name": "Camp Skylark Sunset",
       "position": {
-        "x": 74,
-        "y": 72
+        "x": 9,
+        "y": 62
       },
       "footprint": {
         "aspect": 1.28,
@@ -3476,14 +3514,14 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-premium",
       "evidence": "official-overview",
-      "notes": "Premium south-side camp near Sunset Hill."
+      "notes": "Premium south-side camp near Sunset Hill.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     },
     {
       "id": "camp-camplight",
       "name": "Camplight",
       "position": {
-        "x": 5,
-        "y": 45
+        "x": 34,
+        "y": 20
       },
       "footprint": {
         "aspect": 1.15,
@@ -3492,7 +3530,7 @@ window.GREEBTOWN_CAMP_ZONES = {
       },
       "surface": "camp-green",
       "evidence": "official-overview",
-      "notes": "Separate labelled field next to Downtown Camping and Orchid in the reviewed west-side cluster."
+      "notes": "Separate labelled field next to Downtown Camping and Orchid in the reviewed west-side cluster.; position re-derived from the IMG_3670 full-site official overview (10 Aug 2026)."
     }
   ]
 };
