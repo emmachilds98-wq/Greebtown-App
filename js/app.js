@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v447";
-const APP_BUILD_TIME = "2026-08-10T23:26:37Z";
+const APP_CACHE_VERSION = "v449";
+const APP_BUILD_TIME = "2026-08-10T23:35:14Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7440,7 +7440,7 @@ function evidenceRebuildLabels(){
   // do not reuse the quarantined map-system or app coordinate collections.
   return [
     ["DOWNTOWN CAMPING", 17, 48, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
-    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["ANARA FOREST", 86, 27, "evidence-anara"],
+    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 86, 27, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
     ["HILLTOP", 74, 68, "evidence-gold"], ["CAMP SKYLARK", 78, 72, "evidence-campground"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"]
   ];
@@ -7453,8 +7453,12 @@ function evidenceRebuildDetailLabels(){
     ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 22, 34, "stage", "primary"],
     ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 46, 75, "stage"],
     ["SPECTRUM 360", 39, 67, "stage", "primary"], ["HANGAR 161", 35, 69, "venue"],
-    ["DEVIANT LOUNGE", 35, 72, "venue"], ["BBXL", 41, 73, "venue"],
+    ["DEVIANT LOUNGE", 35, 72, "venue"], ["GAME OVER", 39, 71, "venue"],
+    ["BBXL", 41, 73, "venue"], ["END OF THE LINE", 39, 74, "venue"],
+    ["GUARDIANS ASCENSION PROGRAMME", 37, 76, "venue"], ["REACTOR", 42, 75, "venue"],
     ["ACID LEAK", 42, 76, "stage"], ["HYDRO XL", 26, 72, "stage", "primary"],
+    ["MEMORY MART", 30, 57, "venue"], ["BETTER YOU", 31, 60, "venue"],
+    ["E NUMBERS", 32, 63, "venue"], ["GABBER KEBABBER", 35, 65, "venue"],
     ["BOTANICA ZOO", 39, 46, "venue"], ["KARMA CEUTICALS", 44, 47, "venue"],
     ["MANGO", 35, 47, "venue"], ["THE NETWORK", 45, 44, "venue"],
     ["SUB LAB", 46, 49, "venue"], ["NACHTLICKER", 47, 45, "venue"],
@@ -7471,6 +7475,8 @@ function evidenceRebuildDetailLabels(){
     ["ANCIENT FUTURES", 63, 47, "venue"], ["BOOMTOWN HALL", 58, 51, "venue"], ["DAILY RAG", 57, 53, "venue"],
     ["THE HIDE OUT HILLTOP", 68, 36, "venue"], ["FULL MOON BALLROOM", 65, 33, "venue"],
     ["SILVER SWAN TALENT AGENCY", 63, 30, "venue"], ["VELVET ROPE", 65, 38, "venue"],
+    ["REBEL GIRLS CLUB", 67, 73, "venue"], ["CIRCUS", 70, 76, "venue"], ["THE RETREAT", 72, 72, "venue"],
+    ["REEL NEWS", 78, 73, "venue"], ["THE ARC", 80, 71, "venue"], ["SHARING CIRCLES", 81, 73, "venue"], ["WELFARE", 81, 76, "venue"],
     ["VALLEY CAMPING", 66, 22, "camp"], ["MEADOW", 16, 57, "camp"], ["CAMPFLIGHT", 18, 63, "camp"],
     ["CAMP AT HILLTOP", 75, 63, "camp"], ["RECEPTION", 80, 75, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
   ];
@@ -7498,6 +7504,7 @@ function buildEvidenceOnlyMapGeoJSON(){
       polygon("Metropolis", "rgba(57,126,105,.95)", [[28,55],[39,53],[45,60],[41,67],[29,66],[24,61]]),
       polygon("Area 404", "rgba(150,123,54,.95)", [[28,67],[41,65],[46,72],[41,79],[29,78],[24,73]]),
       polygon("Copperwood Heights", "rgba(193,166,48,.97)", [[53,29],[65,27],[71,32],[68,38],[58,40],[50,36]]),
+      polygon("Thrutopia", "rgba(76,78,174,.97)", [[69,34],[82,34],[88,40],[84,47],[73,46],[68,41]]),
       polygon("Anara Forest", "rgba(43,121,79,.96)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
       polygon("Grand Central", "rgba(176,97,55,.96)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
       polygon("Oldtown", "rgba(117,58,54,.96)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
@@ -7512,8 +7519,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[35,59],[39,52],[42,44]]),                 // Metropolis -> Nexus
     route([[42,44],[47,46],[58,48]]),                 // Nexus/Botanica -> Grand Central
     route([[58,48],[58,55],[56,61]]),                 // Grand Central -> Oldtown
-    route([[58,48],[61,36],[68,33]]),                 // Grand Central -> Copperwood
-    route([[68,33],[79,34],[86,27]]),                 // Copperwood corridor -> Anara Forest
+    route([[58,48],[61,36],[75,40]]),                 // Grand Central -> Copperwood -> Thrutopia
+    route([[75,40],[84,34],[86,27]]),                 // Thrutopia / Copperwood -> Anara Forest
     route([[56,61],[56,70],[56,82]]),                 // Oldtown -> Quantum
     route([[56,61],[66,65],[74,86]]),                 // Oldtown -> Lion's Den corridor
     route([[42,44],[30,47],[26,72]]),                 // Nexus -> Metropolis / Hydro XL branch
@@ -7547,9 +7554,14 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Metropolis outline", "transparent", [[27,58],[31,54],[38,54],[44,59],[41,66],[32,67],[25,62]], { color:"rgba(91,223,222,.94)" }),
     polygon("Area 404 outline", "transparent", [[28,68],[40,66],[46,71],[42,78],[30,79],[24,74]], { color:"rgba(220,238,74,.96)" }),
     polygon("Copperwood court outline", "transparent", [[52,30],[63,28],[70,33],[67,39],[58,40],[50,36]], { color:"rgba(250,214,83,.96)" }),
+    polygon("Thrutopia boundary", "transparent", [[70,35],[81,35],[87,40],[83,46],[74,45],[69,41]], { color:"rgba(105,112,232,.96)" }),
+    polygon("Anara Forest boundary", "transparent", [[79,19],[89,20],[94,26],[92,32],[85,34],[78,29]], { color:"rgba(112,224,144,.92)" }),
     polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)" }),
     polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)" }),
-    polygon("Hilltop field outline", "transparent", [[68,51],[82,50],[85,60],[82,77],[70,78],[67,66]], { color:"rgba(231,205,84,.9)" })
+    polygon("Hilltop field outline", "transparent", [[68,51],[82,50],[85,60],[82,77],[70,78],[67,66]], { color:"rgba(231,205,84,.9)" }),
+    polygon("Quantum boundary", "transparent", [[48,77],[59,76],[63,84],[58,90],[50,89],[46,83]], { color:"rgba(214,137,234,.94)" }),
+    polygon("Lion's Den boundary", "transparent", [[67,81],[81,81],[87,86],[81,91],[69,91],[65,87]], { color:"rgba(240,166,95,.94)" }),
+    polygon("Downtown Camping boundary", "transparent", [[10,40],[20,39],[26,45],[24,53],[16,56],[9,50]], { color:"rgba(242,162,151,.92)" })
   ] };
   geo.evidenceCompoundBlocks = { type:"FeatureCollection", features:[
     building("rgba(173,119,67,.96)", [[37,42],[40,42],[40,44],[37,44]]), building("rgba(211,159,86,.96)", [[43,41],[46,41],[46,43],[43,43]]),
@@ -7596,18 +7608,24 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[75,56],[78,61],[80,66],[80,72]]), route([[71,59],[72,65],[72,72]])
   ] };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
+    route([[23,36],[29,36],[35,35],[40,35]], { kind:"street" }), // Hidden Woods -> Letsbe Avenue
     route([[42,31],[40,35],[42,39],[42,44]], { kind:"street" }), // Letsbe Avenue -> Botanica
     route([[40,32],[43,32],[45,35],[45,38],[42,40],[40,38],[40,35],[40,32]], { kind:"street" }), // Letsbe Avenue loop
     route([[37,48],[39,46],[42,44],[45,44],[47,47],[45,50],[40,50],[37,48]], { kind:"street" }), // Botanica loop
     route([[31,60],[35,59],[39,62],[41,66]], { kind:"street" }), // Metropolis -> Area 404 edge
     route([[35,68],[35,72],[41,73],[42,76]], { kind:"street" }), // Area 404 venue column
     route([[32,70],[36,71],[40,73],[42,76]], { kind:"street" }), // Area 404 inner branch
+    route([[31,60],[29,64],[27,68],[26,72]], { kind:"neon" }),  // Metropolis -> Hydro XL lit route
     route([[54,35],[58,36],[62,35],[66,36]], { kind:"street" }), // Copperwood courtyard
+    route([[70,39],[75,38],[80,39],[83,42],[79,44],[74,43],[70,39]], { kind:"street" }), // Thrutopia boundary loop
+    route([[68,36],[66,34],[65,33],[65,38]], { kind:"street" }), // Hide Out Hilltop -> Full Moon cluster
     route([[58,48],[59,52],[57,55]], { kind:"street" }),         // Grand Central -> Oldtown south exit
     route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
     route([[51,59],[51,62],[51,65],[51,68]], { kind:"street" }), // Oldtown west chain
     route([[62,56],[62,58],[62,60],[62,62],[62,65]], { kind:"street" }), // Oldtown east chain
     route([[53,61],[55,63],[57,62],[58,64],[56,66],[53,65],[53,61]], { kind:"street" }), // Oldtown inner loop
+    route([[46,75],[50,78],[53,81],[56,82]], { kind:"street" }), // Tribe of Frog -> Quantum fork
+    route([[56,82],[63,83],[68,85],[74,86]], { kind:"track" }), // Quantum -> Helix -> Lion's Den
     route([[59,20],[64,22],[69,25]], { kind:"camp" }),           // Valley Camping lanes
     route([[74,59],[78,62],[81,66],[79,71]], { kind:"camp" }),   // Hilltop camping route
     route([[71,58],[76,60],[80,63]], { kind:"camp" }),
@@ -7623,6 +7641,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Spectrum 360 container ring", "rgba(91,73,119,.96)", [[37,65],[40,64],[43,66],[44,69],[42,71],[38,71],[36,69]]),
     polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
     polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
+    polygon("Helix round court", "rgba(222,133,98,.95)", [[61,81],[64,80],[66,82],[65,85],[62,85],[60,83]]),
     polygon("Lion's Den amphitheatre", "rgba(117,78,43,.98)", [[72,85],[80,84],[83,87],[80,89],[72,89],[70,87]])
   ] };
   // The sources show Spectrum 360 enclosed by individual containers, NEXUS
@@ -7647,6 +7666,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     [55,46],[59,45],[61,48],                           // Grand Central hardstanding details
     [51,59],[51,62],[51,65],[51,68], [55,63],[57,62],[56,66], [62,56],[62,58],[62,60],[62,62],[62,65], // Oldtown chains
     [44,73],[47,74],[46,76],                           // Tribe of Frog compound
+    [61,82],[64,81],[65,84],                           // Helix forecourt
     [72,85],[75,85],[78,86],[80,88]                    // Lion's Den forecourt
   ].map(([x,y])=>treeDot(x,y,.72)) };
   // Four confirmed stage focal points get a restrained, zoom-gated glow.
@@ -7656,6 +7676,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     [42,44, "rgba(255,194,92,.34)", 1.0],  // NEXUS
     [60,47, "rgba(255,167,94,.36)", 1.35], // Grand Central
     [39,68, "rgba(213,119,218,.34)", 1.1], // Spectrum 360
+    [63,83, "rgba(255,154,104,.34)", 1.05], // Helix
     [77,87, "rgba(255,166,72,.38)", 1.45]  // The Lion's Den
   ].map(([x,y,color,scale])=>({ type:"Feature", properties:{ color, scale }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } })) };
   return geo;
@@ -9614,7 +9635,7 @@ function installEvidenceSceneLayers(map, geo){
   map.addLayer({ id:"evidence-spine", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(239,225,177,.98)", "line-width":2.2 } });
   source("evidence-detail-paths", geo.evidenceDetailPaths);
   map.addLayer({ id:"evidence-detail-paths-casing", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":"rgba(44,49,34,.42)", "line-width":3.2 } });
-  map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":["match",["get","kind"],"camp","rgba(218,231,173,.92)","rgba(252,241,202,.94)"], "line-width":["match",["get","kind"],"camp",1.05,1.45], "line-dasharray":[1.5,.8] } });
+  map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":["match",["get","kind"],"camp","rgba(218,231,173,.92)","neon","rgba(224,121,229,.94)","track","rgba(222,207,167,.94)","rgba(252,241,202,.94)"], "line-width":["match",["get","kind"],"camp",1.05,"neon",1.8,"track",1.15,1.45], "line-dasharray":[1.5,.8] } });
   source("evidence-compound-blocks", geo.evidenceCompoundBlocks);
   map.addLayer({ id:"evidence-compound-blocks-shadow", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":"rgba(11,17,12,.35)", "fill-translate":[1,1.2] } });
   map.addLayer({ id:"evidence-compound-blocks", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
@@ -9654,7 +9675,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v15-full-evidence-pass";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v17-flat-overhead-boundaries";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -9690,7 +9711,10 @@ function loadMap(){
       [Math.max(...overviewCorners.map(point=> point.lon)), Math.max(...overviewCorners.map(point=> point.lat))]
     ];
     const overviewPadding = { top: 30, right: 30, bottom: 30, left: 30 };
-    const showSiteOverview = duration => mapGL.fitBounds(SITE_OVERVIEW_BOUNDS, { padding: overviewPadding, duration });
+    const showSiteOverview = duration => {
+      mapGL.jumpTo({ bearing:0, pitch:0 });
+      mapGL.fitBounds(SITE_OVERVIEW_BOUNDS, { padding: overviewPadding, duration, bearing:0, pitch:0 });
+    };
     mapGL = new maplibregl.Map({
       container: map,
       // A fully local style — solid background colour, no tile/sprite/
@@ -9751,10 +9775,15 @@ function loadMap(){
       // The precise opening extent is fitted from site-layout on "load"
       // below. This zoom is only the brief pre-style fallback frame.
       zoom: 14.3, minZoom: 13.5, maxZoom: 19,
+      bearing: 0, pitch: 0,
+      dragRotate: false, pitchWithRotate: false,
       maxBounds: MAX_BOUNDS,
       attributionControl: false
     });
     mapGL.__greebtownRenderRevision = MAP_RENDER_REVISION;
+    mapGL.dragRotate.disable();
+    mapGL.touchZoomRotate.disableRotation();
+    if(mapGL.touchPitch) mapGL.touchPitch.disable();
     // Place the compact map utility rail away from the dense northern
     // labels. This mirrors a familiar mobile-map ergonomics pattern
     // without reproducing another app's controls or artwork.
@@ -9769,7 +9798,6 @@ function loadMap(){
     const overviewButton = document.getElementById("mapOverviewBtn");
     if(overviewButton){
       overviewButton.onclick = ()=>{
-        mapGL.rotateTo(0, { duration: 280 });
         showSiteOverview(520);
       };
     }
@@ -9777,7 +9805,7 @@ function loadMap(){
     // entire perimeter into a small phone card. The Site overview control
     // remains the intentional way back to the full festival extent.
     const entryFocus = schematicToLatLon(59, 61);
-    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.35 }));
+    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.35, bearing:0, pitch:0 }));
 
     // Label density is deliberately a three-step reveal rather than one
     // hard switch. DOM markers do not have MapLibre collision handling,

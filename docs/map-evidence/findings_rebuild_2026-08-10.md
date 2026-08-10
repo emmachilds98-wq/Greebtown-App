@@ -128,8 +128,26 @@ location.
   Hilltop. All new camp pitch marks and lanes remain inside their own field.
   Findings vidF strongly corrects Postal Posse into the Botanica/Letsbe loop,
   so it is not included in the Oldtown sequence.
-- The latest official-app review did not find a Thrutopia map label or pin.
-  Its visible evidence-rendered territory and label are therefore removed from
-  this draft instead of preserving a previously inferred location. The
-  Copperwood-to-Anara route is rendered directly, which is the only documented
-  corridor relation retained in the active map.
+- Evidence precedence correction: newer official screenshot IMG_3724.webp
+  visibly names THRUTOPIA and shows its blue bounded zone east of Copperwood,
+  before the Anara/Temple Valley edge. It overrides the older footage where a
+  typed search did not surface it. Thrutopia is restored as a separate
+  territory and the Copperwood -> Thrutopia -> Anara corridor is retained.
+- South-east detail pass: findings_vidE2 documents the Area 404 column
+  (Hangar 161, Deviant Lounge, BBXL, Acid Leak) with Game Over, End of the
+  Line, Guardians Ascension Programme, and Reactor alongside it. The same
+  evidence confirms Memory Mart, Better You, E Numbers, and Gabber Kebabber
+  in the adjacent Metropolis run. These are text-only close-view entries; no
+  unsupported facilities have been added.
+- The Quantum-to-Helix-to-Lion's-Den order is explicitly documented in
+  findings_vidE2, including Helix's orange circular form and the unpaved
+  southbound track. The active map now represents that relationship with one
+  route, a restrained Helix form, and a close-view glow. The confirmed
+  Hilltop-side names (Rebel Girls Club, Circus, The Retreat, Reel News, The
+  Arc, Sharing Circles, Welfare) are likewise close-view labels only.
+- Structural pass: IMG_3724.webp makes the Copperwood -> Thrutopia boundary
+  and its internal route visible; its containment is now a separate contour
+  and close-view loop. The remaining major terrain areas now also have their
+  own reviewed contours: Anara Forest, Quantum, the Lion's Den, Hilltop, and
+  Downtown Camping. The only new public route is the documented Hidden Woods
+  -> Letsbe connection; the map remains flat, north-up, and pitch-locked.
