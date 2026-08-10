@@ -28,7 +28,14 @@ const oldtownAnchor = references.anchors?.Oldtown?.to;
 if(!gcAnchor || !oldtownAnchor || oldtownAnchor[1] - gcAnchor[1] < 8 || Math.abs(oldtownAnchor[0] - gcAnchor[0]) > 5) errors.push("Oldtown must remain directly south of the Grand Central Hilltop sequence");
 const helixAnchor = references.anchors?.Helix?.to;
 const hilltop = read("camp-zones.json").groundUseFields?.find(field => field.id === "hilltop-field");
-if(!hilltop || Math.max(...hilltop.points.map(point => point[1])) < 62) errors.push("Hilltop must remain a long corridor reaching the Quantum junction");
+// Threshold lowered 62 -> 50: a clean, high-res official-app close-up of
+// this exact area (supplied directly this session) shows Hilltop as a
+// compact ~1.4:1 height:width shape whose real south tip sits north of
+// Quantum, not reaching down to it — the original 62 encoded a looser
+// "must reach Quantum" inference from indirect video-frame evidence that
+// this clearer reference supersedes. Kept as a floor (not removed) so a
+// future pass can't silently flatten Hilltop back into a squat blob.
+if(!hilltop || Math.max(...hilltop.points.map(point => point[1])) < 50) errors.push("Hilltop must remain a north-south corridor reaching down past Grand Central/Oldtown");
 if(!helixAnchor || helixAnchor[1] < 60 || helixAnchor[0] > 63) errors.push("Helix must remain beside the lower Hilltop / Quantum junction");
 if(!gcAnchor || !hilltop || gcAnchor[0] >= Math.min(...hilltop.points.map(point => point[0]))) errors.push("Grand Central must remain west of the Hilltop corridor");
 

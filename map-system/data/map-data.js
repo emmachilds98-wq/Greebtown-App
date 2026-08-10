@@ -3186,7 +3186,7 @@ window.GREEBTOWN_CAMP_ZONES = {
       "points": [
         [
           62,
-          29
+          28.5
         ],
         [
           68,
@@ -3194,79 +3194,79 @@ window.GREEBTOWN_CAMP_ZONES = {
         ],
         [
           71,
-          32
+          30.7
         ],
         [
           70,
-          41
+          37.4
         ],
         [
           62,
-          51
+          44.8
         ],
         [
           57,
-          62
+          53
         ],
         [
           54,
-          60
+          51.5
         ],
         [
           54,
-          52
+          45.6
         ],
         [
           57,
-          40
+          36.7
         ],
         [
           60,
-          33
+          31.5
         ]
       ],
       "detailLines": [
         [
           [
             64,
-            31
+            30
           ],
           [
             65,
-            40
+            36.7
           ],
           [
             63,
-            49
+            43.3
           ],
           [
             58,
-            58
+            50
           ]
         ],
         [
           [
             68,
-            29
+            28.5
           ],
           [
             68,
-            39
+            35.9
           ],
           [
             65,
-            47
+            41.9
           ],
           [
             60,
-            55
+            47.8
           ]
         ]
       ],
       "excludes": [
         "Anara Forest"
       ],
-      "notes": "Reviewed long Hilltop field corridor. It runs south beside the Grand Central and Oldtown sequence toward Quantum, while remaining distinct from the Anara Forest woodland stage. North end trimmed (was y:14-27ish, reaching well north of Grand Central itself, a 48-unit total span) after direct user feedback that the field was rendering way too big/long on the top side; findings_screenshots.md's own note is the field's \"north tip near Grand Central\" (y~35), not far above it. South end kept at y~62 (audit-enforced — scripts/audit-rendered-layout-alignment.mjs requires the corridor to still reach the Quantum junction), since the \"too big\" complaint was specifically about the top side, not the south taper toward Quantum."
+      "notes": "Reviewed Hilltop field. User supplied a clean, high-resolution official-app close-up of exactly this area (Grand Central/Oldtown/Quantum/Hilltop/Lion's Den) this session — measuring it directly gives a height:width ratio of roughly 1.4:1, not the ~1.8:1 elongated corridor an earlier pass drew. South end pulled up from y~62 to y~53 to match (see the matching change to scripts/audit-rendered-layout-alignment.mjs's threshold); the field's real south tip sits north of Quantum's own position, not reaching down to it — the earlier 'must reach the Quantum junction' assumption was a looser inference from indirect video-frame evidence that this clearer reference now supersedes. North end unchanged from the previous pass (already matched to Grand Central's own latitude)."
     }
   ],
   "zones": [
@@ -4326,8 +4326,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         55
       ],
       "to": [
-        75,
-        61
+        71,
+        59
       ]
     },
     "Helix": {
