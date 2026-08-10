@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v452";
-const APP_BUILD_TIME = "2026-08-10T23:43:18Z";
+const APP_CACHE_VERSION = "v453";
+const APP_BUILD_TIME = "2026-08-10T23:55:08Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9361,18 +9361,15 @@ function buildMapGeoJSON(){
   };
 }
 
-// Layer visibility persists across loadMap() re-renders (tab switches, syncs,
-// adding a hidden venue, etc. all refresh the map's markers). Off by
-// default for the busier layers so the map first reads as a composed site,
-// not a catalogue of pins. Secondary venues, named stalls and amenities stay
-// one deliberate tap away (or are discoverable through search), while the
-// primary districts, headline stages and ground shapes establish orientation.
-// This is an intentionally blank evidence-only baseline. Every legacy DOM
-// marker group must be explicitly disabled: an omitted key defaults visible.
-// The rebuilt map creates only these two evidence-scene groups. Legacy
-// content groups are deliberately absent rather than hidden: absence keeps a
-// future visibility toggle from accidentally restoring old stage placements.
-let mapLayerVisible = { refresh: true, "refresh-detail": true };
+// Layer visibility persists across loadMap() re-renders. These are the only
+// label families the evidence scene creates; retired pin categories are not
+// represented here, so a control cannot bring stale map data back to life.
+let mapLayerVisible = {
+  territory: true,
+  "evidence-stage": true,
+  "evidence-venue": true,
+  "evidence-camp": true
+};
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -9542,6 +9539,18 @@ function mapMarkerHtml(dotClass, labelClass, name, icon){
 // (e.g. "main", "minor", "poi") — MapLibre has no Leaflet-style
 // LayerGroup object, so group membership/visibility is tracked here
 // instead, by hiding/showing each marker's own DOM element.
+function setMapLayerVisibility(groupName, visible){
+  mapLayerVisible[groupName] = Boolean(visible);
+  (mapMarkerGroups[groupName] || []).forEach(marker=>{
+    const el = marker.getElement();
+    if(el) el.style.display = mapLayerVisible[groupName] ? "" : "none";
+  });
+  document.querySelectorAll(`#mapLayerToggles [data-layer="${groupName}"]`).forEach(chip=>{
+    chip.classList.toggle("active", mapLayerVisible[groupName]);
+    chip.setAttribute("aria-pressed", String(mapLayerVisible[groupName]));
+  });
+  queueMapLabelCollisionPass();
+}
 function addMapMarker(groupName, lat, lon, html, opts){
   opts = opts || {};
   const el = document.createElement("div");
@@ -9558,7 +9567,7 @@ function addMapMarker(groupName, lat, lon, html, opts){
   if(mapLayerVisible[groupName] === false) el.style.display = "none";
   if(!mapMarkerGroups[groupName]) mapMarkerGroups[groupName] = [];
   mapMarkerGroups[groupName].push(marker);
-  if(opts.name) mapMarkersByName[opts.name] = { marker, onClick: opts.onClick || null };
+  if(opts.name) mapMarkersByName[opts.name] = { marker, groupName, onClick: opts.onClick || null };
   queueMapLabelCollisionPass();
   return marker;
 }
@@ -9799,6 +9808,7 @@ function loadMap(){
     if(overviewButton){
       overviewButton.onclick = ()=>{
         showSiteOverview(520);
+        setMapExploreStatus("Showing the reviewed site overview.");
       };
     }
     // Open on the central, walkable part of the site instead of fitting the
@@ -10422,13 +10432,9 @@ function loadMap(){
     document.querySelectorAll("#mapLayerToggles .chip").forEach(chip=>{
       const layer = chip.dataset.layer;
       chip.classList.toggle("active", !!mapLayerVisible[layer]);
+      chip.setAttribute("aria-pressed", String(!!mapLayerVisible[layer]));
       chip.onclick = ()=>{
-        mapLayerVisible[layer] = !mapLayerVisible[layer];
-        chip.classList.toggle("active", mapLayerVisible[layer]);
-        (mapMarkerGroups[layer] || []).forEach(m=>{
-          const el = m.getElement();
-          if(el) el.style.display = mapLayerVisible[layer] ? "" : "none";
-        });
+        setMapLayerVisibility(layer, !mapLayerVisible[layer]);
       };
     });
   }
@@ -10443,14 +10449,14 @@ function loadMap(){
   // but must never be iterated while building the map.
   evidenceRebuildLabels().forEach(([name, x, y, styleClass])=>{
     const coord = schematicToLatLon(x, y);
-    addMapMarker("refresh", coord.lat, coord.lon,
+    addMapMarker("territory", coord.lat, coord.lon,
       `<div class="map-label manual-territory evidence-territory ${styleClass}">${name}</div>`,
       { name, title:name }
     );
   });
   evidenceRebuildDetailLabels().forEach(([name, x, y, kind, prominence])=>{
     const coord = schematicToLatLon(x, y);
-    addMapMarker("refresh-detail", coord.lat, coord.lon,
+    addMapMarker(`evidence-${kind}`, coord.lat, coord.lon,
       `<div class="map-label evidence-detail evidence-${kind}${prominence ? ` evidence-${prominence}` : ""}">${name}</div>`,
       { name, title:name }
     );
@@ -11163,6 +11169,10 @@ document.querySelectorAll("#mapQuickActions button").forEach(btn=>{
 // row into view, never touches the MapLibre canvas). Exact match wins;
 // otherwise first case-insensitive substring match, so "spectrum" finds
 // "Spectrum 360" without needing the exact name.
+function setMapExploreStatus(message){
+  const status = document.getElementById("mapExploreStatus");
+  if(status) status.textContent = message;
+}
 function mapSearchGo(){
   const input = document.getElementById("mapSearchInput");
   if(!input) return;
@@ -11173,18 +11183,22 @@ function mapSearchGo(){
   const match = names.find(n=> n.toLowerCase() === lower) || names.find(n=> n.toLowerCase().includes(lower));
   if(!match){
     if(mapInfo) mapInfo.innerHTML = `<div class="card"><p class="empty-note">No stage, venue or district matches "${escapeHtml(term)}" — check the spelling or try a shorter word.</p></div>`;
+    setMapExploreStatus(`No confirmed map result for ${term}. Try a shorter name.`);
     return;
   }
   const entry = mapMarkersByName[match];
   if(entry && mapGL){
-    mapGL.jumpTo({ center: entry.marker.getLngLat(), zoom: Math.max(mapGL.getZoom(), 17) });
+    if(entry.groupName && mapLayerVisible[entry.groupName] === false) setMapLayerVisibility(entry.groupName, true);
+    mapGL.easeTo({ center: entry.marker.getLngLat(), zoom: Math.max(mapGL.getZoom(), 17), duration:420 });
     if(entry.onClick) entry.onClick();
     const el = entry.marker.getElement();
-    const dot = el && el.querySelector(".marker");
-    if(dot){
-      dot.classList.add("jump-highlight");
-      setTimeout(()=> dot.classList.remove("jump-highlight"), 2400);
+    const target = el && el.querySelector(".marker, .map-label");
+    if(target){
+      target.classList.add("jump-highlight");
+      setTimeout(()=> target.classList.remove("jump-highlight"), 2400);
     }
+    if(!entry.onClick) showMapInfoCard(`<div class="card"><span class="tag">evidence map</span><h3>${escapeHtml(match)}</h3><p>Centred on the reviewed map label. Use the Site overview control to return to the whole festival plan.</p></div>`);
+    setMapExploreStatus(`Showing ${match}.`);
     document.getElementById("map").scrollIntoView({ behavior:"smooth", block:"center" });
   }
 }

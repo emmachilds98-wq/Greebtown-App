@@ -162,3 +162,8 @@ location.
   reviewed zoom, while Tribe of Frog, Helix, Full Moon Ballroom, and Camp at
   Hilltop remain readable wayfinding anchors one step earlier. This changes
   presentation only; it does not introduce any new map location or route.
+- Evidence-map flow pass: no geometry was added or moved. The visible layer
+  controls and map key now describe only the active evidence label families
+  (territories, stages, venue names, and camping), and a search result restores
+  its own label family before centring it. This removes a stale-control path
+  without treating the old collections as map evidence.

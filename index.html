@@ -438,23 +438,21 @@ Meet at the clock tower if separated"></textarea>
       <button data-jump="jumpSiteInfo">🕐 Gate &amp; hours</button>
       <button data-jump="jumpFoodBars">🍺 Food &amp; bars</button>
     </div>
-    <p class="map-control-heading">Show on map</p>
+    <p class="map-control-heading">Map layers</p>
     <div class="stagelist" id="mapLayerToggles" style="margin-bottom:8px;">
-      <span class="chip" data-layer="minor">Other stages</span>
-      <span class="chip" data-layer="detail">Venue labels</span>
-      <span class="chip" data-layer="secret">Hidden venues &amp; things to find</span>
-      <span class="chip" data-layer="camp">Camping labels</span>
-      <span class="chip" data-layer="landmark">Landmarks</span>
-      <span class="chip" data-layer="poi">Amenities</span>
-      <span class="chip active" data-layer="friend">Friends</span>
+      <button class="chip active" type="button" data-layer="territory">Districts</button>
+      <button class="chip active" type="button" data-layer="evidence-stage">Stages</button>
+      <button class="chip active" type="button" data-layer="evidence-venue">Venue names</button>
+      <button class="chip active" type="button" data-layer="evidence-camp">Camping</button>
     </div>
     <div class="map-quick-actions" aria-label="Map controls">
       <button class="ghost" id="mapOverviewBtn" type="button">⌖ Site overview</button>
       <span>Drag to explore · pinch to zoom · tap the compass to face north</span>
     </div>
+    <p class="map-explore-status" id="mapExploreStatus" aria-live="polite">Showing the reviewed evidence map. Search a confirmed name or zoom into a district.</p>
     <div id="map"></div>
 
-    <div class="legend">
+    <div class="legend legacy-map-legend" aria-hidden="true">
       <span><span class="dot" style="border-radius:3px; background:rgba(242,140,60,.32); border:1.5px solid rgba(242,140,60,.95);"></span>District area (colour per district)</span>
       <span><span class="dot" style="border-radius:3px; background:rgba(84,202,123,.72); border:1.5px solid rgba(40,125,69,.75);"></span>Camping field</span>
       <span><span class="dot" style="border-radius:3px; background:rgba(160,160,155,.7); border:1.5px solid rgba(60,60,58,.85);"></span>Parking</span>
@@ -466,6 +464,13 @@ Meet at the clock tower if separated"></textarea>
       <span><span class="dot" style="border-radius:3px; background:rgba(45,168,242,.75);"></span>Landmark</span>
       <span><span class="dot" style="border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:rgba(196,150,255,.85);"></span>Your places</span>
       <span>🚻🍔🍺💧 Real amenity positions</span>
+    </div>
+    <div class="legend" aria-label="Evidence map key">
+      <span><span class="dot" style="border-radius:3px; background:rgba(177,120,76,.9); border:1.5px solid rgba(255,224,184,.9);"></span>District territory</span>
+      <span><span class="dot" style="border-radius:3px; background:rgba(204,122,125,.84); border:1.5px solid rgba(255,214,201,.8);"></span>Camping field</span>
+      <span><span class="line-swatch" style="border-color:rgba(252,241,202,.94);"></span>Documented route</span>
+      <span><span class="dot" style="background:rgba(42,83,52,.9);"></span>Woodland</span>
+      <span><span class="dot teal"></span>Confirmed stage or venue</span>
     </div>
     <div id="mapInfo"></div>
     </div>
@@ -1146,7 +1151,7 @@ Talk to an actor in character
 <!-- Canonical authoring data, generated from map-system/data/map-document.json. -->
 <!-- Versioned URLs prevent an older installed service worker from pairing a
      stale map-data payload with the current application script. -->
-<script src="map-system/data/map-data.js?v=v452"></script>
-<script src="js/app.js?v=v452"></script>
+<script src="map-system/data/map-data.js?v=v453"></script>
+<script src="js/app.js?v=v453"></script>
 <script src="js/pwa-register.js"></script>
 </body></html>
