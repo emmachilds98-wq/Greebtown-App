@@ -65,8 +65,8 @@
       "type": "stage",
       "name": "Grand Central",
       "position": {
-        "x": 42,
-        "y": 49
+        "x": 53,
+        "y": 51
       },
       "dimensions": {
         "width": 6,
@@ -92,7 +92,7 @@
       "name": "The Lion's Den",
       "position": {
         "x": 35,
-        "y": 67
+        "y": 72
       },
       "dimensions": {
         "width": 6,
@@ -144,7 +144,7 @@
       "name": "Anara Forest",
       "position": {
         "x": 82,
-        "y": 35
+        "y": 73
       },
       "dimensions": {
         "width": 6,
@@ -377,8 +377,8 @@
       "type": "stage",
       "name": "Foggers Mill",
       "position": {
-        "x": 53,
-        "y": 47
+        "x": 58,
+        "y": 48
       },
       "dimensions": {
         "width": 3,

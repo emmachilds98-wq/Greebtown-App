@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v426";
-const APP_BUILD_TIME = "2026-08-10T18:00:00Z";
+const APP_CACHE_VERSION = "v427";
+const APP_BUILD_TIME = "2026-08-10T18:29:47Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6009,7 +6009,7 @@ const locations = [
   // north of COPPERWOOD"; (44,36) put it south of Copperwood (37,29)
   // instead, backwards from that finding. This keeps the same distance
   // from Grand Central while putting it north of Copperwood as recorded.
-  { name:"Thrutopia", kind:"district", x:"43%", y:"24%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
+  { name:"Thrutopia", kind:"district", x:"65%", y:"57%", info:"Hilltop. New for Chapter Five — a calmer corner for talks, workshops, breathwork and saunas on hopeful futures, developed with input from author Manda Scott. Home to The Retreat's spa/sauna woodlands." },
   // Copperwood's map pin was removed entirely in an earlier session —
   // same treatment as Thrutopia above. Earlier sessions' video-review
   // notes (docs/map-evidence) repeatedly claimed a "COPPERWOOD HEIGHTS"
@@ -6041,7 +6041,7 @@ const locations = [
   // Turvy Trims) keep their own confirmed positions and stayed described
   // relative to Grand Central rather than reverting — those are
   // independently sourced and don't need Copperwood to anchor them.
-  { name:"Copperwood", kind:"district", x:"37%", y:"29%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
+  { name:"Copperwood", kind:"district", x:"64%", y:"44%", info:"Labelled \"Copperwood Heights\" on the official app's own map. A 1925-set, roaring-twenties film district and the heart of Boomtown's in-universe movie industry, run by self-appointed Creative Director Edna Von Vanderhaus, currently shooting 'Race to the Red Planet'." },
   // Pulled from (88,52) to (68,40) — three independent reference frames
   // this session (all showing Copperwood/Grand Central/Oldtown together,
   // at three different zoom levels across two videos) consistently place
@@ -6053,10 +6053,10 @@ const locations = [
   // on the real map, exactly the kind of over-wide spacing already fixed
   // once for the Downtown cluster. Every "near Oldtown" hidden venue
   // below shifted by the same delta (-20,-12) to stay clustered with it.
-  { name:"Oldtown", kind:"district", x:"49%", y:"56%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
-  { name:"Letsbe Avenue", kind:"district", x:"47%", y:"36%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
+  { name:"Oldtown", kind:"district", x:"45%", y:"57%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
+  { name:"Letsbe Avenue", kind:"district", x:"45%", y:"43%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
   { name:"Metropolis", kind:"district", x:"26%", y:"43%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
-  { name:"Grand Central", kind:"stage", x:"42%", y:"49%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
+  { name:"Grand Central", kind:"stage", x:"53%", y:"51%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
   // Moved from a guessed (93,38), up near Temple Valley Camping, to
   // (90,58) — the second reference video's own wide Copperwood/Grand
   // Central/Oldtown/Hilltop shot shows THE LION'S DEN's own glow right
@@ -6066,7 +6066,7 @@ const locations = [
   // from "Temple Valley Camping" the camp field, despite the shared name.
   // Nudged again this session to (83,55) alongside the wider Oldtown
   // re-derivation above — same direction, modestly closer in.
-  { name:"The Lion's Den", kind:"stage", x:"35%", y:"67%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
+  { name:"The Lion's Den", kind:"stage", x:"35%", y:"72%", info:"Its own third area — the Temple Valley amphitheatre — separate from both Downtown and Hilltop, as foretold by the Lion's Gate Portal at the last closing ceremony. Drum & bass, reggae and headline sets." },
   // Pulled from (28,34) — between Metropolis and Area 404 — to (9,39).
   // This session's reference video shows Hydro XL's own glowing stage
   // marker and label sitting clearly south-WEST of METROPOLIS's own
@@ -6080,7 +6080,7 @@ const locations = [
   // frames puts Anara consistently further east than 75 — the woodland
   // reads as further along toward Temple Valley Camping (also moved
   // east below) than a straight line up from Grand Central would suggest.
-  { name:"Anara Forest", kind:"stage", x:"82%", y:"35%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
+  { name:"Anara Forest", kind:"stage", x:"82%", y:"73%", info:"Hilltop edge. Formerly Psyforest, reborn as Anara Forest in 2025 — a 360° sound-and-visual stage where the story has runaways from Area 404 taking refuge. Bass-driven: jungle, reggae, bassline, UK garage, DnB and grime, with a beach-vibe sand floor." },
   // Nudged from y=8 to y=2 — this session's frame showing Hidden Woods,
   // Letsbe Avenue and Botanica all together shows Hidden Woods sitting a
   // clear gap further north of Letsbe Avenue, not almost level with it
@@ -10069,7 +10069,7 @@ function loadMap(){
   // detailed district names take over after the visitor zooms in.
   [
     { name: "Downtown", x: 36, y: 47, className: "" },
-    { name: "Hilltop", x: 64, y: 62, className: " overview-hilltop" },
+    { name: "Hilltop", x: 60, y: 67, className: " overview-hilltop" },
     { name: "Lion’s Den", x: 35, y: 67, className: " overview-lions-den" },
     { name: "West Camping", x: 68, y: 17, className: "" },
     { name: "East Camping", x: 85, y: 82, className: "" },

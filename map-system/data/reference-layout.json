@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
   "reviewedOverview": true,
-  "reviewNote": "Canonical coordinates rebuilt as an evidence-led relationship layout from the official screenshots and video findings. Legacy coordinate sources are not treated as authoritative; no runtime anchor transform is applied.",
+  "reviewNote": "Canonical coordinates rebuilt directly from the IMG_3670 full-site official map composition. Legacy coordinate sources are not authoritative; no runtime anchor transform is applied.",
   "observations": [
     {
       "id": "official-overview-2026-08-03",
@@ -105,32 +105,32 @@
     },
     "Letsbe Avenue": {
       "from": [
-        47,
-        36
+        45,
+        43
       ],
       "to": [
-        47,
-        36
+        45,
+        43
       ]
     },
     "Grand Central": {
       "from": [
-        42,
-        49
+        53,
+        51
       ],
       "to": [
-        42,
-        49
+        53,
+        51
       ]
     },
     "Oldtown": {
       "from": [
-        49,
-        56
+        45,
+        57
       ],
       "to": [
-        49,
-        56
+        45,
+        57
       ]
     },
     "Hydro XL": {
@@ -146,21 +146,21 @@
     "Anara Forest": {
       "from": [
         82,
-        35
+        73
       ],
       "to": [
         82,
-        35
+        73
       ]
     },
     "The Lion's Den": {
       "from": [
         35,
-        67
+        72
       ],
       "to": [
         35,
-        67
+        72
       ]
     },
     "Helix": {
