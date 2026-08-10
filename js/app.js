@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v415";
-const APP_BUILD_TIME = "2026-08-10T13:47:23Z";
+const APP_CACHE_VERSION = "v416";
+const APP_BUILD_TIME = "2026-08-10T14:06:22Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7178,6 +7178,21 @@ const DISTRICT_PALETTE = ["49,157,83", "60,177,96", "67,169,91", "54,145,76", "8
 // fix comments elsewhere in this file for why precise pixel tracing
 // doesn't hold up here).
 const TRUNK_PATH_EDGES = [
+  // Most of the perimeter camping fields had no path reaching them at
+  // all — every camp not already wired into the network below sat as a
+  // visually isolated shape with nothing connecting it to anywhere else
+  // on the map, reported directly as "paths are still unclear between
+  // all spaces". These route each currently-unconnected camp to its own
+  // nearest evidenced gate/junction rather than inventing new ones.
+  ["West Gate", "West Camping"],
+  ["Grand Central", "Valley Camping"],
+  ["Valley Camping", "Tangerine Fields"],
+  ["East Gate", "Campervan Field"],
+  ["East Gate", "East Camping"],
+  ["Downtown Camping", "Meadow Camping (Accessible)"],
+  ["Meadow Camping (Accessible)", "Meadow Living"],
+  ["Downtown Camping", "Camplight"],
+  ["Camp Skylark Sunset (premium)", "Quiet Camping"],
   ["West Gate", "Downtown Camping"],
   ["Downtown Camping", "Metropolis"],
   ["Metropolis", "Botanica"],

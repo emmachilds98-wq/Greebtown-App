@@ -8,10 +8,10 @@
       "kind": "ground-use",
       "surface": "hilltop-yellow",
       "evidence": "official-overview",
-      "points": [[61,16],[69,14],[72,20],[72,31],[70,41],[62,51],[56,62],[52,60],[52,52],[56,40],[60,25]],
-      "detailLines": [[[63,18],[65,29],[65,40],[59,52]],[[68,16],[69,29],[68,39],[61,50]]],
+      "points": [[62,29],[68,27],[71,32],[70,41],[62,51],[57,62],[54,60],[54,52],[57,40],[60,33]],
+      "detailLines": [[[64,31],[65,40],[63,49],[58,58]],[[68,29],[68,39],[65,47],[60,55]]],
       "excludes": ["Anara Forest"],
-      "notes": "Reviewed long Hilltop field corridor. It runs south beside the Grand Central and Oldtown sequence toward Quantum, while remaining distinct from the Anara Forest woodland stage."
+      "notes": "Reviewed long Hilltop field corridor. It runs south beside the Grand Central and Oldtown sequence toward Quantum, while remaining distinct from the Anara Forest woodland stage. North end trimmed (was y:14-27ish, reaching well north of Grand Central itself, a 48-unit total span) after direct user feedback that the field was rendering way too big/long on the top side; findings_screenshots.md's own note is the field's \"north tip near Grand Central\" (y~35), not far above it. South end kept at y~62 (audit-enforced — scripts/audit-rendered-layout-alignment.mjs requires the corridor to still reach the Quantum junction), since the \"too big\" complaint was specifically about the top side, not the south taper toward Quantum."
     }
   ],
   "zones": [
@@ -21,7 +21,7 @@
     { "id": "camp-meadow-living", "name": "Meadow Living", "position": { "x": 10, "y": 58 }, "footprint": { "aspect": 1.35, "sides": 5, "rotation": 12 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Adjacent field, deliberately distinct from accessible camping." },
     { "id": "camp-valley", "name": "Valley Camping", "position": { "x": 48, "y": 4 }, "footprint": { "aspect": 1.7, "sides": 6, "rotation": -12 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Northern valley field, wide and diagonally divided." },
     { "id": "camp-tangerine", "name": "Tangerine Fields", "position": { "x": 70, "y": 6 }, "footprint": { "aspect": 1.45, "sides": 6, "rotation": 10 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Northern field east of Valley Camping." },
-    { "id": "camp-campervan", "name": "Campervan Field", "position": { "x": 86, "y": 14 }, "footprint": { "aspect": 0.68, "sides": 6, "rotation": -6 }, "surface": "camp-green", "evidence": "official-overview", "notes": "East-side vertical vehicle field." },
+    { "id": "camp-campervan", "name": "Campervan Field", "position": { "x": 93, "y": 41 }, "footprint": { "aspect": 0.68, "sides": 6, "rotation": -6 }, "surface": "camp-green", "evidence": "official-overview", "notes": "East-side vertical vehicle field. Moved south from (86,14) — that position sat north of Anara Forest, contradicting findings_screenshots.md's own note that East Camping/East Gate/Campervan Field appear together 'moving further east/south-east from Anara... along the perimeter road'. Repositioned near East Gate (site-layout.json parking-east-gate, 97,38) and East Camping (91,48), matching that progression." },
     { "id": "camp-temple-valley", "name": "Temple Valley Camping", "position": { "x": 95, "y": 18 }, "footprint": { "aspect": 0.58, "sides": 6, "rotation": 4 }, "surface": "camp-green", "evidence": "official-overview", "notes": "Long east-side camping field near East Gate." },
     { "id": "camp-east", "name": "East Camping", "position": { "x": 91, "y": 48 }, "footprint": { "aspect": 0.72, "sides": 6, "rotation": -4 }, "surface": "camp-green", "evidence": "official-overview", "notes": "East-side field south of Temple Valley." },
     { "id": "camp-quiet", "name": "Quiet Camping", "position": { "x": 95, "y": 64 }, "footprint": { "aspect": 0.78, "sides": 6, "rotation": 8 }, "surface": "camp-green", "evidence": "official-overview", "notes": "South-east quieter field." },
