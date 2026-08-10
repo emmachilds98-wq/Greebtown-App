@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v413";
-const APP_BUILD_TIME = "2026-08-10T13:04:51Z";
+const APP_CACHE_VERSION = "v414";
+const APP_BUILD_TIME = "2026-08-10T13:18:19Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6879,10 +6879,12 @@ function fieldRing(cx, cy, rx, ry, seed, sides, rotationDegrees){
   const pts = [];
   for(let i=0;i<sides;i++){
     const angle = (i / sides) * Math.PI * 2;
-    // Superellipse-ish corner jitter (0.8-1.08x) — enough irregularity to
-    // read as hand-drawn, not enough to lose the field's basic straight-
-    // edged silhouette the way blobRing's wider 0.72-1.22 range does.
-    const jitter = 0.8 + rand() * 0.28;
+    // Tightened from 0.8-1.08 — official close-ups of camping fields
+    // (docs/map-evidence/screenshots/shot_050.jpg) show genuinely crisp,
+    // near-straight surveyed-field edges, closer to real farmland parcel
+    // boundaries than a hand-wobbled outline. Still not a perfect ruler
+    // rectangle, just noticeably straighter than before.
+    const jitter = 0.92 + rand() * 0.13;
     const lx = Math.cos(angle) * rx * jitter, ly = Math.sin(angle) * ry * jitter;
     pts.push([cx + lx * cos - ly * sin, cy + (lx * sin + ly * cos) * 0.85]);
   }
@@ -6926,15 +6928,16 @@ function tentDiamond(cx, cy, size, seed){
   return pts;
 }
 
-// A chamfered (corner-cut) rectangle, not a sharp-cornered one — every
-// official-map reference screenshot shows buildings as soft rounded
-// blocks, and a plain 4-corner rectangle is the single biggest reason
-// this map's buildings read as "hard graphic shapes" rather than small
-// illustrated structures. Chamfering (cutting each corner at 45°) gives
-// that same soft-block silhouette without needing real curve math for
-// a polygon this small, and stays cheap to generate at scale.
+// A very slightly chamfered (corner-cut) rectangle — full-resolution
+// official-map close-ups (docs/map-evidence/screenshots/shot_003.jpg,
+// shot_050.jpg row 3, both clean high-res captures of individual named
+// buildings) show these as genuinely SHARP-cornered rectangles, not soft
+// rounded pills; an earlier pass over-read a heavily rounded look off a
+// low-res multi-thumbnail contact sheet and chamfered at 32%, which was
+// too soft. Kept a small 12% chamfer only to avoid harsh single-pixel
+// aliasing on tiny polygons, not to read as "rounded" at a glance.
 function chamferedRectCorners(w, h){
-  const chamfer = Math.min(w, h) * 0.32;
+  const chamfer = Math.min(w, h) * 0.12;
   const hw = w / 2, hh = h / 2;
   return [
     [-hw + chamfer, -hh], [hw - chamfer, -hh],
@@ -8574,14 +8577,16 @@ function buildMapGeoJSON(){
     { fill: "rgba(228,142,126,0.87)", line: "rgba(193,96,80,0.83)" },
     { fill: "rgba(244,172,156,0.85)", line: "rgba(210,118,100,0.80)" }
   ];
-  // Wider, paler fringe under each field's own solid fill — same trick
-  // already used for the forest/pond edges above. Without one, camping
-  // fields met open grass as a hard graphic cutout ("floating islands"
-  // reported directly); a real pitched field's edge is worn/uneven, not
-  // a clean vector line. Kept as its own feature array/layer (drawn
-  // first, below camp-fields-fill) rather than widening the field ring
-  // itself, so the actual field boundary/area used by the overlap audits
-  // is untouched.
+  // A slim, pale fringe under each field's own solid fill — same trick
+  // already used for the forest/pond edges above, but kept much smaller/
+  // fainter than a first attempt at this (was 1.3x size, 0.16 alpha).
+  // Official close-ups (docs/map-evidence/screenshots/shot_050.jpg) show
+  // camping fields with a genuinely CRISP surveyed edge, not a soft
+  // halo — a big pale fringe was working against the "clear zoning
+  // shape" the field boundary needs to read as. Kept as its own feature
+  // array/layer (drawn first, below camp-fields-fill) rather than
+  // widening the field ring itself, so the actual field boundary/area
+  // used by the overlap audits is untouched.
   const campFieldFringeFeatures = [];
   const campFieldFeatures = ordinaryCamps.map((c,i)=>{
     const cx = parseFloat(c.x), cy = parseFloat(c.y);
@@ -8606,7 +8611,7 @@ function buildMapGeoJSON(){
     const style = /campervan/i.test(c.text)
       ? { fill: "rgba(238,182,150,0.83)", line: "rgba(200,128,92,0.80)" }
       : CAMP_FIELD_STYLES[i % CAMP_FIELD_STYLES.length];
-    campFieldFringeFeatures.push({ type: "Feature", properties: { fill: "rgba(226,146,128,0.16)" }, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect * 1.3, r / aspect * 1.3, seed, footprint.sides, footprint.rotation)) ] } });
+    campFieldFringeFeatures.push({ type: "Feature", properties: { fill: "rgba(226,146,128,0.22)" }, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect * 1.08, r / aspect * 1.08, seed, footprint.sides, footprint.rotation)) ] } });
     return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, footprint.sides, footprint.rotation)) ] } };
   });
   // Ground-use fields are reviewed geometry, not an inferred ellipse.
