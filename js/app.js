@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v419";
-const APP_BUILD_TIME = "2026-08-10T15:51:40Z";
+const APP_CACHE_VERSION = "v420";
+const APP_BUILD_TIME = "2026-08-10T16:06:15Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8598,12 +8598,18 @@ function buildMapGeoJSON(){
   // pitched field, not a plain colour block.
   const ordinaryCamps = campLabels.filter(c=> !/premium/i.test(c.text));
   const campFieldRadii = new Map();
-  const CAMP_FIELD_STYLES = [
-    { fill: "rgba(233,150,134,0.86)", line: "rgba(198,102,86,0.82)" },
-    { fill: "rgba(240,164,148,0.85)", line: "rgba(206,112,94,0.80)" },
-    { fill: "rgba(228,142,126,0.87)", line: "rgba(193,96,80,0.83)" },
-    { fill: "rgba(244,172,156,0.85)", line: "rgba(210,118,100,0.80)" }
-  ];
+  // Land-use colour by evidence (IMG_3670 official full-site overview): the
+  // official map only paints TWO camping areas pink/salmon — the Downtown /
+  // Meadow / Camplight cluster (top-centre by West Gate) and the Campervan
+  // block (bottom-left). Every other camping field (West, Valley, Tangerine,
+  // Temple Valley, East, Quiet) is a GREEN field, distinguished from the open
+  // arena by a crisp boundary and its own pitch texture, not by a pink fill.
+  // An earlier pass made every camp salmon, which is why the camping read as
+  // wrong. Both are semi-transparent so the real map base (added under the
+  // illustration) shows the field parcels through them, like the official.
+  const CAMP_PINK  = { fill: "rgba(233,140,126,0.62)", line: "rgba(198,102,86,0.72)" };
+  const CAMP_GREEN = { fill: "rgba(120,198,120,0.44)", line: "rgba(64,146,78,0.62)" };
+  const isPinkCamp = c => /downtown|meadow|camplight|campervan|orchid/i.test(c.text);
   // A slim, pale fringe under each field's own solid fill — same trick
   // already used for the forest/pond edges above, but kept much smaller/
   // fainter than a first attempt at this (was 1.3x size, 0.16 alpha).
@@ -8633,12 +8639,9 @@ function buildMapGeoJSON(){
     // fields don't all read as the same stretched rectangle.
     const seed = 600 + i * 43;
     const aspect = footprint.aspect;
-    // Campervan fields carry a slightly paler, sandier salmon so they still
-    // read as camping/accommodation but distinguish from tent camping.
-    const style = /campervan/i.test(c.text)
-      ? { fill: "rgba(238,182,150,0.83)", line: "rgba(200,128,92,0.80)" }
-      : CAMP_FIELD_STYLES[i % CAMP_FIELD_STYLES.length];
-    campFieldFringeFeatures.push({ type: "Feature", properties: { fill: "rgba(226,146,128,0.22)" }, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect * 1.08, r / aspect * 1.08, seed, footprint.sides, footprint.rotation)) ] } });
+    const pink = isPinkCamp(c);
+    const style = pink ? CAMP_PINK : CAMP_GREEN;
+    campFieldFringeFeatures.push({ type: "Feature", properties: { fill: pink ? "rgba(226,146,128,0.18)" : "rgba(96,170,100,0.16)" }, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect * 1.08, r / aspect * 1.08, seed, footprint.sides, footprint.rotation)) ] } });
     return { type: "Feature", properties: style, geometry: { type: "Polygon", coordinates: [ schematicRingToLngLat(fieldRing(cx, cy, r * aspect, r / aspect, seed, footprint.sides, footprint.rotation)) ] } };
   });
   // Ground-use fields are reviewed geometry, not an inferred ellipse.
@@ -9440,9 +9443,7 @@ function loadMap(){
       // below. This zoom is only the brief pre-style fallback frame.
       zoom: 14.3, minZoom: 13.5, maxZoom: 19,
       maxBounds: MAX_BOUNDS,
-      // Compact attribution is required by the OSM/CARTO tile terms now that
-      // a real basemap is used; it collapses to a small "i" on mobile.
-      attributionControl: { compact: true }
+      attributionControl: false
     });
     // Place the compact map utility rail away from the dense northern
     // labels. This mirrors a familiar mobile-map ergonomics pattern
