@@ -1144,7 +1144,9 @@ Talk to an actor in character
 <script src="js/artist-previews.js"></script>
 <script src="js/boomtown-locations-2026.js"></script>
 <!-- Canonical authoring data, generated from map-system/data/map-document.json. -->
-<script src="map-system/data/map-data.js"></script>
-<script src="js/app.js"></script>
+<!-- Versioned URLs prevent an older installed service worker from pairing a
+     stale map-data payload with the current application script. -->
+<script src="map-system/data/map-data.js?v=v422"></script>
+<script src="js/app.js?v=v422"></script>
 <script src="js/pwa-register.js"></script>
 </body></html>
