@@ -19,6 +19,9 @@ Never use a Greebtown screenshot to validate Greebtown.
 
 ## Required refresh workflow
 
+The active map was reset to a blank baseline on 10 Aug 2026. No previous
+territory, label, route, or marker is approved for carry-over.
+
 1. Trace the full-site territory order and large silhouettes from the official
    overview before placing labels or venue detail.
 2. Rebuild one connected cluster at a time from that tracing; do not retain an
