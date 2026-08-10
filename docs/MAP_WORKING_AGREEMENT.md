@@ -23,6 +23,11 @@ but they must not be iterated, searched, or merely hidden during map setup.
 Removing their producer path is required; a visibility flag is not a safe
 substitute because it can be switched back on by later work.
 
+`scripts/assert-evidence-map-boundary.mjs` is part of map preflight and
+enforces this at runtime-boundary level: the active renderer may install only
+the evidence scene, and it must return before any legacy MapLibre source or
+legacy DOM marker producer.
+
 ## Evidence threshold
 
 Classify every proposed addition before drawing it:
