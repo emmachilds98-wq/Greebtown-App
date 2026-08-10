@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v439";
-const APP_BUILD_TIME = "2026-08-10T22:38:21Z";
+const APP_CACHE_VERSION = "v440";
+const APP_BUILD_TIME = "2026-08-10T22:46:07Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7450,18 +7450,22 @@ function evidenceRebuildDetailLabels(){
   // Named labels visible in IMG_3721–IMG_3734. These are intentionally a
   // second, close-view tier so the entry view stays legible.
   return [
-    ["NEXUS", 42, 44, "stage"], ["HIDDEN WOODS", 22, 42, "stage"],
+    ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 22, 42, "stage", "primary"],
     ["TANGLED ROOTS", 54, 31, "stage"], ["TRIBE OF FROG", 46, 75, "stage"],
-    ["SPECTRUM 360", 39, 67, "stage"], ["HANGAR 161", 35, 69, "venue"],
+    ["SPECTRUM 360", 39, 67, "stage", "primary"], ["HANGAR 161", 35, 69, "venue"],
     ["DEVIANT LOUNGE", 35, 72, "venue"], ["BBXL", 41, 73, "venue"],
-    ["ACID LEAK", 42, 76, "stage"], ["HYDRO XL", 26, 72, "stage"],
+    ["ACID LEAK", 42, 76, "stage"], ["HYDRO XL", 26, 72, "stage", "primary"],
     ["BOTANICA ZOO", 39, 46, "venue"], ["KARMA CEUTICALS", 44, 47, "venue"],
     ["MANGO", 35, 47, "venue"], ["THE NETWORK", 45, 44, "venue"],
+    ["SUB LAB", 46, 49, "venue"], ["NACHTLICKER", 47, 45, "venue"],
+    ["SOAPRANOS LAUNDRETTE", 40, 49, "venue"],
     ["ROSE AND CLOWN", 47, 47, "stage"], ["THE HIDE OUT", 42, 66, "venue"],
     ["THE FOOLS LEAP", 51, 61, "stage"], ["DEN OF DIS ORDER", 60, 57, "venue"],
     ["POSTAL POSSE", 51, 64, "venue"], ["TROUGH LOVE", 52, 66, "venue"],
     ["DA GRAAFF'S REFORMATORY", 51, 68, "venue"], ["SÍBÍN BEAG", 62, 61, "stage"],
     ["THE FECKLESS WRECKED", 62, 64, "venue"], ["HELIX", 63, 83, "stage"],
+    ["ANCIENT FUTURES", 63, 47, "venue"], ["DAILY RAG", 57, 53, "venue"],
+    ["THE HIDE OUT HILLTOP", 68, 36, "venue"],
     ["VALLEY CAMPING", 66, 22, "camp"], ["CAMP AT HILLTOP", 75, 63, "camp"]
   ];
 }
@@ -7470,8 +7474,8 @@ function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
   const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
-  const polygon = (name, fill, points)=>({
-    type:"Feature", properties:{ name, fill },
+  const polygon = (name, fill, points, properties={})=>({
+    type:"Feature", properties:{ name, fill, outline:"rgba(47,43,28,.8)", ...properties },
     geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(points)] }
   });
   const route = (points, properties={})=>({ type:"Feature", properties, geometry:{ type:"LineString", coordinates:schematicRingToLngLat(points) } });
@@ -7520,8 +7524,8 @@ function buildEvidenceOnlyMapGeoJSON(){
   // observed footprint and circulation, never a guessed business location.
   geo.evidenceStageCourts = { type:"FeatureCollection", features:[
     polygon("NEXUS court", "rgba(132,210,151,.98)", [[39,42],[44,40],[47,43],[45,47],[40,47]]),
-    polygon("Hidden Woods court", "rgba(72,121,82,.98)", [[19,39],[24,38],[27,42],[24,46],[19,45]]),
-    polygon("Tangled Roots court", "rgba(124,98,45,.98)", [[51,29],[56,28],[58,32],[54,34],[50,32]]),
+    polygon("Hidden Woods court", "rgba(72,121,82,.98)", [[19,39],[24,38],[27,42],[24,46],[19,45]], { outline:"rgba(232,157,61,.96)" }),
+    polygon("Tangled Roots court", "rgba(124,98,45,.98)", [[51,29],[56,28],[58,32],[54,34],[50,32]], { outline:"rgba(205,76,58,.96)" }),
     polygon("Grand Central court", "rgba(243,214,165,.98)", [[56,45],[61,44],[63,48],[60,51],[55,49]]),
     polygon("Oldtown court", "rgba(220,170,133,.98)", [[52,58],[58,57],[61,61],[58,65],[53,63]]),
     polygon("Tribe of Frog court", "rgba(173,108,184,.98)", [[43,72],[48,71],[50,75],[47,78],[42,76]]),
@@ -9527,7 +9531,7 @@ function installEvidenceSceneLayers(map, geo){
   source("evidence-stage-courts", geo.evidenceStageCourts);
   map.addLayer({ id:"evidence-stage-courts-shadow", type:"fill", source:"evidence-stage-courts", paint:{ "fill-color":"rgba(22,26,18,.4)", "fill-translate":[1,1.5] } });
   map.addLayer({ id:"evidence-stage-courts", type:"fill", source:"evidence-stage-courts", paint:{ "fill-color":["get","fill"] } });
-  map.addLayer({ id:"evidence-stage-courts-outline", type:"line", source:"evidence-stage-courts", paint:{ "line-color":"rgba(47,43,28,.8)", "line-width":1.1 } });
+  map.addLayer({ id:"evidence-stage-courts-outline", type:"line", source:"evidence-stage-courts", paint:{ "line-color":["get","outline"], "line-width":1.1 } });
   source("evidence-landmarks", geo.evidenceLandmarks);
   map.addLayer({ id:"evidence-landmarks-shadow", type:"fill", source:"evidence-landmarks", minzoom:15.55, paint:{ "fill-color":"rgba(16,21,15,.34)", "fill-translate":[1.1,1.4] } });
   map.addLayer({ id:"evidence-landmarks", type:"fill", source:"evidence-landmarks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
@@ -9549,7 +9553,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v7-runtime-isolated";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v8-detail-pass";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -10315,10 +10319,10 @@ function loadMap(){
       { name, title:name }
     );
   });
-  evidenceRebuildDetailLabels().forEach(([name, x, y, kind])=>{
+  evidenceRebuildDetailLabels().forEach(([name, x, y, kind, prominence])=>{
     const coord = schematicToLatLon(x, y);
     addMapMarker("refresh-detail", coord.lat, coord.lon,
-      `<div class="map-label evidence-detail evidence-${kind}">${name}</div>`,
+      `<div class="map-label evidence-detail evidence-${kind}${prominence ? ` evidence-${prominence}` : ""}">${name}</div>`,
       { name, title:name }
     );
   });

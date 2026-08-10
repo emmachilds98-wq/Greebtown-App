@@ -83,3 +83,10 @@ location.
   Spectrum 360, and Lion's Den focal points a restrained close-zoom glow. The
   shapes remain in their existing evidence-traced courts; no new venue position
   or icon field was inferred.
+- The next detail pass promotes only NEXUS, Hidden Woods, Spectrum 360, and
+  Hydro XL into the normal reading zoom. It adds the readable Botanica-loop
+  names (Sub Lab, Nachtlicker, Soapranos Laundrette), Ancient Futures and
+  Daily Rag at Grand Central/Oldtown, and The Hide Out Hilltop at Copperwood's
+  east edge. The Hidden Woods orange outline and Tangled Roots red outline
+  follow the observed close-up styling; all other venue labels remain gated to
+  close view.
