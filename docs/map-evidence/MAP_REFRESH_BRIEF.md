@@ -5,6 +5,11 @@
 Do not reuse, transform, average, or "correct" the legacy map coordinates.
 They are implementation history, not spatial evidence.
 
+The active renderer must return only the evidence-only map model. Do not add a
+legacy source, marker group, category filter, zoom-control rail, or fallback
+geometry back into that render path. If an old-looking artefact appears, remove
+the active producer; do not hide it beneath another visual layer.
+
 ## Allowed evidence
 
 Use independent official-app material in this folder only. The primary

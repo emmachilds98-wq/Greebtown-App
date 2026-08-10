@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v429";
-const APP_BUILD_TIME = "2026-08-10T21:07:09Z";
+const APP_CACHE_VERSION = "v430";
+const APP_BUILD_TIME = "2026-08-10T21:10:42Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9470,7 +9470,9 @@ function loadMap(){
     // Place the compact map utility rail away from the dense northern
     // labels. This mirrors a familiar mobile-map ergonomics pattern
     // without reproducing another app's controls or artwork.
-    mapGL.addControl(new maplibregl.NavigationControl({ showCompass: true }), "bottom-right");
+    // The legacy zoom/compass rail exposed controls for the retired map
+    // model. The evidence-only map is intentionally gesture-first; its
+    // single Site overview action remains above the canvas.
 
     // A deliberate reset for the one moment people most need it: after
     // following a friend or a venue deep into the map, return to the full
