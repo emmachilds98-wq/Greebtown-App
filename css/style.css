@@ -434,6 +434,8 @@
   .map-label.overview::before,.map-label.overview::after{content:none;}
   .map-label.overview.overview-hilltop{font-size:11px; color:rgba(136,94,28,.98); letter-spacing:.14em;}
   .map-label.overview.overview-lions-den{font-size:10px; color:rgba(34,94,54,.98);}
+  .map-label.manual-territory{display:block; min-height:0; padding:0; border:0; border-radius:0; background:none; box-shadow:none; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; font-size:8px; font-weight:900; letter-spacing:.09em; text-transform:uppercase; color:rgba(30,55,34,.96); text-shadow:0 1px 0 rgba(255,251,224,.95),0 0 5px rgba(255,251,224,.82); transform:translate(-50%,-50%);}
+  .map-label.manual-territory::before,.map-label.manual-territory::after{content:none;}
   /* Area 404 — repeatedly confirmed on camera as a bold red/green
      "glitch" double-exposure, not a flat colour. Two extra offset
      text-shadow layers (one red, one green, either side of the base

@@ -1,5 +1,19 @@
 # Map evidence (2 Aug 2026 session)
 
+## Coordinate quarantine (10 Aug 2026)
+
+The legacy schematic coordinates and their derived map geometry are known to
+be visually skewed. They must not be reused to calibrate, nudge, or validate a
+new map layout. This includes the old position lists in `js/app.js`,
+`reference-layout.json`, district/camp footprint files, and generated
+`map-data.js`.
+
+For the refresh, use this folder's independent official-app evidence only.
+Start with `IMG_3670.png` for full-site topology, then use official close-ups
+to trace each connected cluster. Record the image/frame that supports a new
+silhouette or placement and review a rendered before/after image before
+shipping. Do not use screenshots of Greebtown itself as corroboration.
+
 Screenshots of the official Boomtown Fair 2026 app's own map, plus written
 findings from reviewing them and ~490 frames extracted from 5 screen
 recordings of the same official app. This is the evidence behind the
