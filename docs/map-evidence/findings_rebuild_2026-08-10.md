@@ -90,3 +90,8 @@ location.
   east edge. The Hidden Woods orange outline and Tangled Roots red outline
   follow the observed close-up styling; all other venue labels remain gated to
   close view.
+- A landmark-form pass separates the confirmed Spectrum 360 container ring
+  into visible perimeter segments, gives NEXUS its observed dark triangular
+  canopy with an amber edge, and places an unlabeled blue water form directly
+  south of Hydro XL. These are drawn only at close zoom and are intentionally
+  not treated as additional venues or service icons.
