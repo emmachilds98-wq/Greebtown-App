@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v442";
-const APP_BUILD_TIME = "2026-08-10T23:02:18Z";
+const APP_CACHE_VERSION = "v443";
+const APP_BUILD_TIME = "2026-08-10T23:10:08Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7472,7 +7472,7 @@ function evidenceRebuildDetailLabels(){
 
 function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
-  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos","evidenceContainerEdges","evidenceCanopies","evidenceWaterLandmarks","evidenceDistrictContours","evidenceCompoundBlocks"];
+  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos","evidenceContainerEdges","evidenceCanopies","evidenceWaterLandmarks","evidenceDistrictContours","evidenceCompoundBlocks","evidenceCampPitches","evidenceFieldLanes"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
   const polygon = (name, fill, points, properties={})=>({
     type:"Feature", properties:{ name, fill, outline:"rgba(47,43,28,.8)", ...properties },
@@ -7514,7 +7514,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   ] };
   // Anonymous building scatter was removed: a close detail must be a
   // source-supported named court or a readable route, never texture filler.
-  const treeDot = (x,y,size)=>({ type:"Feature", properties:{ size }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } });
+  const treeDot = (x,y,size, properties={})=>({ type:"Feature", properties:{ size, ...properties }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } });
   geo.evidenceForestDots = { type:"FeatureCollection", features:[
     [18,35,1.2],[23,39,.9],[28,32,1.1],[18,49,.8],[23,52,1.15],[17,62,1],[21,67,.9],[18,75,1.25],[23,80,.85],
     [31,27,1],[38,29,.85],[45,30,1.15],[42,34,.8],[17,86,1],[27,84,.9],[35,86,1.1],[40,89,.85],
@@ -7557,12 +7557,26 @@ function buildEvidenceOnlyMapGeoJSON(){
   ] };
   geo.evidenceCampFields = { type:"FeatureCollection", features:[
     polygon("Valley Camping", "rgba(75,139,84,.92)", [[58,16],[70,15],[74,22],[69,28],[60,27],[55,22]]),
-    polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[71,56],[81,55],[83,66],[79,74],[72,73],[69,65]])
+    polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[71,56],[81,55],[83,66],[79,74],[72,73],[69,65]]),
+    polygon("Lion's Den eastern camp", "rgba(187,105,122,.84)", [[84,82],[91,81],[94,87],[91,95],[84,94],[81,89]])
   ] };
   geo.evidenceCampTents = { type:"FeatureCollection", features:[
     [61,19],[64,18],[67,20],[70,22],[59,23],[63,25],[68,24],
     [73,58],[77,58],[80,60],[72,62],[76,63],[81,64],[73,66],[78,68],[80,71],[74,70]
   ].map(([x,y])=>treeDot(x,y,1)) };
+  // Camping remains a separate ground type: ordered pitch marks sit only in
+  // the documented fields and field lanes never cross into town or forest.
+  const pitch = (x,y,fill)=> polygon("camp pitch", fill, [[x,y-1],[x+1,y],[x,y+1],[x-1,y]]);
+  geo.evidenceCampPitches = { type:"FeatureCollection", features:[
+    [73,57],[77,58],[80,59],[74,61],[78,62],[81,64],[72,65],[76,66],[80,68],[73,69],[77,71],[81,72]
+      .map(([x,y])=> pitch(x,y,"rgba(248,241,203,.92)")),
+    [85,84],[88,84],[90,86],[86,87],[89,88],[92,89],[85,90],[88,92],[91,93]
+      .map(([x,y], index)=> pitch(x,y, index % 3 === 0 ? "rgba(236,143,116,.9)" : index % 3 === 1 ? "rgba(132,176,222,.9)" : "rgba(248,212,111,.9)"))
+  ].flat() };
+  geo.evidenceFieldLanes = { type:"FeatureCollection", features:[
+    route([[71,57],[76,61],[81,65]]), route([[70,61],[75,65],[80,70]]), route([[70,66],[74,70],[79,74]]),
+    route([[75,56],[78,61],[80,66],[80,72]]), route([[71,59],[72,65],[72,72]])
+  ] };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
     route([[37,48],[39,46],[42,44],[45,44],[47,47],[45,50],[40,50],[37,48]], { kind:"street" }), // Botanica loop
     route([[31,60],[35,59],[39,62],[41,66]], { kind:"street" }), // Metropolis -> Area 404 edge
@@ -9563,6 +9577,11 @@ function installEvidenceSceneLayers(map, geo){
   source("evidence-camp-fields", geo.evidenceCampFields);
   map.addLayer({ id:"evidence-camps-fill", type:"fill", source:"evidence-camp-fields", paint:{ "fill-color":["get","fill"] } });
   map.addLayer({ id:"evidence-camps-outline", type:"line", source:"evidence-camp-fields", paint:{ "line-color":"rgba(202,218,156,.68)", "line-width":1.15, "line-dasharray":[2,1.2] } });
+  source("evidence-field-lanes", geo.evidenceFieldLanes);
+  map.addLayer({ id:"evidence-field-lanes", type:"line", source:"evidence-field-lanes", minzoom:15.35, paint:{ "line-color":"rgba(117,104,37,.55)", "line-width":1.1 } });
+  source("evidence-camp-pitches", geo.evidenceCampPitches);
+  map.addLayer({ id:"evidence-camp-pitches", type:"fill", source:"evidence-camp-pitches", minzoom:15.45, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-camp-pitches-outline", type:"line", source:"evidence-camp-pitches", minzoom:15.45, paint:{ "line-color":"rgba(77,75,47,.5)", "line-width":.45 } });
   source("evidence-camp-tents", geo.evidenceCampTents);
   map.addLayer({ id:"evidence-camp-tents", type:"circle", source:"evidence-camp-tents", minzoom:15.55, paint:{ "circle-radius":2.1, "circle-color":"rgba(245,238,194,.9)", "circle-stroke-width":.35, "circle-stroke-color":"rgba(72,92,54,.72)" } });
 
@@ -9611,7 +9630,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v10-connected-clusters";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v11-camp-fields";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
