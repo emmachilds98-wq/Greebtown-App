@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v427";
-const APP_BUILD_TIME = "2026-08-10T18:29:47Z";
+const APP_CACHE_VERSION = "v428";
+const APP_BUILD_TIME = "2026-08-10T21:03:19Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7437,6 +7437,24 @@ const SSSI_SPOTS = [{ name: "Site of Special Scientific Interest", x: "63", y: "
 
 function buildMapGeoJSON(){
   const districts = locations.filter(p=>p.kind === "district");
+  // Fresh, evidence-traced whole-site composition. This deliberately does
+  // not derive any territory from the legacy marker/footprint collections;
+  // it is the visual foundation for the map refresh.
+  const evidenceTerritoryFeatures = [
+    ["West Camping", "rgba(101,187,118,.96)", [[37,11],[63,11],[75,22],[73,35],[58,40],[43,34]]],
+    ["Downtown", "rgba(80,161,94,.98)", [[15,36],[29,32],[45,36],[51,48],[44,59],[26,60],[14,51]]],
+    ["Sunset", "rgba(244,211,84,.98)", [[0,59],[13,57],[20,65],[18,79],[4,77],[0,69]]],
+    ["Hilltop", "rgba(245,211,79,.98)", [[48,62],[56,60],[66,61],[72,65],[71,71],[63,74],[53,73],[48,69]]],
+    ["Lion's Den", "rgba(45,120,68,.98)", [[20,65],[35,62],[46,68],[45,82],[31,85],[18,76]]],
+    ["Anara", "rgba(64,143,79,.98)", [[72,63],[86,65],[91,73],[86,82],[74,80],[69,71]]],
+    ["East Camping", "rgba(105,188,120,.96)", [[86,76],[98,74],[101,94],[88,98],[82,88]]]
+  ].map(([name, fill, points])=>({ type:"Feature", properties:{ name, fill }, geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(points)] } }));
+  const evidenceSpineFeatures = [
+    [[26,47],[37,45],[49,47],[54,51],[45,57],[52,65],[62,67]],
+    [[54,51],[62,45],[65,57]],
+    [[45,57],[37,64],[35,72]],
+    [[71,69],[78,72],[85,76]]
+  ].map(points=>({ type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates:schematicRingToLngLat(points) } }));
 
   // Real farmland field-boundary texture — Matterley Estate is a working
   // dairy farm, and the reference video's own open ground shows real
@@ -9029,6 +9047,8 @@ function buildMapGeoJSON(){
 
   return {
     fields: { type:"FeatureCollection", features: fieldFeatures },
+    evidenceTerritories: { type:"FeatureCollection", features: evidenceTerritoryFeatures },
+    evidenceSpine: { type:"FeatureCollection", features: evidenceSpineFeatures },
     fieldsFine: { type:"FeatureCollection", features: fieldFeaturesFine },
     hedges: { type:"FeatureCollection", features: hedgeFeatures },
     stream: { type:"FeatureCollection", features: [streamFeature] },
@@ -9093,7 +9113,7 @@ function buildMapGeoJSON(){
 // not a catalogue of pins. Secondary venues, named stalls and amenities stay
 // one deliberate tap away (or are discoverable through search), while the
 // primary districts, headline stages and ground shapes establish orientation.
-let mapLayerVisible = { minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: true, sssi: true, road: true };
+let mapLayerVisible = { main: false, minor: false, detail: false, secret: false, camp: false, landmark: false, poi: false, friend: true, sssi: true, road: true };
 
 // ===============================
 // REAL COORDINATE CALIBRATION — bridges this file's existing illustrative
@@ -10014,6 +10034,15 @@ function loadMap(){
         "circle-color": ["get", "color"],
         "circle-stroke-width": 1, "circle-stroke-color": "rgba(238,246,241,0.4)"
       } });
+
+      // Evidence-traced refresh layer. Added last so the old generated
+      // decoration cannot visually reassert its skewed composition.
+      mapGL.addSource("mapEvidenceTerritories", { type: "geojson", data: geo.evidenceTerritories });
+      mapGL.addLayer({ id: "evidence-territories-fill", type: "fill", source: "mapEvidenceTerritories", paint: { "fill-color": ["get", "fill"], "fill-opacity": .94 } });
+      mapGL.addLayer({ id: "evidence-territories-outline", type: "line", source: "mapEvidenceTerritories", paint: { "line-color": "rgba(37,91,50,.72)", "line-width": 1.35 } });
+      mapGL.addSource("mapEvidenceSpine", { type: "geojson", data: geo.evidenceSpine });
+      mapGL.addLayer({ id: "evidence-spine-casing", type: "line", source: "mapEvidenceSpine", paint: { "line-color": "rgba(67,67,46,.38)", "line-width": 4.4 } });
+      mapGL.addLayer({ id: "evidence-spine", type: "line", source: "mapEvidenceSpine", paint: { "line-color": "rgba(239,225,177,.98)", "line-width": 2.2 } });
     });
     document.querySelectorAll("#mapLayerToggles .chip").forEach(chip=>{
       const layer = chip.dataset.layer;
@@ -10080,6 +10109,17 @@ function loadMap(){
       `<div class="map-label overview${place.className}">${place.name}</div>`,
       { title: place.name }
     );
+  });
+  // Primary labels for the evidence-traced refresh. They remain visible at
+  // entry zoom independently of the quarantined legacy marker groups.
+  [
+    ["METROPOLIS", 26, 43], ["BOTANICA", 42, 41], ["AREA 404", 31, 48],
+    ["LETSBE AVENUE", 45, 43], ["COPPERWOOD", 64, 44], ["GRAND CENTRAL", 53, 51],
+    ["OLDTOWN", 45, 57], ["THRUTOPIA", 65, 57], ["HILLTOP", 60, 67],
+    ["THE LION'S DEN", 35, 72], ["ANARA", 82, 73]
+  ].forEach(([name, x, y])=>{
+    const coord = schematicToLatLon(x, y);
+    addMapMarker("manual", coord.lat, coord.lon, `<div class="map-label manual-territory">${name}</div>`, { title:name });
   });
   districtList.forEach(place=>{
     const coord = schematicToLatLon(parseFloat(place.x), parseFloat(place.y));

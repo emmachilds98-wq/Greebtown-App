@@ -147,6 +147,29 @@ checked the file was still complete before merging it.
 
 ## Map system
 
+### Coordinate quarantine — mandatory for the map refresh
+
+The historic schematic coordinates in `js/app.js` and the generated/map-system
+layout files have repeatedly produced a skewed composition. **Do not use those
+numbers as evidence, a calibration target, or an input for a future map
+refresh.** In particular, do not infer a new position by averaging, nudging,
+transforming, or preserving values from `locations`, `minorStagePositions`,
+`thingsToFind`, `reference-layout.json`, `district-footprints.json`, or the
+generated `map-data.js`.
+
+The only admissible source for a new placement is the independent official-map
+evidence under `docs/map-evidence/` (especially the full-site official image
+`IMG_3670.png` and genuinely-official screenshots). Trace visual relationships
+and silhouettes from that evidence into a new, explicitly documented layout.
+Do not mix a new traced area with an adjacent legacy position: rebuild the
+entire connected cluster in one pass. Treat old generated geometry as
+quarantined implementation history until the new renderer has replaced it.
+
+Before publishing a new map composition, record which official image/frame
+supports each region and produce a rendered before/after review. A green data
+validator is necessary but is not proof that the map visually matches the
+official app.
+
 This has been the highest-effort, highest-error area of the app. Key things
 to know before touching any map code or data:
 
