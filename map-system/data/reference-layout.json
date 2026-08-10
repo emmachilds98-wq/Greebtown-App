@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
   "reviewedOverview": true,
-  "reviewNote": "Canonical coordinates calibrated as one full-site composition from IMG_3670; no runtime anchor transform is applied.",
+  "reviewNote": "Canonical coordinates rebuilt as an evidence-led relationship layout from the official screenshots and video findings. Legacy coordinate sources are not treated as authoritative; no runtime anchor transform is applied.",
   "observations": [
     {
       "id": "official-overview-2026-08-03",
@@ -69,7 +69,7 @@
         "lion-den-woodland",
         "east-camping"
       ],
-      "notes": "This is the shared calibration datum for the overview. It places Botanica/Metropolis/Area 404 as one compact west-city group; Grand Central directly north of Oldtown; the Hilltop field to Oldtown's east; and The Lion's Den south-west of that field. Earlier single-frame estimates that placed Lion's Den on the far east side or put Helix below it are superseded."
+      "notes": "This is the shared calibration datum for the overview. It places Botanica/Metropolis/Area 404 as one compact west-city group; Grand Central north-west of Oldtown; the Hilltop field to Oldtown's east; and The Lion's Den south-west of that field. Earlier single-frame estimates that placed Lion's Den on the far east side or put Helix below it are superseded."
     }
   ],
   "anchors": {
@@ -105,22 +105,22 @@
     },
     "Letsbe Avenue": {
       "from": [
-        45,
-        43
+        47,
+        36
       ],
       "to": [
-        45,
-        43
+        47,
+        36
       ]
     },
     "Grand Central": {
       "from": [
-        50,
-        51
+        42,
+        49
       ],
       "to": [
-        50,
-        51
+        42,
+        49
       ]
     },
     "Oldtown": {

@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v424";
-const APP_BUILD_TIME = "2026-08-10T17:40:02Z";
+const APP_CACHE_VERSION = "v426";
+const APP_BUILD_TIME = "2026-08-10T18:00:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -6054,9 +6054,9 @@ const locations = [
   // once for the Downtown cluster. Every "near Oldtown" hidden venue
   // below shifted by the same delta (-20,-12) to stay clustered with it.
   { name:"Oldtown", kind:"district", x:"49%", y:"56%", info:"Hilltop. The festival's founding district, rebuilt uphill after Area 404's expansion. Rufus the Red and the Den of Dis Order are now declaring the separatist 'People's Republic of Oldtownia'." },
-  { name:"Letsbe Avenue", kind:"district", x:"45%", y:"43%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
+  { name:"Letsbe Avenue", kind:"district", x:"47%", y:"36%", info:"Downtown. The everyday high-street district, currently swept up in Patrick Kahn's new consumer product BLIP (Boomtown Lifestyle Important Product) — exclusive to status-holders called VIPPs." },
   { name:"Metropolis", kind:"district", x:"26%", y:"43%", info:"Downtown. A hyper-digital district run by Aurora Venturestone's Bettercorp™ media machine, where laid-off 'inGeniuses' now run risky, unofficial tours into a glitching Betterverse™." },
-  { name:"Grand Central", kind:"stage", x:"50%", y:"51%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
+  { name:"Grand Central", kind:"stage", x:"42%", y:"49%", info:"Hilltop, alongside Thrutopia, Anara Forest and Oldtown. Boomtown's original main stage, relocated for Chapter Five's redesign — bands, hip hop and headline sets across the weekend." },
   // Moved from a guessed (93,38), up near Temple Valley Camping, to
   // (90,58) — the second reference video's own wide Copperwood/Grand
   // Central/Oldtown/Hilltop shot shows THE LION'S DEN's own glow right
@@ -9438,7 +9438,11 @@ function loadMap(){
         showSiteOverview(520);
       };
     }
-    mapGL.once("load", ()=> showSiteOverview(0));
+    // Open on the central, walkable part of the site instead of fitting the
+    // entire perimeter into a small phone card. The Site overview control
+    // remains the intentional way back to the full festival extent.
+    const entryFocus = schematicToLatLon(46, 53);
+    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.65 }));
 
     // Label density is deliberately a three-step reveal rather than one
     // hard switch. DOM markers do not have MapLibre collision handling,
