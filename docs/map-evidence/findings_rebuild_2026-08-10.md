@@ -37,6 +37,11 @@ to prevent their old placements returning through a later layer toggle.
 The MapLibre coordinate frame is now a neutral internal render plane as well;
 it has no physical-site or legacy-GPS meaning.
 
+The active load handler installs only the evidence-scene sources before
+returning; old empty MapLibre sources and the external geographic basemap are
+not registered at runtime. `scripts/assert-evidence-map-boundary.mjs` locks
+this down in preflight.
+
 ## Detail-pass status
 
 The close-detail layer is a review draft, not settled map data. It keeps only
@@ -74,3 +79,7 @@ location.
 - The screenshots show distinct campsite circulation and grid-like lanes in
   Valley Camping and the Hilltop field. Those lanes are rendered separately
   from town streets and remain inside their respective camp field.
+- A further visual pass gives only the confirmed NEXUS, Grand Central,
+  Spectrum 360, and Lion's Den focal points a restrained close-zoom glow. The
+  shapes remain in their existing evidence-traced courts; no new venue position
+  or icon field was inferred.

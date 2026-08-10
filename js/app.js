@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v438";
-const APP_BUILD_TIME = "2026-08-10T22:31:08Z";
+const APP_CACHE_VERSION = "v439";
+const APP_BUILD_TIME = "2026-08-10T22:38:21Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7468,7 +7468,7 @@ function evidenceRebuildDetailLabels(){
 
 function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
-  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots"];
+  const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
   const polygon = (name, fill, points)=>({
     type:"Feature", properties:{ name, fill },
@@ -7519,7 +7519,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   // Close-view areas remain abstract and unbranded: they describe the
   // observed footprint and circulation, never a guessed business location.
   geo.evidenceStageCourts = { type:"FeatureCollection", features:[
-    polygon("NEXUS court", "rgba(132,210,151,.98)", [[39,42],[43,40],[47,43],[45,47],[40,47]]),
+    polygon("NEXUS court", "rgba(132,210,151,.98)", [[39,42],[44,40],[47,43],[45,47],[40,47]]),
     polygon("Hidden Woods court", "rgba(72,121,82,.98)", [[19,39],[24,38],[27,42],[24,46],[19,45]]),
     polygon("Tangled Roots court", "rgba(124,98,45,.98)", [[51,29],[56,28],[58,32],[54,34],[50,32]]),
     polygon("Grand Central court", "rgba(243,214,165,.98)", [[56,45],[61,44],[63,48],[60,51],[55,49]]),
@@ -7564,6 +7564,15 @@ function buildEvidenceOnlyMapGeoJSON(){
     [44,73],[47,74],[46,76],                           // Tribe of Frog compound
     [72,85],[75,85],[78,86],[80,88]                    // Lion's Den forecourt
   ].map(([x,y])=>treeDot(x,y,.72)) };
+  // Four confirmed stage focal points get a restrained, zoom-gated glow.
+  // This echoes the official map's orange stage treatment without adding
+  // unsupported icons or a new position for any venue.
+  geo.evidenceStageHalos = { type:"FeatureCollection", features:[
+    [42,44, "rgba(255,194,92,.34)", 1.0],  // NEXUS
+    [60,47, "rgba(255,167,94,.36)", 1.35], // Grand Central
+    [39,68, "rgba(213,119,218,.34)", 1.1], // Spectrum 360
+    [77,87, "rgba(255,166,72,.38)", 1.45]  // The Lion's Den
+  ].map(([x,y,color,scale])=>({ type:"Feature", properties:{ color, scale }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } })) };
   return geo;
 }
 
@@ -9490,6 +9499,47 @@ function venueMetaHtml(name){
   return bits.length ? `<p class="empty-note">${bits.join(" · ")}</p>` : "";
 }
 
+function installEvidenceSceneLayers(map, geo){
+  // This is the entire active MapLibre scene. Keep it evidence-only: do not
+  // insert a generated map-system source, physical basemap, or compatibility
+  // layer ahead of these sources.
+  const source = (id, data)=> map.addSource(id, { type:"geojson", data });
+  source("evidence-territories", geo.evidenceTerritories);
+  map.addLayer({ id:"evidence-territories-shadow", type:"fill", source:"evidence-territories", paint:{ "fill-color":"rgba(11,22,15,.4)", "fill-translate":[2,3] } });
+  map.addLayer({ id:"evidence-territories-fill", type:"fill", source:"evidence-territories", paint:{ "fill-color":["get","fill"], "fill-opacity":.94 } });
+  map.addLayer({ id:"evidence-territories-outline", type:"line", source:"evidence-territories", paint:{ "line-color":"rgba(37,91,50,.72)", "line-width":1.35 } });
+
+  source("evidence-forest-dots", geo.evidenceForestDots);
+  map.addLayer({ id:"evidence-forest-dots", type:"circle", source:"evidence-forest-dots", paint:{ "circle-radius":["*",["get","size"],2.1], "circle-color":"rgba(133,187,118,.88)", "circle-stroke-width":.4, "circle-stroke-color":"rgba(27,57,35,.7)" } });
+  source("evidence-camp-fields", geo.evidenceCampFields);
+  map.addLayer({ id:"evidence-camps-fill", type:"fill", source:"evidence-camp-fields", paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-camps-outline", type:"line", source:"evidence-camp-fields", paint:{ "line-color":"rgba(202,218,156,.68)", "line-width":1.15, "line-dasharray":[2,1.2] } });
+  source("evidence-camp-tents", geo.evidenceCampTents);
+  map.addLayer({ id:"evidence-camp-tents", type:"circle", source:"evidence-camp-tents", minzoom:15.55, paint:{ "circle-radius":2.1, "circle-color":"rgba(245,238,194,.9)", "circle-stroke-width":.35, "circle-stroke-color":"rgba(72,92,54,.72)" } });
+
+  source("evidence-spine", geo.evidenceSpine);
+  map.addLayer({ id:"evidence-spine-casing", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(67,67,46,.38)", "line-width":4.4 } });
+  map.addLayer({ id:"evidence-spine", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(239,225,177,.98)", "line-width":2.2 } });
+  source("evidence-detail-paths", geo.evidenceDetailPaths);
+  map.addLayer({ id:"evidence-detail-paths-casing", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":"rgba(44,49,34,.42)", "line-width":3.2 } });
+  map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":["match",["get","kind"],"camp","rgba(218,231,173,.92)","rgba(252,241,202,.94)"], "line-width":["match",["get","kind"],"camp",1.05,1.45], "line-dasharray":[1.5,.8] } });
+
+  source("evidence-stage-courts", geo.evidenceStageCourts);
+  map.addLayer({ id:"evidence-stage-courts-shadow", type:"fill", source:"evidence-stage-courts", paint:{ "fill-color":"rgba(22,26,18,.4)", "fill-translate":[1,1.5] } });
+  map.addLayer({ id:"evidence-stage-courts", type:"fill", source:"evidence-stage-courts", paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-stage-courts-outline", type:"line", source:"evidence-stage-courts", paint:{ "line-color":"rgba(47,43,28,.8)", "line-width":1.1 } });
+  source("evidence-landmarks", geo.evidenceLandmarks);
+  map.addLayer({ id:"evidence-landmarks-shadow", type:"fill", source:"evidence-landmarks", minzoom:15.55, paint:{ "fill-color":"rgba(16,21,15,.34)", "fill-translate":[1.1,1.4] } });
+  map.addLayer({ id:"evidence-landmarks", type:"fill", source:"evidence-landmarks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-landmarks-outline", type:"line", source:"evidence-landmarks", minzoom:15.55, paint:{ "line-color":"rgba(37,39,27,.88)", "line-width":1.1 } });
+  source("evidence-stage-tiers", geo.evidenceStageTiers);
+  map.addLayer({ id:"evidence-stage-tiers", type:"line", source:"evidence-stage-tiers", minzoom:15.85, paint:{ "line-color":"rgba(244,205,129,.84)", "line-width":1.05 } });
+  source("evidence-court-dots", geo.evidenceCourtDots);
+  map.addLayer({ id:"evidence-court-dots", type:"circle", source:"evidence-court-dots", minzoom:15.85, paint:{ "circle-radius":1.35, "circle-color":"rgba(255,234,150,.82)", "circle-stroke-width":.3, "circle-stroke-color":"rgba(53,64,37,.82)" } });
+  source("evidence-stage-halos", geo.evidenceStageHalos);
+  map.addLayer({ id:"evidence-stage-halos", type:"circle", source:"evidence-stage-halos", minzoom:15.45, paint:{ "circle-radius":["*",["get","scale"],10], "circle-color":["get","color"], "circle-blur":.72 } });
+}
+
 function loadMap(){
   // Rebuild this map data on each call: later calls reuse the MapLibre
   // instance but still rebuild the road-name markers below.
@@ -9499,7 +9549,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v6-no-legacy-markers";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v7-runtime-isolated";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -9564,7 +9614,7 @@ function loadMap(){
       // field parcels, countryside, georeferenced to Matterley Estate) when
       // online, and degrades to exactly this local look with zero signal.
       style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#cbdcc4" } }] },
-      center: [-1.2394, 51.0534],
+      center: [0.007, 0.005],
       // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
       // 14.4 view (previous pass) showed a lot of surrounding blank
       // countryside/MAX_BOUNDS padding around a small festival footprint
@@ -9650,6 +9700,11 @@ function loadMap(){
     // triangulated into a GPU mesh by MapLibre right here, then just
     // drawn every frame from then on.
     mapGL.on("load", ()=>{
+
+      // Do not construct empty legacy sources or an old geographic underlay.
+      // The active canvas is deliberately limited to the evidence scene above.
+      installEvidenceSceneLayers(mapGL, geo);
+      return;
 
       // Bottom-to-top: faint ground texture first, then area fills, then
       // paths, then icon-like points on top — the same layering a real

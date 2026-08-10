@@ -19,6 +19,10 @@ The binding rules for using this evidence are in
 the evidence hierarchy, area-by-area workflow, geometry constraints, and
 visual review gate apply before any new map feature is added.
 
+The live renderer boundary and its automated check are documented in
+[`SOURCE_OF_TRUTH.md`](SOURCE_OF_TRUTH.md). Treat that document as the
+handover point for any future map work.
+
 Screenshots of the official Boomtown Fair 2026 app's own map, plus written
 findings from reviewing them and ~490 frames extracted from 5 screen
 recordings of the same official app. This is the evidence behind the
