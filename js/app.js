@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v414";
-const APP_BUILD_TIME = "2026-08-10T13:18:19Z";
+const APP_CACHE_VERSION = "v415";
+const APP_BUILD_TIME = "2026-08-10T13:47:23Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7630,17 +7630,29 @@ function buildMapGeoJSON(){
   // districts, not the other way round — but clearanceRadius above was
   // sizing them the same conservative way as a district, capped at 9-11.
   // Camp fields get a higher desired cap and a more generous ratio than
-  // districts (0.44 vs 0.38) since neighbouring camp fields genuinely do
-  // sit closer/blend at their edges more than two themed districts would
-  // (Camp Orchid Downtown sitting inside/beside the wider Downtown
-  // Camping, say) — but they DO still get checked against OTHER camp
-  // fields now, not just districts/parking/the market hub. The previous
-  // version skipped camp-vs-camp entirely on the theory that "blending is
-  // normal", but with no check at all two same-sized camp fields several
-  // schematic units apart could draw fully on top of each other — reported
-  // as camp zoning "overlaps and mishapenness". A real (if slightly
-  // looser) limit still allows visible blending at the edges without
-  // letting one camp field's shape swallow its neighbour's whole.
+  // districts (was 0.44 vs 0.38, now 0.5) since neighbouring camp fields
+  // genuinely do sit closer/blend at their edges more than two themed
+  // districts would (Camp Orchid Downtown sitting inside/beside the wider
+  // Downtown Camping, say) — but they DO still get checked against OTHER
+  // camp fields now, not just districts/parking/the market hub.
+  //
+  // Ratio raised 0.44 -> 0.5 after directly measuring a genuine full-site
+  // overview frame (not a close-up crop — see the note on
+  // downtownWoodlandRing below for the same class of mistake elsewhere):
+  // an isolated field like West Camping, whose nearest OTHER zone is a
+  // district ~32 schematic units away, was still only rendering at radius
+  // ~10-11 — clearly smaller than the reference's own West/Downtown/
+  // Meadow camping field, which reads as comparable in size to the whole
+  // Botanica/Metropolis/Area 404 built cluster. 0.5 is not an arbitrary
+  // further loosening: safeMax below already guarantees no overlap even
+  // at blobRing's worst-case bulge (that's what the min(...,safeMax) is
+  // for), and safeMax's own effective ratio is ~0.5 minus a small fixed
+  // offset — so raising this ratio to 0.5 mostly just means isolated
+  // fields now actually reach that already-safe ceiling instead of
+  // stopping short of it for no reason. Tightly-clustered camps (Downtown
+  // Camping, Meadow Camping/Living, Camplight — all within a few units of
+  // each other) are floor-bound (Math.max(3, ...) below), not ratio-bound,
+  // so this change does not grow those into new overlaps.
   function campClearanceRadius(cx, cy, selfRef, desired){
     let minDist = Infinity;
     zoneCenters.forEach(z=>{
@@ -7648,7 +7660,7 @@ function buildMapGeoJSON(){
       minDist = Math.min(minDist, Math.hypot(z.x - cx, z.y - cy));
     });
     const safeMax = Math.max(1.5, (minDist / 2 - 0.4) / BLOB_MAX_OVERSIZE);
-    return Math.min(Math.max(3, Math.min(desired, minDist * 0.44 / BLOB_MAX_OVERSIZE)), safeMax);
+    return Math.min(Math.max(3, Math.min(desired, minDist * 0.5 / BLOB_MAX_OVERSIZE)), safeMax);
   }
 
   function districtDesired(d){
@@ -8598,7 +8610,7 @@ function buildMapGeoJSON(){
     // clearance function's own safeMax cap still holds each field to half
     // the distance to its nearest neighbour, so the tightly-clustered west
     // camps stay separated and the overlap audits keep passing.
-    const r = campClearanceRadius(cx, cy, c, 26) / reach;
+    const r = campClearanceRadius(cx, cy, c, 34) / reach;
     campFieldRadii.set(c, r);
     // fieldRing, not blobRing — real camping fields are farm-field-shaped
     // (mostly straight edges, an actual boundary), not a circular blob.
@@ -8769,20 +8781,25 @@ function buildMapGeoJSON(){
     const safeMax = Math.max(4, (minDist / 2 - 0.4) / BLOB_MAX_OVERSIZE);
     return Math.min(Math.max(6, Math.min(15, minDist * 0.46 / BLOB_MAX_OVERSIZE)), safeMax);
   }
-  // Was drawn as a dark, high-opacity "shared wooded Downtown enclosure"
-  // under Botanica/Metropolis/Area 404/Oldtown. Direct comparison against
-  // docs/map-evidence/screenshots/shot_005.jpg and shot_012.jpg — actual
-  // official-app captures of exactly this area — shows no such thing: the
-  // ground there is flat, uniform bright green throughout, the same as
-  // everywhere else that isn't camping/a wayfinding field/genuine named
-  // woodland. At full opacity this polygon was rendering as a large dark
-  // green blob covering most of four districts, easily mistaken for (and
-  // reported as) more "stacked shapes" — see forests-fill's fill-color
-  // below, now folded down to near-nothing for this specific role. Kept
-  // as a shape (not deleted) only because forestFringeFeatures below still
-  // references it; the real per-district built-up feel comes from
-  // building density and paths, not a background tint.
-  const downtownWoodlandRing = [[5,31], [22,25], [40,27], [51,38], [55,54], [52,73], [44,81], [25,80], [8,70], [1,50], [5,31]];
+  // A previous pass in this same session gutted this polygon's opacity to
+  // near-zero, reasoning from shot_005.jpg/shot_012.jpg (both CLOSE-ZOOM
+  // crops of just Botanica/Metropolis/Area 404) that no such zone existed
+  // — that was the exact "mixing up the zoomed-in detail shot with the
+  // overall view" mistake flagged directly: those crops are too tight to
+  // show background zoning at all, built-up detail fills the whole frame
+  // either way. A genuine full-SITE overview frame (frames/f7_full.png in
+  // the working session, showing the whole site from Alresford Rd down to
+  // the south perimeter road in one shot) makes it unambiguous: there IS
+  // a large, distinctly darker-green background zone under the whole
+  // built corridor from Botanica through Area 404, Grand Central,
+  // Copperwood and on toward Oldtown/Helix, clearly darker than the
+  // brighter green around West/Downtown/Meadow camping — it just reads
+  // as "flat green" at close zoom because the district's own dense
+  // buildings/paths dominate the eye locally. Restored (see forests-fill
+  // below) and widened east to actually reach that Grand Central/Oldtown/
+  // Helix corridor, which the original ring (capped around x=55) fell
+  // short of.
+  const downtownWoodlandRing = [[5,31], [22,25], [40,27], [58,33], [68,42], [70,58], [62,72], [44,81], [25,80], [8,70], [1,50], [5,31]];
   const downtownWoodlandFringeRing = [[1,28], [21,22], [45,24], [56,35], [60,55], [56,77], [46,85], [23,84], [5,74], [-4,50], [1,28]];
   const reviewedWoodlandFeatures = reviewedNaturalAreas.filter(({area})=> area.kind === "woodland").map(({area, anchor})=>{
     const x = parseFloat(anchor.x), y = parseFloat(anchor.y);
@@ -9515,13 +9532,16 @@ function loadMap(){
 
       mapGL.addSource("mapForests", { type: "geojson", data: geo.forests });
       mapGL.addSource("mapForestFringe", { type: "geojson", data: geo.forestFringe });
-      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(82,163,93,0.02)", "rgba(82,163,93,0.18)"] } });
+      mapGL.addLayer({ id: "forest-fringe-fill", type: "fill", source: "mapForestFringe", paint: { "fill-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(82,163,93,0.12)", "rgba(82,163,93,0.18)"] } });
       // The Downtown bowl is a shared background landscape, not a single
       // enormous dark zone. Its softer value lets Botanica, Metropolis and
       // Area 404 read as distinct places inside one wooded setting, while
       // reviewed woodland stages keep their denser, separate silhouette.
-      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(52,136,75,0.06)", "rgba(52,136,75,0.82)"] } });
-      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(35,105,59,0.04)", "rgba(35,105,59,0.65)"], "line-width": 1.15 } });
+      // Restored to a real (if still more restrained than the full 0.82
+      // named-woodland strength) opacity — see the comment on
+      // downtownWoodlandRing above for why near-zero was a mistake.
+      mapGL.addLayer({ id: "forests-fill", type: "fill", source: "mapForests", paint: { "fill-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(52,136,75,0.38)", "rgba(52,136,75,0.82)"] } });
+      mapGL.addLayer({ id: "forests-line", type: "line", source: "mapForests", paint: { "line-color": ["match", ["get", "role"], "downtown-enclosure", "rgba(35,105,59,0.3)", "rgba(35,105,59,0.65)"], "line-width": 1.15 } });
       mapGL.addSource("mapForestDots", { type: "geojson", data: geo.forestDots });
       mapGL.addLayer({ id: "forest-dots", type: "circle", source: "mapForestDots", minzoom: 13.8, paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 0.7, 19, 2.2],
