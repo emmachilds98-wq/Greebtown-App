@@ -35,12 +35,19 @@ if(!oldtown || oldtown.footprint.width < 11 || oldtown.footprint.height < 4.5) e
 
 const gc = references.anchors?.["Grand Central"]?.to;
 const oldtownAnchor = references.anchors?.Oldtown?.to;
+const botanica = references.anchors?.Botanica?.to;
+const letsbe = references.anchors?.["Letsbe Avenue"]?.to;
+const metropolis = references.anchors?.Metropolis?.to;
+const area404 = references.anchors?.["Area 404"]?.to;
 const lion = references.anchors?.["The Lion's Den"]?.to;
 const helix = references.anchors?.Helix?.to;
 const hilltop = read("camp-zones.json").groundUseFields?.find(field => field.id === "hilltop-field");
 const hilltopXs = hilltop?.points.map(point => point[0]) || [];
 const hilltopYs = hilltop?.points.map(point => point[1]) || [];
 if(!gc || !oldtownAnchor || oldtownAnchor[1] - gc[1] < 3 || oldtownAnchor[0] - gc[0] < 3 || oldtownAnchor[0] - gc[0] > 10) errors.push("Grand Central must remain north-west of Oldtown");
+if(!letsbe || !botanica || letsbe[1] >= botanica[1] - 4) errors.push("Letsbe Avenue must remain north of Botanica");
+if(!metropolis || !botanica || metropolis[1] <= botanica[1]) errors.push("Metropolis must remain south of Botanica");
+if(!area404 || !metropolis || area404[0] <= metropolis[0] || area404[1] <= metropolis[1]) errors.push("Area 404 must remain east-south-east of Metropolis");
 if(!hilltop || Math.max(...hilltopYs) < 67) errors.push("Hilltop must retain its full reviewed southern extent");
 if(!gc || !hilltop || gc[1] >= Math.min(...hilltopYs)) errors.push("Hilltop must remain south of Grand Central");
 if(!lion || !hilltop || lion[1] <= Math.min(...hilltopYs) || lion[0] >= Math.min(...hilltopXs)) errors.push("The Lion's Den must remain south-west of the Hilltop field");

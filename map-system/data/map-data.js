@@ -4142,31 +4142,31 @@ window.GREEBTOWN_DISTRICT_FOOTPRINTS = {
       "points": [
         [
           39,
-          38
+          30
         ],
         [
           52,
-          37
+          29
         ],
         [
           60,
-          42
+          34
         ],
         [
           61,
-          48
+          40
         ],
         [
           56,
-          53
+          45
         ],
         [
           46,
-          53
+          45
         ],
         [
           38,
-          49
+          41
         ]
       ]
     },
@@ -4215,7 +4215,7 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
   "reviewedOverview": true,
-  "reviewNote": "Canonical coordinates calibrated as one full-site composition from IMG_3670; no runtime anchor transform is applied.",
+  "reviewNote": "Canonical coordinates rebuilt as an evidence-led relationship layout from the official screenshots and video findings. Legacy coordinate sources are not treated as authoritative; no runtime anchor transform is applied.",
   "observations": [
     {
       "id": "official-overview-2026-08-03",
@@ -4318,12 +4318,12 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
     },
     "Letsbe Avenue": {
       "from": [
-        45,
-        43
+        47,
+        36
       ],
       "to": [
-        45,
-        43
+        47,
+        36
       ]
     },
     "Grand Central": {

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "coordinateSystem": "schematic-percent-v1",
   "reviewedOverview": true,
-  "reviewNote": "Canonical coordinates calibrated as one full-site composition from IMG_3670; no runtime anchor transform is applied.",
+  "reviewNote": "Canonical coordinates rebuilt as an evidence-led relationship layout from the official screenshots and video findings. Legacy coordinate sources are not treated as authoritative; no runtime anchor transform is applied.",
   "observations": [
     {
       "id": "official-overview-2026-08-03",
@@ -105,12 +105,12 @@
     },
     "Letsbe Avenue": {
       "from": [
-        45,
-        43
+        47,
+        36
       ],
       "to": [
-        45,
-        43
+        47,
+        36
       ]
     },
     "Grand Central": {
