@@ -288,7 +288,7 @@
   /* The map is the task, not a small card in a long settings screen.
      Give it enough vertical room for the site's major terrain bands to
      read at once, while retaining a sensible cap on taller desktops. */
-  #map{height:clamp(500px, 68vh, 680px); position:relative; border-radius:20px; overflow:hidden; border:1px solid rgba(188,212,184,.28); outline:1px solid rgba(26,68,47,.42); outline-offset:3px; background:#cbdcc4; box-shadow:0 18px 38px rgba(5,18,12,.3),inset 0 0 0 5px rgba(240,225,175,.08);}
+  #map{height:clamp(500px, 68vh, 680px); position:relative; border-radius:14px; overflow:hidden; border:2px solid #244a3c; background:#50bb6d; box-shadow:0 12px 26px rgba(5,18,12,.22);}
   /* Grain/texture overlay — every district/building/path/glow on this map
      is a separately-generated flat-colour GeoJSON polygon, which reads as
      "a stack of shapes on a background" rather than one cohesive
@@ -303,10 +303,7 @@
      z-index 1: above the MapLibre canvas (z-index:auto/0) so it textures
      the ground/buildings/paths, below markers (z-index:2) and the
      existing vignette (z-index:3) so pins/labels/the frame stay crisp. */
-  #map::before{content:""; position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.85; mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='saturate' values='0'/><feComponentTransfer><feFuncA type='linear' slope='0.9' intercept='0.05'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    background-size:140px 140px;}
-  #map::after{content:""; position:absolute; inset:0; z-index:3; pointer-events:none; border:7px solid rgba(13,43,29,.1); border-radius:20px; box-shadow:inset 0 0 28px rgba(12,36,24,.12);}
+  #map::before,#map::after{content:none;}
   /* Every district/building/path/camp-field/forest polygon on this map is
      drawn with a perfectly crisp vector edge, which is exactly what makes
      the whole scene read as separate cut-out shapes laid on a background
@@ -323,8 +320,8 @@
      edges — not a soft painterly one, so a strong blur was pulling this
      map away from that reference, not toward it. Keep just enough to
      take the edge off the polygon seams. */
-  .maplibregl-canvas{filter:blur(0.6px) saturate(1.14) contrast(1.03);}
-  .maplibregl-map{background:#cbdcc4; font:inherit;}
+  .maplibregl-canvas{filter:none;}
+  .maplibregl-map{background:#50bb6d; font:inherit;}
   .maplibregl-ctrl-group{background:rgba(255,252,238,.92) !important; border:1px solid rgba(72,83,58,.35) !important; box-shadow:0 2px 8px rgba(34,54,36,.18) !important;}
   .maplibregl-ctrl-group button{background-color:transparent !important;}
   .maplibregl-ctrl-group button + button{border-top:1px solid rgba(72,83,58,.22) !important;}
@@ -335,11 +332,10 @@
   .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group{border-radius:14px !important; overflow:hidden;}
   .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button{width:42px !important; height:42px !important;}
   @media(max-width:460px){#map{height:clamp(480px, 70vh, 600px);}}
-  .marker{position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; border-radius:50%; background:transparent; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center;}
-  .marker::before{content:""; width:13px; height:13px; border-radius:50%; background:var(--accent-amber); box-shadow:0 0 0 4px rgba(242,168,60,.25); border:1.5px solid rgba(11,21,18,.6);}
-  .marker.stage::before{width:16px; height:13px; border-radius:2px 2px 0 0; clip-path:polygon(50% 0%, 100% 100%, 0% 100%); background:var(--accent-teal); box-shadow:0 0 0 4px rgba(75,227,172,.22); border:none;}
-  .marker::after{content:""; position:absolute; inset:-5px; border-radius:50%; border:2px solid rgba(242,168,60,.5); animation:pulse 2.2s infinite;}
-  .marker.stage::after{border-color:rgba(75,227,172,.5);}
+  .marker{position:absolute; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:transparent; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center;}
+  .marker::before{content:""; width:12px; height:12px; border-radius:50%; background:#fffdf5; box-shadow:0 0 0 2px #263b38; border:2px solid #fffdf5;}
+  .marker.stage::before{width:16px; height:14px; border-radius:0; clip-path:polygon(50% 0%,100% 100%,0% 100%); background:#273a36; box-shadow:0 0 0 2px #f6a54c; border:none;}
+  .marker::after{content:none;}
   .marker.minor{width:16px; height:16px; margin:-8px 0 0 -8px;}
   .marker.minor::before{width:8px; height:8px; box-shadow:none; border:1px solid rgba(11,21,18,.6); opacity:.85;}
   .marker.minor::after{content:none;}
@@ -377,9 +373,8 @@
      notched corner, paper grain and dark edge keep the map coherent;
      the stage/district/camp variants below then carry hierarchy without
      looking copied from any other app's sign system. */
-  .map-label{--label-paper:rgba(255,247,222,.97); --label-ink:#273629; --label-edge:rgba(35,51,37,.88); position:absolute; left:0; top:0; z-index:1; display:inline-flex; align-items:center; min-height:15px; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; font-size:9px; font-weight:780; line-height:1.05; color:var(--label-ink); background:linear-gradient(135deg,rgba(255,255,255,.42),transparent 37%),var(--label-paper); padding:3px 8px 3px 10px; border:1px solid var(--label-edge); border-radius:3px 8px 3px 3px; white-space:nowrap; pointer-events:none; transform:translate(-50%, 9px); box-shadow:2px 2px 0 rgba(25,38,28,.45),0 2px 4px rgba(21,38,25,.2); letter-spacing:.025em; isolation:isolate;}
-  .map-label::before{content:""; position:absolute; left:0; top:2px; bottom:2px; width:3px; border-radius:2px; background:rgba(73,164,121,.95);}
-  .map-label::after{content:""; position:absolute; width:5px; height:5px; right:3px; top:3px; border:1px solid rgba(35,51,37,.3); border-left:0; border-bottom:0; opacity:.45;}
+  .map-label{--label-paper:#f5c15d; --label-ink:#182e32; --label-edge:#273842; position:absolute; left:0; top:0; z-index:1; display:inline-flex; align-items:center; min-height:12px; font-family:Arial,Helvetica,sans-serif; font-size:8px; font-weight:800; line-height:1; color:var(--label-ink); background:var(--label-paper); padding:2px 5px; border:2px solid var(--label-edge); border-radius:0; white-space:nowrap; pointer-events:none; transform:translate(-50%, 9px); box-shadow:1px 1px 0 rgba(27,49,53,.35); letter-spacing:.02em; isolation:isolate; text-transform:uppercase;}
+  .map-label::before,.map-label::after{content:none;}
   .map-label-text{position:relative; z-index:1; display:block;}
   /* Zoomed-out label thinning (see loadMap()'s updateLabelDensity) — the
      default view has 20+ names (stages, camps, gates, hidden venues)
@@ -423,7 +418,7 @@
      each district name in its own distinct, poster-bold treatment, not
      a uniform colour. Falls back to the old amber if --district-rgb is
      ever unset (shouldn't happen, but keeps this rule safe on its own). */
-  .map-label.district{display:block; min-height:0; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; background:none; border:none; box-shadow:none; border-radius:0; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.075em; color:rgba(var(--district-rgb, 242,168,60),1); text-shadow:0 1px 3px rgba(0,0,0,.85), 0 0 9px rgba(var(--district-rgb, 242,168,60),.48); transform:translate(calc(-50% + var(--label-dx, 0px)), calc(-22px + var(--label-dy, 0px))); padding:0;}
+  .map-label.district{display:block; min-height:0; font-family:Arial Black,Arial,sans-serif; background:none; border:none; box-shadow:none; border-radius:0; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:rgba(var(--district-rgb,242,168,60),1); text-shadow:1px 1px 0 #28443a,0 0 3px rgba(255,255,255,.45); transform:translate(calc(-50% + var(--label-dx,0px)),calc(-22px + var(--label-dy,0px))); padding:0;}
   .map-label.district::before,.map-label.district::after{content:none;}
   /* Area 404 — repeatedly confirmed on camera as a bold red/green
      "glitch" double-exposure, not a flat colour. Two extra offset
@@ -452,18 +447,12 @@
      teal-tinted (matching .marker.stage's own colour) so the 15-ish main
      stage names read as the clear anchor points of the map, with minor
      stages (below) visibly the smaller, secondary tier. */
-  .map-label.stage{--label-paper:rgba(236,211,132,.98); --label-ink:#182b25; --label-edge:rgba(25,65,50,.94); min-height:18px; font-size:10px; font-weight:900; padding:3px 10px 3px 12px; letter-spacing:.055em; text-transform:uppercase; border-radius:3px 10px 3px 3px; box-shadow:3px 3px 0 rgba(22,61,47,.55),0 2px 4px rgba(35,53,35,.22);}
-  .map-label.stage::before{width:4px; background:rgba(47,155,111,.98);}
-  .map-label.stage::after{width:6px; height:6px; right:4px; top:4px; border-color:rgba(20,65,49,.45);}
-  .map-label.minor{--label-paper:rgba(242,239,211,.96); --label-ink:#473724; --label-edge:rgba(89,66,39,.72); min-height:12px; font-family:system-ui,sans-serif; font-size:7px; font-weight:800; padding:2px 5px 2px 7px; border-radius:2px 5px 2px 2px; box-shadow:1px 1px 0 rgba(64,47,28,.32); letter-spacing:.02em;}
-  .map-label.minor::before{width:2px; background:rgba(178,116,67,.9);}
-  .map-label.minor::after{display:none;}
+  .map-label.stage{--label-paper:#f6bd57; --label-ink:#192d31; --label-edge:#263842; min-height:15px; font-size:9px; font-weight:900; padding:3px 6px; letter-spacing:.04em; border-radius:0; box-shadow:1px 1px 0 rgba(24,45,49,.45);}
+  .map-label.minor{--label-paper:#f4c667; --label-ink:#263842; --label-edge:#33454b; min-height:10px; font-family:Arial,Helvetica,sans-serif; font-size:6px; font-weight:800; padding:2px 4px; border-radius:0; box-shadow:none; letter-spacing:.01em;}
   /* Official-detail small venues use the same compact paper-sign language
      as the reference map, but sit centred over their own illustrated
      footprint rather than being offset from a marker dot. */
-  .map-label.small-venue-label{--label-paper:rgba(255,229,164,.98); --label-edge:rgba(109,67,27,.88); min-height:10px; transform:translate(-50%, -50%); font-size:6px; font-weight:850; text-transform:uppercase; letter-spacing:.025em; color:#312315; padding:1px 4px 1px 6px; border-radius:1px 4px 1px 1px; box-shadow:1px 1px 0 rgba(80,48,17,.52),0 1px 1px rgba(35,53,35,.18); z-index:2;}
-  .map-label.small-venue-label::before{width:2px; background:rgba(218,113,59,.92);}
-  .map-label.small-venue-label::after{display:none;}
+  .map-label.small-venue-label{--label-paper:#f5c15d; --label-edge:#273842; min-height:9px; transform:translate(-50%,-50%); font-size:5.5px; font-weight:850; letter-spacing:.015em; color:#1f3137; padding:1px 3px; border-radius:0; box-shadow:none; z-index:2;}
   .map-label.secret{--label-paper:rgba(237,232,205,.94); font-size:8px; padding:2px 6px 2px 8px; color:#463827; font-style:italic;}
   .map-label.secret::before{background:rgba(111,95,165,.8);}
   /* Was plain floating text with no background — reference screenshots

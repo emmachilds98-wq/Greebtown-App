@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v420";
-const APP_BUILD_TIME = "2026-08-10T16:06:15Z";
+const APP_CACHE_VERSION = "v421";
+const APP_BUILD_TIME = "2026-08-10T16:19:10Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -8973,7 +8973,7 @@ function buildMapGeoJSON(){
   // a pale surrounding landscape. Keep that primary silhouette in the source
   // data rather than trying to imply it with an accumulation of local fields.
   // Woodland, camps, districts and venues are deliberately layered above it.
-  const siteGroundFeature = { type:"Feature", properties:{ fill:"rgba(73,184,108,0.9)" }, geometry:{ type:"Polygon", coordinates:[boundaryRing] } };
+  const siteGroundFeature = { type:"Feature", properties:{ fill:"#50bb6d" }, geometry:{ type:"Polygon", coordinates:[boundaryRing] } };
   const boundaryFeature = { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates: boundaryRing } };
 
   // A dark, thin north–south divider is visible immediately west of the
@@ -9409,7 +9409,7 @@ function loadMap(){
       // map with the festival painted on top" look (real A31/Alresford Rd,
       // field parcels, countryside, georeferenced to Matterley Estate) when
       // online, and degrades to exactly this local look with zero signal.
-      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#cbdcc4" } }] },
+      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#50bb6d" } }] },
       center: [-1.2394, 51.0534],
       // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
       // 14.4 view (previous pass) showed a lot of surrounding blank
@@ -9497,7 +9497,10 @@ function loadMap(){
       mapGL.addSource("mapSiteGround", { type: "geojson", data: geo.siteGround });
       mapGL.addLayer({ id: "site-ground-fill", type: "fill", source: "mapSiteGround", paint: { "fill-color": ["get", "fill"] } });
 
-      // Real map underlay, added HERE (after the vector map is already on
+      // The official reference is a self-contained illustrated vector map,
+      // not a real-world tile map with artwork overlaid on it. Keep this
+      // companion map on the same visual model.
+      if(false){
       // screen) rather than in the init style, so a slow or unreachable
       // tile server can never block the illustration from rendering — see
       // the style comment above. Inserted just below site-ground-fill so it
@@ -9526,17 +9529,17 @@ function loadMap(){
           // Let the open ground read the real base through it.
           mapGL.setPaintProperty("site-ground-fill", "fill-opacity", 0.5);
         }
-      } catch(e){ /* basemap is a non-critical enhancement; never let it break the map */ }
+      } catch(e){ /* basemap is a non-critical enhancement; never let it break the map */ } }
       mapGL.addSource("mapFields", { type: "geojson", data: geo.fields });
       // Broad land parcels establish the arrival view. Fine mottling still
       // waits for deep zoom, so the landscape feels composed rather than
       // noisy before a visitor begins exploring.
-      mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", minzoom: 13.5, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "fields-fill", type: "fill", source: "mapFields", minzoom: 13.5, layout: { visibility: "none" }, paint: { "fill-color": ["get", "fill"] } });
       mapGL.addSource("mapFieldsFine", { type: "geojson", data: geo.fieldsFine });
-      mapGL.addLayer({ id: "fields-fine-fill", type: "fill", source: "mapFieldsFine", minzoom: 17.1, paint: { "fill-color": ["get", "fill"] } });
+      mapGL.addLayer({ id: "fields-fine-fill", type: "fill", source: "mapFieldsFine", minzoom: 17.1, layout: { visibility: "none" }, paint: { "fill-color": ["get", "fill"] } });
 
       mapGL.addSource("mapHedges", { type: "geojson", data: geo.hedges });
-      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", minzoom: 13.5, paint: { "line-color": "rgba(31,72,45,0.2)", "line-width": ["interpolate", ["linear"], ["zoom"], 13.5, 0.55, 16, 0.95] } });
+      mapGL.addLayer({ id: "hedges-line", type: "line", source: "mapHedges", minzoom: 13.5, layout: { visibility: "none" }, paint: { "line-color": "rgba(31,72,45,0.2)", "line-width": ["interpolate", ["linear"], ["zoom"], 13.5, 0.55, 16, 0.95] } });
 
       mapGL.addSource("mapContours", { type: "geojson", data: geo.contours });
       mapGL.addLayer({ id: "contours-line", type: "line", source: "mapContours", paint: { "line-color": "rgba(255,255,255,0.1)", "line-width": 1.2 } });
@@ -9564,8 +9567,8 @@ function loadMap(){
       // paler centre line, same two-layer treatment as the trunk paths
       // inside the site.
       mapGL.addSource("mapRoads", { type: "geojson", data: geo.roads });
-      mapGL.addLayer({ id: "roads-casing", type: "line", source: "mapRoads", paint: { "line-color": "rgba(104,107,104,0.7)", "line-width": 5.4 } });
-      mapGL.addLayer({ id: "roads-line", type: "line", source: "mapRoads", paint: { "line-color": "rgba(239,241,237,0.94)", "line-width": 2.5 } });
+      mapGL.addLayer({ id: "roads-casing", type: "line", source: "mapRoads", paint: { "line-color": "rgba(137,145,139,0.78)", "line-width": 6 } });
+      mapGL.addLayer({ id: "roads-line", type: "line", source: "mapRoads", paint: { "line-color": "rgba(248,246,238,0.98)", "line-width": 3.4 } });
 
       mapGL.addSource("mapGateForecourts", { type: "geojson", data: geo.gateForecourts });
       mapGL.addLayer({ id: "gate-forecourts-fill", type: "fill", source: "mapGateForecourts", paint: { "fill-color": ["get", "fill"] } });
