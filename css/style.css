@@ -443,6 +443,17 @@
   .map-label.overview.overview-lions-den{font-size:10px; color:rgba(34,94,54,.98);}
   .map-label.manual-territory{display:block; min-height:0; padding:0; border:0; border-radius:0; background:none; box-shadow:none; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; font-size:8px; font-weight:900; letter-spacing:.09em; text-transform:uppercase; color:rgba(30,55,34,.96); text-shadow:0 1px 0 rgba(255,251,224,.95),0 0 5px rgba(255,251,224,.82); transform:translate(-50%,-50%);}
   .map-label.manual-territory::before,.map-label.manual-territory::after{content:none;}
+  /* Clean-slate territory labels: a calm, readable hierarchy at the opening
+     zoom, replacing the retired pin/chip constellation. */
+  .map-label.evidence-territory{font-size:10px; letter-spacing:.12em; color:rgba(250,245,219,.98); text-shadow:0 1px 2px rgba(8,20,13,.95),0 0 7px rgba(8,20,13,.88);}
+  .map-label.evidence-territory.evidence-botanical{color:#d3f0bc;}
+  .map-label.evidence-territory.evidence-neon{color:#b7efdc; letter-spacing:.15em;}
+  .map-label.evidence-territory.evidence-warm{color:#ffd69a;}
+  .map-label.evidence-territory.evidence-gold{color:#fff0a8;}
+  .map-label.evidence-territory.evidence-violet{color:#e2c8ff;}
+  .map-label.evidence-territory.evidence-central{color:#ffe0bb; font-size:10.5px;}
+  .map-label.evidence-territory.evidence-oldtown{font-family:Georgia,"Times New Roman",serif; color:#ffd4cb; font-size:11px; letter-spacing:.1em;}
+  .map-label.evidence-territory.evidence-den{color:#ffe2b4; font-size:11px;}
   /* Area 404 — repeatedly confirmed on camera as a bold red/green
      "glitch" double-exposure, not a flat colour. Two extra offset
      text-shadow layers (one red, one green, either side of the base
