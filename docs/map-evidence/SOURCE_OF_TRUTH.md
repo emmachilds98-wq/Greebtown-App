@@ -58,6 +58,15 @@ substantial but north of the compact town and Camp at Hilltop long and eastern.
 Do not shrink these parents to make room for labels or bring any two reviewed
 grounds together; adjust label anchors independently instead.
 
+The evidence renderer deliberately uses a portrait display plane for this
+whole-site composition. It is the current source-backed presentation layer for
+the active evidence geometry, labels, focal points, and entry bounds only; do
+not replace it with a square fit or use it to transform quarantined GPS,
+legacy, or generated map-system collections. `IMG_3748.webp` also requires a
+quiet dark woodland belt between the Lion's Den/Quantum corridor and Sunset;
+the belt is a parent ground silhouette, not permission to add tree scatter or
+unreadable utility detail.
+
 `IMG_3739.webp` and `IMG_3744.webp` show the western woodland as a connected
 outer belt around the town. `IMG_3740.webp`, `IMG_3742.webp`, and
 `IMG_3743.webp` are the current references for Botanica, Metropolis, and Area

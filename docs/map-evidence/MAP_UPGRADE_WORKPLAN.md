@@ -137,6 +137,12 @@ field, and East reads as a tall articulated right-side field. The executable
 proportions audit now blocks a later edit from splitting a field from its own
 outline or reintroducing a documented boundary overlap.
 
+**Entry-composition correction — complete:** the evidence-only display plane
+now follows the tall north-to-south composition of `IMG_3751.webp`, so mobile
+entry no longer compresses the city, Lion's Den woodland, and southern Sunset
+edge into a square patchwork. The layout and its site boundary are protected by
+the same executable proportions audit; no legacy coordinate set participates.
+
 The first of these batches is complete. It is a connected western-core pass
 rather than a single-landmark tweak: parent silhouettes, the documented
 horseshoe, key landmark forms, and their display zoom were reviewed together.

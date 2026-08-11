@@ -671,3 +671,43 @@ location.
   its outline or if the reviewed West/Hidden Woods, Downtown/Area 404,
   Valley/Anara, Hilltop/Lion's Den, Sunset/Quantum, Sunset/East, or
   East/Lion's Den separations are reintroduced.
+
+## Entry-composition aspect correction (recorded before geometry work)
+
+- The controlling `IMG_3751.webp` view is a tall north-to-south composition:
+  the broad western ground occupies the upper left, the named city is a compact
+  middle cluster, and the lower Lion's Den / woodland / Sunset sequence takes
+  a materially longer vertical run than it does in the current square entry
+  layout. A square evidence plane makes every parent look like a similarly
+  sized patch and is not a faithful first-view composition.
+- `IMG_3748.webp` shows a substantial dark woodland belt below the Lion's Den
+  and above the yellow Sunset edge. Quantum and the Lion's Den must not sit
+  directly against the Sunset boundary just to fill the bottom of the map.
+- `IMG_3749.webp` and `IMG_3750.webp` keep East Camping as a long right-side
+  land-use field that continues toward, but remains separate from, that
+  southern edge.
+
+### Scope for this pass
+
+- Give the **evidence-only renderer** a taller display plane, move the reviewed
+  southern site edge, Sunset, and East field together, and add only the
+  anonymous dark woodland silhouette directly supported by `IMG_3748.webp`.
+  All territory, court, route, focal-point, and label coordinates continue to
+  originate in the current evidence scene; no legacy coordinate collection is
+  read or transformed.
+- Do not add woodland texture, amenities, campsite lanes, tents, gates, roads,
+  parking, stalls, utilities, or any new named place. This is entry-scale
+  composition and land-use massing only.
+
+### Entry-composition aspect correction result
+
+- The active evidence renderer now uses one documented portrait display plane
+  for its geometry, overview bounds, focal points, and all evidence labels.
+  The generic schematic conversion remains unchanged, so this does not migrate
+  or reinterpret quarantined map collections.
+- Extended the reviewed site and East-field southern run together, restored a
+  quiet dark woodland belt between the Lion's Den/Quantum corridor and Sunset,
+  and moved Sunset to the actual southern edge. The first view now presents a
+  tall outer-ground hierarchy instead of a square patchwork.
+- The proportion audit now also fails if the evidence plane is returned to a
+  square ratio or if the site boundary stops matching its active ground shape.

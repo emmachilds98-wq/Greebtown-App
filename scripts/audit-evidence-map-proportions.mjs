@@ -48,6 +48,11 @@ const contains = (point, polygon) => {
 const overlaps = (a, b) => a.some((point, index) => b.some((other, otherIndex) => intersects(point, a[(index + 1) % a.length], other, b[(otherIndex + 1) % b.length]))) || contains(a[0], b) || contains(b[0], a);
 const sameRing = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+if(!app.includes("const EVIDENCE_LAYOUT_Y_SCALE = 2;")) fail("the active evidence renderer must retain the reviewed portrait entry ratio");
+if(!app.includes("function evidenceSchematicToLatLon(xPercent, yPercent){")) fail("the portrait ratio must stay isolated to evidence-scene geometry");
+if(!app.includes("const evidenceRingToLngLat = ring =>")) fail("active evidence geometry must use the reviewed portrait display plane");
+if(!sameRing(first("Festival grounds"), last("Festival grounds boundary"))) fail("the reviewed site ground and its boundary must remain on the same portrait silhouette");
+
 const campPairs = [
   ["West Camping boundary", "West Camping"],
   ["Downtown Camping boundary", "Downtown Camping"],
