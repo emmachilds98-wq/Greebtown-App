@@ -392,3 +392,59 @@ location.
   rather than through it. Temple Valley Camping, its boundary, field lanes and
   pitch marks remain unchanged and separate. No new name, route endpoint,
   venue, utility, gate, stall, tree, camp field, or parent boundary was added.
+
+## Tribe of Frog clearing refinement (recorded before geometry work)
+
+- `IMG_3747.webp` is the authoritative close official-app view for this
+  connected south cluster. It shows Tribe of Frog as a pale, irregular clearing
+  enclosed by woodland, with a compact purple/dark stage form within it; the
+  court itself is not a large purple district fill. The `TRIBE OF FROG` title
+  sits at the clearing's north-west edge, while the documented approach leaves
+  from its south-east toward Quantum.
+- The same source shows Quantum directly east/south-east of that clearing and
+  `SUNSET HILL` further south-west. `IMG_3748.webp` separately confirms the
+  Quantum-to-Lion's-Den relationship and must not be changed in this pass.
+- This correction may revise only the existing Tribe court, compact stage form,
+  label anchor, and already-documented approach. It must not introduce nearby
+  service icons, gates, stalls, unnamed compounds, or a new route endpoint.
+- `IMG_3747.webp` shows Quantum as green terrain inside a sharply visible
+  purple boundary treatment, rather than a solid purple land-use block.
+  `IMG_3748.webp` likewise shows the Lion's Den as a dark woodland clearing
+  with a compact warm stage/apron and glow, not a large orange court fill.
+  This connected pass may correct those existing ground treatments only; the
+  current Quantum → Helix → Lion's Den path relationship and all other labels
+  must remain in place.
+
+### Tribe of Frog / Quantum / Lion's Den refinement result
+
+- Re-profiled Tribe of Frog as a pale, irregular woodland clearing and
+  replaced its broad purple compound with the source-visible compact concave
+  stage pod. Its label now sits on the clearing's north-west edge and the
+  existing approach begins at the clear south-east exit.
+- Replaced Quantum's solid violet territory fill with the documented green
+  ground, retaining its purple boundary treatment. The Tribe clearing and
+  stage are now checked to stay entirely outside Quantum while the existing
+  documented approach joins the two areas.
+- Replaced the Lion's Den's broad orange court with dark woodland ground and
+  retained the compact warm stage apron and glow. No service icon, gate,
+  parking shape, stall, new route, or unrelated label was added.
+
+## Lion's Den stage-form refinement (recorded before geometry work)
+
+- `IMG_3748.webp` visibly shows the Lion's Den stage as a long, low warm-faced
+  structure inside the dark clearing, with a darker rear/side mass and a broad
+  orange glow. It is not a generic radial or hexagonal stage marker.
+- The existing forest clearing, purple Quantum boundary, and the three
+  amphitheatre tiers describe the correct connected setting. This pass may
+  re-profile only the existing Lion's Den apron and landmark into the observed
+  compact stage silhouette; it may not add a service icon, access road, vendor,
+  gate, campsite, or new named point.
+
+### Lion's Den stage-form refinement result
+
+- Replaced the generic Lion's Den hexagon with a long, low dark stage structure
+  and a separate warm front face, then re-set its three existing audience tiers
+  below that face. The warm apron and glow remain contained within the original
+  dark woodland clearing.
+- No route, name, utility, access feature, vendor, campsite, gate, parking
+  shape, or adjacent quantum/woodland boundary changed.
