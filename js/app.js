@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v469";
-const APP_BUILD_TIME = "2026-08-11T10:21:22Z";
+const APP_CACHE_VERSION = "v470";
+const APP_BUILD_TIME = "2026-08-11T10:26:37Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7659,7 +7659,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     observedMassing("Oldtown east middle frontage", "rgba(196,119,78,.98)", [[59.4,59.1],[61.2,58.8],[61.6,60.2],[60.9,61.4],[59.5,60.7],[58.9,59.8]], "IMG_3737.webp"),
     observedMassing("Oldtown east lower frontage", "rgba(214,142,83,.98)", [[59,62.1],[60.9,61.9],[61.4,63.3],[60.7,64.8],[59.1,64.6],[58.6,63.2]], "IMG_3737.webp"),
     observedMassing("Oldtown southern turn frontage", "rgba(164,94,70,.98)", [[52.2,66.2],[54.5,65.7],[57.4,66.4],[58.2,67.8],[57.1,68.9],[54.4,68.6],[51.8,67.5]], "IMG_3737.webp"),
-    observedMassing("Lion's Den stage apron", "rgba(100,73,46,.96)", [[71,85],[77,83],[82,85],[82,88],[79,90],[73,89],[70,87]], "IMG_3748.webp")
+    observedMassing("Lion's Den stage apron", "rgba(87,62,43,.96)", [[71.2,85.2],[75,83.9],[80.5,84.8],[82,86.4],[80.7,88.7],[75.5,89.3],[71.3,87.4]], "IMG_3748.webp")
   ] };
   // IMG_3745 through IMG_3751 clarify the outer camping grounds as broad,
   // separate land-use silhouettes. They intentionally contain no newly
@@ -7758,7 +7758,10 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Tribe of Frog stage pod", "rgba(107,63,125,.98)", [[42,72.8],[44,71.7],[46.6,72.3],[47.6,73.8],[46.8,75.5],[45.6,76.6],[44.8,75.6],[45.8,74.7],[45.5,73.7],[44.2,73.4],[43.3,74.4],[43.6,75.8],[42.3,75.7],[41.8,74.4]], { outline:"rgba(225,126,214,.9)", source:"IMG_3747.webp" }),
     polygon("Hilltop camp marker", "rgba(250,203,59,.98)", [[77,59.5],[78.7,62],[77,64.5],[75.3,62]], { outline:"rgba(101,82,33,.96)" }),
     polygon("Helix round court", "rgba(222,133,98,.95)", [[61,81],[64,80],[66,82],[65,85],[62,85],[60,83]]),
-    polygon("Lion's Den amphitheatre", "rgba(117,78,43,.98)", [[72,85],[80,84],[83,87],[80,89],[72,89],[70,87]])
+    // IMG_3748 shows the Lion's Den as a long, low stage with a lit front,
+    // seated inside the darker apron rather than a generic radial court.
+    polygon("Lion's Den stage structure", "rgba(91,65,45,.98)", [[72,85.2],[79.8,85.1],[81,86.1],[80.2,87.2],[73,87.3],[71.5,86.2]], { outline:"rgba(57,45,32,.96)", source:"IMG_3748.webp" }),
+    polygon("Lion's Den stage face", "rgba(208,119,56,.98)", [[73.2,85.9],[79.6,85.8],[79.8,86.7],[73.3,86.8]], { outline:"rgba(248,185,91,.88)", source:"IMG_3748.webp" })
   ] };
   // The sources show Spectrum 360 enclosed by individual containers, NEXUS
   // as a dark triangular canopy, and a small water feature immediately below
@@ -7778,9 +7781,9 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Hydro XL pond", "rgba(67,151,188,.90)", [[24,76],[27,76],[28,77.5],[25,78.5],[23.5,77]])
   ] };
   geo.evidenceStageTiers = { type:"FeatureCollection", features:[
-    route([[72,85.6],[74,84.8],[78,84.7],[81,85.8]], { kind:"tier", source:"IMG_3748.webp" }),
-    route([[71.5,86.9],[74,85.9],[79,85.9],[82,87.1]], { kind:"tier", source:"IMG_3748.webp" }),
-    route([[72.5,88.2],[75,87.2],[79.5,87.3],[81.5,88.4]], { kind:"tier", source:"IMG_3748.webp" }),
+    route([[72.2,87.7],[75,87.2],[79.8,87.3],[81.4,88.1]], { kind:"tier", source:"IMG_3748.webp" }),
+    route([[71.7,88.7],[75,88.1],[79.5,88.1],[81.5,89.1]], { kind:"tier", source:"IMG_3748.webp" }),
+    route([[72.6,89.6],[75.2,89],[79,89.1],[80.7,89.9]], { kind:"tier", source:"IMG_3748.webp" }),
     route([[38,67],[42,67]], { kind:"tier" }), route([[38,68.5],[42.5,68.5]], { kind:"tier" })
   ] };
   geo.evidenceCourtDots = { type:"FeatureCollection", features:[

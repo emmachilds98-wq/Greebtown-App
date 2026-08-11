@@ -177,6 +177,11 @@ incorrect solid purple/orange court fills with the observed woodland ground
 and boundary treatments. The next pass must preserve this corrected south
 sequence before adding any new close detail.
 
+**Update - Lion's Den stage form:** the visible stage in `IMG_3748.webp` is
+now a compact long-fronted landmark inside the reviewed clearing, with its
+audience tiers below it. This completes the source-visible Lion's Den form;
+do not introduce nearby icon-derived facilities or access features.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’

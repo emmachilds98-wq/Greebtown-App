@@ -428,3 +428,23 @@ location.
 - Replaced the Lion's Den's broad orange court with dark woodland ground and
   retained the compact warm stage apron and glow. No service icon, gate,
   parking shape, stall, new route, or unrelated label was added.
+
+## Lion's Den stage-form refinement (recorded before geometry work)
+
+- `IMG_3748.webp` visibly shows the Lion's Den stage as a long, low warm-faced
+  structure inside the dark clearing, with a darker rear/side mass and a broad
+  orange glow. It is not a generic radial or hexagonal stage marker.
+- The existing forest clearing, purple Quantum boundary, and the three
+  amphitheatre tiers describe the correct connected setting. This pass may
+  re-profile only the existing Lion's Den apron and landmark into the observed
+  compact stage silhouette; it may not add a service icon, access road, vendor,
+  gate, campsite, or new named point.
+
+### Lion's Den stage-form refinement result
+
+- Replaced the generic Lion's Den hexagon with a long, low dark stage structure
+  and a separate warm front face, then re-set its three existing audience tiers
+  below that face. The warm apron and glow remain contained within the original
+  dark woodland clearing.
+- No route, name, utility, access feature, vendor, campsite, gate, parking
+  shape, or adjacent quantum/woodland boundary changed.

@@ -99,6 +99,11 @@ its compact warm stage/apron and glow. These views permit correcting those
 ground and landmark forms only: their utility icons, nearby blocks and access
 features must not be copied into the evidence map.
 
+At the Lion's Den, `IMG_3748.webp` specifically permits the long low stage,
+warm front face, darker apron, and audience tiers in that order. It does not
+permit reproducing the surrounding amenity icons, access tracks, or unnamed
+structures.
+
 The evidence map's stylesheet is also a runtime asset. Its URL must be
 versioned with each release and CSS must remain network-first in the service
 worker; otherwise a current map script can retain a stale visual treatment or
