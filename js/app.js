@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v459";
-const APP_BUILD_TIME = "2026-08-11T00:37:09Z";
+const APP_CACHE_VERSION = "v460";
+const APP_BUILD_TIME = "2026-08-11T00:50:52Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7585,8 +7585,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Thrutopia boundary", "transparent", [[70,35],[75,35],[78,37],[82,36],[85,39],[87,41],[84,45],[79,45],[75,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)", lineWidth:2.15 }),
     polygon("Anara Forest boundary", "transparent", [[79,19],[89,20],[94,26],[92,32],[85,34],[78,29]], { color:"rgba(112,224,144,.92)", lineWidth:1.7 }),
     polygon("Temple Valley Camping boundary", "transparent", [[88,30],[96,30],[98,35],[94,40],[87,38],[85,34]], { color:"rgba(94,118,237,.96)", lineWidth:2.05 }),
-    polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)" }),
-    polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)" }),
+    polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)", lineWidth:2 }),
+    polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)", lineWidth:2.2 }),
     polygon("Hilltop field outline", "transparent", [[68,46],[84,47],[87,60],[82,77],[70,78],[66,67]], { color:"rgba(231,205,84,.9)" }),
     // The dark diagonal alongside Hilltop is observed as a boundary/fence,
     // not a public route (findings_vidAB.md). It keeps the Oldtown/Quantum
@@ -7665,12 +7665,17 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[54,35],[58,36],[62,35],[66,36],[69,39]], { kind:"street" }), // Copperwood courtyard -> Thrutopia hand-off
     route([[70,39],[75,38],[80,39],[83,42],[79,44],[74,43],[70,39]], { kind:"street" }), // Thrutopia boundary loop
     route([[81,29],[84,28],[87,27],[90,27]], { kind:"street" }), // Anara clearing approach
-    route([[58,48],[58,50],[59,52],[58,54],[57,55]], { kind:"street" }), // Grand Central -> Boomtown Hall -> Daily Rag
-    route([[59,52],[61,51]], { kind:"street" }),                  // documented Boomtown Hall fork
-    route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
-    route([[51,59],[51,62],[51,65],[51,68]], { kind:"street" }), // Oldtown west chain
-    route([[62,56],[62,58],[62,60],[62,62],[62,65]], { kind:"street" }), // Oldtown east chain
-    route([[53,61],[55,63],[57,62],[58,64],[56,66],[53,65],[53,61]], { kind:"street" }), // Oldtown inner loop
+    // IMG_3737 shows a teal local transition from the Grand Central stage
+    // through two small junctions, with a short fork at Boomtown Hall.
+    route([[58,48],[58,50],[59,52],[58,54],[57,55]], { kind:"central", source:"IMG_3737.webp" }), // Grand Central -> Boomtown Hall -> Daily Rag
+    route([[59,52],[61,51]], { kind:"central", source:"IMG_3737.webp" }), // documented Boomtown Hall fork
+    route([[55,48],[58,50],[61,49]], { kind:"central", source:"IMG_3737.webp" }), // Grand Central court
+    // The Oldtown close-up has two distinct, winding, red-edged venue lanes
+    // and a small central loop. They are styled separately from generic
+    // streets so this compact north-to-south cluster does not read as scatter.
+    route([[51,59],[50,61],[51,63],[50,65],[51,68]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown west chain
+    route([[62,56],[61,58],[62,60],[61,62],[62,65],[61,67]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown east chain
+    route([[53,61],[55,62],[57,61],[58,63],[57,66],[55,67],[53,65],[53,61]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown inner loop
     route([[46,75],[50,78],[53,81],[56,82]], { kind:"street" }), // Tribe of Frog -> Quantum fork
     route([[59,20],[64,22],[69,25]], { kind:"camp" }),           // Valley Camping lanes
     route([[74,59],[78,62],[81,66],[79,71]], { kind:"camp" }),   // Hilltop camping route
@@ -9706,7 +9711,11 @@ function installEvidenceSceneLayers(map, geo){
   map.addLayer({ id:"evidence-spine", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(104,140,110,.88)", "line-width":1.75 } });
   source("evidence-detail-paths", geo.evidenceDetailPaths);
   map.addLayer({ id:"evidence-detail-paths-casing", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":"rgba(44,49,34,.42)", "line-width":3.2 } });
-  map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":["match",["get","kind"],"camp","rgba(184,203,150,.92)","neon","rgba(190,115,207,.94)","track","rgba(151,168,139,.94)","rgba(180,198,167,.94)"], "line-width":["match",["get","kind"],"camp",1.05,"neon",1.8,"track",1.15,1.45], "line-dasharray":[1.5,.8] } });
+  map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, filter:["!",["in",["get","kind"],["literal",["central","oldtown"]]]], paint:{ "line-color":["match",["get","kind"],"camp","rgba(184,203,150,.92)","neon","rgba(190,115,207,.94)","track","rgba(151,168,139,.94)","rgba(180,198,167,.94)"], "line-width":["match",["get","kind"],"camp",1.05,"neon",1.8,"track",1.15,1.45], "line-dasharray":[1.5,.8] } });
+  // The official central close-up differentiates the teal Grand Central
+  // connection and Oldtown's red twin-lane routes from ordinary footpaths.
+  // Render them as solid local routes above their shared casing.
+  map.addLayer({ id:"evidence-featured-routes", type:"line", source:"evidence-detail-paths", minzoom:15.55, filter:["in",["get","kind"],["literal",["central","oldtown"]]], paint:{ "line-color":["match",["get","kind"],"central","rgba(99,194,176,.98)","oldtown","rgba(211,98,70,.98)","rgba(180,198,167,.94)"], "line-width":["match",["get","kind"],"central",1.75,"oldtown",1.85,1.45] } });
   source("evidence-compound-blocks", geo.evidenceCompoundBlocks);
   map.addLayer({ id:"evidence-compound-blocks-shadow", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":"rgba(11,17,12,.35)", "fill-translate":[1,1.2] } });
   map.addLayer({ id:"evidence-compound-blocks", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });

@@ -107,6 +107,13 @@ the green interiors behind the Copperwood/Thrutopia coloured outlines. Those
 observed forms are included in the active map; uncertain Anara venues and
 deeper routes remain deliberately absent.
 
+**Update - Oldtown close view:** `IMG_3737.webp` confirms that the Grand
+Central-to-Oldtown hand-off is a short teal path with a local fork, and that
+Oldtown itself is two linked red-route venue lanes rather than a diffuse
+district of unrelated blocks. This relationship is now rendered at close view
+only. The next pass must keep using connected evidence, not fill those lanes
+with inferred stalls or service icons.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’
