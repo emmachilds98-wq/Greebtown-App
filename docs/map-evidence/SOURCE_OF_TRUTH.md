@@ -31,6 +31,14 @@ reviewed flat diagram.
   landmark, court, campsite lane, or path.
 - Keep a feature out when its name, boundary, or relation is unclear.
 - Do not use a screenshot of Greebtown itself to validate Greebtown.
+- Always keep the coloured zoning/boundary lines the evidence shows. The map is
+  meant to be a faithful copy of the official's zoning, so every district the
+  evidence gives a coloured edge (Thrutopia blue, Copperwood yellow, Quantum
+  purple, Area 404 green, etc.) must render that outline, not just a fill. Per
+  the note below these are boundary treatments over green ground; the outline is
+  the load-bearing feature and must not be dropped when the interior stays
+  green. Evidence for these lines lives in the full-site overviews
+  (IMG_3670/IMG_3671) and the district close-ups (IMG_3736/IMG_3738).
 
 ### Screenshot precedence
 

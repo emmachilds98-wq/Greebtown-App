@@ -63,6 +63,16 @@ Never promote an item because it would make the map look fuller.
 - Districts, camps, woodland, and stage courts must read as distinct ground
   types at entry zoom. Do not rely on a label to distinguish two overlapping
   shapes.
+- Always draw the coloured zoning/boundary line the evidence shows for a
+  bounded territory — the map is meant to be a faithful copy of the official's
+  zoning, so every evidence-bounded district carries its own outline, not just
+  a fill. The lines are readable in the full-site overviews (IMG_3670/IMG_3671)
+  and the district close-ups (IMG_3736/IMG_3738): Thrutopia's blue, Copperwood's
+  yellow, Quantum's purple, Area 404's green, etc. A district that the evidence
+  gives a coloured edge must never render as fill-only. Per SOURCE_OF_TRUTH.md
+  these are boundary treatments over green ground, not solid district fills, so
+  the outline is the load-bearing feature — keep it even when the interior stays
+  green.
 - Campsite lanes stay inside the documented camp field and join a documented
   entrance/corridor. They never cut through towns, woodland, or stages.
 - Utilities require a readable official service name plus neighbouring
