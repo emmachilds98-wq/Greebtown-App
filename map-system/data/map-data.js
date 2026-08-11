@@ -4326,8 +4326,8 @@ window.GREEBTOWN_REFERENCE_LAYOUT = {
         55
       ],
       "to": [
-        71,
-        59
+        69,
+        60
       ]
     },
     "Helix": {
@@ -5024,7 +5024,7 @@ window.GREEBTOWN_NATURAL_AREA_FOOTPRINTS = {
       "sourceName": "The Lion's Den",
       "kind": "woodland",
       "evidence": "official-detail",
-      "notes": "Broad asymmetric eastern woodland mass beside, not inside, the Hilltop corridor; its long north/south edge keeps the amphitheatre clearing legible without reading as a circular camp zone. Scaled to 65% (was a 43x39-unit fringe, genuinely enormous relative to the ~20-30 unit gaps in this part of the site) after direct user feedback that Lion's Den sits far too far east/right — its old full size made ANY position close to Oldtown/Quantum geometrically impossible without overlapping the Hilltop corridor (checked directly with the same overlap-sweep script used previously), forcing it out to x~81 regardless of where the anchor was aimed. Still a genuinely broad woodland at this scale, just no longer implausibly larger than the districts around it.",
+      "notes": "Broad asymmetric eastern woodland mass beside, not inside, the Hilltop corridor; its long north/south edge keeps the amphitheatre clearing legible without reading as a circular camp zone. Scaled to 65% (was a 43x39-unit fringe, genuinely enormous relative to the ~20-30 unit gaps in this part of the site). Position pixel-measured directly off a user-supplied official-app screenshot (IMG_3545, gridded and measured at 2x against Hilltop's own already-calibrated width) — Lion's Den sits almost directly SOUTH of Hilltop, only slightly east of its centre, not east of its eastern edge as earlier passes assumed from indirect/cropped evidence. The measured target (66,57) itself overlaps Hilltop at this scale; (69,59) is the closest point the no-overlap audit allows, ~4 units off the true measurement.",
       "points": [
         [
           -8.5,

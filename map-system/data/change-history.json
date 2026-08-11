@@ -689,6 +689,15 @@
         { "objectId": "audit-rendered-layout-alignment.mjs", "field": "hilltop south-reach threshold", "previous": 62, "next": 50, "note": "the original 62 encoded a 'must reach Quantum' inference from indirect video evidence that this clearer reference supersedes" },
         { "objectId": "stage-lions-den", "field": "reference anchor", "previous": [75, 61], "next": [71, 59], "note": "Hilltop shrinking further freed up room to move Lion's Den closer to Oldtown/Quantum without overlapping it" }
       ]
+    },
+    {
+      "id": "lions-den-pixel-measured-2026-08-11T144800Z",
+      "timestamp": "2026-08-11T14:48:00Z",
+      "actor": "claude",
+      "summary": "User uploaded real image files to the repo (IMG_3544-3556.webp, IMG_3670-3675.png), giving pixel-exact access for the first time this session instead of eyeballing chat-rendered images. Gridded and measured IMG_3545 at 2x against Hilltop's own already-calibrated width: Lion's Den sits almost directly SOUTH of Hilltop, only slightly east of its centre — not east of its eastern edge as every earlier pass (working from indirect video frames or uncropped chat images) assumed.",
+      "changes": [
+        { "objectId": "stage-lions-den", "field": "reference anchor", "previous": [71, 59], "next": [69, 60], "note": "measured target was (66,57); (69,60) is the closest point the no-overlap audit allows against Hilltop's fringe, ~4 units off the true measurement" }
+      ]
     }
   ]
 }
