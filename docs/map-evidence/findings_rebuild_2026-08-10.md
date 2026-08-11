@@ -366,3 +366,29 @@ location.
 - The four route segments and every marquee vertex remain inside the reviewed
   Copperwood parent territory. No new label, venue, stall, service, camping,
   parking, gate, or parent boundary was added.
+
+## Anara clearing form refinement (recorded before geometry work)
+
+- `IMG_3735.webp` is a close official-app view of the Anara clearing. It
+  visibly contains a broad, irregular pale clearing within dark woodland, a
+  round grey gathering court in its lower-middle area, and a two-part magenta
+  stage form at the clearing's north-east edge. The `ANARA` title sits in the
+  upper/eastern half of this same clearing.
+- Temple Valley Camping remains a separate, blue-bounded camping field below
+  and south-east of the clearing. Its coloured pitch marks and local field
+  lanes are already contained inside that separate field; this pass may not
+  connect it to Anara or introduce a new camp route.
+- This is a silhouette and label-anchor correction only. It must not add a
+  venue, utility, gate, stall, individual tree, or a path deeper into the
+  woodland.
+
+### Anara clearing form refinement result
+
+- Re-profiled the existing Anara clearing to its observed asymmetric outline,
+  moved its territory title into the source-visible upper/eastern part of the
+  clearing, and re-drew the grey communal court and magenta stage as the
+  distinct round and stepped forms visible in `IMG_3735.webp`.
+- The existing short approach was retained but routed around the communal court
+  rather than through it. Temple Valley Camping, its boundary, field lanes and
+  pitch marks remain unchanged and separate. No new name, route endpoint,
+  venue, utility, gate, stall, tree, camp field, or parent boundary was added.

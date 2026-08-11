@@ -85,6 +85,13 @@ path chain inside Copperwood. The chain must be limited to The Hide Out,
 Silver Swan/Topsy Turvy, Full Moon, Velvet Rope, and the Foggers Mill branch;
 it does not establish individual stalls or additional nearby landmarks.
 
+`IMG_3735.webp` permits Anara's asymmetric pale clearing, upper/eastern title
+anchor, round grey communal court, and stepped magenta stage form. Its
+documented approach stays within the clearing and must not cross the court.
+Temple Valley Camping remains a separate lower/south-eastern field: the image
+does not establish a public connection into it or any further Anara venue,
+facility, gate, stall, or woodland path.
+
 The evidence map's stylesheet is also a runtime asset. Its URL must be
 versioned with each release and CSS must remain network-first in the service
 worker; otherwise a current map script can retain a stale visual treatment or

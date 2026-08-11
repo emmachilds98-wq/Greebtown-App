@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v467";
-const APP_BUILD_TIME = "2026-08-11T02:38:19Z";
+const APP_CACHE_VERSION = "v468";
+const APP_BUILD_TIME = "2026-08-11T02:47:02Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7440,7 +7440,7 @@ function evidenceRebuildLabels(){
   // do not reuse the quarantined map-system or app coordinate collections.
   return [
     ["WEST CAMPING", 17, 21, "evidence-campground"], ["DOWNTOWN CAMPING", 17, 48, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
-    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 86, 27, "evidence-anara"],
+    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 91, 22.3, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
     ["HILLTOP", 74, 68, "evidence-gold"], ["CAMP SKYLARK", 78, 72, "evidence-campground"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"], ["SUNSET", 23, 94, "evidence-campground"], ["EAST CAMPING", 94, 89, "evidence-campground"]
   ];
@@ -7586,7 +7586,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     // IMG_3735 places a pale communal clearing and round grey court inside
     // Anara's wooded shell, north-west of Temple Valley Camping. These are
     // forms only: no uncertain small-venue name is attached to either.
-    polygon("Anara Forest clearing", "rgba(190,184,151,.96)", [[84,22],[91,21],[94,24],[93,28],[89,30],[84,29],[81,27]], { outline:"rgba(115,125,91,.94)" }),
+    polygon("Anara Forest clearing", "rgba(190,184,151,.96)", [[81.5,26.7],[83.6,24.4],[84.2,21.8],[87.4,20.7],[91.8,21.1],[93.7,23.3],[94.7,25.7],[93.5,28.4],[90.1,30.2],[86.5,29.8],[84.4,30.9],[82.5,29.1]], { outline:"rgba(115,125,91,.94)", source:"IMG_3735.webp" }),
     polygon("Grand Central court", "rgba(243,214,165,.98)", [[56,45],[61,44],[63,48],[60,51],[55,49]]),
     polygon("Tribe of Frog court", "rgba(173,108,184,.98)", [[43,72],[48,71],[50,75],[47,78],[42,76]]),
     polygon("Lion's Den court", "rgba(209,140,65,.98)", [[71,84],[80,83],[83,87],[79,90],[71,89]])
@@ -7711,7 +7711,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[65,33],[65,35.5],[65,38]], { kind:"street", source:"findings_vidCD.md:vidD f_0058,f_0059,f_0067" }),
     route([[65,33],[67,33],[69,33]], { kind:"street", source:"findings_vidCD.md:vidD f_0058,f_0059,f_0067" }),
     route([[70,39],[75,38],[80,39],[83,42],[79,44],[74,43],[70,39]], { kind:"street" }), // Thrutopia boundary loop
-    route([[81,29],[84,28],[87,27],[90,27]], { kind:"street" }), // Anara clearing approach
+    route([[82.7,28.9],[83.4,28.4],[85.5,29.1],[87.3,28.2]], { kind:"street", source:"IMG_3735.webp" }), // Anara clearing approach
     // IMG_3737 shows a teal local transition from the Grand Central stage
     // through two small junctions, with a short fork at Boomtown Hall.
     route([[58,48],[58,50],[59,52],[58,54],[57,55]], { kind:"central", source:"IMG_3737.webp" }), // Grand Central -> Boomtown Hall -> Daily Rag
@@ -7739,7 +7739,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Spectrum 360 container ring", "rgba(91,73,119,.96)", [[37,65],[40,64],[43,66],[44,69],[42,71],[38,71],[36,69]]),
     polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
     polygon("Tangled Roots stage structure", "rgba(130,91,48,.98)", [[52,21],[54,20],[56,21],[56,24],[54,25],[52,23]], { outline:"rgba(205,76,58,.96)", source:"IMG_3739.webp" }),
-    polygon("Anara gathering circle", "rgba(103,105,113,.96)", [[87,25.2],[89,24.8],[90.4,26],[90,27.5],[88,27.9],[86.7,26.7]], { outline:"rgba(62,69,64,.95)" }),
+    polygon("Anara gathering circle", "rgba(103,105,113,.96)", [[87.3,25.6],[88.2,24.9],[89.3,25],[90.1,25.7],[90.4,26.7],[89.9,27.5],[88.9,27.9],[87.8,27.6],[86.9,26.7]], { outline:"rgba(62,69,64,.95)", source:"IMG_3735.webp" }),
     polygon("Grand Central stage frontage", "rgba(180,76,51,.98)", [[55.7,45.2],[58.3,43.7],[60.4,45],[61,47.4],[59,49.1],[56.3,48.5]], { outline:"rgba(255,216,159,.9)", source:"IMG_3737.webp" }),
     polygon("Grand Central main-stage glyph", "rgba(211,84,54,.98)", [[59,45.7],[60.3,47],[59,48.3],[57.7,47]], { outline:"rgba(255,216,159,.9)" }),
     polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
@@ -7763,7 +7763,10 @@ function buildEvidenceOnlyMapGeoJSON(){
   ] };
   geo.evidenceCanopies = { type:"FeatureCollection", features:[
     polygon("NEXUS triangular canopy", "rgba(35,47,39,.96)", [[40,43],[44,41],[45,46]], { outline:"rgba(255,174,81,.88)" }),
-    polygon("Anara Forest stage canopy", "rgba(173,78,147,.96)", [[91,24],[93,23],[94,25],[93,27],[91,26]], { outline:"rgba(243,150,207,.86)" })
+    // IMG_3735 shows Anara's magenta stage as a stepped two-part form at the
+    // clearing's north-east edge, rather than a generic pentagon.
+    polygon("Anara Forest stage canopy", "rgba(173,78,147,.96)", [[90.7,22.9],[92.8,22.5],[93.9,24.1],[94,26.8],[92.2,26.5],[91,25.4]], { outline:"rgba(243,150,207,.86)", source:"IMG_3735.webp" }),
+    polygon("Anara Forest stage face", "rgba(220,104,185,.98)", [[91.8,23.8],[93.1,23.7],[93.5,25.1],[92.6,25.9],[91.7,25.1]], { outline:"rgba(252,175,221,.86)", source:"IMG_3735.webp" })
   ] };
   geo.evidenceWaterLandmarks = { type:"FeatureCollection", features:[
     polygon("Hydro XL pond", "rgba(67,151,188,.90)", [[24,76],[27,76],[28,77.5],[25,78.5],[23.5,77]])
