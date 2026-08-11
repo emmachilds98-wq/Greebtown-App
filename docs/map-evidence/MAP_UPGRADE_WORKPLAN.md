@@ -163,6 +163,13 @@ Mill. The active close view now renders that bounded local route and marquee
 form only; no individual stall, utility, gate, camping, or parent geometry
 has been inferred.
 
+**Update - Anara form refinement:** `IMG_3735.webp` is now reflected more
+closely at close view: Anara's clearing, title anchor, communal circle and
+stepped magenta stage retain their observed relationship, while the separate
+Temple Valley field remains untouched. The next pass must re-check the full
+Copperwood → Thrutopia → Anara sequence before considering any deeper Anara
+detail.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’
