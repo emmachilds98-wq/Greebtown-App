@@ -314,3 +314,31 @@ location.
   close-detail label threshold. Primary confirmed names remain available at
   the normal explore view; the complete venue-chip tier should appear after a
   deliberate small zoom into a district.
+
+## Central lane refinement (recorded before geometry work)
+
+- `IMG_3737.webp` and `findings_vidCD.md` frames `vidD f_0067` and
+  `vidD f_0070` show Oldtown as dark ground containing two narrow, winding
+  north-to-south red-edged venue lanes. The Pomegranate Parlour, Den of Dis
+  Order, Mining For (g)Old Town, Síbín Beag, and The Feckless Wrecked follow
+  the eastern lane; Postal Posse, Trough Love, Da Graaff's Reformatory, La
+  Luna Coven, The Common Ground, and Buskers Wharf follow the western lane.
+- The same sources show compact warm frontage groups beside those lanes, not
+  a single broad peach stage court. The broad Oldtown court approximation must
+  therefore be removed and its connected frontage groups re-profiled into
+  short, irregular lane-side compounds. Their names remain descriptive groups,
+  never claims about individual stalls or businesses.
+- Grand Central, the white chevron clearing, the teal Boomtown Hall/Daily Rag
+  fork, the two existing Oldtown routes, and every named label retain their
+  current evidence-supported relationship. This pass may not add a service,
+  gate, parking area, unnamed vendor, or new route.
+
+### Central lane refinement result
+
+- Removed the broad Oldtown court approximation. Seven compact, irregular
+  frontage groups now follow the already-rendered western and eastern lanes
+  and their southern turn, while the two documented red routes remain visible
+  on the parent district's dark ground.
+- Grouped frontage detail now starts with the complete close-detail tier rather
+  than appearing in the entry view. No labels, routes, stage courts, parent
+  boundaries, or other locations changed.
