@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v481";
-const APP_BUILD_TIME = "2026-08-11T19:27:10Z";
+const APP_CACHE_VERSION = "v482";
+const APP_BUILD_TIME = "2026-08-11T22:04:32Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7943,8 +7943,8 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
     route([A.area404, A.tribe], { kind:"track", source:"IMG_3756.webp" }),
     route([A.tribe, A.quantum], { kind:"track", source:"IMG_3754.webp" }),
-    route([[47,31],[48,32.5],[49,34]], { kind:"oldtown", source:"IMG_3737.webp" }),
-    route([[62,32],[62,34],[62,35.5]], { kind:"oldtown", source:"IMG_3737.webp" })
+    route([[47.3,30.6],[46.9,31.8],[47.3,33],[46.9,34],[47.4,35]], { kind:"oldtown", source:"IMG_3737.webp" }),
+    route([[50.6,30.7],[50.2,31.9],[50.7,33.1],[50.3,34.1],[50.7,35.1]], { kind:"oldtown", source:"IMG_3737.webp" })
   ] };
   geo.evidenceForestDots = { type:"FeatureCollection", features:[
     [17,18,1],[20,20,.9],[58,16,1],[62,18,.9],[85,20,1],[52,45,1],[44,47,.9],[38,46,.9],[70,45,1],[76,48,.9],[30,45,.9],[24,46,1],[16,44,.9],[54,46,.85]
@@ -7989,8 +7989,46 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceOverviewFocalPoints = { type:"FeatureCollection", features: focal.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color, haloColor, scale }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } })) };
   geo.evidenceStageHalos = { type:"FeatureCollection", features: focal.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color:haloColor, scale }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } })) };
   const emptyFC = ()=>({ type:"FeatureCollection", features:[] });
-  geo.evidenceCompoundBlocks = emptyFC(); geo.evidenceContainerEdges = emptyFC(); geo.evidenceCanopies = emptyFC();
-  geo.evidenceWaterLandmarks = emptyFC(); geo.evidenceStageTiers = emptyFC();
+  // Close-zoom inner structure (all zoom-gated in installEvidenceSceneLayers,
+  // so the overview is unaffected). Positioned relative to the north-up
+  // district centres and traced from the district close-ups: IMG_3742 (Area
+  // 404's Spectrum 360 container ring + warm compounds), IMG_3737 (Oldtown's
+  // twin red-route lanes and lane-side frontages), IMG_3739/findings_vidCD
+  // (Copperwood's Full Moon arcade), IMG_3740 (Botanica/NEXUS), IMG_3748
+  // (Lion's Den audience tiers).
+  const blk = (cx,cy,rx,ry,fill,src)=> polygon("frontage", fill, ring(cx,cy,rx,ry,0.08,cx*0.6), { source:src });
+  geo.evidenceCompoundBlocks = { type:"FeatureCollection", features:[
+    // Area 404 warm compounds around Spectrum 360
+    blk(27.2,30.6,1.1,0.7,"rgba(137,89,92,.96)","IMG_3742.webp"), blk(31.2,31,1.1,0.7,"rgba(191,101,77,.96)","IMG_3742.webp"),
+    blk(30.6,29.3,1,0.6,"rgba(204,128,75,.96)","IMG_3742.webp"), blk(26.8,29.2,1,0.6,"rgba(176,111,72,.96)","IMG_3742.webp"),
+    // Oldtown lane-side frontages (two red-route lanes)
+    blk(47.4,31.4,0.9,0.6,"rgba(204,128,75,.98)","IMG_3737.webp"), blk(47,32.9,0.9,0.6,"rgba(221,150,88,.98)","IMG_3737.webp"), blk(47.7,34.3,0.9,0.6,"rgba(179,102,72,.98)","IMG_3737.webp"),
+    blk(50.6,31.5,0.9,0.6,"rgba(225,154,90,.98)","IMG_3737.webp"), blk(50.7,33,0.9,0.6,"rgba(196,119,78,.98)","IMG_3737.webp"), blk(50.2,34.4,0.9,0.6,"rgba(214,142,83,.98)","IMG_3737.webp"),
+    // Copperwood arcade / terrace / courtyard
+    blk(63.4,27,1,0.6,"rgba(204,154,86,.96)","IMG_3739.webp"), blk(66.6,26.8,1,0.6,"rgba(219,171,100,.96)","IMG_3739.webp"), blk(65,28.8,1,0.6,"rgba(175,116,71,.96)","IMG_3739.webp"),
+    // Metropolis & Botanica street edges
+    blk(23.8,25.6,1,0.6,"rgba(159,101,75,.96)","IMG_3743.webp"), blk(26.2,24.2,1,0.6,"rgba(203,125,72,.96)","IMG_3743.webp"),
+    blk(41.6,24.6,1,0.6,"rgba(188,128,74,.96)","IMG_3740.webp"), blk(44.6,23.6,1,0.6,"rgba(216,160,91,.96)","IMG_3740.webp"),
+    // Grand Central stage-side frontages
+    blk(57.8,31,0.9,0.6,"rgba(204,128,75,.96)","IMG_3737.webp"), blk(60.2,31.4,0.9,0.6,"rgba(185,112,72,.96)","IMG_3737.webp")
+  ] };
+  // Spectrum 360's four purple container pieces (IMG_3742) and the NEXUS
+  // triangular canopy (IMG_3740).
+  geo.evidenceCanopies = { type:"FeatureCollection", features:[
+    polygon("Spectrum 360 north container","rgba(113,70,142,.98)", ring(30,29.2,0.7,0.45,0.06), { outline:"rgba(219,119,209,.84)", source:"IMG_3742.webp" }),
+    polygon("Spectrum 360 east container","rgba(113,70,142,.98)", ring(31.1,30,0.7,0.45,0.06), { outline:"rgba(219,119,209,.84)", source:"IMG_3742.webp" }),
+    polygon("Spectrum 360 south container","rgba(113,70,142,.98)", ring(30,30.8,0.7,0.45,0.06), { outline:"rgba(219,119,209,.84)", source:"IMG_3742.webp" }),
+    polygon("Spectrum 360 west container","rgba(113,70,142,.98)", ring(28.9,30,0.7,0.45,0.06), { outline:"rgba(219,119,209,.84)", source:"IMG_3742.webp" }),
+    polygon("NEXUS triangular canopy","rgba(35,47,39,.96)", [[44.2,22.4],[46.4,22.8],[45.1,24.3]], { outline:"rgba(255,174,81,.88)", source:"IMG_3740.webp" })
+  ] };
+  geo.evidenceContainerEdges = emptyFC();
+  // Lion's Den audience tiers stepping back from the warm stage face (IMG_3748).
+  geo.evidenceStageTiers = { type:"FeatureCollection", features:[
+    route([[35.4,42.9],[37,42.6],[38.6,42.9]], { kind:"tier", source:"IMG_3748.webp" }),
+    route([[35.2,43.5],[37,43.2],[38.8,43.5]], { kind:"tier", source:"IMG_3748.webp" }),
+    route([[35.5,44.1],[37,43.8],[38.5,44.1]], { kind:"tier", source:"IMG_3748.webp" })
+  ] };
+  geo.evidenceWaterLandmarks = emptyFC();
   geo.evidenceCampTents = emptyFC(); geo.evidenceCampPitches = emptyFC(); geo.evidenceFieldLanes = emptyFC();
   return geo;
 }
