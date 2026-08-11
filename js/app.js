@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v466";
-const APP_BUILD_TIME = "2026-08-11T02:24:36Z";
+const APP_CACHE_VERSION = "v467";
+const APP_BUILD_TIME = "2026-08-11T02:38:19Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7702,6 +7702,14 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[32,70],[36,71],[40,73],[42,76]], { kind:"street" }), // Area 404 inner branch
     route([[31,60],[29,64],[27,68],[26,72]], { kind:"neon" }),  // Metropolis -> Hydro XL lit route
     route([[54,35],[58,36],[62,35],[66,36],[69,39]], { kind:"street" }), // Copperwood courtyard -> Thrutopia hand-off
+    // The Full Moon Ballroom cluster is a named close-view chain, not a
+    // collection of inferred stalls. These paths join its documented places
+    // only: The Hide Out -> Silver Swan/Topsy -> Full Moon -> Velvet Rope,
+    // with Foggers Mill as the sole eastward branch.
+    route([[68,36],[66,34],[66,31],[63,30]], { kind:"street", source:"findings_vidCD.md:vidD f_0058,f_0059,f_0067" }),
+    route([[63,30],[64,31],[65,33]], { kind:"street", source:"findings_vidCD.md:vidD f_0058,f_0059,f_0067" }),
+    route([[65,33],[65,35.5],[65,38]], { kind:"street", source:"findings_vidCD.md:vidD f_0058,f_0059,f_0067" }),
+    route([[65,33],[67,33],[69,33]], { kind:"street", source:"findings_vidCD.md:vidD f_0058,f_0059,f_0067" }),
     route([[70,39],[75,38],[80,39],[83,42],[79,44],[74,43],[70,39]], { kind:"street" }), // Thrutopia boundary loop
     route([[81,29],[84,28],[87,27],[90,27]], { kind:"street" }), // Anara clearing approach
     // IMG_3737 shows a teal local transition from the Grand Central stage
@@ -7735,7 +7743,10 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Grand Central stage frontage", "rgba(180,76,51,.98)", [[55.7,45.2],[58.3,43.7],[60.4,45],[61,47.4],[59,49.1],[56.3,48.5]], { outline:"rgba(255,216,159,.9)", source:"IMG_3737.webp" }),
     polygon("Grand Central main-stage glyph", "rgba(211,84,54,.98)", [[59,45.7],[60.3,47],[59,48.3],[57.7,47]], { outline:"rgba(255,216,159,.9)" }),
     polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
-    polygon("Full Moon Ballroom dome", "rgba(250,245,221,.98)", [[63,32],[64,30],[67,30],[68,32],[67,35],[64,35],[62,33]], { outline:"rgba(104,89,61,.9)" }),
+    // Large pale marquee, distinct from the nearby warm compound frontages.
+    // Its asymmetric dome outline follows the readable tent icon in vidD
+    // f_0059; this is a venue form, not a new area boundary.
+    polygon("Full Moon Ballroom dome", "rgba(250,245,221,.98)", [[62,33],[62.6,31.3],[64.2,30],[66.5,29.9],[68,31.1],[68.4,33],[67.6,34.7],[66.1,35.5],[63.9,35.1],[62.4,34.2]], { outline:"rgba(104,89,61,.9)", source:"findings_vidCD.md:vidD f_0059" }),
     polygon("The Retreat clearing", "rgba(208,174,124,.94)", [[70,70],[74,70],[76,72],[74,74],[70,73],[69,71]], { outline:"rgba(109,84,49,.9)" }),
     polygon("Circus round tent", "rgba(219,122,86,.95)", [[68,75],[70,73],[72,74],[73,76],[71,78],[69,78],[67,76]], { outline:"rgba(124,57,43,.92)" }),
     polygon("Tribe of Frog stage pod", "rgba(107,63,125,.98)", [[43,73],[45,72],[47,73],[47,75],[45,76],[43,75]], { outline:"rgba(225,126,214,.9)", source:"IMG_3747.webp" }),

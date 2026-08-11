@@ -156,6 +156,13 @@ court has been removed in favour of those connected lane-side groups, without
 adding a vendor, utility, route, or new named place. Frontage detail remains
 close-zoom only.
 
+**Update - Full Moon cluster refinement:** `vidD f_0058`, `f_0059`, and
+`f_0067` establish Full Moon Ballroom's pale marquee and its named local
+chain through The Hide Out, Silver Swan/Topsy Turvy, Velvet Rope, and Foggers
+Mill. The active close view now renders that bounded local route and marquee
+form only; no individual stall, utility, gate, camping, or parent geometry
+has been inferred.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’
