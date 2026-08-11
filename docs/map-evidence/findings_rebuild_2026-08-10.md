@@ -485,3 +485,40 @@ location.
   explore zoom so this larger construction is visible without a deep zoom. All
   new/refined child forms were checked to remain inside Botanica, Metropolis,
   or Area 404 where a reviewed parent boundary exists.
+
+## Full-site overview legibility pass (recorded before geometry work)
+
+- `IMG_3751.webp` is the authoritative wide-site reference. At overview scale,
+  its connected festival ground, separate outer camp fields, central
+  Grand Central -> Oldtown -> Quantum/Lion's Den sequence, and north-east
+  Copperwood -> Thrutopia -> Anara sequence are visibly distinguishable before
+  any venue-level detail is read.
+- `IMG_3744.webp` confirms the western/northern woodland belt needs a distinct
+  visual reading from the central districts, while `IMG_3745.webp` through
+  `IMG_3750.webp` confirm the perimeter camp fields are individually bounded
+  land-use forms rather than a single background fill.
+- `findings_vidAB.md` records the direct main movement relationships that the
+  existing evidence spine already represents. At overview, strengthen only
+  those existing spine segments and the reviewed district/camp boundaries;
+  do not add an inferred route.
+- Scope: update only the presentation of existing territory contours,
+  camp outlines, documented main spine, and already-confirmed stage focal
+  points so they remain legible below explore zoom. Do not move a label or
+  polygon, create a venue/stall/utility/gate/parking feature, or expose close
+  venue chips at overview.
+
+### Full-site overview legibility result
+
+- Lowered the reviewed territory and camp contours to overview zoom and
+  increased their visual contrast, so the full-site territory order is clear
+  rather than reading as a single dark field.
+- Strengthened the existing documented movement spine only. It now reads as
+  the primary site structure at overview while all finer routes remain gated
+  to explore zoom.
+- Added a small original focal-point hierarchy for the already-rendered
+  Hidden Woods, Tangled Roots, NEXUS, Grand Central, Anara, Spectrum 360,
+  Hydro XL, Tribe of Frog, Helix, and Lion's Den forms. Each is a coloured
+  dot and glow at overview—not a copied official icon or an additional place.
+- The child/parent check confirms each overview focal point remains inside its
+  existing reviewed court, territory, or landmark form. No geometry, label,
+  close venue, facility, gate, parking, or inferred route was added.

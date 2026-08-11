@@ -112,6 +112,12 @@ close-view checks.
    close clusters, label hierarchy, fresh-canvas refresh, cache delivery, and
    the executable evidence boundary before publication.
 
+**Overview prerequisite — complete:** the whole-site view now uses the reviewed
+territory and camp boundaries, existing main spine, and confirmed focal-point
+hierarchy as its first reading level. This is an explicit completion gate: no
+more close-only additions can be treated as map progress while the zoomed-out
+map remains visually unchanged.
+
 The first of these batches is complete. It is a connected western-core pass
 rather than a single-landmark tweak: parent silhouettes, the documented
 horseshoe, key landmark forms, and their display zoom were reviewed together.
