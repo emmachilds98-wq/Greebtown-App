@@ -56,6 +56,15 @@ outer belt around the town. `IMG_3740.webp`, `IMG_3742.webp`, and
 404's broad, linked district silhouettes. Use them to correct only the parent
 boundaries; venue footprints and service icons remain close-detail evidence.
 
+`IMG_3751.webp` is the full-site composition source. It establishes a single
+continuous festival-ground silhouette behind the named territories, with the
+north/east Anara â†’ Thrutopia â†’ Copperwood sequence, the central Grand
+Central â†’ Oldtown hand-off, long Hilltop, and the southern Quantum/Lion's Den
+relationship. `IMG_3735.webp` through `IMG_3739.webp` refine the north/east
+parent edges; `IMG_3747.webp` and `IMG_3748.webp` refine the southern ones.
+This permits only the shared ground and parent-boundary work: it does not
+permit new streets, venues, stalls, trees, facilities, gates, or parking.
+
 ## Required verification
 
 Run `node scripts/map-preflight.mjs` for every map change. It includes

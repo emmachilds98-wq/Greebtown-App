@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v462";
-const APP_BUILD_TIME = "2026-08-11T01:25:46Z";
+const APP_CACHE_VERSION = "v463";
+const APP_BUILD_TIME = "2026-08-11T01:38:49Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7454,11 +7454,16 @@ function evidenceRebuildOverviewLabels(){
   return [
     ["WEST CAMPING", 17, 21, ""],
     ["DOWNTOWN CAMPING", 17, 48, ""],
+    ["BOTANICA", 42, 46, ""],
+    ["METROPOLIS", 35, 60, ""],
+    ["AREA 404", 36, 72, ""],
     ["COPPERWOOD HEIGHTS", 61, 35, ""],
     ["THRUTOPIA", 75, 40, ""],
+    ["ANARA FOREST", 86, 27, ""],
     ["GRAND CENTRAL", 58, 48, ""],
     ["OLDTOWN", 55, 61, ""],
     ["HILLTOP", 74, 68, "overview-hilltop"],
+    ["QUANTUM", 56, 83, ""],
     ["THE LION'S DEN", 74, 86, "overview-lions-den"],
     ["SUNSET", 23, 94, ""],
     ["EAST CAMPING", 94, 89, ""]
@@ -7519,6 +7524,10 @@ function buildEvidenceOnlyMapGeoJSON(){
   // separate from every historic map-system collection.
   geo.evidenceTerritories = {
     type:"FeatureCollection", features:[
+      // IMG_3751 establishes one connected festival ground. This quiet base
+      // is deliberately beneath every named territory: it describes the
+      // shared site silhouette, never a new zone, route, or piece of detail.
+      polygon("Festival grounds", "rgba(28,70,47,.98)", [[2,10],[20,6],[43,8],[61,8],[79,12],[94,20],[99,35],[98,55],[100,78],[91,98],[68,99],[47,97],[31,100],[11,93],[2,78],[0,57],[3,38]], { role:"site", source:"IMG_3751.webp" }),
       // IMG_3739 through IMG_3744 show a continuous western woodland belt
       // wrapping the districts, rather than a regular dark background blob.
       polygon("Woodland west", "rgba(20,53,37,.98)", [[10,25],[31,20],[46,26],[52,33],[50,46],[47,54],[46,63],[48,73],[44,82],[38,92],[22,88],[13,81],[8,64],[8,45]], { source:"IMG_3739.webp" }),
@@ -7538,14 +7547,14 @@ function buildEvidenceOnlyMapGeoJSON(){
       // Copperwood's yellow and Thrutopia's blue are boundary treatments,
       // not large solid land-use fields. Hilltop remains the separate yellow
       // camping field to the south-east.
-      polygon("Copperwood Heights", "rgba(55,104,73,.98)", [[52,29],[62,27],[66,29],[70,31],[69,34],[66,36],[67,39],[59,40],[56,42],[53,39],[50,38],[49,35]]),
-      polygon("Thrutopia", "rgba(57,105,78,.98)", [[69,34],[75,34],[78,36],[82,35],[86,38],[88,41],[85,46],[79,46],[75,45],[72,46],[69,42]]),
-      polygon("Anara Forest", "rgba(29,70,47,.98)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
-      polygon("Grand Central", "rgba(54,78,54,.98)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
-      polygon("Oldtown", "rgba(47,72,50,.98)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
-      polygon("Hilltop", "rgba(137,128,45,.96)", [[67,45],[84,46],[88,60],[83,78],[70,79],[65,67]]),
-      polygon("Quantum", "rgba(75,53,99,.97)", [[48,76],[60,75],[64,85],[59,91],[50,90],[45,83]]),
-      polygon("The Lion's Den", "rgba(40,69,47,.98)", [[67,80],[82,80],[88,86],[82,92],[69,92],[64,87]])
+      polygon("Copperwood Heights", "rgba(55,104,73,.98)", [[51,29],[59,26],[64,27],[68,29],[70,32],[68,35],[69,38],[64,40],[59,41],[56,42],[53,40],[51,38],[49,35]], { source:"IMG_3736.webp" }),
+      polygon("Thrutopia", "rgba(57,105,78,.98)", [[69,34],[75,33],[79,35],[82,34],[86,37],[89,40],[87,43],[85,46],[80,47],[76,45],[72,46],[69,42]], { source:"IMG_3738.webp" }),
+      polygon("Anara Forest", "rgba(29,70,47,.98)", [[78,18],[86,17],[92,20],[95,25],[93,31],[88,35],[82,33],[78,30],[76,24]], { source:"IMG_3735.webp" }),
+      polygon("Grand Central", "rgba(54,78,54,.98)", [[54,43],[61,42],[64,45],[65,48],[62,51],[60,53],[55,52],[51,49],[52,46]], { source:"IMG_3751.webp" }),
+      polygon("Oldtown", "rgba(47,72,50,.98)", [[52,53],[59,53],[62,57],[62,62],[60,67],[59,70],[53,70],[49,66],[48,61],[50,56]], { source:"IMG_3751.webp" }),
+      polygon("Hilltop", "rgba(137,128,45,.96)", [[68,46],[81,46],[85,50],[87,60],[85,69],[81,77],[75,79],[70,78],[66,73],[65,66],[66,56]], { source:"IMG_3751.webp" }),
+      polygon("Quantum", "rgba(75,53,99,.97)", [[48,76],[57,75],[61,78],[64,84],[61,89],[57,92],[51,91],[46,87],[45,81]], { source:"IMG_3747.webp" }),
+      polygon("The Lion's Den", "rgba(40,69,47,.98)", [[67,81],[77,80],[84,82],[88,86],[84,90],[80,92],[71,91],[66,88],[65,85]], { source:"IMG_3748.webp" })
     ]
   };
   // Each main corridor below corresponds to a direct relation recorded in
@@ -7588,17 +7597,18 @@ function buildEvidenceOnlyMapGeoJSON(){
   // close-ups. These are limited to pictured districts and their documented
   // venue chains; they are not generic building scatter.
   geo.evidenceDistrictContours = { type:"FeatureCollection", features:[
+    polygon("Festival grounds boundary", "transparent", [[2,10],[20,6],[43,8],[61,8],[79,12],[94,20],[99,35],[98,55],[100,78],[91,98],[68,99],[47,97],[31,100],[11,93],[2,78],[0,57],[3,38]], { color:"rgba(111,174,113,.9)", lineWidth:2.4, source:"IMG_3751.webp" }),
     polygon("Letsbe Avenue approach", "transparent", [[40,30],[45,30],[47,35],[45,40],[40,39],[38,35]], { color:"rgba(245,208,98,.94)" }),
     polygon("Botanica loop", "transparent", [[33,39],[40,37],[47,39],[51,44],[49,49],[45,53],[37,52],[31,48],[30,44]], { color:"rgba(246,232,180,.96)", lineWidth:1.9, source:"IMG_3740.webp" }),
     polygon("Metropolis outline", "transparent", [[27,55],[35,52],[41,54],[45,58],[44,63],[40,66],[34,68],[28,66],[24,62]], { color:"rgba(91,223,222,.94)", lineWidth:1.95, source:"IMG_3743.webp" }),
     polygon("Area 404 outline", "transparent", [[28,66],[34,68],[40,66],[45,68],[47,72],[44,75],[43,78],[40,81],[37,79],[34,81],[30,78],[25,75],[24,71]], { color:"rgba(220,238,74,.96)", lineWidth:2.05, source:"IMG_3742.webp" }),
-    polygon("Copperwood court outline", "transparent", [[52,30],[62,28],[66,30],[69,32],[68,34],[65,36],[66,38],[59,39],[56,41],[54,38],[51,37],[50,35]], { color:"rgba(250,214,83,.96)", lineWidth:2.1 }),
-    polygon("Thrutopia boundary", "transparent", [[70,35],[75,35],[78,37],[82,36],[85,39],[87,41],[84,45],[79,45],[75,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)", lineWidth:2.15 }),
-    polygon("Anara Forest boundary", "transparent", [[79,19],[89,20],[94,26],[92,32],[85,34],[78,29]], { color:"rgba(112,224,144,.92)", lineWidth:1.7 }),
+    polygon("Copperwood court outline", "transparent", [[52,30],[59,27],[64,28],[67,30],[69,32],[67,34],[68,37],[64,39],[59,40],[56,41],[54,39],[52,37],[50,35]], { color:"rgba(250,214,83,.96)", lineWidth:2.1, source:"IMG_3736.webp" }),
+    polygon("Thrutopia boundary", "transparent", [[70,35],[75,34],[79,36],[82,35],[85,38],[88,40],[86,43],[84,45],[80,46],[76,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)", lineWidth:2.15, source:"IMG_3738.webp" }),
+    polygon("Anara Forest boundary", "transparent", [[79,19],[86,18],[91,21],[94,25],[92,30],[88,34],[83,32],[79,29],[77,24]], { color:"rgba(112,224,144,.92)", lineWidth:1.7, source:"IMG_3735.webp" }),
     polygon("Temple Valley Camping boundary", "transparent", [[88,30],[96,30],[98,35],[94,40],[87,38],[85,34]], { color:"rgba(94,118,237,.96)", lineWidth:2.05 }),
-    polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)", lineWidth:2 }),
-    polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)", lineWidth:2.2 }),
-    polygon("Hilltop field outline", "transparent", [[68,46],[84,47],[87,60],[82,77],[70,78],[66,67]], { color:"rgba(231,205,84,.9)" }),
+    polygon("Grand Central outline", "transparent", [[54,44],[61,43],[63,45],[64,48],[61,50],[60,52],[55,51],[52,49],[53,46]], { color:"rgba(241,122,74,.95)", lineWidth:2, source:"IMG_3751.webp" }),
+    polygon("Oldtown outline", "transparent", [[52,54],[59,54],[61,57],[61,62],[59,67],[58,69],[53,69],[50,65],[49,61],[51,56]], { color:"rgba(214,87,67,.94)", lineWidth:2.2, source:"IMG_3751.webp" }),
+    polygon("Hilltop field outline", "transparent", [[69,47],[80,47],[84,50],[86,60],[84,68],[80,76],[75,78],[71,77],[67,72],[66,66],[67,56]], { color:"rgba(231,205,84,.9)", source:"IMG_3751.webp" }),
     // The outer-site close-ups define these as distinct camp grounds, not
     // decorative texture or extensions of the central districts. Their
     // silhouettes are traced before adding any further camp detail.
@@ -7611,8 +7621,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     // not a public route (findings_vidAB.md). It keeps the Oldtown/Quantum
     // corridor visibly outside the yellow camping field.
     route([[65,49],[64,57],[64,65],[66,73],[69,79]], { color:"rgba(20,31,23,.96)" }),
-    polygon("Quantum boundary", "transparent", [[48,77],[59,76],[63,84],[58,90],[50,89],[46,83]], { color:"rgba(214,137,234,.94)" }),
-    polygon("Lion's Den boundary", "transparent", [[67,81],[81,81],[87,86],[81,91],[69,91],[65,87]], { color:"rgba(240,166,95,.94)" })
+    polygon("Quantum boundary", "transparent", [[48,77],[57,76],[60,79],[63,84],[60,88],[57,91],[51,90],[47,86],[46,81]], { color:"rgba(214,137,234,.94)", source:"IMG_3747.webp" }),
+    polygon("Lion's Den boundary", "transparent", [[68,82],[77,81],[83,83],[87,86],[83,89],[80,91],[71,90],[67,87],[66,85]], { color:"rgba(240,166,95,.94)", source:"IMG_3748.webp" })
   ] };
   // These are grouped, unlabeled forms observed in IMG_3724, not an
   // assertion of individual stalls. Keeping them in their own reviewed

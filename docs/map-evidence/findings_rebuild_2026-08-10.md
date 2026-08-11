@@ -232,3 +232,32 @@ location.
   The active parent fills and matching contours now follow those distinct
   silhouettes. No venue, path, utility, gate, parking, or additional detail
   geometry has been added.
+
+## Composition pass evidence (recorded before geometry work)
+
+- `IMG_3751.webp` is the current full-site relationship reference: the map is
+  one continuous festival ground, with West/Downtown camping on the west,
+  Copperwood/Thrutopia/Anara across the north-east, Grand Central then Oldtown
+  at the centre, the long Hilltop field to their east, and Quantum/Lion's Den
+  above the separate southern Sunset/East camping edges.
+- `IMG_3735.webp` through `IMG_3739.webp` confirm that Anara/Temple and the
+  Copperwood/Thrutopia sequence sit within that same north/east ground, not as
+  isolated islands. `IMG_3747.webp` and `IMG_3748.webp` confirm the green
+  Sunset Hill woodland transition between the central/southern cluster and
+  the yellow Sunset field.
+- This composition pass may change only the site silhouette, parent territory
+  boundaries, their overview anchors, and the direct site-edge/territory
+  contours. It must not add venue footprints, stalls, individual trees,
+  utilities, parking, gates, or unsupported paths.
+
+### Composition pass result
+
+- Added a single subdued `Festival grounds` silhouette beneath the evidence
+  territories, traced from `IMG_3751.webp`. This restores the continuous-site
+  reading at overview scale without inventing another zone or adding detail.
+- Re-profiled only the Copperwood/Thrutopia/Anara, Grand Central/Oldtown/
+  Hilltop, and Quantum/Lion's Den parent silhouettes and their matching
+  contours. The north/east sources are `IMG_3735.webp`, `IMG_3736.webp`, and
+  `IMG_3738.webp`; the southern sources are `IMG_3747.webp` and
+  `IMG_3748.webp`. No individual venue, route, stall, tree, utility, gate, or
+  parking feature was added in this pass.
