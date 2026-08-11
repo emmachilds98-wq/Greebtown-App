@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v471";
-const APP_BUILD_TIME = "2026-08-11T10:36:39Z";
+const APP_CACHE_VERSION = "v472";
+const APP_BUILD_TIME = "2026-08-11T10:58:51Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7804,18 +7804,23 @@ function buildEvidenceOnlyMapGeoJSON(){
     [61,82],[64,81],[65,84],                           // Helix forecourt
     [72,85],[75,85],[78,86],[80,88]                    // Lion's Den forecourt
   ].map(([x,y])=>treeDot(x,y,.72)) };
-  // Four confirmed stage focal points get a restrained, zoom-gated glow.
-  // This echoes the official map's orange stage treatment without adding
-  // unsupported icons or a new position for any venue.
-  geo.evidenceStageHalos = { type:"FeatureCollection", features:[
-    [42,44, "rgba(255,194,92,.34)", 1.0],  // NEXUS
-    [60,47, "rgba(255,167,94,.36)", 1.35], // Grand Central
-    [92,25, "rgba(225,98,174,.28)", 1.05], // Anara Forest
-    [39.5,68.5, "rgba(213,119,218,.34)", 1.1], // Spectrum 360
-    [26,72, "rgba(191,105,209,.36)", 1.3], // Hydro XL
-    [63,83, "rgba(255,154,104,.34)", 1.05], // Helix
-    [77,87, "rgba(255,166,72,.38)", 1.45]  // The Lion's Den
-  ].map(([x,y,color,scale])=>({ type:"Feature", properties:{ color, scale }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } })) };
+  // Wide official evidence establishes these as already-confirmed focal points
+  // in the whole-site composition. They are original coloured dots/glows, not
+  // copied official icons; close labels remain gated to the explore view.
+  const overviewFocalPoints = [
+    ["Hidden Woods", 22, 34, "rgba(244,181,91,.96)", "rgba(244,181,91,.30)", .95],
+    ["Tangled Roots", 54, 22, "rgba(205,94,76,.96)", "rgba(205,94,76,.28)", .95],
+    ["NEXUS", 42, 44, "rgba(255,194,92,.98)", "rgba(255,194,92,.34)", 1.05],
+    ["Grand Central", 60, 47, "rgba(255,167,94,.98)", "rgba(255,167,94,.36)", 1.35],
+    ["Anara Forest", 92, 25, "rgba(225,98,174,.96)", "rgba(225,98,174,.28)", 1.05],
+    ["Spectrum 360", 39.5, 68.5, "rgba(213,119,218,.98)", "rgba(213,119,218,.34)", 1.1],
+    ["Hydro XL", 26, 72, "rgba(191,105,209,.98)", "rgba(191,105,209,.36)", 1.3],
+    ["Tribe of Frog", 44.5, 74, "rgba(189,108,205,.98)", "rgba(189,108,205,.30)", 1.05],
+    ["Helix", 63, 83, "rgba(255,154,104,.98)", "rgba(255,154,104,.34)", 1.05],
+    ["The Lion's Den", 77, 87, "rgba(255,166,72,.98)", "rgba(255,166,72,.38)", 1.45]
+  ];
+  geo.evidenceOverviewFocalPoints = { type:"FeatureCollection", features: overviewFocalPoints.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color, haloColor, scale }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } })) };
+  geo.evidenceStageHalos = { type:"FeatureCollection", features: overviewFocalPoints.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color:haloColor, scale }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } })) };
   return geo;
 }
 
@@ -9766,15 +9771,15 @@ function installEvidenceSceneLayers(map, geo){
   source("evidence-territories", geo.evidenceTerritories);
   map.addLayer({ id:"evidence-territories-shadow", type:"fill", source:"evidence-territories", paint:{ "fill-color":"rgba(11,22,15,.4)", "fill-translate":[2,3] } });
   map.addLayer({ id:"evidence-territories-fill", type:"fill", source:"evidence-territories", paint:{ "fill-color":["get","fill"], "fill-opacity":.94 } });
-  map.addLayer({ id:"evidence-territories-outline", type:"line", source:"evidence-territories", paint:{ "line-color":"rgba(92,152,101,.58)", "line-width":1.1 } });
+  map.addLayer({ id:"evidence-territories-outline", type:"line", source:"evidence-territories", paint:{ "line-color":"rgba(128,194,132,.82)", "line-width":["interpolate",["linear"],["zoom"],13.5,1.45,16,1.05] } });
   source("evidence-district-contours", geo.evidenceDistrictContours);
-  map.addLayer({ id:"evidence-district-contours", type:"line", source:"evidence-district-contours", minzoom:14.7, paint:{ "line-color":["get","color"], "line-width":["coalesce",["get","lineWidth"],1.55], "line-opacity":.88 } });
+  map.addLayer({ id:"evidence-district-contours", type:"line", source:"evidence-district-contours", minzoom:13.5, paint:{ "line-color":["get","color"], "line-width":["coalesce",["get","lineWidth"],1.55], "line-opacity":.94 } });
 
   source("evidence-forest-dots", geo.evidenceForestDots);
   map.addLayer({ id:"evidence-forest-dots", type:"circle", source:"evidence-forest-dots", paint:{ "circle-radius":["*",["get","size"],2.1], "circle-color":"rgba(133,187,118,.88)", "circle-stroke-width":.4, "circle-stroke-color":"rgba(27,57,35,.7)" } });
   source("evidence-camp-fields", geo.evidenceCampFields);
   map.addLayer({ id:"evidence-camps-fill", type:"fill", source:"evidence-camp-fields", paint:{ "fill-color":["get","fill"] } });
-  map.addLayer({ id:"evidence-camps-outline", type:"line", source:"evidence-camp-fields", paint:{ "line-color":"rgba(202,218,156,.68)", "line-width":1.15, "line-dasharray":[2,1.2] } });
+  map.addLayer({ id:"evidence-camps-outline", type:"line", source:"evidence-camp-fields", paint:{ "line-color":"rgba(239,233,181,.84)", "line-width":["interpolate",["linear"],["zoom"],13.5,1.35,16,1.05], "line-dasharray":[2,1.2] } });
   source("evidence-field-lanes", geo.evidenceFieldLanes);
   map.addLayer({ id:"evidence-field-lanes", type:"line", source:"evidence-field-lanes", minzoom:15.35, paint:{ "line-color":"rgba(117,104,37,.55)", "line-width":1.1 } });
   source("evidence-camp-pitches", geo.evidenceCampPitches);
@@ -9784,8 +9789,8 @@ function installEvidenceSceneLayers(map, geo){
   map.addLayer({ id:"evidence-camp-tents", type:"circle", source:"evidence-camp-tents", minzoom:15.55, paint:{ "circle-radius":2.1, "circle-color":"rgba(245,238,194,.9)", "circle-stroke-width":.35, "circle-stroke-color":"rgba(72,92,54,.72)" } });
 
   source("evidence-spine", geo.evidenceSpine);
-  map.addLayer({ id:"evidence-spine-casing", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(7,18,12,.82)", "line-width":4.8 } });
-  map.addLayer({ id:"evidence-spine", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(104,140,110,.88)", "line-width":1.75 } });
+  map.addLayer({ id:"evidence-spine-casing", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(8,22,14,.88)", "line-width":["interpolate",["linear"],["zoom"],13.5,4.8,16,4.3] } });
+  map.addLayer({ id:"evidence-spine", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(184,208,154,.98)", "line-width":["interpolate",["linear"],["zoom"],13.5,2.05,16,1.7] } });
   source("evidence-detail-paths", geo.evidenceDetailPaths);
   map.addLayer({ id:"evidence-detail-paths-casing", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":"rgba(44,49,34,.42)", "line-width":3.2 } });
   map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, filter:["!",["in",["get","kind"],["literal",["central","oldtown"]]]], paint:{ "line-color":["match",["get","kind"],"camp","rgba(184,203,150,.92)","neon","rgba(190,115,207,.94)","track","rgba(151,168,139,.94)","rgba(180,198,167,.94)"], "line-width":["match",["get","kind"],"camp",1.05,"neon",1.8,"track",1.15,1.45], "line-dasharray":[1.5,.8] } });
@@ -9822,7 +9827,11 @@ function installEvidenceSceneLayers(map, geo){
   source("evidence-court-dots", geo.evidenceCourtDots);
   map.addLayer({ id:"evidence-court-dots", type:"circle", source:"evidence-court-dots", minzoom:15.85, paint:{ "circle-radius":1.35, "circle-color":"rgba(255,234,150,.82)", "circle-stroke-width":.3, "circle-stroke-color":"rgba(53,64,37,.82)" } });
   source("evidence-stage-halos", geo.evidenceStageHalos);
-  map.addLayer({ id:"evidence-stage-halos", type:"circle", source:"evidence-stage-halos", minzoom:15.35, paint:{ "circle-radius":["*",["get","scale"],10], "circle-color":["get","color"], "circle-blur":.72 } });
+  map.addLayer({ id:"evidence-stage-halos", type:"circle", source:"evidence-stage-halos", minzoom:13.5, paint:{ "circle-radius":["*",["get","scale"],["interpolate",["linear"],["zoom"],13.5,9,15.5,12]], "circle-color":["get","color"], "circle-blur":.72 } });
+  // This layer draws after courts and landmarks so its small original focal
+  // points stay visible at overview without revealing venue-level detail.
+  source("evidence-overview-focal-points", geo.evidenceOverviewFocalPoints);
+  map.addLayer({ id:"evidence-overview-focal-points", type:"circle", source:"evidence-overview-focal-points", minzoom:13.5, maxzoom:15.55, paint:{ "circle-radius":["interpolate",["linear"],["zoom"],13.5,3.6,15.5,5.2], "circle-color":["get","color"], "circle-opacity":.97, "circle-stroke-width":1.15, "circle-stroke-color":"rgba(255,245,203,.95)" } });
 }
 
 function loadMap(){
