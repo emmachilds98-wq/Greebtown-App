@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v454";
-const APP_BUILD_TIME = "2026-08-11T00:00:06Z";
+const APP_CACHE_VERSION = "v456";
+const APP_BUILD_TIME = "2026-08-11T00:11:19Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7446,6 +7446,21 @@ function evidenceRebuildLabels(){
   ];
 }
 
+function evidenceRebuildOverviewLabels(){
+  // The overview is a distinct reading level, not a zoomed-out copy of every
+  // venue label. These six anchors are visible in the full-site official
+  // views (IMG_3721/IMG_3726/IMG_3729) and stay available after Site overview
+  // hides the detailed evidence labels.
+  return [
+    ["COPPERWOOD HEIGHTS", 61, 35, ""],
+    ["THRUTOPIA", 75, 40, ""],
+    ["GRAND CENTRAL", 58, 48, ""],
+    ["OLDTOWN", 55, 61, ""],
+    ["HILLTOP", 74, 68, "overview-hilltop"],
+    ["THE LION'S DEN", 74, 86, "overview-lions-den"]
+  ];
+}
+
 function evidenceRebuildDetailLabels(){
   // Named labels visible in IMG_3721–IMG_3734. These are intentionally a
   // second, close-view tier so the entry view stays legible.
@@ -7509,7 +7524,7 @@ function buildEvidenceOnlyMapGeoJSON(){
       polygon("Anara Forest", "rgba(29,70,47,.98)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
       polygon("Grand Central", "rgba(54,78,54,.98)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
       polygon("Oldtown", "rgba(47,72,50,.98)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
-      polygon("Hilltop", "rgba(137,128,45,.96)", [[67,50],[82,49],[86,60],[83,78],[70,79],[66,66]]),
+      polygon("Hilltop", "rgba(137,128,45,.96)", [[67,45],[84,46],[88,60],[83,78],[70,79],[65,67]]),
       polygon("Quantum", "rgba(75,53,99,.97)", [[48,76],[60,75],[64,85],[59,91],[50,90],[45,83]]),
       polygon("The Lion's Den", "rgba(40,69,47,.98)", [[67,80],[82,80],[88,86],[82,92],[69,92],[64,87]])
     ]
@@ -7559,7 +7574,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Anara Forest boundary", "transparent", [[79,19],[89,20],[94,26],[92,32],[85,34],[78,29]], { color:"rgba(112,224,144,.92)" }),
     polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)" }),
     polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)" }),
-    polygon("Hilltop field outline", "transparent", [[68,51],[82,50],[85,60],[82,77],[70,78],[67,66]], { color:"rgba(231,205,84,.9)" }),
+    polygon("Hilltop field outline", "transparent", [[68,46],[84,47],[87,60],[82,77],[70,78],[66,67]], { color:"rgba(231,205,84,.9)" }),
     polygon("Quantum boundary", "transparent", [[48,77],[59,76],[63,84],[58,90],[50,89],[46,83]], { color:"rgba(214,137,234,.94)" }),
     polygon("Lion's Den boundary", "transparent", [[67,81],[81,81],[87,86],[81,91],[69,91],[65,87]], { color:"rgba(240,166,95,.94)" }),
     polygon("Downtown Camping boundary", "transparent", [[10,40],[20,39],[26,45],[24,53],[16,56],[9,50]], { color:"rgba(242,162,151,.92)" })
@@ -9486,6 +9501,13 @@ let mapLabelCollisionFrame = 0;
 // with a small, deterministic priority pass: district and stage names own
 // the overview; camps, gates and venue detail fill the available space only.
 function mapLabelPriority(label){
+  if(label.classList.contains("overview")) return 110;
+  if(label.classList.contains("evidence-territory")) return 100;
+  if(label.classList.contains("evidence-primary") && label.classList.contains("evidence-stage")) return 96;
+  if(label.classList.contains("evidence-stage")) return 90;
+  if(label.classList.contains("evidence-primary")) return 82;
+  if(label.classList.contains("evidence-camp")) return 75;
+  if(label.classList.contains("evidence-venue")) return 48;
   if(label.classList.contains("district")) return 100;
   if(label.classList.contains("stage")) return 90;
   if(label.classList.contains("camp")) return 75;
@@ -9688,7 +9710,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v21-dark-land-use";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v22-overview-backbone";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -10455,6 +10477,13 @@ function loadMap(){
     addMapMarker("territory", coord.lat, coord.lon,
       `<div class="map-label manual-territory evidence-territory ${styleClass}">${name}</div>`,
       { name, title:name }
+    );
+  });
+  evidenceRebuildOverviewLabels().forEach(([name, x, y, styleClass])=>{
+    const coord = schematicToLatLon(x, y);
+    addMapMarker("overview", coord.lat, coord.lon,
+      `<div class="map-label overview ${styleClass}">${name}</div>`,
+      { title:name }
     );
   });
   evidenceRebuildDetailLabels().forEach(([name, x, y, kind, prominence])=>{

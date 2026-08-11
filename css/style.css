@@ -443,10 +443,10 @@
      ever unset (shouldn't happen, but keeps this rule safe on its own). */
   .map-label.district{display:block; min-height:0; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; background:none; border:none; box-shadow:none; border-radius:0; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.075em; color:rgba(var(--district-rgb, 242,168,60),1); text-shadow:0 1px 3px rgba(0,0,0,.85), 0 0 9px rgba(var(--district-rgb, 242,168,60),.48); transform:translate(calc(-50% + var(--label-dx, 0px)), calc(-22px + var(--label-dy, 0px))); padding:0;}
   .map-label.district::before,.map-label.district::after{content:none;}
-  .map-label.overview{display:block; min-height:0; padding:0; border:0; border-radius:0; background:none; box-shadow:none; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; font-size:9px; font-weight:900; line-height:1; letter-spacing:.12em; text-transform:uppercase; color:rgba(35,65,40,.92); text-shadow:0 1px 0 rgba(255,252,230,.9),0 0 7px rgba(255,252,230,.88); transform:translate(-50%,-50%);}
+  .map-label.overview{display:block; min-height:0; padding:0; border:0; border-radius:0; background:none; box-shadow:none; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; font-size:9px; font-weight:900; line-height:1; letter-spacing:.12em; text-transform:uppercase; color:rgba(237,243,215,.98); text-shadow:0 1px 2px rgba(5,14,9,.96),0 0 7px rgba(5,14,9,.9); transform:translate(-50%,-50%);}
   .map-label.overview::before,.map-label.overview::after{content:none;}
-  .map-label.overview.overview-hilltop{font-size:11px; color:rgba(136,94,28,.98); letter-spacing:.14em;}
-  .map-label.overview.overview-lions-den{font-size:10px; color:rgba(34,94,54,.98);}
+  .map-label.overview.overview-hilltop{font-size:11px; color:rgba(255,227,114,.98); letter-spacing:.14em;}
+  .map-label.overview.overview-lions-den{font-size:10px; color:rgba(255,221,169,.98);}
   .map-label.manual-territory{display:block; min-height:0; padding:0; border:0; border-radius:0; background:none; box-shadow:none; font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif; font-size:8px; font-weight:900; letter-spacing:.09em; text-transform:uppercase; color:rgba(30,55,34,.96); text-shadow:0 1px 0 rgba(255,251,224,.95),0 0 5px rgba(255,251,224,.82); transform:translate(-50%,-50%);}
   .map-label.manual-territory::before,.map-label.manual-territory::after{content:none;}
   /* Clean-slate territory labels: a calm, readable hierarchy at the opening

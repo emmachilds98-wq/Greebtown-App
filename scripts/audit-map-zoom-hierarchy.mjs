@@ -42,6 +42,10 @@ if(!scene.includes('id:"evidence-stage-tiers", type:"line", source:"evidence-sta
 if(!css.includes("#map.map-labels-thin .map-label:not(.overview){display:none;}")) errors.push("overview must reduce labels to territorial anchors");
 if(!css.includes("#map.map-labels-mid .map-label.evidence-detail:not(.evidence-primary)")) errors.push("explore zoom must retain a primary-label tier before fine labels");
 if(!css.includes(".map-label.map-label-collided{visibility:hidden;}")) errors.push("rendered-label collision protection is required");
+if(!app.includes("function evidenceRebuildOverviewLabels()")) errors.push("site overview must have its own source-backed label set");
+if(!app.includes('addMapMarker("overview", coord.lat, coord.lon,')) errors.push("site overview anchors must be rendered in the active evidence path");
+if(!app.includes('label.classList.contains("evidence-territory")')) errors.push("evidence territories must retain collision priority over close detail");
+if(!app.includes('label.classList.contains("evidence-primary") && label.classList.contains("evidence-stage")')) errors.push("primary evidence stages must retain close-view collision priority");
 
 const evidenceGroups = ["territory", "evidence-stage", "evidence-venue", "evidence-camp"];
 for(const group of evidenceGroups){
