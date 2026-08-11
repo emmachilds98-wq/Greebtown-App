@@ -126,6 +126,14 @@ and Area 404 boundaries more clearly than prior overview shots. Their parent
 silhouettes are now the next reviewed layer; do not mistake the close-up venue
 forms for permission to add more buildings or points of interest.
 
+**Update - full-site composition pass:** `IMG_3751.webp` confirms that the
+territories sit on one connected festival ground rather than isolated map
+islands. The active scene now has a restrained shared site silhouette below
+the named territories, plus revised north/east and central/south parent edges
+from `IMG_3735.webp` through `IMG_3739.webp` and `IMG_3747.webp` through
+`IMG_3748.webp`. The next pass must validate this overview at entry scale
+before any further close-detail additions.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’
