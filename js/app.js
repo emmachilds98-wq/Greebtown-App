@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v475";
-const APP_BUILD_TIME = "2026-08-11T11:46:09Z";
+const APP_CACHE_VERSION = "v476";
+const APP_BUILD_TIME = "2026-08-11T12:04:09Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7442,7 +7442,7 @@ function evidenceRebuildLabels(){
     ["WEST CAMPING", 17, 17, "evidence-campground"], ["DOWNTOWN CAMPING", 11, 53, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
     ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 91, 22.3, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
-    ["HILLTOP", 78, 67, "evidence-gold"], ["CAMP SKYLARK", 79, 73, "evidence-campground"], ["QUANTUM", 57, 84, "evidence-violet"], ["THE LION'S DEN", 79, 89, "evidence-den"], ["SUNSET", 50, 101, "evidence-campground"], ["EAST CAMPING", 98, 82, "evidence-campground"]
+    ["HILLTOP", 78, 67, "evidence-gold"], ["CAMP SKYLARK", 79, 73, "evidence-campground"], ["QUANTUM", 57, 84, "evidence-violet"], ["THE LION'S DEN", 79, 89, "evidence-den"], ["SUNSET", 50, 116, "evidence-campground"], ["EAST CAMPING", 98, 88, "evidence-campground"]
   ];
 }
 
@@ -7466,8 +7466,8 @@ function evidenceRebuildOverviewLabels(){
     ["HILLTOP", 78, 67, "overview-hilltop"],
     ["QUANTUM", 57, 84, ""],
     ["THE LION'S DEN", 79, 89, "overview-lions-den"],
-    ["SUNSET", 50, 101, ""],
-    ["EAST CAMPING", 98, 82, ""]
+    ["SUNSET", 50, 116, ""],
+    ["EAST CAMPING", 98, 88, ""]
   ];
 }
 
@@ -7512,11 +7512,15 @@ function buildEvidenceOnlyMapGeoJSON(){
   const empty = ()=>({ type:"FeatureCollection", features:[] });
   const layerNames = ["fields","fieldsFine","hedges","stream","pond","pondOutline","districts","marketHub","openConcourses","districtPassages","districtAtmosphere","districtAtmosphereLights","precinctInlays","precinctLights","parkingAreas","parkingRows","parkingCars","campAreas","campFields","campFieldsFringe","hilltopFieldDots","campFieldLines","campTriangle","skylarkRings","forests","forestFringe","forestDots","reviewedWoodlands","trail","districtStreets","stagePlazas","bunting","buildings","venueAccents","fencedEnclosures","smallVenues","smallVenueYards","authoredMassing","authoredMassingYards","infillBuildings","stageGlow","minorStageGlow","trees","pathScrub","tents","confetti","campervans","contours","hillContours","hillBands","siteGround","boundary","hilltopDivider","roads","gateForecourts","fencePosts","evidenceStructures","evidenceForestDots","evidenceStageCourts","evidenceCampFields","evidenceCampTents","evidenceDetailPaths","evidenceLandmarks","evidenceStageTiers","evidenceCourtDots","evidenceStageHalos","evidenceContainerEdges","evidenceCanopies","evidenceWaterLandmarks","evidenceDistrictContours","evidenceCompoundBlocks","evidenceCampPitches","evidenceFieldLanes"];
   const geo = Object.fromEntries(layerNames.map(name=>[name, empty()]));
+  const evidenceRingToLngLat = ring => ring.map(([x,y])=>{
+    const c = evidenceSchematicToLatLon(x, y);
+    return [c.lon, c.lat];
+  });
   const polygon = (name, fill, points, properties={})=>({
     type:"Feature", properties:{ name, fill, outline:"rgba(47,43,28,.8)", ...properties },
-    geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(points)] }
+    geometry:{ type:"Polygon", coordinates:[evidenceRingToLngLat(points)] }
   });
-  const route = (points, properties={})=>({ type:"Feature", properties, geometry:{ type:"LineString", coordinates:schematicRingToLngLat(points) } });
+  const route = (points, properties={})=>({ type:"Feature", properties, geometry:{ type:"LineString", coordinates:evidenceRingToLngLat(points) } });
 
   // Evidence scene: woodland west, the north-east Copperwood/Thrutopia/Anara
   // sequence, the Grand-Central-to-Oldtown spine, long east Hilltop, then
@@ -7527,7 +7531,11 @@ function buildEvidenceOnlyMapGeoJSON(){
       // IMG_3751 establishes one connected festival ground. This quiet base
       // is deliberately beneath every named territory: it describes the
       // shared site silhouette, never a new zone, route, or piece of detail.
-      polygon("Festival grounds", "rgba(28,70,47,.98)", [[-7,2],[20,0],[46,3],[65,3],[84,8],[100,15],[106,28],[106,52],[107,75],[107,104],[90,106],[65,105],[46,103],[30,106],[6,104],[-7,98],[-8,76],[-8,54],[-7,33]], { role:"site", source:"IMG_3751.webp" }),
+      polygon("Festival grounds", "rgba(28,70,47,.98)", [[-7,2],[20,0],[46,3],[65,3],[84,8],[100,15],[106,28],[106,52],[107,75],[107,104],[102,114],[92,121],[76,121],[62,122],[47,120],[32,122],[17,121],[5,120],[-7,113],[-8,98],[-8,76],[-8,54],[-7,33]], { role:"site", source:"IMG_3751.webp" }),
+      // IMG_3748 shows a continuous dark woodland belt below the Lion's Den
+      // and above Sunset. This is a quiet parent silhouette only; it carries
+      // no inferred path, facility, pitch, or individually placed tree.
+      polygon("Southern woodland", "rgba(16,47,33,.98)", [[1,91],[17,90],[33,92],[49,94],[60,94],[69,93],[80,95],[88,98],[89,104],[86,110],[74,112],[59,111],[44,113],[29,111],[14,109],[2,105],[-5,100]], { source:"IMG_3748.webp" }),
       // IMG_3739 through IMG_3744 show a continuous western woodland belt
       // wrapping the districts, rather than a regular dark background blob.
       polygon("Woodland west", "rgba(20,53,37,.98)", [[6,25],[28,19],[45,25],[52,33],[50,46],[47,54],[46,63],[45,72],[42,80],[37,91],[22,90],[12,83],[6,65],[5,45]], { source:"IMG_3739.webp" }),
@@ -7580,7 +7588,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   ] };
   // Anonymous building scatter was removed: a close detail must be a
   // source-supported named court or a readable route, never texture filler.
-  const treeDot = (x,y,size, properties={})=>({ type:"Feature", properties:{ size, ...properties }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } });
+  const treeDot = (x,y,size, properties={})=>({ type:"Feature", properties:{ size, ...properties }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } });
   geo.evidenceForestDots = { type:"FeatureCollection", features:[
     [18,31,1.2],[23,30,.9],[28,33,1.1],[18,49,.8],[23,52,1.15],[17,62,1],[21,67,.9],[18,75,1.25],[23,80,.85],
     [51,20,1],[56,19,.85],[58,23,1.15],[42,34,.8],[17,86,1],[27,84,.9],[35,86,1.1],[40,89,.85],
@@ -7608,7 +7616,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   // close-ups. These are limited to pictured districts and their documented
   // venue chains; they are not generic building scatter.
   geo.evidenceDistrictContours = { type:"FeatureCollection", features:[
-    polygon("Festival grounds boundary", "transparent", [[-7,2],[20,0],[46,3],[65,3],[84,8],[100,15],[106,28],[106,52],[107,75],[107,104],[90,106],[65,105],[46,103],[30,106],[6,104],[-7,98],[-8,76],[-8,54],[-7,33]], { color:"rgba(111,174,113,.9)", lineWidth:2.4, source:"IMG_3751.webp" }),
+    polygon("Festival grounds boundary", "transparent", [[-7,2],[20,0],[46,3],[65,3],[84,8],[100,15],[106,28],[106,52],[107,75],[107,104],[102,114],[92,121],[76,121],[62,122],[47,120],[32,122],[17,121],[5,120],[-7,113],[-8,98],[-8,76],[-8,54],[-7,33]], { color:"rgba(111,174,113,.9)", lineWidth:2.4, source:"IMG_3751.webp" }),
     polygon("Letsbe Avenue approach", "transparent", [[40,30],[45,30],[47,35],[45,40],[40,39],[38,35]], { color:"rgba(245,208,98,.94)" }),
     polygon("Botanica loop", "transparent", [[32.5,40],[38,37.4],[43.5,37.8],[47.8,40.2],[50.5,43.2],[49.8,46.7],[50.8,49.4],[46.6,52.8],[42.1,52.3],[37.6,53],[33.1,50.8],[30.7,47.3],[30.4,44],[31.5,41.6]], { color:"rgba(246,232,180,.96)", lineWidth:1.9, source:"IMG_3740.webp" }),
     polygon("Metropolis outline", "transparent", [[25.5,55.5],[30,52.8],[35,52.2],[39,54],[43.8,56.9],[45.5,60.8],[43.1,64.6],[39.5,66.8],[34.5,68.3],[29.5,67],[25.4,63.2],[23.8,59.4]], { color:"rgba(91,223,222,.94)", lineWidth:1.95, source:"IMG_3743.webp" }),
@@ -7627,8 +7635,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("West Camping boundary", "transparent", [[-4,6],[6,3],[19,4],[30,7],[38,12],[41,18],[39,22],[34,25],[28,26],[21,25],[14,23.5],[7,25],[0,25],[-4,22]], { color:"rgba(116,184,127,.92)", lineWidth:1.8, source:"IMG_3746.webp" }),
     polygon("Downtown Camping boundary", "transparent", [[-6,35],[3,32],[14,33],[24,36],[28,41],[26,46],[20,51],[18,57],[22,62],[22,69],[18,75],[12,77],[4,74],[-2,68],[-6,60],[-8,50],[-8,42]], { color:"rgba(242,162,151,.94)", lineWidth:2.05, source:"IMG_3745.webp" }),
     polygon("Valley Camping boundary", "transparent", [[47,8],[55,5],[66,5],[75,7],[78,11],[77,16],[74,21],[71,25],[65,27],[58,26],[51,23],[47,19],[45,13]], { color:"rgba(137,201,142,.9)", lineWidth:1.8, source:"IMG_3751.webp" }),
-    polygon("Sunset Camping boundary", "transparent", [[-7,96],[3,94],[17,94],[30,96],[44,97],[58,97],[74,98],[91,98],[107,99],[107,104],[97,106],[83,105],[66,106],[49,105],[31,106],[14,105],[-1,103],[-7,100]], { color:"rgba(244,211,84,.95)", lineWidth:2.05, source:"IMG_3748.webp" }),
-    polygon("East Camping boundary", "transparent", [[94,65],[101,66],[106,70],[107,77],[105,83],[102,88],[103,92],[106,94],[106,95],[98,95],[92,93],[89,89],[89,84],[90,79],[91,73],[90,68]], { color:"rgba(232,151,144,.94)", lineWidth:2.05, source:"IMG_3749.webp" }),
+    polygon("Sunset Camping boundary", "transparent", [[-7,110],[3,108],[17,108],[30,110],[44,111],[58,111],[74,112],[91,112],[107,113],[107,120],[97,122],[83,121],[66,122],[49,121],[31,122],[14,121],[-1,119],[-7,115]], { color:"rgba(244,211,84,.95)", lineWidth:2.05, source:"IMG_3748.webp" }),
+    polygon("East Camping boundary", "transparent", [[94,65],[101,66],[106,70],[107,77],[106,85],[103,91],[103,97],[106,101],[106,108],[98,108],[92,106],[89,101],[89,95],[90,88],[91,80],[90,70]], { color:"rgba(232,151,144,.94)", lineWidth:2.05, source:"IMG_3749.webp" }),
     // The dark diagonal alongside Hilltop is observed as a boundary/fence,
     // not a public route (findings_vidAB.md). It keeps the Oldtown/Quantum
     // corridor visibly outside the yellow camping field.
@@ -7677,8 +7685,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Downtown Camping", "rgba(204,122,125,.84)", [[-6,35],[3,32],[14,33],[24,36],[28,41],[26,46],[20,51],[18,57],[22,62],[22,69],[18,75],[12,77],[4,74],[-2,68],[-6,60],[-8,50],[-8,42]], { source:"IMG_3745.webp" }),
     polygon("Valley Camping", "rgba(75,139,84,.92)", [[47,8],[55,5],[66,5],[75,7],[78,11],[77,16],[74,21],[71,25],[65,27],[58,26],[51,23],[47,19],[45,13]], { source:"IMG_3751.webp" }),
     polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[71,50],[81,49],[86,53],[87,60],[85,67],[83,74],[79,78],[74,78],[70,75],[68,68],[69,59]], { source:"IMG_3751.webp" }),
-    polygon("Sunset Camping", "rgba(194,169,55,.88)", [[-7,96],[3,94],[17,94],[30,96],[44,97],[58,97],[74,98],[91,98],[107,99],[107,104],[97,106],[83,105],[66,106],[49,105],[31,106],[14,105],[-1,103],[-7,100]], { source:"IMG_3748.webp" }),
-    polygon("East Camping", "rgba(187,105,122,.84)", [[94,65],[101,66],[106,70],[107,77],[105,83],[102,88],[103,92],[106,94],[106,95],[98,95],[92,93],[89,89],[89,84],[90,79],[91,73],[90,68]], { source:"IMG_3749.webp" }),
+    polygon("Sunset Camping", "rgba(194,169,55,.88)", [[-7,110],[3,108],[17,108],[30,110],[44,111],[58,111],[74,112],[91,112],[107,113],[107,120],[97,122],[83,121],[66,122],[49,121],[31,122],[14,121],[-1,119],[-7,115]], { source:"IMG_3748.webp" }),
+    polygon("East Camping", "rgba(187,105,122,.84)", [[94,65],[101,66],[106,70],[107,77],[106,85],[103,91],[103,97],[106,101],[106,108],[98,108],[92,106],[89,101],[89,95],[90,88],[91,80],[90,70]], { source:"IMG_3749.webp" }),
     polygon("Temple Valley Camping", "rgba(92,155,102,.88)", [[87,27],[96,27],[101,30],[102,35],[99,41],[94,43],[88,42],[83,38],[82,33],[85,29]], { source:"IMG_3735.webp" })
   ] };
   // Perimeter evidence establishes field silhouettes, not an authoritative
@@ -7802,8 +7810,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     ["Helix", 63, 83, "rgba(255,154,104,.98)", "rgba(255,154,104,.34)", 1.05],
     ["The Lion's Den", 77, 87, "rgba(255,166,72,.98)", "rgba(255,166,72,.38)", 1.45]
   ];
-  geo.evidenceOverviewFocalPoints = { type:"FeatureCollection", features: overviewFocalPoints.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color, haloColor, scale }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } })) };
-  geo.evidenceStageHalos = { type:"FeatureCollection", features: overviewFocalPoints.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color:haloColor, scale }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } })) };
+  geo.evidenceOverviewFocalPoints = { type:"FeatureCollection", features: overviewFocalPoints.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color, haloColor, scale }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } })) };
+  geo.evidenceStageHalos = { type:"FeatureCollection", features: overviewFocalPoints.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color:haloColor, scale }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } })) };
   return geo;
 }
 
@@ -9539,6 +9547,14 @@ function schematicToLatLon(xPercent, yPercent){
     lon: SITE_SW.lon + (xPercent / 100) * lonSpan
   };
 }
+// The official overview is materially taller than it is wide. The evidence
+// scene therefore owns this display-only vertical ratio, while the generic
+// schematic helper above remains unchanged for retired/non-map app data.
+// Every active map geometry and label goes through this helper together.
+const EVIDENCE_LAYOUT_Y_SCALE = 2;
+function evidenceSchematicToLatLon(xPercent, yPercent){
+  return schematicToLatLon(xPercent, yPercent * EVIDENCE_LAYOUT_Y_SCALE);
+}
 // Exact inverse of schematicToLatLon — since that's a straight linear
 // box-scaling (no rotation), this just runs the same two lines backwards.
 // Used to place the real (GPS, not schematic-guessed) POI data from
@@ -9847,24 +9863,26 @@ function loadMap(){
     // blank space with nothing plotted on it. SITE_SW/SITE_NE are
     // shared module-level consts (see above) — buildMapGeoJSON's
     // decorative boundary shape is built from the same two points.
-    const pad = 0.25;
-    const latPad = (SITE_NE.lat - SITE_SW.lat) * pad;
-    const lonPad = (SITE_NE.lon - SITE_SW.lon) * pad;
-    const MAX_BOUNDS = [
-      [SITE_SW.lon - lonPad, SITE_SW.lat - latPad],
-      [SITE_NE.lon + lonPad, SITE_NE.lat + latPad]
-    ];
     // The opening frame is driven by the complete reviewed illustrated
     // perimeter, not a central crop. The outer camp grounds are part of the
     // first reading level in IMG_3751, so clipping them at either edge makes
-    // the site look compressed and wrongly shrinks their visible scale.
-    const overviewCorners = [[-8,0], [107,0], [107,106], [-8,106]]
-      .map(([x,y])=> schematicToLatLon(x, y));
+    // the site look compressed and wrongly shrinks their visible scale. The
+    // evidence plane is intentionally tall, matching the official whole-site
+    // reading rather than the retired square schematic frame.
+    const overviewCorners = [[-8,0], [107,0], [107,122], [-8,122]]
+      .map(([x,y])=> evidenceSchematicToLatLon(x, y));
     const SITE_OVERVIEW_BOUNDS = [
       [Math.min(...overviewCorners.map(point=> point.lon)), Math.min(...overviewCorners.map(point=> point.lat))],
       [Math.max(...overviewCorners.map(point=> point.lon)), Math.max(...overviewCorners.map(point=> point.lat))]
     ];
+    const overviewLonSpan = SITE_OVERVIEW_BOUNDS[1][0] - SITE_OVERVIEW_BOUNDS[0][0];
+    const overviewLatSpan = SITE_OVERVIEW_BOUNDS[1][1] - SITE_OVERVIEW_BOUNDS[0][1];
+    const MAX_BOUNDS = [
+      [SITE_OVERVIEW_BOUNDS[0][0] - overviewLonSpan * .16, SITE_OVERVIEW_BOUNDS[0][1] - overviewLatSpan * .16],
+      [SITE_OVERVIEW_BOUNDS[1][0] + overviewLonSpan * .16, SITE_OVERVIEW_BOUNDS[1][1] + overviewLatSpan * .16]
+    ];
     const overviewPadding = { top: 20, right: 20, bottom: 20, left: 20 };
+    const evidenceInitialCenter = evidenceSchematicToLatLon(50, 61);
     const showSiteOverview = duration => {
       mapGL.jumpTo({ bearing:0, pitch:0 });
       mapGL.fitBounds(SITE_OVERVIEW_BOUNDS, { padding: overviewPadding, duration, bearing:0, pitch:0 });
@@ -9900,7 +9918,7 @@ function loadMap(){
       // The active scene below supplies all illustrated land use and routes;
       // no external basemap or legacy geographic source is allowed here.
       style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#14251c" } }] },
-      center: [0.007, 0.005],
+      center: [evidenceInitialCenter.lon, evidenceInitialCenter.lat],
       // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
       // 14.4 view (previous pass) showed a lot of surrounding blank
       // countryside/MAX_BOUNDS padding around a small festival footprint
@@ -10593,21 +10611,21 @@ function loadMap(){
   // this file for non-map app content (for example schedules and discovery),
   // but must never be iterated while building the map.
   evidenceRebuildLabels().forEach(([name, x, y, styleClass])=>{
-    const coord = schematicToLatLon(x, y);
+    const coord = evidenceSchematicToLatLon(x, y);
     addMapMarker("territory", coord.lat, coord.lon,
       `<div class="map-label manual-territory evidence-territory ${styleClass}">${name}</div>`,
       { name, title:name }
     );
   });
   evidenceRebuildOverviewLabels().forEach(([name, x, y, styleClass])=>{
-    const coord = schematicToLatLon(x, y);
+    const coord = evidenceSchematicToLatLon(x, y);
     addMapMarker("overview", coord.lat, coord.lon,
       `<div class="map-label overview ${styleClass}">${name}</div>`,
       { title:name }
     );
   });
   evidenceRebuildDetailLabels().forEach(([name, x, y, kind, prominence])=>{
-    const coord = schematicToLatLon(x, y);
+    const coord = evidenceSchematicToLatLon(x, y);
     addMapMarker(`evidence-${kind}`, coord.lat, coord.lon,
       `<div class="map-label evidence-detail evidence-${kind}${prominence ? ` evidence-${prominence}` : ""}">${name}</div>`,
       { name, title:name }
