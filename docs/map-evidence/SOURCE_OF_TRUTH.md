@@ -115,10 +115,16 @@ single-page session because an old in-memory canvas can otherwise retain the
 previous GeoJSON sources and make a completed map release appear unchanged.
 
 The entry camera must remain below the close-detail label threshold. The
-opening view is for the `IMG_3751.webp` territory order and main movement
-spine; a small, intentional zoom into a district reveals the complete
-source-backed venue-chip tier. This is a visual hierarchy rule, never a reason
-to move a label or alter its evidence-supported geometry.
+opening view is for the complete `IMG_3751.webp` territory order, including
+the outer camping grounds; a small, intentional zoom into a district reveals
+the complete source-backed venue-chip tier. This is a visual hierarchy rule,
+never a reason to move a label or alter its evidence-supported geometry.
+
+`IMG_3740.webp` keeps Hidden Woods as a distinct pale clearing north-west of
+Letsbe/Botanica. `IMG_3747.webp` keeps Tribe of Frog inside the separate
+Sunset Hill woodland, south of Area 404 and west/north-west of Quantum. These
+three forms must remain non-overlapping at every zoom; do not reconnect them
+through a historic marker collection or a central-camera crop.
 
 ## Required verification
 

@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v473";
-const APP_BUILD_TIME = "2026-08-11T11:08:57Z";
+const APP_CACHE_VERSION = "v474";
+const APP_BUILD_TIME = "2026-08-11T11:29:15Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7439,10 +7439,10 @@ function evidenceRebuildLabels(){
   // Fresh visual anchors traced from IMG_3721–IMG_3734. These intentionally
   // do not reuse the quarantined map-system or app coordinate collections.
   return [
-    ["WEST CAMPING", 17, 21, "evidence-campground"], ["DOWNTOWN CAMPING", 17, 48, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
+    ["WEST CAMPING", 17, 18, "evidence-campground"], ["DOWNTOWN CAMPING", 14, 50, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
     ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 91, 22.3, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
-    ["HILLTOP", 74, 68, "evidence-gold"], ["CAMP SKYLARK", 78, 72, "evidence-campground"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"], ["SUNSET", 23, 94, "evidence-campground"], ["EAST CAMPING", 94, 89, "evidence-campground"]
+    ["HILLTOP", 74, 68, "evidence-gold"], ["CAMP SKYLARK", 78, 72, "evidence-campground"], ["QUANTUM", 58, 86, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"], ["SUNSET", 20, 97, "evidence-campground"], ["EAST CAMPING", 96, 89, "evidence-campground"]
   ];
 }
 
@@ -7452,8 +7452,9 @@ function evidenceRebuildOverviewLabels(){
   // views (IMG_3721/IMG_3726/IMG_3729) and stay available after Site overview
   // hides the detailed evidence labels.
   return [
-    ["WEST CAMPING", 17, 21, ""],
-    ["DOWNTOWN CAMPING", 17, 48, ""],
+    ["WEST CAMPING", 17, 18, ""],
+    ["DOWNTOWN CAMPING", 14, 50, ""],
+    ["VALLEY CAMPING", 66, 18, ""],
     ["BOTANICA", 42, 46, ""],
     ["METROPOLIS", 35, 60, ""],
     ["AREA 404", 36, 72, ""],
@@ -7463,10 +7464,10 @@ function evidenceRebuildOverviewLabels(){
     ["GRAND CENTRAL", 58, 48, ""],
     ["OLDTOWN", 55, 61, ""],
     ["HILLTOP", 74, 68, "overview-hilltop"],
-    ["QUANTUM", 56, 83, ""],
+    ["QUANTUM", 58, 86, ""],
     ["THE LION'S DEN", 74, 86, "overview-lions-den"],
-    ["SUNSET", 23, 94, ""],
-    ["EAST CAMPING", 94, 89, ""]
+    ["SUNSET", 20, 97, ""],
+    ["EAST CAMPING", 96, 89, ""]
   ];
 }
 
@@ -7474,8 +7475,8 @@ function evidenceRebuildDetailLabels(){
   // Named labels visible in the reviewed official sources. These are intentionally a
   // second, close-view tier so the entry view stays legible.
   return [
-    ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 22, 34, "stage", "primary"],
-    ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 43.6, 71.1, "stage", "primary"],
+    ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 29, 34, "stage", "primary"],
+    ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 38.5, 80.2, "stage", "primary"],
     ["SPECTRUM 360", 39, 67, "stage", "primary"], ["HANGAR 161", 35, 69, "venue"],
     ["DEVIANT LOUNGE", 35, 72, "venue"], ["GAME OVER", 39, 71, "venue"],
     ["BBXL", 41, 73, "venue"], ["END OF THE LINE", 39, 74, "venue"],
@@ -7502,7 +7503,7 @@ function evidenceRebuildDetailLabels(){
     ["FOGGERS MILL", 69, 33, "venue"], ["VELVET ROPE", 65, 38, "venue"],
     ["REBEL GIRLS CLUB", 67, 73, "venue"], ["CIRCUS", 70, 76, "venue"], ["THE RETREAT", 72, 72, "venue"],
     ["REEL NEWS", 78, 73, "venue"], ["THE ARC", 80, 71, "venue"], ["SHARING CIRCLES", 81, 73, "venue"], ["WELFARE", 81, 76, "venue"],
-    ["SUNSET HILL", 38, 84, "venue"], ["VALLEY CAMPING", 66, 22, "camp"], ["MEADOW", 16, 57, "camp"], ["CAMPFLIGHT", 18, 63, "camp"],
+    ["SUNSET HILL", 27, 86, "venue"], ["VALLEY CAMPING", 66, 19, "camp"], ["MEADOW", 14, 58, "camp"], ["CAMPFLIGHT", 17, 64, "camp"],
     ["CAMP AT HILLTOP", 75, 63, "camp", "primary"], ["RECEPTION", 80, 75, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
   ];
 }
@@ -7526,10 +7527,10 @@ function buildEvidenceOnlyMapGeoJSON(){
       // IMG_3751 establishes one connected festival ground. This quiet base
       // is deliberately beneath every named territory: it describes the
       // shared site silhouette, never a new zone, route, or piece of detail.
-      polygon("Festival grounds", "rgba(28,70,47,.98)", [[0,9],[20,6],[43,8],[61,8],[79,12],[95,20],[100,35],[100,56],[101,78],[102,99],[92,100],[68,100],[47,98],[31,101],[10,99],[-1,94],[-2,78],[-1,57],[1,38]], { role:"site", source:"IMG_3751.webp" }),
+      polygon("Festival grounds", "rgba(28,70,47,.98)", [[-7,2],[20,0],[46,3],[65,3],[84,8],[100,15],[106,28],[106,52],[107,75],[107,104],[90,106],[65,105],[46,103],[30,106],[6,104],[-7,98],[-8,76],[-8,54],[-7,33]], { role:"site", source:"IMG_3751.webp" }),
       // IMG_3739 through IMG_3744 show a continuous western woodland belt
       // wrapping the districts, rather than a regular dark background blob.
-      polygon("Woodland west", "rgba(20,53,37,.98)", [[10,25],[31,20],[46,26],[52,33],[50,46],[47,54],[46,63],[48,73],[44,82],[38,92],[22,88],[13,81],[8,64],[8,45]], { source:"IMG_3739.webp" }),
+      polygon("Woodland west", "rgba(20,53,37,.98)", [[6,25],[28,19],[45,25],[52,33],[50,46],[47,54],[46,63],[45,72],[42,80],[37,91],[22,90],[12,83],[6,65],[5,45]], { source:"IMG_3739.webp" }),
       // The official west-side close-ups show three linked but visibly
       // different district silhouettes. These are territory boundaries only:
       // their pictured internal venues remain in the existing close-detail tier.
@@ -7537,7 +7538,7 @@ function buildEvidenceOnlyMapGeoJSON(){
       polygon("Metropolis", "rgba(36,89,62,.98)", [[25.5,55.5],[30,52.8],[35,52.2],[39,54],[43.8,56.9],[45.5,60.8],[43.1,64.6],[39.5,66.8],[34.5,68.3],[29.5,67],[25.4,63.2],[23.8,59.4]], { source:"IMG_3743.webp" }),
       // Shared north edge only: Area 404 meets Metropolis at this boundary;
       // neither fill should spread underneath the other district.
-      polygon("Area 404", "rgba(42,96,57,.98)", [[28,64.9],[33.5,64.5],[37.2,64.3],[41.1,64.5],[44.4,65.9],[46.8,69.5],[47.2,72.4],[44.7,74.5],[44.2,78],[41.4,81.3],[38.2,79.8],[35.8,81.4],[32.8,79.6],[29.2,78.2],[25.9,75.5],[24.2,72.2],[24.6,68.8]], { source:"IMG_3742.webp" }),
+      polygon("Area 404", "rgba(42,96,57,.98)", [[28,64.9],[33.5,64.5],[37.2,64.3],[41.1,64.5],[44.4,65.9],[46,69.4],[45.5,72.4],[43.1,74.8],[40.8,76.1],[38.2,75],[35.4,76.4],[32.3,74.9],[28.8,73.7],[25.9,71.7],[24.6,68.8]], { source:"IMG_3742.webp" }),
       // IMG_3724 shows Copperwood as a clipped gold compound with a narrow
       // south hand-off, not a regular hexagon. It meets the separate blue
       // Thrutopia enclosure at its eastern edge; neither silhouette reaches
@@ -7554,10 +7555,10 @@ function buildEvidenceOnlyMapGeoJSON(){
       polygon("Hilltop", "rgba(137,128,45,.96)", [[68,46],[81,46],[85,50],[87,60],[85,69],[81,77],[75,79],[70,78],[66,73],[65,66],[66,56]], { source:"IMG_3751.webp" }),
       // IMG_3747 keeps this green transition distinct from the yellow Sunset
       // camp field below it. It is land-use only: no route or camp detail.
-      polygon("Sunset Hill", "rgba(58,113,66,.98)", [[16,74],[25,71],[35,72],[43,76],[46,81],[44,86],[39,89],[31,90],[23,87],[17,82],[14,78]], { source:"IMG_3747.webp" }),
+      polygon("Sunset Hill", "rgba(58,113,66,.98)", [[10,76],[21,72],[31,73],[44,75.5],[47,80],[46,84],[43,88],[38,92],[29,92],[20,89],[13,84],[9,80]], { source:"IMG_3747.webp" }),
       // IMG_3747 shows Quantum's purple as a boundary treatment over green
       // ground, matching the adjacent woodland rather than a solid violet field.
-      polygon("Quantum", "rgba(43,82,55,.98)", [[48,76],[57,75],[61,78],[64,84],[61,89],[57,92],[51,91],[46,87],[45,81]], { source:"IMG_3747.webp" }),
+      polygon("Quantum", "rgba(43,82,55,.98)", [[51,80],[58,78],[64,80],[67,85],[65,91],[61,95],[55,95],[50,91],[49,85]], { source:"IMG_3747.webp" }),
       polygon("The Lion's Den", "rgba(40,69,47,.98)", [[67,81],[77,80],[84,82],[88,86],[84,90],[80,92],[71,91],[66,88],[65,85]], { source:"IMG_3748.webp" })
     ]
   };
@@ -7572,7 +7573,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[56,61],[56,70],[56,82]]),                 // Oldtown -> Quantum
     route([[56,82],[63,83],[68,85],[74,86]]),         // Quantum -> Helix -> Lion's Den, south of Hilltop
     route([[42,44],[30,47],[26,72]]),                 // Nexus -> Metropolis / Hydro XL branch
-    route([[56,61],[46,75]])                          // Oldtown -> Tribe of Frog
+     route([[56,67],[49,73],[42,77],[40,80]])           // Oldtown -> Tribe of Frog
   ] };
   // Anonymous building scatter was removed: a close detail must be a
   // source-supported named court or a readable route, never texture filler.
@@ -7586,7 +7587,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   // observed footprint and circulation, never a guessed business location.
   geo.evidenceStageCourts = { type:"FeatureCollection", features:[
     polygon("NEXUS court", "rgba(82,151,94,.98)", [[38.7,42.5],[40.8,40.4],[43.9,40.1],[46.7,42.4],[46.1,45.5],[44.7,47.2],[41.4,47.6],[39.2,45.8]], { outline:"rgba(235,181,91,.94)", source:"IMG_3740.webp" }),
-    polygon("Hidden Woods court", "rgba(151,163,117,.96)", [[17.5,31.2],[21.3,29.7],[24.4,30.5],[26.9,32.4],[26.8,34.8],[24.9,37.7],[21.5,38.1],[18.7,36.7],[17.3,34.2]], { outline:"rgba(232,157,61,.96)", source:"IMG_3740.webp" }),
+    polygon("Hidden Woods court", "rgba(151,163,117,.96)", [[22,31],[26,27.8],[32,28.2],[36,31.5],[36,35.5],[33.5,39],[29,40],[25,38.5],[22,35.5]], { outline:"rgba(232,157,61,.96)", source:"IMG_3740.webp" }),
     polygon("Tangled Roots court", "rgba(124,98,45,.98)", [[51,20],[56,19],[58,23],[54,26],[50,24]], { outline:"rgba(205,76,58,.96)" }),
     // IMG_3735 places a pale communal clearing and round grey court inside
     // Anara's wooded shell, north-west of Temple Valley Camping. These are
@@ -7595,7 +7596,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Grand Central court", "rgba(243,214,165,.98)", [[56,45],[61,44],[63,48],[60,51],[55,49]]),
     // IMG_3747 shows a pale woodland clearing around Tribe of Frog; the
     // compact purple form belongs to the stage inside it, not the whole court.
-    polygon("Tribe of Frog clearing", "rgba(181,171,130,.96)", [[41.5,73.5],[42,70.8],[45,70.2],[47.8,71.4],[48.5,73.8],[47.7,75.5],[46.4,76.7],[44.3,77.5],[42.3,76.2]], { outline:"rgba(67,103,62,.96)", source:"IMG_3747.webp" }),
+    polygon("Tribe of Frog clearing", "rgba(181,171,130,.96)", [[34.3,80.2],[35,77.2],[38.8,76.2],[42.5,77.5],[45,80.5],[44.6,83.5],[42.4,85.7],[38.8,86.3],[35.3,84.3]], { outline:"rgba(67,103,62,.96)", source:"IMG_3747.webp" }),
     // IMG_3748 keeps the Lion's Den on dark woodland ground; the warm
     // amphitheatre is a compact landmark and glow within that clearing.
     polygon("Lion's Den court", "rgba(42,78,52,.98)", [[71,84],[80,83],[83,87],[79,90],[71,89]], { outline:"rgba(90,119,70,.92)", source:"IMG_3748.webp" })
@@ -7604,11 +7605,11 @@ function buildEvidenceOnlyMapGeoJSON(){
   // close-ups. These are limited to pictured districts and their documented
   // venue chains; they are not generic building scatter.
   geo.evidenceDistrictContours = { type:"FeatureCollection", features:[
-    polygon("Festival grounds boundary", "transparent", [[0,9],[20,6],[43,8],[61,8],[79,12],[95,20],[100,35],[100,56],[101,78],[102,99],[92,100],[68,100],[47,98],[31,101],[10,99],[-1,94],[-2,78],[-1,57],[1,38]], { color:"rgba(111,174,113,.9)", lineWidth:2.4, source:"IMG_3751.webp" }),
+    polygon("Festival grounds boundary", "transparent", [[-7,2],[20,0],[46,3],[65,3],[84,8],[100,15],[106,28],[106,52],[107,75],[107,104],[90,106],[65,105],[46,103],[30,106],[6,104],[-7,98],[-8,76],[-8,54],[-7,33]], { color:"rgba(111,174,113,.9)", lineWidth:2.4, source:"IMG_3751.webp" }),
     polygon("Letsbe Avenue approach", "transparent", [[40,30],[45,30],[47,35],[45,40],[40,39],[38,35]], { color:"rgba(245,208,98,.94)" }),
     polygon("Botanica loop", "transparent", [[32.5,40],[38,37.4],[43.5,37.8],[47.8,40.2],[50.5,43.2],[49.8,46.7],[50.8,49.4],[46.6,52.8],[42.1,52.3],[37.6,53],[33.1,50.8],[30.7,47.3],[30.4,44],[31.5,41.6]], { color:"rgba(246,232,180,.96)", lineWidth:1.9, source:"IMG_3740.webp" }),
     polygon("Metropolis outline", "transparent", [[25.5,55.5],[30,52.8],[35,52.2],[39,54],[43.8,56.9],[45.5,60.8],[43.1,64.6],[39.5,66.8],[34.5,68.3],[29.5,67],[25.4,63.2],[23.8,59.4]], { color:"rgba(91,223,222,.94)", lineWidth:1.95, source:"IMG_3743.webp" }),
-    polygon("Area 404 outline", "transparent", [[28,64.9],[33.5,64.5],[37.2,64.3],[41.1,64.5],[44.4,65.9],[46.8,69.5],[47.2,72.4],[44.7,74.5],[44.2,78],[41.4,81.3],[38.2,79.8],[35.8,81.4],[32.8,79.6],[29.2,78.2],[25.9,75.5],[24.2,72.2],[24.6,68.8]], { color:"rgba(220,238,74,.96)", lineWidth:2.05, source:"IMG_3742.webp" }),
+    polygon("Area 404 outline", "transparent", [[28,64.9],[33.5,64.5],[37.2,64.3],[41.1,64.5],[44.4,65.9],[46,69.4],[45.5,72.4],[43.1,74.8],[40.8,76.1],[38.2,75],[35.4,76.4],[32.3,74.9],[28.8,73.7],[25.9,71.7],[24.6,68.8]], { color:"rgba(220,238,74,.96)", lineWidth:2.05, source:"IMG_3742.webp" }),
     polygon("Copperwood court outline", "transparent", [[52,30],[59,27],[64,28],[67,30],[69,32],[67,34],[68,37],[64,39],[59,40],[56,41],[54,39],[52,37],[50,35]], { color:"rgba(250,214,83,.96)", lineWidth:2.1, source:"IMG_3736.webp" }),
     polygon("Thrutopia boundary", "transparent", [[70,35],[75,34],[79,36],[82,35],[85,38],[88,40],[86,43],[84,45],[80,46],[76,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)", lineWidth:2.15, source:"IMG_3738.webp" }),
     polygon("Anara Forest boundary", "transparent", [[79,19],[86,18],[91,21],[94,25],[92,30],[88,34],[83,32],[79,29],[77,24]], { color:"rgba(112,224,144,.92)", lineWidth:1.7, source:"IMG_3735.webp" }),
@@ -7616,20 +7617,20 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Grand Central outline", "transparent", [[54,44],[61,43],[63,45],[64,48],[61,50],[60,52],[55,51],[52,49],[53,46]], { color:"rgba(241,122,74,.95)", lineWidth:2, source:"IMG_3751.webp" }),
     polygon("Oldtown outline", "transparent", [[52,54],[59,54],[61,57],[61,62],[59,67],[58,69],[53,69],[50,65],[49,61],[51,56]], { color:"rgba(214,87,67,.94)", lineWidth:2.2, source:"IMG_3751.webp" }),
     polygon("Hilltop field outline", "transparent", [[69,47],[80,47],[84,50],[86,60],[84,68],[80,76],[75,78],[71,77],[67,72],[66,66],[67,56]], { color:"rgba(231,205,84,.9)", source:"IMG_3751.webp" }),
-    polygon("Sunset Hill boundary", "transparent", [[16,74],[25,71],[35,72],[43,76],[46,81],[44,86],[39,89],[31,90],[23,87],[17,82],[14,78]], { color:"rgba(124,190,109,.9)", lineWidth:1.75, source:"IMG_3747.webp" }),
+    polygon("Sunset Hill boundary", "transparent", [[10,76],[21,72],[31,73],[44,75.5],[47,80],[46,84],[43,88],[38,92],[29,92],[20,89],[13,84],[9,80]], { color:"rgba(124,190,109,.9)", lineWidth:1.75, source:"IMG_3747.webp" }),
     // The outer-site close-ups define these as distinct camp grounds, not
     // decorative texture or extensions of the central districts. Their
     // silhouettes are traced before adding any further camp detail.
-    polygon("West Camping boundary", "transparent", [[2,11],[11,9],[20,9.5],[27,12.4],[31,16.5],[30,21],[32,25],[28,29.5],[24,33],[18,34.5],[13.5,31.5],[8,32.5],[4,29.5],[0.8,23],[0.5,17]], { color:"rgba(116,184,127,.92)", lineWidth:1.8, source:"IMG_3746.webp" }),
-    polygon("Downtown Camping boundary", "transparent", [[1.5,39],[10,37.6],[18.8,38.3],[25.8,42.1],[26.2,45.5],[22.9,48.8],[21.4,52.6],[24.6,56.2],[24.5,59.8],[19.3,61.1],[13.2,59.7],[7.8,57.7],[3.2,54.1],[0.8,49.3]], { color:"rgba(242,162,151,.94)", lineWidth:2.05, source:"IMG_3745.webp" }),
-    polygon("Valley Camping boundary", "transparent", [[55.5,17],[60.5,14.8],[67,14.4],[72,16.2],[75,20],[74,23.8],[70.4,27.5],[65.4,28.7],[60.2,27.6],[56.6,24.2],[54,20.4]], { color:"rgba(137,201,142,.9)", lineWidth:1.8, source:"IMG_3751.webp" }),
-    polygon("Sunset Camping boundary", "transparent", [[4,89],[11,87.5],[18,88],[25,89.3],[28,91.6],[26.5,94.2],[22.5,96.7],[14,97],[7,95],[1,92.2]], { color:"rgba(244,211,84,.95)", lineWidth:2.05, source:"IMG_3748.webp" }),
-    polygon("East Camping boundary", "transparent", [[90,77],[97,77.8],[100,81],[100,86],[97.7,88.5],[98.8,91.2],[100,95],[100,99],[89,99],[85.4,96.8],[85.8,93.1],[83.2,90.5],[84.8,87.5],[88.1,85.2],[87.5,81.6]], { color:"rgba(232,151,144,.94)", lineWidth:2.05, source:"IMG_3749.webp" }),
+    polygon("West Camping boundary", "transparent", [[-3,7],[8,4],[20,5],[31,9],[37,14],[36,20],[39,23],[34,26],[29,27],[22,26],[15,25],[8,27],[1,25],[-4,21]], { color:"rgba(116,184,127,.92)", lineWidth:1.8, source:"IMG_3746.webp" }),
+    polygon("Downtown Camping boundary", "transparent", [[-4,37],[4,34],[13,35],[20,38],[23,42],[22,46],[18,50],[17,55],[20,60],[19,65],[14,67],[8,65],[2,61],[-3,56],[-5,49]], { color:"rgba(242,162,151,.94)", lineWidth:2.05, source:"IMG_3745.webp" }),
+    polygon("Valley Camping boundary", "transparent", [[52,13],[58,9],[67,8.5],[75,11],[80,16],[78,23],[73,28],[66,29],[59,27],[53,24],[50,19]], { color:"rgba(137,201,142,.9)", lineWidth:1.8, source:"IMG_3751.webp" }),
+    polygon("Sunset Camping boundary", "transparent", [[-3,93],[5,91],[14,91],[25,93],[35,95],[35,98],[29,101],[20,103],[8,101],[-2,98]], { color:"rgba(244,211,84,.95)", lineWidth:2.05, source:"IMG_3748.webp" }),
+    polygon("East Camping boundary", "transparent", [[90,74],[99,73],[104,78],[104,86],[101,90],[103,94],[104,101],[90,102],[84,99],[82,95],[84,90],[85,85],[87,80],[86,76]], { color:"rgba(232,151,144,.94)", lineWidth:2.05, source:"IMG_3749.webp" }),
     // The dark diagonal alongside Hilltop is observed as a boundary/fence,
     // not a public route (findings_vidAB.md). It keeps the Oldtown/Quantum
     // corridor visibly outside the yellow camping field.
     route([[65,49],[64,57],[64,65],[66,73],[69,79]], { color:"rgba(20,31,23,.96)" }),
-    polygon("Quantum boundary", "transparent", [[48,77],[57,76],[60,79],[63,84],[60,88],[57,91],[51,90],[47,86],[46,81]], { color:"rgba(214,137,234,.94)", source:"IMG_3747.webp" }),
+    polygon("Quantum boundary", "transparent", [[51,80],[58,78],[64,80],[67,85],[65,91],[61,95],[55,95],[50,91],[49,85]], { color:"rgba(214,137,234,.94)", source:"IMG_3747.webp" }),
     polygon("Lion's Den boundary", "transparent", [[68,82],[77,81],[83,83],[87,86],[83,89],[80,91],[71,90],[67,87],[66,85]], { color:"rgba(240,166,95,.94)", source:"IMG_3748.webp" })
   ] };
   // These are connected frontage groups and stage-adjacent compounds, not an
@@ -7669,13 +7670,13 @@ function buildEvidenceOnlyMapGeoJSON(){
   // separate land-use silhouettes. They intentionally contain no newly
   // inferred stalls, utility pins, gates, or internal circulation here.
   geo.evidenceCampFields = { type:"FeatureCollection", features:[
-    polygon("West Camping", "rgba(68,132,77,.9)", [[2,11],[11,9],[20,9.5],[27,12.4],[31,16.5],[30,21],[32,25],[28,29.5],[24,33],[18,34.5],[13.5,31.5],[8,32.5],[4,29.5],[0.8,23],[0.5,17]], { source:"IMG_3746.webp" }),
-    polygon("Downtown Camping", "rgba(204,122,125,.84)", [[1.5,39],[10,37.6],[18.8,38.3],[25.8,42.1],[26.2,45.5],[22.9,48.8],[21.4,52.6],[24.6,56.2],[24.5,59.8],[19.3,61.1],[13.2,59.7],[7.8,57.7],[3.2,54.1],[0.8,49.3]], { source:"IMG_3745.webp" }),
-    polygon("Valley Camping", "rgba(75,139,84,.92)", [[55.5,17],[60.5,14.8],[67,14.4],[72,16.2],[75,20],[74,23.8],[70.4,27.5],[65.4,28.7],[60.2,27.6],[56.6,24.2],[54,20.4]], { source:"IMG_3751.webp" }),
-    polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[72,53.5],[79.8,53],[83.2,56.5],[83.2,62.5],[81.2,68.5],[79,74.5],[74.2,75.7],[70.5,72.5],[69.2,67],[70.3,60.5]], { source:"IMG_3751.webp" }),
-    polygon("Sunset Camping", "rgba(194,169,55,.88)", [[4,89],[11,87.5],[18,88],[25,89.3],[28,91.6],[26.5,94.2],[22.5,96.7],[14,97],[7,95],[1,92.2]], { source:"IMG_3748.webp" }),
-    polygon("East Camping", "rgba(187,105,122,.84)", [[90,77],[97,77.8],[100,81],[100,86],[97.7,88.5],[98.8,91.2],[100,95],[100,99],[89,99],[85.4,96.8],[85.8,93.1],[83.2,90.5],[84.8,87.5],[88.1,85.2],[87.5,81.6]], { source:"IMG_3749.webp" }),
-    polygon("Temple Valley Camping", "rgba(92,155,102,.88)", [[88,29],[95,28.5],[98,30.8],[99,34.8],[97,38.2],[94,40.7],[89,40.1],[85.7,37.9],[84.5,34.2],[86.2,31.1]], { source:"IMG_3735.webp" })
+    polygon("West Camping", "rgba(68,132,77,.9)", [[-3,7],[8,4],[20,5],[31,9],[37,14],[36,20],[39,23],[34,26],[29,27],[22,26],[15,25],[8,27],[1,25],[-4,21]], { source:"IMG_3746.webp" }),
+    polygon("Downtown Camping", "rgba(204,122,125,.84)", [[-4,37],[4,34],[13,35],[20,38],[23,42],[22,46],[18,50],[17,55],[20,60],[19,65],[14,67],[8,65],[2,61],[-3,56],[-5,49]], { source:"IMG_3745.webp" }),
+    polygon("Valley Camping", "rgba(75,139,84,.92)", [[52,13],[58,9],[67,8.5],[75,11],[80,16],[78,23],[73,28],[66,29],[59,27],[53,24],[50,19]], { source:"IMG_3751.webp" }),
+    polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[70,51],[80,50],[85,55],[85,63],[82,70],[80,76],[74,78],[69,75],[67,68],[68,59]], { source:"IMG_3751.webp" }),
+    polygon("Sunset Camping", "rgba(194,169,55,.88)", [[-3,93],[5,91],[14,91],[25,93],[35,95],[35,98],[29,101],[20,103],[8,101],[-2,98]], { source:"IMG_3748.webp" }),
+    polygon("East Camping", "rgba(187,105,122,.84)", [[90,74],[99,73],[104,78],[104,86],[101,90],[103,94],[104,101],[90,102],[84,99],[82,95],[84,90],[85,85],[87,80],[86,76]], { source:"IMG_3749.webp" }),
+    polygon("Temple Valley Camping", "rgba(92,155,102,.88)", [[87,27],[96,27],[101,30],[102,35],[99,41],[94,43],[88,42],[83,38],[82,33],[85,29]], { source:"IMG_3735.webp" })
   ] };
   // Perimeter evidence establishes field silhouettes, not an authoritative
   // pitch plan. Empty collections deliberately remove the old generated tents,
@@ -7684,7 +7685,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceCampPitches = { type:"FeatureCollection", features:[] };
   geo.evidenceFieldLanes = { type:"FeatureCollection", features:[] };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
-    route([[22.8,35.8],[29,35.8],[34.7,35.4],[40,35]], { kind:"street", source:"findings_vidAB.md:vidB f_0030,f_0039" }), // Hidden Woods -> Letsbe Avenue
+    route([[33.5,35.8],[36.5,35.8],[38.5,35.4],[40,35]], { kind:"street", source:"findings_vidAB.md:vidB f_0030,f_0039" }), // Hidden Woods -> Letsbe Avenue
     route([[42,31],[40.3,34.8],[40.9,38.2],[42,41.2],[42,44.2]], { kind:"street", source:"findings_vidAB.md:vidA f_0070,f_0091,f_0093" }), // Letsbe Avenue -> Botanica
     route([[40,32],[43.2,32],[45.2,34.8],[45.4,37.7],[42.3,40.1],[40.1,38.1],[40.3,34.8],[40,32]], { kind:"street", source:"findings_vidAB.md:vidA f_0070,f_0091,f_0093" }), // Letsbe loop
     route([[37.2,48.3],[39,46.1],[42,44.2],[45.2,44.2],[48,46.8],[46,50],[42,50.7],[38.7,50.1],[37.2,48.3]], { kind:"street", source:"findings_vidAB.md:vidA f_0070,f_0091,f_0093" }), // Botanica loop
@@ -7714,7 +7715,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[51,59],[50,61],[51,63],[50,65],[51,68]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown west chain
     route([[62,56],[61,58],[62,60],[61,62],[62,65],[61,67]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown east chain
     route([[53,61],[55,62],[57,61],[58,63],[57,66],[55,67],[53,65],[53,61]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown inner loop
-    route([[47.2,75.4],[50,78],[53,81],[56,82]], { kind:"street", source:"IMG_3747.webp" }), // Tribe of Frog -> Quantum fork
+    route([[42.3,82.4],[46.5,84],[50.5,85.5],[53,86]], { kind:"street", source:"IMG_3747.webp" }), // Tribe of Frog -> Quantum fork
   ] };
   // Recognisable, evidence-backed landmarks and stage forms. These are
   // purposefully few: each is visible in the official close-up material.
@@ -7736,7 +7737,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Circus round tent", "rgba(219,122,86,.95)", [[68,75],[70,73],[72,74],[73,76],[71,78],[69,78],[67,76]], { outline:"rgba(124,57,43,.92)" }),
     // The close source records a compact, concave purple stage form inside
     // the pale court; it is deliberately not a generic circular stage marker.
-    polygon("Tribe of Frog stage pod", "rgba(107,63,125,.98)", [[42,72.8],[44,71.7],[46.6,72.3],[47.6,73.8],[46.8,75.5],[45.6,76.6],[44.8,75.6],[45.8,74.7],[45.5,73.7],[44.2,73.4],[43.3,74.4],[43.6,75.8],[42.3,75.7],[41.8,74.4]], { outline:"rgba(225,126,214,.9)", source:"IMG_3747.webp" }),
+    polygon("Tribe of Frog stage pod", "rgba(107,63,125,.98)", [[36.1,79.7],[38.1,78.5],[41.5,79.2],[43.4,80.9],[42.7,83.2],[40.8,84.5],[39.8,83.2],[41.1,82.1],[40.8,80.8],[39.1,80.3],[37.7,81.4],[38,83.2],[36.5,83],[35.8,81.2]], { outline:"rgba(225,126,214,.9)", source:"IMG_3747.webp" }),
     polygon("Hilltop camp marker", "rgba(250,203,59,.98)", [[77,59.5],[78.7,62],[77,64.5],[75.3,62]], { outline:"rgba(101,82,33,.96)" }),
     polygon("Helix round court", "rgba(222,133,98,.95)", [[61,81],[64,80],[66,82],[65,85],[62,85],[60,83]]),
     // IMG_3748 shows the Lion's Den as a long, low stage with a lit front,
@@ -7779,7 +7780,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     [55,46],[58,50],[59,52],[61,48],                   // Grand Central hardstanding and the two documented junctions
     [63,32],[67,32],[70,71],[74,72],[69,75],[72,76],  // Full Moon, Retreat, Circus forms
     [51,59],[51,62],[51,65],[51,68], [55,63],[57,62],[56,66], [62,56],[62,58],[62,60],[62,62],[62,65], // Oldtown chains
-    [44,73],[47,74],[46,76],                           // Tribe of Frog compound
+    [38,80],[42,81],[41,84],                           // Tribe of Frog compound
     [61,82],[64,81],[65,84],                           // Helix forecourt
     [72,85],[75,85],[78,86],[80,88]                    // Lion's Den forecourt
   ].map(([x,y])=>treeDot(x,y,.72)) };
@@ -7787,14 +7788,14 @@ function buildEvidenceOnlyMapGeoJSON(){
   // in the whole-site composition. They are original coloured dots/glows, not
   // copied official icons; close labels remain gated to the explore view.
   const overviewFocalPoints = [
-    ["Hidden Woods", 22, 34, "rgba(244,181,91,.96)", "rgba(244,181,91,.30)", .95],
+    ["Hidden Woods", 29, 34, "rgba(244,181,91,.96)", "rgba(244,181,91,.30)", 1.08],
     ["Tangled Roots", 54, 22, "rgba(205,94,76,.96)", "rgba(205,94,76,.28)", .95],
     ["NEXUS", 42, 44, "rgba(255,194,92,.98)", "rgba(255,194,92,.34)", 1.05],
     ["Grand Central", 60, 47, "rgba(255,167,94,.98)", "rgba(255,167,94,.36)", 1.35],
     ["Anara Forest", 92, 25, "rgba(225,98,174,.96)", "rgba(225,98,174,.28)", 1.05],
     ["Spectrum 360", 39.5, 68.5, "rgba(213,119,218,.98)", "rgba(213,119,218,.34)", 1.1],
     ["Hydro XL", 26, 72, "rgba(191,105,209,.98)", "rgba(191,105,209,.36)", 1.3],
-    ["Tribe of Frog", 44.5, 74, "rgba(189,108,205,.98)", "rgba(189,108,205,.30)", 1.05],
+    ["Tribe of Frog", 39.5, 81.5, "rgba(189,108,205,.98)", "rgba(189,108,205,.30)", 1.05],
     ["Helix", 63, 83, "rgba(255,154,104,.98)", "rgba(255,154,104,.34)", 1.05],
     ["The Lion's Den", 77, 87, "rgba(255,166,72,.98)", "rgba(255,166,72,.38)", 1.45]
   ];
@@ -9806,7 +9807,7 @@ function installEvidenceSceneLayers(map, geo){
   source("evidence-court-dots", geo.evidenceCourtDots);
   map.addLayer({ id:"evidence-court-dots", type:"circle", source:"evidence-court-dots", minzoom:15.85, paint:{ "circle-radius":1.35, "circle-color":"rgba(255,234,150,.82)", "circle-stroke-width":.3, "circle-stroke-color":"rgba(53,64,37,.82)" } });
   source("evidence-stage-halos", geo.evidenceStageHalos);
-  map.addLayer({ id:"evidence-stage-halos", type:"circle", source:"evidence-stage-halos", minzoom:13.5, paint:{ "circle-radius":["*",["get","scale"],["interpolate",["linear"],["zoom"],13.5,9,15.5,12]], "circle-color":["get","color"], "circle-blur":.72 } });
+  map.addLayer({ id:"evidence-stage-halos", type:"circle", source:"evidence-stage-halos", minzoom:13.5, paint:{ "circle-radius":["interpolate",["linear"],["zoom"],13.5,["*",["get","scale"],9],15.5,["*",["get","scale"],12]], "circle-color":["get","color"], "circle-blur":.72 } });
   // This layer draws after courts and landmarks so its small original focal
   // points stay visible at overview without revealing venue-level detail.
   source("evidence-overview-focal-points", geo.evidenceOverviewFocalPoints);
@@ -9850,17 +9851,17 @@ function loadMap(){
       [SITE_SW.lon - lonPad, SITE_SW.lat - latPad],
       [SITE_NE.lon + lonPad, SITE_NE.lat + latPad]
     ];
-    // The opening frame is driven by the reviewed illustrated perimeter,
-    // not a fixed zoom tuned for one screen size. This keeps the west
-    // fields, Hilltop corridor, Lion's Den woodland and road edge in one
-    // coherent first view on both a phone and a wider desktop card.
-    const overviewCorners = [[10,14], [98,14], [98,94], [10,94]]
+    // The opening frame is driven by the complete reviewed illustrated
+    // perimeter, not a central crop. The outer camp grounds are part of the
+    // first reading level in IMG_3751, so clipping them at either edge makes
+    // the site look compressed and wrongly shrinks their visible scale.
+    const overviewCorners = [[-8,0], [107,0], [107,106], [-8,106]]
       .map(([x,y])=> schematicToLatLon(x, y));
     const SITE_OVERVIEW_BOUNDS = [
       [Math.min(...overviewCorners.map(point=> point.lon)), Math.min(...overviewCorners.map(point=> point.lat))],
       [Math.max(...overviewCorners.map(point=> point.lon)), Math.max(...overviewCorners.map(point=> point.lat))]
     ];
-    const overviewPadding = { top: 30, right: 30, bottom: 30, left: 30 };
+    const overviewPadding = { top: 20, right: 20, bottom: 20, left: 20 };
     const showSiteOverview = duration => {
       mapGL.jumpTo({ bearing:0, pitch:0 });
       mapGL.fitBounds(SITE_OVERVIEW_BOUNDS, { padding: overviewPadding, duration, bearing:0, pitch:0 });
@@ -9951,14 +9952,12 @@ function loadMap(){
         setMapExploreStatus("Showing the reviewed site overview.");
       };
     }
-    // Open on the central, walkable part of the site instead of fitting the
-    // entire perimeter into a small phone card. Start just below the complete
-    // venue-chip tier so the first read is territory order and main routes;
-    // a small, intentional zoom into a district reveals every close label.
-    // The Site overview control remains the intentional way back to the full
-    // festival extent.
-    const entryFocus = schematicToLatLon(59, 61);
-    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.55, bearing:0, pitch:0 }));
+    // The first map view must establish the complete illustrated site. A
+    // centre-only camera hid the outer camps and made the visible central
+    // forms look artificially crowded; the first reading level is the
+    // complete evidence-traced perimeter, with a small zoom revealing close
+    // labels afterwards.
+    mapGL.once("load", ()=> showSiteOverview(0));
 
     // Label density is deliberately a three-step reveal rather than one
     // hard switch. DOM markers do not have MapLibre collision handling,

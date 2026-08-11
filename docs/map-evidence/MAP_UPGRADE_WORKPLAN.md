@@ -123,6 +123,13 @@ reworked as an outer land-use boundary from the newer official screenshots.
 Generic pitch marks, tents and local lanes are no longer active evidence-map
 content.
 
+**Separation reset — complete:** the entry camera now fits the full reviewed
+festival outline; the West, Downtown, Valley, Hilltop, Sunset, East and Temple
+fields read as outer grounds rather than central parcels. Hidden Woods is a
+distinct pale clearing, and Tribe of Frog is contained in Sunset Hill woodland
+with a visible gap from Area 404 and Quantum. The repaired overview-halo layer
+also completes rendering instead of aborting MapLibre layer installation.
+
 The first of these batches is complete. It is a connected western-core pass
 rather than a single-landmark tweak: parent silhouettes, the documented
 horseshoe, key landmark forms, and their display zoom were reviewed together.
