@@ -9,10 +9,11 @@ new map layout. This includes the old position lists in `js/app.js`,
 `map-data.js`.
 
 For the refresh, use this folder's independent official-app evidence only.
-Start with `IMG_3670.png` for full-site topology, then use official close-ups
-to trace each connected cluster. Record the image/frame that supports a new
-silhouette or placement and review a rendered before/after image before
-shipping. Do not use screenshots of Greebtown itself as corroboration.
+Use the newer `IMG_3721` through `IMG_3734` set for the current full-site
+topology, then use official close-ups and cited footage to trace one connected
+cluster at a time. Record the image/frame that supports a new silhouette or
+placement and review a rendered before/after image before shipping. Do not use
+screenshots of Greebtown itself as corroboration.
 
 The binding rules for using this evidence are in
 [`../MAP_WORKING_AGREEMENT.md`](../MAP_WORKING_AGREEMENT.md). In particular,
@@ -22,6 +23,13 @@ visual review gate apply before any new map feature is added.
 The live renderer boundary and its automated check are documented in
 [`SOURCE_OF_TRUTH.md`](SOURCE_OF_TRUTH.md). Treat that document as the
 handover point for any future map work.
+
+The executable delivery sequence is in
+[`MAP_UPGRADE_WORKPLAN.md`](MAP_UPGRADE_WORKPLAN.md). Historical notes below
+may explain a retired draft, but they never authorize legacy coordinates,
+legacy controls, or a superseded placement. In particular, the current ruling
+for Thrutopia is the visible, bounded area in `IMG_3724.webp`; it takes
+precedence over older footage where a typed search did not return a pin.
 
 Screenshots of the official Boomtown Fair 2026 app's own map, plus written
 findings from reviewing them and ~490 frames extracted from 5 screen

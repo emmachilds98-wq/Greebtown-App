@@ -5,37 +5,53 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const app = fs.readFileSync(path.join(root, "js", "app.js"), "utf8");
 const css = fs.readFileSync(path.join(root, "css", "style.css"), "utf8");
+const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const errors = [];
 const matchNumber = pattern => Number(app.match(pattern)?.[1]);
 const labelThreshold = matchNumber(/const LABEL_ZOOM_THRESHOLD = (\d+(?:\.\d+)?)/);
 const labelDetailThreshold = matchNumber(/const LABEL_DETAIL_ZOOM_THRESHOLD = (\d+(?:\.\d+)?)/);
-const passageZoom = matchNumber(/id: "district-passages-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const massingZoom = matchNumber(/id: "authored-massing-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const atmosphereZoom = matchNumber(/id: "district-atmosphere-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const infillZoom = matchNumber(/id: "infill-buildings-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const fineFieldZoom = matchNumber(/id: "fields-fine-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const hedgeZoom = matchNumber(/id: "hedges-line"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const broadFieldZoom = matchNumber(/id: "fields-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const treeZoom = matchNumber(/id: "trees-circle"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const tentZoom = matchNumber(/id: "tents-circle"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const trunkPathZoom = matchNumber(/id: "trail-main-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
-const smallVenueZoom = matchNumber(/id: "small-venues-fill"[^\n]*minzoom: (\d+(?:\.\d+)?)/);
+const entryZoom = matchNumber(/entryFocus\.lon, entryFocus\.lat\], zoom: (\d+(?:\.\d+)?)/);
 
-if(!app.includes('data: geo.siteGround') || !app.includes('id: "site-ground-fill"')) errors.push("the reviewed site boundary must render as the primary festival-ground silhouette");
-if(!Number.isFinite(labelThreshold) || labelThreshold < 15.2 || labelThreshold > 15.5) errors.push("overview anchors must hold through the initial whole-site view");
-if(!Number.isFinite(labelDetailThreshold) || labelDetailThreshold < labelThreshold + .5 || labelDetailThreshold > 17) errors.push("fine labels must have a distinct later reveal threshold");
-if(!Number.isFinite(passageZoom) || passageZoom < 15.3 || passageZoom > 15.7) errors.push("district passages must appear at a normal district-reading zoom");
-if(!Number.isFinite(massingZoom) || massingZoom < 15.4 || massingZoom > 15.8) errors.push("authored massing must appear at a normal district-reading zoom");
-if(!Number.isFinite(atmosphereZoom) || atmosphereZoom < 15.7 || atmosphereZoom > 16) errors.push("district atmosphere must remain after usable district detail");
-if(!Number.isFinite(infillZoom) || infillZoom < atmosphereZoom || infillZoom > 16.3) errors.push("generic infill must support district detail without breaking the overview silhouette");
-if(!Number.isFinite(broadFieldZoom) || broadFieldZoom > 14) errors.push("broad farmland texture must establish the site overview");
-if(!Number.isFinite(fineFieldZoom) || fineFieldZoom < 17) errors.push("fine field mottling must remain deep-zoom only");
-if(!Number.isFinite(hedgeZoom) || hedgeZoom > 14) errors.push("outer hedgerows must provide light structure in the site overview");
-if(!Number.isFinite(treeZoom) || treeZoom > 14) errors.push("woodland texture must support the site overview without venue clutter");
-if(!Number.isFinite(tentZoom) || tentZoom < 16) errors.push("individual tents must remain close-zoom texture");
-if(!Number.isFinite(trunkPathZoom) || trunkPathZoom < 15.7) errors.push("trunk paths must not dominate the whole-site overview");
-if(!Number.isFinite(smallVenueZoom) || smallVenueZoom > 14.2) errors.push("reviewed small venue footprints must appear in the initial overview before their dense text labels");
-if(!css.includes("#map.map-labels-thin .map-label:not(.overview){display:none;}")) errors.push("thin mode must leave only territorial overview labels visible");
-if(!css.includes("#map.map-labels-mid .map-label.minor")) errors.push("middle zoom must defer minor labels until detailed exploration");
-if(errors.length){ console.error(errors.join("\n")); process.exit(1); }
-console.log(`Map zoom hierarchy passed: territorial overview/mid/detail labels ${labelThreshold}/${labelDetailThreshold}; paths/passages ${trunkPathZoom}/${passageZoom}; massing/small venues ${massingZoom}/${smallVenueZoom}; atmosphere ${atmosphereZoom}; generic infill ${infillZoom}; fields ${broadFieldZoom}/${fineFieldZoom}; hedges ${hedgeZoom}; trees/tents ${treeZoom}/${tentZoom}.`);
+const sceneStart = app.indexOf("function installEvidenceSceneLayers(map, geo){");
+const sceneEnd = app.indexOf("function loadMap(){", sceneStart);
+const scene = sceneStart >= 0 && sceneEnd > sceneStart ? app.slice(sceneStart, sceneEnd) : "";
+if(!scene) errors.push("the active evidence scene must remain a distinct renderer");
+
+const requiredSceneTokens = [
+  'source("evidence-territories", geo.evidenceTerritories)',
+  'id:"evidence-territories-fill"',
+  'source("evidence-camp-fields", geo.evidenceCampFields)',
+  'source("evidence-spine", geo.evidenceSpine)',
+  'id:"evidence-detail-paths"',
+  'source("evidence-stage-courts", geo.evidenceStageCourts)',
+  'source("evidence-compound-blocks", geo.evidenceCompoundBlocks)',
+  'source("evidence-stage-halos", geo.evidenceStageHalos)'
+];
+const missingScene = requiredSceneTokens.filter(token => !scene.includes(token));
+if(missingScene.length) errors.push(`active evidence-scene layers missing: ${missingScene.join(", ")}`);
+if(/geo\.(siteGround|parkingAreas|roads|gateForecourts|fields|districts)/.test(scene)) errors.push("active scene must not read legacy geometry collections");
+
+if(!Number.isFinite(labelThreshold) || labelThreshold < 15.2 || labelThreshold > 15.5) errors.push("overview-to-explore label threshold is outside the reviewed range");
+if(!Number.isFinite(labelDetailThreshold) || labelDetailThreshold < labelThreshold + .25 || labelDetailThreshold > 16) errors.push("close label reveal must follow the overview threshold");
+if(!Number.isFinite(entryZoom) || entryZoom < labelDetailThreshold || entryZoom > labelDetailThreshold + .1) errors.push("entry view must open with reviewed normal-reading detail available");
+if(!scene.includes('id:"evidence-field-lanes", type:"line", source:"evidence-field-lanes", minzoom:15.35')) errors.push("camp circulation should appear at normal district-reading zoom");
+if(!scene.includes('id:"evidence-camp-pitches", type:"fill", source:"evidence-camp-pitches", minzoom:15.45')) errors.push("camp pitch detail should remain a second reading level");
+if(!scene.includes('id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55')) errors.push("fine routes must not dominate the overview");
+if(!scene.includes('id:"evidence-stage-tiers", type:"line", source:"evidence-stage-tiers", minzoom:15.85')) errors.push("stage tiers must remain close-view detail");
+
+if(!css.includes("#map.map-labels-thin .map-label:not(.overview){display:none;}")) errors.push("overview must reduce labels to territorial anchors");
+if(!css.includes("#map.map-labels-mid .map-label.evidence-detail:not(.evidence-primary)")) errors.push("explore zoom must retain a primary-label tier before fine labels");
+if(!css.includes(".map-label.map-label-collided{visibility:hidden;}")) errors.push("rendered-label collision protection is required");
+
+const evidenceGroups = ["territory", "evidence-stage", "evidence-venue", "evidence-camp"];
+for(const group of evidenceGroups){
+  if(!app.includes(`\"${group}\": true`) && !app.includes(`${group}: true`)) errors.push(`missing active label visibility group: ${group}`);
+  if(!index.includes(`data-layer=\"${group}\"`)) errors.push(`missing map control for active label group: ${group}`);
+}
+if(index.includes('data-layer="poi"') || index.includes('data-layer="friend"') || index.includes('data-layer="minor"')) errors.push("retired map-layer controls remain visible in index.html");
+
+if(errors.length){
+  console.error(errors.join("\n"));
+  process.exit(1);
+}
+console.log(`Evidence map hierarchy passed: overview/explore/detail labels ${labelThreshold}/${labelDetailThreshold}; entry ${entryZoom}; evidence-only layers and controls are aligned.`);
