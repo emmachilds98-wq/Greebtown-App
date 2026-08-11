@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v478";
-const APP_BUILD_TIME = "2026-08-11T12:38:07Z";
+const APP_CACHE_VERSION = "v479";
+const APP_BUILD_TIME = "2026-08-11T14:08:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7442,7 +7442,7 @@ function evidenceRebuildLabels(){
     ["WEST CAMPING", 17, 17, "evidence-campground"], ["DOWNTOWN CAMPING", 15, 60, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
     ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 91, 22.3, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
-    ["HILLTOP", 78, 67, "evidence-gold"], ["CAMP SKYLARK", 79, 73, "evidence-campground"], ["TRIBE OF FROG", 35, 87, "evidence-violet"], ["QUANTUM", 65, 91, "evidence-violet"], ["THE LION'S DEN", 84, 96, "evidence-den"], ["SUNSET HILL", 23, 117, "evidence-territory"], ["SUNSET", 56, 140, "evidence-campground"], ["EAST CAMPING", 103, 108, "evidence-campground"]
+    ["HILLTOP", 78, 67, "evidence-gold"], ["CAMP SKYLARK", 79, 73, "evidence-campground"], ["TRIBE OF FROG", 50, 78, "evidence-violet"], ["QUANTUM", 65, 91, "evidence-violet"], ["THE LION'S DEN", 84, 96, "evidence-den"], ["SUNSET HILL", 23, 117, "evidence-territory"], ["SUNSET", 56, 140, "evidence-campground"], ["EAST CAMPING", 103, 108, "evidence-campground"]
   ];
 }
 
@@ -7464,7 +7464,7 @@ function evidenceRebuildOverviewLabels(){
     ["GRAND CENTRAL", 58, 48, ""],
     ["OLDTOWN", 55, 61, ""],
     ["HILLTOP", 78, 67, "overview-hilltop"],
-    ["TRIBE OF FROG", 35, 87, ""],
+    ["TRIBE OF FROG", 50, 78, ""],
     ["QUANTUM", 65, 91, ""],
     ["THE LION'S DEN", 84, 96, "overview-lions-den"],
     ["SUNSET HILL", 23, 117, ""],
@@ -7478,7 +7478,7 @@ function evidenceRebuildDetailLabels(){
   // second, close-view tier so the entry view stays legible.
   return [
     ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 29, 34, "stage", "primary"],
-    ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 35, 87, "stage", "primary"],
+    ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 50, 78, "stage", "primary"],
     ["SPECTRUM 360", 39, 67, "stage", "primary"], ["HANGAR 161", 35, 69, "venue"],
     ["DEVIANT LOUNGE", 35, 72, "venue"], ["GAME OVER", 39, 71, "venue"],
     ["BBXL", 41, 73, "venue"], ["END OF THE LINE", 39, 74, "venue"],
@@ -7566,11 +7566,14 @@ function buildEvidenceOnlyMapGeoJSON(){
       // than the town courts beside it. Its full vertical mass is retained
       // here while Quantum and the Lion's Den remain separate below.
       polygon("Hilltop", "rgba(137,128,45,.96)", [[68,45],[82,45],[87,49],[89,58],[88,67],[85,75],[81,79],[75,80],[70,78],[66,74],[65,67],[66,57]], { source:"IMG_3751.webp" }),
-      // IMG_3747 places Tribe of Frog in its own large green ground below the
-      // Metropolis/Area 404 side and west of Oldtown/Quantum. The compact
-      // clearing/stage is deliberately a child of this territory, not its
-      // replacement or an element hidden below a generic southern shape.
-      polygon("Tribe of Frog grounds", "rgba(50,104,67,.98)", [[16,80],[25,77.5],[36,78],[47,80],[53,84],[54,89],[50,95],[45,99],[35,100],[26,98],[18,94],[14,88]], { source:"IMG_3747.webp" }),
+      // IMG_3754/IMG_3755/IMG_3756 place Tribe of Frog as a compact clearing
+      // BETWEEN Area 404 (to its west) and Quantum (to its east), directly
+      // south of Oldtown and north of Sunset Hill — not a large territory
+      // stacked below Area 404. A pale-green valley/track links it west to
+      // Area 404 (IMG_3756); a dark woodland belt separates it east from
+      // Quantum's yellow field (IMG_3755). The clearing/stage are children of
+      // this small green ground, sized to the modest footprint the evidence shows.
+      polygon("Tribe of Frog grounds", "rgba(50,104,67,.98)", [[45,76],[49,74],[53,74.5],[56,77],[57,81],[55,85],[51,87],[47,86],[45,83],[44,79]], { source:"IMG_3754.webp" }),
       // IMG_3747 keeps Sunset Hill as a separate large south-western slope.
       // It starts beyond Tribe of Frog and runs down to the southern woodland;
       // it is intentionally not a small oval between the town and Quantum.
@@ -7592,14 +7595,14 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[56,61],[56,70],[58,80],[64,91]]),         // Oldtown -> Quantum
     route([[64,91],[71,92],[77,94],[84,95]]),         // Quantum -> Helix -> Lion's Den, south of Hilltop
     route([[42,44],[30,47],[26,72]]),                 // Nexus -> Metropolis / Hydro XL branch
-    route([[55,68],[50,72],[44,77],[39,82],[35,87]])    // Oldtown -> Tribe of Frog
+    route([[55,69],[53,72],[51,75],[50,78]])            // Oldtown -> Tribe of Frog (south into the clearing)
   ] };
   // Anonymous building scatter was removed: a close detail must be a
   // source-supported named court or a readable route, never texture filler.
   const treeDot = (x,y,size, properties={})=>({ type:"Feature", properties:{ size, ...properties }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } });
   geo.evidenceForestDots = { type:"FeatureCollection", features:[
     [18,31,1.2],[23,30,.9],[28,33,1.1],[18,49,.8],[23,52,1.15],[17,62,1],[21,67,.9],[18,75,1.25],[23,80,.85],
-    [51,20,1],[56,19,.85],[58,23,1.15],[42,34,.8],[17,86,1],[27,84,.9],[35,86,1.1],[40,89,.85],
+    [51,20,1],[56,19,.85],[58,23,1.15],[42,34,.8],[17,86,1],[27,84,.9],[43,83,1],[58,83,1.1],
     [68,25,1.1],[75,27,.9],[82,22,1],[86,25,.9],[90,28,1.1],[84,29,1],[87,52,1],[90,61,.85],[89,72,1.15],[87,83,.85],[65,94,1],[76,95,1.1]
   ].map(([x,y,size])=>treeDot(x,y,size)) };
   // Close-view areas remain abstract and unbranded: they describe the
@@ -7613,9 +7616,10 @@ function buildEvidenceOnlyMapGeoJSON(){
     // forms only: no uncertain small-venue name is attached to either.
     polygon("Anara Forest clearing", "rgba(190,184,151,.96)", [[81.5,26.7],[83.6,24.4],[84.2,21.8],[87.4,20.7],[91.8,21.1],[93.7,23.3],[94.7,25.7],[93.5,28.4],[90.1,30.2],[86.5,29.8],[84.4,30.9],[82.5,29.1]], { outline:"rgba(115,125,91,.94)", source:"IMG_3735.webp" }),
     polygon("Grand Central court", "rgba(243,214,165,.98)", [[56,45],[61,44],[63,48],[60,51],[55,49]]),
-    // IMG_3747 shows a pale woodland clearing around Tribe of Frog; the
-    // compact purple form belongs to the stage inside it, not the whole court.
-    polygon("Tribe of Frog clearing", "rgba(181,171,130,.96)", [[27,88],[28,84],[32,82],[37,82.5],[41,84.5],[42,88.5],[40,91.5],[36,93],[31,92],[28,91]], { outline:"rgba(67,103,62,.96)", source:"IMG_3747.webp" }),
+    // IMG_3755/IMG_3756 show a pale sandy clearing around Tribe of Frog, set
+    // between Area 404 and Quantum; the compact purple form belongs to the
+    // stage inside it, not the whole court.
+    polygon("Tribe of Frog clearing", "rgba(181,171,130,.96)", [[46,79],[47,76],[50,75],[54,76],[55.5,79],[55,82],[52,84],[48,83.5],[46,81.5]], { outline:"rgba(67,103,62,.96)", source:"IMG_3755.webp" }),
     // IMG_3748 keeps the Lion's Den on dark woodland ground; the warm
     // amphitheatre is a compact landmark and glow within that clearing.
     polygon("Lion's Den court", "rgba(42,78,52,.98)", [[78,90],[87,89],[90,93],[86,96],[78,95]], { outline:"rgba(90,119,70,.92)", source:"IMG_3748.webp" })
@@ -7636,7 +7640,10 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Grand Central outline", "transparent", [[54,44],[61,43],[63,45],[64,48],[61,50],[60,52],[55,51],[52,49],[53,46]], { color:"rgba(241,122,74,.95)", lineWidth:2, source:"IMG_3751.webp" }),
     polygon("Oldtown outline", "transparent", [[52,54],[59,54],[61,57],[61,62],[59,67],[58,69],[53,69],[50,65],[49,61],[51,56]], { color:"rgba(214,87,67,.94)", lineWidth:2.2, source:"IMG_3751.webp" }),
     polygon("Hilltop field outline", "transparent", [[69,46],[81,46],[86,50],[88,58],[87,67],[84,75],[80,78],[75,79],[71,77],[67,73],[66,67],[67,57]], { color:"rgba(231,205,84,.9)", source:"IMG_3751.webp" }),
-    polygon("Tribe of Frog grounds boundary", "transparent", [[16,80],[25,77.5],[36,78],[47,80],[53,84],[54,89],[50,95],[45,99],[35,100],[26,98],[18,94],[14,88]], { color:"rgba(189,108,205,.84)", lineWidth:1.8, source:"IMG_3747.webp" }),
+    // Tribe of Frog reads as a sandy clearing in the woods rather than a
+    // colour-zoned district (unlike Area 404's green line or Quantum's purple),
+    // so its edge is a soft woodland outline, not a bright zoning stroke.
+    polygon("Tribe of Frog grounds boundary", "transparent", [[45,76],[49,74],[53,74.5],[56,77],[57,81],[55,85],[51,87],[47,86],[45,83],[44,79]], { color:"rgba(120,150,96,.78)", lineWidth:1.6, source:"IMG_3754.webp" }),
     polygon("Sunset Hill boundary", "transparent", [[-4,104],[4,99],[13,98],[21,100],[30,104],[38,110],[42,117],[41,124],[36,130],[27,133],[18,132],[9,128],[2,121],[-5,112]], { color:"rgba(124,190,109,.9)", lineWidth:1.75, source:"IMG_3747.webp" }),
     // The outer-site close-ups define these as distinct camp grounds, not
     // decorative texture or extensions of the central districts. Their
@@ -7735,7 +7742,11 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[51,59],[50,61],[51,63],[50,65],[51,68]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown west chain
     route([[62,56],[61,58],[62,60],[61,62],[62,65],[61,67]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown east chain
     route([[53,61],[55,62],[57,61],[58,63],[57,66],[55,67],[53,65],[53,61]], { kind:"oldtown", source:"IMG_3737.webp" }), // Oldtown inner loop
-    route([[41,87],[46.5,88.5],[52,90],[57,91]], { kind:"street", source:"IMG_3747.webp" }), // Tribe of Frog -> Quantum fork
+    // IMG_3756 shows a pale-green valley track linking Area 404's east edge to
+    // the Tribe of Frog clearing; IMG_3754 shows the clearing's east side
+    // handing off toward Quantum past the woodland belt.
+    route([[43,74],[44,76],[46,78],[47.5,79]], { kind:"street", source:"IMG_3756.webp" }), // Area 404 -> Tribe of Frog valley track
+    route([[55,81],[57,83],[58.5,85],[60,86.5]], { kind:"street", source:"IMG_3754.webp" }), // Tribe of Frog -> Quantum hand-off
   ] };
   // Recognisable, evidence-backed landmarks and stage forms. These are
   // purposefully few: each is visible in the official close-up material.
@@ -7757,7 +7768,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Circus round tent", "rgba(219,122,86,.95)", [[68,75],[70,73],[72,74],[73,76],[71,78],[69,78],[67,76]], { outline:"rgba(124,57,43,.92)" }),
     // The close source records a compact, concave purple stage form inside
     // the pale court; it is deliberately not a generic circular stage marker.
-    polygon("Tribe of Frog stage pod", "rgba(107,63,125,.98)", [[29.5,86.5],[31.5,85.3],[34.9,86],[36.8,87.7],[36.1,90],[34.2,91.3],[33.2,90],[34.5,88.9],[34.2,87.6],[32.5,87.1],[31.1,88.2],[31.4,90],[29.9,89.8],[29.2,87.9]], { outline:"rgba(225,126,214,.9)", source:"IMG_3747.webp" }),
+    polygon("Tribe of Frog stage pod", "rgba(107,63,125,.98)", [[46.5,79],[48.5,77.8],[51.9,78.5],[53.8,80.2],[53.1,82.5],[51.2,83.8],[50.2,82.5],[51.5,81.4],[51.2,80.1],[49.5,79.6],[48.1,80.7],[48.4,82.5],[46.9,82.3],[46.2,80.4]], { outline:"rgba(225,126,214,.9)", source:"IMG_3755.webp" }),
     polygon("Hilltop camp marker", "rgba(250,203,59,.98)", [[77,59.5],[78.7,62],[77,64.5],[75.3,62]], { outline:"rgba(101,82,33,.96)" }),
     polygon("Helix round court", "rgba(222,133,98,.95)", [[71,92],[74,91],[76,93],[75,96],[72,96],[70,94]]),
     // IMG_3748 shows the Lion's Den as a long, low stage with a lit front,
@@ -7800,7 +7811,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     [55,46],[58,50],[59,52],[61,48],                   // Grand Central hardstanding and the two documented junctions
     [63,32],[67,32],[70,71],[74,72],[69,75],[72,76],  // Full Moon, Retreat, Circus forms
     [51,59],[51,62],[51,65],[51,68], [55,63],[57,62],[56,66], [62,56],[62,58],[62,60],[62,62],[62,65], // Oldtown chains
-    [31,86],[35,87],[37,90],                           // Tribe of Frog compound
+    [47.5,78],[51.5,79],[53.5,82],                     // Tribe of Frog compound
     [72,93],[75,92],[76,95],                           // Helix forecourt
     [79,92],[82,92],[85,93],[87,95]                    // Lion's Den forecourt
   ].map(([x,y])=>treeDot(x,y,.72)) };
@@ -7815,7 +7826,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     ["Anara Forest", 92, 25, "rgba(225,98,174,.96)", "rgba(225,98,174,.28)", 1.05],
     ["Spectrum 360", 39.5, 68.5, "rgba(213,119,218,.98)", "rgba(213,119,218,.34)", 1.1],
     ["Hydro XL", 26, 72, "rgba(191,105,209,.98)", "rgba(191,105,209,.36)", 1.3],
-    ["Tribe of Frog", 35, 87, "rgba(189,108,205,.98)", "rgba(189,108,205,.30)", 1.05],
+    ["Tribe of Frog", 50, 80, "rgba(189,108,205,.98)", "rgba(189,108,205,.30)", 1.05],
     ["Helix", 73, 94, "rgba(255,154,104,.98)", "rgba(255,154,104,.34)", 1.05],
     ["The Lion's Den", 84, 95, "rgba(255,166,72,.98)", "rgba(255,166,72,.38)", 1.45]
   ];
