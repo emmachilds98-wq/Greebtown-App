@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v478";
-const APP_BUILD_TIME = "2026-08-11T12:38:07Z";
+const APP_CACHE_VERSION = "v479";
+const APP_BUILD_TIME = "2026-08-11T15:09:38Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that

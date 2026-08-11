@@ -1340,8 +1340,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "toilet",
       "name": "Toilets — Grand Central",
       "position": {
-        "x": 58,
-        "y": 20
+        "x": 55.21,
+        "y": 51.79
       },
       "dimensions": {
         "width": 1.25,
@@ -1367,8 +1367,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "toilet",
       "name": "Toilets — Grand Central",
       "position": {
-        "x": 62,
-        "y": 23
+        "x": 54.09,
+        "y": 52.82
       },
       "dimensions": {
         "width": 1.25,
@@ -1394,8 +1394,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Food — Grand Central",
       "position": {
-        "x": 59,
-        "y": 25
+        "x": 52.46,
+        "y": 52.99
       },
       "dimensions": {
         "width": 1.25,
@@ -1421,8 +1421,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Welfare — Grand Central",
       "position": {
-        "x": 56,
-        "y": 26
+        "x": 51.09,
+        "y": 52.23
       },
       "dimensions": {
         "width": 1.25,
@@ -1448,8 +1448,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Water Point — Grand Central",
       "position": {
-        "x": 63,
-        "y": 21
+        "x": 50.6,
+        "y": 50.9
       },
       "dimensions": {
         "width": 1.25,
@@ -1961,8 +1961,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Food — Hidden Woods",
       "position": {
-        "x": 16,
-        "y": 3
+        "x": 20.21,
+        "y": 26.79
       },
       "dimensions": {
         "width": 1.25,
@@ -1988,8 +1988,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Food — Hidden Woods",
       "position": {
-        "x": 17,
-        "y": 6
+        "x": 16.09,
+        "y": 27.23
       },
       "dimensions": {
         "width": 1.25,
@@ -2015,8 +2015,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Food — Hidden Woods",
       "position": {
-        "x": 18,
-        "y": 10
+        "x": 17.7,
+        "y": 23.98
       },
       "dimensions": {
         "width": 1.25,
@@ -2123,8 +2123,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "toilet",
       "name": "Toilets — NEXUS",
       "position": {
-        "x": 21,
-        "y": 24
+        "x": 39.21,
+        "y": 45.79
       },
       "dimensions": {
         "width": 1.25,
@@ -2150,8 +2150,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Accessible Facilities — NEXUS",
       "position": {
-        "x": 22,
-        "y": 25
+        "x": 36.07,
+        "y": 46.88
       },
       "dimensions": {
         "width": 1.25,
@@ -2177,8 +2177,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Water Point — NEXUS",
       "position": {
-        "x": 21,
-        "y": 25
+        "x": 34.79,
+        "y": 44.21
       },
       "dimensions": {
         "width": 1.25,
@@ -2204,8 +2204,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Bar — NEXUS",
       "position": {
-        "x": 25,
-        "y": 21
+        "x": 37.93,
+        "y": 43.12
       },
       "dimensions": {
         "width": 1.25,
@@ -2420,8 +2420,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Bar — Grand Central",
       "position": {
-        "x": 63,
-        "y": 31
+        "x": 51.24,
+        "y": 49.61
       },
       "dimensions": {
         "width": 1.25,
@@ -2447,8 +2447,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Bar — Grand Central",
       "position": {
-        "x": 67,
-        "y": 32
+        "x": 52.7,
+        "y": 48.98
       },
       "dimensions": {
         "width": 1.25,
@@ -2474,8 +2474,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Food — Grand Central",
       "position": {
-        "x": 65,
-        "y": 33
+        "x": 54.3,
+        "y": 49.29
       },
       "dimensions": {
         "width": 1.25,
@@ -2501,8 +2501,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Cash Point — Grand Central",
       "position": {
-        "x": 64,
-        "y": 29
+        "x": 55.29,
+        "y": 50.4
       },
       "dimensions": {
         "width": 1.25,
@@ -2663,8 +2663,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Photobooth — The Lion's Den",
       "position": {
-        "x": 82,
-        "y": 54
+        "x": 37.21,
+        "y": 72.79
       },
       "dimensions": {
         "width": 1.25,
@@ -2690,8 +2690,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Bar — The Lion's Den",
       "position": {
-        "x": 82,
-        "y": 55
+        "x": 34.07,
+        "y": 73.88
       },
       "dimensions": {
         "width": 1.25,
@@ -2717,8 +2717,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "toilet",
       "name": "Toilets — The Lion's Den",
       "position": {
-        "x": 85,
-        "y": 56
+        "x": 32.79,
+        "y": 71.21
       },
       "dimensions": {
         "width": 1.25,
@@ -2744,8 +2744,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Water Point — The Lion's Den",
       "position": {
-        "x": 86,
-        "y": 57
+        "x": 35.93,
+        "y": 70.12
       },
       "dimensions": {
         "width": 1.25,
@@ -2771,8 +2771,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "toilet",
       "name": "Toilets — Anara Forest",
       "position": {
-        "x": 84,
-        "y": 23
+        "x": 84.21,
+        "y": 73.79
       },
       "dimensions": {
         "width": 1.25,
@@ -2798,8 +2798,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Accessible Facilities — Anara Forest",
       "position": {
-        "x": 86,
-        "y": 21
+        "x": 80.09,
+        "y": 74.23
       },
       "dimensions": {
         "width": 1.25,
@@ -2825,8 +2825,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Water Point — Anara Forest",
       "position": {
-        "x": 87,
-        "y": 23
+        "x": 81.7,
+        "y": 70.98
       },
       "dimensions": {
         "width": 1.25,
@@ -3095,8 +3095,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "toilet",
       "name": "Toilets — Hydro XL",
       "position": {
-        "x": 7,
-        "y": 48
+        "x": 17.21,
+        "y": 67.79
       },
       "dimensions": {
         "width": 1.25,
@@ -3122,8 +3122,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "decoration",
       "name": "Water Point — Hydro XL",
       "position": {
-        "x": 11,
-        "y": 49
+        "x": 13.09,
+        "y": 68.23
       },
       "dimensions": {
         "width": 1.25,
@@ -3149,8 +3149,8 @@ window.GREEBTOWN_MAP_DOCUMENT = {
       "type": "vendor",
       "name": "Bar — Hydro XL",
       "position": {
-        "x": 9,
-        "y": 43
+        "x": 14.7,
+        "y": 64.98
       },
       "dimensions": {
         "width": 1.25,
