@@ -261,3 +261,41 @@ location.
   `IMG_3738.webp`; the southern sources are `IMG_3747.webp` and
   `IMG_3748.webp`. No individual venue, route, stall, tree, utility, gate, or
   parking feature was added in this pass.
+
+## Completion-layer evidence (recorded before geometry work)
+
+- `IMG_3737.webp` shows a named Grand Central stage frontage and two separate
+  connected Oldtown streetfront chains around the already-recorded teal and
+  red routes. It supports court/frontage massing, not individual vendor or
+  service placement.
+- `IMG_3739.webp` shows the Tangled Roots/Copperwood transition as connected
+  compound frontage, while `IMG_3735.webp` shows Anara's pale clearing,
+  communal circle and magenta stage form. `IMG_3747.webp` shows the enclosed
+  Tribe of Frog clearing and its approach toward Quantum. These sources permit
+  only the already-named stage/compound forms and their internal edges.
+- `IMG_3747.webp` also gives a readable `SUNSET HILL` area label south-west
+  of the Tribe of Frog/Quantum transition. It is an area name, not a campsite
+  or a new route.
+- This pass must not infer a specific food stall, toilet, water point, gate,
+  parking area, or unnamed vendor from the icons or densely drawn blocks in
+  those sources. Their exact identity and neighbour evidence is incomplete.
+
+### Completion-layer result
+
+- Replaced the remaining anonymous close-view block scatter with 21 named,
+  source-backed frontage/compound groups. They follow the documented
+  Botanica/Metropolis/Area 404, Copperwood/Thrutopia, Grand Central/Oldtown,
+  Tribe of Frog/Quantum, and Lion's Den court or street edges; no individual
+  stall identity is asserted.
+- Added recognisable Tangled Roots, Grand Central, and Tribe of Frog stage
+  forms; reshaped the Lion's Den tier marks into the recorded amphitheatre
+  reading; repaired the `Síbín Beag` label encoding; and added the confirmed
+  `SUNSET HILL` area label. No locations were moved.
+- All other confirmed main-stage names are already represented by the active
+  evidence labels. `Infinity` remains intentionally absent from the map: the
+  current material establishes it east of the Metropolis run but not a stable
+  enough local boundary/anchor to place its footprint safely.
+- Removed the retired parking/gate/utility legend from the page and made the
+  versioned stylesheet network-first. Existing visitors now receive the
+  current map presentation instead of combining new map JavaScript with old
+  cached CSS.

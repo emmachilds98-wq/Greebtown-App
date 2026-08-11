@@ -375,7 +375,6 @@
   .map-quick-actions .ghost{padding:6px 10px; flex-shrink:0; border-color:rgba(135,205,158,.34);}
   .map-quick-actions span{line-height:1.3; text-align:right;}
   .map-explore-status{margin:0 0 8px; color:var(--text-muted); font-size:11px; line-height:1.35;}
-  .legacy-map-legend{display:none;}
   #mapInfo:empty::before{content:"Search a confirmed place or choose a label family to explore.";}
   .legend{display:flex; gap:8px 14px; font-size:11px; color:var(--text-muted); margin-top:14px; padding:10px 12px; border:1px solid rgba(134,179,148,.16); border-radius:14px; background:rgba(35,78,54,.14); flex-wrap:wrap;}
   .legend span{display:inline-flex; align-items:center; gap:6px;}

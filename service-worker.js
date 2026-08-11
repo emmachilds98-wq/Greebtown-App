@@ -1,6 +1,6 @@
 // Greebtown — Service Worker
 // Bump CACHE_VERSION any time you publish an update to force refresh of cached assets.
-const CACHE_VERSION = "v463";
+const CACHE_VERSION = "v464";
 const CACHE_NAME = `boomtown-companion-${CACHE_VERSION}`;
 
 try{
@@ -100,8 +100,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Network-first for JS so map/location updates always reach clients
-  if (url.pathname.includes("/js/") || url.pathname.endsWith(".js")) {
+  // Network-first for versioned runtime assets. The map's stylesheet is as
+  // important as its JavaScript: cache-first CSS previously left a fresh
+  // evidence scene wearing an old legend and visual treatment.
+  if (url.pathname.includes("/js/") || url.pathname.includes("/css/") || url.pathname.endsWith(".js") || url.pathname.endsWith(".css")) {
     event.respondWith(
       fetch(req).then((networkResponse) => {
         const clone = networkResponse.clone();

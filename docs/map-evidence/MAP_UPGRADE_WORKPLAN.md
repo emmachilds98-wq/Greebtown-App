@@ -134,6 +134,15 @@ from `IMG_3735.webp` through `IMG_3739.webp` and `IMG_3747.webp` through
 `IMG_3748.webp`. The next pass must validate this overview at entry scale
 before any further close-detail additions.
 
+**Update - completion-layer pass:** `IMG_3737.webp`, `IMG_3739.webp`,
+`IMG_3738.webp`, `IMG_3735.webp`, `IMG_3747.webp`, and `IMG_3748.webp` now
+support connected close-detail frontages and stage forms in the already
+reviewed central, north/east, and south clusters. Those grouped forms are now
+rendered at close zoom alongside the confirmed labels; individual stalls and
+all facilities remain deliberately blank unless their name and neighbours are
+readable. The CSS delivery path is versioned and network-first so users do not
+mistake a stale visual cache for a missing map update.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’
