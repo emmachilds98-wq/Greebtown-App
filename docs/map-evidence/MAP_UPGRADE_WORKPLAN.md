@@ -90,10 +90,17 @@ following occurs:
 - detail makes the entry view harder to read rather than improving a close
   view.
 
-## Current next action
+## Current progress and next action
 
-Chunk 0 and the control portion of Chunk 1 are in progress: replace retired
-layer controls and legend entries with evidence-only equivalents, make search
-restore a hidden evidence group, and update the zoom-hierarchy audit so it
-checks the active renderer rather than unreachable legacy layers. The next
-geometry pass begins only after this baseline is reviewed.
+Chunks 0, 1 and 2 are complete: the executable evidence boundary, active
+controls/search, entry hierarchy, overview anchors and whole-site backbone
+have all been reviewed and shipped. Chunk 3 is also complete for the current
+evidence set. Chunk 4 is in progress: Copperwood, Thrutopia and their Grand
+Central hand-off have been re-read from `IMG_3724.webp`; Anara, Oldtown and
+Hilltop remain separate reviewed sub-clusters rather than being pulled into a
+single speculative redraw.
+
+The next pass should complete the remaining central/east close detail only if
+new or existing official evidence records a specific relationship. It should
+then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’
+Oldtown â†’ Hilltop sequences before moving to the final polish/release chunk.

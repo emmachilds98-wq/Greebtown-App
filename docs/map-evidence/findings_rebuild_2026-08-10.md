@@ -180,3 +180,13 @@ location.
   own six source-backed anchors (Copperwood, Thrutopia, Grand Central,
   Oldtown, Hilltop, and the Lion's Den), rather than hiding every active label
   at overview zoom. No new venue, utility, camp, or route was added.
+- North/east compound pass: `IMG_3724.webp` shows Copperwood as a clipped
+  golden compound whose south side hands off toward Grand Central, and a
+  separate blue Thrutopia enclosure immediately to its east. The close view
+  also shows compact, grouped internal forms in both places. The active scene
+  now replaces the earlier generic six-sided outlines with those distinct
+  silhouettes, extends the already-documented Copperwood-to-Thrutopia local
+  route, and adds only unlabeled grouped massing inside those two boundaries.
+  These forms are deliberately illustrative clusters, not a claim of exact
+  stall footprints. Anara, Grand Central, Oldtown, Hilltop, routes beyond the
+  observed hand-off, utilities, and gates were not changed.

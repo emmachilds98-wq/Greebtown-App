@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v456";
-const APP_BUILD_TIME = "2026-08-11T00:11:19Z";
+const APP_CACHE_VERSION = "v457";
+const APP_BUILD_TIME = "2026-08-11T00:32:00Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7519,8 +7519,12 @@ function buildEvidenceOnlyMapGeoJSON(){
       polygon("Botanica", "rgba(47,103,69,.98)", [[34,39],[46,38],[51,45],[46,52],[35,51],[30,46]]),
       polygon("Metropolis", "rgba(36,89,62,.98)", [[28,55],[39,53],[45,60],[41,67],[29,66],[24,61]]),
       polygon("Area 404", "rgba(42,96,57,.98)", [[28,67],[41,65],[46,72],[41,79],[29,78],[24,73]]),
-      polygon("Copperwood Heights", "rgba(139,132,42,.97)", [[53,29],[65,27],[71,32],[68,38],[58,40],[50,36]]),
-      polygon("Thrutopia", "rgba(43,55,122,.98)", [[69,34],[82,34],[88,40],[84,47],[73,46],[68,41]]),
+      // IMG_3724 shows Copperwood as a clipped gold compound with a narrow
+      // south hand-off, not a regular hexagon. It meets the separate blue
+      // Thrutopia enclosure at its eastern edge; neither silhouette reaches
+      // into Grand Central or the Hilltop field.
+      polygon("Copperwood Heights", "rgba(139,132,42,.97)", [[52,29],[62,27],[66,29],[70,31],[69,34],[66,36],[67,39],[59,40],[56,42],[53,39],[50,38],[49,35]]),
+      polygon("Thrutopia", "rgba(43,55,122,.98)", [[69,34],[75,34],[78,36],[82,35],[86,38],[88,41],[85,46],[79,46],[75,45],[72,46],[69,42]]),
       polygon("Anara Forest", "rgba(29,70,47,.98)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
       polygon("Grand Central", "rgba(54,78,54,.98)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
       polygon("Oldtown", "rgba(47,72,50,.98)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
@@ -7569,8 +7573,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Botanica loop", "transparent", [[35,43],[39,39],[46,39],[50,43],[48,49],[44,52],[37,51],[32,47]], { color:"rgba(246,232,180,.96)" }),
     polygon("Metropolis outline", "transparent", [[27,58],[31,54],[38,54],[44,59],[41,66],[32,67],[25,62]], { color:"rgba(91,223,222,.94)" }),
     polygon("Area 404 outline", "transparent", [[28,68],[40,66],[46,71],[42,78],[30,79],[24,74]], { color:"rgba(220,238,74,.96)" }),
-    polygon("Copperwood court outline", "transparent", [[52,30],[63,28],[70,33],[67,39],[58,40],[50,36]], { color:"rgba(250,214,83,.96)" }),
-    polygon("Thrutopia boundary", "transparent", [[70,35],[81,35],[87,40],[83,46],[74,45],[69,41]], { color:"rgba(105,112,232,.96)" }),
+    polygon("Copperwood court outline", "transparent", [[52,30],[62,28],[66,30],[69,32],[68,34],[65,36],[66,38],[59,39],[56,41],[54,38],[51,37],[50,35]], { color:"rgba(250,214,83,.96)" }),
+    polygon("Thrutopia boundary", "transparent", [[70,35],[75,35],[78,37],[82,36],[85,39],[87,41],[84,45],[79,45],[75,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)" }),
     polygon("Anara Forest boundary", "transparent", [[79,19],[89,20],[94,26],[92,32],[85,34],[78,29]], { color:"rgba(112,224,144,.92)" }),
     polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)" }),
     polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)" }),
@@ -7579,6 +7583,11 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Lion's Den boundary", "transparent", [[67,81],[81,81],[87,86],[81,91],[69,91],[65,87]], { color:"rgba(240,166,95,.94)" }),
     polygon("Downtown Camping boundary", "transparent", [[10,40],[20,39],[26,45],[24,53],[16,56],[9,50]], { color:"rgba(242,162,151,.92)" })
   ] };
+  // These are grouped, unlabeled forms observed in IMG_3724, not an
+  // assertion of individual stalls. Keeping them in their own reviewed
+  // clusters makes the north/east compounds readable without bringing back
+  // the retired anonymous-scatter generator.
+  const observedMassing = (name, fill, points)=> polygon(name, fill, points, { source:"IMG_3724.webp" });
   geo.evidenceCompoundBlocks = { type:"FeatureCollection", features:[
     building("rgba(173,119,67,.96)", [[37,42],[40,42],[40,44],[37,44]]), building("rgba(211,159,86,.96)", [[43,41],[46,41],[46,43],[43,43]]),
     building("rgba(169,122,77,.96)", [[40,31],[43,31],[43,33],[40,33]]), building("rgba(206,151,90,.96)", [[44,34],[46,34],[46,36],[44,36]]),
@@ -7588,6 +7597,14 @@ function buildEvidenceOnlyMapGeoJSON(){
     building("rgba(131,91,79,.96)", [[32,68],[35,68],[35,70],[32,70]]), building("rgba(203,122,70,.96)", [[36,71],[39,71],[39,73],[36,73]]),
     building("rgba(146,95,129,.96)", [[40,73],[43,73],[43,75],[40,75]]), building("rgba(193,91,74,.96)", [[40,76],[43,76],[43,78],[40,78]]),
     building("rgba(163,115,71,.96)", [[55,32],[58,32],[58,34],[55,34]]), building("rgba(202,147,80,.96)", [[61,33],[64,33],[64,35],[61,35]]),
+    observedMassing("Copperwood west terrace", "rgba(204,154,86,.96)", [[52,33],[55,33],[55,35],[52,35]]),
+    observedMassing("Copperwood south terrace", "rgba(175,116,71,.96)", [[56,36],[59,36],[59,38],[56,38]]),
+    observedMassing("Copperwood east terrace", "rgba(219,171,100,.96)", [[61,36],[64,36],[64,38],[61,38]]),
+    observedMassing("Thrutopia west workshop group", "rgba(190,184,151,.96)", [[71,37],[74,37],[74,38.5],[71,38.5]]),
+    observedMassing("Thrutopia centre workshop group", "rgba(210,198,162,.96)", [[75,39],[78,39],[78,40.5],[75,40.5]]),
+    observedMassing("Thrutopia north workshop group", "rgba(176,169,142,.96)", [[79,37.5],[82,37.5],[82,39],[79,39]]),
+    observedMassing("Thrutopia east workshop group", "rgba(200,192,158,.96)", [[82,41.5],[84.5,41.5],[84.5,43],[82,43]]),
+    observedMassing("Thrutopia south workshop group", "rgba(185,176,145,.96)", [[76,42],[79,42],[79,43.5],[76,43.5]]),
     building("rgba(147,99,68,.96)", [[56,46],[58,46],[58,48],[56,48]]), building("rgba(206,140,80,.96)", [[60,49],[63,49],[63,51],[60,51]]),
     building("rgba(191,111,77,.96)", [[51,59],[53,59],[53,61],[51,61]]), building("rgba(154,91,72,.96)", [[51,63],[53,63],[53,65],[51,65]]),
     building("rgba(207,142,87,.96)", [[51,66],[53,66],[53,68],[51,68]]), building("rgba(171,106,82,.96)", [[59,58],[61,58],[61,60],[59,60]]),
@@ -7632,7 +7649,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[35,68],[35,72],[41,73],[42,76]], { kind:"street" }), // Area 404 venue column
     route([[32,70],[36,71],[40,73],[42,76]], { kind:"street" }), // Area 404 inner branch
     route([[31,60],[29,64],[27,68],[26,72]], { kind:"neon" }),  // Metropolis -> Hydro XL lit route
-    route([[54,35],[58,36],[62,35],[66,36]], { kind:"street" }), // Copperwood courtyard
+    route([[54,35],[58,36],[62,35],[66,36],[69,39]], { kind:"street" }), // Copperwood courtyard -> Thrutopia hand-off
     route([[70,39],[75,38],[80,39],[83,42],[79,44],[74,43],[70,39]], { kind:"street" }), // Thrutopia boundary loop
     route([[58,48],[59,52],[57,55]], { kind:"street" }),         // Grand Central -> Oldtown south exit
     route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
