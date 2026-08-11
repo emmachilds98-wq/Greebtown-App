@@ -95,10 +95,11 @@ following occurs:
 Chunks 0, 1 and 2 are complete: the executable evidence boundary, active
 controls/search, entry hierarchy, overview anchors and whole-site backbone
 have all been reviewed and shipped. Chunk 3 is also complete for the current
-evidence set. Chunk 4 is in progress: Copperwood, Thrutopia and their Grand
-Central hand-off have been re-read from `IMG_3724.webp`; Anara, Oldtown and
-Hilltop remain separate reviewed sub-clusters rather than being pulled into a
-single speculative redraw.
+evidence set. Chunk 4 is in progress: Copperwood/Thrutopia and the Grand
+Central â†’ Oldtown â†’ Quantum â†’ Lion's Den sequence have been re-read from
+`IMG_3724.webp`, `IMG_3729.webp`, and the cited footage. Anara remains a
+separate reviewed sub-cluster rather than being pulled into a speculative
+redraw.
 
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
