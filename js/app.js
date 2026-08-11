@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v476";
-const APP_BUILD_TIME = "2026-08-11T12:04:09Z";
+const APP_CACHE_VERSION = "v477";
+const APP_BUILD_TIME = "2026-08-11T12:31:37Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -14651,6 +14651,15 @@ const CHAT_PRUNE_MIN_INTERVAL_MS = 30 * 60 * 1000;
 // this tab or installed PWA's own JS is still alive to receive the live
 // onSnapshot update that triggers it.
 const CHAT_NOTIFY_KEY = "chatNotificationsEnabled";
+// Relaunch cutoff: every chat message with a timestamp before this is
+// hidden everywhere — the live listener never keeps it in
+// chatMessagesCache, so pre-relaunch history can't appear in any thread,
+// be counted unread, or fire a notification. This wipes the old message
+// history from view for everyone (a clean, non-destructive reset — the
+// docs may still exist in Firestore but are never loaded), while new
+// messages sent after this moment show normally. Bump this if the history
+// ever needs wiping again.
+const CHAT_HISTORY_EPOCH = Date.parse("2026-08-11T12:28:53Z");
 
 let chatOpenThread = null; // null = showing the thread list; else the open thread's id
 let chatOpenThreadLabel = null;
@@ -14665,6 +14674,29 @@ let chatHeartbeatTimer = null;
 function dmThreadId(nameA, nameB){
   const norm = n=> (n || "").trim().toLowerCase();
   return "dm:" + [norm(nameA), norm(nameB)].sort().join("|");
+}
+
+// Privacy gate: a message is only visible to this device if it belongs to
+// the everyone/group chat, or to a direct-message thread this person is
+// actually one of the two participants in. A DM thread id is
+// "dm:<a>|<b>" with both display names lowercased (see dmThreadId), so
+// participation is a membership check on the current contributor's own
+// name. This is what stops a synced device from ever showing (or counting
+// unread, or notifying on) a direct message meant for someone else, while
+// leaving the group chat open to everyone.
+function isMyChatThread(thread){
+  if(thread === CHAT_THREAD_GROUP) return true;
+  if(typeof thread !== "string" || !thread.startsWith("dm:")) return false;
+  const me = (currentContributorName() || "").trim().toLowerCase();
+  return !!me && thread.slice(3).split("|").includes(me);
+}
+// Combines the relaunch-history cutoff with the per-thread privacy gate:
+// the single source of truth for whether a raw Firestore message doc
+// should enter chatMessagesCache at all. Everything downstream (thread
+// list, unread counts, rendering, notifications) reads the already-
+// filtered cache, so this one check enforces both rules everywhere.
+function isVisibleChatMessage(m){
+  return !!m && typeof m.ts === "number" && m.ts >= CHAT_HISTORY_EPOCH && isMyChatThread(m.thread);
 }
 
 // Everyone chat's aware of: the fixed roster plus anyone actually seen
@@ -14951,11 +14983,15 @@ function startChatListeners(){
       if(!firstMessagesSnapshot){
         const myId = ensureDeviceId();
         snap.docChanges().forEach(change=>{
-          if(change.type === "added" && change.doc.data().fromDeviceId !== myId) notifyNewChatMessage(change.doc.data());
+          if(change.type === "added" && change.doc.data().fromDeviceId !== myId && isVisibleChatMessage(change.doc.data())) notifyNewChatMessage(change.doc.data());
         });
       }
       firstMessagesSnapshot = false;
-      chatMessagesCache = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+      // Only keep messages this device is allowed to see: post-relaunch,
+      // and either the group chat or a DM this person is part of. This is
+      // the single point that enforces both the history wipe and DM
+      // privacy — every reader below works off this filtered cache.
+      chatMessagesCache = snap.docs.map(d=> ({ id: d.id, ...d.data() })).filter(isVisibleChatMessage);
       renderChatUnreadBadge();
       if(chatOpenThread){
         renderChatMessagesOnly();
