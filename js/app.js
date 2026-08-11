@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v457";
-const APP_BUILD_TIME = "2026-08-11T00:32:00Z";
+const APP_CACHE_VERSION = "v458";
+const APP_BUILD_TIME = "2026-08-11T00:24:57Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7542,7 +7542,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[58,48],[61,36],[75,40]]),                 // Grand Central -> Copperwood -> Thrutopia
     route([[75,40],[84,34],[86,27]]),                 // Thrutopia / Copperwood -> Anara Forest
     route([[56,61],[56,70],[56,82]]),                 // Oldtown -> Quantum
-    route([[56,61],[66,65],[74,86]]),                 // Oldtown -> Lion's Den corridor
+    route([[56,82],[63,83],[68,85],[74,86]]),         // Quantum -> Helix -> Lion's Den, south of Hilltop
     route([[42,44],[30,47],[26,72]]),                 // Nexus -> Metropolis / Hydro XL branch
     route([[56,61],[46,75]])                          // Oldtown -> Tribe of Frog
   ] };
@@ -7579,6 +7579,10 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)" }),
     polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)" }),
     polygon("Hilltop field outline", "transparent", [[68,46],[84,47],[87,60],[82,77],[70,78],[66,67]], { color:"rgba(231,205,84,.9)" }),
+    // The dark diagonal alongside Hilltop is observed as a boundary/fence,
+    // not a public route (findings_vidAB.md). It keeps the Oldtown/Quantum
+    // corridor visibly outside the yellow camping field.
+    route([[65,49],[64,57],[64,65],[66,73],[69,79]], { color:"rgba(20,31,23,.96)" }),
     polygon("Quantum boundary", "transparent", [[48,77],[59,76],[63,84],[58,90],[50,89],[46,83]], { color:"rgba(214,137,234,.94)" }),
     polygon("Lion's Den boundary", "transparent", [[67,81],[81,81],[87,86],[81,91],[69,91],[65,87]], { color:"rgba(240,166,95,.94)" }),
     polygon("Downtown Camping boundary", "transparent", [[10,40],[20,39],[26,45],[24,53],[16,56],[9,50]], { color:"rgba(242,162,151,.92)" })
@@ -7651,13 +7655,13 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[31,60],[29,64],[27,68],[26,72]], { kind:"neon" }),  // Metropolis -> Hydro XL lit route
     route([[54,35],[58,36],[62,35],[66,36],[69,39]], { kind:"street" }), // Copperwood courtyard -> Thrutopia hand-off
     route([[70,39],[75,38],[80,39],[83,42],[79,44],[74,43],[70,39]], { kind:"street" }), // Thrutopia boundary loop
-    route([[58,48],[59,52],[57,55]], { kind:"street" }),         // Grand Central -> Oldtown south exit
+    route([[58,48],[58,50],[59,52],[58,54],[57,55]], { kind:"street" }), // Grand Central -> Boomtown Hall -> Daily Rag
+    route([[59,52],[61,51]], { kind:"street" }),                  // documented Boomtown Hall fork
     route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
     route([[51,59],[51,62],[51,65],[51,68]], { kind:"street" }), // Oldtown west chain
     route([[62,56],[62,58],[62,60],[62,62],[62,65]], { kind:"street" }), // Oldtown east chain
     route([[53,61],[55,63],[57,62],[58,64],[56,66],[53,65],[53,61]], { kind:"street" }), // Oldtown inner loop
     route([[46,75],[50,78],[53,81],[56,82]], { kind:"street" }), // Tribe of Frog -> Quantum fork
-    route([[56,82],[63,83],[68,85],[74,86]], { kind:"track" }), // Quantum -> Helix -> Lion's Den
     route([[59,20],[64,22],[69,25]], { kind:"camp" }),           // Valley Camping lanes
     route([[74,59],[78,62],[81,66],[79,71]], { kind:"camp" }),   // Hilltop camping route
     route([[71,58],[76,60],[80,63]], { kind:"camp" }),
@@ -7672,10 +7676,12 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceLandmarks = { type:"FeatureCollection", features:[
     polygon("Spectrum 360 container ring", "rgba(91,73,119,.96)", [[37,65],[40,64],[43,66],[44,69],[42,71],[38,71],[36,69]]),
     polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
+    polygon("Grand Central main-stage glyph", "rgba(211,84,54,.98)", [[59,45.7],[60.3,47],[59,48.3],[57.7,47]], { outline:"rgba(255,216,159,.9)" }),
     polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
     polygon("Full Moon Ballroom dome", "rgba(250,245,221,.98)", [[63,32],[64,30],[67,30],[68,32],[67,35],[64,35],[62,33]], { outline:"rgba(104,89,61,.9)" }),
     polygon("The Retreat clearing", "rgba(208,174,124,.94)", [[70,70],[74,70],[76,72],[74,74],[70,73],[69,71]], { outline:"rgba(109,84,49,.9)" }),
     polygon("Circus round tent", "rgba(219,122,86,.95)", [[68,75],[70,73],[72,74],[73,76],[71,78],[69,78],[67,76]], { outline:"rgba(124,57,43,.92)" }),
+    polygon("Hilltop camp marker", "rgba(250,203,59,.98)", [[77,59.5],[78.7,62],[77,64.5],[75.3,62]], { outline:"rgba(101,82,33,.96)" }),
     polygon("Helix round court", "rgba(222,133,98,.95)", [[61,81],[64,80],[66,82],[65,85],[62,85],[60,83]]),
     polygon("Lion's Den amphitheatre", "rgba(117,78,43,.98)", [[72,85],[80,84],[83,87],[80,89],[72,89],[70,87]])
   ] };
@@ -7698,7 +7704,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   ] };
   geo.evidenceCourtDots = { type:"FeatureCollection", features:[
     [40,43],[43,42],[45,45],[40,46],                   // NEXUS/Botanica court vegetation
-    [55,46],[59,45],[61,48],                           // Grand Central hardstanding details
+    [55,46],[58,50],[59,52],[61,48],                   // Grand Central hardstanding and the two documented junctions
     [63,32],[67,32],[70,71],[74,72],[69,75],[72,76],  // Full Moon, Retreat, Circus forms
     [51,59],[51,62],[51,65],[51,68], [55,63],[57,62],[56,66], [62,56],[62,58],[62,60],[62,62],[62,65], // Oldtown chains
     [44,73],[47,74],[46,76],                           // Tribe of Frog compound

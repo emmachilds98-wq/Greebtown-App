@@ -190,3 +190,14 @@ location.
   These forms are deliberately illustrative clusters, not a claim of exact
   stall footprints. Anara, Grand Central, Oldtown, Hilltop, routes beyond the
   observed hand-off, utilities, and gates were not changed.
+- Central/east corridor correction: `IMG_3729.webp` plus
+  `findings_vidAB.md` show the continuous Grand Central â†’ Oldtown â†’ Quantum
+  sequence and the Lion's Den branch passing *below* Hilltop. The dark
+  diagonal at Hilltop's western edge is a boundary/fence rather than a public
+  route. The active spine therefore now ends at Quantum and resumes south of
+  the yellow field for Helix/Lion's Den, instead of cutting across Hilltop.
+  The Grand Central close path now records the observed Boomtown Hall/Daily
+  Rag fork and two junction points. A small original red stage glyph and
+  yellow Hilltop camp marker represent the confirmed landmark forms; neither
+  is a new venue or utility. Anara remains unchanged because its interior
+  relationships are still too imprecise for a geometry pass.
