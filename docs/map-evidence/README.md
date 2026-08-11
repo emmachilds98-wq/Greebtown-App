@@ -9,11 +9,13 @@ new map layout. This includes the old position lists in `js/app.js`,
 `map-data.js`.
 
 For the refresh, use this folder's independent official-app evidence only.
-Use the newer `IMG_3721` through `IMG_3734` set for the current full-site
+Use the newer `IMG_3721` through `IMG_3751` set for the current full-site
 topology, then use official close-ups and cited footage to trace one connected
-cluster at a time. Record the image/frame that supports a new silhouette or
-placement and review a rendered before/after image before shipping. Do not use
-screenshots of Greebtown itself as corroboration.
+cluster at a time. The root-level `IMG_3735` through `IMG_3751` upload is a
+newer official-app batch: prefer it when it visibly corrects an older colour,
+boundary, or landmark reading. Record the image/frame that supports a new
+silhouette or placement and review a rendered before/after image before
+shipping. Do not use screenshots of Greebtown itself as corroboration.
 
 The binding rules for using this evidence are in
 [`../MAP_WORKING_AGREEMENT.md`](../MAP_WORKING_AGREEMENT.md). In particular,
