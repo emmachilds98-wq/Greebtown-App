@@ -711,3 +711,45 @@ location.
   tall outer-ground hierarchy instead of a square patchwork.
 - The proportion audit now also fails if the evidence plane is returned to a
   square ratio or if the site boundary stops matching its active ground shape.
+
+## South-western cluster remeasurement (recorded before geometry work)
+
+- `IMG_3747.webp` shows Tribe of Frog as a distinct compact purple stage
+  within a much larger green clearing/woodland territory. The territory sits
+  below the Metropolis/Area 404 side of the town and west of Oldtown/Quantum;
+  it is not a small isolated court drawn beneath an unrelated territory.
+- The same image shows Sunset Hill as a separate, much larger south-western
+  green slope. It begins beyond the Tribe clearing and runs south alongside
+  woodland rather than reading as a small oval between the town and Quantum.
+- `IMG_3748.webp` keeps the Lion's Den/Quantum side and Sunset Camping apart
+  with a long dark woodland run. `IMG_3745.webp`, `IMG_3746.webp`,
+  `IMG_3749.webp`, `IMG_3750.webp`, and `IMG_3751.webp` keep each camping
+  field peripheral to the compact town: a field boundary must not be pulled
+  inward merely to make the entry view look filled.
+
+### Scope for this pass
+
+- Replace the connected Tribe of Frog / Sunset Hill parent geometry as one
+  evidence-led cluster; move the Tribe clearing, its stage form, label, focal
+  point, and its only documented route with that parent.
+- Pull the west, Downtown, and east camping edges away from the compact city
+  wherever the cited overview leaves a visible quiet ground buffer. Preserve
+  the documented west/upper, left-hand wedge, and right-edge silhouettes.
+- Do not add a new path, campsite feature, utility, gate, parking area, stall,
+  or validation rule. This pass corrects only existing evidence-scene parent
+  massing, their companion labels/forms, and delivery versioning.
+
+### South-western cluster remeasurement result
+
+- Tribe of Frog now has an independently drawn green parent territory, with
+  its existing clearing, compact stage form, overview focal point, label, and
+  documented Oldtown/Quantum connections moved together. It no longer depends
+  on the Sunset Hill polygon for its visible ground.
+- Sunset Hill is now a separate long south-western territory. The Lion's Den,
+  Quantum corridor, southern woodland, and Sunset field remain to its east or
+  south, preserving the open-ground relationships visible in `IMG_3747.webp`
+  and `IMG_3748.webp`.
+- West/Downtown, Valley, East, and Sunset camping fields were re-spaced with
+  the expanded evidence-only perimeter so the compact town is no longer used
+  to visually fill their separation. No legacy collection, generated geometry,
+  GPS source, new map feature, or new validation rule was introduced.
