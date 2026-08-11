@@ -448,3 +448,40 @@ location.
   dark woodland clearing.
 - No route, name, utility, access feature, vendor, campsite, gate, parking
   shape, or adjacent quantum/woodland boundary changed.
+
+## Western core completion batch (recorded before geometry work)
+
+- `IMG_3740.webp` establishes Hidden Woods as a separate pale clearing to the
+  north-west of the Letsbe/Botanica edge; Letsbe then enters the Botanica loop.
+  The same close view shows NEXUS as a dark crag-like canopy on a green mound
+  beside that loop, rather than a large generic stage polygon.
+- `IMG_3743.webp` establishes Metropolis immediately south-west of Botanica,
+  with Hydro XL on its south-west edge. Hydro XL has a distinct purple halo and
+  a small water form below it; its purple backstage loop is not a public path.
+- `IMG_3742.webp` establishes Area 404 as the irregular lime-bounded enclosure
+  east of Metropolis. Spectrum 360 is a compact centre with separate container
+  pieces around it; the documented Area 404 venue chain continues south from
+  that form. `findings_vidAB.md` frames `vidA f_0070`, `f_0091`, and `f_0093`
+  confirm the connected Letsbe -> Botanica -> Metropolis -> Area 404 horseshoe.
+- Scope: revise the five connected parent silhouettes/contours, the one
+  documented horseshoe path, Hidden Woods and NEXUS forms, the Spectrum 360
+  enclosure, and Hydro XL's already-confirmed landmark form. Keep every named
+  label and existing documented venue chain in place. Do not create a stall,
+  utility icon, gate, parking, or any route inferred from the official app UI.
+
+### Western core completion batch result
+
+- Re-profiled the linked Botanica, Metropolis, and Area 404 boundaries with
+  matching contour lines, then re-drew the documented Letsbe-to-Area 404
+  horseshoe as one connected set of locally supported paths.
+- Replaced Hidden Woods' generic green court with its separate pale clearing
+  treatment and reshaped NEXUS into an irregular green mound with its dark
+  crag canopy. The existing labels remain attached to the same reviewed areas.
+- Rebuilt Spectrum 360 as a compact central deck, enclosure, and four separate
+  container forms within Area 404. Re-profiled Hydro XL into a distinct halo,
+  dark core, and separate water form below Metropolis. These are source-visible
+  landmark forms, not named stalls or extra places.
+- Promoted the confirmed western compound and landmark layers to normal
+  explore zoom so this larger construction is visible without a deep zoom. All
+  new/refined child forms were checked to remain inside Botanica, Metropolis,
+  or Area 404 where a reviewed parent boundary exists.

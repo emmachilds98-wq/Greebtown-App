@@ -109,6 +109,11 @@ versioned with each release and CSS must remain network-first in the service
 worker; otherwise a current map script can retain a stale visual treatment or
 retired legend from an earlier cache.
 
+The live MapLibre canvas must be recreated whenever the evidence renderer's
+cache version changes. A service-worker refresh alone is insufficient in a
+single-page session because an old in-memory canvas can otherwise retain the
+previous GeoJSON sources and make a completed map release appear unchanged.
+
 The entry camera must remain below the close-detail label threshold. The
 opening view is for the `IMG_3751.webp` territory order and main movement
 spine; a small, intentional zoom into a district reveals the complete

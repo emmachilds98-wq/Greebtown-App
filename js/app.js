@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v470";
-const APP_BUILD_TIME = "2026-08-11T10:26:37Z";
+const APP_CACHE_VERSION = "v471";
+const APP_BUILD_TIME = "2026-08-11T10:36:39Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7533,11 +7533,11 @@ function buildEvidenceOnlyMapGeoJSON(){
       // The official west-side close-ups show three linked but visibly
       // different district silhouettes. These are territory boundaries only:
       // their pictured internal venues remain in the existing close-detail tier.
-      polygon("Botanica", "rgba(47,103,69,.98)", [[33,39],[40,37],[47,39],[51,44],[49,49],[45,53],[37,52],[31,48],[30,44]], { source:"IMG_3740.webp" }),
-      polygon("Metropolis", "rgba(36,89,62,.98)", [[27,55],[35,52],[41,54],[45,58],[44,63],[40,66],[34,68],[28,66],[24,62]], { source:"IMG_3743.webp" }),
+      polygon("Botanica", "rgba(47,103,69,.98)", [[32.5,40],[38,37.4],[43.5,37.8],[47.8,40.2],[50.5,43.2],[49.8,46.7],[50.8,49.4],[46.6,52.8],[42.1,52.3],[37.6,53],[33.1,50.8],[30.7,47.3],[30.4,44],[31.5,41.6]], { source:"IMG_3740.webp" }),
+      polygon("Metropolis", "rgba(36,89,62,.98)", [[25.5,55.5],[30,52.8],[35,52.2],[39,54],[43.8,56.9],[45.5,60.8],[43.1,64.6],[39.5,66.8],[34.5,68.3],[29.5,67],[25.4,63.2],[23.8,59.4]], { source:"IMG_3743.webp" }),
       // Shared north edge only: Area 404 meets Metropolis at this boundary;
       // neither fill should spread underneath the other district.
-      polygon("Area 404", "rgba(42,96,57,.98)", [[28,66],[34,68],[40,66],[45,68],[47,72],[44,75],[43,78],[40,81],[37,79],[34,81],[30,78],[25,75],[24,71]], { source:"IMG_3742.webp" }),
+      polygon("Area 404", "rgba(42,96,57,.98)", [[28,64.9],[33.5,64.5],[37.2,64.3],[41.1,64.5],[44.4,65.9],[46.8,69.5],[47.2,72.4],[44.7,74.5],[44.2,78],[41.4,81.3],[38.2,79.8],[35.8,81.4],[32.8,79.6],[29.2,78.2],[25.9,75.5],[24.2,72.2],[24.6,68.8]], { source:"IMG_3742.webp" }),
       // IMG_3724 shows Copperwood as a clipped gold compound with a narrow
       // south hand-off, not a regular hexagon. It meets the separate blue
       // Thrutopia enclosure at its eastern edge; neither silhouette reaches
@@ -7582,8 +7582,8 @@ function buildEvidenceOnlyMapGeoJSON(){
   // Close-view areas remain abstract and unbranded: they describe the
   // observed footprint and circulation, never a guessed business location.
   geo.evidenceStageCourts = { type:"FeatureCollection", features:[
-    polygon("NEXUS court", "rgba(132,210,151,.98)", [[39,42],[44,40],[47,43],[45,47],[40,47]]),
-    polygon("Hidden Woods court", "rgba(72,121,82,.98)", [[19,31],[24,30],[27,34],[24,38],[19,37]], { outline:"rgba(232,157,61,.96)" }),
+    polygon("NEXUS court", "rgba(82,151,94,.98)", [[38.7,42.5],[40.8,40.4],[43.9,40.1],[46.7,42.4],[46.1,45.5],[44.7,47.2],[41.4,47.6],[39.2,45.8]], { outline:"rgba(235,181,91,.94)", source:"IMG_3740.webp" }),
+    polygon("Hidden Woods court", "rgba(151,163,117,.96)", [[17.5,31.2],[21.3,29.7],[24.4,30.5],[26.9,32.4],[26.8,34.8],[24.9,37.7],[21.5,38.1],[18.7,36.7],[17.3,34.2]], { outline:"rgba(232,157,61,.96)", source:"IMG_3740.webp" }),
     polygon("Tangled Roots court", "rgba(124,98,45,.98)", [[51,20],[56,19],[58,23],[54,26],[50,24]], { outline:"rgba(205,76,58,.96)" }),
     // IMG_3735 places a pale communal clearing and round grey court inside
     // Anara's wooded shell, north-west of Temple Valley Camping. These are
@@ -7603,9 +7603,9 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceDistrictContours = { type:"FeatureCollection", features:[
     polygon("Festival grounds boundary", "transparent", [[2,10],[20,6],[43,8],[61,8],[79,12],[94,20],[99,35],[98,55],[100,78],[91,98],[68,99],[47,97],[31,100],[11,93],[2,78],[0,57],[3,38]], { color:"rgba(111,174,113,.9)", lineWidth:2.4, source:"IMG_3751.webp" }),
     polygon("Letsbe Avenue approach", "transparent", [[40,30],[45,30],[47,35],[45,40],[40,39],[38,35]], { color:"rgba(245,208,98,.94)" }),
-    polygon("Botanica loop", "transparent", [[33,39],[40,37],[47,39],[51,44],[49,49],[45,53],[37,52],[31,48],[30,44]], { color:"rgba(246,232,180,.96)", lineWidth:1.9, source:"IMG_3740.webp" }),
-    polygon("Metropolis outline", "transparent", [[27,55],[35,52],[41,54],[45,58],[44,63],[40,66],[34,68],[28,66],[24,62]], { color:"rgba(91,223,222,.94)", lineWidth:1.95, source:"IMG_3743.webp" }),
-    polygon("Area 404 outline", "transparent", [[28,66],[34,68],[40,66],[45,68],[47,72],[44,75],[43,78],[40,81],[37,79],[34,81],[30,78],[25,75],[24,71]], { color:"rgba(220,238,74,.96)", lineWidth:2.05, source:"IMG_3742.webp" }),
+    polygon("Botanica loop", "transparent", [[32.5,40],[38,37.4],[43.5,37.8],[47.8,40.2],[50.5,43.2],[49.8,46.7],[50.8,49.4],[46.6,52.8],[42.1,52.3],[37.6,53],[33.1,50.8],[30.7,47.3],[30.4,44],[31.5,41.6]], { color:"rgba(246,232,180,.96)", lineWidth:1.9, source:"IMG_3740.webp" }),
+    polygon("Metropolis outline", "transparent", [[25.5,55.5],[30,52.8],[35,52.2],[39,54],[43.8,56.9],[45.5,60.8],[43.1,64.6],[39.5,66.8],[34.5,68.3],[29.5,67],[25.4,63.2],[23.8,59.4]], { color:"rgba(91,223,222,.94)", lineWidth:1.95, source:"IMG_3743.webp" }),
+    polygon("Area 404 outline", "transparent", [[28,64.9],[33.5,64.5],[37.2,64.3],[41.1,64.5],[44.4,65.9],[46.8,69.5],[47.2,72.4],[44.7,74.5],[44.2,78],[41.4,81.3],[38.2,79.8],[35.8,81.4],[32.8,79.6],[29.2,78.2],[25.9,75.5],[24.2,72.2],[24.6,68.8]], { color:"rgba(220,238,74,.96)", lineWidth:2.05, source:"IMG_3742.webp" }),
     polygon("Copperwood court outline", "transparent", [[52,30],[59,27],[64,28],[67,30],[69,32],[67,34],[68,37],[64,39],[59,40],[56,41],[54,39],[52,37],[50,35]], { color:"rgba(250,214,83,.96)", lineWidth:2.1, source:"IMG_3736.webp" }),
     polygon("Thrutopia boundary", "transparent", [[70,35],[75,34],[79,36],[82,35],[85,38],[88,40],[86,43],[84,45],[80,46],[76,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)", lineWidth:2.15, source:"IMG_3738.webp" }),
     polygon("Anara Forest boundary", "transparent", [[79,19],[86,18],[91,21],[94,25],[92,30],[88,34],[83,32],[79,29],[77,24]], { color:"rgba(112,224,144,.92)", lineWidth:1.7, source:"IMG_3735.webp" }),
@@ -7634,13 +7634,13 @@ function buildEvidenceOnlyMapGeoJSON(){
   // bringing back anonymous scatter.
   const observedMassing = (name, fill, points, source)=> polygon(name, fill, points, { source });
   geo.evidenceCompoundBlocks = { type:"FeatureCollection", features:[
-    observedMassing("Letsbe Avenue north frontage", "rgba(188,128,74,.96)", [[39,31],[42,30],[44,31.5],[43,34],[40,34]], "findings_vidAB.md:f_0060"),
-    observedMassing("Botanica east frontage", "rgba(216,160,91,.96)", [[44,41],[48,41],[49,43],[48,46],[45,45]], "findings_vidAB.md:f_0060"),
-    observedMassing("Botanica south frontage", "rgba(176,111,72,.96)", [[38,48],[42,48],[44,50],[42,52],[38,51],[36,50]], "findings_vidAB.md:f_0060"),
-    observedMassing("Metropolis street edge", "rgba(159,101,75,.96)", [[28,55],[33,54],[35,56],[34,59],[30,59],[27,57]], "findings_vidE2.md"),
-    observedMassing("Metropolis south frontage", "rgba(203,125,72,.96)", [[31,60],[35,59],[37,62],[36,65],[33,66],[31,63]], "findings_vidE2.md"),
-    observedMassing("Area 404 west compound", "rgba(137,89,92,.96)", [[31,67],[35,67],[36,69],[34,71],[30,70]], "findings_vidE2.md"),
-    observedMassing("Area 404 east compound", "rgba(191,101,77,.96)", [[38,70],[42,70],[43,72],[42,76],[40,78],[38,75]], "findings_vidE2.md"),
+    observedMassing("Letsbe Avenue north frontage", "rgba(188,128,74,.96)", [[38.7,31.5],[41.7,30.2],[44.2,31.4],[43.5,34.2],[40.3,34.4]], "IMG_3740.webp"),
+    observedMassing("Botanica east frontage", "rgba(216,160,91,.96)", [[44.8,40.6],[47.8,41.2],[49.1,43],[48.8,45.5],[46.3,45.5],[44.7,43.5]], "IMG_3740.webp"),
+    observedMassing("Botanica south frontage", "rgba(176,111,72,.96)", [[37.1,48.4],[40.6,48],[43.9,49.3],[43.2,51.4],[41,52],[38.4,51.4],[36.4,50.2]], "IMG_3740.webp"),
+    observedMassing("Metropolis street edge", "rgba(159,101,75,.96)", [[27,55.8],[31.8,53.8],[34.7,54.8],[35.4,57],[33.7,59.2],[29.6,59.1],[26.4,57.5]], "IMG_3743.webp"),
+    observedMassing("Metropolis south frontage", "rgba(203,125,72,.96)", [[31.2,60],[35,59.5],[37.5,61.7],[36.8,64.7],[34.4,66.4],[31.7,63.5]], "IMG_3743.webp"),
+    observedMassing("Area 404 west compound", "rgba(137,89,92,.96)", [[30.4,67.2],[33.6,66.8],[35.7,68.4],[34.9,70.8],[31.7,70.5],[29.5,69]], "IMG_3742.webp"),
+    observedMassing("Area 404 east compound", "rgba(191,101,77,.96)", [[39,69.4],[42.6,69.3],[44.2,71.5],[43.1,75.3],[41.4,77.1],[38.8,74.7]], "IMG_3742.webp"),
     observedMassing("Copperwood north arcade", "rgba(204,154,86,.96)", [[53,30],[58,29],[60,31],[58,33],[54,32]], "IMG_3739.webp"),
     observedMassing("Copperwood south terrace", "rgba(175,116,71,.96)", [[55,35],[59,35],[61,37],[59,39],[56,38]], "IMG_3739.webp"),
     observedMassing("Copperwood east courtyard", "rgba(219,171,100,.96)", [[61,33],[65,32],[67,35],[65,38],[62,37]], "IMG_3739.webp"),
@@ -7697,14 +7697,14 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[75,56],[78,61],[80,66],[80,72]]), route([[71,59],[72,65],[72,72]])
   ] };
   geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
-    route([[23,36],[29,36],[35,35],[40,35]], { kind:"street" }), // Hidden Woods -> Letsbe Avenue
-    route([[42,31],[40,35],[42,39],[42,44]], { kind:"street" }), // Letsbe Avenue -> Botanica
-    route([[40,32],[43,32],[45,35],[45,38],[42,40],[40,38],[40,35],[40,32]], { kind:"street" }), // Letsbe Avenue loop
-    route([[37,48],[39,46],[42,44],[45,44],[47,47],[45,50],[40,50],[37,48]], { kind:"street" }), // Botanica loop
-    route([[31,60],[35,59],[39,62],[41,66]], { kind:"street" }), // Metropolis -> Area 404 edge
-    route([[35,68],[35,72],[41,73],[42,76]], { kind:"street" }), // Area 404 venue column
-    route([[32,70],[36,71],[40,73],[42,76]], { kind:"street" }), // Area 404 inner branch
-    route([[31,60],[29,64],[27,68],[26,72]], { kind:"neon" }),  // Metropolis -> Hydro XL lit route
+    route([[22.8,35.8],[29,35.8],[34.7,35.4],[40,35]], { kind:"street", source:"findings_vidAB.md:vidB f_0030,f_0039" }), // Hidden Woods -> Letsbe Avenue
+    route([[42,31],[40.3,34.8],[40.9,38.2],[42,41.2],[42,44.2]], { kind:"street", source:"findings_vidAB.md:vidA f_0070,f_0091,f_0093" }), // Letsbe Avenue -> Botanica
+    route([[40,32],[43.2,32],[45.2,34.8],[45.4,37.7],[42.3,40.1],[40.1,38.1],[40.3,34.8],[40,32]], { kind:"street", source:"findings_vidAB.md:vidA f_0070,f_0091,f_0093" }), // Letsbe loop
+    route([[37.2,48.3],[39,46.1],[42,44.2],[45.2,44.2],[48,46.8],[46,50],[42,50.7],[38.7,50.1],[37.2,48.3]], { kind:"street", source:"findings_vidAB.md:vidA f_0070,f_0091,f_0093" }), // Botanica loop
+    route([[37.2,48.3],[35,51.4],[32,54.2],[30.4,57.5],[31.5,60.4],[35.3,62.2],[39.2,64.2],[41.7,66.8]], { kind:"street", source:"findings_vidAB.md:vidA f_0070,f_0091,f_0093" }), // Botanica -> Metropolis -> Area 404 horseshoe
+    route([[35,68],[35.4,71.5],[38.5,72.6],[41.5,73.5],[42.5,76.1]], { kind:"street", source:"IMG_3742.webp" }), // Area 404 venue column
+    route([[31.5,69.8],[35,70.5],[38.6,72],[41.5,73.5]], { kind:"street", source:"IMG_3742.webp" }), // Area 404 inner branch
+    route([[31.4,60.2],[29.5,64.1],[27.3,68.3],[26.1,72.1]], { kind:"neon", source:"IMG_3743.webp" }),  // Metropolis -> Hydro XL lit route
     route([[54,35],[58,36],[62,35],[66,36],[69,39]], { kind:"street" }), // Copperwood courtyard -> Thrutopia hand-off
     // The Full Moon Ballroom cluster is a named close-view chain, not a
     // collection of inferred stalls. These paths join its documented places
@@ -7740,8 +7740,10 @@ function buildEvidenceOnlyMapGeoJSON(){
   // Recognisable, evidence-backed landmarks and stage forms. These are
   // purposefully few: each is visible in the official close-up material.
   geo.evidenceLandmarks = { type:"FeatureCollection", features:[
-    polygon("Spectrum 360 container ring", "rgba(91,73,119,.96)", [[37,65],[40,64],[43,66],[44,69],[42,71],[38,71],[36,69]]),
-    polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
+    polygon("Spectrum 360 enclosure", "rgba(46,64,47,.98)", [[36.6,66.8],[38.7,65.1],[41.3,65.2],[43.8,66.8],[44.5,69.3],[42.8,71.5],[39.5,72],[36.8,70.1]], { outline:"rgba(217,116,195,.86)", source:"IMG_3742.webp" }),
+    polygon("Spectrum 360 central deck", "rgba(191,111,76,.98)", [[38.8,67.3],[41.2,66.9],[42.5,68.3],[41.6,70],[39.2,70.2],[37.8,68.7]], { outline:"rgba(247,193,111,.9)", source:"IMG_3742.webp" }),
+    polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[21.5,69.3],[24,67.8],[27.3,68.3],[30,70.1],[30,72.8],[28.6,75.5],[25.7,77.1],[22.8,75.3],[21.4,72.5]], { outline:"rgba(225,138,222,.9)", source:"IMG_3743.webp" }),
+    polygon("Hydro XL core", "rgba(89,63,113,.98)", [[23.2,70.3],[25.8,69.3],[28.2,71],[27.4,74.2],[24.8,74.9],[22.8,72.7]], { outline:"rgba(236,166,224,.86)", source:"IMG_3743.webp" }),
     polygon("Tangled Roots stage structure", "rgba(130,91,48,.98)", [[52,21],[54,20],[56,21],[56,24],[54,25],[52,23]], { outline:"rgba(205,76,58,.96)", source:"IMG_3739.webp" }),
     polygon("Anara gathering circle", "rgba(103,105,113,.96)", [[87.3,25.6],[88.2,24.9],[89.3,25],[90.1,25.7],[90.4,26.7],[89.9,27.5],[88.9,27.9],[87.8,27.6],[86.9,26.7]], { outline:"rgba(62,69,64,.95)", source:"IMG_3735.webp" }),
     polygon("Grand Central stage frontage", "rgba(180,76,51,.98)", [[55.7,45.2],[58.3,43.7],[60.4,45],[61,47.4],[59,49.1],[56.3,48.5]], { outline:"rgba(255,216,159,.9)", source:"IMG_3737.webp" }),
@@ -7767,18 +7769,25 @@ function buildEvidenceOnlyMapGeoJSON(){
   // as a dark triangular canopy, and a small water feature immediately below
   // Hydro XL. These are retained as separate forms, not generic decoration.
   geo.evidenceContainerEdges = { type:"FeatureCollection", features:[
-    route([[37,65],[40,64]]), route([[40,64],[43,66]]), route([[43,66],[44,69]]),
-    route([[44,69],[42,71]]), route([[42,71],[38,71]]), route([[38,71],[36,69]]), route([[36,69],[37,65]])
+    route([[36.6,66.8],[38.7,65.1]]), route([[38.7,65.1],[41.3,65.2]]), route([[41.3,65.2],[43.8,66.8]]),
+    route([[43.8,66.8],[44.5,69.3]]), route([[44.5,69.3],[42.8,71.5]]), route([[42.8,71.5],[39.5,72]]),
+    route([[39.5,72],[36.8,70.1]]), route([[36.8,70.1],[36.6,66.8]])
   ] };
   geo.evidenceCanopies = { type:"FeatureCollection", features:[
-    polygon("NEXUS triangular canopy", "rgba(35,47,39,.96)", [[40,43],[44,41],[45,46]], { outline:"rgba(255,174,81,.88)" }),
+    polygon("NEXUS triangular canopy", "rgba(35,47,39,.96)", [[39.8,43.3],[43.9,40.9],[45.3,45.8]], { outline:"rgba(255,174,81,.88)", source:"IMG_3740.webp" }),
+    // IMG_3742 shows a compact centre plus four distinct purple container
+    // pieces around Spectrum 360. They are landmark massing, never stalls.
+    polygon("Spectrum 360 north container", "rgba(113,70,142,.98)", [[39,65.3],[41,65.2],[41.3,66.4],[39.5,66.6]], { outline:"rgba(219,119,209,.84)", source:"IMG_3742.webp" }),
+    polygon("Spectrum 360 east container", "rgba(113,70,142,.98)", [[42.6,66.8],[44,67.5],[43.9,69.6],[42.7,69.5]], { outline:"rgba(219,119,209,.84)", source:"IMG_3742.webp" }),
+    polygon("Spectrum 360 south container", "rgba(113,70,142,.98)", [[39.5,70.6],[41.7,70.3],[42.1,71.4],[40.1,72]], { outline:"rgba(219,119,209,.84)", source:"IMG_3742.webp" }),
+    polygon("Spectrum 360 west container", "rgba(113,70,142,.98)", [[36.8,67.2],[38.2,66.6],[38.5,68.5],[37.3,69.4]], { outline:"rgba(219,119,209,.84)", source:"IMG_3742.webp" }),
     // IMG_3735 shows Anara's magenta stage as a stepped two-part form at the
     // clearing's north-east edge, rather than a generic pentagon.
     polygon("Anara Forest stage canopy", "rgba(173,78,147,.96)", [[90.7,22.9],[92.8,22.5],[93.9,24.1],[94,26.8],[92.2,26.5],[91,25.4]], { outline:"rgba(243,150,207,.86)", source:"IMG_3735.webp" }),
     polygon("Anara Forest stage face", "rgba(220,104,185,.98)", [[91.8,23.8],[93.1,23.7],[93.5,25.1],[92.6,25.9],[91.7,25.1]], { outline:"rgba(252,175,221,.86)", source:"IMG_3735.webp" })
   ] };
   geo.evidenceWaterLandmarks = { type:"FeatureCollection", features:[
-    polygon("Hydro XL pond", "rgba(67,151,188,.90)", [[24,76],[27,76],[28,77.5],[25,78.5],[23.5,77]])
+    polygon("Hydro XL pond", "rgba(67,151,188,.90)", [[23.6,76.7],[26.8,76.2],[28.4,77.6],[27.2,79.1],[24.6,79.5],[23.1,78.3]], { source:"IMG_3743.webp" })
   ] };
   geo.evidenceStageTiers = { type:"FeatureCollection", features:[
     route([[72.2,87.7],[75,87.2],[79.8,87.3],[81.4,88.1]], { kind:"tier", source:"IMG_3748.webp" }),
@@ -7802,7 +7811,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     [42,44, "rgba(255,194,92,.34)", 1.0],  // NEXUS
     [60,47, "rgba(255,167,94,.36)", 1.35], // Grand Central
     [92,25, "rgba(225,98,174,.28)", 1.05], // Anara Forest
-    [39,68, "rgba(213,119,218,.34)", 1.1], // Spectrum 360
+    [39.5,68.5, "rgba(213,119,218,.34)", 1.1], // Spectrum 360
+    [26,72, "rgba(191,105,209,.36)", 1.3], // Hydro XL
     [63,83, "rgba(255,154,104,.34)", 1.05], // Helix
     [77,87, "rgba(255,166,72,.38)", 1.45]  // The Lion's Den
   ].map(([x,y,color,scale])=>({ type:"Feature", properties:{ color, scale }, geometry:{ type:"Point", coordinates:schematicRingToLngLat([[x,y]])[0] } })) };
@@ -9786,33 +9796,33 @@ function installEvidenceSceneLayers(map, geo){
   source("evidence-compound-blocks", geo.evidenceCompoundBlocks);
   // Close-detail frontage groups accompany the complete venue-chip tier; the
   // entry view stays territory-first and avoids a false city-block read.
-  map.addLayer({ id:"evidence-compound-blocks-shadow", type:"fill", source:"evidence-compound-blocks", minzoom:15.8, paint:{ "fill-color":"rgba(11,17,12,.35)", "fill-translate":[1,1.2] } });
-  map.addLayer({ id:"evidence-compound-blocks", type:"fill", source:"evidence-compound-blocks", minzoom:15.8, paint:{ "fill-color":["get","fill"] } });
-  map.addLayer({ id:"evidence-compound-blocks-outline", type:"line", source:"evidence-compound-blocks", minzoom:15.8, paint:{ "line-color":"rgba(65,46,29,.76)", "line-width":.75 } });
+  map.addLayer({ id:"evidence-compound-blocks-shadow", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":"rgba(11,17,12,.35)", "fill-translate":[1,1.2] } });
+  map.addLayer({ id:"evidence-compound-blocks", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-compound-blocks-outline", type:"line", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "line-color":"rgba(65,46,29,.76)", "line-width":.75 } });
 
   source("evidence-stage-courts", geo.evidenceStageCourts);
   map.addLayer({ id:"evidence-stage-courts-shadow", type:"fill", source:"evidence-stage-courts", paint:{ "fill-color":"rgba(22,26,18,.4)", "fill-translate":[1,1.5] } });
   map.addLayer({ id:"evidence-stage-courts", type:"fill", source:"evidence-stage-courts", paint:{ "fill-color":["get","fill"] } });
   map.addLayer({ id:"evidence-stage-courts-outline", type:"line", source:"evidence-stage-courts", paint:{ "line-color":["get","outline"], "line-width":1.1 } });
   source("evidence-landmarks", geo.evidenceLandmarks);
-  map.addLayer({ id:"evidence-landmarks-shadow", type:"fill", source:"evidence-landmarks", minzoom:15.55, paint:{ "fill-color":"rgba(16,21,15,.34)", "fill-translate":[1.1,1.4] } });
-  map.addLayer({ id:"evidence-landmarks", type:"fill", source:"evidence-landmarks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
-  map.addLayer({ id:"evidence-landmarks-outline", type:"line", source:"evidence-landmarks", minzoom:15.55, paint:{ "line-color":"rgba(37,39,27,.88)", "line-width":1.1 } });
+  map.addLayer({ id:"evidence-landmarks-shadow", type:"fill", source:"evidence-landmarks", minzoom:15.45, paint:{ "fill-color":"rgba(16,21,15,.34)", "fill-translate":[1.1,1.4] } });
+  map.addLayer({ id:"evidence-landmarks", type:"fill", source:"evidence-landmarks", minzoom:15.45, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-landmarks-outline", type:"line", source:"evidence-landmarks", minzoom:15.45, paint:{ "line-color":"rgba(37,39,27,.88)", "line-width":1.1 } });
   source("evidence-container-edges", geo.evidenceContainerEdges);
-  map.addLayer({ id:"evidence-container-edges", type:"line", source:"evidence-container-edges", minzoom:15.7, paint:{ "line-color":"rgba(241,186,117,.92)", "line-width":1.4 } });
+  map.addLayer({ id:"evidence-container-edges", type:"line", source:"evidence-container-edges", minzoom:15.5, paint:{ "line-color":"rgba(241,186,117,.92)", "line-width":1.4 } });
   source("evidence-canopies", geo.evidenceCanopies);
-  map.addLayer({ id:"evidence-canopies-shadow", type:"fill", source:"evidence-canopies", minzoom:15.55, paint:{ "fill-color":"rgba(12,19,13,.38)", "fill-translate":[.8,1] } });
-  map.addLayer({ id:"evidence-canopies", type:"fill", source:"evidence-canopies", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
-  map.addLayer({ id:"evidence-canopies-outline", type:"line", source:"evidence-canopies", minzoom:15.55, paint:{ "line-color":["get","outline"], "line-width":1.05 } });
+  map.addLayer({ id:"evidence-canopies-shadow", type:"fill", source:"evidence-canopies", minzoom:15.45, paint:{ "fill-color":"rgba(12,19,13,.38)", "fill-translate":[.8,1] } });
+  map.addLayer({ id:"evidence-canopies", type:"fill", source:"evidence-canopies", minzoom:15.45, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-canopies-outline", type:"line", source:"evidence-canopies", minzoom:15.45, paint:{ "line-color":["get","outline"], "line-width":1.05 } });
   source("evidence-water-landmarks", geo.evidenceWaterLandmarks);
-  map.addLayer({ id:"evidence-water-landmarks", type:"fill", source:"evidence-water-landmarks", minzoom:15.7, paint:{ "fill-color":["get","fill"] } });
-  map.addLayer({ id:"evidence-water-landmarks-outline", type:"line", source:"evidence-water-landmarks", minzoom:15.7, paint:{ "line-color":"rgba(218,245,247,.75)", "line-width":.8 } });
+  map.addLayer({ id:"evidence-water-landmarks", type:"fill", source:"evidence-water-landmarks", minzoom:15.5, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-water-landmarks-outline", type:"line", source:"evidence-water-landmarks", minzoom:15.5, paint:{ "line-color":"rgba(218,245,247,.75)", "line-width":.8 } });
   source("evidence-stage-tiers", geo.evidenceStageTiers);
   map.addLayer({ id:"evidence-stage-tiers", type:"line", source:"evidence-stage-tiers", minzoom:15.85, paint:{ "line-color":"rgba(244,205,129,.84)", "line-width":1.05 } });
   source("evidence-court-dots", geo.evidenceCourtDots);
   map.addLayer({ id:"evidence-court-dots", type:"circle", source:"evidence-court-dots", minzoom:15.85, paint:{ "circle-radius":1.35, "circle-color":"rgba(255,234,150,.82)", "circle-stroke-width":.3, "circle-stroke-color":"rgba(53,64,37,.82)" } });
   source("evidence-stage-halos", geo.evidenceStageHalos);
-  map.addLayer({ id:"evidence-stage-halos", type:"circle", source:"evidence-stage-halos", minzoom:15.45, paint:{ "circle-radius":["*",["get","scale"],10], "circle-color":["get","color"], "circle-blur":.72 } });
+  map.addLayer({ id:"evidence-stage-halos", type:"circle", source:"evidence-stage-halos", minzoom:15.35, paint:{ "circle-radius":["*",["get","scale"],10], "circle-color":["get","color"], "circle-blur":.72 } });
 }
 
 function loadMap(){
@@ -9824,7 +9834,10 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v22-overview-backbone";
+  // Tie the in-memory canvas to the versioned runtime assets. Without this,
+  // a soft app refresh can retain an old GeoJSON scene after a successful
+  // service-worker update and hide a real map release from the visitor.
+  const MAP_RENDER_REVISION = `evidence-rebuild-${APP_CACHE_VERSION}`;
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
