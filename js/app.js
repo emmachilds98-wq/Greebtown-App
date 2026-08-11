@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v453";
-const APP_BUILD_TIME = "2026-08-10T23:55:08Z";
+const APP_CACHE_VERSION = "v454";
+const APP_BUILD_TIME = "2026-08-11T00:00:06Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7500,18 +7500,18 @@ function buildEvidenceOnlyMapGeoJSON(){
   // separate from every historic map-system collection.
   geo.evidenceTerritories = {
     type:"FeatureCollection", features:[
-      polygon("Woodland west", "rgba(42,83,52,.90)", [[14,28],[38,23],[52,30],[50,82],[38,91],[16,81],[10,58]]),
-      polygon("Botanica", "rgba(62,143,94,.95)", [[34,39],[46,38],[51,45],[46,52],[35,51],[30,46]]),
-      polygon("Metropolis", "rgba(57,126,105,.95)", [[28,55],[39,53],[45,60],[41,67],[29,66],[24,61]]),
-      polygon("Area 404", "rgba(150,123,54,.95)", [[28,67],[41,65],[46,72],[41,79],[29,78],[24,73]]),
-      polygon("Copperwood Heights", "rgba(193,166,48,.97)", [[53,29],[65,27],[71,32],[68,38],[58,40],[50,36]]),
-      polygon("Thrutopia", "rgba(76,78,174,.97)", [[69,34],[82,34],[88,40],[84,47],[73,46],[68,41]]),
-      polygon("Anara Forest", "rgba(43,121,79,.96)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
-      polygon("Grand Central", "rgba(176,97,55,.96)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
-      polygon("Oldtown", "rgba(117,58,54,.96)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
-      polygon("Hilltop", "rgba(161,144,43,.94)", [[67,50],[82,49],[86,60],[83,78],[70,79],[66,66]]),
-      polygon("Quantum", "rgba(174,69,188,.95)", [[48,76],[60,75],[64,85],[59,91],[50,90],[45,83]]),
-      polygon("The Lion's Den", "rgba(87,62,42,.96)", [[67,80],[82,80],[88,86],[82,92],[69,92],[64,87]])
+      polygon("Woodland west", "rgba(20,53,37,.98)", [[14,28],[38,23],[52,30],[50,82],[38,91],[16,81],[10,58]]),
+      polygon("Botanica", "rgba(47,103,69,.98)", [[34,39],[46,38],[51,45],[46,52],[35,51],[30,46]]),
+      polygon("Metropolis", "rgba(36,89,62,.98)", [[28,55],[39,53],[45,60],[41,67],[29,66],[24,61]]),
+      polygon("Area 404", "rgba(42,96,57,.98)", [[28,67],[41,65],[46,72],[41,79],[29,78],[24,73]]),
+      polygon("Copperwood Heights", "rgba(139,132,42,.97)", [[53,29],[65,27],[71,32],[68,38],[58,40],[50,36]]),
+      polygon("Thrutopia", "rgba(43,55,122,.98)", [[69,34],[82,34],[88,40],[84,47],[73,46],[68,41]]),
+      polygon("Anara Forest", "rgba(29,70,47,.98)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
+      polygon("Grand Central", "rgba(54,78,54,.98)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
+      polygon("Oldtown", "rgba(47,72,50,.98)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
+      polygon("Hilltop", "rgba(137,128,45,.96)", [[67,50],[82,49],[86,60],[83,78],[70,79],[66,66]]),
+      polygon("Quantum", "rgba(75,53,99,.97)", [[48,76],[60,75],[64,85],[59,91],[50,90],[45,83]]),
+      polygon("The Lion's Den", "rgba(40,69,47,.98)", [[67,80],[82,80],[88,86],[82,92],[69,92],[64,87]])
     ]
   };
   // Each main corridor below corresponds to a direct relation recorded in
@@ -9626,7 +9626,7 @@ function installEvidenceSceneLayers(map, geo){
   source("evidence-territories", geo.evidenceTerritories);
   map.addLayer({ id:"evidence-territories-shadow", type:"fill", source:"evidence-territories", paint:{ "fill-color":"rgba(11,22,15,.4)", "fill-translate":[2,3] } });
   map.addLayer({ id:"evidence-territories-fill", type:"fill", source:"evidence-territories", paint:{ "fill-color":["get","fill"], "fill-opacity":.94 } });
-  map.addLayer({ id:"evidence-territories-outline", type:"line", source:"evidence-territories", paint:{ "line-color":"rgba(37,91,50,.72)", "line-width":1.35 } });
+  map.addLayer({ id:"evidence-territories-outline", type:"line", source:"evidence-territories", paint:{ "line-color":"rgba(92,152,101,.58)", "line-width":1.1 } });
   source("evidence-district-contours", geo.evidenceDistrictContours);
   map.addLayer({ id:"evidence-district-contours", type:"line", source:"evidence-district-contours", minzoom:14.7, paint:{ "line-color":["get","color"], "line-width":1.55, "line-opacity":.88 } });
 
@@ -9644,11 +9644,11 @@ function installEvidenceSceneLayers(map, geo){
   map.addLayer({ id:"evidence-camp-tents", type:"circle", source:"evidence-camp-tents", minzoom:15.55, paint:{ "circle-radius":2.1, "circle-color":"rgba(245,238,194,.9)", "circle-stroke-width":.35, "circle-stroke-color":"rgba(72,92,54,.72)" } });
 
   source("evidence-spine", geo.evidenceSpine);
-  map.addLayer({ id:"evidence-spine-casing", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(67,67,46,.38)", "line-width":4.4 } });
-  map.addLayer({ id:"evidence-spine", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(239,225,177,.98)", "line-width":2.2 } });
+  map.addLayer({ id:"evidence-spine-casing", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(7,18,12,.82)", "line-width":4.8 } });
+  map.addLayer({ id:"evidence-spine", type:"line", source:"evidence-spine", paint:{ "line-color":"rgba(104,140,110,.88)", "line-width":1.75 } });
   source("evidence-detail-paths", geo.evidenceDetailPaths);
   map.addLayer({ id:"evidence-detail-paths-casing", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":"rgba(44,49,34,.42)", "line-width":3.2 } });
-  map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":["match",["get","kind"],"camp","rgba(218,231,173,.92)","neon","rgba(224,121,229,.94)","track","rgba(222,207,167,.94)","rgba(252,241,202,.94)"], "line-width":["match",["get","kind"],"camp",1.05,"neon",1.8,"track",1.15,1.45], "line-dasharray":[1.5,.8] } });
+  map.addLayer({ id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55, paint:{ "line-color":["match",["get","kind"],"camp","rgba(184,203,150,.92)","neon","rgba(190,115,207,.94)","track","rgba(151,168,139,.94)","rgba(180,198,167,.94)"], "line-width":["match",["get","kind"],"camp",1.05,"neon",1.8,"track",1.15,1.45], "line-dasharray":[1.5,.8] } });
   source("evidence-compound-blocks", geo.evidenceCompoundBlocks);
   map.addLayer({ id:"evidence-compound-blocks-shadow", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":"rgba(11,17,12,.35)", "fill-translate":[1,1.2] } });
   map.addLayer({ id:"evidence-compound-blocks", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
@@ -9688,7 +9688,7 @@ function loadMap(){
   // parking and terrain sources visible after the evidence-only reset.
   // Tear down only when the renderer revision changes; ordinary tab visits
   // still reuse the clean canvas.
-  const MAP_RENDER_REVISION = "evidence-rebuild-v20-readable-entry";
+  const MAP_RENDER_REVISION = "evidence-rebuild-v21-dark-land-use";
   if(mapGL && mapGL.__greebtownRenderRevision !== MAP_RENDER_REVISION){
     mapGL.remove();
     mapGL = null;
@@ -9755,7 +9755,10 @@ function loadMap(){
       // map with the festival painted on top" look (real A31/Alresford Rd,
       // field parcels, countryside, georeferenced to Matterley Estate) when
       // online, and degrades to exactly this local look with zero signal.
-      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#cbdcc4" } }] },
+      // Evidence style: IMG_3721/IMG_3724 establish a deep woodland base.
+      // The active scene below supplies all illustrated land use and routes;
+      // no external basemap or legacy geographic source is allowed here.
+      style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#14251c" } }] },
       center: [0.007, 0.005],
       // Zoom bumped from 14.4 back up to 15.4 — the fully-zoomed-out
       // 14.4 view (previous pass) showed a lot of surrounding blank

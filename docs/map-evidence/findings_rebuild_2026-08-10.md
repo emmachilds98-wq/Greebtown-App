@@ -167,3 +167,9 @@ location.
   (territories, stages, venue names, and camping), and a search result restores
   its own label family before centring it. This removes a stale-control path
   without treating the old collections as map evidence.
+- Visual-language pass: `IMG_3721.webp` and `IMG_3724.webp` show a deep
+  woodland ground, subdued district land-use fills, narrow dark/muted-green
+  routes, and only a few high-contrast landmark fields. The active palette now
+  follows that hierarchy while retaining the already-reviewed yellow
+  Copperwood/Hilltop, blue Thrutopia, pink camping, and purple Quantum fields.
+  No territory, label, path, court, or camp geometry changed in this pass.
