@@ -10,7 +10,7 @@ const errors = [];
 const matchNumber = pattern => Number(app.match(pattern)?.[1]);
 const labelThreshold = matchNumber(/const LABEL_ZOOM_THRESHOLD = (\d+(?:\.\d+)?)/);
 const labelDetailThreshold = matchNumber(/const LABEL_DETAIL_ZOOM_THRESHOLD = (\d+(?:\.\d+)?)/);
-const entryZoom = matchNumber(/entryFocus\.lon, entryFocus\.lat\], zoom: (\d+(?:\.\d+)?)/);
+const entryUsesFullSiteOverview = app.includes('mapGL.once("load", ()=> showSiteOverview(0));');
 
 const sceneStart = app.indexOf("function installEvidenceSceneLayers(map, geo){");
 const sceneEnd = app.indexOf("function loadMap(){", sceneStart);
@@ -33,15 +33,15 @@ if(/geo\.(siteGround|parkingAreas|roads|gateForecourts|fields|districts)/.test(s
 
 if(!Number.isFinite(labelThreshold) || labelThreshold < 15.2 || labelThreshold > 15.5) errors.push("overview-to-explore label threshold is outside the reviewed range");
 if(!Number.isFinite(labelDetailThreshold) || labelDetailThreshold < labelThreshold + .25 || labelDetailThreshold > 16) errors.push("close label reveal must follow the overview threshold");
-// Entry is deliberately the normal explore band: primary confirmed labels and
-// local routes are available, but the full venue-chip tier waits for an
-// intentional small zoom. This prevents the reviewed whole-site hierarchy
-// from opening as a wall of close-detail labels.
-if(!Number.isFinite(entryZoom) || entryZoom < labelThreshold + .2 || entryZoom >= labelDetailThreshold) errors.push("entry view must open in the reviewed explore band below the full venue-chip tier");
+// Entry is the whole reviewed site, not a central crop. It stays below the
+// venue-chip tier, then a deliberate zoom reveals the explore/detail labels.
+// This keeps every outer camp ground visible in the first reading level.
+if(!entryUsesFullSiteOverview) errors.push("entry view must open on the complete reviewed site overview");
 if(!scene.includes('id:"evidence-field-lanes", type:"line", source:"evidence-field-lanes", minzoom:15.35')) errors.push("camp circulation should appear at normal district-reading zoom");
 if(!scene.includes('id:"evidence-camp-pitches", type:"fill", source:"evidence-camp-pitches", minzoom:15.45')) errors.push("camp pitch detail should remain a second reading level");
 if(!scene.includes('id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55')) errors.push("fine routes must not dominate the overview");
 if(!scene.includes('id:"evidence-stage-tiers", type:"line", source:"evidence-stage-tiers", minzoom:15.85')) errors.push("stage tiers must remain close-view detail");
+if(!scene.includes('id:"evidence-stage-halos", type:"circle", source:"evidence-stage-halos", minzoom:13.5, paint:{ "circle-radius":["interpolate",["linear"],["zoom"]')) errors.push("stage-halo zoom radius must keep zoom as the top-level expression input");
 
 if(!css.includes("#map.map-labels-thin .map-label:not(.overview){display:none;}")) errors.push("overview must reduce labels to territorial anchors");
 if(!css.includes("#map.map-labels-mid .map-label.evidence-detail:not(.evidence-primary)")) errors.push("explore zoom must retain a primary-label tier before fine labels");
@@ -62,4 +62,4 @@ if(errors.length){
   console.error(errors.join("\n"));
   process.exit(1);
 }
-console.log(`Evidence map hierarchy passed: overview/explore/detail labels ${labelThreshold}/${labelDetailThreshold}; entry ${entryZoom}; evidence-only layers and controls are aligned.`);
+console.log(`Evidence map hierarchy passed: overview/explore/detail labels ${labelThreshold}/${labelDetailThreshold}; entry uses the complete site overview; evidence-only layers and controls are aligned.`);

@@ -567,3 +567,64 @@ location.
 - Containment checks confirm the perimeter fields remain inside the reviewed
   site, Camp at Hilltop remains within Hilltop, and Sunset is separate from
   Sunset Hill. No facilities, gates, parking, vendor, or new route was added.
+
+## Full-site separation reset (recorded before geometry work)
+
+- `IMG_3751.webp` is the controlling whole-site view for this pass. Its
+  western and southern areas must read as distinct regions at first view: the
+  West and Downtown camping grounds occupy broad outer land areas, while the
+  town and the southern woodland do not collapse into one dense central mass.
+  The first camera must include the full reviewed ground outline rather than
+  cutting off the outer edges of those fields.
+- `IMG_3740.webp` shows Hidden Woods as a substantial pale woodland clearing
+  north-west of the Letsbe/Botanica edge. It needs its own visibly readable
+  court and a green gap before the Botanica loop; it is not a small chip
+  embedded in a campsite or town district.
+- `IMG_3747.webp` shows Tribe of Frog as a separate pale clearing in the
+  Sunset Hill woodland, south of the central town and west/north-west of
+  Quantum. Its court and compact purple stage form must stay outside Area
+  404 and outside Quantum, with woodland ground visibly separating all three
+  places.
+- `IMG_3747.webp` and `IMG_3748.webp` establish the continued southward
+  order: separate Tribe of Frog clearing, Quantum transition, then the
+  Lion's Den woodland court to the east. This supports moving the full
+  connected south cluster together, not moving a label independently.
+- `IMG_3745.webp`, `IMG_3746.webp`, `IMG_3748.webp`, `IMG_3749.webp`, and
+  `IMG_3750.webp` keep the outer camping grounds as large, isolated land-use
+  forms at the site edge. They may be enlarged only as coherent outer
+  silhouettes; no inner pitch, lane, utility, gate, or stall detail is
+  licensed by this reset.
+
+### Scope for this pass
+
+- Rework the western/southern parent boundaries, the linked Tribe of Frog /
+  Quantum court-and-route relationship, the Hidden Woods parent clearing,
+  the matching labels/focal points, and the reviewed entry camera together.
+- Do not add a named venue, service, parking area, gate, internal campsite
+  layout, or any new route beyond the already documented connections.
+
+### Runtime presentation repair
+
+- A fresh local entry-view review exposed a MapLibre validation failure in the
+  existing overview-halo radius expression. The expression nested `zoom`
+  inside a multiply expression, so MapLibre stopped installing evidence layers
+  partway through the scene. This is a rendering-syntax repair only: preserve
+  the same source-backed halo scale at each reviewed zoom and do not use it to
+  move, add, or enlarge any map feature.
+
+### Full-site separation reset result
+
+- Re-sized the West, Downtown, Valley, Hilltop, Sunset, East, and Temple
+  field silhouettes as outer site grounds, and expanded the quiet festival
+  outline only enough to contain those reviewed edges. The entry camera now
+  fits that complete outline instead of replacing it with a centre-only view.
+- Re-profiled Hidden Woods as a larger, distinct clearing with a documented
+  connection toward Letsbe, leaving it outside West Camping. Re-profiled the
+  full Area 404 → Tribe of Frog → Quantum relation: Area 404 stops above the
+  Tribe clearing; Tribe is contained in Sunset Hill woodland; and Quantum
+  begins beyond a visible woodland gap.
+- Repaired the overview-halo radius as a top-level zoom interpolation. A
+  fresh local MapLibre render completed with one canvas, all evidence labels,
+  and no new console error. The containment review confirms that every camp
+  stays inside the revised site, Hidden Woods is separate from West Camping,
+  and Tribe is separate from Area 404 and Quantum.
