@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v479";
-const APP_BUILD_TIME = "2026-08-11T14:08:00Z";
+const APP_CACHE_VERSION = "v480";
+const APP_BUILD_TIME = "2026-08-11T18:20:31Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7435,14 +7435,47 @@ function nearestTrunkPoint(x, y){
 // marker can both reach it.
 const SSSI_SPOTS = [{ name: "Site of Special Scientific Interest", x: "63", y: "25" }];
 
+// Master north-up anchor set for the whole-site map. Derived from IMG_3670 —
+// the full-site overview that shows the real A31 / Alresford Rd, which fixes
+// the map orientation as north-up — and cross-checked against the angled and
+// zoomed official captures: IMG_3754/IMG_3755/IMG_3756 (Tribe of Frog sits
+// BETWEEN Area 404 and Quantum, below Oldtown), IMG_3735-3748 (district and
+// stage close-ups) and IMG_3745-3751 (outer camp edges). x = east, y = south,
+// on a 0-100 plane. evidenceSchematicToLatLon doubles y, so these y values are
+// deliberately kept to about half the x scale, which keeps the near-square
+// real site correctly proportioned on screen. Do NOT restore the old large-y
+// (portrait) frame: it stretched the site tall and pushed the southern stages
+// far too far east (Quantum/Lion's Den/Hilltop belong centre-south, not east).
+const EVIDENCE_ANCHORS = {
+  // outer camping
+  meadow:[36,9], camplight:[42,11], downtownCamp:[46,15], westCamp:[72,10],
+  valleyCamp:[91,23], tangerine:[95,28], templeValley:[86,42], eastCamp:[92,50],
+  sunsetField:[10,39], campervanS:[52,56], campervanSE:[80,56],
+  // middle district band
+  metropolis:[25,25], botanica:[43,24], letsbe:[47,22], area404:[29,29],
+  copperwood:[65,28], grandCentral:[59,31], oldtown:[49,33], thrutopia:[67,34],
+  anara:[79,38], hiddenWoods:[53,21], tangledRoots:[71,25], nexus:[45,23],
+  // southern stages
+  tribe:[36,34], quantum:[32,38], lionsDen:[37,42], helix:[43,41],
+  hilltop:[56,40], sunsetHill:[24,36], spectrum360:[30,30], hydroXL:[22,29],
+  fullMoon:[65,27]
+};
+
 function evidenceRebuildLabels(){
-  // Fresh visual anchors traced from IMG_3721–IMG_3734. These intentionally
-  // do not reuse the quarantined map-system or app coordinate collections.
+  // North-up region labels (see EVIDENCE_ANCHORS above for source images).
+  const A = EVIDENCE_ANCHORS;
   return [
-    ["WEST CAMPING", 17, 17, "evidence-campground"], ["DOWNTOWN CAMPING", 15, 60, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
-    ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 91, 22.3, "evidence-anara"],
-    ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
-    ["HILLTOP", 78, 67, "evidence-gold"], ["CAMP SKYLARK", 79, 73, "evidence-campground"], ["TRIBE OF FROG", 50, 78, "evidence-violet"], ["QUANTUM", 65, 91, "evidence-violet"], ["THE LION'S DEN", 84, 96, "evidence-den"], ["SUNSET HILL", 23, 117, "evidence-territory"], ["SUNSET", 56, 140, "evidence-campground"], ["EAST CAMPING", 103, 108, "evidence-campground"]
+    ["WEST CAMPING", ...A.westCamp, "evidence-campground"], ["MEADOW", ...A.meadow, "evidence-campground"],
+    ["DOWNTOWN CAMPING", ...A.downtownCamp, "evidence-campground"], ["VALLEY CAMPING", ...A.valleyCamp, "evidence-campground"],
+    ["METROPOLIS", ...A.metropolis, "evidence-neon"], ["BOTANICA", ...A.botanica, "evidence-botanical"],
+    ["LETSBE AVENUE", ...A.letsbe, "evidence-avenue"], ["AREA 404", ...A.area404, "evidence-warm"],
+    ["COPPERWOOD HEIGHTS", ...A.copperwood, "evidence-gold"], ["GRAND CENTRAL", ...A.grandCentral, "evidence-central"],
+    ["OLDTOWN", ...A.oldtown, "evidence-oldtown"], ["THRUTOPIA", ...A.thrutopia, "evidence-violet"],
+    ["ANARA FOREST", ...A.anara, "evidence-anara"], ["TRIBE OF FROG", ...A.tribe, "evidence-violet"],
+    ["QUANTUM", ...A.quantum, "evidence-violet"], ["THE LION'S DEN", ...A.lionsDen, "evidence-den"],
+    ["HILLTOP", ...A.hilltop, "evidence-gold"], ["SUNSET HILL", ...A.sunsetHill, "evidence-territory"],
+    ["SUNSET", ...A.sunsetField, "evidence-campground"], ["TEMPLE VALLEY CAMPING", ...A.templeValley, "evidence-campground"],
+    ["EAST CAMPING", ...A.eastCamp, "evidence-campground"]
   ];
 }
 
@@ -7451,62 +7484,57 @@ function evidenceRebuildOverviewLabels(){
   // venue label. These broad anchors are visible in the full-site official
   // views (IMG_3721/IMG_3726/IMG_3729) and stay available after Site overview
   // hides the detailed evidence labels.
+  const A = EVIDENCE_ANCHORS;
   return [
-    ["WEST CAMPING", 17, 17, ""],
-    ["DOWNTOWN CAMPING", 15, 60, ""],
-    ["VALLEY CAMPING", 64, 17, ""],
-    ["BOTANICA", 42, 46, ""],
-    ["METROPOLIS", 35, 60, ""],
-    ["AREA 404", 36, 72, ""],
-    ["COPPERWOOD HEIGHTS", 61, 35, ""],
-    ["THRUTOPIA", 75, 40, ""],
-    ["ANARA FOREST", 86, 27, ""],
-    ["GRAND CENTRAL", 58, 48, ""],
-    ["OLDTOWN", 55, 61, ""],
-    ["HILLTOP", 78, 67, "overview-hilltop"],
-    ["TRIBE OF FROG", 50, 78, ""],
-    ["QUANTUM", 65, 91, ""],
-    ["THE LION'S DEN", 84, 96, "overview-lions-den"],
-    ["SUNSET HILL", 23, 117, ""],
-    ["SUNSET", 56, 140, ""],
-    ["EAST CAMPING", 103, 108, ""]
+    ["WEST CAMPING", ...A.westCamp, ""],
+    ["MEADOW", ...A.meadow, ""],
+    ["DOWNTOWN CAMPING", ...A.downtownCamp, ""],
+    ["VALLEY CAMPING", ...A.valleyCamp, ""],
+    ["BOTANICA", ...A.botanica, ""],
+    ["METROPOLIS", ...A.metropolis, ""],
+    ["AREA 404", ...A.area404, ""],
+    ["COPPERWOOD HEIGHTS", ...A.copperwood, ""],
+    ["THRUTOPIA", ...A.thrutopia, ""],
+    ["ANARA FOREST", ...A.anara, ""],
+    ["GRAND CENTRAL", ...A.grandCentral, ""],
+    ["OLDTOWN", ...A.oldtown, ""],
+    ["HILLTOP", ...A.hilltop, "overview-hilltop"],
+    ["TRIBE OF FROG", ...A.tribe, ""],
+    ["QUANTUM", ...A.quantum, ""],
+    ["THE LION'S DEN", ...A.lionsDen, "overview-lions-den"],
+    ["SUNSET HILL", ...A.sunsetHill, ""],
+    ["SUNSET", ...A.sunsetField, ""],
+    ["EAST CAMPING", ...A.eastCamp, ""]
   ];
 }
 
 function evidenceRebuildDetailLabels(){
   // Named labels visible in the reviewed official sources. These are intentionally a
   // second, close-view tier so the entry view stays legible.
+  // Close-view venue tier, positioned around each district's north-up anchor.
+  const A = EVIDENCE_ANCHORS;
   return [
-    ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 29, 34, "stage", "primary"],
-    ["TANGLED ROOTS", 54, 22, "stage"], ["TRIBE OF FROG", 50, 78, "stage", "primary"],
-    ["SPECTRUM 360", 39, 67, "stage", "primary"], ["HANGAR 161", 35, 69, "venue"],
-    ["DEVIANT LOUNGE", 35, 72, "venue"], ["GAME OVER", 39, 71, "venue"],
-    ["BBXL", 41, 73, "venue"], ["END OF THE LINE", 39, 74, "venue"],
-    ["GUARDIANS ASCENSION PROGRAMME", 37, 76, "venue"], ["REACTOR", 42, 75, "venue"],
-    ["ACID LEAK", 42, 76, "stage"], ["HYDRO XL", 26, 72, "stage", "primary"],
-    ["MEMORY MART", 30, 57, "venue"], ["BETTER YOU", 31, 60, "venue"],
-    ["E NUMBERS", 32, 63, "venue"], ["GABBER KEBABBER", 35, 65, "venue"],
-    ["BOTANICA ZOO", 39, 46, "venue"], ["KARMA CEUTICALS", 44, 47, "venue"],
-    ["MANGO", 35, 47, "venue"], ["THE NETWORK", 45, 44, "venue"],
-    ["SUB LAB", 46, 49, "venue"], ["NACHTLICKER", 47, 45, "venue"],
-    ["SOAPRANOS LAUNDRETTE", 40, 49, "venue"], ["POSTAL POSSE", 40, 35, "venue"],
-    ["LUCK EXCHANGE CASINO", 43, 33, "venue"], ["HOTEL PARADISO", 45, 36, "venue"],
-    ["NETWORK COMMS STATION", 42, 38, "venue"], ["INCONVENIENCE STORE", 38, 39, "venue"],
-    ["ROSE AND CLOWN", 47, 47, "stage"], ["THE HIDE OUT", 42, 66, "venue"],
-    ["THE FOOLS LEAP", 51, 59, "stage"], ["DA GRAAFF'S REFORMATORY", 51, 62, "venue"],
-    ["LA LUNA COVEN", 51, 65, "venue"], ["BUSKERS WHARF", 51, 68, "venue"],
-    ["TROUGH LOVE", 55, 63, "venue"], ["THE COMMON GROUND", 56, 62, "venue"],
-    ["THE POMEGRANATE PARLOUR", 62, 56, "venue"], ["DEN OF DIS ORDER", 62, 58, "venue"],
-    ["MINING FOR (G)OLD TOWN", 62, 60, "venue"], ["Síbín Beag", 62, 62, "stage"],
-    ["THE FECKLESS WRECKED", 62, 65, "venue"], ["HELIX", 63, 83, "stage", "primary"],
-    ["ANCIENT FUTURES", 63, 47, "venue"], ["BOOMTOWN HALL", 58, 51, "venue"], ["DAILY RAG", 57, 53, "venue"],
-    ["THE HIDE OUT HILLTOP", 68, 36, "venue"], ["FULL MOON BALLROOM", 65, 33, "venue", "primary"],
-    ["SILVER SWAN TALENT AGENCY", 63, 30, "venue"], ["TOPSY TURVY TWINS", 66, 31, "venue"],
-    ["FOGGERS MILL", 69, 33, "venue"], ["VELVET ROPE", 65, 38, "venue"],
-    ["REBEL GIRLS CLUB", 67, 73, "venue"], ["CIRCUS", 70, 76, "venue"], ["THE RETREAT", 72, 72, "venue"],
-    ["REEL NEWS", 78, 73, "venue"], ["THE ARC", 80, 71, "venue"], ["SHARING CIRCLES", 81, 73, "venue"], ["WELFARE", 81, 76, "venue"],
-    ["SUNSET HILL", 23, 117, "venue"], ["VALLEY CAMPING", 66, 19, "camp"], ["MEADOW", 10, 64, "camp"], ["CAMPFLIGHT", 13, 72, "camp"],
-    ["CAMP AT HILLTOP", 75, 63, "camp", "primary"], ["RECEPTION", 80, 75, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
+    ["NEXUS", ...A.nexus, "stage", "primary"], ["HIDDEN WOODS", ...A.hiddenWoods, "stage", "primary"],
+    ["TANGLED ROOTS", ...A.tangledRoots, "stage"], ["TRIBE OF FROG", ...A.tribe, "stage", "primary"],
+    ["SPECTRUM 360", ...A.spectrum360, "stage", "primary"], ["HYDRO XL", ...A.hydroXL, "stage", "primary"],
+    ["QUANTUM", ...A.quantum, "stage", "primary"], ["THE LION'S DEN", ...A.lionsDen, "stage", "primary"],
+    ["HELIX", ...A.helix, "stage", "primary"], ["FULL MOON BALLROOM", ...A.fullMoon, "venue", "primary"],
+    ["HANGAR 161", 27, 31, "venue"], ["ACID LEAK", 31.5, 31.5, "stage"],
+    ["DEVIANT LOUNGE", 26.5, 30.5, "venue"], ["GAME OVER", 31, 30, "venue"],
+    ["BBXL", 32.5, 31, "venue"], ["END OF THE LINE", 30, 32, "venue"],
+    ["REACTOR", 33, 30, "venue"], ["GUARDIANS ASCENSION", 28, 31.5, "venue"],
+    ["BOTANICA ZOO", 41, 25, "venue"], ["THE NETWORK", 45.5, 24.5, "venue"],
+    ["SUB LAB", 44, 22.5, "venue"], ["MANGO", 40, 23.5, "venue"], ["KARMA CEUTICALS", 46, 25.5, "venue"],
+    ["MEMORY MART", 23, 24, "venue"], ["E NUMBERS", 27, 26.5, "venue"], ["GABBER KEBABBER", 24, 26, "venue"],
+    ["THE FOOLS LEAP", 47, 31, "stage"], ["DA GRAAFF'S REFORMATORY", 51, 32, "venue"],
+    ["LA LUNA COVEN", 48, 34, "venue"], ["BUSKERS WHARF", 50, 35, "venue"], ["TROUGH LOVE", 51.5, 33, "venue"],
+    ["THE POMEGRANATE PARLOUR", 60, 30, "venue"], ["DEN OF DIS ORDER", 62, 33, "venue"],
+    ["MINING FOR (G)OLD TOWN", 62, 35, "venue"], ["Síbín Beag", 64, 34, "stage"],
+    ["THE FECKLESS WRECKED", 64, 36, "venue"], ["ANCIENT FUTURES", 62, 30, "venue"], ["BOOMTOWN HALL", 57, 32, "venue"],
+    ["SILVER SWAN TALENT AGENCY", 63, 26, "venue"], ["TOPSY TURVY TWINS", 66, 26, "venue"],
+    ["FOGGERS MILL", 68, 27, "venue"], ["VELVET ROPE", 66, 29, "venue"], ["THE HIDE OUT", 63, 28, "venue"],
+    ["CAMP AT HILLTOP", ...A.hilltop, "camp", "primary"], ["TEMPLE VALLEY CAMPING", ...A.templeValley, "camp"],
+    ["RECEPTION", 88, 44, "camp"], ["THE RETREAT", 40, 43, "venue"], ["CIRCUS", 39, 44, "venue"]
   ];
 }
 
@@ -7523,12 +7551,56 @@ function buildEvidenceOnlyMapGeoJSON(){
     geometry:{ type:"Polygon", coordinates:[evidenceRingToLngLat(points)] }
   });
   const route = (points, properties={})=>({ type:"Feature", properties, geometry:{ type:"LineString", coordinates:evidenceRingToLngLat(points) } });
+  const A = EVIDENCE_ANCHORS;
+  const TAU = Math.PI * 2;
+  // Organic blob ring around a centre. rx is the east-west radius; ry the
+  // (already halved) north-south radius, so the shape reads roughly round once
+  // the display plane doubles y.
+  const ring = (cx, cy, rx, ry, wob=0.12, rot=0.4)=>{
+    const n = 14, pts = [];
+    for(let i=0;i<n;i++){ const a = rot + i/n*TAU; const w = 1 + Math.sin(i*2.9 + cx*0.7)*wob; pts.push([+(cx+Math.cos(a)*rx*w).toFixed(2), +(cy+Math.sin(a)*ry*w).toFixed(2)]); }
+    return pts;
+  };
+  const dot = (x, y, size, properties={})=>({ type:"Feature", properties:{ size, ...properties }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } });
+  // Shared festival-ground silhouette (drawn beneath every territory), traced
+  // from the IMG_3670 whole-site outline.
+  const siteRing = [[6,11],[26,7],[50,6],[74,8],[92,14],[99,26],[100,40],[97,50],[90,57],[74,60],[54,61],[34,60],[18,58],[7,52],[3,38],[3,22]];
+  // District / stage territories, north-up. Each: name, fill, cx, cy, rx, ry,
+  // zoning-line colour, zoning-line width. Zoning colours match the official
+  // boundary treatments (Metropolis cyan, Area 404 green, Copperwood gold,
+  // Thrutopia blue, Quantum purple, Grand Central orange, Oldtown red, etc.).
+  const DISTRICTS = [
+    ["Botanica","rgba(47,103,69,.98)",...A.botanica,6,3.2,"rgba(246,232,180,.96)",1.9],
+    ["Metropolis","rgba(36,89,62,.98)",...A.metropolis,6,3.2,"rgba(91,223,222,.94)",1.95],
+    ["Area 404","rgba(42,96,57,.98)",...A.area404,6.5,3.6,"rgba(150,232,96,.96)",2.1],
+    ["Copperwood Heights","rgba(55,104,73,.98)",...A.copperwood,6,3.2,"rgba(250,214,83,.96)",2.1],
+    ["Grand Central","rgba(54,78,54,.98)",...A.grandCentral,4.6,2.6,"rgba(241,122,74,.95)",2],
+    ["Oldtown","rgba(47,72,50,.98)",...A.oldtown,5,3,"rgba(214,87,67,.94)",2.2],
+    ["Thrutopia","rgba(57,105,78,.98)",...A.thrutopia,5,2.8,"rgba(105,112,232,.96)",2.15],
+    ["Anara Forest","rgba(29,70,47,.98)",...A.anara,6,3.4,"rgba(112,224,144,.92)",1.7],
+    ["Tribe of Frog grounds","rgba(50,104,67,.98)",...A.tribe,4.6,2.6,"rgba(120,150,96,.8)",1.6],
+    ["Quantum","rgba(43,82,55,.98)",...A.quantum,5,3,"rgba(214,137,234,.94)",2],
+    ["The Lion's Den","rgba(40,69,47,.98)",...A.lionsDen,4.6,2.6,"rgba(240,166,95,.94)",1.9],
+    ["Hilltop","rgba(150,140,49,.9)",...A.hilltop,8,4.6,"rgba(231,205,84,.9)",1.6],
+    ["Sunset Hill","rgba(58,113,66,.96)",...A.sunsetHill,5,3,"rgba(124,190,109,.9)",1.6]
+  ];
+  const districtRings = DISTRICTS.map(d=>({ d, r: ring(d[2], d[3], d[4], d[5], d[0]==="Hilltop"?0.06:0.12, d[2]*0.5) }));
 
-  // Evidence scene: woodland west, the north-east Copperwood/Thrutopia/Anara
-  // sequence, the Grand-Central-to-Oldtown spine, long east Hilltop, then
-  // Quantum and Lion's Den below. It is deliberately separate from every
-  // historic map-system collection.
+  // Evidence scene: a compact north-up plan matching IMG_3670 — the district
+  // band across the middle (Metropolis/Botanica west, Copperwood/Grand
+  // Central/Thrutopia east, Oldtown below), the southern stages centre-south
+  // (Tribe of Frog between Area 404 and Quantum, Lion's Den below Quantum,
+  // Hilltop's yellow field central), and the camps around the perimeter. It is
+  // deliberately separate from every historic map-system collection.
   geo.evidenceTerritories = {
+    type:"FeatureCollection", features:[
+      polygon("Festival grounds", "rgba(28,70,47,.98)", siteRing, { role:"site", source:"IMG_3670.png" }),
+      polygon("Western woodland", "rgba(20,53,37,.9)", ring(15,31,8,7,0.14,0.3), { source:"IMG_3739.webp" }),
+      polygon("Southern woodland", "rgba(18,50,34,.9)", ring(48,50,22,5,0.1,0.2), { source:"IMG_3748.webp" }),
+      ...districtRings.map(({d,r})=> polygon(d[0], d[1], r, { source:"IMG_3670.png" }))
+    ]
+  };
+  geo.__oldTerritories = {
     type:"FeatureCollection", features:[
       // IMG_3751 establishes one connected festival ground. This quiet base
       // is deliberately beneath every named territory: it describes the
@@ -7831,7 +7903,95 @@ function buildEvidenceOnlyMapGeoJSON(){
     ["The Lion's Den", 84, 95, "rgba(255,166,72,.98)", "rgba(255,166,72,.38)", 1.45]
   ];
   geo.evidenceOverviewFocalPoints = { type:"FeatureCollection", features: overviewFocalPoints.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color, haloColor, scale }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } })) };
-  geo.evidenceStageHalos = { type:"FeatureCollection", features: overviewFocalPoints.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color:haloColor, scale }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } })) };
+  // === North-up overrides (IMG_3670 master) ===
+  // Everything below rebuilds each active collection from EVIDENCE_ANCHORS so
+  // the scene is the compact north-up plan, superseding the legacy blocks above
+  // (kept only as unused __old* references). Fill and zoning line share one
+  // ring per district, so every bounded district keeps its coloured boundary.
+  geo.evidenceDistrictContours = { type:"FeatureCollection", features:[
+    polygon("Festival grounds boundary","transparent", siteRing, { color:"rgba(111,174,113,.85)", lineWidth:2.2, source:"IMG_3670.png" }),
+    ...districtRings.map(({d,r})=> polygon(d[0]+" boundary","transparent", r, { color:d[6], lineWidth:d[7] }))
+  ] };
+  const CAMPS = [
+    ["West Camping","rgba(68,132,77,.9)",...A.westCamp,8,4],
+    ["Meadow Camping","rgba(204,122,125,.84)",...A.meadow,6,3],
+    ["Camplight","rgba(210,150,150,.8)",...A.camplight,3,2],
+    ["Downtown Camping","rgba(204,122,125,.84)",...A.downtownCamp,5,3.6],
+    ["Valley Camping","rgba(75,139,84,.92)",...A.valleyCamp,7,4],
+    ["Tangerine Fields","rgba(206,150,92,.82)",...A.tangerine,4,2.6],
+    ["Temple Valley Camping","rgba(92,155,102,.88)",...A.templeValley,6,3.4],
+    ["East Camping","rgba(187,105,122,.84)",...A.eastCamp,5,5.5],
+    ["Sunset","rgba(206,186,72,.9)",...A.sunsetField,5,4.5],
+    ["Campervan Field","rgba(196,120,120,.8)",...A.campervanS,9,3],
+    ["Campervan Field East","rgba(196,120,120,.8)",...A.campervanSE,6,2.6]
+  ];
+  geo.evidenceCampFields = { type:"FeatureCollection", features: CAMPS.map(([name,fill,cx,cy,rx,ry])=> polygon(name, fill, ring(cx,cy,rx,ry,0.12,cx*0.2), { source:"IMG_3670.png" })) };
+  geo.evidenceSpine = { type:"FeatureCollection", features:[
+    route([A.metropolis, A.botanica]),
+    route([A.botanica, A.nexus, A.grandCentral]),
+    route([A.grandCentral, A.copperwood]),
+    route([A.copperwood, A.thrutopia, A.anara]),
+    route([A.grandCentral, A.oldtown]),
+    route([A.oldtown, A.hilltop]),
+    route([A.metropolis, A.area404]),
+    route([A.area404, A.tribe]),
+    route([A.tribe, A.quantum]),
+    route([A.quantum, A.lionsDen]),
+    route([A.lionsDen, A.helix]),
+    route([A.copperwood, A.fullMoon])
+  ] };
+  geo.evidenceDetailPaths = { type:"FeatureCollection", features:[
+    route([A.area404, A.tribe], { kind:"track", source:"IMG_3756.webp" }),
+    route([A.tribe, A.quantum], { kind:"track", source:"IMG_3754.webp" }),
+    route([[47,31],[48,32.5],[49,34]], { kind:"oldtown", source:"IMG_3737.webp" }),
+    route([[62,32],[62,34],[62,35.5]], { kind:"oldtown", source:"IMG_3737.webp" })
+  ] };
+  geo.evidenceForestDots = { type:"FeatureCollection", features:[
+    [17,18,1],[20,20,.9],[58,16,1],[62,18,.9],[85,20,1],[52,45,1],[44,47,.9],[38,46,.9],[70,45,1],[76,48,.9],[30,45,.9],[24,46,1],[16,44,.9],[54,46,.85]
+  ].map(([x,y,size])=> dot(x,y,size)) };
+  geo.evidenceStageCourts = { type:"FeatureCollection", features:[
+    polygon("Tribe of Frog clearing","rgba(181,171,130,.96)", ring(A.tribe[0],A.tribe[1],3.4,2,0.1), { outline:"rgba(120,150,96,.9)", source:"IMG_3755.webp" }),
+    polygon("Anara Forest clearing","rgba(190,184,151,.96)", ring(A.anara[0],A.anara[1],3.6,2.1,0.1), { outline:"rgba(115,125,91,.94)", source:"IMG_3735.webp" }),
+    polygon("Grand Central court","rgba(243,214,165,.98)", ring(A.grandCentral[0],A.grandCentral[1],2.8,1.6,0.08)),
+    polygon("Lion's Den court","rgba(42,78,52,.98)", ring(A.lionsDen[0],A.lionsDen[1],3.2,1.8,0.1), { outline:"rgba(90,119,70,.92)", source:"IMG_3748.webp" }),
+    polygon("Hidden Woods court","rgba(151,163,117,.96)", ring(A.hiddenWoods[0],A.hiddenWoods[1],2.8,1.7,0.1), { outline:"rgba(232,157,61,.96)", source:"IMG_3740.webp" }),
+    polygon("NEXUS court","rgba(82,151,94,.98)", ring(A.nexus[0],A.nexus[1],2.4,1.5,0.1), { outline:"rgba(235,181,91,.94)", source:"IMG_3740.webp" })
+  ] };
+  geo.evidenceLandmarks = { type:"FeatureCollection", features:[
+    polygon("Spectrum 360 enclosure","rgba(46,64,47,.98)", ring(A.spectrum360[0],A.spectrum360[1],2.2,1.3,0.08), { outline:"rgba(217,116,195,.86)", source:"IMG_3742.webp" }),
+    polygon("Hydro XL core","rgba(89,63,113,.98)", ring(A.hydroXL[0],A.hydroXL[1],1.8,1.1,0.08), { outline:"rgba(236,166,224,.86)", source:"IMG_3743.webp" }),
+    polygon("Tribe of Frog stage pod","rgba(107,63,125,.98)", ring(A.tribe[0],A.tribe[1],1.9,1.2,0.1), { outline:"rgba(225,126,214,.9)", source:"IMG_3755.webp" }),
+    polygon("Quantum stage","rgba(84,54,120,.96)", ring(A.quantum[0],A.quantum[1],1.9,1.2,0.1), { outline:"rgba(190,140,230,.9)", source:"IMG_3754.webp" }),
+    polygon("Lion's Den stage","rgba(91,65,45,.98)", ring(A.lionsDen[0],A.lionsDen[1],2.4,1.2,0.06), { outline:"rgba(248,185,91,.88)", source:"IMG_3748.webp" }),
+    polygon("Full Moon Ballroom dome","rgba(250,245,221,.98)", ring(A.fullMoon[0],A.fullMoon[1],2.2,1.4,0.08), { outline:"rgba(104,89,61,.9)", source:"findings_vidCD.md" }),
+    polygon("Anara Forest stage","rgba(173,78,147,.96)", ring(A.anara[0]+2.5,A.anara[1]-1,1.7,1,0.08), { outline:"rgba(243,150,207,.86)", source:"IMG_3735.webp" }),
+    polygon("Grand Central stage","rgba(180,76,51,.98)", ring(A.grandCentral[0],A.grandCentral[1],2,1.2,0.08), { outline:"rgba(255,216,159,.9)", source:"IMG_3737.webp" })
+  ] };
+  geo.evidenceCourtDots = { type:"FeatureCollection", features:[
+    [A.tribe[0]-1,A.tribe[1]],[A.tribe[0]+1.5,A.tribe[1]+0.6],
+    [A.oldtown[0]-1,A.oldtown[1]-1],[A.oldtown[0]+1,A.oldtown[1]+1],[A.oldtown[0],A.oldtown[1]+2],
+    [A.lionsDen[0]-1,A.lionsDen[1]],[A.lionsDen[0]+1.5,A.lionsDen[1]]
+  ].map(([x,y])=> dot(x,y,.72)) };
+  const focal = [
+    ["Hidden Woods",...A.hiddenWoods,"rgba(244,181,91,.96)","rgba(244,181,91,.30)",1.0],
+    ["Tangled Roots",...A.tangledRoots,"rgba(205,94,76,.96)","rgba(205,94,76,.28)",.95],
+    ["NEXUS",...A.nexus,"rgba(255,194,92,.98)","rgba(255,194,92,.34)",1.0],
+    ["Grand Central",...A.grandCentral,"rgba(255,167,94,.98)","rgba(255,167,94,.36)",1.3],
+    ["Copperwood",...A.fullMoon,"rgba(250,214,110,.96)","rgba(250,214,110,.3)",1.05],
+    ["Anara Forest",...A.anara,"rgba(225,98,174,.96)","rgba(225,98,174,.28)",1.05],
+    ["Spectrum 360",...A.spectrum360,"rgba(213,119,218,.98)","rgba(213,119,218,.34)",1.05],
+    ["Hydro XL",...A.hydroXL,"rgba(191,105,209,.98)","rgba(191,105,209,.36)",1.2],
+    ["Tribe of Frog",...A.tribe,"rgba(189,108,205,.98)","rgba(189,108,205,.30)",1.05],
+    ["Quantum",...A.quantum,"rgba(170,120,225,.98)","rgba(170,120,225,.3)",1.1],
+    ["The Lion's Den",...A.lionsDen,"rgba(255,166,72,.98)","rgba(255,166,72,.38)",1.3],
+    ["Helix",...A.helix,"rgba(255,154,104,.98)","rgba(255,154,104,.34)",1.0]
+  ];
+  geo.evidenceOverviewFocalPoints = { type:"FeatureCollection", features: focal.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color, haloColor, scale }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } })) };
+  geo.evidenceStageHalos = { type:"FeatureCollection", features: focal.map(([name,x,y,color,haloColor,scale])=>({ type:"Feature", properties:{ name, color:haloColor, scale }, geometry:{ type:"Point", coordinates:evidenceRingToLngLat([[x,y]])[0] } })) };
+  const emptyFC = ()=>({ type:"FeatureCollection", features:[] });
+  geo.evidenceCompoundBlocks = emptyFC(); geo.evidenceContainerEdges = emptyFC(); geo.evidenceCanopies = emptyFC();
+  geo.evidenceWaterLandmarks = emptyFC(); geo.evidenceStageTiers = emptyFC();
+  geo.evidenceCampTents = emptyFC(); geo.evidenceCampPitches = emptyFC(); geo.evidenceFieldLanes = emptyFC();
   return geo;
 }
 
@@ -9889,7 +10049,7 @@ function loadMap(){
     // the site look compressed and wrongly shrinks their visible scale. The
     // evidence plane is intentionally tall, matching the official whole-site
     // reading rather than the retired square schematic frame.
-    const overviewCorners = [[-9,0], [121,0], [121,150], [-9,150]]
+    const overviewCorners = [[0,2], [102,2], [102,63], [0,63]]
       .map(([x,y])=> evidenceSchematicToLatLon(x, y));
     const SITE_OVERVIEW_BOUNDS = [
       [Math.min(...overviewCorners.map(point=> point.lon)), Math.min(...overviewCorners.map(point=> point.lat))],
@@ -9902,7 +10062,7 @@ function loadMap(){
       [SITE_OVERVIEW_BOUNDS[1][0] + overviewLonSpan * .16, SITE_OVERVIEW_BOUNDS[1][1] + overviewLatSpan * .16]
     ];
     const overviewPadding = { top: 20, right: 20, bottom: 20, left: 20 };
-    const evidenceInitialCenter = evidenceSchematicToLatLon(50, 75);
+    const evidenceInitialCenter = evidenceSchematicToLatLon(51, 33);
     const showSiteOverview = duration => {
       mapGL.jumpTo({ bearing:0, pitch:0 });
       mapGL.fitBounds(SITE_OVERVIEW_BOUNDS, { padding: overviewPadding, duration, bearing:0, pitch:0 });
