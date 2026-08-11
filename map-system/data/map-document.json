@@ -453,7 +453,7 @@
     {
       "id": "stage-sibin-beag",
       "type": "stage",
-      "name": "Síbín Beag",
+      "name": "S\u00edb\u00edn Beag",
       "position": {
         "x": 53,
         "y": 57
@@ -547,11 +547,11 @@
       "layer": "amenities",
       "asset": null,
       "metadata": {
-        "description": "Main entrance — shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, the Public Transport Hub and Camp Orchid Downtown pitches.",
+        "description": "Main entrance \u2014 shuttle buses, taxi rank and coach drop-off land here. Nearest to West, Downtown and Meadow (accessible) camping, the Public Transport Hub and Camp Orchid Downtown pitches.",
         "category": "entrance",
         "accessibility": "",
         "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.",
-        "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30."
+        "hours": "Wed 14:00\u201321:30, Thu\u2013Sun 10:00\u201321:30. No re-entry after 21:30."
       }
     },
     {
@@ -577,7 +577,7 @@
         "category": "entrance",
         "accessibility": "",
         "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.",
-        "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30."
+        "hours": "Wed 14:00\u201321:30, Thu\u2013Sun 10:00\u201321:30. No re-entry after 21:30."
       }
     },
     {
@@ -603,7 +603,7 @@
         "category": "entrance",
         "accessibility": "",
         "notes": "Approximate schematic position. Migrated from the verified legacy gate collection.",
-        "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30."
+        "hours": "Wed 14:00\u201321:30, Thu\u2013Sun 10:00\u201321:30. No re-entry after 21:30."
       }
     },
     {
@@ -629,13 +629,13 @@
         "category": "entrance",
         "accessibility": "",
         "notes": "Seen in a whole-map reference screenshot. Migrated from the verified legacy gate collection.",
-        "hours": "Wed 14:00–21:30, Thu–Sun 10:00–21:30. No re-entry after 21:30."
+        "hours": "Wed 14:00\u201321:30, Thu\u2013Sun 10:00\u201321:30. No re-entry after 21:30."
       }
     },
     {
       "id": "amenity-toilets-west-gate-1",
       "type": "toilet",
-      "name": "Toilets — West Gate",
+      "name": "Toilets \u2014 West Gate",
       "position": {
         "x": 4,
         "y": 44
@@ -662,7 +662,7 @@
     {
       "id": "amenity-toilets-west-gate-2",
       "type": "toilet",
-      "name": "Toilets — West Gate",
+      "name": "Toilets \u2014 West Gate",
       "position": {
         "x": 5,
         "y": 48
@@ -689,7 +689,7 @@
     {
       "id": "amenity-toilets-metropolis-path-1",
       "type": "toilet",
-      "name": "Toilets — Metropolis path",
+      "name": "Toilets \u2014 Metropolis path",
       "position": {
         "x": 9,
         "y": 35
@@ -716,7 +716,7 @@
     {
       "id": "amenity-toilets-metropolis-path-2",
       "type": "toilet",
-      "name": "Toilets — Metropolis path",
+      "name": "Toilets \u2014 Metropolis path",
       "position": {
         "x": 11,
         "y": 38
@@ -743,7 +743,7 @@
     {
       "id": "amenity-toilets-metropolis-path-3",
       "type": "toilet",
-      "name": "Toilets — Metropolis path",
+      "name": "Toilets \u2014 Metropolis path",
       "position": {
         "x": 13,
         "y": 41
@@ -770,7 +770,7 @@
     {
       "id": "amenity-water-point-metropolis-path-1",
       "type": "decoration",
-      "name": "Water Point — Metropolis path",
+      "name": "Water Point \u2014 Metropolis path",
       "position": {
         "x": 12,
         "y": 39
@@ -797,7 +797,7 @@
     {
       "id": "amenity-welfare-metropolis-1",
       "type": "decoration",
-      "name": "Welfare — Metropolis",
+      "name": "Welfare \u2014 Metropolis",
       "position": {
         "x": 16,
         "y": 31
@@ -824,7 +824,7 @@
     {
       "id": "amenity-food-metropolis-1",
       "type": "vendor",
-      "name": "Food — Metropolis",
+      "name": "Food \u2014 Metropolis",
       "position": {
         "x": 18,
         "y": 33
@@ -851,7 +851,7 @@
     {
       "id": "amenity-bar-metropolis-1",
       "type": "vendor",
-      "name": "Bar — Metropolis",
+      "name": "Bar \u2014 Metropolis",
       "position": {
         "x": 19,
         "y": 30
@@ -878,7 +878,7 @@
     {
       "id": "amenity-top-up-point-ancient-futures-1",
       "type": "decoration",
-      "name": "Top-Up Point — Ancient Futures",
+      "name": "Top-Up Point \u2014 Ancient Futures",
       "position": {
         "x": 58,
         "y": 36
@@ -905,7 +905,7 @@
     {
       "id": "amenity-photobooth-ancient-futures-1",
       "type": "decoration",
-      "name": "Photobooth — Ancient Futures",
+      "name": "Photobooth \u2014 Ancient Futures",
       "position": {
         "x": 57,
         "y": 38
@@ -932,7 +932,7 @@
     {
       "id": "amenity-food-ancient-futures-1",
       "type": "vendor",
-      "name": "Food — Ancient Futures",
+      "name": "Food \u2014 Ancient Futures",
       "position": {
         "x": 60,
         "y": 39
@@ -959,7 +959,7 @@
     {
       "id": "amenity-food-ancient-futures-2",
       "type": "vendor",
-      "name": "Food — Ancient Futures",
+      "name": "Food \u2014 Ancient Futures",
       "position": {
         "x": 61,
         "y": 41
@@ -986,7 +986,7 @@
     {
       "id": "amenity-welfare-ancient-futures-1",
       "type": "decoration",
-      "name": "Welfare — Ancient Futures",
+      "name": "Welfare \u2014 Ancient Futures",
       "position": {
         "x": 59,
         "y": 43
@@ -1013,7 +1013,7 @@
     {
       "id": "amenity-first-aid-ancient-futures-1",
       "type": "medical",
-      "name": "First Aid — Ancient Futures",
+      "name": "First Aid \u2014 Ancient Futures",
       "position": {
         "x": 60,
         "y": 45
@@ -1040,7 +1040,7 @@
     {
       "id": "amenity-toilets-oldtown-the-fools-leap-1",
       "type": "toilet",
-      "name": "Toilets — Oldtown / The Fools Leap",
+      "name": "Toilets \u2014 Oldtown / The Fools Leap",
       "position": {
         "x": 67,
         "y": 39
@@ -1067,7 +1067,7 @@
     {
       "id": "amenity-accessible-facilities-oldtown-the-fools-leap-1",
       "type": "decoration",
-      "name": "Accessible Facilities — Oldtown / The Fools Leap",
+      "name": "Accessible Facilities \u2014 Oldtown / The Fools Leap",
       "position": {
         "x": 68,
         "y": 40
@@ -1094,7 +1094,7 @@
     {
       "id": "amenity-water-point-oldtown-the-fools-leap-1",
       "type": "decoration",
-      "name": "Water Point — Oldtown / The Fools Leap",
+      "name": "Water Point \u2014 Oldtown / The Fools Leap",
       "position": {
         "x": 69,
         "y": 41
@@ -1121,7 +1121,7 @@
     {
       "id": "amenity-market-pepperpot-market-1",
       "type": "vendor",
-      "name": "Market — Pepperpot Market",
+      "name": "Market \u2014 Pepperpot Market",
       "position": {
         "x": 45,
         "y": 49
@@ -1148,7 +1148,7 @@
     {
       "id": "amenity-food-pepperpot-market-1",
       "type": "vendor",
-      "name": "Food — Pepperpot Market",
+      "name": "Food \u2014 Pepperpot Market",
       "position": {
         "x": 47,
         "y": 51
@@ -1175,7 +1175,7 @@
     {
       "id": "amenity-food-pepperpot-market-2",
       "type": "vendor",
-      "name": "Food — Pepperpot Market",
+      "name": "Food \u2014 Pepperpot Market",
       "position": {
         "x": 44,
         "y": 52
@@ -1202,7 +1202,7 @@
     {
       "id": "amenity-bar-pepperpot-market-1",
       "type": "vendor",
-      "name": "Bar — Pepperpot Market",
+      "name": "Bar \u2014 Pepperpot Market",
       "position": {
         "x": 48,
         "y": 48
@@ -1229,7 +1229,7 @@
     {
       "id": "amenity-reception-pepperpot-market-1",
       "type": "decoration",
-      "name": "Reception — Pepperpot Market",
+      "name": "Reception \u2014 Pepperpot Market",
       "position": {
         "x": 46,
         "y": 52
@@ -1256,7 +1256,7 @@
     {
       "id": "amenity-first-aid-pepperpot-market-1",
       "type": "medical",
-      "name": "First Aid — Pepperpot Market",
+      "name": "First Aid \u2014 Pepperpot Market",
       "position": {
         "x": 49,
         "y": 50
@@ -1283,7 +1283,7 @@
     {
       "id": "amenity-welfare-pepperpot-market-1",
       "type": "decoration",
-      "name": "Welfare — Pepperpot Market",
+      "name": "Welfare \u2014 Pepperpot Market",
       "position": {
         "x": 43,
         "y": 50
@@ -1310,7 +1310,7 @@
     {
       "id": "amenity-cash-point-pepperpot-market-1",
       "type": "decoration",
-      "name": "Cash Point — Pepperpot Market",
+      "name": "Cash Point \u2014 Pepperpot Market",
       "position": {
         "x": 46,
         "y": 47
@@ -1337,10 +1337,10 @@
     {
       "id": "amenity-toilets-grand-central-1",
       "type": "toilet",
-      "name": "Toilets — Grand Central",
+      "name": "Toilets \u2014 Grand Central",
       "position": {
-        "x": 58,
-        "y": 20
+        "x": 55.21,
+        "y": 51.79
       },
       "dimensions": {
         "width": 1.25,
@@ -1364,10 +1364,10 @@
     {
       "id": "amenity-toilets-grand-central-2",
       "type": "toilet",
-      "name": "Toilets — Grand Central",
+      "name": "Toilets \u2014 Grand Central",
       "position": {
-        "x": 62,
-        "y": 23
+        "x": 54.09,
+        "y": 52.82
       },
       "dimensions": {
         "width": 1.25,
@@ -1391,10 +1391,10 @@
     {
       "id": "amenity-food-grand-central-1",
       "type": "vendor",
-      "name": "Food — Grand Central",
+      "name": "Food \u2014 Grand Central",
       "position": {
-        "x": 59,
-        "y": 25
+        "x": 52.46,
+        "y": 52.99
       },
       "dimensions": {
         "width": 1.25,
@@ -1418,10 +1418,10 @@
     {
       "id": "amenity-welfare-grand-central-1",
       "type": "decoration",
-      "name": "Welfare — Grand Central",
+      "name": "Welfare \u2014 Grand Central",
       "position": {
-        "x": 56,
-        "y": 26
+        "x": 51.09,
+        "y": 52.23
       },
       "dimensions": {
         "width": 1.25,
@@ -1445,10 +1445,10 @@
     {
       "id": "amenity-water-point-grand-central-1",
       "type": "decoration",
-      "name": "Water Point — Grand Central",
+      "name": "Water Point \u2014 Grand Central",
       "position": {
-        "x": 63,
-        "y": 21
+        "x": 50.6,
+        "y": 50.9
       },
       "dimensions": {
         "width": 1.25,
@@ -1472,7 +1472,7 @@
     {
       "id": "amenity-toilets-west-camping-alresford-rd-1",
       "type": "toilet",
-      "name": "Toilets — West Camping / Alresford Rd",
+      "name": "Toilets \u2014 West Camping / Alresford Rd",
       "position": {
         "x": 13,
         "y": 5
@@ -1499,7 +1499,7 @@
     {
       "id": "amenity-accessible-facilities-west-camping-alresford-rd-1",
       "type": "decoration",
-      "name": "Accessible Facilities — West Camping / Alresford Rd",
+      "name": "Accessible Facilities \u2014 West Camping / Alresford Rd",
       "position": {
         "x": 14,
         "y": 6
@@ -1526,7 +1526,7 @@
     {
       "id": "amenity-skylark-entry-camp-skylark-hilltop-1",
       "type": "decoration",
-      "name": "Skylark Entry — Camp Skylark Hilltop",
+      "name": "Skylark Entry \u2014 Camp Skylark Hilltop",
       "position": {
         "x": 76,
         "y": 21
@@ -1553,7 +1553,7 @@
     {
       "id": "amenity-skylark-entry-camp-skylark-sunset-1",
       "type": "decoration",
-      "name": "Skylark Entry — Camp Skylark Sunset",
+      "name": "Skylark Entry \u2014 Camp Skylark Sunset",
       "position": {
         "x": 75,
         "y": 70
@@ -1580,7 +1580,7 @@
     {
       "id": "amenity-toilets-south-gate-1",
       "type": "toilet",
-      "name": "Toilets — South Gate",
+      "name": "Toilets \u2014 South Gate",
       "position": {
         "x": 77,
         "y": 76
@@ -1607,7 +1607,7 @@
     {
       "id": "amenity-toilets-south-gate-2",
       "type": "toilet",
-      "name": "Toilets — South Gate",
+      "name": "Toilets \u2014 South Gate",
       "position": {
         "x": 79,
         "y": 77
@@ -1634,7 +1634,7 @@
     {
       "id": "amenity-accessible-facilities-south-gate-1",
       "type": "decoration",
-      "name": "Accessible Facilities — South Gate",
+      "name": "Accessible Facilities \u2014 South Gate",
       "position": {
         "x": 78,
         "y": 78
@@ -1661,7 +1661,7 @@
     {
       "id": "amenity-water-point-south-gate-1",
       "type": "decoration",
-      "name": "Water Point — South Gate",
+      "name": "Water Point \u2014 South Gate",
       "position": {
         "x": 76,
         "y": 75
@@ -1688,7 +1688,7 @@
     {
       "id": "amenity-welfare-camp-skylark-sunset-1",
       "type": "decoration",
-      "name": "Welfare — Camp Skylark Sunset",
+      "name": "Welfare \u2014 Camp Skylark Sunset",
       "position": {
         "x": 73,
         "y": 71
@@ -1715,7 +1715,7 @@
     {
       "id": "amenity-toilets-quiet-camping-1",
       "type": "toilet",
-      "name": "Toilets — Quiet Camping",
+      "name": "Toilets \u2014 Quiet Camping",
       "position": {
         "x": 93,
         "y": 61
@@ -1742,7 +1742,7 @@
     {
       "id": "amenity-toilets-quiet-camping-2",
       "type": "toilet",
-      "name": "Toilets — Quiet Camping",
+      "name": "Toilets \u2014 Quiet Camping",
       "position": {
         "x": 96,
         "y": 62
@@ -1769,7 +1769,7 @@
     {
       "id": "amenity-water-point-quiet-camping-1",
       "type": "decoration",
-      "name": "Water Point — Quiet Camping",
+      "name": "Water Point \u2014 Quiet Camping",
       "position": {
         "x": 94,
         "y": 66
@@ -1796,7 +1796,7 @@
     {
       "id": "amenity-toilets-tangerine-fields-1",
       "type": "toilet",
-      "name": "Toilets — Tangerine Fields",
+      "name": "Toilets \u2014 Tangerine Fields",
       "position": {
         "x": 68,
         "y": 4
@@ -1823,7 +1823,7 @@
     {
       "id": "amenity-water-point-tangerine-fields-1",
       "type": "decoration",
-      "name": "Water Point — Tangerine Fields",
+      "name": "Water Point \u2014 Tangerine Fields",
       "position": {
         "x": 72,
         "y": 8
@@ -1850,7 +1850,7 @@
     {
       "id": "amenity-accessible-facilities-downtown-camping-path-1",
       "type": "decoration",
-      "name": "Accessible Facilities — Downtown Camping path",
+      "name": "Accessible Facilities \u2014 Downtown Camping path",
       "position": {
         "x": 11,
         "y": 24
@@ -1877,7 +1877,7 @@
     {
       "id": "amenity-photobooth-downtown-camping-path-1",
       "type": "decoration",
-      "name": "Photobooth — Downtown Camping path",
+      "name": "Photobooth \u2014 Downtown Camping path",
       "position": {
         "x": 11,
         "y": 26
@@ -1904,7 +1904,7 @@
     {
       "id": "amenity-food-downtown-camping-path-1",
       "type": "vendor",
-      "name": "Food — Downtown Camping path",
+      "name": "Food \u2014 Downtown Camping path",
       "position": {
         "x": 12,
         "y": 30
@@ -1931,7 +1931,7 @@
     {
       "id": "amenity-toilets-downtown-camping-path-1",
       "type": "toilet",
-      "name": "Toilets — Downtown Camping path",
+      "name": "Toilets \u2014 Downtown Camping path",
       "position": {
         "x": 13,
         "y": 32
@@ -1958,10 +1958,10 @@
     {
       "id": "amenity-food-hidden-woods-1",
       "type": "vendor",
-      "name": "Food — Hidden Woods",
+      "name": "Food \u2014 Hidden Woods",
       "position": {
-        "x": 16,
-        "y": 3
+        "x": 20.21,
+        "y": 26.79
       },
       "dimensions": {
         "width": 1.25,
@@ -1985,10 +1985,10 @@
     {
       "id": "amenity-food-hidden-woods-2",
       "type": "vendor",
-      "name": "Food — Hidden Woods",
+      "name": "Food \u2014 Hidden Woods",
       "position": {
-        "x": 17,
-        "y": 6
+        "x": 16.09,
+        "y": 27.23
       },
       "dimensions": {
         "width": 1.25,
@@ -2012,10 +2012,10 @@
     {
       "id": "amenity-food-hidden-woods-3",
       "type": "vendor",
-      "name": "Food — Hidden Woods",
+      "name": "Food \u2014 Hidden Woods",
       "position": {
-        "x": 18,
-        "y": 10
+        "x": 17.7,
+        "y": 23.98
       },
       "dimensions": {
         "width": 1.25,
@@ -2039,7 +2039,7 @@
     {
       "id": "amenity-bar-letsbe-avenue-1",
       "type": "vendor",
-      "name": "Bar — Letsbe Avenue",
+      "name": "Bar \u2014 Letsbe Avenue",
       "position": {
         "x": 39,
         "y": 8
@@ -2066,7 +2066,7 @@
     {
       "id": "amenity-bar-letsbe-avenue-2",
       "type": "vendor",
-      "name": "Bar — Letsbe Avenue",
+      "name": "Bar \u2014 Letsbe Avenue",
       "position": {
         "x": 40,
         "y": 10
@@ -2093,7 +2093,7 @@
     {
       "id": "amenity-food-botanica-1",
       "type": "vendor",
-      "name": "Food — Botanica",
+      "name": "Food \u2014 Botanica",
       "position": {
         "x": 30,
         "y": 18
@@ -2120,10 +2120,10 @@
     {
       "id": "amenity-toilets-nexus-1",
       "type": "toilet",
-      "name": "Toilets — NEXUS",
+      "name": "Toilets \u2014 NEXUS",
       "position": {
-        "x": 21,
-        "y": 24
+        "x": 39.21,
+        "y": 45.79
       },
       "dimensions": {
         "width": 1.25,
@@ -2147,10 +2147,10 @@
     {
       "id": "amenity-accessible-facilities-nexus-1",
       "type": "decoration",
-      "name": "Accessible Facilities — NEXUS",
+      "name": "Accessible Facilities \u2014 NEXUS",
       "position": {
-        "x": 22,
-        "y": 25
+        "x": 36.07,
+        "y": 46.88
       },
       "dimensions": {
         "width": 1.25,
@@ -2174,10 +2174,10 @@
     {
       "id": "amenity-water-point-nexus-1",
       "type": "decoration",
-      "name": "Water Point — NEXUS",
+      "name": "Water Point \u2014 NEXUS",
       "position": {
-        "x": 21,
-        "y": 25
+        "x": 34.79,
+        "y": 44.21
       },
       "dimensions": {
         "width": 1.25,
@@ -2201,10 +2201,10 @@
     {
       "id": "amenity-bar-nexus-1",
       "type": "vendor",
-      "name": "Bar — NEXUS",
+      "name": "Bar \u2014 NEXUS",
       "position": {
-        "x": 25,
-        "y": 21
+        "x": 37.93,
+        "y": 43.12
       },
       "dimensions": {
         "width": 1.25,
@@ -2228,7 +2228,7 @@
     {
       "id": "amenity-food-botanica-2",
       "type": "vendor",
-      "name": "Food — Botanica",
+      "name": "Food \u2014 Botanica",
       "position": {
         "x": 34,
         "y": 30
@@ -2255,7 +2255,7 @@
     {
       "id": "amenity-toilets-botanica-area-404-path-1",
       "type": "toilet",
-      "name": "Toilets — Botanica / Area 404 path",
+      "name": "Toilets \u2014 Botanica / Area 404 path",
       "position": {
         "x": 40,
         "y": 23
@@ -2282,7 +2282,7 @@
     {
       "id": "amenity-water-point-botanica-area-404-path-1",
       "type": "decoration",
-      "name": "Water Point — Botanica / Area 404 path",
+      "name": "Water Point \u2014 Botanica / Area 404 path",
       "position": {
         "x": 41,
         "y": 24
@@ -2309,7 +2309,7 @@
     {
       "id": "amenity-food-botanica-area-404-path-1",
       "type": "vendor",
-      "name": "Food — Botanica / Area 404 path",
+      "name": "Food \u2014 Botanica / Area 404 path",
       "position": {
         "x": 42,
         "y": 25
@@ -2336,7 +2336,7 @@
     {
       "id": "amenity-bar-botanica-area-404-path-1",
       "type": "vendor",
-      "name": "Bar — Botanica / Area 404 path",
+      "name": "Bar \u2014 Botanica / Area 404 path",
       "position": {
         "x": 37,
         "y": 28
@@ -2363,7 +2363,7 @@
     {
       "id": "amenity-bar-tangled-roots-path-1",
       "type": "vendor",
-      "name": "Bar — Tangled Roots path",
+      "name": "Bar \u2014 Tangled Roots path",
       "position": {
         "x": 57,
         "y": 19
@@ -2390,7 +2390,7 @@
     {
       "id": "amenity-bar-tangled-roots-path-2",
       "type": "vendor",
-      "name": "Bar — Tangled Roots path",
+      "name": "Bar \u2014 Tangled Roots path",
       "position": {
         "x": 58,
         "y": 21
@@ -2417,10 +2417,10 @@
     {
       "id": "amenity-bar-grand-central-1",
       "type": "vendor",
-      "name": "Bar — Grand Central",
+      "name": "Bar \u2014 Grand Central",
       "position": {
-        "x": 63,
-        "y": 31
+        "x": 51.24,
+        "y": 49.61
       },
       "dimensions": {
         "width": 1.25,
@@ -2444,10 +2444,10 @@
     {
       "id": "amenity-bar-grand-central-2",
       "type": "vendor",
-      "name": "Bar — Grand Central",
+      "name": "Bar \u2014 Grand Central",
       "position": {
-        "x": 67,
-        "y": 32
+        "x": 52.7,
+        "y": 48.98
       },
       "dimensions": {
         "width": 1.25,
@@ -2471,10 +2471,10 @@
     {
       "id": "amenity-food-grand-central-2",
       "type": "vendor",
-      "name": "Food — Grand Central",
+      "name": "Food \u2014 Grand Central",
       "position": {
-        "x": 65,
-        "y": 33
+        "x": 54.3,
+        "y": 49.29
       },
       "dimensions": {
         "width": 1.25,
@@ -2498,10 +2498,10 @@
     {
       "id": "amenity-cash-point-grand-central-1",
       "type": "decoration",
-      "name": "Cash Point — Grand Central",
+      "name": "Cash Point \u2014 Grand Central",
       "position": {
-        "x": 64,
-        "y": 29
+        "x": 55.29,
+        "y": 50.4
       },
       "dimensions": {
         "width": 1.25,
@@ -2525,7 +2525,7 @@
     {
       "id": "amenity-bar-oldtown-north-1",
       "type": "vendor",
-      "name": "Bar — Oldtown (north)",
+      "name": "Bar \u2014 Oldtown (north)",
       "position": {
         "x": 60,
         "y": 31
@@ -2552,7 +2552,7 @@
     {
       "id": "amenity-photobooth-oldtown-north-1",
       "type": "decoration",
-      "name": "Photobooth — Oldtown (north)",
+      "name": "Photobooth \u2014 Oldtown (north)",
       "position": {
         "x": 61,
         "y": 32
@@ -2579,7 +2579,7 @@
     {
       "id": "amenity-water-point-oldtown-north-1",
       "type": "decoration",
-      "name": "Water Point — Oldtown (north)",
+      "name": "Water Point \u2014 Oldtown (north)",
       "position": {
         "x": 62,
         "y": 33
@@ -2606,7 +2606,7 @@
     {
       "id": "amenity-first-aid-oldtown-north-1",
       "type": "medical",
-      "name": "First Aid — Oldtown (north)",
+      "name": "First Aid \u2014 Oldtown (north)",
       "position": {
         "x": 72,
         "y": 30
@@ -2633,7 +2633,7 @@
     {
       "id": "amenity-toilets-quantum-1",
       "type": "toilet",
-      "name": "Toilets — Quantum",
+      "name": "Toilets \u2014 Quantum",
       "position": {
         "x": 74,
         "y": 51
@@ -2660,10 +2660,10 @@
     {
       "id": "amenity-photobooth-the-lion-s-den-1",
       "type": "decoration",
-      "name": "Photobooth — The Lion's Den",
+      "name": "Photobooth \u2014 The Lion's Den",
       "position": {
-        "x": 82,
-        "y": 54
+        "x": 37.21,
+        "y": 72.79
       },
       "dimensions": {
         "width": 1.25,
@@ -2687,10 +2687,10 @@
     {
       "id": "amenity-bar-the-lion-s-den-1",
       "type": "vendor",
-      "name": "Bar — The Lion's Den",
+      "name": "Bar \u2014 The Lion's Den",
       "position": {
-        "x": 82,
-        "y": 55
+        "x": 34.07,
+        "y": 73.88
       },
       "dimensions": {
         "width": 1.25,
@@ -2714,10 +2714,10 @@
     {
       "id": "amenity-toilets-the-lion-s-den-1",
       "type": "toilet",
-      "name": "Toilets — The Lion's Den",
+      "name": "Toilets \u2014 The Lion's Den",
       "position": {
-        "x": 85,
-        "y": 56
+        "x": 32.79,
+        "y": 71.21
       },
       "dimensions": {
         "width": 1.25,
@@ -2741,10 +2741,10 @@
     {
       "id": "amenity-water-point-the-lion-s-den-1",
       "type": "decoration",
-      "name": "Water Point — The Lion's Den",
+      "name": "Water Point \u2014 The Lion's Den",
       "position": {
-        "x": 86,
-        "y": 57
+        "x": 35.93,
+        "y": 70.12
       },
       "dimensions": {
         "width": 1.25,
@@ -2768,10 +2768,10 @@
     {
       "id": "amenity-toilets-anara-forest-1",
       "type": "toilet",
-      "name": "Toilets — Anara Forest",
+      "name": "Toilets \u2014 Anara Forest",
       "position": {
-        "x": 84,
-        "y": 23
+        "x": 84.21,
+        "y": 73.79
       },
       "dimensions": {
         "width": 1.25,
@@ -2795,10 +2795,10 @@
     {
       "id": "amenity-accessible-facilities-anara-forest-1",
       "type": "decoration",
-      "name": "Accessible Facilities — Anara Forest",
+      "name": "Accessible Facilities \u2014 Anara Forest",
       "position": {
-        "x": 86,
-        "y": 21
+        "x": 80.09,
+        "y": 74.23
       },
       "dimensions": {
         "width": 1.25,
@@ -2822,10 +2822,10 @@
     {
       "id": "amenity-water-point-anara-forest-1",
       "type": "decoration",
-      "name": "Water Point — Anara Forest",
+      "name": "Water Point \u2014 Anara Forest",
       "position": {
-        "x": 87,
-        "y": 23
+        "x": 81.7,
+        "y": 70.98
       },
       "dimensions": {
         "width": 1.25,
@@ -2849,7 +2849,7 @@
     {
       "id": "amenity-toilets-temple-valley-camping-1",
       "type": "toilet",
-      "name": "Toilets — Temple Valley Camping",
+      "name": "Toilets \u2014 Temple Valley Camping",
       "position": {
         "x": 84,
         "y": 30
@@ -2876,7 +2876,7 @@
     {
       "id": "amenity-water-point-temple-valley-camping-1",
       "type": "decoration",
-      "name": "Water Point — Temple Valley Camping",
+      "name": "Water Point \u2014 Temple Valley Camping",
       "position": {
         "x": 87,
         "y": 33
@@ -2903,7 +2903,7 @@
     {
       "id": "amenity-toilets-east-camping-1",
       "type": "toilet",
-      "name": "Toilets — East Camping",
+      "name": "Toilets \u2014 East Camping",
       "position": {
         "x": 90,
         "y": 46
@@ -2930,7 +2930,7 @@
     {
       "id": "amenity-water-point-east-camping-1",
       "type": "decoration",
-      "name": "Water Point — East Camping",
+      "name": "Water Point \u2014 East Camping",
       "position": {
         "x": 93,
         "y": 49
@@ -2957,7 +2957,7 @@
     {
       "id": "amenity-toilets-sunset-hill-1",
       "type": "toilet",
-      "name": "Toilets — Sunset Hill",
+      "name": "Toilets \u2014 Sunset Hill",
       "position": {
         "x": 78,
         "y": 63
@@ -2984,7 +2984,7 @@
     {
       "id": "amenity-water-point-sunset-hill-1",
       "type": "decoration",
-      "name": "Water Point — Sunset Hill",
+      "name": "Water Point \u2014 Sunset Hill",
       "position": {
         "x": 76,
         "y": 65
@@ -3011,7 +3011,7 @@
     {
       "id": "amenity-toilets-sunset-hill-camp-skylark-sunset-approach-1",
       "type": "toilet",
-      "name": "Toilets — Sunset Hill / Camp Skylark Sunset approach",
+      "name": "Toilets \u2014 Sunset Hill / Camp Skylark Sunset approach",
       "position": {
         "x": 74,
         "y": 68
@@ -3038,7 +3038,7 @@
     {
       "id": "amenity-food-camp-skylark-sunset-1",
       "type": "vendor",
-      "name": "Food — Camp Skylark Sunset",
+      "name": "Food \u2014 Camp Skylark Sunset",
       "position": {
         "x": 72,
         "y": 73
@@ -3065,7 +3065,7 @@
     {
       "id": "amenity-toilets-camp-skylark-sunset-1",
       "type": "toilet",
-      "name": "Toilets — Camp Skylark Sunset",
+      "name": "Toilets \u2014 Camp Skylark Sunset",
       "position": {
         "x": 77,
         "y": 73
@@ -3092,10 +3092,10 @@
     {
       "id": "amenity-toilets-hydro-xl-1",
       "type": "toilet",
-      "name": "Toilets — Hydro XL",
+      "name": "Toilets \u2014 Hydro XL",
       "position": {
-        "x": 7,
-        "y": 48
+        "x": 17.21,
+        "y": 67.79
       },
       "dimensions": {
         "width": 1.25,
@@ -3119,10 +3119,10 @@
     {
       "id": "amenity-water-point-hydro-xl-1",
       "type": "decoration",
-      "name": "Water Point — Hydro XL",
+      "name": "Water Point \u2014 Hydro XL",
       "position": {
-        "x": 11,
-        "y": 49
+        "x": 13.09,
+        "y": 68.23
       },
       "dimensions": {
         "width": 1.25,
@@ -3146,10 +3146,10 @@
     {
       "id": "amenity-bar-hydro-xl-1",
       "type": "vendor",
-      "name": "Bar — Hydro XL",
+      "name": "Bar \u2014 Hydro XL",
       "position": {
-        "x": 9,
-        "y": 43
+        "x": 14.7,
+        "y": 64.98
       },
       "dimensions": {
         "width": 1.25,
