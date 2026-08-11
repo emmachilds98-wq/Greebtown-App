@@ -138,10 +138,11 @@ the complete source-backed venue-chip tier. This is a visual hierarchy rule,
 never a reason to move a label or alter its evidence-supported geometry.
 
 `IMG_3740.webp` keeps Hidden Woods as a distinct pale clearing north-west of
-Letsbe/Botanica. `IMG_3747.webp` keeps Tribe of Frog inside the separate
-Sunset Hill woodland, south of Area 404 and west/north-west of Quantum. These
-three forms must remain non-overlapping at every zoom; do not reconnect them
-through a historic marker collection or a central-camera crop.
+Letsbe/Botanica. `IMG_3747.webp` keeps Tribe of Frog in its own large green
+territory, south of Area 404 and west/north-west of Quantum. Sunset Hill is
+the distinct larger south-western slope beyond that territory. These four
+forms must remain non-overlapping at every zoom; do not reconnect them through
+a historic marker collection or a central-camera crop.
 
 ## Required verification
 
