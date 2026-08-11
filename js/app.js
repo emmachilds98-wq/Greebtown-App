@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v463";
-const APP_BUILD_TIME = "2026-08-11T01:38:49Z";
+const APP_CACHE_VERSION = "v464";
+const APP_BUILD_TIME = "2026-08-11T01:54:58Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7471,7 +7471,7 @@ function evidenceRebuildOverviewLabels(){
 }
 
 function evidenceRebuildDetailLabels(){
-  // Named labels visible in IMG_3721–IMG_3734. These are intentionally a
+  // Named labels visible in the reviewed official sources. These are intentionally a
   // second, close-view tier so the entry view stays legible.
   return [
     ["NEXUS", 42, 44, "stage", "primary"], ["HIDDEN WOODS", 22, 34, "stage", "primary"],
@@ -7494,7 +7494,7 @@ function evidenceRebuildDetailLabels(){
     ["LA LUNA COVEN", 51, 65, "venue"], ["BUSKERS WHARF", 51, 68, "venue"],
     ["TROUGH LOVE", 55, 63, "venue"], ["THE COMMON GROUND", 56, 62, "venue"],
     ["THE POMEGRANATE PARLOUR", 62, 56, "venue"], ["DEN OF DIS ORDER", 62, 58, "venue"],
-    ["MINING FOR (G)OLD TOWN", 62, 60, "venue"], ["SÍBÍN BEAG", 62, 62, "stage"],
+    ["MINING FOR (G)OLD TOWN", 62, 60, "venue"], ["Síbín Beag", 62, 62, "stage"],
     ["THE FECKLESS WRECKED", 62, 65, "venue"], ["HELIX", 63, 83, "stage", "primary"],
     ["ANCIENT FUTURES", 63, 47, "venue"], ["BOOMTOWN HALL", 58, 51, "venue"], ["DAILY RAG", 57, 53, "venue"],
     ["THE HIDE OUT HILLTOP", 68, 36, "venue"], ["FULL MOON BALLROOM", 65, 33, "venue", "primary"],
@@ -7502,7 +7502,7 @@ function evidenceRebuildDetailLabels(){
     ["FOGGERS MILL", 69, 33, "venue"], ["VELVET ROPE", 65, 38, "venue"],
     ["REBEL GIRLS CLUB", 67, 73, "venue"], ["CIRCUS", 70, 76, "venue"], ["THE RETREAT", 72, 72, "venue"],
     ["REEL NEWS", 78, 73, "venue"], ["THE ARC", 80, 71, "venue"], ["SHARING CIRCLES", 81, 73, "venue"], ["WELFARE", 81, 76, "venue"],
-    ["VALLEY CAMPING", 66, 22, "camp"], ["MEADOW", 16, 57, "camp"], ["CAMPFLIGHT", 18, 63, "camp"],
+    ["SUNSET HILL", 38, 84, "venue"], ["VALLEY CAMPING", 66, 22, "camp"], ["MEADOW", 16, 57, "camp"], ["CAMPFLIGHT", 18, 63, "camp"],
     ["CAMP AT HILLTOP", 75, 63, "camp", "primary"], ["RECEPTION", 80, 75, "camp"], ["TEMPLE VALLEY CAMPING", 90, 35, "camp"]
   ];
 }
@@ -7516,12 +7516,11 @@ function buildEvidenceOnlyMapGeoJSON(){
     geometry:{ type:"Polygon", coordinates:[schematicRingToLngLat(points)] }
   });
   const route = (points, properties={})=>({ type:"Feature", properties, geometry:{ type:"LineString", coordinates:schematicRingToLngLat(points) } });
-  const building = (fill, points)=> polygon("illustrated structure", fill, points);
 
-  // New scene, traced only from IMG_3721–IMG_3734: wooded west, a compact
-  // north-east Copperwood/Thrutopia pair, the Grand Central-to-Oldtown spine,
-  // long east Hilltop, then Quantum and Lion's Den below. It is deliberately
-  // separate from every historic map-system collection.
+  // Evidence scene: woodland west, the north-east Copperwood/Thrutopia/Anara
+  // sequence, the Grand-Central-to-Oldtown spine, long east Hilltop, then
+  // Quantum and Lion's Den below. It is deliberately separate from every
+  // historic map-system collection.
   geo.evidenceTerritories = {
     type:"FeatureCollection", features:[
       // IMG_3751 establishes one connected festival ground. This quiet base
@@ -7624,32 +7623,33 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Quantum boundary", "transparent", [[48,77],[57,76],[60,79],[63,84],[60,88],[57,91],[51,90],[47,86],[46,81]], { color:"rgba(214,137,234,.94)", source:"IMG_3747.webp" }),
     polygon("Lion's Den boundary", "transparent", [[68,82],[77,81],[83,83],[87,86],[83,89],[80,91],[71,90],[67,87],[66,85]], { color:"rgba(240,166,95,.94)", source:"IMG_3748.webp" })
   ] };
-  // These are grouped, unlabeled forms observed in IMG_3724, not an
-  // assertion of individual stalls. Keeping them in their own reviewed
-  // clusters makes the north/east compounds readable without bringing back
-  // the retired anonymous-scatter generator.
-  const observedMassing = (name, fill, points)=> polygon(name, fill, points, { source:"IMG_3724.webp" });
+  // These are connected frontage groups and stage-adjacent compounds, not an
+  // assertion of individual stalls. Each follows an observed named court or
+  // street edge so the close map gains useful spatial character without
+  // bringing back anonymous scatter.
+  const observedMassing = (name, fill, points, source)=> polygon(name, fill, points, { source });
   geo.evidenceCompoundBlocks = { type:"FeatureCollection", features:[
-    building("rgba(173,119,67,.96)", [[37,42],[40,42],[40,44],[37,44]]), building("rgba(211,159,86,.96)", [[43,41],[46,41],[46,43],[43,43]]),
-    building("rgba(169,122,77,.96)", [[40,31],[43,31],[43,33],[40,33]]), building("rgba(206,151,90,.96)", [[44,34],[46,34],[46,36],[44,36]]),
-    building("rgba(154,107,72,.96)", [[39,35],[41,35],[41,37],[39,37]]),
-    building("rgba(181,106,77,.96)", [[39,47],[42,47],[42,49],[39,49]]), building("rgba(217,179,107,.96)", [[44,48],[47,48],[47,50],[44,50]]),
-    building("rgba(142,99,63,.96)", [[34,45],[36,45],[36,48],[34,48]]),
-    building("rgba(131,91,79,.96)", [[32,68],[35,68],[35,70],[32,70]]), building("rgba(203,122,70,.96)", [[36,71],[39,71],[39,73],[36,73]]),
-    building("rgba(146,95,129,.96)", [[40,73],[43,73],[43,75],[40,75]]), building("rgba(193,91,74,.96)", [[40,76],[43,76],[43,78],[40,78]]),
-    building("rgba(163,115,71,.96)", [[55,32],[58,32],[58,34],[55,34]]), building("rgba(202,147,80,.96)", [[61,33],[64,33],[64,35],[61,35]]),
-    observedMassing("Copperwood west terrace", "rgba(204,154,86,.96)", [[52,33],[55,33],[55,35],[52,35]]),
-    observedMassing("Copperwood south terrace", "rgba(175,116,71,.96)", [[56,36],[59,36],[59,38],[56,38]]),
-    observedMassing("Copperwood east terrace", "rgba(219,171,100,.96)", [[61,36],[64,36],[64,38],[61,38]]),
-    observedMassing("Thrutopia west workshop group", "rgba(190,184,151,.96)", [[71,37],[74,37],[74,38.5],[71,38.5]]),
-    observedMassing("Thrutopia centre workshop group", "rgba(210,198,162,.96)", [[75,39],[78,39],[78,40.5],[75,40.5]]),
-    observedMassing("Thrutopia north workshop group", "rgba(176,169,142,.96)", [[79,37.5],[82,37.5],[82,39],[79,39]]),
-    observedMassing("Thrutopia east workshop group", "rgba(200,192,158,.96)", [[82,41.5],[84.5,41.5],[84.5,43],[82,43]]),
-    observedMassing("Thrutopia south workshop group", "rgba(185,176,145,.96)", [[76,42],[79,42],[79,43.5],[76,43.5]]),
-    building("rgba(147,99,68,.96)", [[56,46],[58,46],[58,48],[56,48]]), building("rgba(206,140,80,.96)", [[60,49],[63,49],[63,51],[60,51]]),
-    building("rgba(191,111,77,.96)", [[51,59],[53,59],[53,61],[51,61]]), building("rgba(154,91,72,.96)", [[51,63],[53,63],[53,65],[51,65]]),
-    building("rgba(207,142,87,.96)", [[51,66],[53,66],[53,68],[51,68]]), building("rgba(171,106,82,.96)", [[59,58],[61,58],[61,60],[59,60]]),
-    building("rgba(210,151,94,.96)", [[60,61],[62,61],[62,63],[60,63]]), building("rgba(153,94,77,.96)", [[60,64],[62,64],[62,66],[60,66]])
+    observedMassing("Letsbe Avenue north frontage", "rgba(188,128,74,.96)", [[39,31],[42,30],[44,31.5],[43,34],[40,34]], "findings_vidAB.md:f_0060"),
+    observedMassing("Botanica east frontage", "rgba(216,160,91,.96)", [[44,41],[48,41],[49,43],[48,46],[45,45]], "findings_vidAB.md:f_0060"),
+    observedMassing("Botanica south frontage", "rgba(176,111,72,.96)", [[38,48],[42,48],[44,50],[42,52],[38,51],[36,50]], "findings_vidAB.md:f_0060"),
+    observedMassing("Metropolis street edge", "rgba(159,101,75,.96)", [[28,55],[33,54],[35,56],[34,59],[30,59],[27,57]], "findings_vidE2.md"),
+    observedMassing("Metropolis south frontage", "rgba(203,125,72,.96)", [[31,60],[35,59],[37,62],[36,65],[33,66],[31,63]], "findings_vidE2.md"),
+    observedMassing("Area 404 west compound", "rgba(137,89,92,.96)", [[31,67],[35,67],[36,69],[34,71],[30,70]], "findings_vidE2.md"),
+    observedMassing("Area 404 east compound", "rgba(191,101,77,.96)", [[38,70],[42,70],[43,72],[42,76],[40,78],[38,75]], "findings_vidE2.md"),
+    observedMassing("Copperwood north arcade", "rgba(204,154,86,.96)", [[53,30],[58,29],[60,31],[58,33],[54,32]], "IMG_3739.webp"),
+    observedMassing("Copperwood south terrace", "rgba(175,116,71,.96)", [[55,35],[59,35],[61,37],[59,39],[56,38]], "IMG_3739.webp"),
+    observedMassing("Copperwood east courtyard", "rgba(219,171,100,.96)", [[61,33],[65,32],[67,35],[65,38],[62,37]], "IMG_3739.webp"),
+    observedMassing("Thrutopia west workshop edge", "rgba(190,184,151,.96)", [[71,37],[74,36],[76,38],[75,40],[72,40]], "IMG_3738.webp"),
+    observedMassing("Thrutopia central workshop edge", "rgba(210,198,162,.96)", [[76,38],[80,37],[82,39],[81,42],[77,41]], "IMG_3738.webp"),
+    observedMassing("Thrutopia south workshop edge", "rgba(185,176,145,.96)", [[81,42],[84,41],[86,43],[84,45],[81,44]], "IMG_3738.webp"),
+    observedMassing("Grand Central stage-side frontage", "rgba(204,128,75,.96)", [[54,45],[57,44],[59,46],[58,49],[55,48],[53,47]], "IMG_3737.webp"),
+    observedMassing("Grand Central east frontage", "rgba(185,112,72,.96)", [[61,46],[63,46],[64,49],[62,51],[60,49]], "IMG_3737.webp"),
+    observedMassing("Oldtown west streetfront chain", "rgba(174,102,77,.96)", [[49,58],[51,58],[52,60],[51,63],[52,65],[51,68],[49,68],[48,65],[49,62],[48,60]], "IMG_3737.webp"),
+    observedMassing("Oldtown east streetfront chain", "rgba(205,135,86,.96)", [[60,56],[62,56],[63,58],[62,61],[63,63],[62,66],[60,67],[59,64],[60,61],[59,59]], "IMG_3737.webp"),
+    observedMassing("Oldtown southern link frontage", "rgba(152,91,72,.96)", [[53,66],[57,66],[59,68],[57,70],[53,69],[51,68]], "IMG_3737.webp"),
+    observedMassing("Tribe of Frog entry compound", "rgba(150,96,154,.96)", [[42,73],[44,71],[47,72],[49,74],[47,77],[43,76]], "IMG_3747.webp"),
+    observedMassing("Quantum north forecourt", "rgba(116,77,142,.96)", [[49,78],[54,77],[57,79],[56,81],[51,81],[48,80]], "IMG_3747.webp"),
+    observedMassing("Lion's Den stage apron", "rgba(168,105,55,.96)", [[71,85],[77,83],[82,85],[82,88],[79,90],[73,89],[70,87]], "IMG_3748.webp")
   ] };
   // IMG_3745 through IMG_3751 clarify the outer camping grounds as broad,
   // separate land-use silhouettes. They intentionally contain no newly
@@ -7724,12 +7724,15 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceLandmarks = { type:"FeatureCollection", features:[
     polygon("Spectrum 360 container ring", "rgba(91,73,119,.96)", [[37,65],[40,64],[43,66],[44,69],[42,71],[38,71],[36,69]]),
     polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
+    polygon("Tangled Roots stage structure", "rgba(130,91,48,.98)", [[52,21],[54,20],[56,21],[56,24],[54,25],[52,23]], { outline:"rgba(205,76,58,.96)", source:"IMG_3739.webp" }),
     polygon("Anara gathering circle", "rgba(103,105,113,.96)", [[87,25.2],[89,24.8],[90.4,26],[90,27.5],[88,27.9],[86.7,26.7]], { outline:"rgba(62,69,64,.95)" }),
+    polygon("Grand Central stage frontage", "rgba(180,76,51,.98)", [[55.7,45.2],[58.3,43.7],[60.4,45],[61,47.4],[59,49.1],[56.3,48.5]], { outline:"rgba(255,216,159,.9)", source:"IMG_3737.webp" }),
     polygon("Grand Central main-stage glyph", "rgba(211,84,54,.98)", [[59,45.7],[60.3,47],[59,48.3],[57.7,47]], { outline:"rgba(255,216,159,.9)" }),
     polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
     polygon("Full Moon Ballroom dome", "rgba(250,245,221,.98)", [[63,32],[64,30],[67,30],[68,32],[67,35],[64,35],[62,33]], { outline:"rgba(104,89,61,.9)" }),
     polygon("The Retreat clearing", "rgba(208,174,124,.94)", [[70,70],[74,70],[76,72],[74,74],[70,73],[69,71]], { outline:"rgba(109,84,49,.9)" }),
     polygon("Circus round tent", "rgba(219,122,86,.95)", [[68,75],[70,73],[72,74],[73,76],[71,78],[69,78],[67,76]], { outline:"rgba(124,57,43,.92)" }),
+    polygon("Tribe of Frog stage pod", "rgba(107,63,125,.98)", [[43,73],[45,72],[47,73],[47,75],[45,76],[43,75]], { outline:"rgba(225,126,214,.9)", source:"IMG_3747.webp" }),
     polygon("Hilltop camp marker", "rgba(250,203,59,.98)", [[77,59.5],[78.7,62],[77,64.5],[75.3,62]], { outline:"rgba(101,82,33,.96)" }),
     polygon("Helix round court", "rgba(222,133,98,.95)", [[61,81],[64,80],[66,82],[65,85],[62,85],[60,83]]),
     polygon("Lion's Den amphitheatre", "rgba(117,78,43,.98)", [[72,85],[80,84],[83,87],[80,89],[72,89],[70,87]])
@@ -7749,7 +7752,9 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Hydro XL pond", "rgba(67,151,188,.90)", [[24,76],[27,76],[28,77.5],[25,78.5],[23.5,77]])
   ] };
   geo.evidenceStageTiers = { type:"FeatureCollection", features:[
-    route([[72,86],[80,86]], { kind:"tier" }), route([[72,87.3],[81,87.3]], { kind:"tier" }), route([[73,88.5],[80,88.5]], { kind:"tier" }),
+    route([[72,85.6],[74,84.8],[78,84.7],[81,85.8]], { kind:"tier", source:"IMG_3748.webp" }),
+    route([[71.5,86.9],[74,85.9],[79,85.9],[82,87.1]], { kind:"tier", source:"IMG_3748.webp" }),
+    route([[72.5,88.2],[75,87.2],[79.5,87.3],[81.5,88.4]], { kind:"tier", source:"IMG_3748.webp" }),
     route([[38,67],[42,67]], { kind:"tier" }), route([[38,68.5],[42.5,68.5]], { kind:"tier" })
   ] };
   geo.evidenceCourtDots = { type:"FeatureCollection", features:[

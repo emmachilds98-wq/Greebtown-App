@@ -65,6 +65,20 @@ parent edges; `IMG_3747.webp` and `IMG_3748.webp` refine the southern ones.
 This permits only the shared ground and parent-boundary work: it does not
 permit new streets, venues, stalls, trees, facilities, gates, or parking.
 
+## Close-detail and delivery boundary
+
+`IMG_3737.webp` permits connected Grand Central and Oldtown frontage groups;
+`IMG_3739.webp`, `IMG_3738.webp`, and `IMG_3735.webp` permit the distinct
+Tangled Roots/Copperwood/Thrutopia/Anara compound forms; `IMG_3747.webp` and
+`IMG_3748.webp` permit the Tribe of Frog/Quantum/Lion's Den close-stage forms.
+These are grouped frontages and stage-adjacent massing only, never a claim to
+individual stall, food, toilet, water, gate, parking, or utility placement.
+
+The evidence map's stylesheet is also a runtime asset. Its URL must be
+versioned with each release and CSS must remain network-first in the service
+worker; otherwise a current map script can retain a stale visual treatment or
+retired legend from an earlier cache.
+
 ## Required verification
 
 Run `node scripts/map-preflight.mjs` for every map change. It includes
