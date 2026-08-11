@@ -149,6 +149,13 @@ release starts just below that tier, retaining primary confirmed names while
 requiring only a small intentional zoom to reveal the complete close detail.
 This is a presentation correction only; no evidence geometry changes.
 
+**Update - central lane refinement:** `IMG_3737.webp` and `vidD f_0067` /
+`f_0070` make the Oldtown reading more specific: two slender red-edged venue
+lanes on dark ground, with compact warm frontage groups. The broad Oldtown
+court has been removed in favour of those connected lane-side groups, without
+adding a vendor, utility, route, or new named place. Frontage detail remains
+close-zoom only.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’

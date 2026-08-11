@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v465";
-const APP_BUILD_TIME = "2026-08-11T02:12:06Z";
+const APP_CACHE_VERSION = "v466";
+const APP_BUILD_TIME = "2026-08-11T02:24:36Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7588,7 +7588,6 @@ function buildEvidenceOnlyMapGeoJSON(){
     // forms only: no uncertain small-venue name is attached to either.
     polygon("Anara Forest clearing", "rgba(190,184,151,.96)", [[84,22],[91,21],[94,24],[93,28],[89,30],[84,29],[81,27]], { outline:"rgba(115,125,91,.94)" }),
     polygon("Grand Central court", "rgba(243,214,165,.98)", [[56,45],[61,44],[63,48],[60,51],[55,49]]),
-    polygon("Oldtown court", "rgba(220,170,133,.98)", [[52,58],[58,57],[61,61],[58,65],[53,63]]),
     polygon("Tribe of Frog court", "rgba(173,108,184,.98)", [[43,72],[48,71],[50,75],[47,78],[42,76]]),
     polygon("Lion's Den court", "rgba(209,140,65,.98)", [[71,84],[80,83],[83,87],[79,90],[71,89]])
   ] };
@@ -7644,9 +7643,16 @@ function buildEvidenceOnlyMapGeoJSON(){
     observedMassing("Thrutopia south workshop edge", "rgba(185,176,145,.96)", [[81,42],[84,41],[86,43],[84,45],[81,44]], "IMG_3738.webp"),
     observedMassing("Grand Central stage-side frontage", "rgba(204,128,75,.96)", [[54,45],[57,44],[59,46],[58,49],[55,48],[53,47]], "IMG_3737.webp"),
     observedMassing("Grand Central east frontage", "rgba(185,112,72,.96)", [[61,46],[63,46],[64,49],[62,51],[60,49]], "IMG_3737.webp"),
-    observedMassing("Oldtown west streetfront chain", "rgba(174,102,77,.96)", [[49,58],[51,58],[52,60],[51,63],[52,65],[51,68],[49,68],[48,65],[49,62],[48,60]], "IMG_3737.webp"),
-    observedMassing("Oldtown east streetfront chain", "rgba(205,135,86,.96)", [[60,56],[62,56],[63,58],[62,61],[63,63],[62,66],[60,67],[59,64],[60,61],[59,59]], "IMG_3737.webp"),
-    observedMassing("Oldtown southern link frontage", "rgba(152,91,72,.96)", [[53,66],[57,66],[59,68],[57,70],[53,69],[51,68]], "IMG_3737.webp"),
+    // IMG_3737's two Oldtown lanes have compact warm frontages on dark ground,
+    // not one broad peach court. These are lane-side compound groups only;
+    // they never assert individual stalls or independent venue positions.
+    observedMassing("Oldtown west upper frontage", "rgba(204,128,75,.98)", [[49.1,58.3],[50.7,58.1],[51.5,59.2],[50.8,60.3],[49.2,60.1],[48.8,59.2]], "IMG_3737.webp"),
+    observedMassing("Oldtown west middle frontage", "rgba(221,150,88,.98)", [[48.7,61.1],[50.5,60.8],[51.4,61.9],[51.1,63.3],[49.5,63.7],[48.5,62.6]], "IMG_3737.webp"),
+    observedMassing("Oldtown west lower frontage", "rgba(179,102,72,.98)", [[49.3,64.2],[51,63.8],[52,64.9],[51.5,66.3],[50,66.6],[49.1,65.7]], "IMG_3737.webp"),
+    observedMassing("Oldtown east upper frontage", "rgba(225,154,90,.98)", [[59.2,56.2],[61,56.4],[61.5,57.7],[60.6,58.6],[59.2,57.8],[58.8,56.9]], "IMG_3737.webp"),
+    observedMassing("Oldtown east middle frontage", "rgba(196,119,78,.98)", [[59.4,59.1],[61.2,58.8],[61.6,60.2],[60.9,61.4],[59.5,60.7],[58.9,59.8]], "IMG_3737.webp"),
+    observedMassing("Oldtown east lower frontage", "rgba(214,142,83,.98)", [[59,62.1],[60.9,61.9],[61.4,63.3],[60.7,64.8],[59.1,64.6],[58.6,63.2]], "IMG_3737.webp"),
+    observedMassing("Oldtown southern turn frontage", "rgba(164,94,70,.98)", [[52.2,66.2],[54.5,65.7],[57.4,66.4],[58.2,67.8],[57.1,68.9],[54.4,68.6],[51.8,67.5]], "IMG_3737.webp"),
     observedMassing("Tribe of Frog entry compound", "rgba(150,96,154,.96)", [[42,73],[44,71],[47,72],[49,74],[47,77],[43,76]], "IMG_3747.webp"),
     observedMassing("Quantum north forecourt", "rgba(116,77,142,.96)", [[49,78],[54,77],[57,79],[56,81],[51,81],[48,80]], "IMG_3747.webp"),
     observedMassing("Lion's Den stage apron", "rgba(168,105,55,.96)", [[71,85],[77,83],[82,85],[82,88],[79,90],[73,89],[70,87]], "IMG_3748.webp")
@@ -9755,9 +9761,11 @@ function installEvidenceSceneLayers(map, geo){
   // Render them as solid local routes above their shared casing.
   map.addLayer({ id:"evidence-featured-routes", type:"line", source:"evidence-detail-paths", minzoom:15.55, filter:["in",["get","kind"],["literal",["central","oldtown"]]], paint:{ "line-color":["match",["get","kind"],"central","rgba(99,194,176,.98)","oldtown","rgba(211,98,70,.98)","rgba(180,198,167,.94)"], "line-width":["match",["get","kind"],"central",1.75,"oldtown",1.85,1.45] } });
   source("evidence-compound-blocks", geo.evidenceCompoundBlocks);
-  map.addLayer({ id:"evidence-compound-blocks-shadow", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":"rgba(11,17,12,.35)", "fill-translate":[1,1.2] } });
-  map.addLayer({ id:"evidence-compound-blocks", type:"fill", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "fill-color":["get","fill"] } });
-  map.addLayer({ id:"evidence-compound-blocks-outline", type:"line", source:"evidence-compound-blocks", minzoom:15.55, paint:{ "line-color":"rgba(65,46,29,.76)", "line-width":.75 } });
+  // Close-detail frontage groups accompany the complete venue-chip tier; the
+  // entry view stays territory-first and avoids a false city-block read.
+  map.addLayer({ id:"evidence-compound-blocks-shadow", type:"fill", source:"evidence-compound-blocks", minzoom:15.8, paint:{ "fill-color":"rgba(11,17,12,.35)", "fill-translate":[1,1.2] } });
+  map.addLayer({ id:"evidence-compound-blocks", type:"fill", source:"evidence-compound-blocks", minzoom:15.8, paint:{ "fill-color":["get","fill"] } });
+  map.addLayer({ id:"evidence-compound-blocks-outline", type:"line", source:"evidence-compound-blocks", minzoom:15.8, paint:{ "line-color":"rgba(65,46,29,.76)", "line-width":.75 } });
 
   source("evidence-stage-courts", geo.evidenceStageCourts);
   map.addLayer({ id:"evidence-stage-courts-shadow", type:"fill", source:"evidence-stage-courts", paint:{ "fill-color":"rgba(22,26,18,.4)", "fill-translate":[1,1.5] } });

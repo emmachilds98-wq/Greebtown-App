@@ -74,6 +74,11 @@ Tangled Roots/Copperwood/Thrutopia/Anara compound forms; `IMG_3747.webp` and
 These are grouped frontages and stage-adjacent massing only, never a claim to
 individual stall, food, toilet, water, gate, parking, or utility placement.
 
+For Oldtown specifically, `IMG_3737.webp` and `findings_vidCD.md` require two
+slender connected red-route lane groups on dark ground. Do not restore a broad
+solid court as a surrogate for that town detail; only compact, irregular,
+lane-side frontage groups are admissible.
+
 The evidence map's stylesheet is also a runtime asset. Its URL must be
 versioned with each release and CSS must remain network-first in the service
 worker; otherwise a current map script can retain a stale visual treatment or
