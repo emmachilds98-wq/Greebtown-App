@@ -50,6 +50,12 @@ Sunset as its own southern yellow field, while `IMG_3749.webp` and
 these as land-use boundaries first; do not infer their inner stalls, gates,
 parking, or facilities from the overview.
 
+`IMG_3739.webp` and `IMG_3744.webp` show the western woodland as a connected
+outer belt around the town. `IMG_3740.webp`, `IMG_3742.webp`, and
+`IMG_3743.webp` are the current references for Botanica, Metropolis, and Area
+404's broad, linked district silhouettes. Use them to correct only the parent
+boundaries; venue footprints and service icons remain close-detail evidence.
+
 ## Required verification
 
 Run `node scripts/map-preflight.mjs` for every map change. It includes

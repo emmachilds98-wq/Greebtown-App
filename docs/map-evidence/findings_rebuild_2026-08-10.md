@@ -225,3 +225,10 @@ location.
   gives each a separate silhouette, boundary and overview anchor. No new
   internal circulation, stalls, utilities, gates, parking, or car-park shape
   has been added.
+- Western territory pass: `IMG_3739.webp` and `IMG_3744.webp` show a
+  continuous woodland belt around the west/north side of the town, while
+  `IMG_3740.webp`, `IMG_3742.webp`, and `IMG_3743.webp` show Botanica,
+  Metropolis, and Area 404 as connected but visibly irregular territories.
+  The active parent fills and matching contours now follow those distinct
+  silhouettes. No venue, path, utility, gate, parking, or additional detail
+  geometry has been added.

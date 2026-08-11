@@ -120,6 +120,12 @@ Downtown, Valley, Sunset, and East Camping are each separate land-use shapes;
 their new silhouettes and overview labels should be reviewed before any new
 routes, pitches, utilities, gates, or venue detail are added inside them.
 
+**Update - western territory pass:** `IMG_3739.webp` through
+`IMG_3744.webp` show the woodland belt and the linked Botanica, Metropolis,
+and Area 404 boundaries more clearly than prior overview shots. Their parent
+silhouettes are now the next reviewed layer; do not mistake the close-up venue
+forms for permission to add more buildings or points of interest.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’

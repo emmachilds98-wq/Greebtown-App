@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v461";
-const APP_BUILD_TIME = "2026-08-11T00:56:59Z";
+const APP_CACHE_VERSION = "v462";
+const APP_BUILD_TIME = "2026-08-11T01:25:46Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7519,10 +7519,17 @@ function buildEvidenceOnlyMapGeoJSON(){
   // separate from every historic map-system collection.
   geo.evidenceTerritories = {
     type:"FeatureCollection", features:[
-      polygon("Woodland west", "rgba(20,53,37,.98)", [[14,28],[38,23],[52,30],[50,82],[38,91],[16,81],[10,58]]),
-      polygon("Botanica", "rgba(47,103,69,.98)", [[34,39],[46,38],[51,45],[46,52],[35,51],[30,46]]),
-      polygon("Metropolis", "rgba(36,89,62,.98)", [[28,55],[39,53],[45,60],[41,67],[29,66],[24,61]]),
-      polygon("Area 404", "rgba(42,96,57,.98)", [[28,67],[41,65],[46,72],[41,79],[29,78],[24,73]]),
+      // IMG_3739 through IMG_3744 show a continuous western woodland belt
+      // wrapping the districts, rather than a regular dark background blob.
+      polygon("Woodland west", "rgba(20,53,37,.98)", [[10,25],[31,20],[46,26],[52,33],[50,46],[47,54],[46,63],[48,73],[44,82],[38,92],[22,88],[13,81],[8,64],[8,45]], { source:"IMG_3739.webp" }),
+      // The official west-side close-ups show three linked but visibly
+      // different district silhouettes. These are territory boundaries only:
+      // their pictured internal venues remain in the existing close-detail tier.
+      polygon("Botanica", "rgba(47,103,69,.98)", [[33,39],[40,37],[47,39],[51,44],[49,49],[45,53],[37,52],[31,48],[30,44]], { source:"IMG_3740.webp" }),
+      polygon("Metropolis", "rgba(36,89,62,.98)", [[27,55],[35,52],[41,54],[45,58],[44,63],[40,66],[34,68],[28,66],[24,62]], { source:"IMG_3743.webp" }),
+      // Shared north edge only: Area 404 meets Metropolis at this boundary;
+      // neither fill should spread underneath the other district.
+      polygon("Area 404", "rgba(42,96,57,.98)", [[28,66],[34,68],[40,66],[45,68],[47,72],[44,75],[43,78],[40,81],[37,79],[34,81],[30,78],[25,75],[24,71]], { source:"IMG_3742.webp" }),
       // IMG_3724 shows Copperwood as a clipped gold compound with a narrow
       // south hand-off, not a regular hexagon. It meets the separate blue
       // Thrutopia enclosure at its eastern edge; neither silhouette reaches
@@ -7582,9 +7589,9 @@ function buildEvidenceOnlyMapGeoJSON(){
   // venue chains; they are not generic building scatter.
   geo.evidenceDistrictContours = { type:"FeatureCollection", features:[
     polygon("Letsbe Avenue approach", "transparent", [[40,30],[45,30],[47,35],[45,40],[40,39],[38,35]], { color:"rgba(245,208,98,.94)" }),
-    polygon("Botanica loop", "transparent", [[35,43],[39,39],[46,39],[50,43],[48,49],[44,52],[37,51],[32,47]], { color:"rgba(246,232,180,.96)" }),
-    polygon("Metropolis outline", "transparent", [[27,58],[31,54],[38,54],[44,59],[41,66],[32,67],[25,62]], { color:"rgba(91,223,222,.94)" }),
-    polygon("Area 404 outline", "transparent", [[28,68],[40,66],[46,71],[42,78],[30,79],[24,74]], { color:"rgba(220,238,74,.96)" }),
+    polygon("Botanica loop", "transparent", [[33,39],[40,37],[47,39],[51,44],[49,49],[45,53],[37,52],[31,48],[30,44]], { color:"rgba(246,232,180,.96)", lineWidth:1.9, source:"IMG_3740.webp" }),
+    polygon("Metropolis outline", "transparent", [[27,55],[35,52],[41,54],[45,58],[44,63],[40,66],[34,68],[28,66],[24,62]], { color:"rgba(91,223,222,.94)", lineWidth:1.95, source:"IMG_3743.webp" }),
+    polygon("Area 404 outline", "transparent", [[28,66],[34,68],[40,66],[45,68],[47,72],[44,75],[43,78],[40,81],[37,79],[34,81],[30,78],[25,75],[24,71]], { color:"rgba(220,238,74,.96)", lineWidth:2.05, source:"IMG_3742.webp" }),
     polygon("Copperwood court outline", "transparent", [[52,30],[62,28],[66,30],[69,32],[68,34],[65,36],[66,38],[59,39],[56,41],[54,38],[51,37],[50,35]], { color:"rgba(250,214,83,.96)", lineWidth:2.1 }),
     polygon("Thrutopia boundary", "transparent", [[70,35],[75,35],[78,37],[82,36],[85,39],[87,41],[84,45],[79,45],[75,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)", lineWidth:2.15 }),
     polygon("Anara Forest boundary", "transparent", [[79,19],[89,20],[94,26],[92,32],[85,34],[78,29]], { color:"rgba(112,224,144,.92)", lineWidth:1.7 }),
