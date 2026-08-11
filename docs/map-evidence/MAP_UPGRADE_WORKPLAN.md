@@ -101,6 +101,12 @@ Central â†’ Oldtown â†’ Quantum â†’ Lion's Den sequence have been
 separate reviewed sub-cluster rather than being pulled into a speculative
 redraw.
 
+**Update — newer official screenshot batch:** `IMG_3735.webp`, `IMG_3736.webp`
+and `IMG_3738.webp` now confirm Anara's clearing, Temple Valley boundary, and
+the green interiors behind the Copperwood/Thrutopia coloured outlines. Those
+observed forms are included in the active map; uncertain Anara venues and
+deeper routes remain deliberately absent.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’

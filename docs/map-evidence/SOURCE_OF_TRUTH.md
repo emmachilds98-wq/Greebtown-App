@@ -23,8 +23,10 @@ reviewed flat diagram.
 
 ## Evidence policy
 
-- Use the `IMG_3721`–`IMG_3734` official screenshots and the cited video
-  findings for spatial relationships.
+- Use the `IMG_3721`–`IMG_3751` official screenshots and the cited video
+  findings for spatial relationships. The newer root-level `IMG_3735`–
+  `IMG_3751` uploads are verified official-app captures and take precedence
+  where they show a clearer boundary, ground treatment, or landmark form.
 - Record the exact file(s) and observed neighbours before adding a named
   landmark, court, campsite lane, or path.
 - Keep a feature out when its name, boundary, or relation is unclear.
@@ -36,6 +38,10 @@ When newer official screenshots visibly name and bound an area, they take
 precedence over older footage where that area was absent or not searchable.
 In particular, IMG_3724.webp visibly shows THRUTOPIA east of Copperwood with
 its own bounded zone; keep it in the active evidence scene.
+IMG_3736.webp and IMG_3738.webp further clarify that the blue/yellow are
+Thrutopia/Copperwood *boundary* treatments over green ground, not solid
+district fills. IMG_3735.webp is the current reference for Anara's pale
+clearing, round court, and Temple Valley edge.
 
 ## Required verification
 

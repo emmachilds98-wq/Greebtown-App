@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v458";
-const APP_BUILD_TIME = "2026-08-11T00:24:57Z";
+const APP_CACHE_VERSION = "v459";
+const APP_BUILD_TIME = "2026-08-11T00:37:09Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7523,8 +7523,12 @@ function buildEvidenceOnlyMapGeoJSON(){
       // south hand-off, not a regular hexagon. It meets the separate blue
       // Thrutopia enclosure at its eastern edge; neither silhouette reaches
       // into Grand Central or the Hilltop field.
-      polygon("Copperwood Heights", "rgba(139,132,42,.97)", [[52,29],[62,27],[66,29],[70,31],[69,34],[66,36],[67,39],[59,40],[56,42],[53,39],[50,38],[49,35]]),
-      polygon("Thrutopia", "rgba(43,55,122,.98)", [[69,34],[75,34],[78,36],[82,35],[86,38],[88,41],[85,46],[79,46],[75,45],[72,46],[69,42]]),
+      // The new official close-ups show green ground inside both compounds:
+      // Copperwood's yellow and Thrutopia's blue are boundary treatments,
+      // not large solid land-use fields. Hilltop remains the separate yellow
+      // camping field to the south-east.
+      polygon("Copperwood Heights", "rgba(55,104,73,.98)", [[52,29],[62,27],[66,29],[70,31],[69,34],[66,36],[67,39],[59,40],[56,42],[53,39],[50,38],[49,35]]),
+      polygon("Thrutopia", "rgba(57,105,78,.98)", [[69,34],[75,34],[78,36],[82,35],[86,38],[88,41],[85,46],[79,46],[75,45],[72,46],[69,42]]),
       polygon("Anara Forest", "rgba(29,70,47,.98)", [[78,18],[89,19],[95,25],[93,33],[84,35],[77,30]]),
       polygon("Grand Central", "rgba(54,78,54,.98)", [[54,43],[62,42],[65,48],[61,53],[54,52],[51,48]]),
       polygon("Oldtown", "rgba(47,72,50,.98)", [[50,54],[61,52],[64,61],[60,70],[53,69],[48,62]]),
@@ -7560,6 +7564,10 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("NEXUS court", "rgba(132,210,151,.98)", [[39,42],[44,40],[47,43],[45,47],[40,47]]),
     polygon("Hidden Woods court", "rgba(72,121,82,.98)", [[19,31],[24,30],[27,34],[24,38],[19,37]], { outline:"rgba(232,157,61,.96)" }),
     polygon("Tangled Roots court", "rgba(124,98,45,.98)", [[51,20],[56,19],[58,23],[54,26],[50,24]], { outline:"rgba(205,76,58,.96)" }),
+    // IMG_3735 places a pale communal clearing and round grey court inside
+    // Anara's wooded shell, north-west of Temple Valley Camping. These are
+    // forms only: no uncertain small-venue name is attached to either.
+    polygon("Anara Forest clearing", "rgba(190,184,151,.96)", [[84,22],[91,21],[94,24],[93,28],[89,30],[84,29],[81,27]], { outline:"rgba(115,125,91,.94)" }),
     polygon("Grand Central court", "rgba(243,214,165,.98)", [[56,45],[61,44],[63,48],[60,51],[55,49]]),
     polygon("Oldtown court", "rgba(220,170,133,.98)", [[52,58],[58,57],[61,61],[58,65],[53,63]]),
     polygon("Tribe of Frog court", "rgba(173,108,184,.98)", [[43,72],[48,71],[50,75],[47,78],[42,76]]),
@@ -7573,9 +7581,10 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Botanica loop", "transparent", [[35,43],[39,39],[46,39],[50,43],[48,49],[44,52],[37,51],[32,47]], { color:"rgba(246,232,180,.96)" }),
     polygon("Metropolis outline", "transparent", [[27,58],[31,54],[38,54],[44,59],[41,66],[32,67],[25,62]], { color:"rgba(91,223,222,.94)" }),
     polygon("Area 404 outline", "transparent", [[28,68],[40,66],[46,71],[42,78],[30,79],[24,74]], { color:"rgba(220,238,74,.96)" }),
-    polygon("Copperwood court outline", "transparent", [[52,30],[62,28],[66,30],[69,32],[68,34],[65,36],[66,38],[59,39],[56,41],[54,38],[51,37],[50,35]], { color:"rgba(250,214,83,.96)" }),
-    polygon("Thrutopia boundary", "transparent", [[70,35],[75,35],[78,37],[82,36],[85,39],[87,41],[84,45],[79,45],[75,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)" }),
-    polygon("Anara Forest boundary", "transparent", [[79,19],[89,20],[94,26],[92,32],[85,34],[78,29]], { color:"rgba(112,224,144,.92)" }),
+    polygon("Copperwood court outline", "transparent", [[52,30],[62,28],[66,30],[69,32],[68,34],[65,36],[66,38],[59,39],[56,41],[54,38],[51,37],[50,35]], { color:"rgba(250,214,83,.96)", lineWidth:2.1 }),
+    polygon("Thrutopia boundary", "transparent", [[70,35],[75,35],[78,37],[82,36],[85,39],[87,41],[84,45],[79,45],[75,44],[73,45],[70,41]], { color:"rgba(105,112,232,.96)", lineWidth:2.15 }),
+    polygon("Anara Forest boundary", "transparent", [[79,19],[89,20],[94,26],[92,32],[85,34],[78,29]], { color:"rgba(112,224,144,.92)", lineWidth:1.7 }),
+    polygon("Temple Valley Camping boundary", "transparent", [[88,30],[96,30],[98,35],[94,40],[87,38],[85,34]], { color:"rgba(94,118,237,.96)", lineWidth:2.05 }),
     polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)" }),
     polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)" }),
     polygon("Hilltop field outline", "transparent", [[68,46],[84,47],[87,60],[82,77],[70,78],[66,67]], { color:"rgba(231,205,84,.9)" }),
@@ -7655,6 +7664,7 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[31,60],[29,64],[27,68],[26,72]], { kind:"neon" }),  // Metropolis -> Hydro XL lit route
     route([[54,35],[58,36],[62,35],[66,36],[69,39]], { kind:"street" }), // Copperwood courtyard -> Thrutopia hand-off
     route([[70,39],[75,38],[80,39],[83,42],[79,44],[74,43],[70,39]], { kind:"street" }), // Thrutopia boundary loop
+    route([[81,29],[84,28],[87,27],[90,27]], { kind:"street" }), // Anara clearing approach
     route([[58,48],[58,50],[59,52],[58,54],[57,55]], { kind:"street" }), // Grand Central -> Boomtown Hall -> Daily Rag
     route([[59,52],[61,51]], { kind:"street" }),                  // documented Boomtown Hall fork
     route([[55,48],[58,50],[61,49]], { kind:"street" }),         // Grand Central court
@@ -7676,6 +7686,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceLandmarks = { type:"FeatureCollection", features:[
     polygon("Spectrum 360 container ring", "rgba(91,73,119,.96)", [[37,65],[40,64],[43,66],[44,69],[42,71],[38,71],[36,69]]),
     polygon("Hydro XL halo", "rgba(160,77,151,.82)", [[23,69],[27,68],[30,71],[29,75],[25,76],[22,73]]),
+    polygon("Anara gathering circle", "rgba(103,105,113,.96)", [[87,25.2],[89,24.8],[90.4,26],[90,27.5],[88,27.9],[86.7,26.7]], { outline:"rgba(62,69,64,.95)" }),
     polygon("Grand Central main-stage glyph", "rgba(211,84,54,.98)", [[59,45.7],[60.3,47],[59,48.3],[57.7,47]], { outline:"rgba(255,216,159,.9)" }),
     polygon("Oldtown chevron clearing", "rgba(239,235,209,.92)", [[53,53],[56,52],[59,54],[56,56],[54,55],[52,57],[50,55]]),
     polygon("Full Moon Ballroom dome", "rgba(250,245,221,.98)", [[63,32],[64,30],[67,30],[68,32],[67,35],[64,35],[62,33]], { outline:"rgba(104,89,61,.9)" }),
@@ -7693,7 +7704,8 @@ function buildEvidenceOnlyMapGeoJSON(){
     route([[44,69],[42,71]]), route([[42,71],[38,71]]), route([[38,71],[36,69]]), route([[36,69],[37,65]])
   ] };
   geo.evidenceCanopies = { type:"FeatureCollection", features:[
-    polygon("NEXUS triangular canopy", "rgba(35,47,39,.96)", [[40,43],[44,41],[45,46]], { outline:"rgba(255,174,81,.88)" })
+    polygon("NEXUS triangular canopy", "rgba(35,47,39,.96)", [[40,43],[44,41],[45,46]], { outline:"rgba(255,174,81,.88)" }),
+    polygon("Anara Forest stage canopy", "rgba(173,78,147,.96)", [[91,24],[93,23],[94,25],[93,27],[91,26]], { outline:"rgba(243,150,207,.86)" })
   ] };
   geo.evidenceWaterLandmarks = { type:"FeatureCollection", features:[
     polygon("Hydro XL pond", "rgba(67,151,188,.90)", [[24,76],[27,76],[28,77.5],[25,78.5],[23.5,77]])
@@ -7717,6 +7729,7 @@ function buildEvidenceOnlyMapGeoJSON(){
   geo.evidenceStageHalos = { type:"FeatureCollection", features:[
     [42,44, "rgba(255,194,92,.34)", 1.0],  // NEXUS
     [60,47, "rgba(255,167,94,.36)", 1.35], // Grand Central
+    [92,25, "rgba(225,98,174,.28)", 1.05], // Anara Forest
     [39,68, "rgba(213,119,218,.34)", 1.1], // Spectrum 360
     [63,83, "rgba(255,154,104,.34)", 1.05], // Helix
     [77,87, "rgba(255,166,72,.38)", 1.45]  // The Lion's Den
@@ -9673,7 +9686,7 @@ function installEvidenceSceneLayers(map, geo){
   map.addLayer({ id:"evidence-territories-fill", type:"fill", source:"evidence-territories", paint:{ "fill-color":["get","fill"], "fill-opacity":.94 } });
   map.addLayer({ id:"evidence-territories-outline", type:"line", source:"evidence-territories", paint:{ "line-color":"rgba(92,152,101,.58)", "line-width":1.1 } });
   source("evidence-district-contours", geo.evidenceDistrictContours);
-  map.addLayer({ id:"evidence-district-contours", type:"line", source:"evidence-district-contours", minzoom:14.7, paint:{ "line-color":["get","color"], "line-width":1.55, "line-opacity":.88 } });
+  map.addLayer({ id:"evidence-district-contours", type:"line", source:"evidence-district-contours", minzoom:14.7, paint:{ "line-color":["get","color"], "line-width":["coalesce",["get","lineWidth"],1.55], "line-opacity":.88 } });
 
   source("evidence-forest-dots", geo.evidenceForestDots);
   map.addLayer({ id:"evidence-forest-dots", type:"circle", source:"evidence-forest-dots", paint:{ "circle-radius":["*",["get","size"],2.1], "circle-color":"rgba(133,187,118,.88)", "circle-stroke-width":.4, "circle-stroke-color":"rgba(27,57,35,.7)" } });

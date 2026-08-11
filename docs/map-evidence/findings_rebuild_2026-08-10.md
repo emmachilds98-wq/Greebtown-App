@@ -201,3 +201,14 @@ location.
   yellow Hilltop camp marker represent the confirmed landmark forms; neither
   is a new venue or utility. Anara remains unchanged because its interior
   relationships are still too imprecise for a geometry pass.
+- New-evidence correction: `IMG_3735.webp`, `IMG_3736.webp`, and
+  `IMG_3738.webp` are official-app close views newly added at the root of
+  this folder. They show green land inside Copperwood and Thrutopia, with the
+  yellow/blue treatment restricted to each compound's boundary. The active
+  scene therefore replaces the mistaken solid yellow/blue district fills with
+  wooded green ground and stronger evidence contours. `IMG_3735.webp` also
+  shows Anara as a pale clearing inside the forest shell, with a round grey
+  court and a magenta stage form north-west of the separately outlined Temple
+  Valley Camping field. The renderer adds only these observed forms and the
+  short clearing approach; it does not add unnamed facilities, gates, or a
+  speculative route deeper into Anara.
