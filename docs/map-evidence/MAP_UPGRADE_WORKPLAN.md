@@ -114,6 +114,12 @@ district of unrelated blocks. This relationship is now rendered at close view
 only. The next pass must keep using connected evidence, not fill those lanes
 with inferred stalls or service icons.
 
+**Update - outer-zone pass:** `IMG_3745.webp` through `IMG_3751.webp` make
+the campsite perimeter clearer than the earlier core close-ups. West,
+Downtown, Valley, Sunset, and East Camping are each separate land-use shapes;
+their new silhouettes and overview labels should be reviewed before any new
+routes, pitches, utilities, gates, or venue detail are added inside them.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’

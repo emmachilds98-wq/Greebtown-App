@@ -218,3 +218,10 @@ location.
   The active close view now gives these documented circulation types their own
   solid route treatment and reinforces their containing outlines. It does not
   add or relocate individual stalls, facilities, gates, parking, or labels.
+- Outer-zone pass: `IMG_3745.webp` and `IMG_3746.webp` show West and Downtown
+  Camping as separate, broad outer grounds; `IMG_3748.webp` shows Sunset as a
+  distinct southern yellow field; and `IMG_3749.webp` plus `IMG_3750.webp`
+  show the eastern salmon ground beyond the Lion's Den. The active map now
+  gives each a separate silhouette, boundary and overview anchor. No new
+  internal circulation, stalls, utilities, gates, parking, or car-park shape
+  has been added.
