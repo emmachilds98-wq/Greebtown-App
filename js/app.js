@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v480";
-const APP_BUILD_TIME = "2026-08-11T18:20:31Z";
+const APP_CACHE_VERSION = "v481";
+const APP_BUILD_TIME = "2026-08-11T19:27:10Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7913,15 +7913,15 @@ function buildEvidenceOnlyMapGeoJSON(){
     ...districtRings.map(({d,r})=> polygon(d[0]+" boundary","transparent", r, { color:d[6], lineWidth:d[7] }))
   ] };
   const CAMPS = [
-    ["West Camping","rgba(68,132,77,.9)",...A.westCamp,8,4],
-    ["Meadow Camping","rgba(204,122,125,.84)",...A.meadow,6,3],
+    ["West Camping","rgba(68,132,77,.9)",...A.westCamp,7.5,4.2],
+    ["Meadow Camping","rgba(204,122,125,.84)",...A.meadow,6.5,3.4],
     ["Camplight","rgba(210,150,150,.8)",...A.camplight,3,2],
-    ["Downtown Camping","rgba(204,122,125,.84)",...A.downtownCamp,5,3.6],
+    ["Downtown Camping","rgba(204,122,125,.84)",...A.downtownCamp,5.5,5.2],
     ["Valley Camping","rgba(75,139,84,.92)",...A.valleyCamp,7,4],
     ["Tangerine Fields","rgba(206,150,92,.82)",...A.tangerine,4,2.6],
     ["Temple Valley Camping","rgba(92,155,102,.88)",...A.templeValley,6,3.4],
-    ["East Camping","rgba(187,105,122,.84)",...A.eastCamp,5,5.5],
-    ["Sunset","rgba(206,186,72,.9)",...A.sunsetField,5,4.5],
+    ["East Camping","rgba(187,105,122,.84)",...A.eastCamp,5,6],
+    ["Sunset","rgba(206,186,72,.9)",...A.sunsetField,4.5,5.5],
     ["Campervan Field","rgba(196,120,120,.8)",...A.campervanS,9,3],
     ["Campervan Field East","rgba(196,120,120,.8)",...A.campervanSE,6,2.6]
   ];
