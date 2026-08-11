@@ -79,6 +79,12 @@ slender connected red-route lane groups on dark ground. Do not restore a broad
 solid court as a surrogate for that town detail; only compact, irregular,
 lane-side frontage groups are admissible.
 
+`findings_vidCD.md` frames `vidD f_0058`, `vidD f_0059`, and `vidD f_0067`
+permit the Full Moon Ballroom's pale marquee silhouette and its named local
+path chain inside Copperwood. The chain must be limited to The Hide Out,
+Silver Swan/Topsy Turvy, Full Moon, Velvet Rope, and the Foggers Mill branch;
+it does not establish individual stalls or additional nearby landmarks.
+
 The evidence map's stylesheet is also a runtime asset. Its URL must be
 versioned with each release and CSS must remain network-first in the service
 worker; otherwise a current map script can retain a stale visual treatment or

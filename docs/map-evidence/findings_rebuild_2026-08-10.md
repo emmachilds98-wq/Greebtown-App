@@ -342,3 +342,27 @@ location.
 - Grouped frontage detail now starts with the complete close-detail tier rather
   than appearing in the entry view. No labels, routes, stage courts, parent
   boundaries, or other locations changed.
+
+## Full Moon Ballroom cluster refinement (recorded before geometry work)
+
+- `findings_vidCD.md` frames `vidD f_0058`, `vidD f_0059`, and `vidD f_0067`
+  identify Full Moon Ballroom as a large pale dome/marquee, with Silver Swan
+  Talent Agency and Topsy Turvy Twins on the approach toward The Hide Out
+  Hilltop, Velvet Rope to its south, and Foggers Mill branching east.
+- The sources establish one local, named path chain: The Hide Out Hilltop →
+  Silver Swan/Topsy Turvy → Full Moon Ballroom → Velvet Rope, plus the
+  Foggers Mill branch. The chain is fully inside the already-reviewed
+  Copperwood parent area; it may be rendered as a close-zoom local route and
+  marquee form only.
+- This pass may not assert individual stalls, amenities, a gate, camping,
+  parking, a service, or any unconfirmed Anara/Copperwood feature.
+
+### Full Moon Ballroom cluster refinement result
+
+- Re-profiled the Full Moon Ballroom from a generic polygon into the recorded
+  pale marquee form, then added only the named local approach/branch routes.
+  The Full Moon, Velvet Rope, Foggers Mill, Silver Swan, Topsy Turvy, and The
+  Hide Out labels retain their existing evidence-supported positions.
+- The four route segments and every marquee vertex remain inside the reviewed
+  Copperwood parent territory. No new label, venue, stall, service, camping,
+  parking, gate, or parent boundary was added.
