@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v460";
-const APP_BUILD_TIME = "2026-08-11T00:50:52Z";
+const APP_CACHE_VERSION = "v461";
+const APP_BUILD_TIME = "2026-08-11T00:56:59Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7439,25 +7439,29 @@ function evidenceRebuildLabels(){
   // Fresh visual anchors traced from IMG_3721–IMG_3734. These intentionally
   // do not reuse the quarantined map-system or app coordinate collections.
   return [
-    ["DOWNTOWN CAMPING", 17, 48, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
+    ["WEST CAMPING", 17, 21, "evidence-campground"], ["DOWNTOWN CAMPING", 17, 48, "evidence-campground"], ["LETSBE AVENUE", 42, 34, "evidence-avenue"], ["BOTANICA", 42, 46, "evidence-botanical"], ["METROPOLIS", 35, 59, "evidence-neon"], ["AREA 404", 36, 69, "evidence-warm"],
     ["COPPERWOOD HEIGHTS", 61, 35, "evidence-gold"], ["THRUTOPIA", 75, 40, "evidence-violet"], ["ANARA FOREST", 86, 27, "evidence-anara"],
     ["GRAND CENTRAL", 58, 48, "evidence-central"], ["OLDTOWN", 55, 61, "evidence-oldtown"],
-    ["HILLTOP", 74, 68, "evidence-gold"], ["CAMP SKYLARK", 78, 72, "evidence-campground"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"]
+    ["HILLTOP", 74, 68, "evidence-gold"], ["CAMP SKYLARK", 78, 72, "evidence-campground"], ["QUANTUM", 56, 82, "evidence-violet"], ["THE LION'S DEN", 74, 86, "evidence-den"], ["SUNSET", 23, 94, "evidence-campground"], ["EAST CAMPING", 94, 89, "evidence-campground"]
   ];
 }
 
 function evidenceRebuildOverviewLabels(){
   // The overview is a distinct reading level, not a zoomed-out copy of every
-  // venue label. These six anchors are visible in the full-site official
+  // venue label. These broad anchors are visible in the full-site official
   // views (IMG_3721/IMG_3726/IMG_3729) and stay available after Site overview
   // hides the detailed evidence labels.
   return [
+    ["WEST CAMPING", 17, 21, ""],
+    ["DOWNTOWN CAMPING", 17, 48, ""],
     ["COPPERWOOD HEIGHTS", 61, 35, ""],
     ["THRUTOPIA", 75, 40, ""],
     ["GRAND CENTRAL", 58, 48, ""],
     ["OLDTOWN", 55, 61, ""],
     ["HILLTOP", 74, 68, "overview-hilltop"],
-    ["THE LION'S DEN", 74, 86, "overview-lions-den"]
+    ["THE LION'S DEN", 74, 86, "overview-lions-den"],
+    ["SUNSET", 23, 94, ""],
+    ["EAST CAMPING", 94, 89, ""]
   ];
 }
 
@@ -7588,13 +7592,20 @@ function buildEvidenceOnlyMapGeoJSON(){
     polygon("Grand Central outline", "transparent", [[54,44],[62,43],[65,48],[61,53],[54,52],[51,48]], { color:"rgba(241,122,74,.95)", lineWidth:2 }),
     polygon("Oldtown outline", "transparent", [[51,55],[61,53],[64,61],[60,70],[53,69],[48,62]], { color:"rgba(214,87,67,.94)", lineWidth:2.2 }),
     polygon("Hilltop field outline", "transparent", [[68,46],[84,47],[87,60],[82,77],[70,78],[66,67]], { color:"rgba(231,205,84,.9)" }),
+    // The outer-site close-ups define these as distinct camp grounds, not
+    // decorative texture or extensions of the central districts. Their
+    // silhouettes are traced before adding any further camp detail.
+    polygon("West Camping boundary", "transparent", [[3,11],[22,10],[31,16],[32,26],[26,34],[15,36],[5,31],[0,22]], { color:"rgba(116,184,127,.92)", lineWidth:1.8, source:"IMG_3746.webp" }),
+    polygon("Downtown Camping boundary", "transparent", [[3,39],[20,38],[27,44],[25,51],[22,57],[16,60],[7,57],[1,51]], { color:"rgba(242,162,151,.94)", lineWidth:2.05, source:"IMG_3745.webp" }),
+    polygon("Valley Camping boundary", "transparent", [[58,16],[70,15],[74,22],[69,28],[60,27],[55,22]], { color:"rgba(137,201,142,.9)", lineWidth:1.8, source:"IMG_3751.webp" }),
+    polygon("Sunset Camping boundary", "transparent", [[4,85],[18,82],[31,86],[42,91],[45,99],[5,99],[0,93]], { color:"rgba(244,211,84,.95)", lineWidth:2.05, source:"IMG_3748.webp" }),
+    polygon("East Camping boundary", "transparent", [[89,78],[97,78],[100,84],[100,99],[89,99],[85,94],[88,89],[87,84]], { color:"rgba(232,151,144,.94)", lineWidth:2.05, source:"IMG_3749.webp" }),
     // The dark diagonal alongside Hilltop is observed as a boundary/fence,
     // not a public route (findings_vidAB.md). It keeps the Oldtown/Quantum
     // corridor visibly outside the yellow camping field.
     route([[65,49],[64,57],[64,65],[66,73],[69,79]], { color:"rgba(20,31,23,.96)" }),
     polygon("Quantum boundary", "transparent", [[48,77],[59,76],[63,84],[58,90],[50,89],[46,83]], { color:"rgba(214,137,234,.94)" }),
-    polygon("Lion's Den boundary", "transparent", [[67,81],[81,81],[87,86],[81,91],[69,91],[65,87]], { color:"rgba(240,166,95,.94)" }),
-    polygon("Downtown Camping boundary", "transparent", [[10,40],[20,39],[26,45],[24,53],[16,56],[9,50]], { color:"rgba(242,162,151,.92)" })
+    polygon("Lion's Den boundary", "transparent", [[67,81],[81,81],[87,86],[81,91],[69,91],[65,87]], { color:"rgba(240,166,95,.94)" })
   ] };
   // These are grouped, unlabeled forms observed in IMG_3724, not an
   // assertion of individual stalls. Keeping them in their own reviewed
@@ -7623,11 +7634,16 @@ function buildEvidenceOnlyMapGeoJSON(){
     building("rgba(207,142,87,.96)", [[51,66],[53,66],[53,68],[51,68]]), building("rgba(171,106,82,.96)", [[59,58],[61,58],[61,60],[59,60]]),
     building("rgba(210,151,94,.96)", [[60,61],[62,61],[62,63],[60,63]]), building("rgba(153,94,77,.96)", [[60,64],[62,64],[62,66],[60,66]])
   ] };
+  // IMG_3745 through IMG_3751 clarify the outer camping grounds as broad,
+  // separate land-use silhouettes. They intentionally contain no newly
+  // inferred stalls, utility pins, gates, or internal circulation here.
   geo.evidenceCampFields = { type:"FeatureCollection", features:[
-    polygon("Downtown Camping", "rgba(204,122,125,.84)", [[10,40],[20,39],[26,45],[24,53],[16,56],[9,50]]),
-    polygon("Valley Camping", "rgba(75,139,84,.92)", [[58,16],[70,15],[74,22],[69,28],[60,27],[55,22]]),
+    polygon("West Camping", "rgba(68,132,77,.9)", [[3,11],[22,10],[31,16],[32,26],[26,34],[15,36],[5,31],[0,22]], { source:"IMG_3746.webp" }),
+    polygon("Downtown Camping", "rgba(204,122,125,.84)", [[3,39],[20,38],[27,44],[25,51],[22,57],[16,60],[7,57],[1,51]], { source:"IMG_3745.webp" }),
+    polygon("Valley Camping", "rgba(75,139,84,.92)", [[58,16],[70,15],[74,22],[69,28],[60,27],[55,22]], { source:"IMG_3751.webp" }),
     polygon("Camp at Hilltop", "rgba(179,159,63,.82)", [[71,56],[81,55],[83,66],[79,74],[72,73],[69,65]]),
-    polygon("Lion's Den eastern camp", "rgba(187,105,122,.84)", [[84,82],[91,81],[94,87],[91,95],[84,94],[81,89]]),
+    polygon("Sunset Camping", "rgba(194,169,55,.88)", [[4,85],[18,82],[31,86],[42,91],[45,99],[5,99],[0,93]], { source:"IMG_3748.webp" }),
+    polygon("East Camping", "rgba(187,105,122,.84)", [[89,78],[97,78],[100,84],[100,99],[89,99],[85,94],[88,89],[87,84]], { source:"IMG_3749.webp" }),
     polygon("Temple Valley Camping", "rgba(92,155,102,.88)", [[88,30],[96,30],[98,35],[94,40],[87,38],[85,34]])
   ] };
   geo.evidenceCampTents = { type:"FeatureCollection", features:[

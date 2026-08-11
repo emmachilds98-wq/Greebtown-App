@@ -43,6 +43,13 @@ Thrutopia/Copperwood *boundary* treatments over green ground, not solid
 district fills. IMG_3735.webp is the current reference for Anara's pale
 clearing, round court, and Temple Valley edge.
 
+`IMG_3745.webp` and `IMG_3746.webp` are the current references for the
+separate West and Downtown Camping silhouettes. `IMG_3748.webp` confirms
+Sunset as its own southern yellow field, while `IMG_3749.webp` and
+`IMG_3750.webp` confirm the separate eastern salmon camping ground. Treat
+these as land-use boundaries first; do not infer their inner stalls, gates,
+parking, or facilities from the overview.
+
 ## Required verification
 
 Run `node scripts/map-preflight.mjs` for every map change. It includes
