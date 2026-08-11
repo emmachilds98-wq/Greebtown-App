@@ -118,6 +118,11 @@ hierarchy as its first reading level. This is an explicit completion gate: no
 more close-only additions can be treated as map progress while the zoomed-out
 map remains visually unchanged.
 
+**Perimeter prerequisite — complete:** every campsite silhouette has been
+reworked as an outer land-use boundary from the newer official screenshots.
+Generic pitch marks, tents and local lanes are no longer active evidence-map
+content.
+
 The first of these batches is complete. It is a connected western-core pass
 rather than a single-landmark tweak: parent silhouettes, the documented
 horseshoe, key landmark forms, and their display zoom were reviewed together.
