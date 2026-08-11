@@ -92,6 +92,32 @@ following occurs:
 
 ## Current progress and next action
 
+### Completion execution sequence
+
+The remaining work is executed in substantial connected batches, not isolated
+marker edits. Each batch starts at the parent silhouette, then applies only the
+documented route and close forms inside it, then runs the required entry and
+close-view checks.
+
+1. **Western core** — Hidden Woods, Letsbe, Botanica, NEXUS, Metropolis, Area
+   404/Spectrum 360, and Hydro XL. Sources: `IMG_3740.webp`, `IMG_3742.webp`,
+   `IMG_3743.webp`, and `findings_vidAB.md`.
+2. **North-east and central** — Tangled Roots, Copperwood, Thrutopia, Anara,
+   Grand Central, Oldtown, and Hilltop. Sources: `IMG_3735.webp` through
+   `IMG_3739.webp` and `findings_vidCD.md`.
+3. **South and perimeter** — Tribe of Frog, Quantum, Helix, Lion's Den,
+   Sunset, and the reviewed separate camp-field silhouettes. Sources:
+   `IMG_3745.webp` through `IMG_3751.webp` and `findings_vidE2.md`.
+4. **Release review** — confirm the whole-site overview, all three connected
+   close clusters, label hierarchy, fresh-canvas refresh, cache delivery, and
+   the executable evidence boundary before publication.
+
+The first of these batches is complete. It is a connected western-core pass
+rather than a single-landmark tweak: parent silhouettes, the documented
+horseshoe, key landmark forms, and their display zoom were reviewed together.
+The next batch re-checks the north-east/central sequence as a whole before
+adding anything further.
+
 Chunks 0, 1 and 2 are complete: the executable evidence boundary, active
 controls/search, entry hierarchy, overview anchors and whole-site backbone
 have all been reviewed and shipped. Chunk 3 is also complete for the current
