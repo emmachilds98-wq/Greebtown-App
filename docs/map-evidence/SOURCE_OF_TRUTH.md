@@ -79,6 +79,12 @@ versioned with each release and CSS must remain network-first in the service
 worker; otherwise a current map script can retain a stale visual treatment or
 retired legend from an earlier cache.
 
+The entry camera must remain below the close-detail label threshold. The
+opening view is for the `IMG_3751.webp` territory order and main movement
+spine; a small, intentional zoom into a district reveals the complete
+source-backed venue-chip tier. This is a visual hierarchy rule, never a reason
+to move a label or alter its evidence-supported geometry.
+
 ## Required verification
 
 Run `node scripts/map-preflight.mjs` for every map change. It includes

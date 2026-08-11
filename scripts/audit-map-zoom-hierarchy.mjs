@@ -33,7 +33,11 @@ if(/geo\.(siteGround|parkingAreas|roads|gateForecourts|fields|districts)/.test(s
 
 if(!Number.isFinite(labelThreshold) || labelThreshold < 15.2 || labelThreshold > 15.5) errors.push("overview-to-explore label threshold is outside the reviewed range");
 if(!Number.isFinite(labelDetailThreshold) || labelDetailThreshold < labelThreshold + .25 || labelDetailThreshold > 16) errors.push("close label reveal must follow the overview threshold");
-if(!Number.isFinite(entryZoom) || entryZoom < labelDetailThreshold || entryZoom > labelDetailThreshold + .1) errors.push("entry view must open with reviewed normal-reading detail available");
+// Entry is deliberately the normal explore band: primary confirmed labels and
+// local routes are available, but the full venue-chip tier waits for an
+// intentional small zoom. This prevents the reviewed whole-site hierarchy
+// from opening as a wall of close-detail labels.
+if(!Number.isFinite(entryZoom) || entryZoom < labelThreshold + .2 || entryZoom >= labelDetailThreshold) errors.push("entry view must open in the reviewed explore band below the full venue-chip tier");
 if(!scene.includes('id:"evidence-field-lanes", type:"line", source:"evidence-field-lanes", minzoom:15.35')) errors.push("camp circulation should appear at normal district-reading zoom");
 if(!scene.includes('id:"evidence-camp-pitches", type:"fill", source:"evidence-camp-pitches", minzoom:15.45')) errors.push("camp pitch detail should remain a second reading level");
 if(!scene.includes('id:"evidence-detail-paths", type:"line", source:"evidence-detail-paths", minzoom:15.55')) errors.push("fine routes must not dominate the overview");

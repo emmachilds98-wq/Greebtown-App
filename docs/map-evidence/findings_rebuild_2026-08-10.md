@@ -299,3 +299,18 @@ location.
   versioned stylesheet network-first. Existing visitors now receive the
   current map presentation instead of combining new map JavaScript with old
   cached CSS.
+
+## Entry-hierarchy polish (recorded before code)
+
+- A fresh live review of the v464 map at its normal entry camera showed that
+  the camera landed exactly on the close-detail label threshold. That made
+  every verified small-venue chip appear at once, obscuring the territory
+  sequence that `IMG_3751.webp` establishes first.
+- `IMG_3751.webp` remains the source for the whole-site order; `IMG_3737.webp`
+  remains the source for the Grand Central-to-Oldtown close detail. This is a
+  hierarchy correction only: it must not move, resize, add, or remove any
+  territory, court, frontage, route, campsite, or landmark.
+- The reviewed entry should therefore start one small zoom step below the
+  close-detail label threshold. Primary confirmed names remain available at
+  the normal explore view; the complete venue-chip tier should appear after a
+  deliberate small zoom into a district.

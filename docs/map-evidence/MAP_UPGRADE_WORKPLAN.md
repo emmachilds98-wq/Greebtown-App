@@ -143,6 +143,12 @@ all facilities remain deliberately blank unless their name and neighbours are
 readable. The CSS delivery path is versioned and network-first so users do not
 mistake a stale visual cache for a missing map update.
 
+**Update - entry-hierarchy polish:** a fresh v464 review showed that entry
+landed on the same threshold as the complete venue-chip tier. The next
+release starts just below that tier, retaining primary confirmed names while
+requiring only a small intentional zoom to reveal the complete close detail.
+This is a presentation correction only; no evidence geometry changes.
+
 The next pass should complete the remaining central/east close detail only if
 new or existing official evidence records a specific relationship. It should
 then re-check the full Copperwood â†’ Thrutopia â†’ Anara and Grand Central â†’

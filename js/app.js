@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v464";
-const APP_BUILD_TIME = "2026-08-11T01:54:58Z";
+const APP_CACHE_VERSION = "v465";
+const APP_BUILD_TIME = "2026-08-11T02:12:06Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -9920,10 +9920,13 @@ function loadMap(){
       };
     }
     // Open on the central, walkable part of the site instead of fitting the
-    // entire perimeter into a small phone card. The Site overview control
-    // remains the intentional way back to the full festival extent.
+    // entire perimeter into a small phone card. Start just below the complete
+    // venue-chip tier so the first read is territory order and main routes;
+    // a small, intentional zoom into a district reveals every close label.
+    // The Site overview control remains the intentional way back to the full
+    // festival extent.
     const entryFocus = schematicToLatLon(59, 61);
-    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.65, bearing:0, pitch:0 }));
+    mapGL.once("load", ()=> mapGL.jumpTo({ center: [entryFocus.lon, entryFocus.lat], zoom: 15.55, bearing:0, pitch:0 }));
 
     // Label density is deliberately a three-step reveal rather than one
     // hard switch. DOM markers do not have MapLibre collision handling,
@@ -9932,7 +9935,7 @@ function loadMap(){
     // now reads as territory first, then names its primary stages/camps,
     // and only then reveals hidden venues and fine-grain wayfinding.
     const LABEL_ZOOM_THRESHOLD = 15.3;
-    const LABEL_DETAIL_ZOOM_THRESHOLD = 15.65;
+    const LABEL_DETAIL_ZOOM_THRESHOLD = 15.8;
     const updateLabelDensity = ()=>{
       const zoom = mapGL.getZoom();
       map.classList.toggle("map-labels-thin", zoom < LABEL_ZOOM_THRESHOLD);
