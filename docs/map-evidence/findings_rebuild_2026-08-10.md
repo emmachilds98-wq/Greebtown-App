@@ -522,3 +522,48 @@ location.
 - The child/parent check confirms each overview focal point remains inside its
   existing reviewed court, territory, or landmark form. No geometry, label,
   close venue, facility, gate, parking, or inferred route was added.
+
+## Perimeter camping-shape reset (recorded before geometry work)
+
+- `IMG_3745.webp` shows Downtown Camping as an angular western field with a
+  broad upper wedge and a narrower southern continuation. It must not remain a
+  rounded, isolated blob. `IMG_3746.webp` separately shows West Camping north
+  of that field as an irregular green outer-ground form; the two areas may not
+  merge.
+- `IMG_3751.webp` establishes the compact north Valley Camping form and the
+  long Hilltop eastern field as separate land-use areas. `IMG_3748.webp`
+  establishes the yellow Sunset field along the southern edge as separate from
+  the green `SUNSET HILL` transition above it; Sunset Hill has an area label,
+  not a supported campsite footprint.
+- `IMG_3749.webp` and `IMG_3750.webp` establish East Camping as a long,
+  angular right/perimeter field with a narrow upper connection and a broader
+  southern body, separate from the Lion's Den woodland and the southern road
+  edge. Temple Valley stays its own right/north-east field.
+- `IMG_3747.webp` shows the named Sunset Hill as the broad green transition
+  above the separate yellow Sunset field. It may be rendered as a simple green
+  landscape silhouette without an internal route, camp detail, or new label.
+- The screenshots show many amenity and pitch-like icons, but do not provide
+  stable identities or an authoritative internal circulation layout. This pass
+  therefore replaces every active generic camp pitch, tent, and local lane
+  pattern with empty evidence collections. It changes only outer silhouettes
+  and their matching contours; no campsite route, utility, gate, parking,
+  vendor, or individual pitch may be inferred.
+- The shared festival-ground silhouette may expand only where the revised
+  official campsite edges meet the site perimeter. Its matching outer contour
+  must move with it; no new land use or access edge is implied by that change.
+
+### Perimeter camping-shape reset result
+
+- Replaced the West, Downtown, Valley, Camp at Hilltop, Sunset, East, and
+  Temple Valley field silhouettes and moved every matching contour with its
+  parent. The shared ground now contains the revised west/south/east edges
+  without clipping a reviewed campsite.
+- Replaced the old over-wide yellow Sunset field with a compact southern field
+  and drew Sunset Hill as its separate green transition. The Sunset Hill label
+  remains in that green form and the two land-use shapes do not overlap.
+- Removed all active generic campsite tents, pitch diamonds, local lanes, and
+  camp-only detail routes. The map now presents only the evidence-supported
+  outer field shapes until a source establishes an internal public layout.
+- Containment checks confirm the perimeter fields remain inside the reviewed
+  site, Camp at Hilltop remains within Hilltop, and Sunset is separate from
+  Sunset Hill. No facilities, gates, parking, vendor, or new route was added.
