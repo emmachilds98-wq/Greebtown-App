@@ -11,8 +11,8 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v482";
-const APP_BUILD_TIME = "2026-08-11T22:04:32Z";
+const APP_CACHE_VERSION = "v483";
+const APP_BUILD_TIME = "2026-08-11T22:13:21Z";
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -7534,7 +7534,18 @@ function evidenceRebuildDetailLabels(){
     ["SILVER SWAN TALENT AGENCY", 63, 26, "venue"], ["TOPSY TURVY TWINS", 66, 26, "venue"],
     ["FOGGERS MILL", 68, 27, "venue"], ["VELVET ROPE", 66, 29, "venue"], ["THE HIDE OUT", 63, 28, "venue"],
     ["CAMP AT HILLTOP", ...A.hilltop, "camp", "primary"], ["TEMPLE VALLEY CAMPING", ...A.templeValley, "camp"],
-    ["RECEPTION", 88, 44, "camp"], ["THE RETREAT", 40, 43, "venue"], ["CIRCUS", 39, 44, "venue"]
+    ["RECEPTION", 88, 44, "camp"], ["THE RETREAT", 40, 43, "venue"], ["CIRCUS", 39, 44, "venue"],
+    // Letsbe Avenue frontage chain (IMG_3740) and more Botanica/Metropolis venues
+    ["POSTAL POSSE", 46.5, 21, "venue"], ["LUCK EXCHANGE CASINO", 48.5, 21.4, "venue"],
+    ["HOTEL PARADISO", 49.5, 22.2, "venue"], ["INCONVENIENCE STORE", 45.5, 21.5, "venue"],
+    ["NACHTLICKER", 46.5, 23, "venue"], ["ROSE AND CLOWN", 47.5, 24.5, "stage"],
+    ["SOAPRANOS LAUNDRETTE", 41, 26.5, "venue"], ["BETTER YOU", 26.5, 25.6, "venue"],
+    // Grand Central / Oldtown extras
+    ["DAILY RAG", 57.5, 32.4, "venue"], ["THE COMMON GROUND", 55.6, 31.2, "venue"],
+    // Anara Forest / Hilltop welfare frontage (IMG_3735/3670 east edge)
+    ["REEL NEWS", 81, 39.4, "venue"], ["THE ARC", 82.6, 40.2, "venue"],
+    ["SHARING CIRCLES", 83, 41.2, "venue"], ["WELFARE", 84, 42.2, "venue"],
+    ["REBEL GIRLS CLUB", 52, 42.4, "venue"]
   ];
 }
 
@@ -7569,22 +7580,33 @@ function buildEvidenceOnlyMapGeoJSON(){
   // zoning-line colour, zoning-line width. Zoning colours match the official
   // boundary treatments (Metropolis cyan, Area 404 green, Copperwood gold,
   // Thrutopia blue, Quantum purple, Grand Central orange, Oldtown red, etc.).
+  // Each: name, fill, cx, cy, rx, ry, zoning-colour, zoning-width, [custom ring].
+  // Where the evidence shows a distinctly non-round footprint, an explicit ring
+  // replaces the default blob (shared by fill and its zoning line): Oldtown is
+  // an elongated walled town, Copperwood a clipped gold compound (IMG_3724),
+  // Hilltop a large field, Thrutopia a bounded blue enclosure, Anara a woodland
+  // lobe. The rest stay organic blobs from ring().
   const DISTRICTS = [
     ["Botanica","rgba(47,103,69,.98)",...A.botanica,6,3.2,"rgba(246,232,180,.96)",1.9],
     ["Metropolis","rgba(36,89,62,.98)",...A.metropolis,6,3.2,"rgba(91,223,222,.94)",1.95],
     ["Area 404","rgba(42,96,57,.98)",...A.area404,6.5,3.6,"rgba(150,232,96,.96)",2.1],
-    ["Copperwood Heights","rgba(55,104,73,.98)",...A.copperwood,6,3.2,"rgba(250,214,83,.96)",2.1],
+    ["Copperwood Heights","rgba(55,104,73,.98)",...A.copperwood,6,3.2,"rgba(250,214,83,.96)",2.1,
+      [[61,26.4],[64,25.4],[67.5,26],[70,27.6],[68.5,29],[69.5,30.4],[66,31],[63.5,30.4],[61.4,29],[60.6,27.4]]],
     ["Grand Central","rgba(54,78,54,.98)",...A.grandCentral,4.6,2.6,"rgba(241,122,74,.95)",2],
-    ["Oldtown","rgba(47,72,50,.98)",...A.oldtown,5,3,"rgba(214,87,67,.94)",2.2],
-    ["Thrutopia","rgba(57,105,78,.98)",...A.thrutopia,5,2.8,"rgba(105,112,232,.96)",2.15],
-    ["Anara Forest","rgba(29,70,47,.98)",...A.anara,6,3.4,"rgba(112,224,144,.92)",1.7],
+    ["Oldtown","rgba(47,72,50,.98)",...A.oldtown,5,3,"rgba(214,87,67,.94)",2.2,
+      [[46.5,30],[48.5,29.4],[51,30.2],[51.8,32],[51.4,34],[51.8,36],[49.5,36.6],[47,36],[46.2,34],[46,31.8]]],
+    ["Thrutopia","rgba(57,105,78,.98)",...A.thrutopia,5,2.8,"rgba(105,112,232,.96)",2.15,
+      [[63.4,32],[66,31.2],[69.5,31.8],[71.6,33.4],[70.6,35.4],[68,36.6],[65,36],[63.2,34.4]]],
+    ["Anara Forest","rgba(29,70,47,.98)",...A.anara,6,3.4,"rgba(112,224,144,.92)",1.7,
+      [[75,36],[78.5,35],[82.5,36.4],[84.4,38.6],[83,41],[79.5,42],[76,41],[74.2,38.8]]],
     ["Tribe of Frog grounds","rgba(50,104,67,.98)",...A.tribe,4.6,2.6,"rgba(120,150,96,.8)",1.6],
     ["Quantum","rgba(43,82,55,.98)",...A.quantum,5,3,"rgba(214,137,234,.94)",2],
     ["The Lion's Den","rgba(40,69,47,.98)",...A.lionsDen,4.6,2.6,"rgba(240,166,95,.94)",1.9],
-    ["Hilltop","rgba(150,140,49,.9)",...A.hilltop,8,4.6,"rgba(231,205,84,.9)",1.6],
+    ["Hilltop","rgba(150,140,49,.9)",...A.hilltop,8,4.6,"rgba(231,205,84,.9)",1.6,
+      [[49,36],[56,35.2],[63,36],[65,38.5],[64.5,42],[62,44.6],[56,45.4],[50,44.6],[47.6,42],[47.6,38.5]]],
     ["Sunset Hill","rgba(58,113,66,.96)",...A.sunsetHill,5,3,"rgba(124,190,109,.9)",1.6]
   ];
-  const districtRings = DISTRICTS.map(d=>({ d, r: ring(d[2], d[3], d[4], d[5], d[0]==="Hilltop"?0.06:0.12, d[2]*0.5) }));
+  const districtRings = DISTRICTS.map(d=>({ d, r: d[8] || ring(d[2], d[3], d[4], d[5], d[0]==="Hilltop"?0.06:0.12, d[2]*0.5) }));
 
   // Evidence scene: a compact north-up plan matching IMG_3670 — the district
   // band across the middle (Metropolis/Botanica west, Copperwood/Grand
