@@ -173,3 +173,10 @@ location.
   follows that hierarchy while retaining the already-reviewed yellow
   Copperwood/Hilltop, blue Thrutopia, pink camping, and purple Quantum fields.
   No territory, label, path, court, or camp geometry changed in this pass.
+- Backbone correction: `IMG_3726.webp` and `IMG_3729.webp` show Hilltop as a
+  long north-to-south field running from the Thrutopia/Oldtown corridor toward
+  Quantum and the Lion's Den. Its parent territory and matching contour now
+  retain that longer eastern silhouette. The Site overview action also has its
+  own six source-backed anchors (Copperwood, Thrutopia, Grand Central,
+  Oldtown, Hilltop, and the Lion's Den), rather than hiding every active label
+  at overview zoom. No new venue, utility, camp, or route was added.
