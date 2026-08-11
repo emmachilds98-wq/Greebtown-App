@@ -130,6 +130,13 @@ distinct pale clearing, and Tribe of Frog is contained in Sunset Hill woodland
 with a visible gap from Area 404 and Quantum. The repaired overview-halo layer
 also completes rendering instead of aborting MapLibre layer installation.
 
+**Proportional scale correction — complete:** the cited outer fields have
+been resized as a single overview composition: Downtown has its wide wedge and
+lower body, Sunset spans the southern edge, Hilltop reads as a long eastern
+field, and East reads as a tall articulated right-side field. The executable
+proportions audit now blocks a later edit from splitting a field from its own
+outline or reintroducing a documented boundary overlap.
+
 The first of these batches is complete. It is a connected western-core pass
 rather than a single-landmark tweak: parent silhouettes, the documented
 horseshoe, key landmark forms, and their display zoom were reviewed together.

@@ -50,6 +50,14 @@ Sunset as its own southern yellow field, while `IMG_3749.webp` and
 these as land-use boundaries first; do not infer their inner stalls, gates,
 parking, or facilities from the overview.
 
+At overview scale, preserve the relative massing shown in those images: West
+is the broad upper field; Downtown is a wide upper wedge with a lower body;
+Sunset spans the southern edge; and East is a tall right-edge field with a
+narrow upper connection and wider lower body. `IMG_3751.webp` keeps Valley
+substantial but north of the compact town and Camp at Hilltop long and eastern.
+Do not shrink these parents to make room for labels or bring any two reviewed
+grounds together; adjust label anchors independently instead.
+
 `IMG_3739.webp` and `IMG_3744.webp` show the western woodland as a connected
 outer belt around the town. `IMG_3740.webp`, `IMG_3742.webp`, and
 `IMG_3743.webp` are the current references for Botanica, Metropolis, and Area
@@ -130,5 +138,7 @@ through a historic marker collection or a central-camera crop.
 
 Run `node scripts/map-preflight.mjs` for every map change. It includes
 `scripts/assert-evidence-map-boundary.mjs`, which fails if a legacy geometry,
-MapLibre source, or marker producer becomes active again. Then compare a fresh
-entry view and a close view with the cited official material before merge.
+MapLibre source, or marker producer becomes active again, and
+`scripts/audit-evidence-map-proportions.mjs`, which protects the reviewed camp
+outlines and separations. Then compare a fresh entry view and a close view with
+the cited official material before merge.

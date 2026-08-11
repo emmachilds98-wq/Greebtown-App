@@ -628,3 +628,46 @@ location.
   and no new console error. The containment review confirms that every camp
   stays inside the revised site, Hidden Woods is separate from West Camping,
   and Tribe is separate from Area 404 and Quantum.
+
+## Whole-site proportional scale correction (recorded before geometry work)
+
+- `IMG_3745.webp` and `IMG_3746.webp` show that the western camping side is
+  not made of small, equal islands. West Camping is a broad upper ground, while
+  Downtown Camping has a wide northern wedge, a pinched middle by the town
+  approach, and a substantial southern body. The two remain separate land-use
+  fields.
+- `IMG_3748.webp` is decisive for the southern scale: Sunset is a long yellow
+  field along the reviewed southern edge, visibly much wider than the nearby
+  Tribe of Frog clearing or Sunset Hill transition. It must not be represented
+  as a small isolated patch at the lower left.
+- `IMG_3749.webp` and `IMG_3750.webp` show East Camping as a tall, articulated
+  right-edge field: a narrow northern neck joins a much broader southern body.
+  It is set east of the Lion's Den woodland and above the southern Sunset edge,
+  rather than collapsing into either one.
+- `IMG_3751.webp` keeps Valley Camping as a broad northern field and Camp at
+  Hilltop as a long, narrow eastern field. These outer forms must be visibly
+  larger than the dense town courts at the opening overview, while Grand
+  Central/Oldtown remain the compact focal cluster.
+
+### Scope for this pass
+
+- Resize the cited outer parent silhouettes, their matching contour rings, the
+  shared festival-ground edge where needed, and their overview anchors as one
+  proportional composition. Keep the established town, Hidden Woods,
+  Tribe/Quantum, and Lion's Den relationships intact.
+- Do not add or infer campsite pitches, tents, roads, facilities, gates,
+  parking, stalls, utilities, or new named places. The source supports field
+  massing and edge shape only.
+
+### Whole-site proportional scale correction result
+
+- Re-sized West, Downtown, Valley, Camp at Hilltop, Sunset, and East as one
+  overview composition. The now-wide Sunset band, the two-part Downtown field,
+  the tall Hilltop field, and the articulated East field make the outer grounds
+  visually larger than the compact town courts, as in the cited sources.
+- Kept all matching camp outlines on the exact same ring as their active field
+  fill. The only inset is Hilltop's reviewed inner field outline.
+- Added an executable proportions audit. It fails if a camp fill drifts from
+  its outline or if the reviewed West/Hidden Woods, Downtown/Area 404,
+  Valley/Anara, Hilltop/Lion's Den, Sunset/Quantum, Sunset/East, or
+  East/Lion's Den separations are reintroduced.

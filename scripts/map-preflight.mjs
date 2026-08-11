@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const steps = [
   ["scripts/assert-evidence-map-boundary.mjs"],
+  ["scripts/audit-evidence-map-proportions.mjs"],
   ["--check", "js/app.js"],
   ["--check", "service-worker.js"]
 ];
