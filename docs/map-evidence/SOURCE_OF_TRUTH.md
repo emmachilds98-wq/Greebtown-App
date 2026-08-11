@@ -92,6 +92,13 @@ Temple Valley Camping remains a separate lower/south-eastern field: the image
 does not establish a public connection into it or any further Anara venue,
 facility, gate, stall, or woodland path.
 
+`IMG_3747.webp` establishes a pale Tribe of Frog clearing with a compact
+purple/dark stage form, then green Quantum terrain framed by a purple boundary
+treatment. `IMG_3748.webp` establishes dark woodland at the Lion's Den around
+its compact warm stage/apron and glow. These views permit correcting those
+ground and landmark forms only: their utility icons, nearby blocks and access
+features must not be copied into the evidence map.
+
 The evidence map's stylesheet is also a runtime asset. Its URL must be
 versioned with each release and CSS must remain network-first in the service
 worker; otherwise a current map script can retain a stale visual treatment or
