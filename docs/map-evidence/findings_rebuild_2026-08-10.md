@@ -212,3 +212,9 @@ location.
   Valley Camping field. The renderer adds only these observed forms and the
   short clearing approach; it does not add unnamed facilities, gates, or a
   speculative route deeper into Anara.
+- Oldtown spine refinement: `IMG_3737.webp` shows Grand Central's short teal
+  transition and fork into the town, followed by Oldtown's two separate,
+  winding red-edged north-to-south venue lanes and one small linking loop.
+  The active close view now gives these documented circulation types their own
+  solid route treatment and reinforces their containing outlines. It does not
+  add or relocate individual stalls, facilities, gates, parking, or labels.
