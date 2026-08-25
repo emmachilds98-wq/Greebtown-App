@@ -917,3 +917,32 @@
      inside a full-height sheet, where the zoom-and-shift is most visible. */
   .chat-input-row input{flex:1; font-size:16px;}
   .chat-input-row button{flex-shrink:0;}
+
+/* ===============================================================
+   MEMORY MODE (Boomtown 2026 over) — set by js/app.js adding the
+   .memory-mode class to <html>. Hides the "like/save" star and the
+   "invite / heart" buttons on artist cards, the timeline and invite
+   cards, leaving only the "✓ I saw this" marker. Also hides the chat
+   composer since chat is now a read-only archive. Reverting for 2027 is
+   just flipping MEMORY_MODE back to false — these rules then no-op.
+   =============================================================== */
+.memory-mode .star-btn,
+.memory-mode .invite-heart-btn,
+.memory-mode [data-invite-action="heart"],
+.memory-mode .chat-input-row{ display:none !important; }
+/* Sync is switched off in memory mode, so hide the controls that would try to
+   push/pull or hand data between devices (the name picker is left alone — it's
+   just local identity for showing "your" saved plan). */
+.memory-mode #cloudSyncBtn,
+.memory-mode #copySyncCodeBtn,
+.memory-mode #mergeSyncCodeBtn,
+.memory-mode #syncDiagnosticsBtn,
+.memory-mode #cloudSyncStatusNote,
+.memory-mode #homeSyncStatus{ display:none !important; }
+/* Trim the lineup/plan legends to the interactions that still exist: the
+   Like (☆), Must-see (★) and Invite (🤍) keys and the "tap to save" hint are
+   gone in memory mode, leaving Seen (✓) and the Timeline/time key. */
+.memory-mode .lineup-key span:nth-child(1),
+.memory-mode .lineup-key span:nth-child(2),
+.memory-mode .lineup-key span:nth-child(4),
+.memory-mode #planStarSeenLegend{ display:none !important; }
