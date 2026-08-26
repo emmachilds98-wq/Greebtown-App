@@ -11,8 +11,27 @@
 // "Updated" text is rendered from APP_BUILD_TIME below, in the viewer's
 // own local time, so it's never a stale/guessed hand-typed string.
 // ===============================
-const APP_CACHE_VERSION = "v483";
-const APP_BUILD_TIME = "2026-08-11T22:13:21Z";
+const APP_CACHE_VERSION = "v484";
+const APP_BUILD_TIME = "2026-08-25T19:59:08Z";
+
+// ===============================
+// MEMORY MODE — Boomtown 2026 (Chapter Five) is over. The app is now a
+// frozen keepsake until it's updated for 2027: cloud sync is fully off
+// (no push, no pull), so nothing a phone stores can be changed by another
+// device and no new input is broadcast, and the live illustrated map is
+// retired. Everything already saved on a phone (plan, "I saw this" ticks,
+// chat history) stays visible; "I saw this" can still be toggled locally,
+// it just no longer syncs.
+//
+// Declared at the very top, above every load-time caller (autoSyncNow("on
+// open") and pushToCloud() are both reachable from load-time code further
+// down), per the TDZ rule in CLAUDE.md — a plain boolean literal with no
+// dependencies, so it is safe to read from anywhere below.
+//
+// To wake the app back up for 2027: set MEMORY_MODE = false (and repoint
+// FESTIVAL_GATES_OPEN / the schedule data).
+const MEMORY_MODE = true;
+try { document.documentElement.classList.toggle("memory-mode", MEMORY_MODE); } catch (e) {}
 
 // Loaded by map-system/data/map-data.js before this script. Map data is
 // authored in map-system/data/map-document.json and compiled into that
@@ -921,7 +940,10 @@ notesBox.oninput = ()=> Store.set("notes", notesBox.value);
 // 12:00 BST. Declared up here (not down with FESTIVAL_START near
 // TODAY/FESTIVAL MODE) since updateCountdown() runs at load time, at
 // the bottom of this same block — see the TDZ rule in CLAUDE.md.
-const FESTIVAL_GATES_OPEN = new Date("2026-08-12T11:00:00Z"); // 12:00 BST, Wed 12 Aug 2026
+// Boomtown 2026 (Chapter Five) is over; the countdown now points at
+// Boomtown 2027, 11-15 August 2027, Hampshire (gates Wed 11 Aug, 12:00 BST).
+// 11:00 UTC = 12:00 BST. Update this when the 2027 dates are firmed up.
+const FESTIVAL_GATES_OPEN = new Date("2027-08-11T11:00:00Z"); // 12:00 BST, Wed 11 Aug 2027
 function updateCountdown(){
   const el = document.getElementById("countdownText");
   const card = document.getElementById("countdownCard");
@@ -953,7 +975,7 @@ function updateCountdown(){
   const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
   const mins = Math.floor((diff % 3600000) / 60000);
-  el.innerHTML = `<span style="font-size:22px; font-weight:700; color:var(--accent-amber);">${days}d ${hours}h ${mins}m</span><br>until gates open (Wed 12 Aug, 12:00 UK time)`;
+  el.innerHTML = `<span style="font-size:22px; font-weight:700; color:var(--accent-amber);">${days}d ${hours}h ${mins}m</span><br>until Boomtown 2027 gates open (Wed 11 Aug, 12:00 UK time)`;
 }
 updateCountdown();
 setInterval(updateCountdown, 60000);
@@ -10074,6 +10096,19 @@ function installEvidenceSceneLayers(map, geo){
 }
 
 function loadMap(){
+  // Festival over (MEMORY_MODE): the live illustrated map is retired. The rest
+  // of the Map page (directory, GPS, gate/food info, meeting point) is left in
+  // place; only the map image itself is replaced with a short keepsake note.
+  // No MapLibre instance is created, so it costs nothing on every tab visit.
+  if(MEMORY_MODE){
+    const host = document.getElementById("map");
+    if(host && !host.dataset.memoryNote){
+      host.dataset.memoryNote = "1";
+      host.style.minHeight = "0";
+      host.innerHTML = '<div class="empty-note" style="padding:22px 16px; text-align:center; line-height:1.5;">🗺️ The live festival map has been retired now Boomtown 2026 (Chapter Five) is over.<br>The venue directory, GPS and site info below are still here as a memory.</div>';
+    }
+    return;
+  }
   // Rebuild this map data on each call: later calls reuse the MapLibre
   // instance but still rebuild the road-name markers below.
   const geo = buildMapGeoJSON();
@@ -14067,6 +14102,7 @@ function renderRecentActivity(containerId, limit){
 }
 
 async function pushToCloud(){
+  if(MEMORY_MODE) return; // festival over: never write to the cloud
   const db = getFirestoreDb();
   const room = currentRoomCode();
   const name = currentContributorName();
@@ -14288,6 +14324,7 @@ function mergeOwnCloudCopy(payload){
 }
 
 async function pullFromCloud(){
+  if(MEMORY_MODE) return { stats: null, count: 0 }; // festival over: never read remote changes into this phone
   const db = getFirestoreDb();
   const room = currentRoomCode();
   if(!db || !room) return { stats: null, count: 0 };
@@ -14780,6 +14817,7 @@ if(takeBackupNowBtn) takeBackupNowBtn.onclick = async ()=>{
 const AUTO_SYNC_INTERVAL_MS = 2 * 60 * 1000;
 let _lastAutoSyncAttempt = 0;
 function autoSyncNow(trigger){
+  if(MEMORY_MODE) return Promise.resolve(); // festival over: never pull or push
   if(!currentRoomCode()) return Promise.resolve();
   if(!getFirestoreDb()) return Promise.resolve();
   _lastAutoSyncAttempt = Date.now();
@@ -14826,8 +14864,15 @@ function autoSyncNow(trigger){
     }
   });
 }
-autoSyncNow("on open");
-setInterval(()=> autoSyncNow("periodic"), AUTO_SYNC_INTERVAL_MS);
+// Festival over (MEMORY_MODE): skip the on-open pull and the periodic sync
+// timer entirely. autoSyncNow is a no-op now anyway, but there's no reason to
+// keep a 3-minute timer running. The visibilitychange handler below is left
+// in place because it also drives the "update available" pill's stale-copy
+// check; its autoSyncNow call is a harmless no-op.
+if(!MEMORY_MODE){
+  autoSyncNow("on open");
+  setInterval(()=> autoSyncNow("periodic"), AUTO_SYNC_INTERVAL_MS);
+}
 document.addEventListener("visibilitychange", ()=>{
   // Guard against firing right on top of the interval or another
   // just-happened attempt (e.g. rapid tab switching) — only worth a
@@ -15048,6 +15093,9 @@ function markThreadRead(thread){
 }
 
 async function sendChatMessage(thread, text){
+  // Festival over (MEMORY_MODE): chat is a read-only archive — existing
+  // history still shows, but no new messages can be posted from any phone.
+  if(MEMORY_MODE) throw new Error("Boomtown 2026 is over — chat is now a read-only memory.");
   const trimmed = (text || "").trim();
   if(!trimmed) return;
   const db = getFirestoreDb();

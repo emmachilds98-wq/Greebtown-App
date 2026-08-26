@@ -135,12 +135,24 @@
     <h2 style="margin-bottom:14px;">Our Greebtown</h2>
 
     <div class="card" id="countdownCard">
-      <div id="countdownText" class="empty-note"><span style="font-size:22px; font-weight:700; color:var(--accent-amber);">19d 6h 9m</span><br>until gates open (Wed 12 Aug, 12:00 UK time)</div>
+      <div id="countdownText" class="empty-note"><span style="font-size:22px; font-weight:700; color:var(--accent-amber);">—</span><br>until Boomtown 2027 gates open (Wed 11 Aug, 12:00 UK time)</div>
     </div>
 
     <div class="ticket" id="nextEventCard" style="display:none;">
       <h3>Next saved event</h3>
       <div id="next-event">Nothing saved yet</div>
+    </div>
+
+    <div class="card" id="boomtown2027Card">
+      <span class="tag">Save the date</span>
+      <h3>🎪 Boomtown 2027</h3>
+      <p class="empty-note" style="margin-bottom:6px;">Chapter Six returns to the Matterley Estate, Hampshire.</p>
+      <ul class="compact-list" style="padding-left:20px; margin-top:0;">
+        <li><strong>Dates:</strong> Wednesday 11 – Sunday 15 August 2027</li>
+        <li><strong>Where:</strong> Matterley Estate, Winchester, Hampshire</li>
+        <li>🎟️ We've already got our tickets — see you there.</li>
+      </ul>
+      <p class="empty-note" style="margin-top:6px; font-size:12px; opacity:.75;">This app is now a keepsake of Boomtown 2026. It'll be updated with the full 2027 timetable and details closer to the time.</p>
     </div>
 
     <div class="card" id="homeSyncStatus"></div>
@@ -151,12 +163,12 @@
 
     <div class="card">
       <h3>What's in here</h3>
-      <p class="empty-note" style="margin-bottom:2px;">Everything for the weekend, synced across the group with no accounts or logins. Tap any section below to jump straight there.</p>
+      <p class="empty-note" style="margin-bottom:2px;">Our whole Boomtown 2026 weekend, kept as a memory. Live syncing is switched off now the festival's over, but everything you saved is still here. Tap any section below to jump straight there.</p>
       <ul class="compact-list" style="padding-left:20px;">
         <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('today')">☀️ Today</a> — a live day-of dashboard: what's on now/next from your Plan, the group's status, latest decisions and the meeting point, all in one glance.</li>
         <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('artists')">🎵 Lineup</a> — search or browse the full 5-day timetable, filter by day or genre, see a stage-by-stage timeline, and save acts straight to your Plan.</li>
         <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('plan')">⭐ Plan</a> — your own saved timetable: a day-by-day list, a Clashes view, a visual Timeline, and Compare to see everyone's picks side by side.</li>
-        <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('mapscreen')">🗺 Map</a> — the schematic site map, the full hidden-venue directory, GPS, gate &amp; food info, and your group's shared meeting point.</li>
+        <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('mapscreen')">🗺 Map</a> — the live site map has been retired now the festival's over, but the hidden-venue directory, GPS and gate &amp; food info are still here.</li>
         <li><a class="inline-link" href="javascript:void(0)" onclick="jumpToTab('discover')">✨ Discover</a> — the story so far, districts &amp; characters, bingo, your character, the quotebook, theories, packing checklist and glossary.</li>
         <li><a class="inline-link" href="javascript:void(0)" onclick="if(typeof openChatPanel==='function') openChatPanel();">💬 Chat</a> — group and 1:1 messages with whoever's synced in, from the icon top-right on any screen.</li>
         <li><a class="inline-link" href="javascript:void(0)" onclick="if(typeof openSettingsScreen==='function') openSettingsScreen();">⚙️ Settings</a> — sync, merge duplicates, backups, location &amp; GPS and notifications, from the cog icon top-right under Chat.</li>
@@ -1139,6 +1151,6 @@ Talk to an actor in character
 <!-- Versioned URLs prevent an older installed service worker from pairing a
      stale map-data payload with the current application script. -->
 <script src="map-system/data/map-data.js?v=v478"></script>
-<script src="js/app.js?v=v483"></script>
+<script src="js/app.js?v=v484"></script>
 <script src="js/pwa-register.js"></script>
 </body></html>
