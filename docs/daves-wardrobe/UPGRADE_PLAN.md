@@ -6,7 +6,7 @@ it, so the page and its data can be used or rebuilt outside Claude.
 
 | File | What it is |
 |---|---|
-| `page.html` | The page source as published (version 7, 5 Oct 2026). |
+| `page.html` | The page source as published (version 8, 5 Oct 2026). |
 | `data/items.json` | All 794 picks, keyed by id, as stored in the artifact's `items` collection. |
 | `data/outfits.json` | All 110 outfits from the `outfits` collection. |
 | `tools/fetch_photos.py` | Downloads listing photos and packs them for the page (step 2 below). |
@@ -90,6 +90,26 @@ people using the page.
 - **5 more outfits:** Black bomber, white tee; Made in England; Cold festival queue; Warehouse
   night under £100; Chucks and black denim.
 - Totals: **794 picks, 110 outfits, 74 shops with picks.**
+
+## 2c. Photos (5 Oct 2026, evening)
+
+- Network access was opened, and `fetch_photos.py --browser` ran over every pick.
+- **483 of 794 picks now show the shop's own listing photo** (version 8 of the page, two packs
+  of about 3.9 MB in total, roughly 8 KB per photo).
+  - Every Uniqlo pick has a photo, and 118 of 120 from M&S.
+  - The photos also show as thumbnails in outfits, the builder, the shortlist, "This week" and
+    "One piece, many outfits".
+- **Still drawings:**
+  - ASOS (195 picks): it stalls every connection from cloud servers.
+  - Pre-owned searches: they have no single photo.
+  - Picks linking to brand or category pages (most M and M Direct ones).
+  - Shops that block even a headless browser: Arket, COS, Zara (mostly), Next, Joules,
+    The North Face, Converse, Decathlon, Adidas, Office, Zalando, H&M, Hawes & Curtis,
+    John Lewis and a few others.
+- 42 photos that several picks shared were dropped, because a shared photo is a shop logo or
+  banner rather than the product.
+- To fill the gaps, run the tool from a home computer: shops rarely block home broadband the way
+  they block cloud servers. Then republish the packs.
 
 ## 3. Next steps
 

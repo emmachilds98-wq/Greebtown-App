@@ -331,6 +331,10 @@ details.fold > summary small{font-family:var(--f-text);font-size:.82rem;color:va
 .lrow.has-th{grid-template-columns:40px minmax(0,1fr) auto}
 .lrow.has-th .acts{grid-column:2/-1}
 .stale{color:var(--tan)}
+.cut-row.has-th{grid-template-columns:3.4rem 44px minmax(0,1fr) auto}
+.mix-head .mixph{width:min(100%,220px);aspect-ratio:4/3}
+.mix-head .mixph svg{padding:12px 20%}
+@media (max-width:560px){.cut-row.has-th{grid-template-columns:3.1rem 44px minmax(0,1fr)}.cut-row.has-th .cut-price{grid-column:3}}
 .pdrop{color:var(--claret);font-weight:600}
 #results.compact .grid{grid-template-columns:repeat(auto-fill,minmax(min(46%,160px),1fr));gap:10px}
 #results.compact .card{padding:10px 11px 10px;gap:5px}
@@ -1389,7 +1393,7 @@ function renderMix(){
   list.forEach(function(u){u.f.styles.forEach(function(s){styles[s]=1;});});
   var ns=Object.keys(styles).length,ord={};STYLE.forEach(function(s,i){ord[s[0]]=i;});
   list=list.slice().sort(function(a,b){return ord[a.f.styles[0]]-ord[b.f.styles[0]]||a.f.rank-b.f.rank;});
-  $("mix-body").innerHTML='<div class="mix-head"><div><span class="label">'+esc(it.shop)+'</span><h3>'+esc(it.name)+'</h3></div>'+
+  $("mix-body").innerHTML='<div class="mix-head">'+photoBox(it,"mixph",false)+'<div><span class="label">'+esc(it.shop)+'</span><h3>'+esc(it.name)+'</h3></div>'+
     '<p>Worn '+list.length+' ways across '+ns+(ns===1?" style":" styles")+'. '+money(c)+(pct(it)>0?", down from "+money(it.was):"")+', which is about '+money(Math.round(c/list.length*100)/100)+' an outfit. '+
     (it.insize===true?esc(it.sizes)+". ":(it.insize===false?"His size is sold out at the moment. ":""))+'The piece is shown in full colour and the rest of each outfit is faded.</p>'+
     '<div class="fit-acts"><a class="buy" href="'+esc(it.url)+'" target="_blank" rel="noopener">View at '+esc(it.shop)+' <span aria-hidden="true">↗</span></a>'+saveBtn("i_"+it.id)+'</div></div>'+
@@ -1567,7 +1571,7 @@ function renderWeek(){
     (top.length?"The best reductions among them, leaving out anything sold out in his size. ":"")+(fresh.length?'<button class="linkbtn" type="button" data-week-new>See everything new</button>':"");
   $("week-list").innerHTML=top.map(function(it){
     var p=pct(it);
-    return '<a class="cut-row" href="'+esc(it.url)+'" target="_blank" rel="noopener"><span class="cut-pct">'+(p>0?p+"%":"↓")+'</span>'+
+    return '<a class="cut-row has-th" href="'+esc(it.url)+'" target="_blank" rel="noopener"><span class="cut-pct">'+(p>0?p+"%":"↓")+'</span>'+(photoBox(it,"thumb",false)||'<span></span>')+
       '<span><span class="cut-name">'+esc(it.name)+'<span class="wk-tag">'+(isDrop(it)?"Price drop":"New")+'</span></span><span class="cut-shop">'+esc(it.shop)+" · "+esc(it.style.map(function(s){return label(STYLE,s);}).slice(0,2).join(", "))+(it.insize===true?" · in his size":"")+'</span></span>'+
       '<span class="cut-price"><b>'+money(it.price)+'</b><s>'+money(isDrop(it)&&!(it.was>it.price)?it.prev:it.was)+'</s></span></a>';
   }).join("");
