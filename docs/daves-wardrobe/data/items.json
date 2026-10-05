@@ -4549,6 +4549,33 @@
    "warm"
   ]
  },
+ "cv-chuck70": {
+  "name": "Converse Chuck 70 high tops, black",
+  "shop": "Converse",
+  "cat": "shoe",
+  "kind": "new",
+  "price": 58.99,
+  "url": "https://www.converse.com/uk/en/products/men/mens-collections/mens-chuck-70",
+  "checked": "2026-09-20",
+  "added": "2026-10-05",
+  "style": [
+   "street",
+   "casual",
+   "rave"
+  ],
+  "occ": [
+   "everyday",
+   "party"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ],
+  "note": "Thicker canvas and more cushioning than the standard All Star. The link opens the Chuck 70 range; pick the black high top. From £58.99 depending on colour.",
+  "rank": 290,
+  "sets": [],
+  "was": 90
+ },
  "cw-belmar": {
   "cat": "coat",
   "checked": "2026-10-05",
@@ -4726,6 +4753,31 @@
   "note": "Over 2,800 reviews. Warm, plain grey, and cheap enough to keep one in the car.",
   "rank": 180,
   "sets": []
+ },
+ "end-ymc-waffle": {
+  "name": "YMC Almost Grown waffle sweatshirt, off white",
+  "shop": "END.",
+  "cat": "knit",
+  "kind": "new",
+  "price": 81,
+  "url": "https://www.endclothing.com/gb/ymc-almost-grown-waffle-sweatshirt-p7yma-10.html",
+  "checked": "2026-05-31",
+  "added": "2026-10-05",
+  "style": [
+   "minimal",
+   "casual"
+  ],
+  "occ": [
+   "everyday"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ],
+  "note": "Waffle texture in off white, 40% off. One textured piece against plain trousers.",
+  "rank": 500,
+  "sets": [],
+  "was": 135
  },
  "fa-boxworth": {
   "cat": "shirt",
@@ -5124,6 +5176,31 @@
    "winter"
   ],
   "was": 55
+ },
+ "fl-nb740": {
+  "name": "New Balance 740, brown and green",
+  "shop": "Foot Locker",
+  "cat": "shoe",
+  "kind": "new",
+  "price": 60,
+  "url": "https://www.footlocker.co.uk/en/product/new-balance-740-men-shoes/314209948604.html",
+  "checked": "2026-08-09",
+  "added": "2026-10-05",
+  "style": [
+   "street",
+   "casual"
+  ],
+  "occ": [
+   "everyday"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ],
+  "note": "Chunky 2000s runner, £39 off at the last check. Earthy colours that go with olive and stone.",
+  "rank": 300,
+  "sets": [],
+  "was": 99.99
  },
  "ga-check-shacket": {
   "name": "George micro-check shacket, brown",
@@ -10471,6 +10548,33 @@
    "mild"
   ]
  },
+ "mw-seasons": {
+  "name": "Mountain Warehouse Seasons padded jacket",
+  "shop": "Mountain Warehouse",
+  "cat": "coat",
+  "kind": "new",
+  "price": 39.99,
+  "url": "https://www.mountainwarehouse.com/p/053054/mw/seasons-mens-padded-jacket",
+  "checked": "2026-10-03",
+  "added": "2026-10-05",
+  "style": [
+   "outdoor",
+   "casual"
+  ],
+  "occ": [
+   "everyday"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ],
+  "note": "Light, water-resistant padded jacket that rolls into its hood. A review on 3 October saw it at £39.99 in the sale.",
+  "rank": 105,
+  "sets": [
+   "winter"
+  ],
+  "was": 79.99
+ },
  "next-epsom": {
   "cat": "coat",
   "checked": "2026-10-05",
@@ -10495,6 +10599,31 @@
   "wx": [
    "cold"
   ]
+ },
+ "nx-heavy-tee": {
+  "name": "Next relaxed fit heavyweight T-shirt, white",
+  "shop": "Next",
+  "cat": "polo",
+  "kind": "new",
+  "price": 16,
+  "url": "https://www.next.co.uk/style/st958848/m75036",
+  "checked": "2026-07-12",
+  "added": "2026-10-05",
+  "style": [
+   "casual",
+   "street",
+   "minimal"
+  ],
+  "occ": [
+   "everyday"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ],
+  "note": "Heavyweight cotton, relaxed fit. Also sold in a 5-pack for £75.",
+  "rank": 280,
+  "sets": []
  },
  "of-vans-oldskool": {
   "name": "Vans Old Skool trainers, black and white",
@@ -10930,6 +11059,33 @@
    "mild",
    "cold"
   ]
+ },
+ "pe-ford-navy": {
+  "name": "Peregrine Ford merino crew jumper, navy",
+  "shop": "Peregrine",
+  "cat": "knit",
+  "kind": "new",
+  "price": 110,
+  "url": "https://peregrineclothing.co.uk/products/ford-crew?colour=Navy",
+  "checked": "2026-05-20",
+  "added": "2026-10-05",
+  "style": [
+   "quiet"
+  ],
+  "occ": [
+   "everyday",
+   "smart"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ],
+  "note": "Knitted in Peregrine's own Manchester factory from merino. A jumper to keep for ten years. Also in olive, oatmeal and wheat.",
+  "rank": 260,
+  "sets": [
+   "winter"
+  ],
+  "gift": true
  },
  "po-arket": {
   "cat": "knit",
@@ -14455,6 +14611,32 @@
    "warm"
   ]
  },
+ "sd-firetrap-wind": {
+  "name": "Firetrap hooded windbreaker",
+  "shop": "Sports Direct",
+  "cat": "coat",
+  "kind": "new",
+  "price": 11,
+  "url": "https://www.sportsdirect.com/firetrap-mens-windproof-hooded-long-sleeve-windbreaker-601376#colcode=60137601",
+  "checked": "2026-06-20",
+  "added": "2026-10-05",
+  "style": [
+   "rave",
+   "outdoor"
+  ],
+  "occ": [
+   "party",
+   "everyday"
+  ],
+  "wx": [
+   "mild",
+   "wet"
+  ],
+  "note": "An £11 layer to tie round the waist at a festival or warehouse night. You won't mind losing it.",
+  "rank": 190,
+  "sets": [],
+  "was": 54.99
+ },
  "sd-harrington": {
   "cat": "coat",
   "checked": "2026-10-05",
@@ -17409,6 +17591,57 @@
   "wx": [
    "mild"
   ]
+ },
+ "tnf-glacier": {
+  "name": "The North Face Glacier fleece",
+  "shop": "The North Face",
+  "cat": "knit",
+  "kind": "new",
+  "price": 48,
+  "url": "https://www.thenorthface.com/en-gb/p/men-211701/men-s-glacier-fleece-NF0A8D0R?color=8K2",
+  "checked": "2026-07-24",
+  "added": "2026-10-05",
+  "style": [
+   "outdoor",
+   "street"
+  ],
+  "occ": [
+   "everyday"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ],
+  "note": "Light full-zip fleece. £48 in some colours, up to £80 in others.",
+  "rank": 270,
+  "sets": [],
+  "was": 80
+ },
+ "tnf-yumiori-qz": {
+  "name": "The North Face Yumiori quarter-zip fleece",
+  "shop": "The North Face",
+  "cat": "knit",
+  "kind": "new",
+  "price": 56,
+  "url": "https://www.thenorthface.com/en-gb/p/men-211701/men-s-yumiori-1-4-zip-fleece-jacket-NF0A883S?color=M0F",
+  "checked": "2026-06-19",
+  "added": "2026-10-05",
+  "style": [
+   "outdoor",
+   "casual",
+   "street"
+  ],
+  "occ": [
+   "everyday"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ],
+  "note": "Soft quarter-zip fleece that looks fine in town. From £56 depending on colour.",
+  "rank": 350,
+  "sets": [],
+  "was": 80
  },
  "tp-cherhill": {
   "cat": "trouser",
@@ -20904,6 +21137,104 @@
   "rank": 430,
   "sets": [],
   "gift": true
+ },
+ "za-heavy-tee": {
+  "name": "Zara basic heavyweight T-shirt, white",
+  "shop": "Zara",
+  "cat": "polo",
+  "kind": "new",
+  "price": 17.99,
+  "url": "https://www.zara.com/uk/en/basic-heavyweight-t-shirt--03-p01887410.html",
+  "checked": "2026-09-05",
+  "added": "2026-10-05",
+  "style": [
+   "minimal",
+   "street",
+   "casual"
+  ],
+  "occ": [
+   "everyday"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ],
+  "note": "Thick white tee that keeps its shape. Size up to L for a boxy fit.",
+  "rank": 240,
+  "sets": []
+ },
+ "za-straight-jeans": {
+  "name": "Zara straight fit jeans",
+  "shop": "Zara",
+  "cat": "trouser",
+  "kind": "new",
+  "price": 49.99,
+  "url": "https://www.zara.com/uk/en/straight-fit-jeans-p00840515.html",
+  "checked": "2026-06-05",
+  "added": "2026-10-05",
+  "style": [
+   "casual",
+   "minimal"
+  ],
+  "occ": [
+   "everyday"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ],
+  "note": "Plain mid-blue straight leg. Check the inside leg against 32in.",
+  "rank": 460,
+  "sets": []
+ },
+ "za-tech-bomber": {
+  "name": "Zara regular fit technical bomber jacket",
+  "shop": "Zara",
+  "cat": "coat",
+  "kind": "new",
+  "price": 79.99,
+  "url": "https://www.zara.com/uk/en/regular-fit-technical-bomber-jacket-p03046316.html",
+  "checked": "2026-06-14",
+  "added": "2026-10-05",
+  "style": [
+   "street",
+   "minimal"
+  ],
+  "occ": [
+   "everyday",
+   "party"
+  ],
+  "wx": [
+   "mild"
+  ],
+  "note": "Clean nylon bomber with no big branding. Works over a hoodie or a tee.",
+  "rank": 410,
+  "sets": []
+ },
+ "za-twill-shirt": {
+  "name": "Zara regular fit cotton twill shirt",
+  "shop": "Zara",
+  "cat": "shirt",
+  "kind": "new",
+  "price": 35.99,
+  "url": "https://www.zara.com/uk/en/regular-fit-cotton-twill-shirt-p00975480.html",
+  "checked": "2026-06-12",
+  "added": "2026-10-05",
+  "style": [
+   "minimal",
+   "casual"
+  ],
+  "occ": [
+   "everyday",
+   "smart"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ],
+  "note": "Heavier than a poplin shirt, so it can be worn open as a layer.",
+  "rank": 490,
+  "sets": []
  },
  "zl-bdg-jack-black": {
   "name": "BDG Jack straight-leg jeans, black",

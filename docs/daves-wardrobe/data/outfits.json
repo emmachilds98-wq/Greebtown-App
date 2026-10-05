@@ -1867,6 +1867,47 @@
    }
   ]
  },
+ "nw-chuck": {
+  "name": "Chucks and black denim",
+  "occ": "everyday",
+  "style": [
+   "street",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ],
+  "note": "Black jeans and Chuck 70s, with a brown check shacket worn open over a white tee.",
+  "look": "men brown check overshirt open white t-shirt black straight jeans black converse chuck 70 high tops",
+  "rank": 19,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "ga-check-shacket",
+    "shape": "shirt",
+    "col": "brown",
+    "what": "Check shacket, worn open"
+   },
+   {
+    "item": "nx-heavy-tee",
+    "shape": "tee",
+    "col": "white",
+    "what": "Heavyweight tee"
+   },
+   {
+    "item": "zl-bdg-jack-black",
+    "shape": "trousers",
+    "col": "black",
+    "what": "Black jeans"
+   },
+   {
+    "item": "cv-chuck70",
+    "shape": "trainers",
+    "col": "black",
+    "what": "Chuck 70 high tops"
+   }
+  ]
+ },
  "nw-country-cord": {
   "name": "Green cord and navy",
   "occ": "smart",
@@ -1990,6 +2031,49 @@
    }
   ]
  },
+ "nw-made-england": {
+  "name": "Made in England",
+  "occ": "smart",
+  "style": [
+   "quiet"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ],
+  "note": "A Manchester-knitted merino over a striped Oxford, with chinos and desert boots.",
+  "look": "men navy merino crew jumper blue striped oxford collar stone chinos sand suede desert boots",
+  "rank": 13,
+  "tags": [
+   "winter"
+  ],
+  "pieces": [
+   {
+    "item": "pe-ford-navy",
+    "shape": "jumper",
+    "col": "navy",
+    "what": "Merino jumper"
+   },
+   {
+    "item": "hc-stripe-oxford",
+    "shape": "shirt",
+    "col": "blue",
+    "what": "Striped Oxford"
+   },
+   {
+    "item": "ms-twill-chino",
+    "shape": "trousers",
+    "col": "stone",
+    "what": "Chinos"
+   },
+   {
+    "item": "clarks-desert",
+    "shape": "boots",
+    "col": "sand",
+    "what": "Desert boots"
+   }
+  ]
+ },
  "nw-oldskool": {
   "name": "Old Skool Saturday",
   "occ": "everyday",
@@ -2070,6 +2154,49 @@
     "shape": "trainers",
     "col": "grey",
     "what": "New Balance 574"
+   }
+  ]
+ },
+ "nw-queue": {
+  "name": "Cold festival queue",
+  "occ": "everyday",
+  "style": [
+   "outdoor",
+   "street"
+  ],
+  "wx": [
+   "cold"
+  ],
+  "note": "A £40 padded jacket over a fleece quarter-zip, cargos and Docs.",
+  "look": "men black padded jacket grey fleece quarter zip olive cargo trousers black dr martens boots winter",
+  "rank": 15,
+  "tags": [
+   "winter"
+  ],
+  "pieces": [
+   {
+    "item": "mw-seasons",
+    "shape": "jacket",
+    "col": "black",
+    "what": "Padded jacket"
+   },
+   {
+    "item": "tnf-yumiori-qz",
+    "shape": "halfzip",
+    "col": "grey",
+    "what": "Fleece quarter-zip"
+   },
+   {
+    "item": "uq-cargo",
+    "shape": "trousers",
+    "col": "olive",
+    "what": "Cargo trousers"
+   },
+   {
+    "item": "js-dm-1460",
+    "shape": "boots",
+    "col": "black",
+    "what": "Dr Martens 1460"
    }
   ]
  },
@@ -2282,6 +2409,87 @@
     "shape": "trainers",
     "col": "black",
     "what": "Trail shoes"
+   }
+  ]
+ },
+ "nw-windbreaker": {
+  "name": "Warehouse night under £100",
+  "occ": "party",
+  "style": [
+   "rave"
+  ],
+  "wx": [
+   "mild"
+  ],
+  "note": "Mesh tee, baggy cargos, Old Skools and an £11 windbreaker to tie round the waist. Add a pair of earplugs.",
+  "look": "men black mesh t-shirt black baggy cargo trousers black windbreaker vans rave warehouse outfit",
+  "rank": 5,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "sd-firetrap-wind",
+    "shape": "jacket",
+    "col": "black",
+    "what": "Windbreaker"
+   },
+   {
+    "item": "rv-mesh-tee",
+    "shape": "tee",
+    "col": "black",
+    "what": "Mesh tee"
+   },
+   {
+    "item": "rv-jj-cargo-black",
+    "shape": "trousers",
+    "col": "black",
+    "what": "Baggy cargos"
+   },
+   {
+    "item": "of-vans-oldskool",
+    "shape": "trainers",
+    "col": "black",
+    "what": "Vans Old Skool"
+   }
+  ]
+ },
+ "nw-zara": {
+  "name": "Black bomber, white tee",
+  "occ": "everyday",
+  "style": [
+   "minimal",
+   "street"
+  ],
+  "wx": [
+   "mild"
+  ],
+  "note": "Three plain pieces from Zara and white leather trainers. Nothing competes for attention.",
+  "look": "men black nylon bomber jacket white heavyweight t-shirt straight blue jeans white leather trainers minimal",
+  "rank": 11,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "za-tech-bomber",
+    "shape": "jacket",
+    "col": "black",
+    "what": "Technical bomber"
+   },
+   {
+    "item": "za-heavy-tee",
+    "shape": "tee",
+    "col": "white",
+    "what": "Heavyweight tee"
+   },
+   {
+    "item": "za-straight-jeans",
+    "shape": "trousers",
+    "col": "indigo",
+    "what": "Straight jeans"
+   },
+   {
+    "item": "ms-cupsole",
+    "shape": "trainers",
+    "col": "white",
+    "what": "Leather trainers"
    }
   ]
  },

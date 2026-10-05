@@ -330,6 +330,15 @@ details.fold > summary small{font-family:var(--f-text);font-size:.82rem;color:va
 .b-list li.has-th > span:nth-child(2){flex:1;min-width:0}
 .lrow.has-th{grid-template-columns:40px minmax(0,1fr) auto}
 .lrow.has-th .acts{grid-column:2/-1}
+.stale{color:var(--tan)}
+.pdrop{color:var(--claret);font-weight:600}
+#results.compact .grid{grid-template-columns:repeat(auto-fill,minmax(min(46%,160px),1fr));gap:10px}
+#results.compact .card{padding:10px 11px 10px;gap:5px}
+#results.compact .card .ph{margin:-10px -11px 2px;max-width:calc(100% + 22px)}
+#results.compact .note,#results.compact .offer,#results.compact .meta,#results.compact .mixlink,#results.compact .kicker .tags,#results.compact .typ,#results.compact .acts .ico,#results.compact .cut{display:none}
+#results.compact .card h4{font-size:.88rem}
+#results.compact .now{font-size:1.1rem}
+#results.compact .buy{font-size:.82rem}
 
 @media (max-width:760px){
   .builder{grid-template-columns:minmax(0,1fr)}
@@ -457,6 +466,10 @@ details.fold > summary small{font-family:var(--f-text);font-size:.82rem;color:va
           <label class="field" for="f-max">Price
             <select id="f-max"><option value="0">Any price</option><option value="15">£15 or less</option><option value="25">£25 or less</option><option value="50">£50 or less</option><option value="75">£75 or less</option><option value="100">£100 or less</option></select>
           </label>
+          <label class="field" for="f-shop">Shop
+            <select id="f-shop"><option value="all">Every shop</option></select>
+          </label>
+          <label class="check" for="f-compact"><input type="checkbox" id="f-compact">Compact grid</label>
           <label class="check" for="f-no" id="l-no" hidden><input type="checkbox" id="f-no"><span id="no-text">Show thumbs-down</span></label>
         </div>
       </div>
@@ -510,7 +523,7 @@ details.fold > summary small{font-family:var(--f-text);font-size:.82rem;color:va
         <li><a href="https://www2.hm.com/en_gb/men.html" target="_blank" rel="noopener">H&amp;M</a><small data-shop="H&amp;M"></small></li>
         <li><a href="https://www.asos.com/men/" target="_blank" rel="noopener">ASOS</a><small data-shop="ASOS"></small></li>
         <li><a href="https://www.gap.co.uk/" target="_blank" rel="noopener">Gap</a></li>
-        <li><a href="https://www.zara.com/uk/" target="_blank" rel="noopener">Zara</a></li>
+        <li><a href="https://www.zara.com/uk/" target="_blank" rel="noopener">Zara</a><small data-shop="Zara"></small></li>
         <li><a href="https://www.whitestuff.com/browse/mens" target="_blank" rel="noopener">White Stuff</a><small data-shop="White Stuff"></small></li>
         <li><a href="https://www.seasaltcornwall.com/sale/mens-all-sale" target="_blank" rel="noopener">Seasalt sale</a><small data-shop="Seasalt"></small></li>
       </ul></div>
@@ -519,11 +532,11 @@ details.fold > summary small{font-family:var(--f-text);font-size:.82rem;color:va
         <li><a href="https://direct.asda.com/george/" target="_blank" rel="noopener">George at Asda</a><small data-shop="George at Asda"></small></li>
         <li><a href="https://www.tesco.com/" target="_blank" rel="noopener">F&amp;F at Tesco</a></li>
         <li><a href="https://www.primark.com/en-gb" target="_blank" rel="noopener">Primark (to browse, not online)</a></li>
-        <li><a href="https://www.sportsdirect.com/" target="_blank" rel="noopener">Sports Direct</a></li>
+        <li><a href="https://www.sportsdirect.com/" target="_blank" rel="noopener">Sports Direct</a><small data-shop="Sports Direct"></small></li>
       </ul></div>
       <div class="shopgroup"><span class="label">Big multi-brand shops</span><ul>
         <li><a href="https://www.zalando.co.uk/men-home/" target="_blank" rel="noopener">Zalando</a><small data-shop="Zalando"></small></li>
-        <li><a href="https://www.endclothing.com/gb" target="_blank" rel="noopener">END.</a></li>
+        <li><a href="https://www.endclothing.com/gb" target="_blank" rel="noopener">END.</a><small data-shop="END."></small></li>
         <li><a href="https://www.very.co.uk/" target="_blank" rel="noopener">Very</a></li>
         <li><a href="https://www.jeanstore.co.uk/" target="_blank" rel="noopener">Jean Store</a><small data-shop="Jean Store"></small></li>
         <li><a href="https://stuartslondon.com/" target="_blank" rel="noopener">Stuarts London</a><small data-shop="Stuarts London"></small></li>
@@ -546,7 +559,7 @@ details.fold > summary small{font-family:var(--f-text);font-size:.82rem;color:va
         <li><a href="https://www.peterchristian.co.uk/sale/" target="_blank" rel="noopener">Peter Christian sale</a><small data-shop="Peter Christian"></small></li>
         <li><a href="https://www.joules.com/" target="_blank" rel="noopener">Joules</a><small data-shop="Joules"></small></li>
         <li><a href="https://www.fatface.com/" target="_blank" rel="noopener">FatFace</a><small data-shop="FatFace"></small></li>
-        <li><a href="https://peregrineclothing.co.uk/collections/mens" target="_blank" rel="noopener">Peregrine (made in England)</a></li>
+        <li><a href="https://peregrineclothing.co.uk/collections/mens" target="_blank" rel="noopener">Peregrine (made in England)</a><small data-shop="Peregrine"></small></li>
       </ul></div>
       <div class="shopgroup"><span class="label">Shoes and watches</span><ul>
         <li><a href="https://www.clarks.com/en-gb/mens/mens-sale/m_sale_uk-c" target="_blank" rel="noopener">Clarks sale</a><small data-shop="Clarks"></small></li>
@@ -571,6 +584,7 @@ details.fold > summary small{font-family:var(--f-text);font-size:.82rem;color:va
         <li><a href="https://www.schuh.co.uk/" target="_blank" rel="noopener">Schuh</a><small data-shop="Schuh"></small></li>
         <li><a href="https://www.office.co.uk/" target="_blank" rel="noopener">Office</a><small data-shop="Office"></small></li>
         <li><a href="https://www.jdsports.co.uk/" target="_blank" rel="noopener">JD Sports</a></li>
+        <li><a href="https://www.footlocker.co.uk/" target="_blank" rel="noopener">Foot Locker</a><small data-shop="Foot Locker"></small></li>
         <li><a href="https://www.newbalance.co.uk/" target="_blank" rel="noopener">New Balance</a></li>
         <li><a href="https://www.vans.co.uk/" target="_blank" rel="noopener">Vans</a></li>
       </ul></div>
@@ -581,16 +595,16 @@ details.fold > summary small{font-family:var(--f-text);font-size:.82rem;color:va
         <li><a href="https://www.drmartens.com/uk/en_gb/" target="_blank" rel="noopener">Dr Martens</a></li>
         <li><a href="https://www.timberland.co.uk/" target="_blank" rel="noopener">Timberland</a></li>
         <li><a href="https://www.lyleandscott.com/" target="_blank" rel="noopener">Lyle &amp; Scott</a><small data-shop="Lyle &amp; Scott"></small></li>
-        <li><a href="https://www.converse.com/uk" target="_blank" rel="noopener">Converse</a></li>
+        <li><a href="https://www.converse.com/uk" target="_blank" rel="noopener">Converse</a><small data-shop="Converse"></small></li>
       </ul></div>
       <div class="shopgroup"><span class="label">Outdoors</span><ul>
         <li><a href="https://www.berghaus.com/" target="_blank" rel="noopener">Berghaus</a></li>
         <li><a href="https://www.regatta.com/" target="_blank" rel="noopener">Regatta</a><small data-shop="Regatta"></small></li>
-        <li><a href="https://www.thenorthface.co.uk/" target="_blank" rel="noopener">The North Face</a></li>
+        <li><a href="https://www.thenorthface.co.uk/" target="_blank" rel="noopener">The North Face</a><small data-shop="The North Face"></small></li>
         <li><a href="https://www.decathlon.co.uk/" target="_blank" rel="noopener">Decathlon</a><small data-shop="Decathlon"></small></li>
         <li><a href="https://www.rohan.co.uk/" target="_blank" rel="noopener">Rohan</a><small data-shop="Rohan"></small></li>
         <li><a href="https://summits.co.uk/" target="_blank" rel="noopener">Summits</a><small data-shop="Summits"></small></li>
-        <li><a href="https://www.mountainwarehouse.com/" target="_blank" rel="noopener">Mountain Warehouse</a></li>
+        <li><a href="https://www.mountainwarehouse.com/" target="_blank" rel="noopener">Mountain Warehouse</a><small data-shop="Mountain Warehouse"></small></li>
         <li><a href="https://www.gooutdoors.co.uk/" target="_blank" rel="noopener">Go Outdoors</a></li>
         <li><a href="https://www.cotswoldoutdoor.com/" target="_blank" rel="noopener">Cotswold Outdoor</a></li>
         <li><a href="https://www.trespass.com/" target="_blank" rel="noopener">Trespass</a><small data-shop="Trespass"></small></li>
@@ -1001,7 +1015,7 @@ var STYLES={
   }
 };
 
-var state={style:"quiet",sub:"all",set:"all",gift:"all",mix:"",fit:"all",fitmax:0,fitsort:"rec",occ:"all",wx:"all",cat:"all",src:"all",sale:false,size:false,fresh:false,max:0,sort:"rec",q:"",showNo:false};
+var state={shop:"all",compact:false,style:"quiet",sub:"all",set:"all",gift:"all",mix:"",fit:"all",fitmax:0,fitsort:"rec",occ:"all",wx:"all",cat:"all",src:"all",sale:false,size:false,fresh:false,max:0,sort:"rec",q:"",showNo:false};
 var lim={picks:PAGE,fits:FITPAGE};
 var items=[],fits=[],byId={},fitById={},meta={},profile={},phase="loading",fitsSeen=false;
 var db=null,canShare=true,saved={},votes={},myfits=[],local={saved:{},votes:{},myfits:{}};
@@ -1024,6 +1038,10 @@ function styleList(v){
 function isNew(it){
   if(!it.added||!meta.checked)return false;
   var d=(Date.parse(meta.checked)-Date.parse(it.added))/864e5;return d>=0&&d<7;
+}
+function stale(it){
+  if(!it.checked||!meta.checked)return false;
+  return (Date.parse(meta.checked)-Date.parse(it.checked))/864e5>30;
 }
 function isDrop(it){return it.kind!=="preowned"&&it.prev>it.price;}
 function sizeOk(it){return it.insize===true||(it.insize===null&&it.kind!=="preowned"&&(it.cat==="acc"||it.cat==="basics"));}
@@ -1179,7 +1197,7 @@ function syncChips(){
     Array.prototype.forEach.call($(p[0]).children,function(c){c.setAttribute("aria-pressed",String(c.getAttribute("data-v")===state[p[1]]));});
   });
   $("f-sale").checked=state.sale;$("f-size").checked=state.size;$("f-new").checked=state.fresh;$("f-no").checked=state.showNo;
-  $("f-src").value=state.src;$("f-max").value=String(state.max);$("f-sort").value=state.sort;$("f-fitmax").value=String(state.fitmax);$("f-fitsort").value=state.fitsort;
+  $("f-src").value=state.src;$("f-max").value=String(state.max);$("f-compact").checked=state.compact;$("f-sort").value=state.sort;$("f-fitmax").value=String(state.fitmax);$("f-fitsort").value=state.fitsort;
   if($("q").value!==state.q){$("q").value=state.q;}
 }
 
@@ -1208,6 +1226,7 @@ function narrow(it,skipCat){
   if(state.fresh&&!isNew(it))return false;
   if(state.size&&!sizeOk(it))return false;
   if(state.max>0&&cost(it)>state.max)return false;
+  if(state.shop!=="all"&&it.shop!==state.shop)return false;
   return true;
 }
 function sizeFor(it){var m=profile&&profile.bycat;return m&&typeof m==="object"&&typeof m[it.cat]==="string"?m[it.cat]:"";}
@@ -1229,14 +1248,14 @@ function card(it){
     price='<span class="now">'+money(it.price)+'</span>'+(p>0?'<s class="was">'+money(it.was)+'</s><span class="cut">'+p+'% off</span>':"")+(isDrop(it)?'<span class="typ">was '+money(it.prev)+' last week</span>':"");
   }
   var where=it.occ.map(function(o){return label(OCC,o);}).concat(it.wx.length>=4?["Any weather"]:it.wx.map(function(w){return label(WX,w);})).join(" · ");
-  var chk=niceDate(it.checked),sz=sizeLine(it),wide=state.q||state.set==="gifts";
+  var chk=niceDate(it.checked),sz=sizeLine(it),wide=state.q||state.set==="gifts",old=stale(it);
   return '<article class="'+cls+'">'+photoBox(it,"",true)+
     '<div class="kicker"><span class="label">'+esc(it.shop)+'</span><span class="tags">'+tags+'</span></div>'+
     '<h4>'+esc(it.name)+'</h4>'+
     (it.note?'<p class="note">'+esc(it.note)+'</p>':"")+
     '<div class="price">'+price+'</div>'+
     (it.offer?'<p class="offer">'+esc(it.offer)+'</p>':"")+
-    '<p class="meta">'+(sz?sz+'<br>':"")+esc(where)+(wide?'<br>'+esc(it.style.map(function(s){return label(STYLE,s);}).join(", ")):"")+(chk?'<br>Checked '+esc(chk):"")+'</p>'+
+    '<p class="meta">'+(sz?sz+'<br>':"")+esc(where)+(wide?'<br>'+esc(it.style.map(function(s){return label(STYLE,s);}).join(", ")):"")+(chk?'<br>'+(old?'<span class="stale">Price seen '+esc(chk)+', over a month ago. Check before buying.</span>':'Checked '+esc(chk)):"")+'</p>'+
     '<a class="buy" href="'+esc(it.url)+'" target="_blank" rel="noopener">'+(pre?"Search ":"View at ")+esc(it.shop)+' <span aria-hidden="true">↗</span></a>'+
     (heroCount[it.id]?'<button class="linkbtn mixlink" type="button" data-mix="'+esc(it.id)+'">See it in '+heroCount[it.id]+' outfits</button>':"")+
     '<div class="acts">'+saveBtn("i_"+it.id)+voteBtns(it.id)+'</div>'+
@@ -1555,7 +1574,15 @@ function renderWeek(){
 }
 
 /* ---- picks ---- */
-function filtered(){return state.occ!=="all"||state.wx!=="all"||state.cat!=="all"||state.src!=="all"||state.sale||state.size||state.fresh||state.max>0;}
+function filtered(){return state.shop!=="all"||state.occ!=="all"||state.wx!=="all"||state.cat!=="all"||state.src!=="all"||state.sale||state.size||state.fresh||state.max>0;}
+/* Shop select lists the shops with picks in the current style or search, busiest first. */
+function fillShops(mine){
+  var n={};mine.forEach(function(it){n[it.shop]=(n[it.shop]||0)+1;});
+  if(state.shop!=="all"&&!n[state.shop])n[state.shop]=0;
+  var keys=Object.keys(n).sort(function(a,b){return n[b]-n[a]||a.localeCompare(b);});
+  var h='<option value="all">Every shop ('+keys.length+')</option>'+keys.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+' ('+n[k]+')</option>';}).join("");
+  var sel=$("f-shop");if(sel.innerHTML!==h){sel.innerHTML=h;}sel.value=state.shop;
+}
 function renderPicks(){
   var ready=phase==="ready"&&items.length>0,st=$("state"),res=$("results"),more=$("more");
   if(!ready){
@@ -1570,6 +1597,7 @@ function renderPicks(){
   var w=words(),mine=items.filter(function(it){return scope(it,w);}),no=0;
   var counts={};mine.forEach(function(it){if(narrow(it,true)){counts[it.cat]=(counts[it.cat]||0)+1;}});
   Array.prototype.forEach.call($("f-cat").children,function(c){var v=c.getAttribute("data-v");c.hidden=v!=="all"&&!counts[v]&&state.cat!==v;});
+  fillShops(mine);
   var list=mine.filter(function(it){return narrow(it);});
   list=list.filter(function(it){if(voteOf(it.id)===-1){no++;return state.showNo;}return true;});
   $("l-no").hidden=!no&&!state.showNo;$("no-text").textContent="Show the "+no+" he said no to";
@@ -1607,7 +1635,7 @@ function renderPicks(){
     var part=list.slice(0,lim.picks);shown=part.length;
     html='<div class="grid">'+part.map(card).join("")+'</div>';
   }
-  res.innerHTML=html;
+  res.innerHTML=html;res.classList.toggle("compact",state.compact);
   var rest=list.length-shown;
   more.hidden=rest<=0;more.textContent=rest>0?"Show "+Math.min(rest,PAGE)+" more ("+rest+" left)":"";
 }
@@ -1623,9 +1651,9 @@ function renderList(){
   if(phase!=="ready"){box.innerHTML=phase==="loading"?'<div class="state"><b>Loading the shortlist</b>It will appear here in a moment.</div>':'<div class="state"><b>The shortlist is not available in this view</b>It loads with the picks when the page is opened in Claude by someone signed in.</div>';return;}
   if(!keys.length&&!mine.length){box.innerHTML='<div class="state"><b>Nothing saved yet</b>Press Save on any pick or outfit and it appears here with a running total. Build your own outfits in the builder above.</div>';return;}
   function row(k,bought){
-    var id=k.slice(2),it=byId[id];
+    var id=k.slice(2),it=byId[id],sv=savedOf(k),fell=it&&!bought&&sv&&sv.price>0?Math.round((sv.price-cost(it))*100)/100:0;
     if(!it){return '<div class="lrow"><span><span class="nm">'+esc(id)+'</span><span class="sub">No longer listed</span></span><span class="pr"></span><div class="acts"><button class="act" type="button" data-unsave="'+esc(k)+'">Remove</button></div></div>';}
-    return '<div class="lrow has-th">'+(photoBox(it,"thumb",false)||'<span></span>')+'<span><a class="nm" href="'+esc(it.url)+'" target="_blank" rel="noopener">'+esc(it.name)+' <span aria-hidden="true">↗</span></a><span class="sub">'+esc(it.shop)+(pct(it)>0?" · "+pct(it)+"% off":"")+'</span><span class="sub">'+sizeLine(it)+'</span></span>'+
+    return '<div class="lrow has-th">'+(photoBox(it,"thumb",false)||'<span></span>')+'<span><a class="nm" href="'+esc(it.url)+'" target="_blank" rel="noopener">'+esc(it.name)+' <span aria-hidden="true">↗</span></a><span class="sub">'+esc(it.shop)+(pct(it)>0?" · "+pct(it)+"% off":"")+'</span><span class="sub">'+sizeLine(it)+'</span>'+(fell>0?'<span class="sub pdrop">Down '+money(fell)+' since it was saved</span>':"")+'</span>'+
       '<span class="pr">'+money(cost(it))+'</span>'+
       '<div class="acts"><button class="act" type="button" data-bought="'+esc(k)+'" aria-pressed="'+bought+'">'+ICON.tick+'<span>'+(bought?"Bought":"Mark as bought")+'</span></button><button class="act" type="button" data-unsave="'+esc(k)+'">Remove</button></div></div>';
   }
@@ -1696,6 +1724,7 @@ function refilter(){lim.picks=PAGE;lim.fits=FITPAGE;renderHead();renderFits();re
   if(h==="work")h="quiet";if(s==="work")s="quiet";
   if(isStyle(h)){state.style=h;}else if(isStyle(s)){state.style=s;}
   loadLocal();
+  try{state.compact=localStorage.getItem("dw-compact")==="1";}catch(e){}
   var bar=$("bar");
   function barh(){document.documentElement.style.setProperty("--barh",bar.offsetHeight+"px");}
   barh();if(window.ResizeObserver){new ResizeObserver(barh).observe(bar);}else{window.addEventListener("resize",barh);}
@@ -1716,11 +1745,13 @@ onPick("f-no",function(t){state.showNo=t.checked;});
 onPick("f-src",function(t){state.src=t.value;});
 onPick("f-max",function(t){state.max=Number(t.value)||0;});
 onPick("f-sort",function(t){state.sort=t.value;});
+onPick("f-shop",function(t){state.shop=t.value;});
+onPick("f-compact",function(t){state.compact=t.checked;try{localStorage.setItem("dw-compact",t.checked?"1":"");}catch(e){}});
 $("f-fitmax").addEventListener("change",function(e){state.fitmax=Number(e.target.value)||0;lim.fits=FITPAGE;renderFits();syncMarks();});
 $("f-fitsort").addEventListener("change",function(e){state.fitsort=e.target.value;lim.fits=FITPAGE;renderFits();syncMarks();});
 var qTimer=0;
 $("q").addEventListener("input",function(e){clearTimeout(qTimer);var v=e.target.value;qTimer=setTimeout(function(){state.q=v.trim();refilter();},180);});
-$("clear").addEventListener("click",function(){state.occ="all";state.wx="all";state.cat="all";state.src="all";state.sale=false;state.size=false;state.fresh=false;state.max=0;state.q="";state.set="all";state.gift="all";syncChips();refilter();});
+$("clear").addEventListener("click",function(){state.occ="all";state.wx="all";state.cat="all";state.src="all";state.sale=false;state.size=false;state.fresh=false;state.max=0;state.shop="all";state.q="";state.set="all";state.gift="all";syncChips();refilter();});
 $("more").addEventListener("click",function(){lim.picks+=PAGE;renderPicks();syncMarks();});
 $("fit-more").addEventListener("click",function(){lim.fits+=FITPAGE;renderFits();syncMarks();});
 $("b-all").addEventListener("change",renderBuilder);
@@ -1743,9 +1774,9 @@ $("b-save").addEventListener("click",function(){
 document.addEventListener("click",function(e){
   var t=e.target,b;
   if((b=t.closest("[data-jump]"))){var el=$(b.getAttribute("data-jump"));if(el){el.scrollIntoView({block:"start"});}return;}
-  if((b=t.closest("[data-save]"))){var k=b.getAttribute("data-save");setSaved(k,savedOf(k)?null:{kind:k.charAt(0)==="o"?"outfit":"item",ref:k.slice(2),state:"want",at:new Date().toISOString()});return;}
+  if((b=t.closest("[data-save]"))){var k=b.getAttribute("data-save");var si=k.charAt(0)==="i"?byId[k.slice(2)]:null,sd={kind:k.charAt(0)==="o"?"outfit":"item",ref:k.slice(2),state:"want",at:new Date().toISOString()};if(si){sd.price=cost(si);}setSaved(k,savedOf(k)?null:sd);return;}
   if((b=t.closest("[data-unsave]"))){setSaved(b.getAttribute("data-unsave"),null);renderFits();return;}
-  if((b=t.closest("[data-bought]"))){var kb=b.getAttribute("data-bought"),s=savedOf(kb);if(s){setSaved(kb,{kind:"item",ref:kb.slice(2),state:s.state==="bought"?"want":"bought",at:new Date().toISOString()});renderFits();}return;}
+  if((b=t.closest("[data-bought]"))){var kb=b.getAttribute("data-bought"),s=savedOf(kb);if(s){var nb={kind:"item",ref:kb.slice(2),state:s.state==="bought"?"want":"bought",at:new Date().toISOString()};if(s.price>0){nb.price=s.price;}setSaved(kb,nb);renderFits();}return;}
   if((b=t.closest("[data-vote]"))){var id=b.getAttribute("data-vote"),v=Number(b.getAttribute("data-v"));setVote(id,voteOf(id)===v?0:v);if(v===-1||voteOf(id)===0){renderPicks();}return;}
   if((b=t.closest("[data-mix]"))){state.mix=b.getAttribute("data-mix");renderMix();syncMarks();if(b.classList.contains("mixlink")){$("mix").scrollIntoView({block:"start"});}return;}
   if((b=t.closest("[data-goto-fit]"))){gotoFit(b.getAttribute("data-goto-fit"));return;}
@@ -1782,7 +1813,7 @@ syncChips();paintStyle();renderAll();
     db.doc("meta/photos").onSnapshot(function(s){var d=(s&&s.exists&&s.data())||{};loadPhotoPacks(d.packs);},function(){});
     db.doc("meta/profile").onSnapshot(function(s){profile=(s&&s.exists&&s.data())||{};schedule();},function(){});
     db.collection("saved").limit(1000).onSnapshot(function(snap){
-      var m={};snap.docs.forEach(function(doc){var d=doc.data()||{};m[doc.id]={kind:d.kind==="outfit"?"outfit":"item",ref:String(d.ref||""),state:d.state==="bought"?"bought":"want"};});
+      var m={};snap.docs.forEach(function(doc){var d=doc.data()||{};m[doc.id]={kind:d.kind==="outfit"?"outfit":"item",ref:String(d.ref||""),state:d.state==="bought"?"bought":"want",price:Number(d.price)||0};});
       saved=m;schedule();
     },function(){});
     db.collection("votes").limit(1000).onSnapshot(function(snap){
