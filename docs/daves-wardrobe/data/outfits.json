@@ -1,0 +1,4777 @@
+{
+ "autumn-budget": {
+  "look": "men beige harrington jacket brown jumper olive chinos brown leather trainers autumn outfit",
+  "name": "Autumn weekend on a budget",
+  "note": "Four pieces in brown, olive and beige for about £135 all in.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "sand",
+    "item": "asos-jj-harrington",
+    "shape": "jacket",
+    "what": "Harrington jacket"
+   },
+   {
+    "col": "brown",
+    "item": "uq-merino-crew",
+    "shape": "jumper",
+    "what": "Merino jumper"
+   },
+   {
+    "col": "olive",
+    "item": "sw-cord",
+    "shape": "trousers",
+    "what": "Cords"
+   },
+   {
+    "col": "brown",
+    "item": "sw-trainer",
+    "shape": "trainers",
+    "what": "Leather trainers"
+   }
+  ],
+  "rank": 5,
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "barrel-chore": {
+  "look": "men brown chore jacket white pocket tee wide beige trousers black converse high tops workwear outfit",
+  "name": "Chore jacket and wide trousers",
+  "note": "A brown chore jacket over a white pocket tee, with wide beige trousers and black high-tops.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "brown",
+    "item": "us-brown",
+    "shape": "jacket",
+    "what": "Chore jacket"
+   },
+   {
+    "col": "white",
+    "item": "asos-carhartt-tee",
+    "shape": "tee",
+    "what": "Pocket tee"
+   },
+   {
+    "col": "stone",
+    "item": "uq-barrel",
+    "shape": "trousers",
+    "what": "Wide trousers"
+   },
+   {
+    "col": "black",
+    "item": "asos-converse-hi",
+    "shape": "trainers",
+    "what": "Converse high-tops"
+   }
+  ],
+  "rank": 57,
+  "style": [
+   "work",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "barrel-navy": {
+  "look": "men navy jumper white t-shirt wide beige trousers white trainers minimalist outfit",
+  "name": "Navy and beige",
+  "note": "A fine navy jumper over a white tee with wide beige trousers and plain white trainers.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "asos-arket-jumper",
+    "shape": "jumper",
+    "what": "Fine navy jumper"
+   },
+   {
+    "col": "white",
+    "item": "uq-supima-tee",
+    "shape": "tee",
+    "what": "Cotton tee"
+   },
+   {
+    "col": "stone",
+    "item": "uq-barrel",
+    "shape": "trousers",
+    "what": "Wide trousers"
+   },
+   {
+    "col": "white",
+    "item": "asos-own-white",
+    "shape": "trainers",
+    "what": "White trainers"
+   }
+  ],
+  "rank": 56,
+  "style": [
+   "minimal"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "barrel-polo": {
+  "look": "men navy open collar knitted polo wide beige trousers navy suede loafers summer evening outfit",
+  "name": "Summer evening",
+  "note": "An open-collar knitted polo in navy with wide beige trousers and suede loafers.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "sw-open-polo",
+    "shape": "polo",
+    "what": "Open-collar knit polo"
+   },
+   {
+    "col": "stone",
+    "item": "uq-barrel",
+    "shape": "trousers",
+    "what": "Wide trousers"
+   },
+   {
+    "col": "navy",
+    "item": "sc-rico",
+    "shape": "shoes",
+    "what": "Suede loafers"
+   },
+   {
+    "col": "tan",
+    "item": "ct-stretch-belt",
+    "shape": "belt",
+    "what": "Woven belt"
+   }
+  ],
+  "rank": 58,
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "ca-autumn": {
+  "look": "men olive chore jacket navy sweatshirt relaxed jeans desert boots beanie outfit",
+  "name": "Cold evening out",
+  "note": "A chore overshirt as the jacket, a navy sweatshirt, relaxed jeans and desert boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "us-army",
+    "shape": "jacket",
+    "what": "Chore overshirt"
+   },
+   {
+    "col": "navy",
+    "item": "fa-tim-navy",
+    "shape": "jumper",
+    "what": "Sweatshirt"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-relaxed-rigid",
+    "shape": "trousers",
+    "what": "Relaxed jeans"
+   },
+   {
+    "col": "sand",
+    "item": "clarks-desert",
+    "shape": "boots",
+    "what": "Desert boots"
+   },
+   {
+    "col": "black",
+    "item": "asos-beanie",
+    "shape": "beanie",
+    "what": "Beanie"
+   }
+  ],
+  "rank": 85,
+  "style": [
+   "casual"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "ca-beer-garden": {
+  "look": "men open short sleeve shirt white t-shirt denim shorts vans sunglasses summer outfit",
+  "name": "Beer garden",
+  "note": "A short-sleeve shirt open over a white tee, denim shorts and Vans.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "blue",
+    "item": "fa-boxworth",
+    "shape": "sshirt",
+    "what": "Short-sleeve shirt, worn open"
+   },
+   {
+    "col": "white",
+    "item": "uq-airism-tee",
+    "shape": "tee",
+    "what": "White tee"
+   },
+   {
+    "col": "blue",
+    "item": "uq-jorts",
+    "shape": "shorts",
+    "what": "Denim shorts"
+   },
+   {
+    "col": "black",
+    "item": "asos-vans",
+    "shape": "trainers",
+    "what": "Vans"
+   },
+   {
+    "col": "black",
+    "item": "ms-sunglasses",
+    "shape": "sunglasses",
+    "what": "Sunglasses"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Bum bag"
+   }
+  ],
+  "rank": 86,
+  "style": [
+   "casual"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "ca-dinner": {
+  "look": "men knitted bomber navy knitted polo brown pleated cord trousers suede chelsea boots outfit",
+  "name": "Dinner, not dressed up",
+  "note": "A knitted polo under a knitted bomber with pleated cords and suede Chelsea boots.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "charcoal",
+    "item": "ms-knit-bomber",
+    "shape": "jacket",
+    "what": "Knitted bomber"
+   },
+   {
+    "col": "navy",
+    "item": "uq-skipper-polo",
+    "shape": "polo",
+    "what": "Knitted polo"
+   },
+   {
+    "col": "brown",
+    "item": "ms-cord-pleat",
+    "shape": "trousers",
+    "what": "Pleated cords"
+   },
+   {
+    "col": "brown",
+    "item": "sw-chelsea",
+    "shape": "boots",
+    "what": "Suede Chelsea boots"
+   }
+  ],
+  "rank": 87,
+  "style": [
+   "casual"
+  ],
+  "tags": [
+   "christmas",
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "ca-pub": {
+  "look": "men navy overshirt white t-shirt dark jeans brown suede trainers casual outfit",
+  "name": "Pub with friends",
+  "note": "An overshirt open over a white tee with dark jeans. Nothing to think about, and it always looks right.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "fa-ramsey-navy",
+    "shape": "shirt",
+    "what": "Overshirt, worn open"
+   },
+   {
+    "col": "white",
+    "item": "asos-carhartt-tee",
+    "shape": "tee",
+    "what": "White tee"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-straight-jeans",
+    "shape": "trousers",
+    "what": "Dark jeans"
+   },
+   {
+    "col": "brown",
+    "item": "asos-samba-brown",
+    "shape": "trainers",
+    "what": "Sambas"
+   }
+  ],
+  "rank": 83,
+  "style": [
+   "casual"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "ca-rugby": {
+  "look": "men navy rugby shirt dark jeans beige trainers casual outfit",
+  "name": "Rugby shirt and jeans",
+  "note": "A navy rugby shirt does the work of a jumper and a collar at once.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "tml-rugby",
+    "shape": "polo",
+    "what": "Rugby shirt, long sleeve"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-straight-jeans",
+    "shape": "trousers",
+    "what": "Dark jeans"
+   },
+   {
+    "col": "stone",
+    "item": "op-gaz",
+    "shape": "trainers",
+    "what": "Trainers"
+   },
+   {
+    "col": "olive",
+    "item": "uq-coated-bag",
+    "shape": "bag",
+    "what": "Shoulder bag"
+   }
+  ],
+  "rank": 88,
+  "style": [
+   "casual"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "ca-town": {
+  "look": "men navy bomber jacket grey polo beige wide trousers white trainers cap outfit",
+  "name": "Saturday in town",
+  "note": "A navy bomber, a dark polo and wide beige trousers, with white court trainers.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "tml-bomber-navy",
+    "shape": "jacket",
+    "what": "Bomber jacket"
+   },
+   {
+    "col": "charcoal",
+    "item": "ls-slub-polo",
+    "shape": "polo",
+    "what": "Slub polo"
+   },
+   {
+    "col": "stone",
+    "item": "uq-barrel",
+    "shape": "trousers",
+    "what": "Barrel-leg trousers"
+   },
+   {
+    "col": "white",
+    "item": "sp-adidas-vl",
+    "shape": "trainers",
+    "what": "Court trainers"
+   },
+   {
+    "col": "black",
+    "item": "rv-ls-cap",
+    "shape": "bcap",
+    "what": "Cap"
+   },
+   {
+    "col": "black",
+    "item": "asos-sling",
+    "shape": "bag",
+    "what": "Sling bag"
+   }
+  ],
+  "rank": 84,
+  "style": [
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "ca-zip-polo": {
+  "look": "men black zip polo stone pleated trousers white trainers night out outfit",
+  "name": "Bar, then somewhere louder",
+  "note": "A black zip polo with pale pleated trousers: smart enough for the bar and fine for the club after.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-fila-zip-polo",
+    "shape": "polo",
+    "what": "Zip polo"
+   },
+   {
+    "col": "stone",
+    "item": "asos-pleat-stone",
+    "shape": "trousers",
+    "what": "Pleated trousers"
+   },
+   {
+    "col": "white",
+    "item": "ms-club-trainers",
+    "shape": "trainers",
+    "what": "White trainers"
+   },
+   {
+    "col": "grey",
+    "item": "w-casio-a158",
+    "shape": "watch",
+    "what": "Steel Casio"
+   }
+  ],
+  "rank": 89,
+  "style": [
+   "casual"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ]
+ },
+ "cargo-street": {
+  "look": "men black oversized hoodie olive cargo trousers white chunky trainers streetwear outfit",
+  "name": "Hoodie and cargos",
+  "note": "A heavy black hoodie with olive cargos and chunky white trainers.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "asos-heavy-hoodie",
+    "shape": "hoodie",
+    "what": "Heavy hoodie"
+   },
+   {
+    "col": "olive",
+    "item": "uq-cargo",
+    "shape": "trousers",
+    "what": "Cargo trousers"
+   },
+   {
+    "col": "white",
+    "item": "asos-nb740",
+    "shape": "trainers",
+    "what": "Chunky trainers"
+   }
+  ],
+  "rank": 69,
+  "style": [
+   "street",
+   "casual"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "cargo-work": {
+  "look": "men black eisenhower work jacket white tee olive cargo trousers brown work boots outfit",
+  "name": "Work jacket and cargos",
+  "note": "A short black work jacket over a white pocket tee, with olive cargos and work boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "asos-dickies-eisenhower",
+    "shape": "jacket",
+    "what": "Work jacket"
+   },
+   {
+    "col": "white",
+    "item": "asos-carhartt-tee",
+    "shape": "tee",
+    "what": "Pocket tee"
+   },
+   {
+    "col": "olive",
+    "item": "uq-cargo",
+    "shape": "trousers",
+    "what": "Cargo trousers"
+   },
+   {
+    "col": "brown",
+    "item": "asos-jj-worker-boot",
+    "shape": "boots",
+    "what": "Work boots"
+   }
+  ],
+  "rank": 70,
+  "style": [
+   "work"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "cold-commute": {
+  "look": "men camel tobacco overcoat navy jumper blue oxford shirt olive cords brown suede boots outfit",
+  "name": "Cold commute",
+  "note": "A long coat over a fine knit and a shirt collar. Smart enough for work and fine for the weekend.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "tan",
+    "item": "asos-overcoat-tobacco",
+    "shape": "coat",
+    "what": "Overcoat"
+   },
+   {
+    "col": "navy",
+    "item": "sw-crew",
+    "shape": "jumper",
+    "what": "Navy crew neck"
+   },
+   {
+    "col": "blue",
+    "item": "tml-oxford",
+    "shape": "shirt",
+    "what": "Oxford shirt"
+   },
+   {
+    "col": "olive",
+    "item": "sw-cord",
+    "shape": "trousers",
+    "what": "Cords"
+   },
+   {
+    "col": "brown",
+    "item": "sw-chukka",
+    "shape": "boots",
+    "what": "Chukka boots"
+   }
+  ],
+  "rank": 6,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "dinner-out": {
+  "look": "men navy overcoat grey roll neck jumper navy trousers brown suede chelsea boots outfit",
+  "name": "Dinner out in winter",
+  "note": "A fine roll neck under a navy overcoat is smart without a shirt or tie.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "next-epsom",
+    "shape": "coat",
+    "what": "Overcoat"
+   },
+   {
+    "col": "grey",
+    "item": "uq-merino-turtle",
+    "shape": "rollneck",
+    "what": "Merino roll neck"
+   },
+   {
+    "col": "navy",
+    "item": "moss-navy-trousers",
+    "shape": "trousers",
+    "what": "Smart trousers"
+   },
+   {
+    "col": "brown",
+    "item": "sw-chelsea",
+    "shape": "boots",
+    "what": "Chelsea boots"
+   },
+   {
+    "col": "black",
+    "item": "timex-35",
+    "shape": "watch",
+    "what": "Watch"
+   }
+  ],
+  "rank": 7,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas",
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "errands": {
+  "look": "men olive quilted gilet camel jumper white oxford shirt dark jeans suede chukka boots outfit",
+  "name": "Out and about",
+  "note": "A gilet in place of a coat for dry days. Camel knitwear with dark jeans keeps it relaxed.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "ct-quilted-gilet",
+    "shape": "gilet",
+    "what": "Quilted gilet"
+   },
+   {
+    "col": "camel",
+    "item": "ct-merino-camel",
+    "shape": "jumper",
+    "what": "Merino jumper"
+   },
+   {
+    "col": "white",
+    "item": "fa-brewer-white",
+    "shape": "shirt",
+    "what": "Oxford shirt"
+   },
+   {
+    "col": "indigo",
+    "item": "uq-selvedge-jeans",
+    "shape": "trousers",
+    "what": "Dark jeans"
+   },
+   {
+    "col": "brown",
+    "item": "sw-chukka",
+    "shape": "boots",
+    "what": "Chukka boots"
+   },
+   {
+    "col": "brown",
+    "item": "timex-38",
+    "shape": "watch",
+    "what": "Watch"
+   }
+  ],
+  "rank": 2,
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "evening-in": {
+  "look": "men navy check brushed cotton pyjamas dressing gown suede moccasin slippers",
+  "name": "Winter evening in",
+  "note": "Brushed cotton pyjamas, a warm gown and suede slippers.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "ms-fleece-gown",
+    "shape": "gown",
+    "what": "Dressing gown"
+   },
+   {
+    "col": "blue",
+    "item": "ms-brushed-pyjamas",
+    "shape": "shirt",
+    "what": "Brushed pyjamas"
+   },
+   {
+    "col": "blue",
+    "item": "ms-brushed-pyjamas",
+    "shape": "trousers",
+    "what": "Brushed pyjamas"
+   },
+   {
+    "col": "tan",
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "what": "Moccasin slippers"
+   }
+  ],
+  "rank": 16,
+  "style": [
+   "quiet",
+   "lounge"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "fala-town": {
+  "look": "men black waterproof jacket navy fleece olive cargo trousers black walking shoes rainy day outfit",
+  "name": "Rainy day in town",
+  "note": "A plain black waterproof over a navy quarter-zip, with olive cargos and black walking shoes.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "tp-fala",
+    "shape": "jacket",
+    "what": "Waterproof jacket"
+   },
+   {
+    "col": "navy",
+    "item": "fa-jim-qz",
+    "shape": "halfzip",
+    "what": "Quarter-zip sweatshirt"
+   },
+   {
+    "col": "olive",
+    "item": "uq-cargo",
+    "shape": "trousers",
+    "what": "Cargo trousers"
+   },
+   {
+    "col": "black",
+    "item": "tp-fisk",
+    "shape": "trainers",
+    "what": "Walking shoes"
+   }
+  ],
+  "rank": 71,
+  "style": [
+   "outdoor"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "wet",
+   "cold"
+  ]
+ },
+ "festival": {
+  "look": "men cream resort shirt linen shorts brown leather trainers festival outfit old money",
+  "name": "Festival or rave day",
+  "note": "Light and loose for heat and crowds, with a rain jacket that ties round the waist and a bag that stays zipped.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "uq-blocktech-parka",
+    "shape": "jacket",
+    "what": "Rain jacket"
+   },
+   {
+    "col": "cream",
+    "item": "hm-resort",
+    "shape": "sshirt",
+    "what": "Resort shirt"
+   },
+   {
+    "col": "cream",
+    "item": "sw-linen-shorts-ecru",
+    "shape": "shorts",
+    "what": "Linen shorts"
+   },
+   {
+    "col": "brown",
+    "item": "sw-trainer",
+    "shape": "trainers",
+    "what": "Leather trainers"
+   },
+   {
+    "col": "green",
+    "item": "uq-mini-bag",
+    "shape": "bag",
+    "what": "Crossbody bag"
+   },
+   {
+    "col": "brown",
+    "item": "uq-sunglasses-wellington",
+    "shape": "sunglasses",
+    "what": "Sunglasses"
+   }
+  ],
+  "rank": 14,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm",
+   "wet"
+  ]
+ },
+ "field-jacket": {
+  "look": "men olive field jacket charcoal jumper stone chinos brown toe cap boots outfit",
+  "name": "Field jacket weekend",
+  "note": "A reduced field jacket over a charcoal knit, with chinos and toe-cap boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "bb-field-jacket",
+    "shape": "jacket",
+    "what": "Field jacket"
+   },
+   {
+    "col": "charcoal",
+    "item": "ls-merino-crew",
+    "shape": "jumper",
+    "what": "Charcoal knit"
+   },
+   {
+    "col": "stone",
+    "item": "bb-dodworth",
+    "shape": "trousers",
+    "what": "Chinos"
+   },
+   {
+    "col": "brown",
+    "item": "bl-foster",
+    "shape": "boots",
+    "what": "Toe-cap boots"
+   }
+  ],
+  "rank": 72,
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "wx": [
+   "mild",
+   "wet"
+  ]
+ },
+ "hoodie-chore": {
+  "look": "men brown chore jacket grey hoodie relaxed blue jeans brown work boots workwear outfit",
+  "name": "Hoodie under a work jacket",
+  "note": "The grey hoodie under a brown work jacket, with relaxed jeans and work boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "brown",
+    "item": "uq-utility-jacket",
+    "shape": "jacket",
+    "what": "Work jacket"
+   },
+   {
+    "col": "grey",
+    "item": "asos-boxy-hoodie",
+    "shape": "hoodie",
+    "what": "Boxy hoodie"
+   },
+   {
+    "col": "indigo",
+    "item": "mm-levis-555",
+    "shape": "trousers",
+    "what": "Relaxed jeans"
+   },
+   {
+    "col": "brown",
+    "item": "asos-jj-worker-boot",
+    "shape": "boots",
+    "what": "Work boots"
+   }
+  ],
+  "rank": 62,
+  "style": [
+   "work"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "hoodie-coat": {
+  "look": "men long black overcoat grey hoodie wide charcoal trousers white trainers minimalist winter outfit",
+  "name": "Hoodie under a long coat",
+  "note": "The grey hoodie under a long black coat, with wide charcoal trousers and white trainers.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "asos-wool-overcoat-black",
+    "shape": "coat",
+    "what": "Long coat"
+   },
+   {
+    "col": "grey",
+    "item": "asos-boxy-hoodie",
+    "shape": "hoodie",
+    "what": "Boxy hoodie"
+   },
+   {
+    "col": "charcoal",
+    "item": "asos-weekday-baggy",
+    "shape": "trousers",
+    "what": "Wide trousers"
+   },
+   {
+    "col": "white",
+    "item": "asos-own-white",
+    "shape": "trainers",
+    "what": "White trainers"
+   }
+  ],
+  "rank": 63,
+  "style": [
+   "minimal"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "jeans-blazer": {
+  "look": "men navy cotton blazer blue striped oxford shirt dark jeans burgundy tassel loafers smart casual outfit",
+  "name": "Blazer and jeans",
+  "note": "A soft navy cotton blazer over a striped Oxford, with dark jeans and burgundy loafers.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "pc-blazer-navy",
+    "shape": "blazer",
+    "what": "Cotton blazer"
+   },
+   {
+    "col": "blue",
+    "item": "ct-oxford-stripe",
+    "shape": "shirt",
+    "what": "Striped Oxford"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-straight-jeans",
+    "shape": "trousers",
+    "what": "Dark jeans"
+   },
+   {
+    "col": "burgundy",
+    "item": "sc-robin",
+    "shape": "shoes",
+    "what": "Tassel loafers"
+   }
+  ],
+  "rank": 67,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "jeans-flannel": {
+  "look": "men brown flannel shirt open cream henley dark jeans brown leather boots workwear outfit",
+  "name": "Flannel and jeans",
+  "note": "A brown flannel shirt worn open over a waffle henley, with dark jeans and leather boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "brown",
+    "item": "asos-jj-flannel",
+    "shape": "shirt",
+    "what": "Flannel shirt, worn open"
+   },
+   {
+    "col": "cream",
+    "item": "uq-waffle-henley",
+    "shape": "tee",
+    "what": "Waffle henley"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-straight-jeans",
+    "shape": "trousers",
+    "what": "Dark jeans"
+   },
+   {
+    "col": "brown",
+    "item": "sc-giles",
+    "shape": "boots",
+    "what": "Leather boots"
+   }
+  ],
+  "rank": 65,
+  "style": [
+   "work",
+   "casual"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "jeans-roll": {
+  "look": "men brown short jacket cream roll neck dark jeans black chelsea boots minimalist outfit",
+  "name": "Roll neck and jeans",
+  "note": "A short brown jacket over a cream roll neck, with dark jeans and black Chelsea boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "brown",
+    "item": "uq-single-blouson",
+    "shape": "jacket",
+    "what": "Short jacket"
+   },
+   {
+    "col": "cream",
+    "item": "asos-newlook-roll",
+    "shape": "rollneck",
+    "what": "Roll neck"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-straight-jeans",
+    "shape": "trousers",
+    "what": "Dark jeans"
+   },
+   {
+    "col": "black",
+    "item": "asos-chelsea-black",
+    "shape": "boots",
+    "what": "Chelsea boots"
+   }
+  ],
+  "rank": 66,
+  "style": [
+   "minimal",
+   "casual"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "knit-polo-dinner": {
+  "look": "men navy zip jacket brown knitted polo grey tailored trousers brown loafers smart casual outfit",
+  "name": "Knitted polo dinner",
+  "note": "A knitted polo does the job of a shirt and tie. The zip jacket comes off indoors.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "tml-smart-zip",
+    "shape": "jacket",
+    "what": "Smart zip jacket"
+   },
+   {
+    "col": "brown",
+    "item": "sw-knit-polo",
+    "shape": "polo",
+    "what": "Knitted polo"
+   },
+   {
+    "col": "grey",
+    "item": "sw-tailored-grey",
+    "shape": "trousers",
+    "what": "Tailored trousers"
+   },
+   {
+    "col": "brown",
+    "item": "clarks-cranhill",
+    "shape": "shoes",
+    "what": "Leather slip-ons"
+   }
+  ],
+  "rank": 21,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "lazy-sunday": {
+  "look": "men cream knit jumper grey flannel drawstring trousers loungewear at home outfit",
+  "name": "Lazy Sunday",
+  "note": "A soft knit and flannel trousers are as comfortable as a tracksuit and fine for answering the door.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "cream",
+    "item": "uq-souffle-crew",
+    "shape": "jumper",
+    "what": "Soft knit jumper"
+   },
+   {
+    "col": "grey",
+    "item": "uq-flannel-easy",
+    "shape": "trousers",
+    "what": "Flannel trousers"
+   },
+   {
+    "col": "tan",
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "what": "Moccasin slippers"
+   }
+  ],
+  "rank": 17,
+  "style": [
+   "quiet",
+   "lounge"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "lg-day-after": {
+  "look": "men navy jersey pyjama top bottoms slippers loungewear",
+  "name": "The day after",
+  "note": "For the morning after a late one: a soft navy long sleeve, jersey bottoms and something warm on his feet.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "lg-cj-navy-ls",
+    "shape": "tee",
+    "what": "Jersey long sleeve"
+   },
+   {
+    "col": "navy",
+    "item": "lg-cj-navy-bottoms",
+    "shape": "trousers",
+    "what": "Jersey bottoms"
+   },
+   {
+    "col": "brown",
+    "item": "ms-moccasin-lined",
+    "shape": "slippers",
+    "what": "Lined moccasins"
+   }
+  ],
+  "rank": 94,
+  "style": [
+   "lounge"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "lg-film-night": {
+  "look": "men loungewear navy waffle sweatshirt checked pyjama bottoms moccasin slippers",
+  "name": "Film night",
+  "note": "A waffle sweatshirt and checked bottoms that are fine for answering the door.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "lg-ms-waffle-sweat",
+    "shape": "jumper",
+    "what": "Waffle sweatshirt"
+   },
+   {
+    "col": "navy",
+    "item": "lg-ms-lounge-bottoms",
+    "shape": "trousers",
+    "what": "Checked lounge bottoms"
+   },
+   {
+    "col": "tan",
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "what": "Moccasin slippers"
+   }
+  ],
+  "rank": 90,
+  "style": [
+   "lounge"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "lg-pyjamas": {
+  "look": "men brushed cotton check pyjamas dressing gown moccasin slippers",
+  "name": "Proper pyjamas",
+  "note": "A brushed cotton set, a fleece gown and lined slippers for winter mornings.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "burgundy",
+    "item": "ms-fleece-gown",
+    "shape": "gown",
+    "what": "Fleece dressing gown"
+   },
+   {
+    "col": "navy",
+    "item": "lg-ms-brushed-set",
+    "shape": "shirt",
+    "what": "Brushed pyjama top"
+   },
+   {
+    "col": "navy",
+    "item": "lg-ms-brushed-set",
+    "shape": "trousers",
+    "what": "Pyjama bottoms"
+   },
+   {
+    "col": "brown",
+    "item": "ms-moccasin-lined",
+    "shape": "slippers",
+    "what": "Lined moccasins"
+   }
+  ],
+  "rank": 91,
+  "style": [
+   "lounge"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "lg-summer": {
+  "look": "men white t-shirt navy check pyjama shorts summer loungewear",
+  "name": "Warm night in",
+  "note": "A cotton tee and pyjama shorts.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "white",
+    "item": "uq-airism-tee",
+    "shape": "tee",
+    "what": "Cotton tee"
+   },
+   {
+    "col": "navy",
+    "item": "lg-ms-pj-shorts",
+    "shape": "shorts",
+    "what": "Pyjama shorts"
+   },
+   {
+    "col": "black",
+    "item": "lg-seqwl-slip",
+    "shape": "slippers",
+    "what": "Slippers"
+   }
+  ],
+  "rank": 93,
+  "style": [
+   "lounge"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "lg-sunday": {
+  "look": "men grey hoodie navy joggers slippers loungewear outfit",
+  "name": "Not leaving the house",
+  "note": "A boxy hoodie with fleece joggers in a different colour, so it does not read as a tracksuit.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "asos-boxy-hoodie",
+    "shape": "hoodie",
+    "what": "Boxy hoodie"
+   },
+   {
+    "col": "navy",
+    "item": "sp-adidas-joggers",
+    "shape": "trousers",
+    "what": "Fleece joggers"
+   },
+   {
+    "col": "tan",
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "what": "Moccasin slippers"
+   }
+  ],
+  "rank": 92,
+  "style": [
+   "lounge"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "loose-quiet": {
+  "look": "men cream cable knit jumper oversized striped oxford shirt wide beige trousers brown adidas samba outfit",
+  "name": "The look in his usual fit",
+  "note": "The same colours and cloth, cut loose: an oversized Oxford under a heavy cable knit, with wide beige trousers and his crossbody bag.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "cream",
+    "item": "asos-dickies-cable",
+    "shape": "jumper",
+    "what": "Cable knit"
+   },
+   {
+    "col": "blue",
+    "item": "uq-oversized-oxford-stripe",
+    "shape": "shirt",
+    "what": "Oversized striped Oxford"
+   },
+   {
+    "col": "stone",
+    "item": "uq-barrel",
+    "shape": "trousers",
+    "what": "Wide trousers"
+   },
+   {
+    "col": "brown",
+    "item": "asos-samba-brown",
+    "shape": "trainers",
+    "what": "Brown Sambas"
+   },
+   {
+    "col": "charcoal",
+    "item": "uq-coated-bag",
+    "shape": "bag",
+    "what": "Crossbody bag"
+   }
+  ],
+  "rank": 20,
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "mn-cold": {
+  "look": "men long khaki overcoat grey oversized jumper white mock neck wide charcoal trousers black chelsea boots minimalist outfit",
+  "name": "Winter in town",
+  "note": "A long coat over an oversized grey knit. Three plain colours and nothing else.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "asos-longline-khaki",
+    "shape": "coat",
+    "what": "Long coat"
+   },
+   {
+    "col": "grey",
+    "item": "asos-arket-wool",
+    "shape": "jumper",
+    "what": "Oversized wool jumper"
+   },
+   {
+    "col": "white",
+    "item": "uq-mock-neck",
+    "shape": "tee",
+    "what": "Mock-neck top"
+   },
+   {
+    "col": "charcoal",
+    "item": "asos-weekday-baggy",
+    "shape": "trousers",
+    "what": "Wide trousers"
+   },
+   {
+    "col": "black",
+    "item": "asos-chelsea-black",
+    "shape": "boots",
+    "what": "Chelsea boots"
+   },
+   {
+    "col": "black",
+    "item": "asos-beanie",
+    "shape": "beanie",
+    "what": "Beanie"
+   }
+  ],
+  "rank": 28,
+  "style": [
+   "minimal"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "wet"
+  ]
+ },
+ "mn-event": {
+  "look": "men charcoal blazer white shirt navy knitted tie grey trousers black loafers minimalist formal outfit",
+  "name": "Event",
+  "note": "Charcoal and grey with a white shirt and one navy tie. His black suit also fits this style as it is.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "uq-knit-jacket",
+    "shape": "blazer",
+    "what": "Knitted jacket"
+   },
+   {
+    "col": "white",
+    "item": "ms-oxford-white",
+    "shape": "shirt",
+    "what": "White shirt"
+   },
+   {
+    "col": "navy",
+    "item": "mbt-navy-tie",
+    "shape": "tie",
+    "what": "Knitted tie"
+   },
+   {
+    "col": "grey",
+    "item": "sw-tailored-grey",
+    "shape": "trousers",
+    "what": "Tailored trousers"
+   },
+   {
+    "col": "black",
+    "item": "clarks-banbury",
+    "shape": "shoes",
+    "what": "Leather slip-ons"
+   }
+  ],
+  "rank": 31,
+  "style": [
+   "minimal"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "cold",
+   "warm"
+  ]
+ },
+ "mn-highstreet": {
+  "look": "men grey funnel neck jacket stone roll neck jumper navy trousers white trainers minimalist outfit",
+  "name": "High-street minimal",
+  "note": "A grey funnel-neck jacket over a pale roll neck, with navy trousers and white trainers. All from M&S.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "ms-funnel-jacket",
+    "shape": "jacket",
+    "what": "Funnel-neck jacket"
+   },
+   {
+    "col": "stone",
+    "item": "ms-cotton-roll",
+    "shape": "rollneck",
+    "what": "Cotton roll neck"
+   },
+   {
+    "col": "navy",
+    "item": "ms-smart-stretch",
+    "shape": "trousers",
+    "what": "Smart trousers"
+   },
+   {
+    "col": "white",
+    "item": "ms-club-trainers",
+    "shape": "trainers",
+    "what": "White trainers"
+   }
+  ],
+  "rank": 49,
+  "style": [
+   "minimal",
+   "casual"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "mn-lounge": {
+  "look": "men grey plain sweatshirt white tee olive jersey trousers minimalist loungewear",
+  "name": "At home",
+  "note": "A plain sweatshirt and jersey trousers that he can also wear to the shop.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "asos-weekday-sweat",
+    "shape": "jumper",
+    "what": "Plain sweatshirt"
+   },
+   {
+    "col": "white",
+    "item": "uq-supima-tee",
+    "shape": "tee",
+    "what": "Cotton tee"
+   },
+   {
+    "col": "olive",
+    "item": "uq-jersey-easy-barrel",
+    "shape": "trousers",
+    "what": "Jersey trousers"
+   },
+   {
+    "col": "tan",
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "what": "Slippers"
+   }
+  ],
+  "rank": 33,
+  "style": [
+   "minimal",
+   "lounge"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "mn-party": {
+  "look": "men navy long sleeve polo off white wide leg trousers white trainers minimalist evening outfit",
+  "name": "Night out",
+  "note": "A navy long-sleeve polo with off-white wide trousers and plain white trainers.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "asos-arket-polo",
+    "shape": "polo",
+    "what": "Long-sleeve polo"
+   },
+   {
+    "col": "cream",
+    "item": "uq-jersey-barrel",
+    "shape": "trousers",
+    "what": "Wide jersey trousers"
+   },
+   {
+    "col": "white",
+    "item": "asos-own-white",
+    "shape": "trainers",
+    "what": "White trainers"
+   },
+   {
+    "col": "black",
+    "item": "asos-sling",
+    "shape": "bag",
+    "what": "Sling bag"
+   }
+  ],
+  "rank": 32,
+  "style": [
+   "minimal"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ]
+ },
+ "mn-smart": {
+  "look": "men grey knit blazer navy roll neck navy tailored trousers black loafers minimalist smart outfit",
+  "name": "Smart",
+  "note": "A knitted jacket over a fine roll neck. Smart without a shirt or tie.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "uq-knit-jacket",
+    "shape": "blazer",
+    "what": "Knitted jacket"
+   },
+   {
+    "col": "navy",
+    "item": "tml-merino-roll",
+    "shape": "rollneck",
+    "what": "Merino roll neck"
+   },
+   {
+    "col": "navy",
+    "item": "sw-tailored",
+    "shape": "trousers",
+    "what": "Tailored trousers"
+   },
+   {
+    "col": "black",
+    "item": "clarks-cranhill-black",
+    "shape": "shoes",
+    "what": "Loafers"
+   },
+   {
+    "col": "black",
+    "item": "timex-35",
+    "shape": "watch",
+    "what": "Watch"
+   }
+  ],
+  "rank": 30,
+  "style": [
+   "minimal"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "mn-summer": {
+  "look": "men white t-shirt loose beige linen trousers cream suede trainers minimalist summer outfit",
+  "name": "Summer",
+  "note": "White tee, loose beige trousers, cream trainers.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "white",
+    "item": "uq-airism-tee",
+    "shape": "tee",
+    "what": "Heavy tee"
+   },
+   {
+    "col": "sand",
+    "item": "asos-only-linen",
+    "shape": "trousers",
+    "what": "Linen-mix trousers"
+   },
+   {
+    "col": "cream",
+    "item": "mm-converse-star",
+    "shape": "trainers",
+    "what": "Suede trainers"
+   },
+   {
+    "col": "black",
+    "item": "asos-sling",
+    "shape": "bag",
+    "what": "Sling bag"
+   },
+   {
+    "col": "black",
+    "item": "uq-sunglasses-wellington",
+    "shape": "sunglasses",
+    "what": "Sunglasses"
+   }
+  ],
+  "rank": 29,
+  "style": [
+   "minimal"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "ms-one-shop": {
+  "look": "men navy car coat brown jumper blue striped oxford shirt ecru corduroy trousers brown desert boots outfit",
+  "name": "All from M&S",
+  "note": "One shop, one order: a navy car coat, a brown knit over a striped Oxford, relaxed ecru cords and desert boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "ms-car-coat",
+    "shape": "coat",
+    "what": "Car coat"
+   },
+   {
+    "col": "brown",
+    "item": "ms-smart-crew",
+    "shape": "jumper",
+    "what": "Smart crew neck"
+   },
+   {
+    "col": "blue",
+    "item": "ms-oxford-stripe",
+    "shape": "shirt",
+    "what": "Striped Oxford"
+   },
+   {
+    "col": "cream",
+    "item": "ms-cord-pleat",
+    "shape": "trousers",
+    "what": "Relaxed cords"
+   },
+   {
+    "col": "brown",
+    "item": "ms-desert",
+    "shape": "boots",
+    "what": "Desert boots"
+   },
+   {
+    "col": "brown",
+    "item": "ms-stitch-belt",
+    "shape": "belt",
+    "what": "Leather belt"
+   }
+  ],
+  "rank": 46,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "night-out": {
+  "look": "men navy knitted polo wide pleated stone trousers white adidas samba night out outfit",
+  "name": "Night out",
+  "note": "An open-collar knit and wide pleated trousers with trainers. Dressed up, but he can dance in it all night.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "uq-skipper-polo",
+    "shape": "polo",
+    "what": "Knitted polo"
+   },
+   {
+    "col": "stone",
+    "item": "asos-pleat-stone",
+    "shape": "trousers",
+    "what": "Pleated trousers"
+   },
+   {
+    "col": "white",
+    "item": "adidas-samba",
+    "shape": "trainers",
+    "what": "Trainers"
+   },
+   {
+    "col": "green",
+    "item": "uq-mini-bag",
+    "shape": "bag",
+    "what": "Crossbody bag"
+   }
+  ],
+  "rank": 13,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "nw-charcoal": {
+  "name": "Charcoal and navy",
+  "occ": "smart",
+  "style": [
+   "minimal"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ],
+  "note": "Tones of one colour: charcoal merino, navy wide trousers and white leather trainers.",
+  "look": "men charcoal merino crew jumper navy wide leg trousers white leather trainers minimal",
+  "rank": 10,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "cos-tipped-merino",
+    "shape": "jumper",
+    "col": "charcoal",
+    "what": "Merino jumper"
+   },
+   {
+    "item": "asos-arket-trouser",
+    "shape": "trousers",
+    "col": "navy",
+    "what": "Wide trousers"
+   },
+   {
+    "item": "ms-cupsole",
+    "shape": "trainers",
+    "col": "white",
+    "what": "Leather trainers"
+   }
+  ]
+ },
+ "nw-country-cord": {
+  "name": "Green cord and navy",
+  "occ": "smart",
+  "style": [
+   "quiet"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ],
+  "note": "Dusky green cords, a navy merino over a white Oxford, and sand desert boots.",
+  "look": "men navy merino jumper white oxford collar green corduroy trousers sand suede desert boots",
+  "rank": 20,
+  "tags": [
+   "winter",
+   "christmas"
+  ],
+  "pieces": [
+   {
+    "item": "ws-newport-merino",
+    "shape": "jumper",
+    "col": "navy",
+    "what": "Merino jumper"
+   },
+   {
+    "item": "hc-white-oxford",
+    "shape": "shirt",
+    "col": "white",
+    "what": "White Oxford"
+   },
+   {
+    "item": "fat-cord-green",
+    "shape": "trousers",
+    "col": "green",
+    "what": "Cord trousers"
+   },
+   {
+    "item": "clarks-desert",
+    "shape": "boots",
+    "col": "sand",
+    "what": "Desert boots"
+   }
+  ]
+ },
+ "nw-docs": {
+  "name": "Docs and black denim",
+  "occ": "party",
+  "style": [
+   "street",
+   "rave"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ],
+  "note": "Washed black jeans, a grey heavy tee and the brown collar jacket, on proper boots.",
+  "look": "men brown faux leather aviator jacket grey t-shirt black straight jeans black dr martens boots",
+  "rank": 14,
+  "tags": [
+   "winter"
+  ],
+  "pieces": [
+   {
+    "item": "ga-shearling-jacket",
+    "shape": "jacket",
+    "col": "brown",
+    "what": "Collar jacket"
+   },
+   {
+    "item": "ar-heavy-tee-grey",
+    "shape": "tee",
+    "col": "grey",
+    "what": "Heavy tee"
+   },
+   {
+    "item": "zl-bdg-jack-black",
+    "shape": "trousers",
+    "col": "black",
+    "what": "Black jeans"
+   },
+   {
+    "item": "js-dm-1460",
+    "shape": "boots",
+    "col": "black",
+    "what": "Dr Martens 1460"
+   }
+  ]
+ },
+ "nw-film": {
+  "name": "Film night",
+  "occ": "lounge",
+  "style": [
+   "lounge"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ],
+  "note": "Half-price joggers, a soft hoodie and suede slippers.",
+  "look": "men grey hoodie indigo joggers suede moccasin slippers loungewear",
+  "rank": 6,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "lg-ms-scuba-hoodie",
+    "shape": "hoodie",
+    "col": "grey",
+    "what": "Soft hoodie"
+   },
+   {
+    "item": "gs-restday-indigo",
+    "shape": "trousers",
+    "col": "indigo",
+    "what": "Joggers"
+   },
+   {
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "col": "tan",
+    "what": "Moccasin slippers"
+   }
+  ]
+ },
+ "nw-oldskool": {
+  "name": "Old Skool Saturday",
+  "occ": "everyday",
+  "style": [
+   "street",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ],
+  "note": "Dark vintage denim, an olive zip jacket and Old Skools.",
+  "look": "men olive zip jacket grey heavy t-shirt dark relaxed jeans vans old skool",
+  "rank": 18,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "uq-zip-blouson",
+    "shape": "jacket",
+    "col": "olive",
+    "what": "Zip jacket"
+   },
+   {
+    "item": "ar-heavy-tee-grey",
+    "shape": "tee",
+    "col": "grey",
+    "what": "Heavy tee"
+   },
+   {
+    "item": "zl-bdg-vintage",
+    "shape": "trousers",
+    "col": "indigo",
+    "what": "Relaxed jeans"
+   },
+   {
+    "item": "of-vans-oldskool",
+    "shape": "trainers",
+    "col": "black",
+    "what": "Vans Old Skool"
+   }
+  ]
+ },
+ "nw-quarterzip": {
+  "name": "Quarter-zip pub",
+  "occ": "everyday",
+  "style": [
+   "casual",
+   "quiet"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ],
+  "note": "A khaki quarter-zip over an Oxford, straight jeans and grey New Balance.",
+  "look": "men khaki quarter zip jumper oxford shirt collar straight jeans grey new balance 574",
+  "rank": 24,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "jo-hillside-khaki",
+    "shape": "halfzip",
+    "col": "olive",
+    "what": "Quarter-zip jumper"
+   },
+   {
+    "item": "uq-oxford",
+    "shape": "shirt",
+    "col": "blue",
+    "what": "Oxford shirt"
+   },
+   {
+    "item": "ms-straight-jeans",
+    "shape": "trousers",
+    "col": "indigo",
+    "what": "Straight jeans"
+   },
+   {
+    "item": "zl-nb574-grey",
+    "shape": "trainers",
+    "col": "grey",
+    "what": "New Balance 574"
+   }
+  ]
+ },
+ "nw-seasalt": {
+  "name": "Coastal weekend",
+  "occ": "everyday",
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ],
+  "note": "A chunky cotton jumper over a soft check shirt, with sand desert boots.",
+  "look": "men cream cotton jumper check shirt collar navy chinos sand desert boots",
+  "rank": 30,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "ss-mizzen",
+    "shape": "jumper",
+    "col": "cream",
+    "what": "Cotton jumper"
+   },
+   {
+    "item": "ss-banyan",
+    "shape": "shirt",
+    "col": "blue",
+    "what": "Check shirt"
+   },
+   {
+    "item": "ms-twill-chino",
+    "shape": "trousers",
+    "col": "navy",
+    "what": "Chinos"
+   },
+   {
+    "item": "clarks-desert",
+    "shape": "boots",
+    "col": "sand",
+    "what": "Desert boots"
+   }
+  ]
+ },
+ "nw-sixty": {
+  "name": "About £100, all new",
+  "occ": "everyday",
+  "style": [
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ],
+  "note": "A £16 olive knit over a £10 polo, with dark jeans and Old Skools: about £103 all in.",
+  "look": "men olive ribbed jumper blue polo collar dark jeans vans old skool",
+  "rank": 9,
+  "tags": [],
+  "pieces": [
+   {
+    "item": "ga-ribbed-olive",
+    "shape": "jumper",
+    "col": "olive",
+    "what": "Ribbed jumper"
+   },
+   {
+    "item": "tu-birdseye-polo",
+    "shape": "polo",
+    "col": "blue",
+    "what": "Jersey polo"
+   },
+   {
+    "item": "zl-bdg-vintage",
+    "shape": "trousers",
+    "col": "indigo",
+    "what": "Relaxed jeans"
+   },
+   {
+    "item": "of-vans-oldskool",
+    "shape": "trainers",
+    "col": "black",
+    "what": "Vans Old Skool"
+   }
+  ]
+ },
+ "nw-supermarket": {
+  "name": "The supermarket upgrade",
+  "occ": "everyday",
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ],
+  "note": "Lambswool from Sainsbury's and a striped Oxford for £25, finished with navy suede desert boots.",
+  "look": "men grey lambswool jumper blue striped oxford shirt stone chinos navy suede desert boots",
+  "rank": 8,
+  "tags": [
+   "winter"
+  ],
+  "pieces": [
+   {
+    "item": "tu-lambswool-high",
+    "shape": "jumper",
+    "col": "grey",
+    "what": "Lambswool jumper"
+   },
+   {
+    "item": "hc-stripe-oxford",
+    "shape": "shirt",
+    "col": "blue",
+    "what": "Striped Oxford shirt"
+   },
+   {
+    "item": "ms-twill-chino",
+    "shape": "trousers",
+    "col": "stone",
+    "what": "Chinos"
+   },
+   {
+    "item": "lk-sahara-navy",
+    "shape": "boots",
+    "col": "navy",
+    "what": "Navy suede desert boots"
+   }
+  ]
+ },
+ "nw-timberland": {
+  "name": "Wet weekend",
+  "occ": "everyday",
+  "style": [
+   "street",
+   "outdoor"
+  ],
+  "wx": [
+   "wet",
+   "cold"
+  ],
+  "note": "Wheat Timberlands with olive cargos, a black fleece and a plain tee.",
+  "look": "men black fleece jacket white tee olive cargo trousers wheat timberland boots",
+  "rank": 16,
+  "tags": [
+   "winter"
+  ],
+  "pieces": [
+   {
+    "item": "sm-berghaus-prism",
+    "shape": "jacket",
+    "col": "black",
+    "what": "Polartec fleece"
+   },
+   {
+    "item": "uq-airism-tee",
+    "shape": "tee",
+    "col": "white",
+    "what": "Plain tee"
+   },
+   {
+    "item": "uq-cargo",
+    "shape": "trousers",
+    "col": "olive",
+    "what": "Cargo trousers"
+   },
+   {
+    "item": "sl-timberland-6in",
+    "shape": "boots",
+    "col": "tan",
+    "what": "Timberland boots"
+   }
+  ]
+ },
+ "nw-trail": {
+  "name": "Three-in-one walk",
+  "occ": "everyday",
+  "style": [
+   "outdoor"
+  ],
+  "wx": [
+   "wet",
+   "cold"
+  ],
+  "note": "A 3-in-1 waterproof over a £10 fleece, tough jeans and trail shoes.",
+  "look": "men green waterproof jacket brown fleece dark jeans black trail shoes autumn walk",
+  "rank": 12,
+  "tags": [
+   "winter"
+  ],
+  "pieces": [
+   {
+    "item": "dc-3in1-green",
+    "shape": "coat",
+    "col": "green",
+    "what": "3-in-1 waterproof"
+   },
+   {
+    "item": "dc-mh100-brown",
+    "shape": "halfzip",
+    "col": "brown",
+    "what": "Half-zip fleece"
+   },
+   {
+    "item": "rh-range-jeans",
+    "shape": "trousers",
+    "col": "indigo",
+    "what": "Walking jeans"
+   },
+   {
+    "item": "asos-salomon",
+    "shape": "trainers",
+    "col": "black",
+    "what": "Trail shoes"
+   }
+  ]
+ },
+ "od-budget": {
+  "look": "men grey waterproof shell jacket brown fleece dark walking trousers brown walking shoes hiking outfit",
+  "name": "Wet walk for under £95",
+  "note": "A waterproof shell, a fleece, walking trousers and walking shoes, all at 70% off or more.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "rg-freesdale",
+    "shape": "jacket",
+    "what": "Waterproof shell"
+   },
+   {
+    "col": "brown",
+    "item": "rg-montes",
+    "shape": "halfzip",
+    "what": "Half-zip fleece"
+   },
+   {
+    "col": "charcoal",
+    "item": "tp-cherhill",
+    "shape": "trousers",
+    "what": "Walking trousers"
+   },
+   {
+    "col": "brown",
+    "item": "tp-scarp",
+    "shape": "shoes",
+    "what": "Walking shoes"
+   }
+  ],
+  "rank": 51,
+  "style": [
+   "outdoor"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "wet",
+   "cold"
+  ]
+ },
+ "od-event": {
+  "look": "men off white down jacket navy guernsey jumper olive cargo trousers tan brogue boots scarf winter outfit",
+  "name": "Outdoor event in winter",
+  "note": "For bonfire night, a Christmas market or standing on a touchline.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "cream",
+    "item": "uq-seamless-down",
+    "shape": "jacket",
+    "what": "Down jacket"
+   },
+   {
+    "col": "navy",
+    "item": "wo-guernsey",
+    "shape": "jumper",
+    "what": "Guernsey jumper"
+   },
+   {
+    "col": "olive",
+    "item": "uq-cargo",
+    "shape": "trousers",
+    "what": "Cargo trousers"
+   },
+   {
+    "col": "tan",
+    "item": "sw-brogue-boot",
+    "shape": "boots",
+    "what": "Brogue boots"
+   },
+   {
+    "col": "blue",
+    "item": "wo-scarf",
+    "shape": "scarf",
+    "what": "Lambswool scarf"
+   }
+  ],
+  "rank": 43,
+  "style": [
+   "outdoor"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "od-festival": {
+  "look": "men khaki rain shell jacket white tee black joggers black trail shoes bucket hat bum bag festival outfit",
+  "name": "Festival",
+  "note": "A shell that packs into the bag, waterproof shoes and a hat for sun or drizzle.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "asos-regatta-matt",
+    "shape": "jacket",
+    "what": "Packable shell"
+   },
+   {
+    "col": "white",
+    "item": "uq-airism-tee",
+    "shape": "tee",
+    "what": "Heavy tee"
+   },
+   {
+    "col": "black",
+    "item": "uq-active-joggers",
+    "shape": "trousers",
+    "what": "Light joggers"
+   },
+   {
+    "col": "black",
+    "item": "asos-terrex",
+    "shape": "trainers",
+    "what": "Waterproof trail shoes"
+   },
+   {
+    "col": "black",
+    "item": "asos-tnf-bucket",
+    "shape": "bucket",
+    "what": "Bucket hat"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Crossbody bag"
+   },
+   {
+    "col": "black",
+    "item": "uq-sport-sunglasses",
+    "shape": "sunglasses",
+    "what": "Sunglasses"
+   }
+  ],
+  "rank": 44,
+  "style": [
+   "outdoor"
+  ],
+  "wx": [
+   "warm",
+   "wet",
+   "mild"
+  ]
+ },
+ "od-hike": {
+  "look": "men stone waterproof jacket grey fleece grey walking trousers olive hiking boots beanie backpack outfit",
+  "name": "Wet walk",
+  "note": "A proper waterproof over a fleece, quick-drying trousers and waterproof boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "stone",
+    "item": "asos-berghaus-deluge",
+    "shape": "jacket",
+    "what": "Waterproof jacket"
+   },
+   {
+    "col": "charcoal",
+    "item": "mm-berghaus-anwick",
+    "shape": "halfzip",
+    "what": "Full-zip fleece"
+   },
+   {
+    "col": "grey",
+    "item": "mm-regatta-highton",
+    "shape": "trousers",
+    "what": "Walking trousers"
+   },
+   {
+    "col": "olive",
+    "item": "mm-timberland-alden",
+    "shape": "boots",
+    "what": "Waterproof boots"
+   },
+   {
+    "col": "green",
+    "item": "wo-beanie",
+    "shape": "beanie",
+    "what": "Wool beanie"
+   },
+   {
+    "col": "black",
+    "item": "asos-tnf-rodey",
+    "shape": "backpack",
+    "what": "Day pack"
+   }
+  ],
+  "rank": 40,
+  "style": [
+   "outdoor"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "wet",
+   "cold"
+  ]
+ },
+ "od-lounge": {
+  "look": "men navy half zip fleece olive long sleeve top dark grey fleece joggers beanie camping outfit",
+  "name": "Campsite or cabin evening",
+  "note": "A half-zip fleece, a brushed base layer and fleece joggers.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "mm-regatta-frankie",
+    "shape": "halfzip",
+    "what": "Half-zip fleece"
+   },
+   {
+    "col": "olive",
+    "item": "uq-soft-brushed",
+    "shape": "tee",
+    "what": "Brushed long-sleeve"
+   },
+   {
+    "col": "charcoal",
+    "item": "uq-fleece-joggers",
+    "shape": "trousers",
+    "what": "Fleece joggers"
+   },
+   {
+    "col": "cream",
+    "item": "asos-carhartt-beanie",
+    "shape": "beanie",
+    "what": "Beanie"
+   }
+  ],
+  "rank": 45,
+  "style": [
+   "outdoor",
+   "lounge"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "od-smart": {
+  "look": "men black rains jacket brown quarter zip fleece green shirt beige trousers brown leather boots outfit",
+  "name": "Pub after the walk",
+  "note": "A matte rain jacket, a brown fleece over a twill shirt, and leather boots.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "asos-rains",
+    "shape": "jacket",
+    "what": "Rain jacket"
+   },
+   {
+    "col": "brown",
+    "item": "asos-brown-fleece",
+    "shape": "halfzip",
+    "what": "Quarter-zip fleece"
+   },
+   {
+    "col": "green",
+    "item": "tml-garment-dyed",
+    "shape": "shirt",
+    "what": "Twill shirt"
+   },
+   {
+    "col": "stone",
+    "item": "uq-warm-lined",
+    "shape": "trousers",
+    "what": "Lined trousers"
+   },
+   {
+    "col": "brown",
+    "item": "mm-timberland-chukka",
+    "shape": "boots",
+    "what": "Waterproof chukka boots"
+   }
+  ],
+  "rank": 42,
+  "style": [
+   "outdoor"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "wet",
+   "mild"
+  ]
+ },
+ "od-summer": {
+  "look": "men white t-shirt beige cargo shorts olive trail trainers green cap gorpcore summer outfit",
+  "name": "Summer walk",
+  "note": "Cargo shorts, a plain tee and trainers that cope with a wet path.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "white",
+    "item": "asos-oversized-tee",
+    "shape": "tee",
+    "what": "Plain tee"
+   },
+   {
+    "col": "black",
+    "item": "ms-cargo-shorts",
+    "shape": "shorts",
+    "what": "Cargo shorts"
+   },
+   {
+    "col": "olive",
+    "item": "asos-peakfreak",
+    "shape": "trainers",
+    "what": "Waterproof trainers"
+   },
+   {
+    "col": "green",
+    "item": "asos-nb-cap",
+    "shape": "bcap",
+    "what": "Washed cap"
+   },
+   {
+    "col": "black",
+    "item": "uq-utility-shoulder",
+    "shape": "bag",
+    "what": "Shoulder bag"
+   },
+   {
+    "col": "black",
+    "item": "uq-sport-sunglasses",
+    "shape": "sunglasses",
+    "what": "Sunglasses"
+   }
+  ],
+  "rank": 41,
+  "style": [
+   "outdoor"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "ox-knit": {
+  "look": "men navy crew neck jumper white oxford shirt collar dark jeans brown desert boots outfit",
+  "name": "Navy knit and jeans",
+  "note": "The white Oxford under a navy crew neck with dark jeans and desert boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "ms-air-yarn-crew",
+    "shape": "jumper",
+    "what": "Navy crew neck"
+   },
+   {
+    "col": "white",
+    "item": "fa-brewer-white",
+    "shape": "shirt",
+    "what": "Boxy Oxford"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-straight-jeans",
+    "shape": "trousers",
+    "what": "Dark jeans"
+   },
+   {
+    "col": "brown",
+    "item": "ms-desert",
+    "shape": "boots",
+    "what": "Desert boots"
+   }
+  ],
+  "rank": 52,
+  "style": [
+   "quiet"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "ox-mono": {
+  "look": "men charcoal knit overshirt white shirt wide charcoal trousers black penny loafers minimalist outfit",
+  "name": "Charcoal and white",
+  "note": "A knitted charcoal overshirt, the white Oxford buttoned up, wide charcoal trousers and black penny loafers.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "charcoal",
+    "item": "ms-milano-overshirt",
+    "shape": "jacket",
+    "what": "Knitted overshirt"
+   },
+   {
+    "col": "white",
+    "item": "fa-brewer-white",
+    "shape": "shirt",
+    "what": "Boxy Oxford"
+   },
+   {
+    "col": "charcoal",
+    "item": "asos-weekday-baggy",
+    "shape": "trousers",
+    "what": "Wide trousers"
+   },
+   {
+    "col": "black",
+    "item": "ms-penny",
+    "shape": "shoes",
+    "what": "Penny loafers"
+   }
+  ],
+  "rank": 55,
+  "style": [
+   "minimal"
+  ],
+  "tags": [
+   "christmas",
+   "winter"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "ox-open": {
+  "look": "men white oxford shirt worn open over black t-shirt wide beige trousers white trainers outfit",
+  "name": "Shirt as a jacket",
+  "note": "The Oxford worn open over a black pocket tee, with wide beige trousers and white trainers.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "white",
+    "item": "fa-brewer-white",
+    "shape": "shirt",
+    "what": "Boxy Oxford, worn open"
+   },
+   {
+    "col": "black",
+    "item": "ri-pocket-tee",
+    "shape": "tee",
+    "what": "Pocket tee"
+   },
+   {
+    "col": "stone",
+    "item": "uq-barrel",
+    "shape": "trousers",
+    "what": "Wide trousers"
+   },
+   {
+    "col": "white",
+    "item": "ms-club-trainers",
+    "shape": "trainers",
+    "what": "White trainers"
+   }
+  ],
+  "rank": 54,
+  "style": [
+   "street",
+   "casual"
+  ],
+  "wx": [
+   "warm",
+   "mild"
+  ]
+ },
+ "ox-suit": {
+  "look": "men navy suit white shirt navy silk tie black lace up shoes wedding guest outfit",
+  "name": "Navy suit",
+  "note": "The next suit after black: navy, with the white Oxford, a navy silk tie and black lace-ups.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "sdr-navy-suit",
+    "shape": "blazer",
+    "what": "Suit jacket"
+   },
+   {
+    "col": "white",
+    "item": "fa-brewer-white",
+    "shape": "shirt",
+    "what": "Boxy Oxford"
+   },
+   {
+    "col": "navy",
+    "item": "ms-silk-tie",
+    "shape": "tie",
+    "what": "Silk tie"
+   },
+   {
+    "col": "navy",
+    "item": "sdr-navy-suit",
+    "shape": "trousers",
+    "what": "Suit trousers"
+   },
+   {
+    "col": "black",
+    "item": "bl-vance-black",
+    "shape": "shoes",
+    "what": "Black lace-ups"
+   }
+  ],
+  "rank": 53,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "cold",
+   "warm"
+  ]
+ },
+ "pub-lunch": {
+  "look": "men navy wax jacket cream jumper blue oxford shirt olive cords desert boots outfit",
+  "name": "Sunday pub lunch",
+  "note": "The whole look in one outfit: a wax jacket over lambswool and an Oxford shirt, with cords and suede boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "ry-thirsk",
+    "shape": "jacket",
+    "what": "Wax jacket"
+   },
+   {
+    "col": "cream",
+    "item": "ms-lambswool-crew",
+    "shape": "jumper",
+    "what": "Lambswool jumper"
+   },
+   {
+    "col": "blue",
+    "item": "ms-oxford",
+    "shape": "shirt",
+    "what": "Oxford shirt"
+   },
+   {
+    "col": "olive",
+    "item": "sw-cord",
+    "shape": "trousers",
+    "what": "Cords"
+   },
+   {
+    "col": "sand",
+    "item": "clarks-desert",
+    "shape": "boots",
+    "what": "Desert boots"
+   },
+   {
+    "col": "green",
+    "item": "jl-barbour-scarf",
+    "shape": "scarf",
+    "what": "Scarf"
+   }
+  ],
+  "rank": 1,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "ramsey-roll": {
+  "look": "men navy overshirt stone roll neck navy trousers white leather trainers smart minimalist outfit",
+  "name": "Overshirt and roll neck",
+  "note": "The navy overshirt over a pale roll neck, with navy trousers and white leather trainers.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "fa-ramsey-navy",
+    "shape": "jacket",
+    "what": "Light overshirt"
+   },
+   {
+    "col": "stone",
+    "item": "ms-cotton-roll",
+    "shape": "rollneck",
+    "what": "Cotton roll neck"
+   },
+   {
+    "col": "navy",
+    "item": "ms-smart-stretch",
+    "shape": "trousers",
+    "what": "Smart trousers"
+   },
+   {
+    "col": "white",
+    "item": "ms-cupsole",
+    "shape": "trainers",
+    "what": "Leather trainers"
+   }
+  ],
+  "rank": 59,
+  "style": [
+   "minimal"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "ramsey-street": {
+  "look": "men navy overshirt over grey hoodie baggy washed black jeans black vans streetwear outfit",
+  "name": "Overshirt over a hoodie",
+  "note": "The navy overshirt over the grey hoodie, with washed black baggy jeans and Vans.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "fa-ramsey-navy",
+    "shape": "jacket",
+    "what": "Light overshirt"
+   },
+   {
+    "col": "grey",
+    "item": "asos-boxy-hoodie",
+    "shape": "hoodie",
+    "what": "Boxy hoodie"
+   },
+   {
+    "col": "charcoal",
+    "item": "asos-baggy-jeans",
+    "shape": "trousers",
+    "what": "Baggy jeans"
+   },
+   {
+    "col": "black",
+    "item": "asos-vans",
+    "shape": "trainers",
+    "what": "Vans Old Skool"
+   }
+  ],
+  "rank": 61,
+  "style": [
+   "street",
+   "casual"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "ramsey-weekend": {
+  "look": "men navy overshirt breton stripe long sleeve tee ecru corduroy trousers brown adidas samba outfit",
+  "name": "Overshirt weekend",
+  "note": "The navy overshirt over a striped long-sleeve tee, with relaxed ecru cords and brown Sambas.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "fa-ramsey-navy",
+    "shape": "jacket",
+    "what": "Light overshirt"
+   },
+   {
+    "col": "cream",
+    "item": "uq-stripe-ls",
+    "shape": "tee",
+    "what": "Striped long-sleeve tee"
+   },
+   {
+    "col": "cream",
+    "item": "ms-cord-pleat",
+    "shape": "trousers",
+    "what": "Relaxed cords"
+   },
+   {
+    "col": "brown",
+    "item": "asos-samba-brown",
+    "shape": "trainers",
+    "what": "Brown Sambas"
+   }
+  ],
+  "rank": 60,
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "rv-black-smart": {
+  "look": "men all black night out outfit open black shirt vest wide trousers chelsea boots chain",
+  "name": "Black on black, dressed up",
+  "note": "For the nights with a door policy: a studded shirt open over a vest, loose tailored trousers and leather Chelsea boots.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-tt-studded",
+    "shape": "shirt",
+    "what": "Studded shirt, worn open"
+   },
+   {
+    "col": "black",
+    "item": "rv-vest-black",
+    "shape": "vest",
+    "what": "Black vest"
+   },
+   {
+    "col": "black",
+    "item": "asos-only-tailored",
+    "shape": "trousers",
+    "what": "Loose tailored trousers"
+   },
+   {
+    "col": "black",
+    "item": "rv-walk-sean",
+    "shape": "boots",
+    "what": "Chunky Chelsea boots"
+   },
+   {
+    "col": "silver",
+    "item": "rv-chain-link",
+    "shape": "chain",
+    "what": "Link chain"
+   }
+  ],
+  "rank": 76,
+  "style": [
+   "rave"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "cold",
+   "mild",
+   "warm",
+   "wet"
+  ]
+ },
+ "rv-budget": {
+  "look": "men budget rave outfit black mesh top nylon trousers chelsea boots",
+  "name": "The whole look for under £60",
+  "note": "Three pieces, £58. He already owns a bum bag, which finishes it.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-mesh-tee",
+    "shape": "tee",
+    "what": "Mesh tee"
+   },
+   {
+    "col": "black",
+    "item": "rv-nylon-baggy",
+    "shape": "trousers",
+    "what": "Baggy nylon trousers"
+   },
+   {
+    "col": "black",
+    "item": "rv-seqwl-chelsea",
+    "shape": "boots",
+    "what": "Chunky Chelsea boots"
+   }
+  ],
+  "rank": 78,
+  "style": [
+   "rave"
+  ],
+  "wx": [
+   "cold",
+   "mild",
+   "warm",
+   "wet"
+  ]
+ },
+ "rv-day": {
+  "look": "men black t-shirt olive cargo trousers vans cap streetwear outfit",
+  "name": "The daytime version",
+  "note": "The same idea toned down for the afternoon before: a plain black tee, olive cargos and Vans.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "asos-dickies-tee",
+    "shape": "tee",
+    "what": "Black tee"
+   },
+   {
+    "col": "olive",
+    "item": "uq-cargo",
+    "shape": "trousers",
+    "what": "Cargo trousers"
+   },
+   {
+    "col": "black",
+    "item": "asos-vans",
+    "shape": "trainers",
+    "what": "Vans"
+   },
+   {
+    "col": "black",
+    "item": "rv-ls-cap",
+    "shape": "bcap",
+    "what": "Cap"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Bum bag"
+   }
+  ],
+  "rank": 81,
+  "style": [
+   "rave",
+   "street",
+   "casual"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ]
+ },
+ "rv-field": {
+  "look": "men outdoor rave festival outfit hooded track jacket cargo shorts waterproof boots bucket hat",
+  "name": "Rave in a field",
+  "note": "Outdoor events need a jacket that sheds rain and boots that are waterproof. Everything else stays light.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-stormmax-track",
+    "shape": "jacket",
+    "what": "Water-repellent jacket, worn open"
+   },
+   {
+    "col": "black",
+    "item": "sp-4505-tank",
+    "shape": "vest",
+    "what": "Mesh tank"
+   },
+   {
+    "col": "black",
+    "item": "rv-cargo-short",
+    "shape": "shorts",
+    "what": "Cargo shorts"
+   },
+   {
+    "col": "black",
+    "item": "rv-regatta-samaris",
+    "shape": "boots",
+    "what": "Waterproof boots"
+   },
+   {
+    "col": "black",
+    "item": "asos-tnf-bucket",
+    "shape": "bucket",
+    "what": "Bucket hat"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Bum bag"
+   }
+  ],
+  "rank": 80,
+  "style": [
+   "rave",
+   "outdoor"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm",
+   "wet"
+  ]
+ },
+ "rv-long-sleeve": {
+  "look": "men techno outfit fitted long sleeve top baggy black trousers chunky boots",
+  "name": "Fitted top, wide leg",
+  "note": "A close ribbed top makes very wide trousers look deliberate. Charcoal on black adds some depth.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-rib-ls",
+    "shape": "tee",
+    "what": "Fitted ribbed long sleeve"
+   },
+   {
+    "col": "black",
+    "item": "rv-nylon-baggy",
+    "shape": "trousers",
+    "what": "Baggy nylon trousers"
+   },
+   {
+    "col": "black",
+    "item": "rv-seqwl-lace",
+    "shape": "boots",
+    "what": "Chunky boots"
+   },
+   {
+    "col": "black",
+    "item": "rv-wrap-blue",
+    "shape": "sunglasses",
+    "what": "Blue-lens sunglasses"
+   },
+   {
+    "col": "black",
+    "item": "uq-utility-shoulder",
+    "shape": "bag",
+    "what": "Shoulder bag"
+   }
+  ],
+  "rank": 77,
+  "style": [
+   "rave"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "rv-summer": {
+  "look": "men summer rave festival outfit black mesh tee shorts bucket hat wrap sunglasses",
+  "name": "Open-air and day parties",
+  "note": "For outdoor events in summer: parachute shorts, a mesh tee, a bucket hat for the sun and a tinted lens.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-mesh-tee",
+    "shape": "tee",
+    "what": "Mesh tee"
+   },
+   {
+    "col": "black",
+    "item": "rv-nl-parachute-short",
+    "shape": "shorts",
+    "what": "Parachute shorts"
+   },
+   {
+    "col": "black",
+    "item": "asos-vans",
+    "shape": "trainers",
+    "what": "Vans"
+   },
+   {
+    "col": "black",
+    "item": "asos-tnf-bucket",
+    "shape": "bucket",
+    "what": "Bucket hat"
+   },
+   {
+    "col": "black",
+    "item": "rv-wrap-amber",
+    "shape": "sunglasses",
+    "what": "Amber wrap sunglasses"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Bum bag"
+   }
+  ],
+  "rank": 75,
+  "style": [
+   "rave"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "rv-track": {
+  "look": "men 90s rave outfit adidas firebird track top parachute trousers trainers",
+  "name": "Track top and parachutes",
+  "note": "A nod to nineties rave: a three-stripe track top over a vest with navy parachute trousers.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-firebird-gold",
+    "shape": "jacket",
+    "what": "Track top, worn open"
+   },
+   {
+    "col": "black",
+    "item": "rv-vest-black",
+    "shape": "vest",
+    "what": "Black vest"
+   },
+   {
+    "col": "navy",
+    "item": "rv-tommy-parachute",
+    "shape": "trousers",
+    "what": "Parachute trousers"
+   },
+   {
+    "col": "navy",
+    "item": "sc-warrington",
+    "shape": "trainers",
+    "what": "Navy trainers"
+   },
+   {
+    "col": "grey",
+    "item": "w-casio-a158",
+    "shape": "watch",
+    "what": "Steel Casio"
+   }
+  ],
+  "rank": 82,
+  "style": [
+   "rave"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "rv-vest-cargo": {
+  "look": "men rave outfit black ribbed vest baggy cargo trousers vans track jacket",
+  "name": "Vest and cargos",
+  "note": "A ribbed vest and baggy cargos, with a thin track jacket to tie round the waist once inside.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-4505-track",
+    "shape": "jacket",
+    "what": "Track jacket, worn open"
+   },
+   {
+    "col": "black",
+    "item": "rv-collusion-vest",
+    "shape": "vest",
+    "what": "Ribbed vest"
+   },
+   {
+    "col": "black",
+    "item": "rv-jj-cargo-black",
+    "shape": "trousers",
+    "what": "Baggy cargo trousers"
+   },
+   {
+    "col": "black",
+    "item": "asos-vans",
+    "shape": "trainers",
+    "what": "Vans"
+   },
+   {
+    "col": "black",
+    "item": "rv-cap-black",
+    "shape": "bcap",
+    "what": "Cap"
+   },
+   {
+    "col": "black",
+    "item": "asos-sling",
+    "shape": "bag",
+    "what": "Sling bag"
+   }
+  ],
+  "rank": 74,
+  "style": [
+   "rave"
+  ],
+  "wx": [
+   "warm",
+   "mild"
+  ]
+ },
+ "rv-warehouse": {
+  "look": "men techno rave outfit black mesh t-shirt parachute trousers chunky boots wrap sunglasses",
+  "name": "Warehouse night",
+  "note": "The core look: mesh over nothing or over a vest, parachute trousers, heavy boots, and everything he needs in the bum bag.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-mesh-tee",
+    "shape": "tee",
+    "what": "Mesh tee"
+   },
+   {
+    "col": "charcoal",
+    "item": "rv-weekday-parachute",
+    "shape": "trousers",
+    "what": "Parachute trousers"
+   },
+   {
+    "col": "black",
+    "item": "rv-chunky-boot",
+    "shape": "boots",
+    "what": "Chunky boots"
+   },
+   {
+    "col": "black",
+    "item": "rv-wrap-sunglasses",
+    "shape": "sunglasses",
+    "what": "Wrap sunglasses"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Bum bag"
+   },
+   {
+    "col": "silver",
+    "item": "rv-chain-slim",
+    "shape": "chain",
+    "what": "Chain"
+   }
+  ],
+  "rank": 73,
+  "style": [
+   "rave"
+  ],
+  "wx": [
+   "cold",
+   "mild",
+   "warm",
+   "wet"
+  ]
+ },
+ "rv-winter-queue": {
+  "look": "men winter rave outfit black utility gilet long sleeve baggy trousers boots beanie",
+  "name": "Cold queue, warm room",
+  "note": "A padded gilet instead of a coat: warm outside, and it can stay on or go in the cloakroom.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "rv-utility-gilet",
+    "shape": "gilet",
+    "what": "Utility gilet"
+   },
+   {
+    "col": "charcoal",
+    "item": "rv-charcoal-ls",
+    "shape": "tee",
+    "what": "Fitted long sleeve"
+   },
+   {
+    "col": "black",
+    "item": "rv-carhartt-ray",
+    "shape": "trousers",
+    "what": "Baggy twill trousers"
+   },
+   {
+    "col": "black",
+    "item": "rv-schuh-devin",
+    "shape": "boots",
+    "what": "Chunky boots"
+   },
+   {
+    "col": "black",
+    "item": "asos-beanie",
+    "shape": "beanie",
+    "what": "Beanie"
+   }
+  ],
+  "rank": 79,
+  "style": [
+   "rave"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "samba-cord": {
+  "look": "men navy quarter zip jumper ecru corduroy trousers brown adidas samba outfit",
+  "name": "Quarter-zip and cords",
+  "note": "A navy cotton quarter-zip with relaxed ecru cords and brown Sambas.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "sw-qz-navy",
+    "shape": "halfzip",
+    "what": "Quarter-zip jumper"
+   },
+   {
+    "col": "cream",
+    "item": "ms-cord-pleat",
+    "shape": "trousers",
+    "what": "Relaxed cords"
+   },
+   {
+    "col": "brown",
+    "item": "asos-samba-brown",
+    "shape": "trainers",
+    "what": "Brown Sambas"
+   }
+  ],
+  "rank": 68,
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "smart-125": {
+  "look": "men navy overshirt white oxford shirt grey tailored trousers navy suede loafers smart casual outfit",
+  "name": "Smart for under £125",
+  "note": "Four reduced pieces: a navy overshirt as the jacket, a boxy white Oxford, grey tailored trousers and suede loafers.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "fa-ramsey-navy",
+    "shape": "jacket",
+    "what": "Light overshirt"
+   },
+   {
+    "col": "white",
+    "item": "fa-brewer-white",
+    "shape": "shirt",
+    "what": "Boxy Oxford"
+   },
+   {
+    "col": "grey",
+    "item": "sw-tailored-grey",
+    "shape": "trousers",
+    "what": "Tailored trousers"
+   },
+   {
+    "col": "navy",
+    "item": "sc-rico",
+    "shape": "shoes",
+    "what": "Suede loafers"
+   }
+  ],
+  "rank": 47,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "smart-casual": {
+  "look": "men navy blazer blue striped shirt stone chinos brown penny loafers smart casual outfit",
+  "name": "Office or a date",
+  "note": "Navy jacket, blue stripe shirt and stone chinos. This covers most smart casual invitations.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "ct-jacket-navy",
+    "shape": "blazer",
+    "what": "Navy jacket"
+   },
+   {
+    "col": "blue",
+    "item": "ct-poplin-stripe",
+    "shape": "shirt",
+    "what": "Stripe shirt"
+   },
+   {
+    "col": "stone",
+    "item": "bb-dodworth",
+    "shape": "trousers",
+    "what": "Chinos"
+   },
+   {
+    "col": "brown",
+    "item": "sw-penny",
+    "shape": "shoes",
+    "what": "Penny loafers"
+   },
+   {
+    "col": "brown",
+    "item": "sw-belt",
+    "shape": "belt",
+    "what": "Belt"
+   }
+  ],
+  "rank": 8,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "smart-summer": {
+  "look": "men pale blue linen shirt tan chinos navy suede loafers summer smart outfit",
+  "name": "Smart in summer",
+  "note": "Linen shirt with the sleeves rolled, light chinos and suede loafers with invisible socks.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "blue",
+    "item": "moss-linen-sky",
+    "shape": "shirt",
+    "what": "Linen shirt"
+   },
+   {
+    "col": "sand",
+    "item": "ct-chino-tan",
+    "shape": "trousers",
+    "what": "Light chinos"
+   },
+   {
+    "col": "navy",
+    "item": "ct-loafer-navy",
+    "shape": "shoes",
+    "what": "Suede loafers"
+   },
+   {
+    "col": "tan",
+    "item": "ct-belt-tan",
+    "shape": "belt",
+    "what": "Belt"
+   },
+   {
+    "col": "brown",
+    "item": "uq-sunglasses-wellington",
+    "shape": "sunglasses",
+    "what": "Sunglasses"
+   }
+  ],
+  "rank": 9,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "st-budget": {
+  "look": "men grey blue sweatshirt black oversized tee relaxed dark indigo jeans navy trainers streetwear outfit",
+  "name": "Streetwear for under £110",
+  "note": "A plain sweatshirt over an oversized pocket tee, with relaxed dark jeans and navy court trainers.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "ms-brushback-sweat",
+    "shape": "jumper",
+    "what": "Plain sweatshirt"
+   },
+   {
+    "col": "black",
+    "item": "ri-pocket-tee",
+    "shape": "tee",
+    "what": "Oversized pocket tee"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-relaxed-rigid",
+    "shape": "trousers",
+    "what": "Relaxed jeans"
+   },
+   {
+    "col": "navy",
+    "item": "sc-warrington",
+    "shape": "trainers",
+    "what": "Court trainers"
+   },
+   {
+    "col": "black",
+    "item": "asos-sling",
+    "shape": "bag",
+    "what": "Sling bag"
+   }
+  ],
+  "rank": 48,
+  "style": [
+   "street",
+   "casual"
+  ],
+  "wx": [
+   "mild"
+  ]
+ },
+ "st-daily": {
+  "look": "men olive bomber jacket grey hoodie white tee wide beige trousers brown adidas samba streetwear outfit",
+  "name": "Everyday layers",
+  "note": "His usual shape with the black swapped out: an olive jacket, a grey hoodie and wide beige trousers.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "uq-zip-blouson",
+    "shape": "jacket",
+    "what": "Zip jacket"
+   },
+   {
+    "col": "grey",
+    "item": "asos-boxy-hoodie",
+    "shape": "hoodie",
+    "what": "Boxy hoodie"
+   },
+   {
+    "col": "white",
+    "item": "asos-super-heavy-tee",
+    "shape": "tee",
+    "what": "Heavy tee"
+   },
+   {
+    "col": "stone",
+    "item": "uq-barrel",
+    "shape": "trousers",
+    "what": "Barrel-leg trousers"
+   },
+   {
+    "col": "brown",
+    "item": "asos-samba-brown",
+    "shape": "trainers",
+    "what": "Brown Sambas"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Crossbody bag"
+   }
+  ],
+  "rank": 22,
+  "style": [
+   "street",
+   "casual"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "st-event": {
+  "look": "men charcoal relaxed blazer cream roll neck wide black trousers black loafers outfit",
+  "name": "Event without a suit",
+  "note": "For birthdays and work parties. For a wedding or a dress code, his black suit with a white shirt is still the right choice.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "uq-knit-jacket",
+    "shape": "blazer",
+    "what": "Knitted jacket"
+   },
+   {
+    "col": "cream",
+    "item": "asos-newlook-roll",
+    "shape": "rollneck",
+    "what": "Roll neck"
+   },
+   {
+    "col": "black",
+    "item": "asos-only-tailored",
+    "shape": "trousers",
+    "what": "Wide tailored trousers"
+   },
+   {
+    "col": "black",
+    "item": "clarks-banbury",
+    "shape": "shoes",
+    "what": "Leather slip-ons"
+   }
+  ],
+  "rank": 25,
+  "style": [
+   "street"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "cold",
+   "warm"
+  ]
+ },
+ "st-lounge": {
+  "look": "men black oversized hoodie grey wide leg joggers loungewear outfit",
+  "name": "Day at home",
+  "note": "A heavy hoodie and wide joggers in two different colours, so it does not read as a tracksuit.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "asos-heavy-hoodie",
+    "shape": "hoodie",
+    "what": "Heavy hoodie"
+   },
+   {
+    "col": "cream",
+    "item": "uq-ls-tee",
+    "shape": "tee",
+    "what": "Long-sleeve tee"
+   },
+   {
+    "col": "grey",
+    "item": "asos-wide-jogger",
+    "shape": "trousers",
+    "what": "Wide joggers"
+   },
+   {
+    "col": "tan",
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "what": "Slippers"
+   }
+  ],
+  "rank": 27,
+  "style": [
+   "street",
+   "lounge"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "st-party": {
+  "look": "men black windbreaker white tee baggy black trousers white new balance trainers bucket hat rave outfit",
+  "name": "Night out or rave",
+  "note": "Light layers he can dance in, trainers that can take a spilled drink, and a bag that zips shut.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "black",
+    "item": "asos-jj-windbreaker",
+    "shape": "jacket",
+    "what": "Windbreaker"
+   },
+   {
+    "col": "white",
+    "item": "asos-weekday-tee",
+    "shape": "tee",
+    "what": "Boxy tee"
+   },
+   {
+    "col": "black",
+    "item": "uq-barrel-jeans",
+    "shape": "trousers",
+    "what": "Black barrel jeans"
+   },
+   {
+    "col": "white",
+    "item": "asos-nb740",
+    "shape": "trainers",
+    "what": "Chunky trainers"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Crossbody bag"
+   },
+   {
+    "col": "black",
+    "item": "asos-tnf-bucket",
+    "shape": "bucket",
+    "what": "Bucket hat"
+   }
+  ],
+  "rank": 26,
+  "style": [
+   "street"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "warm",
+   "wet"
+  ]
+ },
+ "st-smart": {
+  "look": "men grey quarter zip sweatshirt white shirt collar wide black tailored trousers black suede trainers outfit",
+  "name": "Dinner or drinks",
+  "note": "A collared quarter-zip over a white shirt, with wide tailored trousers and suede trainers.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "asos-qz-sweat",
+    "shape": "halfzip",
+    "what": "Collared quarter-zip"
+   },
+   {
+    "col": "white",
+    "item": "asos-boxy-poplin",
+    "shape": "shirt",
+    "what": "Poplin shirt"
+   },
+   {
+    "col": "black",
+    "item": "asos-only-tailored",
+    "shape": "trousers",
+    "what": "Wide tailored trousers"
+   },
+   {
+    "col": "black",
+    "item": "asos-spezial",
+    "shape": "trainers",
+    "what": "Suede trainers"
+   },
+   {
+    "col": "brown",
+    "item": "timex-38",
+    "shape": "watch",
+    "what": "Watch"
+   }
+  ],
+  "rank": 24,
+  "style": [
+   "street"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "st-sofa": {
+  "look": "men grey hoodie black relaxed joggers loungewear outfit",
+  "name": "Sofa day",
+  "note": "The grey hoodie with heavy black joggers.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "grey",
+    "item": "asos-boxy-hoodie",
+    "shape": "hoodie",
+    "what": "Boxy hoodie"
+   },
+   {
+    "col": "black",
+    "item": "asos-collusion-jogger",
+    "shape": "trousers",
+    "what": "Heavy joggers"
+   },
+   {
+    "col": "tan",
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "what": "Slippers"
+   }
+  ],
+  "rank": 64,
+  "style": [
+   "street",
+   "lounge"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "st-summer": {
+  "look": "men white oversized tee long baggy denim shorts jorts black vans brown cap crossbody bag summer outfit",
+  "name": "Hot day",
+  "note": "What he wore on the rooftop, tidied up: a plain heavy tee in place of the print, and long denim shorts.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "white",
+    "item": "asos-oversized-tee",
+    "shape": "tee",
+    "what": "Oversized tee"
+   },
+   {
+    "col": "blue",
+    "item": "uq-jorts",
+    "shape": "shorts",
+    "what": "Long denim shorts"
+   },
+   {
+    "col": "black",
+    "item": "asos-vans",
+    "shape": "trainers",
+    "what": "Vans Old Skool"
+   },
+   {
+    "col": "brown",
+    "item": "asos-cap-brown",
+    "shape": "bcap",
+    "what": "Plain cap"
+   },
+   {
+    "col": "black",
+    "item": "asos-sling",
+    "shape": "bag",
+    "what": "Sling bag"
+   },
+   {
+    "col": "black",
+    "item": "uq-sunglasses-wellington",
+    "shape": "sunglasses",
+    "what": "Sunglasses"
+   }
+  ],
+  "rank": 23,
+  "style": [
+   "street",
+   "casual"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "summer-event": {
+  "look": "men navy blazer white linen shirt sand chinos brown loafers blue tie summer wedding outfit",
+  "name": "Summer wedding or the races",
+  "note": "A navy jacket with light trousers is smart enough for most summer events and cooler than a suit.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "ct-jacket-navy",
+    "shape": "blazer",
+    "what": "Navy jacket"
+   },
+   {
+    "col": "white",
+    "item": "moss-linen-white",
+    "shape": "shirt",
+    "what": "Linen shirt"
+   },
+   {
+    "col": "sand",
+    "item": "tml-chino-sand",
+    "shape": "trousers",
+    "what": "Light chinos"
+   },
+   {
+    "col": "brown",
+    "item": "sw-penny",
+    "shape": "shoes",
+    "what": "Leather loafers"
+   },
+   {
+    "col": "blue",
+    "item": "ct-linen-tie",
+    "shape": "tie",
+    "what": "Linen tie"
+   },
+   {
+    "col": "brown",
+    "item": "sw-belt",
+    "shape": "belt",
+    "what": "Belt"
+   }
+  ],
+  "rank": 12,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "warm",
+   "mild"
+  ]
+ },
+ "summer-morning": {
+  "look": "men blue striped cotton pyjamas lightweight cotton dressing gown",
+  "name": "Summer morning",
+  "note": "Striped cotton pyjamas and a light cotton gown.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "ms-dressing-gown",
+    "shape": "gown",
+    "what": "Light dressing gown"
+   },
+   {
+    "col": "blue",
+    "item": "ms-pyjamas",
+    "shape": "shirt",
+    "what": "Striped pyjamas"
+   },
+   {
+    "col": "blue",
+    "item": "ms-pyjamas",
+    "shape": "trousers",
+    "what": "Striped pyjamas"
+   }
+  ],
+  "rank": 18,
+  "style": [
+   "quiet",
+   "lounge"
+  ],
+  "wx": [
+   "warm",
+   "mild"
+  ]
+ },
+ "summer-party": {
+  "look": "men cream knitted polo navy linen trousers suede loafers summer evening outfit",
+  "name": "Summer party",
+  "note": "A cream knitted polo with navy linen trousers. Add the light overshirt when it cools down.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "sand",
+    "item": "fa-ramsey-sand",
+    "shape": "jacket",
+    "what": "Light overshirt"
+   },
+   {
+    "col": "cream",
+    "item": "hm-knit-polo",
+    "shape": "polo",
+    "what": "Knitted polo"
+   },
+   {
+    "col": "navy",
+    "item": "sw-linen-trousers",
+    "shape": "trousers",
+    "what": "Linen trousers"
+   },
+   {
+    "col": "navy",
+    "item": "sc-rico",
+    "shape": "shoes",
+    "what": "Suede loafers"
+   }
+  ],
+  "rank": 15,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "summer-weekend": {
+  "look": "men white polo shirt khaki chino shorts brown deck shoes tan belt summer outfit",
+  "name": "Summer weekend",
+  "note": "A plain white polo, tailored shorts and leather deck shoes. The belt and sunglasses are what make it look considered.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "white",
+    "item": "uq-airism-pique",
+    "shape": "polo",
+    "what": "Polo shirt"
+   },
+   {
+    "col": "sand",
+    "item": "tml-chino-short-sand",
+    "shape": "shorts",
+    "what": "Chino shorts"
+   },
+   {
+    "col": "brown",
+    "item": "sw-deck",
+    "shape": "shoes",
+    "what": "Deck shoes"
+   },
+   {
+    "col": "tan",
+    "item": "ct-belt-tan",
+    "shape": "belt",
+    "what": "Belt"
+   },
+   {
+    "col": "black",
+    "item": "uq-sunglasses-wellington",
+    "shape": "sunglasses",
+    "what": "Sunglasses"
+   }
+  ],
+  "rank": 4,
+  "style": [
+   "quiet",
+   "casual"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ },
+ "wedding-guest": {
+  "look": "men navy suit white shirt green knitted tie oxblood brogues wedding guest outfit",
+  "name": "Wedding guest",
+  "note": "One navy suit does every wedding. A knitted tie and oxblood brogues stop it looking like office wear.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "moss-navy-suit",
+    "shape": "blazer",
+    "what": "Navy suit"
+   },
+   {
+    "col": "white",
+    "item": "ms-oxford-white",
+    "shape": "shirt",
+    "what": "White shirt"
+   },
+   {
+    "col": "navy",
+    "item": "moss-navy-suit",
+    "shape": "trousers",
+    "what": "Navy suit"
+   },
+   {
+    "col": "burgundy",
+    "item": "sw-brogue",
+    "shape": "shoes",
+    "what": "Brogues"
+   },
+   {
+    "col": "green",
+    "item": "mbt-knit-tie",
+    "shape": "tie",
+    "what": "Knitted tie"
+   },
+   {
+    "col": "pink",
+    "item": "ct-pocket-square",
+    "shape": "square",
+    "what": "Pocket square"
+   }
+  ],
+  "rank": 10,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ]
+ },
+ "wet-walk": {
+  "look": "men olive wax jacket cream cable knit jumper navy chinos brogue boots flat cap outfit",
+  "name": "Wet-day walk",
+  "note": "Everything here copes with rain and mud. The cream cable knit stops it looking like workwear.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "ry-classic",
+    "shape": "jacket",
+    "what": "Hooded wax jacket"
+   },
+   {
+    "col": "cream",
+    "item": "wo-aran",
+    "shape": "jumper",
+    "what": "Aran jumper"
+   },
+   {
+    "col": "navy",
+    "item": "ct-chino-navy",
+    "shape": "trousers",
+    "what": "Chinos"
+   },
+   {
+    "col": "tan",
+    "item": "sw-brogue-boot",
+    "shape": "boots",
+    "what": "Brogue boots"
+   },
+   {
+    "col": "olive",
+    "item": "ry-tweed-cap",
+    "shape": "cap",
+    "what": "Tweed cap"
+   }
+  ],
+  "rank": 3,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "wet",
+   "cold"
+  ]
+ },
+ "winter-140": {
+  "look": "men olive long overcoat taupe zip neck jumper white shirt grey trousers brown suede derby shoes outfit",
+  "name": "Winter for under £140",
+  "note": "Five reduced pieces: a long coat, a merino zip-neck, an Oxford shirt, grey trousers and suede lace-ups.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "asos-longline-khaki",
+    "shape": "coat",
+    "what": "Long coat"
+   },
+   {
+    "col": "stone",
+    "item": "moss-merino-zip",
+    "shape": "halfzip",
+    "what": "Merino zip-neck"
+   },
+   {
+    "col": "white",
+    "item": "mm-crew-oxford",
+    "shape": "shirt",
+    "what": "Oxford shirt"
+   },
+   {
+    "col": "grey",
+    "item": "sw-tailored-grey",
+    "shape": "trousers",
+    "what": "Tailored trousers"
+   },
+   {
+    "col": "brown",
+    "item": "sw-derby-suede",
+    "shape": "shoes",
+    "what": "Suede lace-ups"
+   }
+  ],
+  "rank": 19,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold"
+  ]
+ },
+ "winter-formal": {
+  "look": "men charcoal suit white shirt pale blue tie black oxford shoes navy overcoat formal outfit",
+  "name": "Formal in winter",
+  "note": "Charcoal suit, plain tie and black Oxfords under the navy overcoat. Right for interviews, funerals and formal dinners.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "next-epsom",
+    "shape": "coat",
+    "what": "Overcoat"
+   },
+   {
+    "col": "charcoal",
+    "item": "moss-charcoal-suit",
+    "shape": "blazer",
+    "what": "Charcoal suit"
+   },
+   {
+    "col": "white",
+    "item": "ms-oxford-white",
+    "shape": "shirt",
+    "what": "White shirt"
+   },
+   {
+    "col": "charcoal",
+    "item": "moss-charcoal-suit",
+    "shape": "trousers",
+    "what": "Charcoal suit"
+   },
+   {
+    "col": "black",
+    "item": "sw-oxford-black",
+    "shape": "shoes",
+    "what": "Oxford shoes"
+   },
+   {
+    "col": "blue",
+    "item": "ct-silk-tie",
+    "shape": "tie",
+    "what": "Silk tie"
+   },
+   {
+    "col": "black",
+    "item": "ct-belt-black",
+    "shape": "belt",
+    "what": "Belt"
+   }
+  ],
+  "rank": 11,
+  "style": [
+   "quiet"
+  ],
+  "tags": [
+   "christmas",
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "wet"
+  ]
+ },
+ "wk-chore": {
+  "look": "men army green chore jacket beige henley jumper dark selvedge jeans brown leather boots workwear outfit",
+  "name": "Chore jacket and selvedge",
+  "note": "A green chore jacket from a Manchester maker, a button-neck knit, selvedge jeans and leather boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "us-army",
+    "shape": "jacket",
+    "what": "Chore jacket"
+   },
+   {
+    "col": "stone",
+    "item": "ms-henley-jumper",
+    "shape": "jumper",
+    "what": "Button-neck knit"
+   },
+   {
+    "col": "indigo",
+    "item": "ms-selvedge",
+    "shape": "trousers",
+    "what": "Selvedge jeans"
+   },
+   {
+    "col": "brown",
+    "item": "sc-giles",
+    "shape": "boots",
+    "what": "Leather boots"
+   },
+   {
+    "col": "brown",
+    "item": "ms-casual-belt",
+    "shape": "belt",
+    "what": "Leather belt"
+   }
+  ],
+  "rank": 50,
+  "style": [
+   "work"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "cold",
+   "mild"
+  ]
+ },
+ "wk-daily": {
+  "look": "men brown chore jacket cream cable knit jumper levis 501 jeans brown work boots beanie workwear outfit",
+  "name": "Autumn weekend",
+  "note": "A brown work jacket over a cream cable knit, with straight jeans and work boots.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "brown",
+    "item": "uq-utility-jacket",
+    "shape": "jacket",
+    "what": "Work jacket"
+   },
+   {
+    "col": "cream",
+    "item": "asos-dickies-cable",
+    "shape": "jumper",
+    "what": "Cable knit"
+   },
+   {
+    "col": "indigo",
+    "item": "mm-levis-501",
+    "shape": "trousers",
+    "what": "501 jeans"
+   },
+   {
+    "col": "brown",
+    "item": "asos-jj-worker-boot",
+    "shape": "boots",
+    "what": "Work boots"
+   },
+   {
+    "col": "cream",
+    "item": "asos-carhartt-beanie",
+    "shape": "beanie",
+    "what": "Beanie"
+   }
+  ],
+  "rank": 34,
+  "style": [
+   "work",
+   "casual"
+  ],
+  "tags": [
+   "winter"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "wk-event": {
+  "look": "men navy cotton blazer white oxford shirt grey knitted wool tie olive corduroy trousers brown brogues outfit",
+  "name": "Event",
+  "note": "The heritage end of the style: a cotton jacket, a knitted tie, cords and brogues. Good for a christening or a day at the races. For a formal wedding, wear the suit.",
+  "occ": "event",
+  "pieces": [
+   {
+    "col": "navy",
+    "item": "ct-jacket-navy",
+    "shape": "blazer",
+    "what": "Cotton jacket"
+   },
+   {
+    "col": "white",
+    "item": "mm-crew-oxford",
+    "shape": "shirt",
+    "what": "Oxford shirt"
+   },
+   {
+    "col": "grey",
+    "item": "ct-knit-tie",
+    "shape": "tie",
+    "what": "Knitted wool tie"
+   },
+   {
+    "col": "olive",
+    "item": "sw-cord",
+    "shape": "trousers",
+    "what": "Cords"
+   },
+   {
+    "col": "brown",
+    "item": "sw-derby-brogue",
+    "shape": "shoes",
+    "what": "Grain brogues"
+   }
+  ],
+  "rank": 37,
+  "style": [
+   "work"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "wk-lounge": {
+  "look": "men brown flannel shirt open cream waffle henley grey sweatpants cosy outfit",
+  "name": "Slow morning",
+  "note": "A waffle henley with a flannel shirt worn open over it, and wide sweat trousers.",
+  "occ": "lounge",
+  "pieces": [
+   {
+    "col": "brown",
+    "item": "asos-jj-flannel",
+    "shape": "shirt",
+    "what": "Flannel shirt, worn open"
+   },
+   {
+    "col": "cream",
+    "item": "uq-waffle-henley",
+    "shape": "tee",
+    "what": "Waffle henley"
+   },
+   {
+    "col": "grey",
+    "item": "uq-sweat-wide",
+    "shape": "trousers",
+    "what": "Wide sweat trousers"
+   },
+   {
+    "col": "tan",
+    "item": "ms-moccasin-tan",
+    "shape": "slippers",
+    "what": "Slippers"
+   }
+  ],
+  "rank": 39,
+  "style": [
+   "work",
+   "lounge"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "wk-party": {
+  "look": "men blue denim jacket black t-shirt black dickies trousers black vans outfit",
+  "name": "Night out",
+  "note": "A denim jacket over black, with skate shoes.",
+  "occ": "party",
+  "pieces": [
+   {
+    "col": "blue",
+    "item": "uq-denim-trucker",
+    "shape": "jacket",
+    "what": "Denim jacket"
+   },
+   {
+    "col": "black",
+    "item": "asos-dickies-tee",
+    "shape": "tee",
+    "what": "Heavy tee"
+   },
+   {
+    "col": "black",
+    "item": "asos-dickies-874",
+    "shape": "trousers",
+    "what": "874 work trousers"
+   },
+   {
+    "col": "black",
+    "item": "asos-vans",
+    "shape": "trainers",
+    "what": "Vans Old Skool"
+   },
+   {
+    "col": "black",
+    "item": "asos-bum-bag",
+    "shape": "bag",
+    "what": "Crossbody bag"
+   }
+  ],
+  "rank": 38,
+  "style": [
+   "work"
+  ],
+  "tags": [
+   "christmas"
+  ],
+  "wx": [
+   "mild",
+   "warm"
+  ]
+ },
+ "wk-smart": {
+  "look": "men charcoal overshirt taupe corduroy shirt black dickies 874 sand desert boots outfit",
+  "name": "Pub or dinner",
+  "note": "A cord shirt under a brushed overshirt, pressed work trousers and desert boots.",
+  "occ": "smart",
+  "pieces": [
+   {
+    "col": "charcoal",
+    "item": "asos-jj-brushed-overshirt",
+    "shape": "jacket",
+    "what": "Brushed overshirt"
+   },
+   {
+    "col": "stone",
+    "item": "tml-cord-taupe",
+    "shape": "shirt",
+    "what": "Cord shirt"
+   },
+   {
+    "col": "black",
+    "item": "asos-dickies-874",
+    "shape": "trousers",
+    "what": "874 work trousers"
+   },
+   {
+    "col": "sand",
+    "item": "clarks-desert",
+    "shape": "boots",
+    "what": "Desert boots"
+   },
+   {
+    "col": "brown",
+    "item": "uq-belt",
+    "shape": "belt",
+    "what": "Leather belt"
+   }
+  ],
+  "rank": 36,
+  "style": [
+   "work"
+  ],
+  "tags": [
+   "christmas",
+   "winter"
+  ],
+  "wx": [
+   "mild",
+   "cold"
+  ]
+ },
+ "wk-summer": {
+  "look": "men khaki overshirt open white pocket tee carpenter denim shorts black converse cap workwear summer outfit",
+  "name": "Summer",
+  "note": "A pocket tee and carpenter shorts, with a twill overshirt worn open for the evening.",
+  "occ": "everyday",
+  "pieces": [
+   {
+    "col": "olive",
+    "item": "asos-twill-overshirt",
+    "shape": "shirt",
+    "what": "Twill overshirt, worn open"
+   },
+   {
+    "col": "white",
+    "item": "asos-carhartt-tee",
+    "shape": "tee",
+    "what": "Pocket tee"
+   },
+   {
+    "col": "blue",
+    "item": "asos-dickies-jorts",
+    "shape": "shorts",
+    "what": "Carpenter shorts"
+   },
+   {
+    "col": "black",
+    "item": "asos-converse-hi",
+    "shape": "trainers",
+    "what": "Converse high-tops"
+   },
+   {
+    "col": "brown",
+    "item": "asos-cap-brown",
+    "shape": "bcap",
+    "what": "Plain cap"
+   }
+  ],
+  "rank": 35,
+  "style": [
+   "work"
+  ],
+  "tags": [
+   "holiday"
+  ],
+  "wx": [
+   "warm"
+  ]
+ }
+}
