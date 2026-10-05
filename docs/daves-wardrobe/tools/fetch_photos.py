@@ -18,6 +18,9 @@ For each pick in data/items.json it:
 Pre-owned picks (Vinted and eBay searches) and category pages are skipped,
 because they have no single listing photo.
 
+With --browser, picks the plain download could not reach are retried in
+headless Chromium (browser_fetch.js), which gets past most bot protection.
+
 Then publish the packs with the page and point meta/photos at them:
   Artifact publish  url=<wardrobe url>  file_path=page.html
                     files={"photos/pack-01.json": "photos/pack-01.json", ...}
@@ -39,7 +42,9 @@ import io
 import json
 import os
 import re
+import subprocess
 import sys
+import urllib.parse
 import urllib.request
 
 from PIL import Image
@@ -108,7 +113,7 @@ def one(item_id, item):
         raw, ctype = get(src, 8_000_000)
         if not ctype.startswith("image/"):
             return item_id, None, "photo URL did not return an image"
-        return item_id, shrink(raw), "ok"
+        return item_id, raw, "ok"
     except Exception as exc:  # network errors, blocked shops, bad images
         return item_id, None, "failed: %s" % str(exc)[:100]
 
@@ -120,6 +125,10 @@ def main():
     ap.add_argument("--out", default="photos")
     ap.add_argument("--only", default="")
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--browser", action="store_true",
+                    help="retry refused shops in headless Chromium (node + playwright, see browser_fetch.js)")
+    ap.add_argument("--skip-hosts", default="www.asos.com",
+                    help="comma-separated hosts not worth a browser retry (they block data-centre traffic)")
     args = ap.parse_args()
 
     items = json.load(open(args.items))
@@ -128,13 +137,37 @@ def main():
         items = {k: v for k, v in items.items() if k in keep}
     os.makedirs(args.out, exist_ok=True)
 
-    got, report = {}, {}
+    raw, report = {}, {}
     with cf.ThreadPoolExecutor(args.workers) as ex:
-        for item_id, uri, why in ex.map(lambda kv: one(*kv), items.items()):
+        for item_id, data, why in ex.map(lambda kv: one(*kv), items.items()):
             report[item_id] = why
-            if uri:
-                got[item_id] = uri
-            print(("+ " if uri else "- ") + item_id + ": " + why, file=sys.stderr)
+            if data:
+                raw[item_id] = data
+            print(("+ " if data else "- ") + item_id + ": " + why, file=sys.stderr)
+
+    if args.browser:
+        skip = set(h for h in args.skip_hosts.split(",") if h)
+        retry = [k for k, why in report.items()
+                 if k not in raw and not why.startswith("skipped")
+                 and urllib.parse.urlsplit(items[k]["url"]).hostname not in skip]
+        if retry:
+            rawdir = os.path.join(args.out, "browser-raw")
+            os.makedirs(rawdir, exist_ok=True)
+            subprocess.run(["node", os.path.join(here, "browser_fetch.js"), args.items, ",".join(retry), rawdir])
+            for k in retry:
+                f = os.path.join(rawdir, k + ".img")
+                if os.path.exists(f):
+                    raw[k] = open(f, "rb").read()
+                    report[k] = "ok (browser)"
+                else:
+                    report[k] += "; browser retry failed too"
+
+    got = {}
+    for k, data in raw.items():
+        try:
+            got[k] = shrink(data)
+        except Exception as exc:  # unreadable or unsupported image format
+            report[k] = "could not read the image: %s" % str(exc)[:80]
 
     packs, cur, size = [], {}, 0
     for k in sorted(got):
